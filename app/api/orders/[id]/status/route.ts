@@ -1,10 +1,8 @@
 // TesoritoOS - Update Order Status API
 // Handles order status changes
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
 
 interface RouteParams {
   params: Promise<{ id: string }>;
