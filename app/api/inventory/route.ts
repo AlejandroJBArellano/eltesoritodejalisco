@@ -1,11 +1,11 @@
 // TesoritoOS - Inventory Management API
 // Handles ingredient CRUD and stock adjustments
 
+import { prisma } from "@/lib/prisma";
 import {
   adjustIngredientStock,
   checkLowStockIngredients,
 } from "@/lib/services/inventory";
-import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -132,7 +132,8 @@ export async function PATCH(request: NextRequest) {
     );
 
     if (!result.success) {
-      const errorMessage = "error" in result ? result.error : "Invalid adjustment";
+      const errorMessage =
+        "error" in result ? result.error : "Invalid adjustment";
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 

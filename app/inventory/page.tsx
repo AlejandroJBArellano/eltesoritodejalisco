@@ -52,13 +52,16 @@ export default function InventoryPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formState, setFormState] = useState<IngredientFormState>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [adjustState, setAdjustState] = useState<AdjustmentState>(emptyAdjustment);
+  const [adjustState, setAdjustState] =
+    useState<AdjustmentState>(emptyAdjustment);
   const [adjustErrors, setAdjustErrors] = useState<Record<string, string>>({});
 
   const isEditing = Boolean(formState.id);
 
   const lowStockCount = useMemo(
-    () => ingredients.filter((item) => item.currentStock <= item.minimumStock).length,
+    () =>
+      ingredients.filter((item) => item.currentStock <= item.minimumStock)
+        .length,
     [ingredients],
   );
 
@@ -97,12 +100,14 @@ export default function InventoryPage() {
 
     const currentStock = Number(state.currentStock);
     if (!Number.isFinite(currentStock) || currentStock < 0) {
-      errors.currentStock = "El stock actual debe ser un número mayor o igual a 0";
+      errors.currentStock =
+        "El stock actual debe ser un número mayor o igual a 0";
     }
 
     const minimumStock = Number(state.minimumStock || 0);
     if (!Number.isFinite(minimumStock) || minimumStock < 0) {
-      errors.minimumStock = "El stock mínimo debe ser un número mayor o igual a 0";
+      errors.minimumStock =
+        "El stock mínimo debe ser un número mayor o igual a 0";
     }
 
     if (state.costPerUnit) {
@@ -168,7 +173,9 @@ export default function InventoryPage() {
         currentStock: Number(formState.currentStock),
         minimumStock: Number(formState.minimumStock || 0),
         costPerUnit:
-          formState.costPerUnit === "" ? undefined : Number(formState.costPerUnit),
+          formState.costPerUnit === ""
+            ? undefined
+            : Number(formState.costPerUnit),
       };
 
       const response = await fetch("/api/inventory", {
@@ -280,10 +287,15 @@ export default function InventoryPage() {
       <header className="bg-white shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div>
-            <Link href="/" className="text-sm text-blue-600 hover:text-blue-800">
+            <Link
+              href="/"
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
               ← Volver al Dashboard
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Gestión de Inventario</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Gestión de Inventario
+            </h1>
             <p className="text-sm text-gray-600">
               {ingredients.length} ingredientes · {lowStockCount} en stock bajo
             </p>
@@ -322,7 +334,9 @@ export default function InventoryPage() {
                 <input
                   type="text"
                   value={formState.name}
-                  onChange={(event) => handleFormChange("name", event.target.value)}
+                  onChange={(event) =>
+                    handleFormChange("name", event.target.value)
+                  }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                   placeholder="Ej. Pan Telera"
                 />
@@ -333,10 +347,14 @@ export default function InventoryPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Unidad</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Unidad
+                  </label>
                   <select
                     value={formState.unit}
-                    onChange={(event) => handleFormChange("unit", event.target.value)}
+                    onChange={(event) =>
+                      handleFormChange("unit", event.target.value)
+                    }
                     className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                   >
                     {UNIT_OPTIONS.map((unit) => (
@@ -346,7 +364,9 @@ export default function InventoryPage() {
                     ))}
                   </select>
                   {formErrors.unit && (
-                    <p className="mt-1 text-xs text-red-600">{formErrors.unit}</p>
+                    <p className="mt-1 text-xs text-red-600">
+                      {formErrors.unit}
+                    </p>
                   )}
                 </div>
                 <div>
@@ -365,7 +385,9 @@ export default function InventoryPage() {
                     placeholder="Ej. 25.50"
                   />
                   {formErrors.costPerUnit && (
-                    <p className="mt-1 text-xs text-red-600">{formErrors.costPerUnit}</p>
+                    <p className="mt-1 text-xs text-red-600">
+                      {formErrors.costPerUnit}
+                    </p>
                   )}
                 </div>
               </div>
@@ -387,7 +409,9 @@ export default function InventoryPage() {
                     placeholder="Ej. 12"
                   />
                   {formErrors.currentStock && (
-                    <p className="mt-1 text-xs text-red-600">{formErrors.currentStock}</p>
+                    <p className="mt-1 text-xs text-red-600">
+                      {formErrors.currentStock}
+                    </p>
                   )}
                 </div>
                 <div>
@@ -406,7 +430,9 @@ export default function InventoryPage() {
                     placeholder="Ej. 4"
                   />
                   {formErrors.minimumStock && (
-                    <p className="mt-1 text-xs text-red-600">{formErrors.minimumStock}</p>
+                    <p className="mt-1 text-xs text-red-600">
+                      {formErrors.minimumStock}
+                    </p>
                   )}
                 </div>
               </div>
@@ -426,7 +452,9 @@ export default function InventoryPage() {
           </div>
 
           <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="text-lg font-semibold text-gray-900">Ajuste manual de stock</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Ajuste manual de stock
+            </h2>
             <form onSubmit={handleAdjustSubmit} className="mt-4 grid gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">
@@ -447,7 +475,9 @@ export default function InventoryPage() {
                   ))}
                 </select>
                 {adjustErrors.ingredientId && (
-                  <p className="mt-1 text-xs text-red-600">{adjustErrors.ingredientId}</p>
+                  <p className="mt-1 text-xs text-red-600">
+                    {adjustErrors.ingredientId}
+                  </p>
                 )}
               </div>
 
@@ -466,27 +496,37 @@ export default function InventoryPage() {
                   placeholder="Ej. -2 o 3"
                 />
                 {adjustErrors.adjustment && (
-                  <p className="mt-1 text-xs text-red-600">{adjustErrors.adjustment}</p>
+                  <p className="mt-1 text-xs text-red-600">
+                    {adjustErrors.adjustment}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">Motivo</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Motivo
+                </label>
                 <input
                   type="text"
                   value={adjustState.reason}
-                  onChange={(event) => handleAdjustChange("reason", event.target.value)}
+                  onChange={(event) =>
+                    handleAdjustChange("reason", event.target.value)
+                  }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                   placeholder="Merma, ajuste de conteo, etc."
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">Usuario (opcional)</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Usuario (opcional)
+                </label>
                 <input
                   type="text"
                   value={adjustState.userId}
-                  onChange={(event) => handleAdjustChange("userId", event.target.value)}
+                  onChange={(event) =>
+                    handleAdjustChange("userId", event.target.value)
+                  }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                   placeholder="ID del usuario"
                 />
@@ -505,7 +545,9 @@ export default function InventoryPage() {
 
         <section className="rounded-lg bg-white p-6 shadow-md">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Ingredientes</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Ingredientes
+            </h2>
             <button
               type="button"
               onClick={fetchIngredients}
@@ -516,7 +558,9 @@ export default function InventoryPage() {
           </div>
 
           {isLoading ? (
-            <p className="mt-4 text-sm text-gray-600">Cargando ingredientes...</p>
+            <p className="mt-4 text-sm text-gray-600">
+              Cargando ingredientes...
+            </p>
           ) : ingredients.length === 0 ? (
             <p className="mt-4 text-sm text-gray-600">
               No hay ingredientes registrados.
@@ -536,9 +580,13 @@ export default function InventoryPage() {
                 </thead>
                 <tbody>
                   {ingredients.map((ingredient) => {
-                    const isLow = ingredient.currentStock <= ingredient.minimumStock;
+                    const isLow =
+                      ingredient.currentStock <= ingredient.minimumStock;
                     return (
-                      <tr key={ingredient.id} className="border-b last:border-0">
+                      <tr
+                        key={ingredient.id}
+                        className="border-b last:border-0"
+                      >
                         <td className="py-3 font-medium text-gray-900">
                           {ingredient.name}
                           {isLow && (
@@ -547,7 +595,9 @@ export default function InventoryPage() {
                             </span>
                           )}
                         </td>
-                        <td className="py-3 text-gray-600">{ingredient.unit}</td>
+                        <td className="py-3 text-gray-600">
+                          {ingredient.unit}
+                        </td>
                         <td className="py-3 text-gray-600">
                           {ingredient.currentStock}
                         </td>
