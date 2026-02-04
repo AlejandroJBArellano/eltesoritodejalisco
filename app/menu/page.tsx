@@ -13,6 +13,20 @@ type MenuItem = {
   isAvailable: boolean;
 };
 
+type Ingredient = {
+  id: string;
+  name: string;
+  unit: string;
+};
+
+type RecipeItem = {
+  id: string;
+  menuItemId: string;
+  ingredientId: string;
+  quantityRequired: number;
+  ingredient?: Ingredient;
+};
+
 type MenuFormState = {
   id?: string;
   name: string;
@@ -21,6 +35,11 @@ type MenuFormState = {
   category: string;
   imageUrl: string;
   isAvailable: boolean;
+};
+
+type RecipeFormState = {
+  ingredientId: string;
+  quantityRequired: string;
 };
 
 const emptyForm: MenuFormState = {
@@ -32,8 +51,22 @@ const emptyForm: MenuFormState = {
   isAvailable: true,
 };
 
+const emptyRecipeForm: RecipeFormState = {
+  ingredientId: "",
+  quantityRequired: "",
+};
+
 export default function MenuPage() {
   const [items, setItems] = useState<MenuItem[]>([]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [recipeItems, setRecipeItems] = useState<RecipeItem[]>([]);
+  const [selectedRecipeMenuItemId, setSelectedRecipeMenuItemId] = useState("");
+  const [recipeForm, setRecipeForm] =
+    useState<RecipeFormState>(emptyRecipeForm);
+  const [recipeErrors, setRecipeErrors] = useState<Record<string, string>>({});
+  const [recipeQuantities, setRecipeQuantities] = useState<
+    Record<string, string>
+  >({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -66,8 +99,52 @@ export default function MenuPage() {
     }
   };
 
+  const fetchIngredients = async () => {
+    const response = await fetch("/api/inventory");
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.error || "Error al cargar ingredientes");
+    }
+    const ingredientsList = (data.ingredients || []).map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      unit: item.unit,
+    }));
+    setIngredients(ingredientsList);
+  };
+
+  const fetchRecipes = async (menuItemId: string) => {
+    if (!menuItemId) {
+      setRecipeItems([]);
+      setRecipeQuantities({});
+      return;
+    }
+    const response = await fetch(`/api/recipes?menuItemId=${menuItemId}`);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.error || "Error al cargar recetas");
+    }
+    const recipes = data.recipeItems || [];
+    setRecipeItems(recipes);
+    setRecipeQuantities(
+      recipes.reduce((acc: Record<string, string>, item: RecipeItem) => {
+        acc[item.id] = String(item.quantityRequired);
+        return acc;
+      }, {}),
+    );
+  };
+
   useEffect(() => {
-    fetchMenu();
+    const load = async () => {
+      try {
+        await Promise.all([fetchMenu(), fetchIngredients()]);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error ? error.message : "Error inesperado al cargar",
+        );
+      }
+    };
+    load();
   }, []);
 
   const validateForm = (state: MenuFormState) => {
@@ -96,9 +173,21 @@ export default function MenuPage() {
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleRecipeFormChange = (
+    field: keyof RecipeFormState,
+    value: string,
+  ) => {
+    setRecipeForm((prev) => ({ ...prev, [field]: value }));
+  };
+
   const resetForm = () => {
     setFormState(emptyForm);
     setFormErrors({});
+  };
+
+  const resetRecipeForm = () => {
+    setRecipeForm(emptyRecipeForm);
+    setRecipeErrors({});
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -182,6 +271,135 @@ export default function MenuPage() {
       );
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const validateRecipeForm = (state: RecipeFormState) => {
+    const errors: Record<string, string> = {};
+    if (!selectedRecipeMenuItemId) {
+      errors.menuItemId = "Selecciona un producto del menú";
+    }
+    if (!state.ingredientId) {
+      errors.ingredientId = "Selecciona un ingrediente";
+    }
+    const qty = Number(state.quantityRequired);
+    if (!Number.isFinite(qty) || qty <= 0) {
+      errors.quantityRequired = "La cantidad debe ser mayor a 0";
+    }
+    return errors;
+  };
+
+  const handleRecipeSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const errors = validateRecipeForm(recipeForm);
+    setRecipeErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const payload = {
+        menuItemId: selectedRecipeMenuItemId,
+        ingredientId: recipeForm.ingredientId,
+        quantityRequired: Number(recipeForm.quantityRequired),
+      };
+      const response = await fetch("/api/recipes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || "No se pudo guardar la receta");
+      }
+      await fetchRecipes(selectedRecipeMenuItemId);
+      resetRecipeForm();
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error inesperado al guardar",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRecipeQuantityChange = (recipeId: string, value: string) => {
+    setRecipeQuantities((prev) => ({ ...prev, [recipeId]: value }));
+  };
+
+  const updateRecipe = async (recipeId: string) => {
+    const qty = Number(recipeQuantities[recipeId]);
+    if (!Number.isFinite(qty) || qty <= 0) {
+      setRecipeErrors({ update: "La cantidad debe ser mayor a 0" });
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/recipes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: recipeId, quantityRequired: qty }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || "No se pudo actualizar la receta");
+      }
+      await fetchRecipes(selectedRecipeMenuItemId);
+      setErrorMessage(null);
+      setRecipeErrors({});
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Error inesperado al actualizar",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const deleteRecipe = async (recipeId: string) => {
+    const confirmed = window.confirm(
+      "¿Eliminar este ingrediente de la receta?",
+    );
+    if (!confirmed) {
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/recipes", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: recipeId }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || "No se pudo eliminar la receta");
+      }
+      await fetchRecipes(selectedRecipeMenuItemId);
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error inesperado al eliminar",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRecipeMenuSelection = async (menuItemId: string) => {
+    setSelectedRecipeMenuItemId(menuItemId);
+    try {
+      await fetchRecipes(menuItemId);
+      setRecipeErrors({});
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Error inesperado al cargar recetas",
+      );
     }
   };
 
@@ -349,15 +567,165 @@ export default function MenuPage() {
 
           <div className="rounded-lg bg-white p-6 shadow-md">
             <h2 className="text-lg font-semibold text-gray-900">
-              Notas de recetas
+              Recetas por producto
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Próximo paso: enlazar ingredientes con recetas para el descuento
-              automático.
+              Selecciona un producto y registra los ingredientes necesarios.
             </p>
-            <div className="mt-4 rounded-lg bg-blue-50 p-4 text-sm text-blue-700">
-              Cada platillo podrá registrar los ingredientes y cantidades
-              requeridas.
+
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Producto del menú
+                </label>
+                <select
+                  value={selectedRecipeMenuItemId}
+                  onChange={(event) =>
+                    handleRecipeMenuSelection(event.target.value)
+                  }
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                >
+                  <option value="">Selecciona un producto</option>
+                  {items.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+                {recipeErrors.menuItemId && (
+                  <p className="mt-1 text-xs text-red-600">
+                    {recipeErrors.menuItemId}
+                  </p>
+                )}
+              </div>
+
+              <form onSubmit={handleRecipeSubmit} className="grid gap-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Ingrediente
+                  </label>
+                  <select
+                    value={recipeForm.ingredientId}
+                    onChange={(event) =>
+                      handleRecipeFormChange("ingredientId", event.target.value)
+                    }
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  >
+                    <option value="">Selecciona un ingrediente</option>
+                    {ingredients.map((ingredient) => (
+                      <option key={ingredient.id} value={ingredient.id}>
+                        {ingredient.name} ({ingredient.unit})
+                      </option>
+                    ))}
+                  </select>
+                  {recipeErrors.ingredientId && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {recipeErrors.ingredientId}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Cantidad requerida
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={recipeForm.quantityRequired}
+                    onChange={(event) =>
+                      handleRecipeFormChange(
+                        "quantityRequired",
+                        event.target.value,
+                      )
+                    }
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    placeholder="Ej. 0.2"
+                  />
+                  {recipeErrors.quantityRequired && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {recipeErrors.quantityRequired}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="rounded-lg bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-70"
+                >
+                  {isSubmitting ? "Guardando..." : "Agregar ingrediente"}
+                </button>
+              </form>
+
+              {recipeErrors.update && (
+                <p className="text-xs text-red-600">{recipeErrors.update}</p>
+              )}
+
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-700">
+                  Ingredientes en receta
+                </h3>
+                {!selectedRecipeMenuItemId ? (
+                  <p className="text-sm text-gray-500">
+                    Selecciona un producto para ver su receta.
+                  </p>
+                ) : recipeItems.length === 0 ? (
+                  <p className="text-sm text-gray-500">
+                    Aún no hay ingredientes registrados.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {recipeItems.map((recipe) => (
+                      <div
+                        key={recipe.id}
+                        className="rounded-lg border border-gray-200 p-3"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {recipe.ingredient?.name || recipe.ingredientId}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Unidad: {recipe.ingredient?.unit || "—"}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={recipeQuantities[recipe.id] || ""}
+                              onChange={(event) =>
+                                handleRecipeQuantityChange(
+                                  recipe.id,
+                                  event.target.value,
+                                )
+                              }
+                              className="w-24 rounded-lg border border-gray-300 px-2 py-1 text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => updateRecipe(recipe.id)}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              Actualizar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deleteRecipe(recipe.id)}
+                              className="text-red-600 hover:text-red-800 text-sm"
+                            >
+                              Eliminar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>
