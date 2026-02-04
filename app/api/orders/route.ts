@@ -1,11 +1,9 @@
 // TesoritoOS - Orders API Route
 // Handles order creation, updates, and retrieval
 
+import { prisma } from "@/lib/prisma";
 import type { CreateOrderRequest } from "@/types";
-import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
 
 /**
  * GET /api/orders
@@ -50,6 +48,20 @@ export async function POST(request: NextRequest) {
     const body: CreateOrderRequest = await request.json();
     const { customerId, source, table, notes, orderItems } = body;
 
+    if (!source) {
+      return NextResponse.json(
+        { error: "Order source is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!orderItems || orderItems.length === 0) {
+      return NextResponse.json(
+        { error: "At least one order item is required" },
+        { status: 400 },
+      );
+    }
+
     // Generate order number (simple increment, in production use a more robust system)
     const lastOrder = await prisma.order.findFirst({
       orderBy: { orderNumber: "desc" },
@@ -63,17 +75,27 @@ export async function POST(request: NextRequest) {
     let subtotal = 0;
     const itemsWithPrices = await Promise.all(
       orderItems.map(async (item) => {
+        if (!item.menuItemId) {
+          throw new Error("Menu item is required");
+        }
+
+        const parsedQuantity = Number(item.quantity);
+        if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
+          throw new Error("Quantity must be greater than 0");
+        }
+
         const menuItem = await prisma.menuItem.findUnique({
           where: { id: item.menuItemId },
         });
         if (!menuItem)
           throw new Error(`Menu item ${item.menuItemId} not found`);
 
-        const itemTotal = menuItem.price * item.quantity;
+        const itemTotal = menuItem.price * parsedQuantity;
         subtotal += itemTotal;
 
         return {
           ...item,
+          quantity: Math.round(parsedQuantity),
           unitPrice: menuItem.price,
         };
       }),
@@ -124,6 +146,32 @@ export async function POST(request: NextRequest) {
     console.error("Error creating order:", error);
     return NextResponse.json(
       { error: "Failed to create order" },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * DELETE /api/orders
+ * Delete an order
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const { id } = await request.json();
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Order ID is required" },
+        { status: 400 },
+      );
+    }
+
+    await prisma.order.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    return NextResponse.json(
+      { error: "Failed to delete order" },
       { status: 500 },
     );
   }
