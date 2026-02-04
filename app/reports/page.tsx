@@ -1,7 +1,7 @@
 // TesoritoOS - Reports & Analytics Page
 // Interface for viewing reports and analytics
 
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function ReportsPage() {
   return (
@@ -10,10 +10,15 @@ export default function ReportsPage() {
       <header className="bg-white shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div>
-            <Link href="/" className="text-sm text-blue-600 hover:text-blue-800">
+            <Link
+              href="/"
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
               ← Volver al Dashboard
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Reportes & Analytics</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Reportes & Analytics
+            </h1>
           </div>
           <div className="flex gap-3">
             <button className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
@@ -31,7 +36,8 @@ export default function ReportsPage() {
             Módulo de Reportes en Construcción
           </h2>
           <p className="mt-2 text-gray-600">
-            Analytics y reportes de ventas, inventario y efectividad de marketing.
+            Analytics y reportes de ventas, inventario y efectividad de
+            marketing.
           </p>
         </div>
 
@@ -49,7 +55,9 @@ export default function ReportsPage() {
           </div>
 
           <div className="rounded-lg bg-white p-6 shadow-md">
-            <h3 className="mb-4 text-lg font-bold text-gray-900">📦 Inventario</h3>
+            <h3 className="mb-4 text-lg font-bold text-gray-900">
+              📦 Inventario
+            </h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>• Consumo por ingrediente</li>
               <li>• Costo de productos</li>
@@ -60,7 +68,9 @@ export default function ReportsPage() {
           </div>
 
           <div className="rounded-lg bg-white p-6 shadow-md">
-            <h3 className="mb-4 text-lg font-bold text-gray-900">📱 Marketing</h3>
+            <h3 className="mb-4 text-lg font-bold text-gray-900">
+              📱 Marketing
+            </h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>• Ventas por fuente</li>
               <li>• ROI de campañas</li>
@@ -71,7 +81,9 @@ export default function ReportsPage() {
           </div>
 
           <div className="rounded-lg bg-white p-6 shadow-md">
-            <h3 className="mb-4 text-lg font-bold text-gray-900">👥 Clientes</h3>
+            <h3 className="mb-4 text-lg font-bold text-gray-900">
+              👥 Clientes
+            </h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>• Clientes nuevos vs recurrentes</li>
               <li>• Programa de lealtad</li>
@@ -82,7 +94,9 @@ export default function ReportsPage() {
           </div>
 
           <div className="rounded-lg bg-white p-6 shadow-md">
-            <h3 className="mb-4 text-lg font-bold text-gray-900">⏱️ Operaciones</h3>
+            <h3 className="mb-4 text-lg font-bold text-gray-900">
+              ⏱️ Operaciones
+            </h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>• Tiempo promedio de preparación</li>
               <li>• Órdenes por hora</li>
@@ -93,7 +107,9 @@ export default function ReportsPage() {
           </div>
 
           <div className="rounded-lg bg-white p-6 shadow-md">
-            <h3 className="mb-4 text-lg font-bold text-gray-900">📈 Tendencias</h3>
+            <h3 className="mb-4 text-lg font-bold text-gray-900">
+              📈 Tendencias
+            </h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>• Análisis predictivo</li>
               <li>• Proyecciones de ventas</li>

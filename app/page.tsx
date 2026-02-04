@@ -6,9 +6,7 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            🍽️ TesoritoOS
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">🍽️ TesoritoOS</h1>
           <p className="mt-1 text-sm text-gray-600">
             Sistema de Gestión para Restaurantes
           </p>
@@ -25,7 +23,9 @@ export default function Home() {
                 <span className="text-2xl">📋</span>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Órdenes Activas</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Órdenes Activas
+                </p>
                 <p className="text-2xl font-bold text-gray-900">12</p>
               </div>
             </div>
@@ -70,7 +70,9 @@ export default function Home() {
 
         {/* Main Modules */}
         <div className="mb-8">
-          <h2 className="mb-6 text-2xl font-bold text-gray-900">Módulos Principales</h2>
+          <h2 className="mb-6 text-2xl font-bold text-gray-900">
+            Módulos Principales
+          </h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {/* Kitchen Display System */}
             <Link href="/kitchen">
@@ -178,7 +180,9 @@ export default function Home() {
 
         {/* Quick Actions */}
         <div className="rounded-lg bg-white p-6 shadow-md">
-          <h3 className="mb-4 text-lg font-bold text-gray-900">Acciones Rápidas</h3>
+          <h3 className="mb-4 text-lg font-bold text-gray-900">
+            Acciones Rápidas
+          </h3>
           <div className="flex flex-wrap gap-3">
             <Link href="/pos">
               <button className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
