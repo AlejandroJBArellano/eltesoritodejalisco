@@ -5,10 +5,8 @@ import {
   adjustIngredientStock,
   checkLowStockIngredients,
 } from "@/lib/services/inventory";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
 
 /**
  * GET /api/inventory
@@ -53,13 +51,51 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, unit, currentStock, minimumStock, costPerUnit } = body;
 
+    if (!name || !unit) {
+      return NextResponse.json(
+        { error: "Name and unit are required" },
+        { status: 400 },
+      );
+    }
+
+    const parsedCurrentStock = Number(currentStock);
+    const parsedMinimumStock = Number(minimumStock ?? 0);
+    const parsedCostPerUnit =
+      costPerUnit === undefined || costPerUnit === null || costPerUnit === ""
+        ? undefined
+        : Number(costPerUnit);
+
+    if (!Number.isFinite(parsedCurrentStock) || parsedCurrentStock < 0) {
+      return NextResponse.json(
+        { error: "Current stock must be a non-negative number" },
+        { status: 400 },
+      );
+    }
+
+    if (!Number.isFinite(parsedMinimumStock) || parsedMinimumStock < 0) {
+      return NextResponse.json(
+        { error: "Minimum stock must be a non-negative number" },
+        { status: 400 },
+      );
+    }
+
+    if (
+      parsedCostPerUnit !== undefined &&
+      (!Number.isFinite(parsedCostPerUnit) || parsedCostPerUnit < 0)
+    ) {
+      return NextResponse.json(
+        { error: "Cost per unit must be a non-negative number" },
+        { status: 400 },
+      );
+    }
+
     const ingredient = await prisma.ingredient.create({
       data: {
         name,
         unit,
-        currentStock,
-        minimumStock: minimumStock || 0,
-        costPerUnit,
+        currentStock: parsedCurrentStock,
+        minimumStock: parsedMinimumStock,
+        costPerUnit: parsedCostPerUnit,
       },
     });
 
@@ -96,7 +132,8 @@ export async function PATCH(request: NextRequest) {
     );
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
+      const errorMessage = "error" in result ? result.error : "Invalid adjustment";
+      return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
     return NextResponse.json(result);
@@ -104,6 +141,100 @@ export async function PATCH(request: NextRequest) {
     console.error("Error adjusting stock:", error);
     return NextResponse.json(
       { error: "Failed to adjust stock" },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * PUT /api/inventory
+ * Update an ingredient
+ */
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, name, unit, currentStock, minimumStock, costPerUnit } = body;
+
+    if (!id || !name || !unit) {
+      return NextResponse.json(
+        { error: "ID, name, and unit are required" },
+        { status: 400 },
+      );
+    }
+
+    const parsedCurrentStock = Number(currentStock);
+    const parsedMinimumStock = Number(minimumStock ?? 0);
+    const parsedCostPerUnit =
+      costPerUnit === undefined || costPerUnit === null || costPerUnit === ""
+        ? undefined
+        : Number(costPerUnit);
+
+    if (!Number.isFinite(parsedCurrentStock) || parsedCurrentStock < 0) {
+      return NextResponse.json(
+        { error: "Current stock must be a non-negative number" },
+        { status: 400 },
+      );
+    }
+
+    if (!Number.isFinite(parsedMinimumStock) || parsedMinimumStock < 0) {
+      return NextResponse.json(
+        { error: "Minimum stock must be a non-negative number" },
+        { status: 400 },
+      );
+    }
+
+    if (
+      parsedCostPerUnit !== undefined &&
+      (!Number.isFinite(parsedCostPerUnit) || parsedCostPerUnit < 0)
+    ) {
+      return NextResponse.json(
+        { error: "Cost per unit must be a non-negative number" },
+        { status: 400 },
+      );
+    }
+
+    const ingredient = await prisma.ingredient.update({
+      where: { id },
+      data: {
+        name,
+        unit,
+        currentStock: parsedCurrentStock,
+        minimumStock: parsedMinimumStock,
+        costPerUnit: parsedCostPerUnit,
+      },
+    });
+
+    return NextResponse.json({ ingredient });
+  } catch (error) {
+    console.error("Error updating ingredient:", error);
+    return NextResponse.json(
+      { error: "Failed to update ingredient" },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * DELETE /api/inventory
+ * Delete an ingredient
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const { id } = await request.json();
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Ingredient ID is required" },
+        { status: 400 },
+      );
+    }
+
+    await prisma.ingredient.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting ingredient:", error);
+    return NextResponse.json(
+      { error: "Failed to delete ingredient" },
       { status: 500 },
     );
   }
