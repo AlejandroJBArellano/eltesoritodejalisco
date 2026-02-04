@@ -1,36 +1,228 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍽️ TesoritoOS - Restaurant Management System
 
-## Getting Started
+> Sistema de gestión integral para restaurantes enfocado en **velocidad**, **inventarios en tiempo real** y **análisis de efectividad de marketing**.
 
-First, run the development server:
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-6-2D3748)](https://www.prisma.io/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-4-38B2AC)](https://tailwindcss.com/)
+
+---
+
+## 🚀 Características Principales
+
+### 1. Sistema de Cocina (KDS - Kitchen Display System)
+- ⏱️ **Temporizador en tiempo real** para cada orden
+- 🎨 **Vista Kanban** con columnas: Pendiente → En Preparación → Listo
+- 📦 **Smart Batching**: Agrupación inteligente de ítems idénticos
+- 🔴 **Alertas visuales** cuando una orden supera 15 minutos
+
+### 2. Gestión de Inventario Inteligente
+- 📝 **Recetas con ingredientes** (relación many-to-many)
+- 🔄 **Desconteo automático** al completar órdenes
+- 📊 **Alertas de stock bajo**
+- ✏️ **Ajustes manuales** con historial
+
+### 3. CRM y Marketing
+- 📱 **Captura de fuente de visita** (TikTok, Instagram, etc.)
+- 💎 **Programa de lealtad**: $10 pesos = 1 punto
+- 👥 **Perfiles de cliente** con gasto histórico
+- 🎂 **Fechas de cumpleaños**
+
+---
+
+## ⚡ Inicio Rápido
+
+### Opción 1: Script Automático (Recomendado)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clonar el repositorio
+git clone <repo-url>
+cd eltesoritodejalisco
+
+# Ejecutar script de configuración
+./setup.sh
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Opción 2: Instalación Manual
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 1. Instalar dependencias
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 2. Configurar variables de entorno
+cp .env.example .env
+# Edita .env con tu DATABASE_URL
 
-## Learn More
+# 3. Configurar base de datos
+npm run prisma:generate
+npm run prisma:push
 
-To learn more about Next.js, take a look at the following resources:
+# 4. Iniciar servidor
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Visita:
+- **App**: [http://localhost:3000](http://localhost:3000)
+- **KDS**: [http://localhost:3000/kitchen](http://localhost:3000/kitchen)
+- **Prisma Studio**: `npm run prisma:studio`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+> 💡 **Tip**: Lee [docs/SETUP.md](docs/SETUP.md) para instrucciones detalladas
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🛠️ Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Frontend**: Next.js 16 (App Router) + TypeScript
+- **UI**: TailwindCSS 4
+- **Database**: PostgreSQL + Prisma ORM
+- **Real-time**: WebSockets o Supabase Realtime (recomendado)
+- **Estado**: React Hooks nativos
+
+---
+
+## 📂 Estructura del Proyecto
+
+```
+eltesoritodejalisco/
+├── app/                    # Next.js App Router
+│   ├── api/               # Backend API Routes
+│   │   ├── orders/       # Gestión de órdenes
+│   │   └── inventory/    # Gestión de inventario
+│   └── kitchen/          # Página del KDS
+├── components/            # Componentes React
+│   └── kitchen/          # Componentes del KDS
+├── lib/                  # Lógica de negocio
+│   ├── services/        # Servicios (inventario, etc.)
+│   └── utils.ts         # Funciones auxiliares
+├── prisma/              # Prisma ORM
+│   └── schema.prisma    # Schema de base de datos
+├── types/               # Tipos TypeScript
+├── hooks/               # Custom React Hooks
+└── docs/                # Documentación completa
+```
+
+---
+
+## 🔧 Scripts Disponibles
+
+```bash
+# Desarrollo
+npm run dev              # Servidor de desarrollo
+npm run build            # Build para producción
+npm run start            # Servidor de producción
+
+# Base de Datos (Prisma)
+npm run prisma:generate  # Generar cliente Prisma
+npm run prisma:push      # Sincronizar schema con BD
+npm run prisma:migrate   # Crear migración
+npm run prisma:studio    # UI visual para BD
+```
+
+---
+
+## 📚 Documentación
+
+| Documento | Descripción |
+|-----------|-------------|
+| [SETUP.md](docs/SETUP.md) | Guía de instalación y configuración |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitectura del sistema |
+| [API_EXAMPLES.md](docs/API_EXAMPLES.md) | Ejemplos de uso de APIs |
+| [PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | Estructura de carpetas |
+
+---
+
+## 📋 Modelo de Datos
+
+### Entidades Principales
+
+- **Ingredient**: Insumos con stock actual y mínimo
+- **MenuItem**: Productos del menú con precio
+- **RecipeItem**: Relación entre platos e ingredientes
+- **Order**: Órdenes con estado y temporizador
+- **OrderItem**: Ítems individuales de cada orden
+- **Customer**: Clientes con puntos de lealtad
+- **Payment**: Pagos asociados a órdenes
+
+---
+
+## 🔄 Flujo de Trabajo
+
+### Creación de Orden
+1. Mesero selecciona productos del menú
+2. Añade notas específicas y fuente de visita
+3. Orden se crea con número único (001, 002...)
+4. Aparece en KDS en columna "Pendiente"
+
+### Preparación en Cocina
+1. Chef ve la orden en KDS con temporizador
+2. Cambia a "En Preparación"
+3. Smart Batching muestra ítems agrupados
+4. Marca "Listo" cuando termina
+
+### Entrega y Pago
+1. Mesero marca como "Entregado"
+2. **Sistema descuenta inventario automáticamente**
+3. Se suman puntos de lealtad al cliente
+4. Orden se completa
+
+---
+
+## 🗺️ Roadmap
+
+### ✅ Fase 1: MVP (Completado)
+- [x] Schema completo de base de datos
+- [x] KDS con temporizador en tiempo real
+- [x] Sistema de desconteo automático
+- [x] CRM básico con programa de lealtad
+- [x] API RESTful completa
+
+### 🚧 Fase 2: Real-time & UX
+- [ ] WebSockets para actualizaciones en vivo
+- [ ] Drag & drop en vista Kanban
+- [ ] Notificaciones push
+- [ ] Dashboard de analytics
+
+### 📅 Fase 3: Avanzado
+- [ ] Autenticación (NextAuth.js)
+- [ ] Módulo de gestión de mesas
+- [ ] Reportes automáticos
+- [ ] Integración con impresoras
+- [ ] App móvil (React Native)
+
+---
+
+## 🤝 Contribuciones
+
+Las contribuciones son bienvenidas. Por favor:
+
+1. Fork el proyecto
+2. Crea una rama (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add: AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+---
+
+## 📄 Licencia
+
+Este proyecto es privado y propiedad de **El Tesorito de Jalisco**.
+
+---
+
+## 🙏 Recursos Adicionales
+
+- [Documentación Next.js](https://nextjs.org/docs)
+- [Prisma Docs](https://www.prisma.io/docs)
+- [TailwindCSS](https://tailwindcss.com/docs)
+- [Supabase](https://supabase.com/docs)
+
+---
+
+<div align="center">
+
+**Desarrollado con ❤️ para El Tesorito de Jalisco**
+
+⭐ Si te gusta este proyecto, ¡dale una estrella!
+
+</div>
