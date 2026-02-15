@@ -42,15 +42,6 @@ export function KitchenDisplaySystem({
             : order,
         ),
       );
-
-      // If order is completed, trigger inventory deduction
-      if (newStatus === OrderStatus.DELIVERED || newStatus === OrderStatus.PAID) {
-        await fetch(`/api/inventory/deduct`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderId }),
-        });
-      }
     } catch (error) {
       console.error("Error updating order status:", error);
       alert("Error al actualizar el estado de la orden");
