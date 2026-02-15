@@ -380,7 +380,7 @@ export default function InventoryPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">
-                    Costo por unidad
+                    Costo por unidad (MXN)
                   </label>
                   <input
                     type="number"
