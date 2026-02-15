@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent, useRef } from "react";
 
 type MenuItem = {
   id: string;
@@ -72,6 +72,9 @@ export default function MenuPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formState, setFormState] = useState<MenuFormState>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditing = Boolean(formState.id);
 
@@ -159,10 +162,6 @@ export default function MenuPage() {
       errors.price = "El precio debe ser un número mayor o igual a 0";
     }
 
-    if (state.imageUrl && !/^https?:\/\//i.test(state.imageUrl)) {
-      errors.imageUrl = "La URL de imagen debe iniciar con http o https";
-    }
-
     return errors;
   };
 
@@ -171,6 +170,18 @@ export default function MenuPage() {
     value: string | boolean,
   ) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleRecipeFormChange = (
@@ -183,6 +194,9 @@ export default function MenuPage() {
   const resetForm = () => {
     setFormState(emptyForm);
     setFormErrors({});
+    setSelectedFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const resetRecipeForm = () => {
@@ -200,21 +214,26 @@ export default function MenuPage() {
 
     try {
       setIsSubmitting(true);
-      const payload = {
-        id: formState.id,
-        name: formState.name.trim(),
-        description: formState.description || undefined,
-        price: Number(formState.price),
-        category: formState.category || undefined,
-        imageUrl: formState.imageUrl || undefined,
-        isAvailable: formState.isAvailable,
-      };
+      
+      const formData = new FormData();
+      if (formState.id) formData.append("id", formState.id);
+      formData.append("name", formState.name.trim());
+      formData.append("description", formState.description);
+      formData.append("price", formState.price);
+      formData.append("category", formState.category);
+      formData.append("isAvailable", String(formState.isAvailable));
+      
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      } else if (formState.imageUrl) {
+        formData.append("imageUrl", formState.imageUrl);
+      }
 
       const response = await fetch("/api/menu", {
         method: isEditing ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: formData, // Enviar como FormData
       });
+      
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data?.error || "No se pudo guardar el producto");
@@ -241,7 +260,9 @@ export default function MenuPage() {
       imageUrl: item.imageUrl || "",
       isAvailable: item.isAvailable,
     });
+    setImagePreview(item.imageUrl || null);
     setFormErrors({});
+    setSelectedFile(null);
   };
 
   const handleDelete = async (itemId: string) => {
@@ -521,22 +542,26 @@ export default function MenuPage() {
 
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Imagen URL
+                  Imagen del producto
                 </label>
-                <input
-                  type="url"
-                  value={formState.imageUrl}
-                  onChange={(event) =>
-                    handleFormChange("imageUrl", event.target.value)
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="https://..."
-                />
-                {formErrors.imageUrl && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {formErrors.imageUrl}
-                  </p>
-                )}
+                <div className="mt-1 flex items-center gap-4">
+                  {imagePreview && (
+                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </div>
               </div>
 
               <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -766,12 +791,25 @@ export default function MenuPage() {
                   {items.map((item) => (
                     <tr key={item.id} className="border-b last:border-0">
                       <td className="py-3">
-                        <p className="font-medium text-gray-900">{item.name}</p>
-                        {item.description && (
-                          <p className="text-xs text-gray-500">
-                            {item.description}
-                          </p>
-                        )}
+                        <div className="flex items-center gap-3">
+                          {item.imageUrl && (
+                            <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200">
+                              <img
+                                src={item.imageUrl}
+                                alt={item.name}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-medium text-gray-900">{item.name}</p>
+                            {item.description && (
+                              <p className="text-xs text-gray-500">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </td>
                       <td className="py-3 text-gray-600">
                         {item.category || "—"}

@@ -1,7 +1,8 @@
 // TesoritoOS - Menu Management API
-// Handles menu items CRUD
+// Handles menu items CRUD with Supabase Storage integration
 
 import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -26,12 +27,17 @@ export async function GET() {
 
 /**
  * POST /api/menu
- * Create a new menu item
+ * Create a new menu item with optional image upload
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { name, description, price, category, imageUrl, isAvailable } = body;
+    const formData = await request.formData();
+    const name = formData.get("name") as string;
+    const description = formData.get("description") as string;
+    const price = formData.get("price") as string;
+    const category = formData.get("category") as string;
+    const isAvailable = formData.get("isAvailable") === "true";
+    const imageFile = formData.get("image") as File | null;
 
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -45,14 +51,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let imageUrl = null;
+
+    // Handle image upload to Supabase Storage
+    if (imageFile && imageFile.size > 0) {
+      const supabase = await createClient();
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('menu-items')
+        .upload(filePath, imageFile);
+
+      if (uploadError) {
+        console.error("Storage upload error:", uploadError);
+      } else {
+        const { data: { publicUrl } } = supabase.storage
+          .from('menu-items')
+          .getPublicUrl(filePath);
+        imageUrl = publicUrl;
+      }
+    }
+
     const item = await prisma.menuItem.create({
       data: {
         name,
         description: description || null,
         price: parsedPrice,
         category: category || null,
-        imageUrl: imageUrl || null,
-        isAvailable: isAvailable !== undefined ? Boolean(isAvailable) : true,
+        imageUrl,
+        isAvailable,
       },
     });
 
@@ -68,13 +97,19 @@ export async function POST(request: NextRequest) {
 
 /**
  * PUT /api/menu
- * Update a menu item
+ * Update a menu item with optional new image
  */
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { id, name, description, price, category, imageUrl, isAvailable } =
-      body;
+    const formData = await request.formData();
+    const id = formData.get("id") as string;
+    const name = formData.get("name") as string;
+    const description = formData.get("description") as string;
+    const price = formData.get("price") as string;
+    const category = formData.get("category") as string;
+    const isAvailable = formData.get("isAvailable") === "true";
+    const imageFile = formData.get("image") as File | null;
+    let imageUrl = formData.get("imageUrl") as string | null;
 
     if (!id || !name) {
       return NextResponse.json(
@@ -91,6 +126,25 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Handle new image upload if provided
+    if (imageFile && imageFile.size > 0) {
+      const supabase = await createClient();
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('menu-items')
+        .upload(filePath, imageFile);
+
+      if (!uploadError) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('menu-items')
+          .getPublicUrl(filePath);
+        imageUrl = publicUrl;
+      }
+    }
+
     const item = await prisma.menuItem.update({
       where: { id },
       data: {
@@ -99,7 +153,7 @@ export async function PUT(request: NextRequest) {
         price: parsedPrice,
         category: category || null,
         imageUrl: imageUrl || null,
-        isAvailable: Boolean(isAvailable),
+        isAvailable,
       },
     });
 
