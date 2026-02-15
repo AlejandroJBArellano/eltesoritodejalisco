@@ -20,7 +20,10 @@ export function IngredientBatchControl({
 
   // Helper for duration display
   const getDuration = (start: string | Date) => {
+    if (!start) return "0m";
     const startDate = new Date(start);
+    if (isNaN(startDate.getTime())) return "0m";
+
     const now = new Date();
     const diffMs = now.getTime() - startDate.getTime();
 
