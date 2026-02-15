@@ -1,7 +1,7 @@
 // TesoritoOS - Custom Hooks
 // Reusable React hooks for common operations
 
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import type { OrderWithDetails } from "@/types";
 import { useEffect, useState } from "react";
 
@@ -12,6 +12,7 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
   const [orders, setOrders] = useState<OrderWithDetails[]>(initialData);
   const [loading, setLoading] = useState(initialData.length === 0);
   const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
 
   const fetchOrders = async () => {
     try {
@@ -41,13 +42,18 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
-        () => {
+        (payload) => {
+          console.log("Change received!", payload);
           // Re-fetch all active orders when any change occurs
           // This ensures we have the full OrderWithDetails structure
           fetchOrders();
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          console.log("Subscribed to orders channel");
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
