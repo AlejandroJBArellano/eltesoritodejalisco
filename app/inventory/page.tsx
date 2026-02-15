@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 type Ingredient = {
   id: string;
@@ -25,7 +26,6 @@ type AdjustmentState = {
   ingredientId: string;
   adjustment: string;
   reason: string;
-  userId: string;
 };
 
 const emptyForm: IngredientFormState = {
@@ -40,7 +40,6 @@ const emptyAdjustment: AdjustmentState = {
   ingredientId: "",
   adjustment: "",
   reason: "",
-  userId: "",
 };
 
 const UNIT_OPTIONS = [
@@ -51,10 +50,8 @@ const UNIT_OPTIONS = [
   { label: "Mililitro", value: "ml" },
 ] as const;
 
-// Si necesitas extraer el tipo para usarlo en otras partes:
-type UnitOption = (typeof UNIT_OPTIONS)[number]["value"];
-
 export default function InventoryPage() {
+  const supabase = createClient();
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,55 +96,22 @@ export default function InventoryPage() {
 
   const validateForm = (state: IngredientFormState) => {
     const errors: Record<string, string> = {};
-
-    if (!state.name.trim()) {
-      errors.name = "El nombre es obligatorio";
-    }
-    if (!state.unit) {
-      errors.unit = "La unidad es obligatoria";
-    }
-
+    if (!state.name.trim()) errors.name = "El nombre es obligatorio";
+    if (!state.unit) errors.unit = "La unidad es obligatoria";
     const currentStock = Number(state.currentStock);
-    if (!Number.isFinite(currentStock) || currentStock < 0) {
-      errors.currentStock =
-        "El stock actual debe ser un número mayor o igual a 0";
-    }
-
-    const minimumStock = Number(state.minimumStock || 0);
-    if (!Number.isFinite(minimumStock) || minimumStock < 0) {
-      errors.minimumStock =
-        "El stock mínimo debe ser un número mayor o igual a 0";
-    }
-
-    if (state.costPerUnit) {
-      const cost = Number(state.costPerUnit);
-      if (!Number.isFinite(cost) || cost < 0) {
-        errors.costPerUnit = "El costo debe ser un número mayor o igual a 0";
-      }
-    }
-
+    if (!Number.isFinite(currentStock) || currentStock < 0) errors.currentStock = "Mínimo 0";
     return errors;
   };
 
   const validateAdjustment = (state: AdjustmentState) => {
     const errors: Record<string, string> = {};
-
-    if (!state.ingredientId) {
-      errors.ingredientId = "Selecciona un ingrediente";
-    }
-
+    if (!state.ingredientId) errors.ingredientId = "Selecciona un ingrediente";
     const adjustment = Number(state.adjustment);
-    if (!Number.isFinite(adjustment) || adjustment === 0) {
-      errors.adjustment = "El ajuste debe ser un número distinto de 0";
-    }
-
+    if (!Number.isFinite(adjustment) || adjustment === 0) errors.adjustment = "Debe ser distinto de 0";
     return errors;
   };
 
-  const handleFormChange = (
-    field: keyof IngredientFormState,
-    value: string,
-  ) => {
+  const handleFormChange = (field: keyof IngredientFormState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -169,9 +133,7 @@ export default function InventoryPage() {
     event.preventDefault();
     const errors = validateForm(formState);
     setFormErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
+    if (Object.keys(errors).length > 0) return;
 
     try {
       setIsSubmitting(true);
@@ -181,10 +143,7 @@ export default function InventoryPage() {
         unit: formState.unit,
         currentStock: Number(formState.currentStock),
         minimumStock: Number(formState.minimumStock || 0),
-        costPerUnit:
-          formState.costPerUnit === ""
-            ? undefined
-            : Number(formState.costPerUnit),
+        costPerUnit: formState.costPerUnit === "" ? undefined : Number(formState.costPerUnit),
       };
 
       const response = await fetch("/api/inventory", {
@@ -193,16 +152,46 @@ export default function InventoryPage() {
         body: JSON.stringify(payload),
       });
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.error || "No se pudo guardar el ingrediente");
-      }
+      if (!response.ok) throw new Error(data?.error || "Error al guardar");
       await fetchIngredients();
       resetForm();
-      setErrorMessage(null);
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al guardar",
-      );
+      setErrorMessage(error instanceof Error ? error.message : "Error inesperado");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAdjustSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const errors = validateAdjustment(adjustState);
+    setAdjustErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    try {
+      setIsSubmitting(true);
+      
+      // Obtener el ID del usuario de la sesión actual
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const payload = {
+        ingredientId: adjustState.ingredientId,
+        adjustment: Number(adjustState.adjustment),
+        reason: adjustState.reason || undefined,
+        userId: user?.id, // ID automático desde Supabase Auth
+      };
+
+      const response = await fetch("/api/inventory", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Error al ajustar");
+      await fetchIngredients();
+      resetAdjust();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Error inesperado");
     } finally {
       setIsSubmitting(false);
     }
@@ -215,22 +204,13 @@ export default function InventoryPage() {
       unit: ingredient.unit,
       currentStock: String(ingredient.currentStock),
       minimumStock: String(ingredient.minimumStock),
-      costPerUnit:
-        ingredient.costPerUnit === null || ingredient.costPerUnit === undefined
-          ? ""
-          : String(ingredient.costPerUnit),
+      costPerUnit: ingredient.costPerUnit === null ? "" : String(ingredient.costPerUnit),
     });
     setFormErrors({});
   };
 
   const handleDelete = async (ingredientId: string) => {
-    const confirmed = window.confirm(
-      "¿Eliminar este ingrediente? Esta acción no se puede deshacer.",
-    );
-    if (!confirmed) {
-      return;
-    }
-
+    if (!window.confirm("¿Eliminar este ingrediente?")) return;
     try {
       setIsSubmitting(true);
       const response = await fetch("/api/inventory", {
@@ -238,412 +218,183 @@ export default function InventoryPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: ingredientId }),
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.error || "No se pudo eliminar el ingrediente");
-      }
+      if (!response.ok) throw new Error("Error al eliminar");
       await fetchIngredients();
-      setErrorMessage(null);
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al eliminar",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleAdjustSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const errors = validateAdjustment(adjustState);
-    setAdjustErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const payload = {
-        ingredientId: adjustState.ingredientId,
-        adjustment: Number(adjustState.adjustment),
-        reason: adjustState.reason || undefined,
-        userId: adjustState.userId || undefined,
-      };
-
-      const response = await fetch("/api/inventory", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.error || "No se pudo ajustar el stock");
-      }
-      await fetchIngredients();
-      resetAdjust();
-      setErrorMessage(null);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al ajustar",
-      );
+      setErrorMessage(error instanceof Error ? error.message : "Error inesperado");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div>
-            <Link
-              href="/"
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              ← Volver al Dashboard
-            </Link>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Gestión de Inventario
-            </h1>
-            <p className="text-sm text-gray-600">
-              {ingredients.length} ingredientes · {lowStockCount} en stock bajo
-            </p>
-          </div>
-          <div className="flex gap-3">
-            {isEditing && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
-              >
-                Cancelar edición
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen">
+      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {errorMessage && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="mb-8 rounded-xl border-2 border-primary/20 bg-primary/5 p-4 text-sm font-bold text-primary">
             {errorMessage}
           </div>
         )}
 
-        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="text-lg font-semibold text-gray-900">
+        <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-2xl bg-white p-8 shadow-sm border border-dark/5">
+            <h2 className="text-xl font-black text-dark tracking-tight uppercase mb-6">
               {isEditing ? "Editar ingrediente" : "Nuevo ingrediente"}
             </h2>
-            <form onSubmit={handleSubmit} className="mt-4 grid gap-4">
+            <form onSubmit={handleSubmit} className="grid gap-6">
               <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Nombre
-                </label>
+                <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">Nombre</label>
                 <input
                   type="text"
                   value={formState.name}
-                  onChange={(event) =>
-                    handleFormChange("name", event.target.value)
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  onChange={(e) => handleFormChange("name", e.target.value)}
+                  className="w-full rounded-xl border-2 border-dark/5 bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all"
                   placeholder="Ej. Pan Telera"
                 />
-                {formErrors.name && (
-                  <p className="mt-1 text-xs text-red-600">{formErrors.name}</p>
-                )}
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Unidad
-                  </label>
+                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">Unidad</label>
                   <select
                     value={formState.unit}
-                    onChange={(event) =>
-                      handleFormChange("unit", event.target.value)
-                    }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    onChange={(e) => handleFormChange("unit", e.target.value)}
+                    className="w-full rounded-xl border-2 border-dark/5 bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all"
                   >
                     {UNIT_OPTIONS.map((unit) => (
-                      <option key={unit.value} value={unit.value}>
-                        {unit.label}
-                      </option>
+                      <option key={unit.value} value={unit.value}>{unit.label}</option>
                     ))}
                   </select>
-                  {formErrors.unit && (
-                    <p className="mt-1 text-xs text-red-600">
-                      {formErrors.unit}
-                    </p>
-                  )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Costo por unidad (MXN)
-                  </label>
+                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">Costo (MXN)</label>
                   <input
                     type="number"
-                    min="0"
-                    step="0.01"
                     value={formState.costPerUnit}
-                    onChange={(event) =>
-                      handleFormChange("costPerUnit", event.target.value)
-                    }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    placeholder="Ej. 25.50"
+                    onChange={(e) => handleFormChange("costPerUnit", e.target.value)}
+                    className="w-full rounded-xl border-2 border-dark/5 bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all"
+                    placeholder="0.00"
                   />
-                  {formErrors.costPerUnit && (
-                    <p className="mt-1 text-xs text-red-600">
-                      {formErrors.costPerUnit}
-                    </p>
-                  )}
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Stock actual
-                  </label>
+                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">Stock Actual</label>
                   <input
                     type="number"
-                    min="0"
-                    step="0.01"
                     value={formState.currentStock}
-                    onChange={(event) =>
-                      handleFormChange("currentStock", event.target.value)
-                    }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    placeholder="Ej. 12"
+                    onChange={(e) => handleFormChange("currentStock", e.target.value)}
+                    className="w-full rounded-xl border-2 border-dark/5 bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all"
                   />
-                  {formErrors.currentStock && (
-                    <p className="mt-1 text-xs text-red-600">
-                      {formErrors.currentStock}
-                    </p>
-                  )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Stock mínimo
-                  </label>
+                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">Stock Mínimo</label>
                   <input
                     type="number"
-                    min="0"
-                    step="0.01"
                     value={formState.minimumStock}
-                    onChange={(event) =>
-                      handleFormChange("minimumStock", event.target.value)
-                    }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    placeholder="Ej. 4"
+                    onChange={(e) => handleFormChange("minimumStock", e.target.value)}
+                    className="w-full rounded-xl border-2 border-dark/5 bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all"
                   />
-                  {formErrors.minimumStock && (
-                    <p className="mt-1 text-xs text-red-600">
-                      {formErrors.minimumStock}
-                    </p>
-                  )}
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-70"
+                className="rounded-xl bg-warning py-4 text-sm font-black text-dark hover:bg-warning/90 transition-all shadow-lg shadow-warning/20 uppercase tracking-widest"
               >
-                {isSubmitting
-                  ? "Guardando..."
-                  : isEditing
-                    ? "Actualizar ingrediente"
-                    : "Crear ingrediente"}
+                {isSubmitting ? "Guardando..." : isEditing ? "Actualizar" : "Crear Ingrediente"}
               </button>
             </form>
           </div>
 
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Ajuste manual de stock
-            </h2>
-            <form onSubmit={handleAdjustSubmit} className="mt-4 grid gap-4">
+          <div className="rounded-2xl bg-dark p-8 shadow-2xl">
+            <h2 className="text-xl font-black text-white tracking-tight uppercase mb-6">Ajuste Manual</h2>
+            <form onSubmit={handleAdjustSubmit} className="grid gap-6">
               <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Ingrediente
-                </label>
+                <label className="text-xs font-black text-white/40 uppercase tracking-widest block mb-2">Ingrediente</label>
                 <select
                   value={adjustState.ingredientId}
-                  onChange={(event) =>
-                    handleAdjustChange("ingredientId", event.target.value)
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  onChange={(e) => handleAdjustChange("ingredientId", e.target.value)}
+                  className="w-full rounded-xl border-2 border-white/10 bg-white/5 px-4 py-3 font-bold text-white focus:border-warning outline-none transition-all"
                 >
-                  <option value="">Selecciona un ingrediente</option>
-                  {ingredients.map((ingredient) => (
-                    <option key={ingredient.id} value={ingredient.id}>
-                      {ingredient.name}
-                    </option>
-                  ))}
+                  <option value="" className="text-dark">Seleccionar...</option>
+                  {ingredients.map((ing) => <option key={ing.id} value={ing.id} className="text-dark">{ing.name}</option>)}
                 </select>
-                {adjustErrors.ingredientId && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {adjustErrors.ingredientId}
-                  </p>
-                )}
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Ajuste (positivo o negativo)
-                </label>
+                <label className="text-xs font-black text-white/40 uppercase tracking-widest block mb-2">Ajuste (+/-)</label>
                 <input
                   type="number"
-                  step="0.01"
                   value={adjustState.adjustment}
-                  onChange={(event) =>
-                    handleAdjustChange("adjustment", event.target.value)
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="Ej. -2 o 3"
+                  onChange={(e) => handleAdjustChange("adjustment", e.target.value)}
+                  className="w-full rounded-xl border-2 border-white/10 bg-white/5 px-4 py-3 font-bold text-white focus:border-warning outline-none transition-all"
+                  placeholder="Ej. -2 o 5"
                 />
-                {adjustErrors.adjustment && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {adjustErrors.adjustment}
-                  </p>
-                )}
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Motivo
-                </label>
+                <label className="text-xs font-black text-white/40 uppercase tracking-widest block mb-2">Motivo</label>
                 <input
                   type="text"
                   value={adjustState.reason}
-                  onChange={(event) =>
-                    handleAdjustChange("reason", event.target.value)
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="Merma, ajuste de conteo, etc."
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Usuario (opcional)
-                </label>
-                <input
-                  type="text"
-                  value={adjustState.userId}
-                  onChange={(event) =>
-                    handleAdjustChange("userId", event.target.value)
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="ID del usuario"
+                  onChange={(e) => handleAdjustChange("reason", e.target.value)}
+                  className="w-full rounded-xl border-2 border-white/10 bg-white/5 px-4 py-3 font-bold text-white focus:border-warning outline-none transition-all"
+                  placeholder="Merma, ajuste de conteo..."
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:opacity-70"
+                className="rounded-xl bg-primary py-4 text-sm font-black text-white hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
               >
-                {isSubmitting ? "Ajustando..." : "Aplicar ajuste"}
+                {isSubmitting ? "Procesando..." : "Aplicar Ajuste"}
               </button>
             </form>
           </div>
         </section>
 
-        <section className="rounded-lg bg-white p-6 shadow-md">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Ingredientes
-            </h2>
-            <button
-              type="button"
-              onClick={fetchIngredients}
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              Recargar
-            </button>
+        <section className="mt-12 rounded-2xl bg-white p-8 shadow-sm border border-dark/5">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-black text-dark tracking-tight uppercase">Inventario Actual</h2>
+            <button onClick={fetchIngredients} className="text-xs font-black text-secondary uppercase tracking-widest hover:underline">Recargar</button>
           </div>
 
-          {isLoading ? (
-            <p className="mt-4 text-sm text-gray-600">
-              Cargando ingredientes...
-            </p>
-          ) : ingredients.length === 0 ? (
-            <p className="mt-4 text-sm text-gray-600">
-              No hay ingredientes registrados.
-            </p>
-          ) : (
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b text-gray-500">
-                    <th className="py-2">Ingrediente</th>
-                    <th className="py-2">Unidad</th>
-                    <th className="py-2">Stock</th>
-                    <th className="py-2">Mínimo</th>
-                    <th className="py-2">Costo</th>
-                    <th className="py-2">Acciones</th>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b-2 border-dark/5 text-dark/40 font-black uppercase tracking-widest">
+                  <th className="pb-4 px-2">Ingrediente</th>
+                  <th className="pb-4 px-2">Stock</th>
+                  <th className="pb-4 px-2">Unidad</th>
+                  <th className="pb-4 px-2 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-dark/5">
+                {ingredients.map((ing) => (
+                  <tr key={ing.id} className="group hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-2 font-bold text-dark">
+                      {ing.name}
+                      {ing.currentStock <= ing.minimumStock && (
+                        <span className="ml-3 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-black text-primary uppercase">Bajo</span>
+                      )}
+                    </td>
+                    <td className={`py-4 px-2 font-black ${ing.currentStock <= ing.minimumStock ? 'text-primary' : 'text-success'}`}>{ing.currentStock}</td>
+                    <td className="py-4 px-2 text-dark/50 font-bold uppercase text-xs">{ing.unit}</td>
+                    <td className="py-4 px-2 text-right">
+                      <div className="flex justify-end gap-4">
+                        <button onClick={() => handleEdit(ing)} className="text-xs font-black text-secondary uppercase hover:underline">Editar</button>
+                        <button onClick={() => handleDelete(ing.id)} className="text-xs font-black text-primary uppercase hover:underline">Borrar</button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {ingredients.map((ingredient) => {
-                    const isLow =
-                      ingredient.currentStock <= ingredient.minimumStock;
-                    return (
-                      <tr
-                        key={ingredient.id}
-                        className="border-b last:border-0"
-                      >
-                        <td className="py-3 font-medium text-gray-900">
-                          {ingredient.name}
-                          {isLow && (
-                            <span className="ml-2 rounded-full bg-red-100 px-2 py-1 text-xs text-red-700">
-                              Bajo
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 text-gray-600">
-                          {ingredient.unit}
-                        </td>
-                        <td className="py-3 text-gray-600">
-                          {ingredient.currentStock}
-                        </td>
-                        <td className="py-3 text-gray-600">
-                          {ingredient.minimumStock}
-                        </td>
-                        <td className="py-3 text-gray-600">
-                          {ingredient.costPerUnit !== null &&
-                          ingredient.costPerUnit !== undefined
-                            ? `$${ingredient.costPerUnit.toFixed(2)}`
-                            : "—"}
-                        </td>
-                        <td className="py-3">
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleEdit(ingredient)}
-                              className="text-blue-600 hover:text-blue-800"
-                            >
-                              Editar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(ingredient.id)}
-                              className="text-red-600 hover:text-red-800"
-                            >
-                              Eliminar
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       </main>
     </div>
