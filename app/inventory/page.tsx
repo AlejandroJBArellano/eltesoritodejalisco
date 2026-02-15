@@ -43,7 +43,16 @@ const emptyAdjustment: AdjustmentState = {
   userId: "",
 };
 
-const UNIT_OPTIONS = ["unit", "kg", "gr", "lt", "ml"] as const;
+const UNIT_OPTIONS = [
+  { label: "Unidad", value: "unit" },
+  { label: "Kilogramo", value: "kg" },
+  { label: "Gramo", value: "gr" },
+  { label: "Litro", value: "lt" },
+  { label: "Mililitro", value: "ml" },
+] as const;
+
+// Si necesitas extraer el tipo para usarlo en otras partes:
+type UnitOption = (typeof UNIT_OPTIONS)[number]["value"];
 
 export default function InventoryPage() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -358,8 +367,8 @@ export default function InventoryPage() {
                     className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                   >
                     {UNIT_OPTIONS.map((unit) => (
-                      <option key={unit} value={unit}>
-                        {unit}
+                      <option key={unit.value} value={unit.value}>
+                        {unit.label}
                       </option>
                     ))}
                   </select>
