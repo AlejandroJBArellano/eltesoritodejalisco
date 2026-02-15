@@ -1,7 +1,4 @@
-// TesoritoOS - Update Order Status API
-// Handles order status changes
-
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
@@ -21,20 +18,24 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     // If order is completed, set completion timestamp
     if (status === "DELIVERED" || status === "PAID") {
-      updateData.completedAt = new Date();
+      updateData.completed_at = new Date().toISOString();
     }
 
-    const order = await prisma.order.update({
-      where: { id },
-      data: updateData,
-      include: {
-        orderItems: {
-          include: {
-            menuItem: true,
-          },
-        },
-      },
-    });
+    const supabase = await createClient();
+    const { data: order, error } = await supabase
+      .from("orders")
+      .update(updateData)
+      .eq("id", id)
+      .select(`
+        *,
+        order_items (
+          *,
+          menu_items (*)
+        )
+      `)
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json({ order });
   } catch (error) {

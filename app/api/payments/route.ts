@@ -1,7 +1,6 @@
 // TesoritoOS - Payments API
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { PaymentMethod } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,29 +11,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Usamos una transacción para asegurar que el pago y el estado se actualicen juntos
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Crear el registro de pago
-      const payment = await tx.payment.create({
-        data: {
-          orderId,
-          method: method as PaymentMethod,
-          amount: Number(amount),
-          receivedAmount: receivedAmount ? Number(receivedAmount) : null,
-          change: change ? Number(change) : null,
-        },
-      });
+    const supabase = await createClient();
 
-      // 2. Actualizar el estado de la orden a PAID
-      const order = await tx.order.update({
-        where: { id: orderId },
-        data: { status: "PAID" },
-      });
+    // 1. Crear el registro de pago
+    const { data: payment, error: paymentError } = await supabase
+      .from("payments")
+      .insert({
+        order_id: orderId,
+        method,
+        amount: Number(amount),
+        received_amount: receivedAmount ? Number(receivedAmount) : null,
+        change: change ? Number(change) : null,
+      })
+      .select()
+      .single();
 
-      return { payment, order };
-    });
+    if (paymentError) throw paymentError;
 
-    return NextResponse.json(result, { status: 201 });
+    // 2. Actualizar el estado de la orden a PAID
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .update({ status: "PAID" })
+      .eq("id", orderId)
+      .select()
+      .single();
+
+    if (orderError) throw orderError;
+
+    return NextResponse.json({ payment, order }, { status: 201 });
   } catch (error) {
     console.error("Error processing payment:", error);
     return NextResponse.json({ error: "Failed to process payment" }, { status: 500 });

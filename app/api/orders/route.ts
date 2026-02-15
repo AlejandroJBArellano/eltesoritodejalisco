@@ -1,7 +1,4 @@
-// TesoritoOS - Orders API Route
-// Handles order creation, updates, and retrieval
-
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import type { CreateOrderRequest } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -14,25 +11,27 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const statusParam = searchParams.get("status");
 
-    // Handle comma-separated statuses (e.g., "PENDING,PREPARING")
-    const statusFilter = statusParam
-      ? { in: statusParam.split(",") as any[] }
-      : undefined;
+    const supabase = await createClient();
+    let query = supabase
+      .from("orders")
+      .select(`
+        *,
+        order_items (
+          *,
+          menu_items (*)
+        ),
+        customer:customers (*)
+      `)
+      .order("created_at", { ascending: false });
 
-    const orders = await prisma.order.findMany({
-      where: statusFilter ? { status: statusFilter } : undefined,
-      include: {
-        orderItems: {
-          include: {
-            menuItem: true,
-          },
-        },
-        customer: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    if (statusParam) {
+      const statuses = statusParam.split(",");
+      query = query.in("status", statuses);
+    }
+
+    const { data: orders, error } = await query;
+
+    if (error) throw error;
 
     return NextResponse.json({ orders });
   } catch (error) {
@@ -67,86 +66,123 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate order number (simple increment, in production use a more robust system)
-    const lastOrder = await prisma.order.findFirst({
-      orderBy: { orderNumber: "desc" },
-    });
+    const supabase = await createClient();
+
+    // Generate order number
+    const { data: lastOrder } = await supabase
+      .from("orders")
+      .select("order_number")
+      .order("order_number", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     const nextNumber = lastOrder
-      ? (parseInt(lastOrder.orderNumber) + 1).toString().padStart(3, "0")
+      ? (parseInt(lastOrder.order_number) + 1).toString().padStart(3, "0")
       : "001";
 
     // Calculate order totals
     let subtotal = 0;
-    const itemsWithPrices = await Promise.all(
-      orderItems.map(async (item) => {
-        if (!item.menuItemId) {
-          throw new Error("Menu item is required");
-        }
+    const itemsWithPrices = [];
 
-        const parsedQuantity = Number(item.quantity);
-        if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
-          throw new Error("Quantity must be greater than 0");
-        }
+    for (const item of orderItems) {
+      if (!item.menuItemId) {
+        throw new Error("Menu item is required");
+      }
 
-        const menuItem = await prisma.menuItem.findUnique({
-          where: { id: item.menuItemId },
-        });
-        if (!menuItem)
-          throw new Error(`Menu item ${item.menuItemId} not found`);
+      const parsedQuantity = Number(item.quantity);
+      if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
+        throw new Error("Quantity must be greater than 0");
+      }
 
-        const itemTotal = menuItem.price * parsedQuantity;
-        subtotal += itemTotal;
+      const { data: menuItem, error: menuError } = await supabase
+        .from("menu_items")
+        .select("*")
+        .eq("id", item.menuItemId)
+        .single();
 
-        return {
-          ...item,
-          quantity: Math.round(parsedQuantity),
-          unitPrice: menuItem.price,
-        };
-      }),
-    );
+      if (menuError || !menuItem)
+        throw new Error(`Menu item ${item.menuItemId} not found`);
 
-    const tax = subtotal * 0; // 0.16; // 16% IVA (Temporarily disabled)
+      const itemTotal = menuItem.price * parsedQuantity;
+      subtotal += itemTotal;
+
+      itemsWithPrices.push({
+        menu_item_id: item.menuItemId,
+        quantity: Math.round(parsedQuantity),
+        unit_price: menuItem.price,
+        notes: item.notes || null,
+      });
+    }
+
+    const tax = subtotal * 0;
     const total = subtotal + tax;
 
-    // Create order with items
-    const order = await prisma.order.create({
-      data: {
-        orderNumber: nextNumber,
-        customerId,
+    // Create order
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .insert({
+        order_number: nextNumber,
+        customer_id: customerId,
         source,
         table,
         notes,
         subtotal,
         tax,
         total,
-        orderItems: {
-          create: itemsWithPrices,
-        },
-      },
-      include: {
-        orderItems: {
-          include: {
-            menuItem: true,
-          },
-        },
-        customer: true,
-      },
-    });
+      })
+      .select()
+      .single();
+
+    if (orderError) throw orderError;
+
+    // Create order items
+    const { error: itemsError } = await supabase
+      .from("order_items")
+      .insert(
+        itemsWithPrices.map((item) => ({
+          ...item,
+          order_id: order.id,
+        }))
+      );
+
+    if (itemsError) throw itemsError;
+
+    // Fetch full order for response
+    const { data: fullOrder } = await supabase
+      .from("orders")
+      .select(`
+        *,
+        order_items (
+          *,
+          menu_items (*)
+        ),
+        customer:customers (*)
+      `)
+      .eq("id", order.id)
+      .single();
 
     // If customer exists, update loyalty points
     if (customerId) {
-      const pointsEarned = Math.floor(total / 10); // $10 = 1 point
-      await prisma.customer.update({
-        where: { id: customerId },
-        data: {
-          loyaltyPoints: { increment: pointsEarned },
-          totalSpend: { increment: total },
-        },
-      });
+      const pointsEarned = Math.floor(total / 10);
+      
+      const { data: customer } = await supabase
+        .from("customers")
+        .select("loyalty_points, total_spend")
+        .eq("id", customerId)
+        .single();
+
+      if (customer) {
+        await supabase
+          .from("customers")
+          .update({
+            loyalty_points: (customer.loyalty_points || 0) + pointsEarned,
+            total_spend: (customer.total_spend || 0) + total,
+          })
+          .eq("id", customerId);
+      }
     }
 
-    return NextResponse.json({ order }, { status: 201 });
+    return NextResponse.json({ order: fullOrder }, { status: 201 });
   } catch (error) {
     console.error("Error creating order:", error);
     return NextResponse.json(
@@ -171,7 +207,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.order.delete({ where: { id } });
+    const supabase = await createClient();
+    const { error } = await supabase.from("orders").delete().eq("id", id);
+
+    if (error) throw error;
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting order:", error);

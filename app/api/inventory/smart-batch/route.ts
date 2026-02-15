@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 // GET: Get the active batch for a specific ingredient
@@ -14,15 +14,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const activeBatch = await prisma.smartBatch.findFirst({
-      where: {
-        ingredientId,
-        isActive: true,
-      },
-      include: {
-        ingredient: true,
-      },
-    });
+    const supabase = await createClient();
+    const { data: activeBatch, error } = await supabase
+      .from("smart_batches")
+      .select("*, ingredient:ingredients(*)")
+      .eq("ingredient_id", ingredientId)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (error) throw error;
 
     return NextResponse.json({ activeBatch });
   } catch (error) {
@@ -46,25 +46,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Close any existing active batches for this ingredient
-    await prisma.smartBatch.updateMany({
-      where: {
-        ingredientId,
-        isActive: true,
-      },
-      data: {
-        isActive: false,
-        endedAt: new Date(), // Just close them without calc if force opened
-      },
-    });
+    const supabase = await createClient();
 
-    const newBatch = await prisma.smartBatch.create({
-      data: {
-        ingredientId,
+    // Close any existing active batches for this ingredient
+    const { error: updateError } = await supabase
+      .from("smart_batches")
+      .update({
+        is_active: false,
+        ended_at: new Date().toISOString(),
+      })
+      .eq("ingredient_id", ingredientId)
+      .eq("is_active", true);
+
+    if (updateError) throw updateError;
+
+    const { data: newBatch, error: createError } = await supabase
+      .from("smart_batches")
+      .insert({
+        ingredient_id: ingredientId,
         name: name || "Topper Standard",
-        isActive: true, // Started now
-      },
-    });
+        is_active: true,
+      })
+      .select()
+      .single();
+
+    if (createError) throw createError;
 
     return NextResponse.json(newBatch, { status: 201 });
   } catch (error) {

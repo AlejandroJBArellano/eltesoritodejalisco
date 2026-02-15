@@ -1,7 +1,7 @@
 // TesoritoOS - Customers & CRM API
 // Handles customer CRUD operations
 
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
@@ -13,9 +13,13 @@ const phoneRegex = /^[0-9+\-()\s]{7,20}$/;
  */
 export async function GET() {
   try {
-    const customers = await prisma.customer.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+    const supabase = await createClient();
+    const { data: customers, error } = await supabase
+      .from("customers")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
 
     return NextResponse.json({ customers });
   } catch (error) {
@@ -54,7 +58,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let parsedBirthday: Date | null = null;
+    let parsedBirthday: string | null = null;
     if (birthday) {
       const date = new Date(birthday);
       if (Number.isNaN(date.getTime())) {
@@ -63,17 +67,22 @@ export async function POST(request: NextRequest) {
           { status: 400 },
         );
       }
-      parsedBirthday = date;
+      parsedBirthday = date.toISOString().split("T")[0]; // Use YYYY-MM-DD for Supabase date
     }
 
-    const customer = await prisma.customer.create({
-      data: {
+    const supabase = await createClient();
+    const { data: customer, error } = await supabase
+      .from("customers")
+      .insert({
         name,
         phone: phone || null,
         email: email || null,
         birthday: parsedBirthday,
-      },
-    });
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json({ customer }, { status: 201 });
   } catch (error) {
@@ -115,7 +124,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    let parsedBirthday: Date | null = null;
+    let parsedBirthday: string | null = null;
     if (birthday) {
       const date = new Date(birthday);
       if (Number.isNaN(date.getTime())) {
@@ -124,18 +133,23 @@ export async function PUT(request: NextRequest) {
           { status: 400 },
         );
       }
-      parsedBirthday = date;
+      parsedBirthday = date.toISOString().split("T")[0];
     }
 
-    const customer = await prisma.customer.update({
-      where: { id },
-      data: {
+    const supabase = await createClient();
+    const { data: customer, error } = await supabase
+      .from("customers")
+      .update({
         name,
         phone: phone || null,
         email: email || null,
         birthday: parsedBirthday,
-      },
-    });
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json({ customer });
   } catch (error) {
@@ -162,7 +176,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.customer.delete({ where: { id } });
+    const supabase = await createClient();
+    const { error } = await supabase.from("customers").delete().eq("id", id);
+
+    if (error) throw error;
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting customer:", error);

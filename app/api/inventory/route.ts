@@ -1,7 +1,7 @@
 // TesoritoOS - Inventory Management API
 // Handles ingredient CRUD and stock adjustments
 
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import {
   adjustIngredientStock,
   checkLowStockIngredients,
@@ -22,17 +22,30 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ingredients });
     }
 
-    const ingredients = await prisma.ingredient.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        stockAdjustments: {
-          take: 5,
-          orderBy: { createdAt: "desc" },
-        },
-      },
-    });
+    const supabase = await createClient();
+    const { data: ingredients, error } = await supabase
+      .from("ingredients")
+      .select(`
+        *,
+        stock_adjustments (
+          *
+        )
+      `)
+      .order("name", { ascending: true });
 
-    return NextResponse.json({ ingredients });
+    if (error) throw error;
+
+    // Prisma's "take: 5" for nested stockAdjustments is hard to do in a single Supabase query
+    // without complex logic. For simplicity, we might just return all or handle it in client.
+    // However, if we want exactly 5:
+    const ingredientsWithLimitedAdjustments = (ingredients || []).map((ing: any) => ({
+      ...ing,
+      stockAdjustments: (ing.stock_adjustments || [])
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 5)
+    }));
+
+    return NextResponse.json({ ingredients: ingredientsWithLimitedAdjustments });
   } catch (error) {
     console.error("Error fetching ingredients:", error);
     return NextResponse.json(
@@ -62,7 +75,7 @@ export async function POST(request: NextRequest) {
     const parsedMinimumStock = Number(minimumStock ?? 0);
     const parsedCostPerUnit =
       costPerUnit === undefined || costPerUnit === null || costPerUnit === ""
-        ? undefined
+        ? null
         : Number(costPerUnit);
 
     if (!Number.isFinite(parsedCurrentStock) || parsedCurrentStock < 0) {
@@ -80,7 +93,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (
-      parsedCostPerUnit !== undefined &&
+      parsedCostPerUnit !== null &&
       (!Number.isFinite(parsedCostPerUnit) || parsedCostPerUnit < 0)
     ) {
       return NextResponse.json(
@@ -89,15 +102,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const ingredient = await prisma.ingredient.create({
-      data: {
+    const supabase = await createClient();
+    const { data: ingredient, error } = await supabase
+      .from("ingredients")
+      .insert({
         name,
         unit,
-        currentStock: parsedCurrentStock,
-        minimumStock: parsedMinimumStock,
-        costPerUnit: parsedCostPerUnit,
-      },
-    });
+        current_stock: parsedCurrentStock,
+        minimum_stock: parsedMinimumStock,
+        cost_per_unit: parsedCostPerUnit,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json({ ingredient }, { status: 201 });
   } catch (error) {
@@ -167,7 +185,7 @@ export async function PUT(request: NextRequest) {
     const parsedMinimumStock = Number(minimumStock ?? 0);
     const parsedCostPerUnit =
       costPerUnit === undefined || costPerUnit === null || costPerUnit === ""
-        ? undefined
+        ? null
         : Number(costPerUnit);
 
     if (!Number.isFinite(parsedCurrentStock) || parsedCurrentStock < 0) {
@@ -185,7 +203,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (
-      parsedCostPerUnit !== undefined &&
+      parsedCostPerUnit !== null &&
       (!Number.isFinite(parsedCostPerUnit) || parsedCostPerUnit < 0)
     ) {
       return NextResponse.json(
@@ -194,16 +212,21 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const ingredient = await prisma.ingredient.update({
-      where: { id },
-      data: {
+    const supabase = await createClient();
+    const { data: ingredient, error } = await supabase
+      .from("ingredients")
+      .update({
         name,
         unit,
-        currentStock: parsedCurrentStock,
-        minimumStock: parsedMinimumStock,
-        costPerUnit: parsedCostPerUnit,
-      },
-    });
+        current_stock: parsedCurrentStock,
+        minimum_stock: parsedMinimumStock,
+        cost_per_unit: parsedCostPerUnit,
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json({ ingredient });
   } catch (error) {
@@ -230,7 +253,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.ingredient.delete({ where: { id } });
+    const supabase = await createClient();
+    const { error } = await supabase.from("ingredients").delete().eq("id", id);
+
+    if (error) throw error;
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting ingredient:", error);

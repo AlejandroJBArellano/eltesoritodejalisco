@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
@@ -15,12 +15,16 @@ export async function PATCH(
       return NextResponse.json({ error: "No items to add" }, { status: 400 });
     }
 
-    // Check if order exists
-    const order = await prisma.order.findUnique({
-      where: { id },
-    });
+    const supabase = await createClient();
 
-    if (!order) {
+    // Check if order exists
+    const { data: order, error: fetchError } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
@@ -30,20 +34,19 @@ export async function PATCH(
     // Process each new item
     for (const item of orderItems) {
       if (!item.menuItemId) {
-        // Find menuItemId in prisma to get price
-        // Actually we need to fetch menuItem here if not provided in body fully?
-        // Let's assume body has menuItemId and quantity
         return NextResponse.json(
           { error: "Menu item ID is required for all items" },
           { status: 400 },
         );
       }
 
-      const menuItem = await prisma.menuItem.findUnique({
-        where: { id: item.menuItemId },
-      });
+      const { data: menuItem, error: menuError } = await supabase
+        .from("menu_items")
+        .select("*")
+        .eq("id", item.menuItemId)
+        .single();
 
-      if (!menuItem) {
+      if (menuError || !menuItem) {
         return NextResponse.json(
           { error: `Menu item ${item.menuItemId} not found` },
           { status: 400 },
@@ -62,41 +65,45 @@ export async function PATCH(
       additionalSubtotal += itemTotal;
 
       newItemsData.push({
-        orderId: id,
-        menuItemId: item.menuItemId,
+        order_id: id,
+        menu_item_id: item.menuItemId,
         quantity: quantity,
-        unitPrice: menuItem.price,
+        unit_price: menuItem.price,
         notes: item.notes || "",
       });
     }
 
     // Create new order items in database
-    await prisma.orderItem.createMany({
-      data: newItemsData,
-    });
+    const { error: itemsError } = await supabase
+      .from("order_items")
+      .insert(newItemsData);
 
-    const additionalTax = additionalSubtotal * 0; // Tax rate is 0 currently
+    if (itemsError) throw itemsError;
+
+    const additionalTax = additionalSubtotal * 0;
     const additionalTotal = additionalSubtotal + additionalTax;
 
     // Update order totals
-    // Use increment to be atomic
-    const updatedOrder = await prisma.order.update({
-      where: { id },
-      data: {
-        subtotal: { increment: additionalSubtotal },
-        tax: { increment: additionalTax },
-        total: { increment: additionalTotal },
-        updatedAt: new Date(),
-      },
-      include: {
-        orderItems: {
-          include: {
-            menuItem: true,
-          },
-        },
-        customer: true,
-      },
-    });
+    const { data: updatedOrder, error: updateError } = await supabase
+      .from("orders")
+      .update({
+        subtotal: (order.subtotal || 0) + additionalSubtotal,
+        tax: (order.tax || 0) + additionalTax,
+        total: (order.total || 0) + additionalTotal,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .select(`
+        *,
+        order_items (
+          *,
+          menu_items (*)
+        ),
+        customer:customers (*)
+      `)
+      .single();
+
+    if (updateError) throw updateError;
 
     return NextResponse.json({ order: updatedOrder });
   } catch (error) {

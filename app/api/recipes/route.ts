@@ -1,7 +1,7 @@
 // TesoritoOS - Recipes API
 // Handles recipe items for menu products
 
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -19,10 +19,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const recipeItems = await prisma.recipeItem.findMany({
-      where: { menuItemId },
-      include: { ingredient: true },
-    });
+    const supabase = await createClient();
+    const { data: recipeItems, error } = await supabase
+      .from("recipe_items")
+      .select("*, ingredient:ingredients(*)")
+      .eq("menu_item_id", menuItemId);
+
+    if (error) throw error;
 
     return NextResponse.json({ recipeItems });
   } catch (error) {
@@ -58,14 +61,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const recipeItem = await prisma.recipeItem.create({
-      data: {
-        menuItemId,
-        ingredientId,
-        quantityRequired: parsedQuantity,
-      },
-      include: { ingredient: true },
-    });
+    const supabase = await createClient();
+    const { data: recipeItem, error } = await supabase
+      .from("recipe_items")
+      .insert({
+        menu_item_id: menuItemId,
+        ingredient_id: ingredientId,
+        quantity_required: parsedQuantity,
+      })
+      .select("*, ingredient:ingredients(*)")
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json({ recipeItem }, { status: 201 });
   } catch (error) {
@@ -101,11 +108,15 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const recipeItem = await prisma.recipeItem.update({
-      where: { id },
-      data: { quantityRequired: parsedQuantity },
-      include: { ingredient: true },
-    });
+    const supabase = await createClient();
+    const { data: recipeItem, error } = await supabase
+      .from("recipe_items")
+      .update({ quantity_required: parsedQuantity })
+      .eq("id", id)
+      .select("*, ingredient:ingredients(*)")
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json({ recipeItem });
   } catch (error) {
@@ -132,7 +143,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.recipeItem.delete({ where: { id } });
+    const supabase = await createClient();
+    const { error } = await supabase.from("recipe_items").delete().eq("id", id);
+
+    if (error) throw error;
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting recipe:", error);

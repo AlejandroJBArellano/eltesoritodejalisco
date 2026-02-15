@@ -1,7 +1,6 @@
 // TesoritoOS - Menu Management API
 // Handles menu items CRUD with Supabase Storage integration
 
-import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -11,9 +10,13 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export async function GET() {
   try {
-    const items = await prisma.menuItem.findMany({
-      orderBy: { name: "asc" },
-    });
+    const supabase = await createClient();
+    const { data: items, error } = await supabase
+      .from("menu_items")
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) throw error;
 
     return NextResponse.json({ items });
   } catch (error) {
@@ -52,10 +55,10 @@ export async function POST(request: NextRequest) {
     }
 
     let imageUrl = null;
+    const supabase = await createClient();
 
     // Handle image upload to Supabase Storage
     if (imageFile && imageFile.size > 0) {
-      const supabase = await createClient();
       const fileExt = imageFile.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `${fileName}`;
@@ -74,16 +77,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const item = await prisma.menuItem.create({
-      data: {
+    const { data: item, error: createError } = await supabase
+      .from("menu_items")
+      .insert({
         name,
         description: description || null,
         price: parsedPrice,
         category: category || null,
-        imageUrl,
-        isAvailable,
-      },
-    });
+        image_url: imageUrl,
+        is_available: isAvailable,
+      })
+      .select()
+      .single();
+
+    if (createError) throw createError;
 
     return NextResponse.json({ item }, { status: 201 });
   } catch (error) {
@@ -126,9 +133,10 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const supabase = await createClient();
+
     // Handle new image upload if provided
     if (imageFile && imageFile.size > 0) {
-      const supabase = await createClient();
       const fileExt = imageFile.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `${fileName}`;
@@ -145,17 +153,21 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const item = await prisma.menuItem.update({
-      where: { id },
-      data: {
+    const { data: item, error: updateError } = await supabase
+      .from("menu_items")
+      .update({
         name,
         description: description || null,
         price: parsedPrice,
         category: category || null,
-        imageUrl: imageUrl || null,
-        isAvailable,
-      },
-    });
+        image_url: imageUrl || null,
+        is_available: isAvailable,
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
 
     return NextResponse.json({ item });
   } catch (error) {
@@ -182,7 +194,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.menuItem.delete({ where: { id } });
+    const supabase = await createClient();
+    const { error } = await supabase.from("menu_items").delete().eq("id", id);
+
+    if (error) throw error;
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting menu item:", error);

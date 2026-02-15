@@ -2,9 +2,7 @@
 // Automatically deducts ingredients from stock when an order is completed
 
 import type { InventoryDeductionResult } from "@/types";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Deducts ingredients from inventory based on order items and their recipes
@@ -23,27 +21,28 @@ export async function deductInventoryForOrder(
   };
 
   try {
-    // Fetch the order with all its items and recipe information
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: {
-        orderItems: {
-          include: {
-            menuItem: {
-              include: {
-                recipeItems: {
-                  include: {
-                    ingredient: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+    const supabase = await createClient();
 
-    if (!order) {
+    // Fetch the order with all its items and recipe information
+    const { data: order, error: fetchError } = await supabase
+      .from("orders")
+      .select(`
+        *,
+        order_items (
+          *,
+          menu_items (
+            *,
+            recipe_items (
+              *,
+              ingredients (*)
+            )
+          )
+        )
+      `)
+      .eq("id", orderId)
+      .single();
+
+    if (fetchError || !order) {
       result.success = false;
       result.errors = ["Order not found"];
       return result;
@@ -55,12 +54,16 @@ export async function deductInventoryForOrder(
       { ingredient: any; totalRequired: number }
     >();
 
-    for (const orderItem of order.orderItems) {
-      const { menuItem, quantity } = orderItem;
+    for (const orderItem of (order as any).order_items) {
+      const { menu_items: menuItem, quantity } = orderItem;
 
-      for (const recipeItem of menuItem.recipeItems) {
-        const { ingredient, quantityRequired } = recipeItem;
-        const totalNeeded = quantityRequired * quantity;
+      if (!menuItem || !menuItem.recipe_items) continue;
+
+      for (const recipeItem of menuItem.recipe_items) {
+        const { ingredients: ingredient, quantity_required } = recipeItem;
+        if (!ingredient) continue;
+        
+        const totalNeeded = quantity_required * quantity;
 
         if (ingredientRequirements.has(ingredient.id)) {
           const existing = ingredientRequirements.get(ingredient.id)!;
@@ -74,59 +77,49 @@ export async function deductInventoryForOrder(
       }
     }
 
-    // Execute the deductions in a transaction
-    await prisma.$transaction(async (tx) => {
-      for (const [
+    // Process deductions
+    for (const [
+      ingredientId,
+      { ingredient, totalRequired },
+    ] of ingredientRequirements) {
+      const previousStock = ingredient.current_stock;
+      const newStock = previousStock - totalRequired;
+
+      // Update the ingredient stock (allow negative)
+      const { error: updateError } = await supabase
+        .from("ingredients")
+        .update({ current_stock: newStock })
+        .eq("id", ingredientId);
+
+      if (updateError) {
+        result.success = false;
+        result.errors?.push(`Failed to update stock for ${ingredient.name}`);
+        continue;
+      }
+
+      // Log the deduction
+      const { error: logError } = await supabase
+        .from("stock_adjustments")
+        .insert({
+          ingredient_id: ingredient.id,
+          adjustment: -totalRequired,
+          reason: `Order deduction`,
+          created_at: new Date().toISOString(),
+        });
+
+      if (logError) {
+        console.error("Failed to log stock adjustment:", logError);
+      }
+
+      // Record the deduction
+      result.deductions.push({
         ingredientId,
-        { ingredient, totalRequired },
-      ] of ingredientRequirements) {
-        const previousStock = ingredient.currentStock;
-        const newStock = previousStock - totalRequired;
-
-        // Check if we have enough stock - DISABLED FOR PERMISSIVE MODE
-        // We want to track usage even if it goes negative (to correct later)
-        /* 
-        if (newStock < 0) {
-          result.errors?.push(
-            `Insufficient stock for ${ingredient.name}. Required: ${totalRequired}, Available: ${previousStock}`,
-          );
-          result.success = false;
-          // Continue to show all stock issues
-          continue;
-        }
-        */
-
-        // Update the ingredient stock (allow negative)
-        await tx.ingredient.update({
-          where: { id: ingredientId },
-          data: { currentStock: newStock },
-        });
-
-        // Log the deduction
-        await tx.stockAdjustment.create({
-          data: {
-            ingredientId: ingredient.id,
-            adjustment: -totalRequired,
-            reason: `Order deduction`,
-            createdAt: new Date(),
-          },
-        });
-
-        // Record the deduction
-        result.deductions.push({
-          ingredientId,
-          ingredientName: ingredient.name,
-          quantityDeducted: totalRequired,
-          previousStock,
-          newStock,
-        });
-      }
-
-      // If there were any errors, rollback the transaction
-      if (!result.success) {
-        throw new Error("Insufficient inventory for order");
-      }
-    });
+        ingredientName: ingredient.name,
+        quantityDeducted: totalRequired,
+        previousStock,
+        newStock,
+      });
+    }
 
     return result;
   } catch (error) {
@@ -153,41 +146,50 @@ export async function adjustIngredientStock(
   userId?: string,
 ) {
   try {
-    return await prisma.$transaction(async (tx) => {
-      // Get current ingredient
-      const ingredient = await tx.ingredient.findUnique({
-        where: { id: ingredientId },
+    const supabase = await createClient();
+
+    // Get current ingredient
+    const { data: ingredient, error: fetchError } = await supabase
+      .from("ingredients")
+      .select("*")
+      .eq("id", ingredientId)
+      .single();
+
+    if (fetchError || !ingredient) {
+      throw new Error("Ingredient not found");
+    }
+
+    // Update the stock
+    const newStock = ingredient.current_stock + adjustment;
+    const { data: updatedIngredient, error: updateError } = await supabase
+      .from("ingredients")
+      .update({
+        current_stock: newStock,
+      })
+      .eq("id", ingredientId)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    // Create adjustment record
+    const { error: insertError } = await supabase
+      .from("stock_adjustments")
+      .insert({
+        ingredient_id: ingredientId,
+        adjustment,
+        reason,
+        user_id: userId,
       });
 
-      if (!ingredient) {
-        throw new Error("Ingredient not found");
-      }
+    if (insertError) throw insertError;
 
-      // Update the stock
-      const updatedIngredient = await tx.ingredient.update({
-        where: { id: ingredientId },
-        data: {
-          currentStock: ingredient.currentStock + adjustment,
-        },
-      });
-
-      // Create adjustment record
-      await tx.stockAdjustment.create({
-        data: {
-          ingredientId,
-          adjustment,
-          reason,
-          userId,
-        },
-      });
-
-      return {
-        success: true,
-        ingredient: updatedIngredient,
-        previousStock: ingredient.currentStock,
-        newStock: updatedIngredient.currentStock,
-      };
-    });
+    return {
+      success: true,
+      ingredient: updatedIngredient,
+      previousStock: ingredient.current_stock,
+      newStock: updatedIngredient.current_stock,
+    };
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
@@ -202,12 +204,15 @@ export async function adjustIngredientStock(
  * Check which ingredients are below minimum stock level
  */
 export async function checkLowStockIngredients() {
-  const ingredients = await prisma.ingredient.findMany({
-    orderBy: {
-      currentStock: "asc",
-    },
-  });
-  return ingredients.filter((ing) => ing.currentStock <= ing.minimumStock);
+  const supabase = await createClient();
+  const { data: ingredients, error } = await supabase
+    .from("ingredients")
+    .select("*")
+    .order("current_stock", { ascending: true });
+
+  if (error) throw error;
+  
+  return (ingredients || []).filter((ing: any) => ing.current_stock <= ing.minimum_stock);
 }
 
 /**
@@ -218,18 +223,15 @@ export async function getIngredientUsageHistory(
   startDate: Date,
   endDate: Date,
 ) {
-  const adjustments = await prisma.stockAdjustment.findMany({
-    where: {
-      ingredientId,
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const supabase = await createClient();
+  const { data: adjustments, error } = await supabase
+    .from("stock_adjustments")
+    .select("*")
+    .eq("ingredient_id", ingredientId)
+    .gte("created_at", startDate.toISOString())
+    .lte("created_at", endDate.toISOString())
+    .order("created_at", { ascending: false });
 
+  if (error) throw error;
   return adjustments;
 }

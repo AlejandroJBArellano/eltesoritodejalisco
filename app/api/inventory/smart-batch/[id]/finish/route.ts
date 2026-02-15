@@ -1,27 +1,28 @@
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const batchId = params.id;
-    const endedAt = new Date(); // Use current time as end time or pass it via body if needed (usually just "now")
+    const { id: batchId } = await params;
+    const endedAt = new Date();
+
+    const supabase = await createClient();
 
     // 1. Get the batch details
-    const batch = await prisma.smartBatch.findUnique({
-      where: { id: batchId },
-      include: {
-        ingredient: true,
-      },
-    });
+    const { data: batch, error: batchError } = await supabase
+      .from("smart_batches")
+      .select("*, ingredient:ingredients(*)")
+      .eq("id", batchId)
+      .single();
 
-    if (!batch) {
+    if (batchError || !batch) {
       return NextResponse.json({ error: "Batch not found" }, { status: 404 });
     }
 
-    if (!batch.isActive) {
+    if (!batch.is_active) {
       return NextResponse.json(
         { error: "Batch is already closed" },
         { status: 400 },
@@ -29,42 +30,37 @@ export async function POST(
     }
 
     // 2. Find orders during this period
-    const orders = await prisma.order.findMany({
-      where: {
-        createdAt: {
-          gte: batch.startedAt,
-          lte: endedAt,
-        },
-        status: {
-          not: "CANCELLED", // Exclude cancelled orders
-        },
-      },
-      include: {
-        orderItems: {
-          include: {
-            menuItem: {
-              include: {
-                recipeItems: true, // Need to check if this item uses the ingredient
-              },
-            },
-          },
-        },
-      },
-    });
+    const { data: orders, error: ordersError } = await supabase
+      .from("orders")
+      .select(`
+        *,
+        order_items (
+          *,
+          menu_items (
+            *,
+            recipe_items (*)
+          )
+        )
+      `)
+      .gte("created_at", batch.started_at)
+      .lte("created_at", endedAt.toISOString())
+      .neq("status", "CANCELLED");
+
+    if (ordersError) throw ordersError;
 
     // 3. Calculate Yield (How many items consumed this ingredient)
     const yieldSummary: Record<string, number> = {};
     let totalItemsServed = 0;
 
-    for (const order of orders) {
-      for (const item of order.orderItems) {
+    for (const order of (orders || [])) {
+      for (const item of (order as any).order_items) {
         // Check if this menu item uses the ingredient of the batch
-        const usesIngredient = item.menuItem?.recipeItems.some(
-          (ri) => ri.ingredientId === batch.ingredientId,
+        const usesIngredient = item.menu_items?.recipe_items.some(
+          (ri: any) => ri.ingredient_id === batch.ingredient_id,
         );
 
-        if (usesIngredient && item.menuItem) {
-          const itemName = item.menuItem.name;
+        if (usesIngredient && item.menu_items) {
+          const itemName = item.menu_items.name;
           const quantity = item.quantity;
 
           if (!yieldSummary[itemName]) {
@@ -77,14 +73,18 @@ export async function POST(
     }
 
     // 4. Close the batch
-    const updatedBatch = await prisma.smartBatch.update({
-      where: { id: batchId },
-      data: {
-        isActive: false,
-        endedAt: endedAt,
-        finalYield: yieldSummary,
-      },
-    });
+    const { data: updatedBatch, error: updateError } = await supabase
+      .from("smart_batches")
+      .update({
+        is_active: false,
+        ended_at: endedAt.toISOString(),
+        final_yield: yieldSummary,
+      })
+      .eq("id", batchId)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
 
     return NextResponse.json({
       success: true,

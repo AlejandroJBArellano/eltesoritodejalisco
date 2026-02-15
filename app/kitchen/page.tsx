@@ -1,41 +1,45 @@
 import { IngredientBatchControl } from "@/components/kitchen/IngredientBatchControl";
 import { KitchenDisplaySystem } from "@/components/kitchen/KitchenDisplaySystem";
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 
 // In production, fetch from API with real-time subscription
 async function getActiveOrders() {
-  const orders = await prisma.order.findMany({
-    where: {
-      status: { in: ["PENDING", "PREPARING", "READY"] },
-    },
-    include: {
-      orderItems: {
-        include: {
-          menuItem: true,
-        },
-      },
-    },
-    orderBy: { createdAt: "asc" },
-  });
+  const supabase = await createClient();
+  const { data: orders } = await supabase
+    .from("orders")
+    .select(`
+      *,
+      order_items (
+        *,
+        menu_items (*)
+      )
+    `)
+    .in("status", ["PENDING", "PREPARING", "READY"])
+    .order("created_at", { ascending: true });
 
-  // Serialize dates to strings to avoid "Date object" warning in Client Components
-  return JSON.parse(JSON.stringify(orders));
+  return orders || [];
 }
 
 async function getTrackedIngredient() {
+  const supabase = await createClient();
   // Try to find the main protein like "Carne de Soya"
-  let ingredient = await prisma.ingredient.findFirst({
-    where: {
-      name: { contains: "Soya", mode: "insensitive" },
-    },
-  });
+  const { data: ingredient } = await supabase
+    .from("ingredients")
+    .select("*")
+    .ilike("name", "%Soya%")
+    .limit(1)
+    .maybeSingle();
+
+  if (ingredient) return ingredient;
 
   // Fallback to first ingredient if not found
-  if (!ingredient) {
-    ingredient = await prisma.ingredient.findFirst();
-  }
+  const { data: firstIng } = await supabase
+    .from("ingredients")
+    .select("*")
+    .limit(1)
+    .maybeSingle();
 
-  return ingredient ? JSON.parse(JSON.stringify(ingredient)) : null;
+  return firstIng;
 }
 
 export default async function KitchenPage() {
