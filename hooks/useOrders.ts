@@ -8,32 +8,19 @@ import { useEffect, useState } from "react";
  * Hook to fetch and subscribe to real-time orders
  * In production, this would use WebSockets or Supabase Realtime
  */
+import { supabase } from "@/lib/supabase";
+import type { OrderWithDetails } from "@/types";
+import { useEffect, useState } from "react";
+
+/**
+ * Hook to fetch and subscribe to real-time orders using Supabase
+ */
 export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
   const [orders, setOrders] = useState<OrderWithDetails[]>(initialData);
   const [loading, setLoading] = useState(initialData.length === 0);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Initial fetch if no data provided
-    if (initialData.length === 0) {
-      fetchOrders();
-    }
-
-    // Setup real-time subscription
-    // const subscription = subscribeToOrders((newOrder) => {
-    //   setOrders((prev) => [...prev, newOrder]);
-    // });
-
-    // Polling fallback (remove when WebSockets are implemented)
-    const interval = setInterval(fetchOrders, 5000); // Refresh every 5s
-
-    return () => {
-      clearInterval(interval);
-      // subscription?.unsubscribe();
-    };
-  }, []);
-
-  async function fetchOrders() {
+  const fetchOrders = async () => {
     try {
       const response = await fetch(
         "/api/orders?status=PENDING,PREPARING,READY",
@@ -48,7 +35,31 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  useEffect(() => {
+    if (initialData.length === 0) {
+      fetchOrders();
+    }
+
+    // Subscribe to changes in the 'orders' table
+    const channel = supabase
+      .channel("orders_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        () => {
+          // Re-fetch all active orders when any change occurs
+          // This ensures we have the full OrderWithDetails structure
+          fetchOrders();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   return { orders, loading, error, refetch: fetchOrders, setOrders };
 }
