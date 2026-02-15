@@ -12,10 +12,15 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const status = searchParams.get("status");
+    const statusParam = searchParams.get("status");
+
+    // Handle comma-separated statuses (e.g., "PENDING,PREPARING")
+    const statusFilter = statusParam
+      ? { in: statusParam.split(",") as any[] }
+      : undefined;
 
     const orders = await prisma.order.findMany({
-      where: status ? { status: status as any } : undefined,
+      where: statusFilter ? { status: statusFilter } : undefined,
       include: {
         orderItems: {
           include: {
