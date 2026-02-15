@@ -524,7 +524,44 @@ export default function POSPage() {
                         onClick={() => {
                           setCheckoutOrder(order);
                           setShowKitchenTicket(true);
-                   AGREGAR PRODUCTOS */}
+                          setShowTicket(false);
+                        }}
+                        className="bg-orange-500 text-white px-2 py-1.5 rounded text-[10px] font-bold"
+                      >
+                        COMANDA
+                      </button>
+                      <button
+                        onClick={() => {
+                          setCheckoutOrder(order);
+                          setShowTicket(true);
+                          setShowKitchenTicket(false);
+                        }}
+                        className="border border-gray-300 px-2 py-1.5 rounded text-[10px] font-bold"
+                      >
+                        TICKET
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setEditingOrder(order);
+                          setAdditionalItems([
+                            { menuItemId: "", quantity: "1", notes: "" },
+                          ]);
+                        }}
+                        className="bg-purple-600 text-white px-2 py-1.5 rounded text-[10px] font-bold"
+                      >
+                        AGREGAR
+                      </button>
+                    </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+
+      {/* MODAL DE AGREGAR PRODUCTOS */}
       {editingOrder && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
@@ -611,43 +648,6 @@ export default function POSPage() {
           </div>
         </div>
       )}
-
-      {/* MODAL DE        setShowTicket(false);
-                        }}
-                        className="bg-orange-500 text-white px-2 py-1.5 rounded text-[10px] font-bold"
-                      >
-                        COMANDA
-                      </button>
-                      <button
-                        onClick={() => {
-                          setCheckoutOrder(order);
-                          setShowTicket(true);
-                          setShowKitchenTicket(false);
-                        }}
-                        className="border border-gray-300 px-2 py-1.5 rounded text-[10px] font-bold"
-                      >
-                        TICKET
-                      </button>
-
-                        <button
-                          onClick={() => {
-                            setEditingOrder(order);
-                            setAdditionalItems([
-                              { menuItemId: "", quantity: "1", notes: "" },
-                            ]);
-                          }}
-                          className="bg-purple-600 text-white px-2 py-1.5 rounded text-[10px] font-bold"
-                        >
-                          AGREGAR
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </main>
 
       {/* MODALES DE IMPRESIÓN */}
       {(showTicket || showKitchenTicket) && checkoutOrder && (
