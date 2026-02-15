@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 type Ingredient = {
   id: string;
@@ -99,7 +98,8 @@ export default function InventoryPage() {
     if (!state.name.trim()) errors.name = "El nombre es obligatorio";
     if (!state.unit) errors.unit = "La unidad es obligatoria";
     const currentStock = Number(state.currentStock);
-    if (!Number.isFinite(currentStock) || currentStock < 0) errors.currentStock = "Mínimo 0";
+    if (!Number.isFinite(currentStock) || currentStock < 0)
+      errors.currentStock = "Mínimo 0";
     return errors;
   };
 
@@ -107,11 +107,15 @@ export default function InventoryPage() {
     const errors: Record<string, string> = {};
     if (!state.ingredientId) errors.ingredientId = "Selecciona un ingrediente";
     const adjustment = Number(state.adjustment);
-    if (!Number.isFinite(adjustment) || adjustment === 0) errors.adjustment = "Debe ser distinto de 0";
+    if (!Number.isFinite(adjustment) || adjustment === 0)
+      errors.adjustment = "Debe ser distinto de 0";
     return errors;
   };
 
-  const handleFormChange = (field: keyof IngredientFormState, value: string) => {
+  const handleFormChange = (
+    field: keyof IngredientFormState,
+    value: string,
+  ) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -143,7 +147,10 @@ export default function InventoryPage() {
         unit: formState.unit,
         currentStock: Number(formState.currentStock),
         minimumStock: Number(formState.minimumStock || 0),
-        costPerUnit: formState.costPerUnit === "" ? undefined : Number(formState.costPerUnit),
+        costPerUnit:
+          formState.costPerUnit === ""
+            ? undefined
+            : Number(formState.costPerUnit),
       };
 
       const response = await fetch("/api/inventory", {
@@ -156,7 +163,9 @@ export default function InventoryPage() {
       await fetchIngredients();
       resetForm();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Error inesperado");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error inesperado",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -170,10 +179,12 @@ export default function InventoryPage() {
 
     try {
       setIsSubmitting(true);
-      
+
       // Obtener el ID del usuario de la sesión actual
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       const payload = {
         ingredientId: adjustState.ingredientId,
         adjustment: Number(adjustState.adjustment),
@@ -191,7 +202,9 @@ export default function InventoryPage() {
       await fetchIngredients();
       resetAdjust();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Error inesperado");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error inesperado",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -204,7 +217,8 @@ export default function InventoryPage() {
       unit: ingredient.unit,
       currentStock: String(ingredient.currentStock),
       minimumStock: String(ingredient.minimumStock),
-      costPerUnit: ingredient.costPerUnit === null ? "" : String(ingredient.costPerUnit),
+      costPerUnit:
+        ingredient.costPerUnit === null ? "" : String(ingredient.costPerUnit),
     });
     setFormErrors({});
   };
@@ -221,7 +235,9 @@ export default function InventoryPage() {
       if (!response.ok) throw new Error("Error al eliminar");
       await fetchIngredients();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Error inesperado");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error inesperado",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -243,59 +259,102 @@ export default function InventoryPage() {
             </h2>
             <form onSubmit={handleSubmit} className="grid gap-6">
               <div>
-                <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">Nombre</label>
+                <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">
+                  Nombre
+                </label>
                 <input
                   type="text"
                   value={formState.name}
                   onChange={(e) => handleFormChange("name", e.target.value)}
-                  className="w-full rounded-xl border-2 border-dark/5 bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all"
+                  className={`w-full rounded-xl border-2 ${formErrors.name ? "border-primary" : "border-dark/5"} bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all`}
                   placeholder="Ej. Pan Telera"
                 />
+                {formErrors.name && (
+                  <p className="mt-1 text-xs font-bold text-primary">
+                    {formErrors.name}
+                  </p>
+                )}
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">Unidad</label>
+                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">
+                    Unidad
+                  </label>
                   <select
                     value={formState.unit}
                     onChange={(e) => handleFormChange("unit", e.target.value)}
-                    className="w-full rounded-xl border-2 border-dark/5 bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all"
+                    className={`w-full rounded-xl border-2 ${formErrors.unit ? "border-primary" : "border-dark/5"} bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all`}
                   >
                     {UNIT_OPTIONS.map((unit) => (
-                      <option key={unit.value} value={unit.value}>{unit.label}</option>
+                      <option key={unit.value} value={unit.value}>
+                        {unit.label}
+                      </option>
                     ))}
                   </select>
+                  {formErrors.unit && (
+                    <p className="mt-1 text-xs font-bold text-primary">
+                      {formErrors.unit}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">Costo (MXN)</label>
+                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">
+                    Costo (MXN)
+                  </label>
                   <input
                     type="number"
                     value={formState.costPerUnit}
-                    onChange={(e) => handleFormChange("costPerUnit", e.target.value)}
-                    className="w-full rounded-xl border-2 border-dark/5 bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all"
+                    onChange={(e) =>
+                      handleFormChange("costPerUnit", e.target.value)
+                    }
+                    className={`w-full rounded-xl border-2 ${formErrors.costPerUnit ? "border-primary" : "border-dark/5"} bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all`}
                     placeholder="0.00"
                   />
+                  {formErrors.costPerUnit && (
+                    <p className="mt-1 text-xs font-bold text-primary">
+                      {formErrors.costPerUnit}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">Stock Actual</label>
+                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">
+                    Stock Actual
+                  </label>
                   <input
                     type="number"
                     value={formState.currentStock}
-                    onChange={(e) => handleFormChange("currentStock", e.target.value)}
-                    className="w-full rounded-xl border-2 border-dark/5 bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all"
+                    onChange={(e) =>
+                      handleFormChange("currentStock", e.target.value)
+                    }
+                    className={`w-full rounded-xl border-2 ${formErrors.currentStock ? "border-primary" : "border-dark/5"} bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all`}
                   />
+                  {formErrors.currentStock && (
+                    <p className="mt-1 text-xs font-bold text-primary">
+                      {formErrors.currentStock}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">Stock Mínimo</label>
+                  <label className="text-xs font-black text-dark/40 uppercase tracking-widest block mb-2">
+                    Stock Mínimo
+                  </label>
                   <input
                     type="number"
                     value={formState.minimumStock}
-                    onChange={(e) => handleFormChange("minimumStock", e.target.value)}
-                    className="w-full rounded-xl border-2 border-dark/5 bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all"
+                    onChange={(e) =>
+                      handleFormChange("minimumStock", e.target.value)
+                    }
+                    className={`w-full rounded-xl border-2 ${formErrors.minimumStock ? "border-primary" : "border-dark/5"} bg-gray-50 px-4 py-3 font-bold text-dark focus:border-warning outline-none transition-all`}
                   />
+                  {formErrors.minimumStock && (
+                    <p className="mt-1 text-xs font-bold text-primary">
+                      {formErrors.minimumStock}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -304,39 +363,71 @@ export default function InventoryPage() {
                 disabled={isSubmitting}
                 className="rounded-xl bg-warning py-4 text-sm font-black text-dark hover:bg-warning/90 transition-all shadow-lg shadow-warning/20 uppercase tracking-widest"
               >
-                {isSubmitting ? "Guardando..." : isEditing ? "Actualizar" : "Crear Ingrediente"}
+                {isSubmitting
+                  ? "Guardando..."
+                  : isEditing
+                    ? "Actualizar"
+                    : "Crear Ingrediente"}
               </button>
             </form>
           </div>
 
           <div className="rounded-2xl bg-dark p-8 shadow-2xl">
-            <h2 className="text-xl font-black text-white tracking-tight uppercase mb-6">Ajuste Manual</h2>
+            <h2 className="text-xl font-black text-white tracking-tight uppercase mb-6">
+              Ajuste Manual
+            </h2>
             <form onSubmit={handleAdjustSubmit} className="grid gap-6">
               <div>
-                <label className="text-xs font-black text-white/40 uppercase tracking-widest block mb-2">Ingrediente</label>
+                <label className="text-xs font-black text-white/40 uppercase tracking-widest block mb-2">
+                  Ingrediente
+                </label>
                 <select
                   value={adjustState.ingredientId}
-                  onChange={(e) => handleAdjustChange("ingredientId", e.target.value)}
-                  className="w-full rounded-xl border-2 border-white/10 bg-white/5 px-4 py-3 font-bold text-white focus:border-warning outline-none transition-all"
+                  onChange={(e) =>
+                    handleAdjustChange("ingredientId", e.target.value)
+                  }
+                  className={`w-full rounded-xl border-2 ${adjustErrors.ingredientId ? "border-primary" : "border-white/10"} bg-white/5 px-4 py-3 font-bold text-white focus:border-warning outline-none transition-all`}
                 >
-                  <option value="" className="text-dark">Seleccionar...</option>
-                  {ingredients.map((ing) => <option key={ing.id} value={ing.id} className="text-dark">{ing.name}</option>)}
+                  <option value="" className="text-dark">
+                    Seleccionar...
+                  </option>
+                  {ingredients.map((ing) => (
+                    <option key={ing.id} value={ing.id} className="text-dark">
+                      {ing.name}
+                    </option>
+                  ))}
                 </select>
+                {adjustErrors.ingredientId && (
+                  <p className="mt-1 text-xs font-bold text-primary">
+                    {adjustErrors.ingredientId}
+                  </p>
+                )}
               </div>
 
               <div>
-                <label className="text-xs font-black text-white/40 uppercase tracking-widest block mb-2">Ajuste (+/-)</label>
+                <label className="text-xs font-black text-white/40 uppercase tracking-widest block mb-2">
+                  Ajuste (+/-)
+                </label>
                 <input
                   type="number"
                   value={adjustState.adjustment}
-                  onChange={(e) => handleAdjustChange("adjustment", e.target.value)}
-                  className="w-full rounded-xl border-2 border-white/10 bg-white/5 px-4 py-3 font-bold text-white focus:border-warning outline-none transition-all"
+                  onChange={(e) =>
+                    handleAdjustChange("adjustment", e.target.value)
+                  }
+                  className={`w-full rounded-xl border-2 ${adjustErrors.adjustment ? "border-primary" : "border-white/10"} bg-white/5 px-4 py-3 font-bold text-white focus:border-warning outline-none transition-all`}
                   placeholder="Ej. -2 o 5"
                 />
+                {adjustErrors.adjustment && (
+                  <p className="mt-1 text-xs font-bold text-primary">
+                    {adjustErrors.adjustment}
+                  </p>
+                )}
               </div>
 
               <div>
-                <label className="text-xs font-black text-white/40 uppercase tracking-widest block mb-2">Motivo</label>
+                <label className="text-xs font-black text-white/40 uppercase tracking-widest block mb-2">
+                  Motivo
+                </label>
                 <input
                   type="text"
                   value={adjustState.reason}
@@ -359,8 +450,15 @@ export default function InventoryPage() {
 
         <section className="mt-12 rounded-2xl bg-white p-8 shadow-sm border border-dark/5">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-black text-dark tracking-tight uppercase">Inventario Actual</h2>
-            <button onClick={fetchIngredients} className="text-xs font-black text-secondary uppercase tracking-widest hover:underline">Recargar</button>
+            <h2 className="text-2xl font-black text-dark tracking-tight uppercase">
+              Inventario Actual
+            </h2>
+            <button
+              onClick={fetchIngredients}
+              className="text-xs font-black text-secondary uppercase tracking-widest hover:underline"
+            >
+              Recargar
+            </button>
           </div>
 
           <div className="overflow-x-auto">
@@ -375,19 +473,40 @@ export default function InventoryPage() {
               </thead>
               <tbody className="divide-y divide-dark/5">
                 {ingredients.map((ing) => (
-                  <tr key={ing.id} className="group hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={ing.id}
+                    className="group hover:bg-gray-50 transition-colors"
+                  >
                     <td className="py-4 px-2 font-bold text-dark">
                       {ing.name}
                       {ing.currentStock <= ing.minimumStock && (
-                        <span className="ml-3 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-black text-primary uppercase">Bajo</span>
+                        <span className="ml-3 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-black text-primary uppercase">
+                          Bajo
+                        </span>
                       )}
                     </td>
-                    <td className={`py-4 px-2 font-black ${ing.currentStock <= ing.minimumStock ? 'text-primary' : 'text-success'}`}>{ing.currentStock}</td>
-                    <td className="py-4 px-2 text-dark/50 font-bold uppercase text-xs">{ing.unit}</td>
+                    <td
+                      className={`py-4 px-2 font-black ${ing.currentStock <= ing.minimumStock ? "text-primary" : "text-success"}`}
+                    >
+                      {ing.currentStock}
+                    </td>
+                    <td className="py-4 px-2 text-dark/50 font-bold uppercase text-xs">
+                      {ing.unit}
+                    </td>
                     <td className="py-4 px-2 text-right">
                       <div className="flex justify-end gap-4">
-                        <button onClick={() => handleEdit(ing)} className="text-xs font-black text-secondary uppercase hover:underline">Editar</button>
-                        <button onClick={() => handleDelete(ing.id)} className="text-xs font-black text-primary uppercase hover:underline">Borrar</button>
+                        <button
+                          onClick={() => handleEdit(ing)}
+                          className="text-xs font-black text-secondary uppercase hover:underline"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(ing.id)}
+                          className="text-xs font-black text-primary uppercase hover:underline"
+                        >
+                          Borrar
+                        </button>
                       </div>
                     </td>
                   </tr>

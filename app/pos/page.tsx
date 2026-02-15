@@ -1,10 +1,10 @@
 "use client";
 
+import { KitchenTicket } from "@/components/pos/KitchenTicket";
+import { OrderTicket } from "@/components/pos/OrderTicket";
+import { OrderWithDetails } from "@/types";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { OrderTicket } from "@/components/pos/OrderTicket";
-import { KitchenTicket } from "@/components/pos/KitchenTicket";
-import { OrderWithDetails, PaymentMethod } from "@/types";
 
 type MenuItem = {
   id: string;
@@ -47,6 +47,7 @@ const SOURCE_OPTIONS = [
   "Instagram",
   "Pasaba por ahí",
   "Recomendación",
+  "Google Maps",
   "Otro",
 ];
 
@@ -107,7 +108,9 @@ export default function POSPage() {
         await Promise.all([fetchMenu(), fetchCustomers(), fetchOrders()]);
         setErrorMessage(null);
       } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : "Error al cargar");
+        setErrorMessage(
+          error instanceof Error ? error.message : "Error al cargar",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -125,7 +128,11 @@ export default function POSPage() {
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleItemChange = (index: number, field: keyof OrderItemDraft, value: string) => {
+  const handleItemChange = (
+    index: number,
+    field: keyof OrderItemDraft,
+    value: string,
+  ) => {
     setFormState((prev) => {
       const nextItems = [...prev.items];
       nextItems[index] = { ...nextItems[index], [field]: value };
@@ -181,7 +188,7 @@ export default function POSPage() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Error al crear orden");
-      
+
       // Actualizar órdenes y preparar comanda para imprimir
       await fetchOrders();
       setCheckoutOrder(data.order);
@@ -189,7 +196,9 @@ export default function POSPage() {
       setFormState(emptyForm);
       setErrorMessage(null);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Error inesperado");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error inesperado",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -206,7 +215,10 @@ export default function POSPage() {
           orderId: checkoutOrder.id,
           method: paymentMethod,
           amount: checkoutOrder.total,
-          receivedAmount: paymentMethod === "CASH" ? Number(receivedAmount) : checkoutOrder.total,
+          receivedAmount:
+            paymentMethod === "CASH"
+              ? Number(receivedAmount)
+              : checkoutOrder.total,
           change: paymentMethod === "CASH" ? change : 0,
         }),
       });
@@ -225,7 +237,10 @@ export default function POSPage() {
       <header className="bg-white shadow-sm no-print">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div>
-            <Link href="/" className="text-sm text-blue-600 hover:text-blue-800">
+            <Link
+              href="/"
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
               ← Dashboard
             </Link>
             <h1 className="text-2xl font-bold text-gray-900">Punto de Venta</h1>
@@ -242,30 +257,51 @@ export default function POSPage() {
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Nueva orden</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Nueva orden
+            </h2>
             <form onSubmit={handleSubmit} className="grid gap-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Cliente</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Cliente
+                  </label>
                   <select
                     value={formState.customerId}
-                    onChange={(e) => handleFormChange("customerId", e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("customerId", e.target.value)
+                    }
                     className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                   >
                     <option value="">Sin cliente</option>
-                    {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    {customers.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Fuente</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Fuente
+                  </label>
                   <select
                     value={formState.source}
                     onChange={(e) => handleFormChange("source", e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    className={`mt-1 w-full rounded-lg border ${formErrors.source ? "border-red-500" : "border-gray-300"} px-3 py-2 text-sm`}
                   >
                     <option value="">Selecciona una fuente</option>
-                    {SOURCE_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                    {SOURCE_OPTIONS.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
                   </select>
+                  {formErrors.source && (
+                    <p className="mt-1 text-xs text-red-600 font-bold">
+                      {formErrors.source}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -289,25 +325,50 @@ export default function POSPage() {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-bold">Productos</span>
-                  <button type="button" onClick={addItemRow} className="text-sm text-blue-600 font-bold">+ Añadir</button>
+                  <button
+                    type="button"
+                    onClick={addItemRow}
+                    className="text-sm text-blue-600 font-bold"
+                  >
+                    + Añadir
+                  </button>
                 </div>
+                {formErrors.items && (
+                  <p className="text-xs text-red-600 font-bold">
+                    {formErrors.items}
+                  </p>
+                )}
                 {formState.items.map((item, index) => (
                   <div key={index} className="flex gap-2 items-start">
                     <select
                       value={item.menuItemId}
-                      onChange={(e) => handleItemChange(index, "menuItemId", e.target.value)}
+                      onChange={(e) =>
+                        handleItemChange(index, "menuItemId", e.target.value)
+                      }
                       className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
                     >
                       <option value="">Producto</option>
-                      {availableMenuItems.map((m) => <option key={m.id} value={m.id}>{m.name} (${m.price})</option>)}
+                      {availableMenuItems.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} (${m.price})
+                        </option>
+                      ))}
                     </select>
                     <input
                       type="number"
                       value={item.quantity}
-                      onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
+                      onChange={(e) =>
+                        handleItemChange(index, "quantity", e.target.value)
+                      }
                       className="w-16 rounded-lg border border-gray-300 px-2 py-2 text-sm text-center"
                     />
-                    <button type="button" onClick={() => removeItemRow(index)} className="text-red-500 font-bold">✕</button>
+                    <button
+                      type="button"
+                      onClick={() => removeItemRow(index)}
+                      className="text-red-500 font-bold"
+                    >
+                      ✕
+                    </button>
                   </div>
                 ))}
               </div>
@@ -317,22 +378,42 @@ export default function POSPage() {
                 disabled={isSubmitting}
                 className="w-full rounded-lg bg-green-600 py-3 text-white font-bold hover:bg-green-700 transition-colors"
               >
-                {isSubmitting ? "GUARDANDO..." : "GUARDAR ORDEN E IMPRIMIR COMANDA"}
+                {isSubmitting
+                  ? "GUARDANDO..."
+                  : "GUARDAR ORDEN E IMPRIMIR COMANDA"}
               </button>
             </form>
           </div>
 
           <div className="rounded-lg bg-white p-6 shadow-md h-fit">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Resumen de Hoy</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Resumen de Hoy
+            </h2>
             <div className="space-y-2 text-sm text-gray-600">
-              <div className="flex justify-between"><span>Órdenes activas:</span><span className="font-bold text-gray-900">{orders.filter(o => o.status !== 'PAID').length}</span></div>
-              <div className="flex justify-between"><span>Ventas hoy:</span><span className="font-bold text-green-600">${orders.filter(o => o.status === 'PAID').reduce((acc, o) => acc + o.total, 0).toFixed(2)}</span></div>
+              <div className="flex justify-between">
+                <span>Órdenes activas:</span>
+                <span className="font-bold text-gray-900">
+                  {orders.filter((o) => o.status !== "PAID").length}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Ventas hoy:</span>
+                <span className="font-bold text-green-600">
+                  $
+                  {orders
+                    .filter((o) => o.status === "PAID")
+                    .reduce((acc, o) => acc + o.total, 0)
+                    .toFixed(2)}
+                </span>
+              </div>
             </div>
           </div>
         </section>
 
         <section className="rounded-lg bg-white p-6 shadow-md">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Órdenes Recientes</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Órdenes Recientes
+          </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 text-gray-500 uppercase text-xs font-bold">
@@ -346,26 +427,42 @@ export default function POSPage() {
               <tbody className="divide-y divide-gray-100">
                 {orders.slice(0, 10).map((order) => (
                   <tr key={order.id}>
-                    <td className="px-4 py-4 font-bold text-gray-900">#{order.orderNumber}</td>
+                    <td className="px-4 py-4 font-bold text-gray-900">
+                      #{order.orderNumber}
+                    </td>
                     <td className="px-4 py-4">{order.table || "Llevar"}</td>
-                    <td className="px-4 py-4 font-bold">${order.total.toFixed(2)}</td>
+                    <td className="px-4 py-4 font-bold">
+                      ${order.total.toFixed(2)}
+                    </td>
                     <td className="px-4 py-4 flex gap-2">
-                      {order.status !== 'PAID' && (
+                      {order.status !== "PAID" && (
                         <button
-                          onClick={() => { setCheckoutOrder(order); setShowTicket(false); setShowKitchenTicket(false); }}
+                          onClick={() => {
+                            setCheckoutOrder(order);
+                            setShowTicket(false);
+                            setShowKitchenTicket(false);
+                          }}
                           className="bg-blue-600 text-white px-2 py-1.5 rounded text-[10px] font-bold"
                         >
                           COBRAR
                         </button>
                       )}
                       <button
-                        onClick={() => { setCheckoutOrder(order); setShowKitchenTicket(true); setShowTicket(false); }}
+                        onClick={() => {
+                          setCheckoutOrder(order);
+                          setShowKitchenTicket(true);
+                          setShowTicket(false);
+                        }}
                         className="bg-orange-500 text-white px-2 py-1.5 rounded text-[10px] font-bold"
                       >
                         COMANDA
                       </button>
                       <button
-                        onClick={() => { setCheckoutOrder(order); setShowTicket(true); setShowKitchenTicket(false); }}
+                        onClick={() => {
+                          setCheckoutOrder(order);
+                          setShowTicket(true);
+                          setShowKitchenTicket(false);
+                        }}
                         className="border border-gray-300 px-2 py-1.5 rounded text-[10px] font-bold"
                       >
                         TICKET
@@ -384,10 +481,28 @@ export default function POSPage() {
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto">
           <div className="max-w-md w-full py-10">
             <div className="flex justify-center gap-4 mb-6 no-print">
-              <button onClick={() => window.print()} className="bg-green-600 text-white px-6 py-3 rounded-xl font-black shadow-lg">🖨️ IMPRIMIR AHORA</button>
-              <button onClick={() => { setCheckoutOrder(null); setShowTicket(false); setShowKitchenTicket(false); }} className="bg-white text-black px-6 py-3 rounded-xl font-black shadow-lg">CERRAR</button>
+              <button
+                onClick={() => window.print()}
+                className="bg-green-600 text-white px-6 py-3 rounded-xl font-black shadow-lg"
+              >
+                🖨️ IMPRIMIR AHORA
+              </button>
+              <button
+                onClick={() => {
+                  setCheckoutOrder(null);
+                  setShowTicket(false);
+                  setShowKitchenTicket(false);
+                }}
+                className="bg-white text-black px-6 py-3 rounded-xl font-black shadow-lg"
+              >
+                CERRAR
+              </button>
             </div>
-            {showTicket ? <OrderTicket order={checkoutOrder} /> : <KitchenTicket order={checkoutOrder} />}
+            {showTicket ? (
+              <OrderTicket order={checkoutOrder} />
+            ) : (
+              <KitchenTicket order={checkoutOrder} />
+            )}
           </div>
         </div>
       )}
@@ -397,23 +512,36 @@ export default function POSPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Cerrar Cuenta #{checkoutOrder.orderNumber}</h3>
-              <button onClick={() => setCheckoutOrder(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <h3 className="text-xl font-bold text-gray-900">
+                Cerrar Cuenta #{checkoutOrder.orderNumber}
+              </h3>
+              <button
+                onClick={() => setCheckoutOrder(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
             </div>
             <div className="space-y-6">
               <div className="text-center bg-blue-50 py-6 rounded-2xl">
                 <p className="text-blue-600 text-sm font-bold">TOTAL A PAGAR</p>
-                <p className="text-5xl font-black text-blue-700">${checkoutOrder.total.toFixed(2)}</p>
+                <p className="text-5xl font-black text-blue-700">
+                  ${checkoutOrder.total.toFixed(2)}
+                </p>
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-400 block mb-2 uppercase">Método</label>
+                <label className="text-xs font-bold text-gray-400 block mb-2 uppercase">
+                  Método
+                </label>
                 <div className="grid grid-cols-3 gap-2">
                   {PAYMENT_METHODS.map((m) => (
                     <button
                       key={m.value}
                       onClick={() => setPaymentMethod(m.value)}
                       className={`py-3 text-xs rounded-xl font-black border-2 transition-all ${
-                        paymentMethod === m.value ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-100 text-gray-400'
+                        paymentMethod === m.value
+                          ? "border-blue-600 bg-blue-50 text-blue-700"
+                          : "border-gray-100 text-gray-400"
                       }`}
                     >
                       {m.label}
@@ -433,13 +561,20 @@ export default function POSPage() {
                   />
                   <div className="flex justify-between items-center bg-gray-50 p-4 rounded-xl">
                     <span className="font-bold text-gray-400">CAMBIO:</span>
-                    <span className="text-3xl font-black text-green-600">${change.toFixed(2)}</span>
+                    <span className="text-3xl font-black text-green-600">
+                      ${change.toFixed(2)}
+                    </span>
                   </div>
                 </div>
               )}
               <button
                 onClick={handleProcessPayment}
-                disabled={isSubmitting || (paymentMethod === 'CASH' && (!receivedAmount || Number(receivedAmount) < checkoutOrder.total))}
+                disabled={
+                  isSubmitting ||
+                  (paymentMethod === "CASH" &&
+                    (!receivedAmount ||
+                      Number(receivedAmount) < checkoutOrder.total))
+                }
                 className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl disabled:opacity-50 transition-all"
               >
                 {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGO E IMPRIMIR"}

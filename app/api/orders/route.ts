@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       }),
     );
 
-    const tax = subtotal * 0.16; // 16% IVA
+    const tax = subtotal * 0; // 0.16; // 16% IVA (Temporarily disabled)
     const total = subtotal + tax;
 
     // Create order with items
