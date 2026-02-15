@@ -73,6 +73,11 @@ export default function POSPage() {
   const [receivedAmount, setReceivedAmount] = useState<string>("");
   const [showTicket, setShowTicket] = useState(false);
   const [showKitchenTicket, setShowKitchenTicket] = useState(false);
+  // Edit Order State
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [additionalItems, setAdditionalItems] = useState<OrderItemDraft[]>([
+    { menuItemId: "", quantity: "1", notes: "" },
+  ]);
 
   const availableMenuItems = useMemo(
     () => menuItems.filter((item) => item.isAvailable),
@@ -230,6 +235,74 @@ export default function POSPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleAddItems = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingOrder) return;
+
+    // Validate items
+    const validItems = additionalItems.filter(
+      (item) => item.menuItemId && Number(item.quantity) > 0,
+    );
+
+    if (validItems.length === 0) {
+      alert("Agrega al menos un producto válido");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/orders/${editingOrder.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderItems: validItems.map((item) => ({
+            menuItemId: item.menuItemId,
+            quantity: Number(item.quantity),
+            notes: item.notes || undefined,
+          })),
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data?.error || "Error al agregar productos");
+
+      await fetchOrders();
+      setEditingOrder(null);
+      setAdditionalItems([{ menuItemId: "", quantity: "1", notes: "" }]);
+      
+      // Optionally show updated ticket or kitchen ticket
+      // For now, just close modal
+    } catch (error) {
+       alert(error instanceof Error ? error.message : "Error al actualizar orden");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAdditionalItemChange = (
+    index: number,
+    field: keyof OrderItemDraft,
+    value: string,
+  ) => {
+    setAdditionalItems((prev) => {
+      const nextItems = [...prev];
+      nextItems[index] = { ...nextItems[index], [field]: value };
+      return nextItems;
+    });
+  };
+
+  const addAdditionalItemRow = () => {
+    setAdditionalItems((prev) => [
+      ...prev,
+      { menuItemId: "", quantity: "1", notes: "" },
+    ]);
+  };
+
+  const removeAdditionalItemRow = (index: number) => {
+    setAdditionalItems((prev) => prev.filter((_, idx) => idx !== index));
   };
 
   return (
@@ -451,7 +524,95 @@ export default function POSPage() {
                         onClick={() => {
                           setCheckoutOrder(order);
                           setShowKitchenTicket(true);
-                          setShowTicket(false);
+                   AGREGAR PRODUCTOS */}
+      {editingOrder && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-900">
+                Agregar Productos a Orden #{editingOrder.orderNumber}
+              </h3>
+              <button
+                onClick={() => setEditingOrder(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddItems} className="space-y-6">
+               <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-bold">Nuevos Productos</span>
+                  <button
+                    type="button"
+                    onClick={addAdditionalItemRow}
+                    className="text-sm text-blue-600 font-bold"
+                  >
+                    + Añadir
+                  </button>
+                </div>
+                
+                {additionalItems.map((item, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <select
+                      value={item.menuItemId}
+                      onChange={(e) =>
+                        handleAdditionalItemChange(index, "menuItemId", e.target.value)
+                      }
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                      required
+                    >
+                      <option value="">Producto</option>
+                      {availableMenuItems.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} (${m.price})
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) =>
+                        handleAdditionalItemChange(index, "quantity", e.target.value)
+                      }
+                      className="w-16 rounded-lg border border-gray-300 px-2 py-2 text-sm text-center"
+                      min="1"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeAdditionalItemRow(index)}
+                      className="text-red-500 font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-4">
+                 <button
+                  type="button"
+                  onClick={() => setEditingOrder(null)}
+                  className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-bold hover:bg-gray-300 transition-colors"
+                >
+                  CANCELAR
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 transition-colors"
+                >
+                  {isSubmitting ? "GUARDANDO..." : "AGREGAR"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE        setShowTicket(false);
                         }}
                         className="bg-orange-500 text-white px-2 py-1.5 rounded text-[10px] font-bold"
                       >
@@ -467,9 +628,21 @@ export default function POSPage() {
                       >
                         TICKET
                       </button>
-                    </td>
-                  </tr>
-                ))}
+
+                        <button
+                          onClick={() => {
+                            setEditingOrder(order);
+                            setAdditionalItems([
+                              { menuItemId: "", quantity: "1", notes: "" },
+                            ]);
+                          }}
+                          className="bg-purple-600 text-white px-2 py-1.5 rounded text-[10px] font-bold"
+                        >
+                          AGREGAR
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
