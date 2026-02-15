@@ -1,13 +1,6 @@
 // TesoritoOS - Custom Hooks
 // Reusable React hooks for common operations
 
-import type { OrderWithDetails } from "@/types";
-import { useEffect, useState } from "react";
-
-/**
- * Hook to fetch and subscribe to real-time orders
- * In production, this would use WebSockets or Supabase Realtime
- */
 import { supabase } from "@/lib/supabase";
 import type { OrderWithDetails } from "@/types";
 import { useEffect, useState } from "react";
