@@ -18,11 +18,41 @@ export async function GET() {
   // if (currentUser?.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
+    // Sync with Supabase Auth users if database is empty or desynchronized
+    const supabaseAdmin = createAdminClient();
+    const {
+      data: { users: authUsers },
+      error: authError,
+    } = await supabaseAdmin.auth.admin.listUsers();
+
+    if (!authError && authUsers) {
+      // Find users that exist in Auth but not in our DB (likely the initial admin)
+      for (const authUser of authUsers) {
+        const dbUser = await prisma.user.findFirst({
+          where: { email: authUser.email },
+        });
+
+        if (!dbUser && authUser.email) {
+          // Create missing user record from Auth data
+          await prisma.user.create({
+            data: {
+              email: authUser.email,
+              name:
+                authUser.user_metadata?.name || authUser.email.split("@")[0],
+              role: (authUser.user_metadata?.role as any) || "ADMIN", // Default to ADMIN for existing users if role missing
+              password: "MANAGED_BY_SUPABASE",
+            },
+          });
+        }
+      }
+    }
+
     const users = await prisma.user.findMany({
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json({ users });
   } catch (error) {
+    console.error("Error fetching users:", error);
     return NextResponse.json(
       { error: "Error al obtener usuarios" },
       { status: 500 },
