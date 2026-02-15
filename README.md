@@ -178,10 +178,10 @@ npm run prisma:studio    # UI visual para BD
 - [x] API RESTful completa
 
 ### 🚧 Fase 2: Real-time & UX
-- [ ] WebSockets para actualizaciones en vivo
+- [x] WebSockets para actualizaciones en vivo (Polling implementado)
 - [ ] Drag & drop en vista Kanban
 - [ ] Notificaciones push
-- [ ] Dashboard de analytics
+- [x] Dashboard de analytics
 
 ### 📅 Fase 3: Avanzado
 - [ ] Autenticación (NextAuth.js)

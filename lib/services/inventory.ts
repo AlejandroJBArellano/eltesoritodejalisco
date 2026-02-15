@@ -189,16 +189,12 @@ export async function adjustIngredientStock(
  * Check which ingredients are below minimum stock level
  */
 export async function checkLowStockIngredients() {
-  return await prisma.ingredient.findMany({
-    where: {
-      currentStock: {
-        lte: prisma.raw("minimum_stock"), // currentStock <= minimumStock
-      },
-    },
+  const ingredients = await prisma.ingredient.findMany({
     orderBy: {
       currentStock: "asc",
     },
   });
+  return ingredients.filter((ing) => ing.currentStock <= ing.minimumStock);
 }
 
 /**
