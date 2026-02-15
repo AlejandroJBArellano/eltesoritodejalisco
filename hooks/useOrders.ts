@@ -8,13 +8,16 @@ import { useEffect, useState } from "react";
  * Hook to fetch and subscribe to real-time orders
  * In production, this would use WebSockets or Supabase Realtime
  */
-export function useRealtimeOrders() {
-  const [orders, setOrders] = useState<OrderWithDetails[]>([]);
-  const [loading, setLoading] = useState(true);
+export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
+  const [orders, setOrders] = useState<OrderWithDetails[]>(initialData);
+  const [loading, setLoading] = useState(initialData.length === 0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchOrders();
+    // Initial fetch if no data provided
+    if (initialData.length === 0) {
+      fetchOrders();
+    }
 
     // Setup real-time subscription
     // const subscription = subscribeToOrders((newOrder) => {
@@ -22,7 +25,7 @@ export function useRealtimeOrders() {
     // });
 
     // Polling fallback (remove when WebSockets are implemented)
-    const interval = setInterval(fetchOrders, 10000); // Refresh every 10s
+    const interval = setInterval(fetchOrders, 5000); // Refresh every 5s
 
     return () => {
       clearInterval(interval);
@@ -47,7 +50,7 @@ export function useRealtimeOrders() {
     }
   }
 
-  return { orders, loading, error, refetch: fetchOrders };
+  return { orders, loading, error, refetch: fetchOrders, setOrders };
 }
 
 /**

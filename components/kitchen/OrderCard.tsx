@@ -1,6 +1,6 @@
 "use client";
 
-import type { OrderStatus, OrderWithDetails } from "@/types";
+import { OrderStatus, type OrderWithDetails } from "@/types";
 import { useEffect, useState } from "react";
 
 interface OrderCardProps {
@@ -45,13 +45,13 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
 
   const getStatusColor = (status: OrderStatus): string => {
     switch (status) {
-      case "PENDING":
+      case OrderStatus.PENDING:
         return "bg-yellow-500";
-      case "PREPARING":
+      case OrderStatus.PREPARING:
         return "bg-blue-500";
-      case "READY":
+      case OrderStatus.READY:
         return "bg-green-500";
-      case "DELIVERED":
+      case OrderStatus.DELIVERED:
         return "bg-gray-500";
       default:
         return "bg-gray-300";
@@ -60,12 +60,12 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
 
   const getStatusLabel = (status: OrderStatus): string => {
     const labels: Record<OrderStatus, string> = {
-      PENDING: "Pendiente",
-      PREPARING: "En Preparación",
-      READY: "Listo",
-      DELIVERED: "Entregado",
-      PAID: "Pagado",
-      CANCELLED: "Cancelado",
+      [OrderStatus.PENDING]: "Pendiente",
+      [OrderStatus.PREPARING]: "En Preparación",
+      [OrderStatus.READY]: "Listo",
+      [OrderStatus.DELIVERED]: "Entregado",
+      [OrderStatus.PAID]: "Pagado",
+      [OrderStatus.CANCELLED]: "Cancelado",
     };
     return labels[status];
   };
@@ -73,7 +73,9 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
   return (
     <div
       className={`rounded-lg border-2 p-4 shadow-lg transition-all duration-300 ${
-        isOverdue && order.status !== "DELIVERED" && order.status !== "READY"
+        isOverdue &&
+        order.status !== OrderStatus.DELIVERED &&
+        order.status !== OrderStatus.READY
           ? "border-red-500 bg-red-50"
           : "border-gray-200 bg-white"
       }`}
@@ -142,27 +144,27 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
 
       {/* Action Buttons */}
       <div className="flex gap-2">
-        {order.status === "PENDING" && (
+        {order.status === OrderStatus.PENDING && (
           <button
-            onClick={() => onStatusChange(order.id, "PREPARING")}
+            onClick={() => onStatusChange(order.id, OrderStatus.PREPARING)}
             className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition-colors"
           >
             Comenzar
           </button>
         )}
 
-        {order.status === "PREPARING" && (
+        {order.status === OrderStatus.PREPARING && (
           <button
-            onClick={() => onStatusChange(order.id, "READY")}
+            onClick={() => onStatusChange(order.id, OrderStatus.READY)}
             className="flex-1 rounded-md bg-green-600 px-4 py-2 text-white font-semibold hover:bg-green-700 transition-colors"
           >
             Marcar Listo
           </button>
         )}
 
-        {order.status === "READY" && (
+        {order.status === OrderStatus.READY && (
           <button
-            onClick={() => onStatusChange(order.id, "DELIVERED")}
+            onClick={() => onStatusChange(order.id, OrderStatus.DELIVERED)}
             className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-white font-semibold hover:bg-gray-700 transition-colors"
           >
             Entregar

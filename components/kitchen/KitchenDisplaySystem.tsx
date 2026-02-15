@@ -1,6 +1,7 @@
 "use client";
 
-import type { OrderStatus, OrderWithDetails } from "@/types";
+import { useRealtimeOrders } from "@/hooks/useOrders";
+import { OrderStatus, type OrderWithDetails } from "@/types";
 import { useState } from "react";
 import { OrderCard } from "./OrderCard";
 import { SmartBatchingView } from "./SmartBatchingView";
@@ -16,7 +17,7 @@ interface KitchenDisplaySystemProps {
 export function KitchenDisplaySystem({
   initialOrders,
 }: KitchenDisplaySystemProps) {
-  const [orders, setOrders] = useState<OrderWithDetails[]>(initialOrders);
+  const { orders, setOrders } = useRealtimeOrders(initialOrders);
   const [view, setView] = useState<"kanban" | "batching">("kanban");
 
   const handleStatusChange = async (
@@ -43,7 +44,7 @@ export function KitchenDisplaySystem({
       );
 
       // If order is completed, trigger inventory deduction
-      if (newStatus === "DELIVERED" || newStatus === "PAID") {
+      if (newStatus === OrderStatus.DELIVERED || newStatus === OrderStatus.PAID) {
         await fetch(`/api/inventory/deduct`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -58,9 +59,9 @@ export function KitchenDisplaySystem({
 
   // Group orders by status for Kanban view
   const ordersByStatus = {
-    pending: orders.filter((o) => o.status === "PENDING"),
-    preparing: orders.filter((o) => o.status === "PREPARING"),
-    ready: orders.filter((o) => o.status === "READY"),
+    pending: orders.filter((o) => o.status === OrderStatus.PENDING),
+    preparing: orders.filter((o) => o.status === OrderStatus.PREPARING),
+    ready: orders.filter((o) => o.status === OrderStatus.READY),
   };
 
   return (
