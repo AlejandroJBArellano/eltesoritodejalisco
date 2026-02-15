@@ -9,22 +9,23 @@ export default async function Navbar() {
   if (!user) return null
 
   return (
-    <nav className="bg-white border-b border-gray-200">
+    <nav className="bg-dark border-b border-dark/20 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-gray-900">
-              🍽️ TesoritoOS
+            <Link href="/" className="text-xl font-black tracking-tighter">
+              <span className="text-primary">TESORITO</span>
+              <span className="text-warning">OS</span>
             </Link>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600 hidden sm:block">
+            <span className="text-sm text-gray-300 hidden sm:block font-medium">
               {user.email}
             </span>
             <form action={logout}>
               <button
                 type="submit"
-                className="text-sm font-medium text-red-600 hover:text-red-800"
+                className="text-sm font-bold text-primary hover:text-primary/80 transition-colors bg-white/10 px-3 py-1.5 rounded-lg"
               >
                 Cerrar sesión
               </button>
