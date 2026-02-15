@@ -4,7 +4,7 @@
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
-[![Prisma](https://img.shields.io/badge/Prisma-6-2D3748)](https://www.prisma.io/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E)](https://supabase.com/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-4-38B2AC)](https://tailwindcss.com/)
 
 ---
@@ -52,20 +52,15 @@ npm install
 
 # 2. Configurar variables de entorno
 cp .env.example .env
-# Edita .env con tu DATABASE_URL
+# Edita .env con tus credenciales de Supabase
 
-# 3. Configurar base de datos
-npm run prisma:generate
-npm run prisma:push
-
-# 4. Iniciar servidor
+# 3. Iniciar servidor
 npm run dev
 ```
 
 Visita:
 - **App**: [http://localhost:3000](http://localhost:3000)
 - **KDS**: [http://localhost:3000/kitchen](http://localhost:3000/kitchen)
-- **Prisma Studio**: `npm run prisma:studio`
 
 > 💡 **Tip**: Lee [docs/SETUP.md](docs/SETUP.md) para instrucciones detalladas
 
@@ -75,8 +70,8 @@ Visita:
 
 - **Frontend**: Next.js 16 (App Router) + TypeScript
 - **UI**: TailwindCSS 4
-- **Database**: PostgreSQL + Prisma ORM
-- **Real-time**: WebSockets o Supabase Realtime (recomendado)
+- **Database**: PostgreSQL (Supabase)
+- **Real-time**: Supabase Realtime
 - **Estado**: React Hooks nativos
 
 ---
@@ -94,8 +89,9 @@ eltesoritodejalisco/
 │   └── kitchen/          # Componentes del KDS
 ├── lib/                  # Lógica de negocio
 │   ├── services/        # Servicios (inventario, etc.)
+│   ├── supabase/        # Cliente y utilidades Supabase
 │   └── utils.ts         # Funciones auxiliares
-├── prisma/              # Prisma ORM
+├── prisma/              # Schema de referencia (No requerido en runtime)
 │   └── schema.prisma    # Schema de base de datos
 ├── types/               # Tipos TypeScript
 ├── hooks/               # Custom React Hooks
@@ -111,12 +107,6 @@ eltesoritodejalisco/
 npm run dev              # Servidor de desarrollo
 npm run build            # Build para producción
 npm run start            # Servidor de producción
-
-# Base de Datos (Prisma)
-npm run prisma:generate  # Generar cliente Prisma
-npm run prisma:push      # Sincronizar schema con BD
-npm run prisma:migrate   # Crear migración
-npm run prisma:studio    # UI visual para BD
 ```
 
 ---
@@ -213,9 +203,8 @@ Este proyecto es privado y propiedad de **El Tesorito de Jalisco**.
 ## 🙏 Recursos Adicionales
 
 - [Documentación Next.js](https://nextjs.org/docs)
-- [Prisma Docs](https://www.prisma.io/docs)
+- [Supabase Docs](https://supabase.com/docs)
 - [TailwindCSS](https://tailwindcss.com/docs)
-- [Supabase](https://supabase.com/docs)
 
 ---
 
