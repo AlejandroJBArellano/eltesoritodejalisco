@@ -218,3 +218,18 @@ export interface InventoryDeductionResult {
   }[];
   errors?: string[];
 }
+
+// ============================================
+// SMART BATCH TYPES
+// ============================================
+
+export interface SmartBatch {
+  id: string;
+  ingredientId: string;
+  name: string;
+  startedAt: Date;
+  endedAt?: Date;
+  finalYield?: any; // Json
+  isActive: boolean;
+  ingredient?: Ingredient;
+}

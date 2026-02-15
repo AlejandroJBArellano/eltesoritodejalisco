@@ -83,7 +83,9 @@ export async function deductInventoryForOrder(
         const previousStock = ingredient.currentStock;
         const newStock = previousStock - totalRequired;
 
-        // Check if we have enough stock
+        // Check if we have enough stock - DISABLED FOR PERMISSIVE MODE
+        // We want to track usage even if it goes negative (to correct later)
+        /* 
         if (newStock < 0) {
           result.errors?.push(
             `Insufficient stock for ${ingredient.name}. Required: ${totalRequired}, Available: ${previousStock}`,
@@ -92,11 +94,22 @@ export async function deductInventoryForOrder(
           // Continue to show all stock issues
           continue;
         }
+        */
 
-        // Update the ingredient stock
+        // Update the ingredient stock (allow negative)
         await tx.ingredient.update({
           where: { id: ingredientId },
           data: { currentStock: newStock },
+        });
+
+        // Log the deduction
+        await tx.stockAdjustment.create({
+          data: {
+            ingredientId: ingredient.id,
+            adjustment: -totalRequired,
+            reason: `Order deduction`,
+            createdAt: new Date(),
+          },
         });
 
         // Record the deduction
