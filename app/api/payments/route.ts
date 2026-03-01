@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     const { data: payment, error: paymentError } = await supabase
       .from("payments")
       .insert({
+        id: crypto.randomUUID(),
         order_id: orderId,
         method,
         amount: Number(amount),
