@@ -88,7 +88,12 @@ export default function POSPage() {
     const response = await fetch("/api/menu");
     const data = await response.json();
     if (!response.ok) throw new Error(data?.error || "Error al cargar menú");
-    setMenuItems(data.items || []);
+    setMenuItems(
+      (data.items || []).map((item: any) => ({
+        ...item,
+        isAvailable: item.is_available,
+      }))
+    );
   };
 
   const fetchCustomers = async () => {
@@ -272,11 +277,11 @@ export default function POSPage() {
       await fetchOrders();
       setEditingOrder(null);
       setAdditionalItems([{ menuItemId: "", quantity: "1", notes: "" }]);
-      
+
       // Optionally show updated ticket or kitchen ticket
       // For now, just close modal
     } catch (error) {
-       alert(error instanceof Error ? error.message : "Error al actualizar orden");
+      alert(error instanceof Error ? error.message : "Error al actualizar orden");
     } finally {
       setIsSubmitting(false);
     }
@@ -420,7 +425,6 @@ export default function POSPage() {
                       }
                       className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
                     >
-                      <option value="">Producto</option>
                       {availableMenuItems.map((m) => (
                         <option key={m.id} value={m.id}>
                           {m.name} (${m.price})
@@ -553,8 +557,8 @@ export default function POSPage() {
                         AGREGAR
                       </button>
                     </td>
-                    </tr>
-                  ))}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -576,9 +580,9 @@ export default function POSPage() {
                 ✕
               </button>
             </div>
-            
+
             <form onSubmit={handleAddItems} className="space-y-6">
-               <div className="space-y-3">
+              <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-bold">Nuevos Productos</span>
                   <button
@@ -589,7 +593,7 @@ export default function POSPage() {
                     + Añadir
                   </button>
                 </div>
-                
+
                 {additionalItems.map((item, index) => (
                   <div key={index} className="flex gap-2 items-start">
                     <select
@@ -629,7 +633,7 @@ export default function POSPage() {
               </div>
 
               <div className="flex gap-4">
-                 <button
+                <button
                   type="button"
                   onClick={() => setEditingOrder(null)}
                   className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-bold hover:bg-gray-300 transition-colors"
@@ -711,11 +715,10 @@ export default function POSPage() {
                     <button
                       key={m.value}
                       onClick={() => setPaymentMethod(m.value)}
-                      className={`py-3 text-xs rounded-xl font-black border-2 transition-all ${
-                        paymentMethod === m.value
-                          ? "border-blue-600 bg-blue-50 text-blue-700"
-                          : "border-gray-100 text-gray-400"
-                      }`}
+                      className={`py-3 text-xs rounded-xl font-black border-2 transition-all ${paymentMethod === m.value
+                        ? "border-blue-600 bg-blue-50 text-blue-700"
+                        : "border-gray-100 text-gray-400"
+                        }`}
                     >
                       {m.label}
                     </button>
