@@ -1,6 +1,31 @@
-import { IngredientBatchControl } from "@/components/kitchen/IngredientBatchControl";
 import { KitchenDisplaySystem } from "@/components/kitchen/KitchenDisplaySystem";
 import { createClient } from "@/lib/supabase/server";
+
+export const mapOrderData = (dbOrder: any) => {
+  return {
+    ...dbOrder,
+    orderNumber: dbOrder.order_number,
+    customerId: dbOrder.customer_id,
+    createdAt: dbOrder.created_at,
+    updatedAt: dbOrder.updated_at,
+    orderItems: Array.isArray(dbOrder.order_items)
+      ? dbOrder.order_items.map((item: any) => ({
+        ...item,
+        orderId: item.order_id,
+        menuItemId: item.menu_item_id,
+        unitPrice: item.unit_price,
+        menuItem: item.menu_items
+          ? {
+            ...item.menu_items,
+            imageUrl: item.menu_items?.image_url,
+            isAvailable: item.menu_items?.is_available,
+          }
+          : { name: "Producto", price: item.unit_price || 0 },
+      }))
+      : [],
+    customer: dbOrder.customers || dbOrder.customer || undefined,
+  };
+};
 
 // In production, fetch from API with real-time subscription
 async function getActiveOrders() {
@@ -17,58 +42,19 @@ async function getActiveOrders() {
     .in("status", ["PENDING", "PREPARING", "READY"])
     .order("created_at", { ascending: true });
 
-  return orders || [];
-}
-
-async function getTrackedIngredient() {
-  const supabase = await createClient();
-  // Try to find the main protein like "Carne de Soya"
-  const { data: ingredient } = await supabase
-    .from("ingredients")
-    .select("*")
-    .ilike("name", "%Soya%")
-    .limit(1)
-    .maybeSingle();
-
-  if (ingredient) return ingredient;
-
-  // Fallback to first ingredient if not found
-  const { data: firstIng } = await supabase
-    .from("ingredients")
-    .select("*")
-    .limit(1)
-    .maybeSingle();
-
-  return firstIng;
+  return (orders || []).map(mapOrderData);
 }
 
 export default async function KitchenPage() {
   const orders = await getActiveOrders();
-  const trackedIngredient = await getTrackedIngredient();
 
   return (
-    <main className="p-4 bg-slate-100 min-h-screen grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <div className="lg:col-span-3">
+    <main className="p-4 bg-slate-100 min-h-screen grid grid-cols-1">
+      <div className="w-full">
         <h1 className="text-2xl font-bold mb-4 text-slate-800">
           Comandas en Cocina
         </h1>
         <KitchenDisplaySystem initialOrders={orders} />
-      </div>
-
-      <div className="lg:col-span-1">
-        {trackedIngredient ? (
-          <div className="sticky top-4 h-[calc(100vh-2rem)]">
-            <IngredientBatchControl
-              ingredientName={trackedIngredient.name}
-              ingredientId={trackedIngredient.id}
-            />
-          </div>
-        ) : (
-          <div className="bg-white p-4 rounded shadow text-sm text-gray-500">
-            Crea un ingrediente (ej. Carne de Soya) para activar el control de
-            lotes.
-          </div>
-        )}
       </div>
     </main>
   );
