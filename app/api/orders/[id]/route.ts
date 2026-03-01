@@ -65,6 +65,7 @@ export async function PATCH(
       additionalSubtotal += itemTotal;
 
       newItemsData.push({
+        id: crypto.randomUUID(),
         order_id: id,
         menu_item_id: item.menuItemId,
         quantity: quantity,
