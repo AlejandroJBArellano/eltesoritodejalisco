@@ -77,9 +77,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const id = crypto.randomUUID();
+
     const { data: item, error: createError } = await supabase
       .from("menu_items")
       .insert({
+        id,
         name,
         description: description || null,
         price: parsedPrice,
