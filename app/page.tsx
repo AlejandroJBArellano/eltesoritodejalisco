@@ -63,21 +63,7 @@ export default async function Home() {
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl bg-white p-6 shadow-sm border border-dark/5">
-              <div className="flex items-center">
-                <div className="rounded-xl bg-warning/10 p-3 text-warning text-2xl">
-                  📦
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-bold text-dark/50 uppercase tracking-wider">
-                    Stock Bajo
-                  </p>
-                  <p className="text-3xl font-black text-dark tracking-tight">
-                    3
-                  </p>
-                </div>
-              </div>
-            </div>
+
             <div className="rounded-2xl bg-white p-6 shadow-sm border border-dark/5">
               <div className="flex items-center">
                 <div className="rounded-xl bg-success/10 p-3 text-success text-2xl">
@@ -140,25 +126,7 @@ export default async function Home() {
               </Link>
             )}
 
-            {/* Inventory - Admin */}
-            {isAdmin && (
-              <Link href="/inventory">
-                <div className="group cursor-pointer rounded-2xl bg-white p-8 shadow-sm border border-dark/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className="mb-6 flex items-center justify-between">
-                    <span className="text-5xl">📦</span>
-                    <span className="rounded-full bg-warning/10 px-4 py-1 text-xs font-black text-warning uppercase tracking-widest">
-                      Stock
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-dark tracking-tight uppercase">
-                    Inventario
-                  </h3>
-                  <p className="text-sm text-dark/60 font-medium leading-relaxed">
-                    Gestión de insumos y mermas.
-                  </p>
-                </div>
-              </Link>
-            )}
+
 
             {/* Menu - Admin */}
             {isAdmin && (
@@ -251,13 +219,7 @@ export default async function Home() {
                 VER COCINA
               </button>
             </Link>
-            {isAdmin && (
-              <Link href="/inventory">
-                <button className="rounded-xl bg-warning px-6 py-3 text-sm font-black text-dark hover:bg-warning/90 transition-all">
-                  AJUSTAR STOCK
-                </button>
-              </Link>
-            )}
+
           </div>
         </div>
       </main>

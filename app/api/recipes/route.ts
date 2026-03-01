@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { data: recipeItems, error } = await supabase
       .from("recipe_items")
-      .select("*, ingredient:ingredients(*)")
+      .select("*")
       .eq("menu_item_id", menuItemId);
 
     if (error) throw error;
@@ -44,11 +44,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { menuItemId, ingredientId, quantityRequired } = body;
+    const { menuItemId, ingredientName, quantityRequired } = body;
 
-    if (!menuItemId || !ingredientId) {
+    if (!menuItemId || !ingredientName) {
       return NextResponse.json(
-        { error: "menuItemId and ingredientId are required" },
+        { error: "menuItemId and ingredientName are required" },
         { status: 400 },
       );
     }
@@ -66,10 +66,10 @@ export async function POST(request: NextRequest) {
       .from("recipe_items")
       .insert({
         menu_item_id: menuItemId,
-        ingredient_id: ingredientId,
+        ingredient_name: ingredientName,
         quantity_required: parsedQuantity,
       })
-      .select("*, ingredient:ingredients(*)")
+      .select("*")
       .single();
 
     if (error) throw error;
@@ -113,7 +113,7 @@ export async function PUT(request: NextRequest) {
       .from("recipe_items")
       .update({ quantity_required: parsedQuantity })
       .eq("id", id)
-      .select("*, ingredient:ingredients(*)")
+      .select("*")
       .single();
 
     if (error) throw error;

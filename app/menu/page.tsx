@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type FormEvent, useRef } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 type MenuItem = {
   id: string;
@@ -22,9 +22,9 @@ type Ingredient = {
 type RecipeItem = {
   id: string;
   menuItemId: string;
-  ingredientId: string;
+  ingredientName: string;
   quantityRequired: number;
-  ingredient?: Ingredient;
+
 };
 
 type MenuFormState = {
@@ -38,7 +38,7 @@ type MenuFormState = {
 };
 
 type RecipeFormState = {
-  ingredientId: string;
+  ingredientName: string;
   quantityRequired: string;
 };
 
@@ -52,7 +52,7 @@ const emptyForm: MenuFormState = {
 };
 
 const emptyRecipeForm: RecipeFormState = {
-  ingredientId: "",
+  ingredientName: "",
   quantityRequired: "",
 };
 
@@ -102,19 +102,7 @@ export default function MenuPage() {
     }
   };
 
-  const fetchIngredients = async () => {
-    const response = await fetch("/api/inventory");
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data?.error || "Error al cargar ingredientes");
-    }
-    const ingredientsList = (data.ingredients || []).map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      unit: item.unit,
-    }));
-    setIngredients(ingredientsList);
-  };
+
 
   const fetchRecipes = async (menuItemId: string) => {
     if (!menuItemId) {
@@ -140,7 +128,7 @@ export default function MenuPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        await Promise.all([fetchMenu(), fetchIngredients()]);
+        await Promise.all([fetchMenu()]);
       } catch (error) {
         setErrorMessage(
           error instanceof Error ? error.message : "Error inesperado al cargar",
@@ -214,7 +202,7 @@ export default function MenuPage() {
 
     try {
       setIsSubmitting(true);
-      
+
       const formData = new FormData();
       if (formState.id) formData.append("id", formState.id);
       formData.append("name", formState.name.trim());
@@ -222,7 +210,7 @@ export default function MenuPage() {
       formData.append("price", formState.price);
       formData.append("category", formState.category);
       formData.append("isAvailable", String(formState.isAvailable));
-      
+
       if (selectedFile) {
         formData.append("image", selectedFile);
       } else if (formState.imageUrl) {
@@ -233,7 +221,7 @@ export default function MenuPage() {
         method: isEditing ? "PUT" : "POST",
         body: formData, // Enviar como FormData
       });
-      
+
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data?.error || "No se pudo guardar el producto");
@@ -300,8 +288,8 @@ export default function MenuPage() {
     if (!selectedRecipeMenuItemId) {
       errors.menuItemId = "Selecciona un producto del menú";
     }
-    if (!state.ingredientId) {
-      errors.ingredientId = "Selecciona un ingrediente";
+    if (!state.ingredientName) {
+      errors.ingredientName = "Ingresa el nombre del ingrediente";
     }
     const qty = Number(state.quantityRequired);
     if (!Number.isFinite(qty) || qty <= 0) {
@@ -322,7 +310,7 @@ export default function MenuPage() {
       setIsSubmitting(true);
       const payload = {
         menuItemId: selectedRecipeMenuItemId,
-        ingredientId: recipeForm.ingredientId,
+        ingredientName: recipeForm.ingredientName,
         quantityRequired: Number(recipeForm.quantityRequired),
       };
       const response = await fetch("/api/recipes", {
@@ -629,23 +617,18 @@ export default function MenuPage() {
                   <label className="text-sm font-medium text-gray-700">
                     Ingrediente
                   </label>
-                  <select
-                    value={recipeForm.ingredientId}
+                  <input
+                    type="text"
+                    value={recipeForm.ingredientName}
                     onChange={(event) =>
-                      handleRecipeFormChange("ingredientId", event.target.value)
+                      handleRecipeFormChange("ingredientName", event.target.value)
                     }
                     className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  >
-                    <option value="">Selecciona un ingrediente</option>
-                    {ingredients.map((ingredient) => (
-                      <option key={ingredient.id} value={ingredient.id}>
-                        {ingredient.name} ({ingredient.unit})
-                      </option>
-                    ))}
-                  </select>
-                  {recipeErrors.ingredientId && (
+                    placeholder="Ej. Tomate (kg)"
+                  />
+                  {recipeErrors.ingredientName && (
                     <p className="mt-1 text-xs text-red-600">
-                      {recipeErrors.ingredientId}
+                      {recipeErrors.ingredientName}
                     </p>
                   )}
                 </div>
@@ -710,10 +693,7 @@ export default function MenuPage() {
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
                             <p className="text-sm font-semibold text-gray-900">
-                              {recipe.ingredient?.name || recipe.ingredientId}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Unidad: {recipe.ingredient?.unit || "—"}
+                              {recipe.ingredientName}
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
@@ -819,11 +799,10 @@ export default function MenuPage() {
                       </td>
                       <td className="py-3">
                         <span
-                          className={`rounded-full px-2 py-1 text-xs ${
-                            item.isAvailable
+                          className={`rounded-full px-2 py-1 text-xs ${item.isAvailable
                               ? "bg-green-100 text-green-700"
                               : "bg-gray-200 text-gray-600"
-                          }`}
+                            }`}
                         >
                           {item.isAvailable ? "Disponible" : "No disponible"}
                         </span>
