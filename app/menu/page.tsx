@@ -91,7 +91,13 @@ export default function MenuPage() {
       if (!response.ok) {
         throw new Error(data?.error || "Error al cargar el menú");
       }
-      setItems(data.items || []);
+      setItems(
+        (data.items || []).map((item: any) => ({
+          ...item,
+          isAvailable: item.is_available,
+          imageUrl: item.image_url,
+        }))
+      );
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
@@ -561,7 +567,7 @@ export default function MenuPage() {
                   }
                   className="h-4 w-4 rounded border-gray-300"
                 />
-                Disponible en menú
+                {formState.isAvailable ? "Disponible en menú" : "No disponible"}
               </label>
 
               <button
@@ -800,8 +806,8 @@ export default function MenuPage() {
                       <td className="py-3">
                         <span
                           className={`rounded-full px-2 py-1 text-xs ${item.isAvailable
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-200 text-gray-600"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-200 text-gray-600"
                             }`}
                         >
                           {item.isAvailable ? "Disponible" : "No disponible"}
