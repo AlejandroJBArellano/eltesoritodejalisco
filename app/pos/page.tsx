@@ -104,11 +104,37 @@ export default function POSPage() {
     setCustomers(data.customers || []);
   };
 
+  const mapOrderData = (dbOrder: any): Order => {
+    return {
+      ...dbOrder,
+      orderNumber: dbOrder.order_number,
+      customerId: dbOrder.customer_id,
+      createdAt: dbOrder.created_at,
+      updatedAt: dbOrder.updated_at,
+      orderItems: Array.isArray(dbOrder.order_items)
+        ? dbOrder.order_items.map((item: any) => ({
+          ...item,
+          orderId: item.order_id,
+          menuItemId: item.menu_item_id,
+          unitPrice: item.unit_price,
+          menuItem: item.menu_items
+            ? {
+              ...item.menu_items,
+              imageUrl: item.menu_items?.image_url,
+              isAvailable: item.menu_items?.is_available,
+            }
+            : { name: "Producto", price: item.unit_price || 0 },
+        }))
+        : [],
+      customer: dbOrder.customers || dbOrder.customer || undefined,
+    } as Order;
+  };
+
   const fetchOrders = async () => {
     const response = await fetch("/api/orders");
     const data = await response.json();
     if (!response.ok) throw new Error(data?.error || "Error al cargar órdenes");
-    setOrders(data.orders || []);
+    setOrders((data.orders || []).map(mapOrderData));
   };
 
   useEffect(() => {
@@ -226,7 +252,7 @@ export default function POSPage() {
 
       // Actualizar órdenes y preparar comanda para imprimir
       await fetchOrders();
-      setCheckoutOrder(data.order);
+      setCheckoutOrder(mapOrderData(data.order));
       setShowKitchenTicket(true);
       setFormState(emptyForm);
       setErrorMessage(null);
