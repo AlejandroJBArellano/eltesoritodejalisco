@@ -117,10 +117,13 @@ export async function POST(request: NextRequest) {
     const tax = subtotal * 0;
     const total = subtotal + tax;
 
+    const orderId = crypto.randomUUID();
+
     // Create order
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
+        id: orderId,
         order_number: nextNumber,
         customer_id: customerId,
         source,
@@ -129,6 +132,7 @@ export async function POST(request: NextRequest) {
         subtotal,
         tax,
         total,
+        updated_at: new Date().toISOString()
       })
       .select()
       .single();
@@ -141,6 +145,7 @@ export async function POST(request: NextRequest) {
       .insert(
         itemsWithPrices.map((item) => ({
           ...item,
+          id: crypto.randomUUID(),
           order_id: order.id,
         }))
       );

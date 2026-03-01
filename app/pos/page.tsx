@@ -128,6 +128,28 @@ export default function POSPage() {
     load();
   }, []);
 
+  useEffect(() => {
+    if (availableMenuItems.length > 0) {
+      setFormState((prev) => {
+        if (prev.items.length === 1 && prev.items[0].menuItemId === "") {
+          const nextItems = [...prev.items];
+          nextItems[0] = { ...nextItems[0], menuItemId: availableMenuItems[0].id };
+          return { ...prev, items: nextItems };
+        }
+        return prev;
+      });
+
+      setAdditionalItems((prev) => {
+        if (prev.length === 1 && prev[0].menuItemId === "") {
+          const nextItems = [...prev];
+          nextItems[0] = { ...nextItems[0], menuItemId: availableMenuItems[0].id };
+          return nextItems;
+        }
+        return prev;
+      });
+    }
+  }, [availableMenuItems]);
+
   const change = useMemo(() => {
     if (!checkoutOrder || !receivedAmount) return 0;
     const diff = Number(receivedAmount) - checkoutOrder.total;
@@ -153,7 +175,10 @@ export default function POSPage() {
   const addItemRow = () => {
     setFormState((prev) => ({
       ...prev,
-      items: [...prev.items, { menuItemId: "", quantity: "1", notes: "" }],
+      items: [
+        ...prev.items,
+        { menuItemId: availableMenuItems[0]?.id || "", quantity: "1", notes: "" },
+      ],
     }));
   };
 
@@ -276,7 +301,7 @@ export default function POSPage() {
 
       await fetchOrders();
       setEditingOrder(null);
-      setAdditionalItems([{ menuItemId: "", quantity: "1", notes: "" }]);
+      setAdditionalItems([{ menuItemId: availableMenuItems[0]?.id || "", quantity: "1", notes: "" }]);
 
       // Optionally show updated ticket or kitchen ticket
       // For now, just close modal
@@ -302,7 +327,7 @@ export default function POSPage() {
   const addAdditionalItemRow = () => {
     setAdditionalItems((prev) => [
       ...prev,
-      { menuItemId: "", quantity: "1", notes: "" },
+      { menuItemId: availableMenuItems[0]?.id || "", quantity: "1", notes: "" },
     ]);
   };
 
@@ -549,7 +574,7 @@ export default function POSPage() {
                         onClick={() => {
                           setEditingOrder(order);
                           setAdditionalItems([
-                            { menuItemId: "", quantity: "1", notes: "" },
+                            { menuItemId: availableMenuItems[0]?.id || "", quantity: "1", notes: "" },
                           ]);
                         }}
                         className="bg-purple-600 text-white px-2 py-1.5 rounded text-[10px] font-bold"
