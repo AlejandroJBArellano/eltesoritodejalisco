@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
         category: category || null,
         image_url: imageUrl,
         is_available: isAvailable,
+        updated_at: new Date().toISOString(),
       })
       .select()
       .single();
@@ -165,6 +166,7 @@ export async function PUT(request: NextRequest) {
         category: category || null,
         image_url: imageUrl || null,
         is_available: isAvailable,
+        updated_at: new Date().toISOString(),
       })
       .eq("id", id)
       .select()
