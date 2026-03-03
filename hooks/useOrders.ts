@@ -121,8 +121,13 @@ export function useOrderTimer(createdAt: Date) {
   useEffect(() => {
     const calculateElapsed = () => {
       const now = new Date();
-      const created = new Date(createdAt);
-      const diffMs = now.getTime() - created.getTime();
+      const rawDate = createdAt as unknown as string;
+      const createdAtStr = typeof rawDate === 'string' && !rawDate.endsWith('Z') 
+        ? `${rawDate}Z` 
+        : rawDate;
+      
+      const created = new Date(createdAtStr);
+      const diffMs = Math.max(0, now.getTime() - created.getTime());
       setElapsedSeconds(Math.floor(diffMs / 1000));
     };
 

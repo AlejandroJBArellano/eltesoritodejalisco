@@ -22,8 +22,15 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
     // Calculate elapsed time from order creation
     const calculateElapsed = () => {
       const now = new Date();
-      const created = new Date(order.createdAt);
-      const diffMs = now.getTime() - created.getTime();
+      // Supabase timestamps might come without 'Z' at the end, so we explicitly treat them as UTC
+      const rawDate = order.createdAt as unknown as string;
+      const createdAtStr = typeof rawDate === 'string' && !rawDate.endsWith('Z')
+        ? `${rawDate}Z`
+        : rawDate;
+
+      const created = new Date(createdAtStr);
+      const diffMs = Math.max(0, now.getTime() - created.getTime());
+
       const diffMinutes = Math.floor(diffMs / 1000 / 60);
       const diffSeconds = Math.floor((diffMs / 1000) % 60);
 
@@ -72,13 +79,12 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
 
   return (
     <div
-      className={`rounded-lg border-2 p-4 shadow-lg transition-all duration-300 ${
-        isOverdue &&
+      className={`rounded-lg border-2 p-4 shadow-lg transition-all duration-300 ${isOverdue &&
         order.status !== OrderStatus.DELIVERED &&
         order.status !== OrderStatus.READY
-          ? "border-red-500 bg-red-50"
-          : "border-gray-200 bg-white"
-      }`}
+        ? "border-red-500 bg-red-50"
+        : "border-gray-200 bg-white"
+        }`}
     >
       {/* Header */}
       <div className="mb-3 flex items-start justify-between">
@@ -93,9 +99,8 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
 
         {/* Timer */}
         <div
-          className={`rounded-md px-3 py-2 text-center font-mono text-xl font-bold ${
-            isOverdue ? "bg-red-600 text-white" : "bg-gray-200 text-gray-900"
-          }`}
+          className={`rounded-md px-3 py-2 text-center font-mono text-xl font-bold ${isOverdue ? "bg-red-600 text-white" : "bg-gray-200 text-gray-900"
+            }`}
         >
           {formatTime(elapsedTime)}
         </div>
