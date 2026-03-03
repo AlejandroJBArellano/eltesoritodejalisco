@@ -51,7 +51,15 @@ export function OrderTicket({ order }: OrderTicketProps) {
       <div className="border-b border-dashed my-2"></div>
 
       <div className="text-right space-y-1">
-        <p className="font-bold text-lg">TOTAL: ${order.total.toFixed(2)}</p>
+        {order.payments && order.payments.length > 0 && order.payments[0].tipAmount ? (
+          <>
+            <p className="font-bold text-md">SUBTOTAL: ${order.total.toFixed(2)}</p>
+            <p className="font-bold text-md text-gray-700">PROPINA: ${order.payments[0].tipAmount.toFixed(2)}</p>
+            <p className="font-black text-xl mt-2">TOTAL: ${(order.total + order.payments[0].tipAmount).toFixed(2)}</p>
+          </>
+        ) : (
+          <p className="font-bold text-lg">TOTAL: ${order.total.toFixed(2)}</p>
+        )}
       </div>
 
       <div className="text-center mt-6">

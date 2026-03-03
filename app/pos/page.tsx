@@ -128,6 +128,13 @@ export default function POSPage() {
             : { name: "Producto", price: item.unit_price || 0 },
         }))
         : [],
+      payments: Array.isArray(dbOrder.payments)
+        ? dbOrder.payments.map((p: any) => ({
+          ...p,
+          orderId: p.order_id,
+          tipAmount: p.tip_amount
+        }))
+        : [],
       customer: dbOrder.customers || dbOrder.customer || undefined,
     } as Order;
   };
@@ -136,7 +143,9 @@ export default function POSPage() {
     const response = await fetch("/api/orders");
     const data = await response.json();
     if (!response.ok) throw new Error(data?.error || "Error al cargar órdenes");
-    setOrders((data.orders || []).map(mapOrderData));
+    const mappedOrders = (data.orders || []).map(mapOrderData);
+    setOrders(mappedOrders);
+    return mappedOrders;
   };
 
   useEffect(() => {
@@ -298,7 +307,9 @@ export default function POSPage() {
         }),
       });
       if (!response.ok) throw new Error("Error al procesar el pago");
-      await fetchOrders();
+      const updatedOrders = await fetchOrders();
+      const updatedOrder = updatedOrders.find((o: Order) => o.id === checkoutOrder.id) || checkoutOrder;
+      setCheckoutOrder(updatedOrder);
       setShowTicket(true);
     } catch (error) {
       alert("Error al procesar el pago");
@@ -575,6 +586,11 @@ export default function POSPage() {
                     <td className="px-4 py-4">{order.table || "Llevar"}</td>
                     <td className="px-4 py-4 font-bold">
                       ${order.total.toFixed(2)}
+                      {order.payments && order.payments.length > 0 && order.payments[0].tipAmount ? (
+                        <span className="text-xs text-blue-500 ml-1 block">
+                          (+${order.payments[0].tipAmount.toFixed(2)} propina)
+                        </span>
+                      ) : null}
                     </td>
                     <td className="px-4 py-4 flex gap-2">
                       {order.status !== "PAID" && (

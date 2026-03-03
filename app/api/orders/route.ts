@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
           *,
           menu_items (*)
         ),
+        payments (*),
         customer:customers (*)
       `)
       .order("created_at", { ascending: false });
@@ -161,6 +162,7 @@ export async function POST(request: NextRequest) {
           *,
           menu_items (*)
         ),
+        payments (*),
         customer:customers (*)
       `)
       .eq("id", order.id)

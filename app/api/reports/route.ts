@@ -33,6 +33,16 @@ export async function GET() {
     const totalOrders = (completedOrders || []).length;
     const averageTicket = totalOrders > 0 ? totalSales / totalOrders : 0;
 
+    const { data: payments } = await supabase
+      .from("payments")
+      .select("tip_amount")
+      .gte("created_at", sevenDaysAgo.toISOString());
+    
+    const totalTips = (payments || []).reduce(
+      (sum, p) => sum + (p.tip_amount || 0),
+      0
+    );
+
     // Sales by Day
     const salesByDay: Record<string, number> = {};
     (completedOrders || []).forEach((order) => {
@@ -96,6 +106,7 @@ export async function GET() {
         totalSales,
         totalOrders,
         averageTicket,
+        totalTips,
       },
       salesByDay,
       salesBySource,

@@ -21,6 +21,7 @@ export default async function Home() {
   let activeOrdersCount = 0;
   let salesToday = 0;
   let customersCount = 0;
+  let tipsToday = 0;
 
   if (isAdmin) {
     const supabase = await createClient();
@@ -44,6 +45,17 @@ export default async function Home() {
 
     salesToday = (todayOrders || []).reduce(
       (sum, order) => sum + (order.total || 0),
+      0
+    );
+
+    // 2.5 Propinas Hoy
+    const { data: todayPayments } = await supabase
+      .from("payments")
+      .select("tip_amount")
+      .gte("created_at", today.toISOString());
+
+    tipsToday = (todayPayments || []).reduce(
+      (sum, payment) => sum + (payment.tip_amount || 0),
       0
     );
 
@@ -116,6 +128,25 @@ export default async function Home() {
                   </p>
                   <p className="text-3xl font-black text-dark tracking-tight">
                     {customersCount}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-white p-6 shadow-sm border border-dark/5">
+              <div className="flex items-center">
+                <div className="rounded-xl bg-blue-500/10 p-3 text-blue-500 text-2xl">
+                  💵
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-bold text-dark/50 uppercase tracking-wider">
+                    Propinas Hoy
+                  </p>
+                  <p className="text-3xl font-black text-dark tracking-tight">
+                    {new Intl.NumberFormat("es-MX", {
+                      style: "currency",
+                      currency: "MXN",
+                    }).format(tipsToday)}
                   </p>
                 </div>
               </div>

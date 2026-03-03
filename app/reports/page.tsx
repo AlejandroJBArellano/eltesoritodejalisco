@@ -8,6 +8,7 @@ type ReportData = {
     totalSales: number;
     totalOrders: number;
     averageTicket: number;
+    totalTips: number;
   };
   salesByDay: Record<string, number>;
   salesBySource: Record<string, { count: number; total: number }>;
@@ -120,7 +121,7 @@ export default function ReportsPage() {
               ${data.summary.totalSales.toLocaleString()}
             </p>
             <p className="mt-1 text-xs text-green-600">
-              {data.summary.totalOrders} órdenes completadas
+              +{data.summary.totalTips ? `$${data.summary.totalTips.toLocaleString()} en propinas` : `${data.summary.totalOrders} órdenes completadas`}
             </p>
           </div>
           <div className="rounded-lg bg-white p-6 shadow-md">

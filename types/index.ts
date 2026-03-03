@@ -154,6 +154,7 @@ export interface User {
 export interface OrderWithDetails extends Order {
   orderItems: (OrderItem & { menuItem: MenuItem })[];
   elapsedMinutes?: number;
+  payments?: Payment[];
 }
 
 export interface BatchedMenuItem {
