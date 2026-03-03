@@ -24,11 +24,9 @@ export async function login(formData: FormData) {
   redirect('/')
 }
 
-
-
 export async function loginWithGoogle() {
   const supabase = await createClient()
-  
+
   // Intentamos obtener dinámicamente el origen real del servidor
   const headersList = await headers()
   const host = headersList.get('x-forwarded-host') || headersList.get('host')
