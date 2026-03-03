@@ -71,6 +71,7 @@ export async function PATCH(
         quantity: quantity,
         unit_price: menuItem.price,
         notes: item.notes || "",
+        status: "PENDING",
       });
     }
 
@@ -84,15 +85,21 @@ export async function PATCH(
     const additionalTax = additionalSubtotal * 0;
     const additionalTotal = additionalSubtotal + additionalTax;
 
+    const orderUpdate: any = {
+      subtotal: (order.subtotal || 0) + additionalSubtotal,
+      tax: (order.tax || 0) + additionalTax,
+      total: (order.total || 0) + additionalTotal,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (["DELIVERED", "READY", "COMPLETED"].includes(order.status)) {
+      orderUpdate.status = "PENDING";
+    }
+
     // Update order totals
     const { data: updatedOrder, error: updateError } = await supabase
       .from("orders")
-      .update({
-        subtotal: (order.subtotal || 0) + additionalSubtotal,
-        tax: (order.tax || 0) + additionalTax,
-        total: (order.total || 0) + additionalTotal,
-        updated_at: new Date().toISOString(),
-      })
+      .update(orderUpdate)
       .eq("id", id)
       .select(`
         *,

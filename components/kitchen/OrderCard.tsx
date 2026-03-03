@@ -108,11 +108,16 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
 
       {/* Order Items */}
       <div className="mb-4 space-y-2">
-        {order.orderItems.map((item) => (
+        {order.orderItems.filter((item) => item.status !== OrderStatus.DELIVERED).map((item) => (
           <div
             key={item.id}
-            className="flex items-start justify-between rounded border border-gray-200 bg-gray-50 p-2"
+            className="flex items-start justify-between rounded border border-gray-200 bg-gray-50 p-2 relative overflow-hidden"
           >
+            {item.status === OrderStatus.PENDING && (
+              <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">
+                NUEVO
+              </div>
+            )}
             <div className="flex-1">
               <p className="font-semibold text-gray-900">
                 {item.quantity}x {item.menuItem.name}

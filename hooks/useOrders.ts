@@ -18,6 +18,7 @@ export const mapOrderData = (dbOrder: any): OrderWithDetails => {
           orderId: item.order_id,
           menuItemId: item.menu_item_id,
           unitPrice: item.unit_price,
+          status: item.status,
           menuItem: item.menu_items
             ? {
                 ...item.menu_items,

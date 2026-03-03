@@ -22,6 +22,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const supabase = await createClient();
+
+    // Sync order items status for items that are not already delivered
+    await supabase
+      .from("order_items")
+      .update({ status })
+      .eq("order_id", id)
+      .neq("status", "DELIVERED");
     const { data: order, error } = await supabase
       .from("orders")
       .update(updateData)
