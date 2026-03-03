@@ -19,6 +19,7 @@ export function KitchenDisplaySystem({
 }: KitchenDisplaySystemProps) {
   const { orders, setOrders } = useRealtimeOrders(initialOrders);
   const [view, setView] = useState<"kanban" | "batching">("kanban");
+  const [soundEnabled, setSoundEnabled] = useState(false);
 
   const handleStatusChange = async (
     orderId: string,
@@ -63,25 +64,32 @@ export function KitchenDisplaySystem({
           TesoritoOS - Sistema de Cocina
         </h1>
 
+        {!soundEnabled && (
+          <button
+            onClick={() => setSoundEnabled(true)}
+            className="rounded-lg border border-red-300 bg-red-100 px-4 py-2 font-bold text-red-700 shadow-md animate-pulse hover:bg-red-200 transition-colors"
+          >
+            🔔 Toca aquí para Activar Sonidos
+          </button>
+        )}
+
         {/* View Toggle */}
         <div className="flex gap-2 rounded-lg border border-gray-300 bg-white p-1">
           <button
             onClick={() => setView("kanban")}
-            className={`rounded px-4 py-2 font-semibold transition-colors ${
-              view === "kanban"
+            className={`rounded px-4 py-2 font-semibold transition-colors ${view === "kanban"
                 ? "bg-blue-600 text-white"
                 : "text-gray-700 hover:bg-gray-100"
-            }`}
+              }`}
           >
             Vista Kanban
           </button>
           <button
             onClick={() => setView("batching")}
-            className={`rounded px-4 py-2 font-semibold transition-colors ${
-              view === "batching"
+            className={`rounded px-4 py-2 font-semibold transition-colors ${view === "batching"
                 ? "bg-blue-600 text-white"
                 : "text-gray-700 hover:bg-gray-100"
-            }`}
+              }`}
           >
             Vista de Lotes
           </button>
