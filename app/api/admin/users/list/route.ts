@@ -15,7 +15,7 @@ export async function GET() {
     const { data: profiles, error } = await adminClient
       .from("profiles")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("updated_at", { ascending: false });
 
     if (error) {
       console.error(error);
