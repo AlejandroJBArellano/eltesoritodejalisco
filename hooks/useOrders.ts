@@ -62,26 +62,39 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
       fetchOrders();
     }
 
-    // Subscribe to changes in the 'orders' table
+    let lastAudioTime = 0;
+
+    const playBell = () => {
+      const now = Date.now();
+      if (now - lastAudioTime > 2000) { // debounce de 2 segundos
+        lastAudioTime = now;
+        try {
+          const audio = new Audio('/new_order.mp3');
+          audio.play().catch((e) => console.log('Audio playback prevented:', e));
+        } catch (error) {
+          console.error('Error playing sound', error);
+        }
+      }
+    };
+
+    // Subscribe to changes in the tables
     const channel = supabase
       .channel("orders_realtime")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
         (payload) => {
-          console.log("Change received!", payload);
-          
           if (payload.eventType === 'INSERT') {
-            try {
-              const audio = new Audio('/new_order.mp3');
-              audio.play().catch((e) => console.log('Audio playback prevented:', e));
-            } catch (error) {
-              console.error('Error playing sound', error);
-            }
+            playBell();
           }
-          
-          // Re-fetch all active orders when any change occurs
-          // This ensures we have the full OrderWithDetails structure
+          fetchOrders();
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "order_items" },
+        (payload) => {
+          playBell();
           fetchOrders();
         },
       )
