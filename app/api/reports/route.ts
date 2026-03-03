@@ -73,19 +73,11 @@ export async function GET() {
       .slice(0, 5);
 
     // 3. Inventory Status
-    const { data: ingredients, error: invError } = await supabase
-      .from("ingredients")
-      .select("*");
+    const ingredients: any[] = [];
+    const invError = null;
 
-    if (invError) throw invError;
-
-    const lowStockIngredients = (ingredients || []).filter(
-      (ing) => ing.current_stock <= ing.minimum_stock,
-    );
-    const totalStockValue = (ingredients || []).reduce(
-      (sum, ing) => sum + ing.current_stock * (ing.cost_per_unit || 0),
-      0,
-    );
+    const lowStockIngredients: any[] = [];
+    const totalStockValue = 0;
 
     // 4. Customer Insights
     const { data: customers, error: custError } = await supabase
