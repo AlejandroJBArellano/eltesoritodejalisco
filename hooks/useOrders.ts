@@ -70,6 +70,16 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
         { event: "*", schema: "public", table: "orders" },
         (payload) => {
           console.log("Change received!", payload);
+          
+          if (payload.eventType === 'INSERT') {
+            try {
+              const audio = new Audio('/new_order.mp3');
+              audio.play().catch((e) => console.log('Audio playback prevented:', e));
+            } catch (error) {
+              console.error('Error playing sound', error);
+            }
+          }
+          
           // Re-fetch all active orders when any change occurs
           // This ensures we have the full OrderWithDetails structure
           fetchOrders();

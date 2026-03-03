@@ -613,18 +613,19 @@ export default function POSPage() {
                       >
                         TICKET
                       </button>
-
-                      <button
-                        onClick={() => {
-                          setEditingOrder(order);
-                          setAdditionalItems([
-                            { menuItemId: availableMenuItems[0]?.id || "", quantity: "1", notes: "" },
-                          ]);
-                        }}
-                        className="bg-purple-600 text-white px-2 py-1.5 rounded text-[10px] font-bold"
-                      >
-                        AGREGAR
-                      </button>
+                      {order.status !== "PAID" && (
+                        <button
+                          onClick={() => {
+                            setEditingOrder(order);
+                            setAdditionalItems([
+                              { menuItemId: availableMenuItems[0]?.id || "", quantity: "1", notes: "" },
+                            ]);
+                          }}
+                          className="bg-purple-600 text-white px-2 py-1.5 rounded text-[10px] font-bold"
+                        >
+                          AGREGAR
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
