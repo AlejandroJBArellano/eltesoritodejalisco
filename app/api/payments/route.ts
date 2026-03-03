@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { orderId, method, amount, receivedAmount, change } = body;
+    const { orderId, method, amount, receivedAmount, change, tipAmount } = body;
 
     if (!orderId || !method || !amount) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
         amount: Number(amount),
         received_amount: receivedAmount ? Number(receivedAmount) : null,
         change: change ? Number(change) : null,
+        tip_amount: tipAmount ? Number(tipAmount) : 0,
       })
       .select()
       .single();

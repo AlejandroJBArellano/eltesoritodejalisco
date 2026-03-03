@@ -73,6 +73,8 @@ export default function POSPage() {
   const [receivedAmount, setReceivedAmount] = useState<string>("");
   const [showTicket, setShowTicket] = useState(false);
   const [showKitchenTicket, setShowKitchenTicket] = useState(false);
+  const [tipType, setTipType] = useState<"NONE" | "PERCENTAGE" | "FIXED">("NONE");
+  const [tipInput, setTipInput] = useState<string>("");
   // Edit Order State
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [additionalItems, setAdditionalItems] = useState<OrderItemDraft[]>([
@@ -176,11 +178,22 @@ export default function POSPage() {
     }
   }, [availableMenuItems]);
 
+  const tipAmountCalculated = useMemo(() => {
+    if (!checkoutOrder) return 0;
+    if (tipType === "PERCENTAGE") {
+      return (checkoutOrder.total * (Number(tipInput) || 0)) / 100;
+    }
+    if (tipType === "FIXED") {
+      return Number(tipInput) || 0;
+    }
+    return 0;
+  }, [checkoutOrder, tipType, tipInput]);
+
   const change = useMemo(() => {
     if (!checkoutOrder || !receivedAmount) return 0;
-    const diff = Number(receivedAmount) - checkoutOrder.total;
+    const diff = Number(receivedAmount) - (checkoutOrder.total + tipAmountCalculated);
     return diff > 0 ? diff : 0;
-  }, [checkoutOrder, receivedAmount]);
+  }, [checkoutOrder, receivedAmount, tipAmountCalculated]);
 
   const handleFormChange = (field: keyof OrderFormState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
@@ -279,8 +292,9 @@ export default function POSPage() {
           receivedAmount:
             paymentMethod === "CASH"
               ? Number(receivedAmount)
-              : checkoutOrder.total,
+              : checkoutOrder.total + tipAmountCalculated,
           change: paymentMethod === "CASH" ? change : 0,
+          tipAmount: tipAmountCalculated,
         }),
       });
       if (!response.ok) throw new Error("Error al procesar el pago");
@@ -569,6 +583,10 @@ export default function POSPage() {
                             setCheckoutOrder(order);
                             setShowTicket(false);
                             setShowKitchenTicket(false);
+                            setTipType("NONE");
+                            setTipInput("");
+                            setPaymentMethod("CASH");
+                            setReceivedAmount("");
                           }}
                           className="bg-blue-600 text-white px-2 py-1.5 rounded text-[10px] font-bold"
                         >
@@ -754,8 +772,33 @@ export default function POSPage() {
               <div className="text-center bg-blue-50 py-6 rounded-2xl">
                 <p className="text-blue-600 text-sm font-bold">TOTAL A PAGAR</p>
                 <p className="text-5xl font-black text-blue-700">
-                  ${checkoutOrder.total.toFixed(2)}
+                  ${(checkoutOrder.total + tipAmountCalculated).toFixed(2)}
                 </p>
+                {tipAmountCalculated > 0 && (
+                  <p className="text-sm font-bold text-gray-500 mt-2">
+                    Incluye ${(tipAmountCalculated).toFixed(2)} de propina
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-400 block mb-2 uppercase">
+                  Propina
+                </label>
+                <div className="grid grid-cols-3 gap-2 mb-2">
+                  <button onClick={() => { setTipType("NONE"); setTipInput(""); }} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "NONE" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Sin propina</button>
+                  <button onClick={() => setTipType("PERCENTAGE")} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "PERCENTAGE" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Porcentaje %</button>
+                  <button onClick={() => setTipType("FIXED")} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "FIXED" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Monto fijo $</button>
+                </div>
+                {tipType !== "NONE" && (
+                  <input
+                    type="number"
+                    value={tipInput}
+                    onChange={(e) => setTipInput(e.target.value)}
+                    placeholder={tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"}
+                    className="w-full text-lg font-bold p-3 border-2 border-gray-100 rounded-xl focus:border-blue-600 outline-none text-center"
+                  />
+                )}
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-400 block mb-2 uppercase">
@@ -800,7 +843,7 @@ export default function POSPage() {
                   isSubmitting ||
                   (paymentMethod === "CASH" &&
                     (!receivedAmount ||
-                      Number(receivedAmount) < checkoutOrder.total))
+                      Number(receivedAmount) < (checkoutOrder.total + tipAmountCalculated)))
                 }
                 className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl disabled:opacity-50 transition-all"
               >

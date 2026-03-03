@@ -122,6 +122,7 @@ export interface Payment {
   amount: number;
   receivedAmount?: number;
   change?: number;
+  tipAmount?: number;
   createdAt: Date;
 }
 
