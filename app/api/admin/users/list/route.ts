@@ -15,8 +15,6 @@ export async function GET() {
     // Obtenemos los usuarios y sus metadatos desde Supabase Auth (donde viven los correos y full_name verídicos)
     const { data: authData, error: authError } = await adminClient.auth.admin.listUsers();
 
-    console.log(authData.users.map(e => e.user_metadata));
-
     if (authError) {
       console.error(authError);
       return NextResponse.json(

@@ -9,8 +9,8 @@ type Customer = {
   phone?: string | null;
   email?: string | null;
   birthday?: string | null;
-  loyaltyPoints: number;
-  totalSpend: number;
+  loyalty_points: number;
+  total_spend: number;
   createdAt?: string;
 };
 
@@ -45,7 +45,7 @@ export default function CustomersPage() {
   const totalLoyaltyPoints = useMemo(
     () =>
       customers.reduce(
-        (acc, customer) => acc + (customer.loyaltyPoints || 0),
+        (acc, customer) => acc + (customer.loyalty_points || 0),
         0,
       ),
     [customers],
@@ -377,15 +377,15 @@ export default function CustomersPage() {
                       <td className="py-3 text-gray-600">
                         {customer.birthday
                           ? new Date(customer.birthday).toLocaleDateString(
-                              "es-MX",
-                            )
+                            "es-MX",
+                          )
                           : "—"}
                       </td>
                       <td className="py-3 text-gray-600">
-                        {customer.loyaltyPoints}
+                        {customer.loyalty_points || 0}
                       </td>
                       <td className="py-3 text-gray-600">
-                        ${customer.totalSpend.toFixed(2)}
+                        ${Number(customer.total_spend || 0).toFixed(2)}
                       </td>
                       <td className="py-3">
                         <div className="flex gap-2">

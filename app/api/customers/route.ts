@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
         phone: phone || null,
         email: email || null,
         birthday: parsedBirthday,
+        updated_at: new Date().toISOString(),
       })
       .select()
       .single();
