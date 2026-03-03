@@ -72,10 +72,6 @@ export async function GET() {
       .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 5);
 
-    // 3. Inventory Status
-    const ingredients: any[] = [];
-    const invError = null;
-
     const lowStockIngredients: any[] = [];
     const totalStockValue = 0;
 
