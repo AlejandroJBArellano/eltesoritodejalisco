@@ -82,8 +82,7 @@ export async function GET() {
       .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 5);
 
-    const lowStockIngredients: any[] = [];
-    const totalStockValue = 0;
+
 
     // 4. Customer Insights
     const { data: customers, error: custError } = await supabase
@@ -111,11 +110,6 @@ export async function GET() {
       salesByDay,
       salesBySource,
       topSellingItems,
-      inventory: {
-        lowStockCount: lowStockIngredients.length,
-        totalStockValue,
-        lowStockItems: lowStockIngredients.map(i => ({ name: i.name, stock: i.current_stock, min: i.minimum_stock }))
-      },
       customers: {
         topCustomers: customers,
         newCustomersCount: newCustomersCount || 0

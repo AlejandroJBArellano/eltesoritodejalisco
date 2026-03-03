@@ -13,11 +13,6 @@ type ReportData = {
   salesByDay: Record<string, number>;
   salesBySource: Record<string, { count: number; total: number }>;
   topSellingItems: { name: string; quantity: number; revenue: number }[];
-  inventory: {
-    lowStockCount: number;
-    totalStockValue: number;
-    lowStockItems: { name: string; stock: number; min: number }[];
-  };
   customers: {
     topCustomers: { name: string; totalSpend: number; loyaltyPoints: number }[];
     newCustomersCount: number;
@@ -114,7 +109,7 @@ export default function ReportsPage() {
       {/* Main Content */}
       <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
         {/* KPI Cards */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-lg bg-white p-6 shadow-md">
             <p className="text-sm font-medium text-gray-600">Ventas Totales</p>
             <p className="mt-2 text-3xl font-bold text-gray-900">
@@ -128,17 +123,6 @@ export default function ReportsPage() {
             <p className="text-sm font-medium text-gray-600">Ticket Promedio</p>
             <p className="mt-2 text-3xl font-bold text-gray-900">
               ${data.summary.averageTicket.toFixed(2)}
-            </p>
-          </div>
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <p className="text-sm font-medium text-gray-600">
-              Valor de Inventario
-            </p>
-            <p className="mt-2 text-3xl font-bold text-gray-900">
-              ${data.inventory.totalStockValue.toLocaleString()}
-            </p>
-            <p className="mt-1 text-xs text-red-600">
-              {data.inventory.lowStockCount} ítems en stock bajo
             </p>
           </div>
           <div className="rounded-lg bg-white p-6 shadow-md">
@@ -243,47 +227,7 @@ export default function ReportsPage() {
           </section>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Low Stock Alert */}
-          <section className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="mb-4 text-lg font-bold text-red-600">
-              ⚠️ Alerta de Stock Bajo
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b text-gray-500">
-                    <th className="py-2">Ingrediente</th>
-                    <th className="py-2 text-right">Actual</th>
-                    <th className="py-2 text-right">Mínimo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.inventory.lowStockItems.map((item, index) => (
-                    <tr key={index} className="border-b last:border-0">
-                      <td className="py-3 font-medium text-gray-900">
-                        {item.name}
-                      </td>
-                      <td className="py-3 text-right text-red-600 font-bold">
-                        {item.stock}
-                      </td>
-                      <td className="py-3 text-right text-gray-600">
-                        {item.min}
-                      </td>
-                    </tr>
-                  ))}
-                  {data.inventory.lowStockItems.length === 0 && (
-                    <tr>
-                      <td colSpan={3} className="py-4 text-center text-green-600">
-                        Todo el inventario está en orden ✅
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
+        <div className="grid gap-6 lg:grid-cols-1">
           {/* Top Customers */}
           <section className="rounded-lg bg-white p-6 shadow-md">
             <h2 className="mb-4 text-lg font-bold text-gray-900">
