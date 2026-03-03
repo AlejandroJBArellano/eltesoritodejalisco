@@ -1,4 +1,5 @@
 import { getProfile } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -16,6 +17,43 @@ export default async function Home() {
 
   const isAdmin = profile.role === "ADMIN" || profile.role === "MANAGER";
   const isWaiter = profile.role === "WAITER";
+
+  let activeOrdersCount = 0;
+  let salesToday = 0;
+  let customersCount = 0;
+
+  if (isAdmin) {
+    const supabase = await createClient();
+
+    // 1. Órdenes Activas
+    const { count: activeCount } = await supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .in("status", ["PENDING", "PREPARING", "READY"]);
+
+    activeOrdersCount = activeCount || 0;
+
+    // 2. Ventas Hoy
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const { data: todayOrders } = await supabase
+      .from("orders")
+      .select("total")
+      .in("status", ["PAID", "DELIVERED"])
+      .gte("created_at", today.toISOString());
+
+    salesToday = (todayOrders || []).reduce(
+      (sum, order) => sum + (order.total || 0),
+      0
+    );
+
+    // 3. Clientes
+    const { count: custCount } = await supabase
+      .from("customers")
+      .select("*", { count: "exact", head: true });
+
+    customersCount = custCount || 0;
+  }
 
   return (
     <div className="min-h-screen">
@@ -43,7 +81,7 @@ export default async function Home() {
                     Órdenes Activas
                   </p>
                   <p className="text-3xl font-black text-dark tracking-tight">
-                    12
+                    {activeOrdersCount}
                   </p>
                 </div>
               </div>
@@ -58,7 +96,10 @@ export default async function Home() {
                     Ventas Hoy
                   </p>
                   <p className="text-3xl font-black text-dark tracking-tight">
-                    $4,850
+                    {new Intl.NumberFormat("es-MX", {
+                      style: "currency",
+                      currency: "MXN",
+                    }).format(salesToday)}
                   </p>
                 </div>
               </div>
@@ -74,7 +115,7 @@ export default async function Home() {
                     Clientes
                   </p>
                   <p className="text-3xl font-black text-dark tracking-tight">
-                    248
+                    {customersCount}
                   </p>
                 </div>
               </div>
