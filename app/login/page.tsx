@@ -8,16 +8,16 @@ export default async function LoginPage({
   const { error } = await searchParams
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-[#121212] px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div>
-          <h1 className="text-center text-4xl font-extrabold text-gray-900">
+          <h1 className="text-center text-4xl font-extrabold text-[#E0E0E0]">
             🍽️ TesoritoOS
           </h1>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-[#E0E0E0]">
             Iniciar sesión
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-400">
             Ingresa tus credenciales para acceder al sistema
           </p>
         </div>
@@ -33,7 +33,7 @@ export default async function LoginPage({
                 type="email"
                 autoComplete="email"
                 required
-                className="relative block w-full rounded-t-md border-0 py-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                className="relative block w-full rounded-t-md border-0 bg-[#181818] py-2.5 text-[#E0E0E0] ring-1 ring-inset ring-[#333333] placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[#FFB7CE] sm:text-sm sm:leading-6 transition-colors"
                 placeholder="Correo electrónico"
               />
             </div>
@@ -47,22 +47,22 @@ export default async function LoginPage({
                 type="password"
                 autoComplete="current-password"
                 required
-                className="relative block w-full rounded-b-md border-0 py-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                className="relative block w-full rounded-b-md border-0 bg-[#181818] py-2.5 text-[#E0E0E0] ring-1 ring-inset ring-[#333333] placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[#FFB7CE] sm:text-sm sm:leading-6 transition-colors"
                 placeholder="Contraseña"
               />
             </div>
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-3">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="rounded-md bg-red-900/50 border border-red-500/50 p-3">
+              <p className="text-sm text-red-200">{error}</p>
             </div>
           )}
 
           <div>
             <button
               type="submit"
-              className="group relative flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              className="group relative flex w-full justify-center rounded-md bg-[#FFB7CE] px-3 py-2 text-sm font-bold text-[#121212] hover:bg-[#FFD1DC] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFB7CE] shadow-[#FFB7CE]/20 shadow-lg transition-all"
             >
               Entrar
             </button>
@@ -70,15 +70,15 @@ export default async function LoginPage({
         </form>
 
         <div className="mt-6 flex items-center justify-center">
-          <div className="w-full border-t border-gray-300"></div>
-          <div className="px-3 text-sm text-gray-500 bg-gray-50 uppercase">O</div>
-          <div className="w-full border-t border-gray-300"></div>
+          <div className="w-full border-t border-[#333333]"></div>
+          <div className="px-3 text-sm text-gray-500 bg-[#121212] uppercase font-bold tracking-widest">O</div>
+          <div className="w-full border-t border-[#333333]"></div>
         </div>
 
         <form action={loginWithGoogle}>
           <button
             type="submit"
-            className="group relative flex w-full justify-center items-center gap-3 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-200 transition-colors"
+            className="group relative flex w-full justify-center items-center gap-3 rounded-md border border-[#333333] bg-[#242424] px-3 py-2 text-sm font-semibold text-[#E0E0E0] hover:bg-[#333333] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 transition-colors shadow-md"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
