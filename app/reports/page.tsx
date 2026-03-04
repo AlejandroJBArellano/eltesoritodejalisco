@@ -109,28 +109,42 @@ export default function ReportsPage() {
       {/* Main Content */}
       <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
         {/* KPI Cards */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <p className="text-sm font-medium text-gray-600">Ventas Totales</p>
-            <p className="mt-2 text-3xl font-bold text-gray-900">
-              ${data.summary.totalSales.toLocaleString()}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg bg-white p-6 shadow-md border-l-4 border-green-500">
+            <p className="text-sm font-medium text-gray-600">Venta Bruta</p>
+            <p className="mt-2 text-2xl font-bold text-gray-900">
+              ${data.summary.totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="mt-1 text-xs text-green-600">
-              +{data.summary.totalTips ? `$${data.summary.totalTips.toLocaleString()} en propinas` : `${data.summary.totalOrders} órdenes completadas`}
+            <p className="mt-1 text-xs text-gray-500">
+              Total ingresado a caja
             </p>
           </div>
-          <div className="rounded-lg bg-white p-6 shadow-md">
+          <div className="rounded-lg bg-white p-6 shadow-md border-l-4 border-blue-500">
+            <p className="text-sm font-medium text-gray-600">Venta Neta</p>
+            <p className="mt-2 text-2xl font-bold text-gray-900">
+              ${(data.summary.totalSales / 1.16).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              Utilidad (Libre de IVA)
+            </p>
+          </div>
+          <div className="rounded-lg bg-white p-6 shadow-md border-l-4 border-purple-500">
             <p className="text-sm font-medium text-gray-600">Ticket Promedio</p>
-            <p className="mt-2 text-3xl font-bold text-gray-900">
-              ${data.summary.averageTicket.toFixed(2)}
+            <p className="mt-2 text-2xl font-bold text-gray-900">
+              ${data.summary.averageTicket.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              Promedio por orden
             </p>
           </div>
-          <div className="rounded-lg bg-white p-6 shadow-md">
+          <div className="rounded-lg bg-white p-6 shadow-md border-l-4 border-orange-500">
             <p className="text-sm font-medium text-gray-600">Nuevos Clientes</p>
-            <p className="mt-2 text-3xl font-bold text-gray-900">
+            <p className="mt-2 text-2xl font-bold text-gray-900">
               {data.customers.newCustomersCount}
             </p>
-            <p className="mt-1 text-xs text-blue-600">En la última semana</p>
+            <p className="mt-1 text-xs text-gray-500">
+              En la última semana
+            </p>
           </div>
         </div>
 
