@@ -11,6 +11,7 @@ type MenuItem = {
   name: string;
   price: number;
   isAvailable: boolean;
+  category?: string;
 };
 
 type Customer = {
@@ -39,7 +40,7 @@ const emptyForm: OrderFormState = {
   source: "",
   table: "",
   notes: "",
-  items: [{ menuItemId: "", quantity: "1", notes: "" }],
+  items: [],
 };
 
 const SOURCE_OPTIONS = [
@@ -67,6 +68,9 @@ export default function POSPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Category tab state
+  const [activeCategory, setActiveCategory] = useState<string>("TACOS");
+
   // Checkout & Print State
   const [checkoutOrder, setCheckoutOrder] = useState<Order | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>("CASH");
@@ -93,6 +97,7 @@ export default function POSPage() {
     setMenuItems(
       (data.items || []).map((item: any) => ({
         ...item,
+        category: item.category,
         isAvailable: item.is_available,
       }))
     );
@@ -208,6 +213,36 @@ export default function POSPage() {
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleGridItemClick = (menuItem: MenuItem) => {
+    setFormState((prev) => {
+      const existingIndex = prev.items.findIndex((item) => item.menuItemId === menuItem.id);
+      if (existingIndex >= 0) {
+        const nextItems = [...prev.items];
+        nextItems[existingIndex] = {
+          ...nextItems[existingIndex],
+          quantity: (Number(nextItems[existingIndex].quantity) + 1).toString(),
+        };
+        return { ...prev, items: nextItems };
+      }
+      return {
+        ...prev,
+        items: [...prev.items, { menuItemId: menuItem.id, quantity: "1", notes: "" }],
+      };
+    });
+  };
+
+  const handleQuantityChange = (index: number, delta: number) => {
+    setFormState((prev) => {
+      const nextItems = [...prev.items];
+      const newQuantity = Number(nextItems[index].quantity) + delta;
+      if (newQuantity <= 0) {
+        return { ...prev, items: nextItems.filter((_, idx) => idx !== index) };
+      }
+      nextItems[index] = { ...nextItems[index], quantity: newQuantity.toString() };
+      return { ...prev, items: nextItems };
+    });
+  };
+
   const handleItemChange = (
     index: number,
     field: keyof OrderItemDraft,
@@ -218,16 +253,6 @@ export default function POSPage() {
       nextItems[index] = { ...nextItems[index], [field]: value };
       return { ...prev, items: nextItems };
     });
-  };
-
-  const addItemRow = () => {
-    setFormState((prev) => ({
-      ...prev,
-      items: [
-        ...prev.items,
-        { menuItemId: availableMenuItems[0]?.id || "", quantity: "1", notes: "" },
-      ],
-    }));
   };
 
   const removeItemRow = (index: number) => {
@@ -476,54 +501,112 @@ export default function POSPage() {
                 />
               </div>
 
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold">Productos</span>
-                  <button
-                    type="button"
-                    onClick={addItemRow}
-                    className="text-sm text-blue-600 font-bold"
-                  >
-                    + Añadir
-                  </button>
+              <div className="space-y-4">
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {["TACOS", "BEBIDAS", "EXTRAS", "PAQUETES"].map(cat => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setActiveCategory(cat)}
+                      className={`px-4 py-3 rounded-xl font-black whitespace-nowrap transition-all ${activeCategory === cat
+                          ? "bg-black text-white shadow-md transform scale-[1.02]"
+                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                        }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
                 </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {availableMenuItems
+                    .filter(m => {
+                      const itemCat = (m.category || "TACOS").toUpperCase();
+                      if (activeCategory === "TACOS" || activeCategory === "EXTRAS" || activeCategory === "BEBIDAS" || activeCategory === "PAQUETES") {
+                        // We are doing exact match or fallback for specific categories
+                        // Wait, what if the category in db is exactly "Bebidas"? `itemCat` handles it via `.toUpperCase()`
+                        return itemCat.includes(activeCategory) || itemCat === activeCategory;
+                      }
+                      return false;
+                    })
+                    .map(m => {
+                      let colorClass = "bg-gray-100 hover:bg-gray-200 text-gray-800 border-gray-200";
+                      if (activeCategory === "BEBIDAS") colorClass = "bg-blue-600 hover:bg-blue-500 text-white border-blue-700 shadow-blue-500/20 shadow-md";
+                      else if (activeCategory === "TACOS" || activeCategory === "PAQUETES") colorClass = "bg-red-600 hover:bg-red-500 text-white border-red-700 shadow-red-500/20 shadow-md";
+                      else if (activeCategory === "EXTRAS") colorClass = "bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-700 shadow-emerald-500/20 shadow-md";
+
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => handleGridItemClick(m)}
+                          className={`p-3 rounded-[1.25rem] flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all ${colorClass}`}
+                        >
+                          <span className="font-extrabold text-[13px] leading-snug line-clamp-2">{m.name}</span>
+                          <span className="font-black mt-1 opacity-90">${m.price.toFixed(2)}</span>
+                        </button>
+                      );
+                    })}
+                </div>
+              </div>
+
+              <div className="space-y-4 mt-8 bg-gray-50 border border-gray-200 rounded-3xl p-5 shadow-inner">
+                <span className="text-base font-black uppercase text-gray-400 block mb-2 tracking-widest">Pedido</span>
                 {formErrors.items && (
-                  <p className="text-xs text-red-600 font-bold">
+                  <p className="text-xs text-red-600 font-bold mb-2">
                     {formErrors.items}
                   </p>
                 )}
-                {formState.items.map((item, index) => (
-                  <div key={index} className="flex gap-2 items-start">
-                    <select
-                      value={item.menuItemId}
-                      onChange={(e) =>
-                        handleItemChange(index, "menuItemId", e.target.value)
-                      }
-                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    >
-                      {availableMenuItems.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} (${m.price})
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) =>
-                        handleItemChange(index, "quantity", e.target.value)
-                      }
-                      className="w-16 rounded-lg border border-gray-300 px-2 py-2 text-sm text-center"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeItemRow(index)}
-                      className="text-red-500 font-bold"
-                    >
-                      ✕
-                    </button>
+                {formState.items.length === 0 && (
+                  <div className="text-center py-6 text-gray-400 font-bold">
+                    <p className="text-3xl mb-2">🛒</p>
+                    <p>Agrega productos usando los botones</p>
                   </div>
-                ))}
+                )}
+                {formState.items.map((item, index) => {
+                  const product = availableMenuItems.find(m => m.id === item.menuItemId);
+                  return (
+                    <div key={index} className="flex gap-3 items-center bg-white p-3 rounded-2xl border border-gray-200 shadow-sm">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-black text-gray-800 text-lg leading-tight truncate">{product?.name || "Producto"}</p>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">${product?.price.toFixed(2)} c/u</p>
+                      </div>
+                      <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange(index, -1)}
+                          className="w-10 h-10 rounded-lg hover:bg-white hover:shadow-sm flex items-center justify-center font-black text-gray-600 text-lg transition-all"
+                        >
+                          -
+                        </button>
+                        <span className="w-8 text-center font-black text-gray-900 text-lg">{item.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange(index, 1)}
+                          className="w-10 h-10 rounded-lg hover:bg-white hover:shadow-sm flex items-center justify-center font-black text-gray-600 text-lg transition-all"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <div className="w-20 text-right">
+                        <p className="font-black text-blue-600 text-xl">
+                          ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+                {formState.items.length > 0 && (
+                  <div className="pt-4 mt-4 border-t-2 border-dashed border-gray-200 flex justify-between items-center">
+                    <span className="font-black text-gray-500 uppercase tracking-widest text-sm">Total Orden</span>
+                    <span className="text-4xl font-black text-blue-600">
+                      ${formState.items.reduce((total, item) => {
+                        const product = availableMenuItems.find(m => m.id === item.menuItemId);
+                        return total + (product?.price || 0) * Number(item.quantity);
+                      }, 0).toFixed(2)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <button
