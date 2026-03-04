@@ -26,12 +26,26 @@ export async function GET() {
     if (ordersError) throw ordersError;
 
     // Calculate totals
+    let totalCompletionTimeMs = 0;
+    let completedOrdersCount = 0;
+    
     const totalSales = (completedOrders || []).reduce(
-      (sum, order) => sum + (order.total || 0),
+      (sum, order) => {
+        if (order.created_at && order.completed_at) {
+          const created = new Date(order.created_at).getTime();
+          const completed = new Date(order.completed_at).getTime();
+          if (completed >= created) {
+             totalCompletionTimeMs += (completed - created);
+             completedOrdersCount++;
+          }
+        }
+        return sum + (order.total || 0);
+      },
       0,
     );
     const totalOrders = (completedOrders || []).length;
     const averageTicket = totalOrders > 0 ? totalSales / totalOrders : 0;
+    const averageCompletionTimeMinutes = completedOrdersCount > 0 ? (totalCompletionTimeMs / completedOrdersCount) / (1000 * 60) : 0;
 
     const { data: payments } = await supabase
       .from("payments")
@@ -111,6 +125,7 @@ export async function GET() {
         totalOrders,
         averageTicket,
         totalTips,
+        averageCompletionTimeMinutes,
       },
       salesByDay,
       salesBySource,

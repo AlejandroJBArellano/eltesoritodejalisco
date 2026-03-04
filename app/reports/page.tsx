@@ -9,6 +9,7 @@ type ReportData = {
     totalOrders: number;
     averageTicket: number;
     totalTips: number;
+    averageCompletionTimeMinutes: number;
   };
   salesByDay: Record<string, number>;
   salesBySource: Record<string, { count: number; total: number }>;
@@ -109,7 +110,7 @@ export default function ReportsPage() {
       {/* Main Content */}
       <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
         {/* KPI Cards */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
           <div className="rounded-lg bg-white p-6 shadow-md border-l-4 border-green-500">
             <p className="text-sm font-medium text-gray-600">Venta Bruta</p>
             <p className="mt-2 text-2xl font-bold text-gray-900">
@@ -132,6 +133,15 @@ export default function ReportsPage() {
             <p className="text-sm font-medium text-gray-600">Ticket Promedio</p>
             <p className="mt-2 text-2xl font-bold text-gray-900">
               ${data.summary.averageTicket.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              Promedio por orden
+            </p>
+          </div>
+          <div className="rounded-lg bg-white p-6 shadow-md border-l-4 border-yellow-500">
+            <p className="text-sm font-medium text-gray-600">Tiempo Preparación</p>
+            <p className="mt-2 text-2xl font-bold text-gray-900">
+              {Math.round(data.summary.averageCompletionTimeMinutes)} <span className="text-sm font-medium text-gray-500">min</span>
             </p>
             <p className="mt-1 text-xs text-gray-500">
               Promedio por orden
