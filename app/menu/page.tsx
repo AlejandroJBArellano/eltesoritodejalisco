@@ -522,15 +522,19 @@ export default function MenuPage() {
                   <label className="text-sm font-medium text-gray-700">
                     Categoría
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formState.category}
                     onChange={(event) =>
                       handleFormChange("category", event.target.value)
                     }
                     className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    placeholder="Entradas, Bebidas, etc."
-                  />
+                  >
+                    <option value="">Selecciona una categoría</option>
+                    <option value="Bebidas">Bebidas</option>
+                    <option value="Platillos Fuertes">Platillos Fuertes</option>
+                    <option value="Antojitos">Antojitos</option>
+                    <option value="Tacos">Tacos</option>
+                  </select>
                 </div>
               </div>
 
