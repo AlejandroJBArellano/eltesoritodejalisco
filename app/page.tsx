@@ -41,14 +41,17 @@ export default async function Home() {
       month: "2-digit",
       day: "2-digit",
     }).format(new Date());
-    // CDMX no tiene horario de verano, por lo que -06:00 es correcto
-    const todayStartISO = `${mxDateString}T00:00:00-06:00`;
+
+    // Convertir el inicio del día en CDMX a UTC literal para que Postgres 
+    // lo compare correctamente contra "timestamp without time zone"
+    const mxMidnight = new Date(`${mxDateString}T00:00:00-06:00`);
+    const todayStartUTC = mxMidnight.toISOString().replace("Z", "");
 
     const { data: todayOrders } = await supabase
       .from("orders")
       .select("total")
       .in("status", ["PAID", "DELIVERED"])
-      .gte("created_at", todayStartISO);
+      .gte("created_at", todayStartUTC);
 
     salesToday = (todayOrders || []).reduce(
       (sum, order) => sum + (order.total || 0),
@@ -59,7 +62,7 @@ export default async function Home() {
     const { data: todayPayments } = await supabase
       .from("payments")
       .select("tip_amount")
-      .gte("created_at", todayStartISO);
+      .gte("created_at", todayStartUTC);
 
     tipsToday = (todayPayments || []).reduce(
       (sum, payment) => sum + (payment.tip_amount || 0),
