@@ -35,13 +35,20 @@ export default async function Home() {
     activeOrdersCount = activeCount || 0;
 
     // 2. Ventas Hoy
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const mxDateString = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Mexico_City",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    // CDMX no tiene horario de verano, por lo que -06:00 es correcto
+    const todayStartISO = `${mxDateString}T00:00:00-06:00`;
+
     const { data: todayOrders } = await supabase
       .from("orders")
       .select("total")
       .in("status", ["PAID", "DELIVERED"])
-      .gte("created_at", today.toISOString());
+      .gte("created_at", todayStartISO);
 
     salesToday = (todayOrders || []).reduce(
       (sum, order) => sum + (order.total || 0),
@@ -52,7 +59,7 @@ export default async function Home() {
     const { data: todayPayments } = await supabase
       .from("payments")
       .select("tip_amount")
-      .gte("created_at", today.toISOString());
+      .gte("created_at", todayStartISO);
 
     tipsToday = (todayPayments || []).reduce(
       (sum, payment) => sum + (payment.tip_amount || 0),
