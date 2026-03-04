@@ -534,6 +534,8 @@ export default function MenuPage() {
                     <option value="Platillos Fuertes">Platillos Fuertes</option>
                     <option value="Antojitos">Antojitos</option>
                     <option value="Tacos">Tacos</option>
+                    <option value="Extras">Extras</option>
+                    <option value="Postres">Postres</option>
                   </select>
                 </div>
               </div>
