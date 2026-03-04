@@ -57,10 +57,10 @@ export function KitchenDisplaySystem({
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen bg-[#121212] p-4">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-[#E0E0E0]">
           TesoritoOS - Sistema de Cocina
         </h1>
 
@@ -74,12 +74,12 @@ export function KitchenDisplaySystem({
         )}
 
         {/* View Toggle */}
-        <div className="flex gap-2 rounded-lg border border-gray-300 bg-white p-1">
+        <div className="flex gap-2 rounded-lg border border-[#333333] bg-[#242424] p-1">
           <button
             onClick={() => setView("kanban")}
             className={`rounded px-4 py-2 font-semibold transition-colors ${view === "kanban"
                 ? "bg-blue-600 text-white"
-                : "text-gray-700 hover:bg-gray-100"
+                : "text-gray-400 hover:bg-[#121212]"
               }`}
           >
             Vista Kanban
@@ -88,7 +88,7 @@ export function KitchenDisplaySystem({
             onClick={() => setView("batching")}
             className={`rounded px-4 py-2 font-semibold transition-colors ${view === "batching"
                 ? "bg-blue-600 text-white"
-                : "text-gray-700 hover:bg-gray-100"
+                : "text-gray-400 hover:bg-[#121212]"
               }`}
           >
             Vista de Lotes
@@ -100,8 +100,8 @@ export function KitchenDisplaySystem({
       {view === "kanban" ? (
         <div className="grid gap-6 md:grid-cols-3">
           {/* Pending Column */}
-          <div className="rounded-lg bg-gray-50 p-4">
-            <h2 className="mb-4 text-xl font-bold text-gray-900">
+          <div className="rounded-lg bg-[#181818] p-4">
+            <h2 className="mb-4 text-xl font-bold text-[#E0E0E0]">
               Pendientes ({ordersByStatus.pending.length})
             </h2>
             <div className="space-y-4">
@@ -113,7 +113,7 @@ export function KitchenDisplaySystem({
                 />
               ))}
               {ordersByStatus.pending.length === 0 && (
-                <p className="text-center text-gray-500">
+                <p className="text-center text-gray-400">
                   No hay órdenes pendientes
                 </p>
               )}
@@ -121,8 +121,8 @@ export function KitchenDisplaySystem({
           </div>
 
           {/* Preparing Column */}
-          <div className="rounded-lg bg-blue-50 p-4">
-            <h2 className="mb-4 text-xl font-bold text-gray-900">
+          <div className="rounded-lg bg-[#1A2634] p-4">
+            <h2 className="mb-4 text-xl font-bold text-[#E0E0E0]">
               En Preparación ({ordersByStatus.preparing.length})
             </h2>
             <div className="space-y-4">
@@ -134,7 +134,7 @@ export function KitchenDisplaySystem({
                 />
               ))}
               {ordersByStatus.preparing.length === 0 && (
-                <p className="text-center text-gray-500">
+                <p className="text-center text-gray-400">
                   No hay órdenes en preparación
                 </p>
               )}
@@ -142,8 +142,8 @@ export function KitchenDisplaySystem({
           </div>
 
           {/* Ready Column */}
-          <div className="rounded-lg bg-green-50 p-4">
-            <h2 className="mb-4 text-xl font-bold text-gray-900">
+          <div className="rounded-lg bg-[#142A1D] p-4">
+            <h2 className="mb-4 text-xl font-bold text-[#E0E0E0]">
               Listos ({ordersByStatus.ready.length})
             </h2>
             <div className="space-y-4">
@@ -155,7 +155,7 @@ export function KitchenDisplaySystem({
                 />
               ))}
               {ordersByStatus.ready.length === 0 && (
-                <p className="text-center text-gray-500">
+                <p className="text-center text-gray-400">
                   No hay órdenes listas
                 </p>
               )}

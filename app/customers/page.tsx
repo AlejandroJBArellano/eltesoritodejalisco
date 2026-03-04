@@ -184,8 +184,8 @@ export default function CustomersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen bg-[#121212]">
+      <header className="bg-[#242424] shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div>
             <Link
@@ -194,8 +194,8 @@ export default function CustomersPage() {
             >
               ← Volver al Dashboard
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Clientes & CRM</h1>
-            <p className="text-sm text-gray-600">
+            <h1 className="text-2xl font-bold text-[#E0E0E0]">Clientes & CRM</h1>
+            <p className="text-sm text-gray-400">
               {customers.length} clientes · {totalLoyaltyPoints} puntos totales
             </p>
           </div>
@@ -204,7 +204,7 @@ export default function CustomersPage() {
               <button
                 type="button"
                 onClick={resetForm}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                className="rounded-lg border border-[#333333] px-4 py-2 text-gray-400 hover:bg-[#181818]"
               >
                 Cancelar edición
               </button>
@@ -221,13 +221,13 @@ export default function CustomersPage() {
         )}
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="rounded-lg bg-[#242424] p-6 shadow-md">
+            <h2 className="text-lg font-semibold text-[#E0E0E0]">
               {isEditing ? "Editar cliente" : "Registrar cliente"}
             </h2>
             <form onSubmit={handleSubmit} className="mt-4 grid gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-400">
                   Nombre
                 </label>
                 <input
@@ -236,7 +236,7 @@ export default function CustomersPage() {
                   onChange={(event) =>
                     handleFormChange("name", event.target.value)
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border border-[#333333] px-3 py-2 text-sm"
                   placeholder="Nombre completo"
                 />
                 {formErrors.name && (
@@ -246,7 +246,7 @@ export default function CustomersPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-400">
                     Teléfono
                   </label>
                   <input
@@ -255,7 +255,7 @@ export default function CustomersPage() {
                     onChange={(event) =>
                       handleFormChange("phone", event.target.value)
                     }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg border border-[#333333] px-3 py-2 text-sm"
                     placeholder="WhatsApp"
                   />
                   {formErrors.phone && (
@@ -265,7 +265,7 @@ export default function CustomersPage() {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-400">
                     Email
                   </label>
                   <input
@@ -274,7 +274,7 @@ export default function CustomersPage() {
                     onChange={(event) =>
                       handleFormChange("email", event.target.value)
                     }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg border border-[#333333] px-3 py-2 text-sm"
                     placeholder="correo@ejemplo.com"
                   />
                   {formErrors.email && (
@@ -286,7 +286,7 @@ export default function CustomersPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-400">
                   Cumpleaños
                 </label>
                 <input
@@ -295,7 +295,7 @@ export default function CustomersPage() {
                   onChange={(event) =>
                     handleFormChange("birthday", event.target.value)
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border border-[#333333] px-3 py-2 text-sm"
                 />
               </div>
 
@@ -313,11 +313,11 @@ export default function CustomersPage() {
             </form>
           </div>
 
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="rounded-lg bg-[#242424] p-6 shadow-md">
+            <h2 className="text-lg font-semibold text-[#E0E0E0]">
               Programa de lealtad
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-400">
               Se acumulan automáticamente $10 pesos por punto al registrar
               ventas.
             </p>
@@ -327,9 +327,9 @@ export default function CustomersPage() {
           </div>
         </section>
 
-        <section className="rounded-lg bg-white p-6 shadow-md">
+        <section className="rounded-lg bg-[#242424] p-6 shadow-md">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E0E0E0]">
               Clientes registrados
             </h2>
             <button
@@ -342,16 +342,16 @@ export default function CustomersPage() {
           </div>
 
           {isLoading ? (
-            <p className="mt-4 text-sm text-gray-600">Cargando clientes...</p>
+            <p className="mt-4 text-sm text-gray-400">Cargando clientes...</p>
           ) : customers.length === 0 ? (
-            <p className="mt-4 text-sm text-gray-600">
+            <p className="mt-4 text-sm text-gray-400">
               No hay clientes registrados.
             </p>
           ) : (
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b text-gray-500">
+                  <tr className="border-b text-gray-400">
                     <th className="py-2">Cliente</th>
                     <th className="py-2">Contacto</th>
                     <th className="py-2">Cumpleaños</th>
@@ -364,27 +364,27 @@ export default function CustomersPage() {
                   {customers.map((customer) => (
                     <tr key={customer.id} className="border-b last:border-0">
                       <td className="py-3">
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-[#E0E0E0]">
                           {customer.name}
                         </p>
                       </td>
-                      <td className="py-3 text-gray-600">
+                      <td className="py-3 text-gray-400">
                         <p>{customer.phone || "—"}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-400">
                           {customer.email || ""}
                         </p>
                       </td>
-                      <td className="py-3 text-gray-600">
+                      <td className="py-3 text-gray-400">
                         {customer.birthday
                           ? new Date(customer.birthday).toLocaleDateString(
                             "es-MX",
                           )
                           : "—"}
                       </td>
-                      <td className="py-3 text-gray-600">
+                      <td className="py-3 text-gray-400">
                         {customer.loyalty_points || 0}
                       </td>
-                      <td className="py-3 text-gray-600">
+                      <td className="py-3 text-gray-400">
                         ${Number(customer.total_spend || 0).toFixed(2)}
                       </td>
                       <td className="py-3">

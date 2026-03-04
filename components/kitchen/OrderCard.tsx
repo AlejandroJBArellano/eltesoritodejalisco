@@ -53,13 +53,13 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
   const getStatusColor = (status: OrderStatus): string => {
     switch (status) {
       case OrderStatus.PENDING:
-        return "bg-yellow-500";
+        return "bg-yellow-600";
       case OrderStatus.PREPARING:
-        return "bg-blue-500";
+        return "bg-blue-600";
       case OrderStatus.READY:
-        return "bg-green-500";
+        return "bg-green-600";
       case OrderStatus.DELIVERED:
-        return "bg-gray-500";
+        return "bg-gray-600";
       default:
         return "bg-gray-300";
     }
@@ -82,24 +82,24 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
       className={`rounded-lg border-2 p-4 shadow-lg transition-all duration-300 ${isOverdue &&
         order.status !== OrderStatus.DELIVERED &&
         order.status !== OrderStatus.READY
-        ? "border-red-500 bg-red-50"
-        : "border-gray-200 bg-white"
+        ? "border-red-500 bg-[#3A1414]"
+        : "border-[#333333] bg-[#242424]"
         }`}
     >
       {/* Header */}
       <div className="mb-3 flex items-start justify-between">
         <div>
-          <h3 className="text-2xl font-bold text-gray-900">
+          <h3 className="text-2xl font-bold text-[#E0E0E0]">
             #{order.orderNumber}
           </h3>
           {order.table && (
-            <p className="text-sm text-gray-600">Mesa: {order.table}</p>
+            <p className="text-sm text-gray-400">Mesa: {order.table}</p>
           )}
         </div>
 
         {/* Timer */}
         <div
-          className={`rounded-md px-3 py-2 text-center font-mono text-xl font-bold ${isOverdue ? "bg-red-600 text-white" : "bg-gray-200 text-gray-900"
+          className={`rounded-md px-3 py-2 text-center font-mono text-xl font-bold ${isOverdue ? "bg-red-600 text-white" : "bg-[#333333] text-[#E0E0E0]"
             }`}
         >
           {formatTime(elapsedTime)}
@@ -111,7 +111,7 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
         {order.orderItems.filter((item) => item.status !== OrderStatus.DELIVERED).map((item) => (
           <div
             key={item.id}
-            className="flex items-start justify-between rounded border border-gray-200 bg-gray-50 p-2 relative overflow-hidden"
+            className="flex items-start justify-between rounded border border-[#333333] bg-[#181818] p-2 relative overflow-hidden"
           >
             {item.status === OrderStatus.PENDING && (
               <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">
@@ -119,11 +119,11 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
               </div>
             )}
             <div className="flex-1">
-              <p className="font-semibold text-gray-900">
+              <p className="font-semibold text-[#E0E0E0]">
                 {item.quantity}x {item.menuItem.name}
               </p>
               {item.notes && (
-                <p className="mt-1 text-sm italic text-gray-600">
+                <p className="mt-1 text-sm italic text-gray-400">
                   Nota: {item.notes}
                 </p>
               )}
@@ -134,8 +134,8 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
 
       {/* Order Notes */}
       {order.notes && (
-        <div className="mb-4 rounded border-l-4 border-orange-500 bg-orange-50 p-2">
-          <p className="text-sm font-medium text-orange-900">
+        <div className="mb-4 rounded border-l-4 border-orange-500 bg-[#2A2414] p-2">
+          <p className="text-sm font-medium text-orange-400">
             Nota de la orden: {order.notes}
           </p>
         </div>

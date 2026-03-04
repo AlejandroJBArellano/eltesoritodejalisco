@@ -92,9 +92,9 @@ export default function AdminUsersPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 pb-12">
+        <div className="min-h-screen bg-[#121212] pb-12">
             {/* Header */}
-            <header className="bg-white shadow-sm">
+            <header className="bg-[#242424] shadow-sm">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                     <div>
                         <Link
@@ -103,10 +103,10 @@ export default function AdminUsersPage() {
                         >
                             ← Volver al Dashboard
                         </Link>
-                        <h1 className="text-2xl font-bold text-gray-900">
+                        <h1 className="text-2xl font-bold text-[#E0E0E0]">
                             Personal y Usuarios
                         </h1>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-400">
                             Administración de cuentas y permisos
                         </p>
                     </div>
@@ -132,52 +132,52 @@ export default function AdminUsersPage() {
 
                     {/* New User Form */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-                            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="bg-[#242424] rounded-xl shadow-md p-6 border border-gray-100">
+                            <h2 className="text-lg font-bold text-[#E0E0E0] mb-4 flex items-center gap-2">
                                 <span>➕</span> Nuevo Usuario
                             </h2>
 
                             <form onSubmit={handleCreateUser} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Nombre Completo</label>
+                                    <label className="block text-sm font-medium text-gray-400">Nombre Completo</label>
                                     <input
                                         type="text"
                                         name="fullName"
                                         required
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 border p-2"
+                                        className="mt-1 block w-full rounded-md border-[#333333] shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-[#181818] border p-2"
                                         placeholder="Ej. Juan Pérez"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                                    <label className="block text-sm font-medium text-gray-400">Correo Electrónico</label>
                                     <input
                                         type="email"
                                         name="email"
                                         required
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 border p-2"
+                                        className="mt-1 block w-full rounded-md border-[#333333] shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-[#181818] border p-2"
                                         placeholder="correo@ejemplo.com"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Contraseña Temporal</label>
+                                    <label className="block text-sm font-medium text-gray-400">Contraseña Temporal</label>
                                     <input
                                         type="password"
                                         name="password"
                                         required
                                         minLength={6}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 border p-2"
+                                        className="mt-1 block w-full rounded-md border-[#333333] shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-[#181818] border p-2"
                                         placeholder="Mínimo 6 caracteres"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Rol del Empleado</label>
+                                    <label className="block text-sm font-medium text-gray-400">Rol del Empleado</label>
                                     <select
                                         name="role"
                                         required
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 border p-2"
+                                        className="mt-1 block w-full rounded-md border-[#333333] shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-[#181818] border p-2"
                                         defaultValue="WAITER"
                                     >
                                         <option value="ADMIN">Administrador (ADMIN)</option>
@@ -200,17 +200,17 @@ export default function AdminUsersPage() {
 
                     {/* User List */}
                     <div className="lg:col-span-2">
-                        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100 overflow-x-auto">
-                            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="bg-[#242424] rounded-xl shadow-md p-6 border border-gray-100 overflow-x-auto">
+                            <h2 className="text-lg font-bold text-[#E0E0E0] mb-4 flex items-center gap-2">
                                 <span>👥</span> Personal Registrado
                             </h2>
 
                             {isLoading ? (
-                                <p className="text-gray-500 italic py-4">Cargando usuarios...</p>
+                                <p className="text-gray-400 italic py-4">Cargando usuarios...</p>
                             ) : (
                                 <table className="w-full text-left text-sm">
                                     <thead>
-                                        <tr className="border-b text-gray-500">
+                                        <tr className="border-b text-gray-400">
                                             <th className="py-2">Nombre y Correo</th>
                                             <th className="py-2">Rol Actual</th>
                                             <th className="py-2 text-right">Acciones</th>
@@ -218,14 +218,14 @@ export default function AdminUsersPage() {
                                     </thead>
                                     <tbody>
                                         {profiles.map((profile) => (
-                                            <tr key={profile.id} className="border-b last:border-0 hover:bg-gray-50">
+                                            <tr key={profile.id} className="border-b last:border-0 hover:bg-[#181818]">
                                                 <td className="py-3">
-                                                    <p className="font-medium text-gray-900">{profile.full_name || 'Sin Nombre'}</p>
-                                                    <p className="text-xs text-gray-500">{profile.email}</p>
+                                                    <p className="font-medium text-[#E0E0E0]">{profile.full_name || 'Sin Nombre'}</p>
+                                                    <p className="text-xs text-gray-400">{profile.email}</p>
                                                 </td>
                                                 <td className="py-3">
                                                     <select
-                                                        className="bg-gray-50 border border-gray-200 text-gray-900 text-xs rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-1 max-w-[130px]"
+                                                        className="bg-[#181818] border border-[#333333] text-[#E0E0E0] text-xs rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-1 max-w-[130px]"
                                                         value={profile.role}
                                                         onChange={(e) => handleRoleChange(profile.id, e.target.value)}
                                                     >
@@ -247,7 +247,7 @@ export default function AdminUsersPage() {
                                         ))}
                                         {profiles.length === 0 && (
                                             <tr>
-                                                <td colSpan={3} className="py-4 text-center text-gray-500">
+                                                <td colSpan={3} className="py-4 text-center text-gray-400">
                                                     No hay usuarios registrados.
                                                 </td>
                                             </tr>

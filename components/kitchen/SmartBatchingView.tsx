@@ -62,15 +62,15 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
 
   if (batchedItems.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
-        <p className="text-gray-500">No hay órdenes activas en este momento</p>
+      <div className="rounded-lg border border-[#333333] bg-[#242424] p-6 text-center">
+        <p className="text-gray-400">No hay órdenes activas en este momento</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-gray-900">
+      <h2 className="text-2xl font-bold text-[#E0E0E0]">
         Resumen de Preparación en Lote
       </h2>
 
@@ -78,11 +78,11 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
         {batchedItems.map((item) => (
           <div
             key={item.menuItemId}
-            className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4 shadow-md"
+            className="rounded-lg border-2 border-blue-200 bg-[#1A2634] p-4 shadow-md"
           >
             {/* Item Header */}
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 className="text-lg font-bold text-[#E0E0E0]">
                 {item.menuItemName}
               </h3>
               <div className="rounded-full bg-blue-600 px-4 py-2">
@@ -94,15 +94,15 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
 
             {/* Order Breakdown */}
             <div className="space-y-1">
-              <p className="mb-2 text-sm font-semibold text-gray-700">
+              <p className="mb-2 text-sm font-semibold text-gray-400">
                 Desglose por orden:
               </p>
               {item.orders.map((orderRef) => (
                 <div
                   key={orderRef.orderId}
-                  className="flex items-center justify-between rounded bg-white px-2 py-1 text-sm"
+                  className="flex items-center justify-between rounded bg-[#242424] px-2 py-1 text-sm"
                 >
-                  <span className="font-medium text-gray-800">
+                  <span className="font-medium text-gray-300">
                     #{orderRef.orderNumber}
                   </span>
                   <span className="font-semibold text-blue-600">
@@ -114,7 +114,7 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
 
             {/* Quick Stats */}
             <div className="mt-3 pt-3 border-t border-blue-200">
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-gray-400">
                 En {item.orders.length} orden
                 {item.orders.length !== 1 ? "es" : ""}
               </p>

@@ -423,8 +423,8 @@ export default function POSPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm no-print">
+    <div className="min-h-screen bg-[#121212]">
+      <header className="bg-[#242424] shadow-sm no-print">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div>
             <Link
@@ -433,7 +433,7 @@ export default function POSPage() {
             >
               ← Dashboard
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Punto de Venta</h1>
+            <h1 className="text-2xl font-bold text-[#E0E0E0]">Punto de Venta</h1>
           </div>
         </div>
       </header>
@@ -446,14 +446,14 @@ export default function POSPage() {
         )}
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="rounded-lg bg-[#242424] p-6 shadow-md">
+            <h2 className="text-lg font-semibold text-[#E0E0E0] mb-4">
               Nueva orden
             </h2>
             <form onSubmit={handleSubmit} className="grid gap-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-400">
                     Cliente
                   </label>
                   <select
@@ -472,7 +472,7 @@ export default function POSPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-400">
                     Fuente
                   </label>
                   <select
@@ -520,8 +520,8 @@ export default function POSPage() {
                       type="button"
                       onClick={() => setActiveCategory(cat)}
                       className={`px-4 py-3 rounded-xl font-black whitespace-nowrap transition-all ${activeCategory === cat
-                        ? "bg-pink-500 text-white shadow-md shadow-pink-500/30 transform scale-[1.02]"
-                        : "bg-pink-50 text-pink-500 hover:bg-pink-100"
+                        ? "bg-[#FFB7CE] text-[#121212] shadow-md shadow-[#FFB7CE]/30 transform scale-[1.02]"
+                        : "bg-[#181818] text-[#FFB7CE] hover:bg-[#2A2A2A] border border-[#FFB7CE]/20"
                         }`}
                     >
                       {cat}
@@ -536,7 +536,7 @@ export default function POSPage() {
                       return itemCat === activeCategory;
                     })
                     .map(m => {
-                      let colorClass = "bg-pink-400 hover:bg-pink-300 text-white border-pink-500 shadow-pink-400/30 shadow-md";
+                      let colorClass = "bg-[#FFB7CE] hover:bg-[#FFD1DC] text-[#121212] border-[#FFD1DC] shadow-[#FFD1DC]/30 shadow-md";
 
                       if (activeCategory === "BEBIDAS") {
                         colorClass = "bg-rose-400 hover:bg-rose-300 text-white border-rose-500 shadow-rose-400/30 shadow-md";
@@ -559,7 +559,7 @@ export default function POSPage() {
                 </div>
               </div>
 
-              <div className="space-y-4 mt-8 bg-gray-50 border border-gray-200 rounded-3xl p-5 shadow-inner">
+              <div className="space-y-4 mt-8 bg-[#181818] border border-gray-200 rounded-3xl p-5 shadow-inner">
                 <span className="text-base font-black uppercase text-gray-400 block mb-2 tracking-widest">Pedido</span>
                 {formErrors.items && (
                   <p className="text-xs text-red-600 font-bold mb-2">
@@ -575,24 +575,24 @@ export default function POSPage() {
                 {formState.items.map((item, index) => {
                   const product = availableMenuItems.find(m => m.id === item.menuItemId);
                   return (
-                    <div key={index} className="flex gap-3 items-center bg-white p-3 rounded-2xl border border-gray-200 shadow-sm">
+                    <div key={index} className="flex gap-3 items-center bg-[#242424] p-3 rounded-2xl border border-gray-200 shadow-sm">
                       <div className="flex-1 min-w-0">
-                        <p className="font-black text-gray-800 text-lg leading-tight truncate">{product?.name || "Producto"}</p>
+                        <p className="font-black text-gray-300 text-lg leading-tight truncate">{product?.name || "Producto"}</p>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">${product?.price.toFixed(2)} c/u</p>
                       </div>
-                      <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+                      <div className="flex items-center gap-1 bg-[#121212] rounded-xl p-1">
                         <button
                           type="button"
                           onClick={() => handleQuantityChange(index, -1)}
-                          className="w-10 h-10 rounded-lg hover:bg-white hover:shadow-sm flex items-center justify-center font-black text-gray-600 text-lg transition-all"
+                          className="w-10 h-10 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
                         >
                           -
                         </button>
-                        <span className="w-8 text-center font-black text-gray-900 text-lg">{item.quantity}</span>
+                        <span className="w-8 text-center font-black text-[#E0E0E0] text-lg">{item.quantity}</span>
                         <button
                           type="button"
                           onClick={() => handleQuantityChange(index, 1)}
-                          className="w-10 h-10 rounded-lg hover:bg-white hover:shadow-sm flex items-center justify-center font-black text-gray-600 text-lg transition-all"
+                          className="w-10 h-10 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
                         >
                           +
                         </button>
@@ -607,7 +607,7 @@ export default function POSPage() {
                 })}
                 {formState.items.length > 0 && (
                   <div className="pt-4 mt-4 border-t-2 border-dashed border-gray-200 flex justify-between items-center">
-                    <span className="font-black text-gray-500 uppercase tracking-widest text-sm">Total Orden</span>
+                    <span className="font-black text-gray-400 uppercase tracking-widest text-sm">Total Orden</span>
                     <span className="text-4xl font-black text-blue-600">
                       ${formState.items.reduce((total, item) => {
                         const product = availableMenuItems.find(m => m.id === item.menuItemId);
@@ -630,14 +630,14 @@ export default function POSPage() {
             </form>
           </div>
 
-          <div className="rounded-lg bg-white p-6 shadow-md h-fit">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="rounded-lg bg-[#242424] p-6 shadow-md h-fit">
+            <h2 className="text-lg font-semibold text-[#E0E0E0] mb-4">
               Resumen de Hoy
             </h2>
-            <div className="space-y-2 text-sm text-gray-600">
+            <div className="space-y-2 text-sm text-gray-400">
               <div className="flex justify-between">
                 <span>Órdenes activas:</span>
-                <span className="font-bold text-gray-900">
+                <span className="font-bold text-[#E0E0E0]">
                   {orders.filter((o) => o.status !== "PAID").length}
                 </span>
               </div>
@@ -655,13 +655,13 @@ export default function POSPage() {
           </div>
         </section>
 
-        <section className="rounded-lg bg-white p-6 shadow-md">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <section className="rounded-lg bg-[#242424] p-6 shadow-md">
+          <h2 className="text-lg font-semibold text-[#E0E0E0] mb-4">
             Órdenes Recientes
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-gray-500 uppercase text-xs font-bold">
+              <thead className="bg-[#181818] text-gray-400 uppercase text-xs font-bold">
                 <tr>
                   <th className="px-4 py-3">Orden</th>
                   <th className="px-4 py-3">Mesa</th>
@@ -672,7 +672,7 @@ export default function POSPage() {
               <tbody className="divide-y divide-gray-100">
                 {orders.slice(0, 10).map((order) => (
                   <tr key={order.id}>
-                    <td className="px-4 py-4 font-bold text-gray-900">
+                    <td className="px-4 py-4 font-bold text-[#E0E0E0]">
                       #{order.orderNumber}
                     </td>
                     <td className="px-4 py-4">{order.table || "Llevar"}</td>
@@ -746,14 +746,14 @@ export default function POSPage() {
       {/* MODAL DE AGREGAR PRODUCTOS */}
       {editingOrder && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+          <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className="text-xl font-bold text-[#E0E0E0]">
                 Agregar Productos a Orden #{editingOrder.orderNumber}
               </h3>
               <button
                 onClick={() => setEditingOrder(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-400"
               >
                 ✕
               </button>
@@ -814,7 +814,7 @@ export default function POSPage() {
                 <button
                   type="button"
                   onClick={() => setEditingOrder(null)}
-                  className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-bold hover:bg-gray-300 transition-colors"
+                  className="w-full bg-gray-200 text-gray-300 py-3 rounded-lg font-bold hover:bg-gray-300 transition-colors"
                 >
                   CANCELAR
                 </button>
@@ -848,7 +848,7 @@ export default function POSPage() {
                   setShowTicket(false);
                   setShowKitchenTicket(false);
                 }}
-                className="bg-white text-black px-6 py-3 rounded-xl font-black shadow-lg"
+                className="bg-[#242424] text-black px-6 py-3 rounded-xl font-black shadow-lg"
               >
                 CERRAR
               </button>
@@ -865,14 +865,14 @@ export default function POSPage() {
       {/* MODAL DE CHECKOUT */}
       {checkoutOrder && !showTicket && !showKitchenTicket && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+          <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className="text-xl font-bold text-[#E0E0E0]">
                 Cerrar Cuenta #{checkoutOrder.orderNumber}
               </h3>
               <button
                 onClick={() => setCheckoutOrder(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-400"
               >
                 ✕
               </button>
@@ -884,7 +884,7 @@ export default function POSPage() {
                   ${(checkoutOrder.total + tipAmountCalculated).toFixed(2)}
                 </p>
                 {tipAmountCalculated > 0 && (
-                  <p className="text-sm font-bold text-gray-500 mt-2">
+                  <p className="text-sm font-bold text-gray-400 mt-2">
                     Incluye ${(tipAmountCalculated).toFixed(2)} de propina
                   </p>
                 )}
@@ -938,7 +938,7 @@ export default function POSPage() {
                     placeholder="EFECTIVO RECIBIDO"
                     autoFocus
                   />
-                  <div className="flex justify-between items-center bg-gray-50 p-4 rounded-xl">
+                  <div className="flex justify-between items-center bg-[#181818] p-4 rounded-xl">
                     <span className="font-bold text-gray-400">CAMBIO:</span>
                     <span className="text-3xl font-black text-green-600">
                       ${change.toFixed(2)}

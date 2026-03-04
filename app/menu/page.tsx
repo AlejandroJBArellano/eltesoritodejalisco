@@ -419,8 +419,8 @@ export default function MenuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen bg-[#121212]">
+      <header className="bg-[#242424] shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div>
             <Link
@@ -429,10 +429,10 @@ export default function MenuPage() {
             >
               ← Volver al Dashboard
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-[#E0E0E0]">
               Gestión de Menú
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-400">
               {items.length} productos · {activeCount} disponibles
             </p>
           </div>
@@ -441,7 +441,7 @@ export default function MenuPage() {
               <button
                 type="button"
                 onClick={resetForm}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                className="rounded-lg border border-[#333333] px-4 py-2 text-gray-400 hover:bg-[#181818]"
               >
                 Cancelar edición
               </button>
@@ -458,13 +458,13 @@ export default function MenuPage() {
         )}
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="rounded-lg bg-[#242424] p-6 shadow-md">
+            <h2 className="text-lg font-semibold text-[#E0E0E0]">
               {isEditing ? "Editar producto" : "Nuevo producto"}
             </h2>
             <form onSubmit={handleSubmit} className="mt-4 grid gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-400">
                   Nombre
                 </label>
                 <input
@@ -473,7 +473,7 @@ export default function MenuPage() {
                   onChange={(event) =>
                     handleFormChange("name", event.target.value)
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border border-[#333333] px-3 py-2 text-sm"
                   placeholder="Ej. Torta Ahogada"
                 />
                 {formErrors.name && (
@@ -482,7 +482,7 @@ export default function MenuPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-400">
                   Descripción
                 </label>
                 <textarea
@@ -490,7 +490,7 @@ export default function MenuPage() {
                   onChange={(event) =>
                     handleFormChange("description", event.target.value)
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border border-[#333333] px-3 py-2 text-sm"
                   rows={3}
                   placeholder="Descripción corta del platillo"
                 />
@@ -498,7 +498,7 @@ export default function MenuPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-400">
                     Precio
                   </label>
                   <input
@@ -509,7 +509,7 @@ export default function MenuPage() {
                     onChange={(event) =>
                       handleFormChange("price", event.target.value)
                     }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg border border-[#333333] px-3 py-2 text-sm"
                     placeholder="Ej. 95"
                   />
                   {formErrors.price && (
@@ -519,7 +519,7 @@ export default function MenuPage() {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-400">
                     Categoría
                   </label>
                   <select
@@ -527,7 +527,7 @@ export default function MenuPage() {
                     onChange={(event) =>
                       handleFormChange("category", event.target.value)
                     }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg border border-[#333333] px-3 py-2 text-sm"
                   >
                     <option value="">Selecciona una categoría</option>
                     <option value="Bebidas">Bebidas</option>
@@ -539,12 +539,12 @@ export default function MenuPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-400">
                   Imagen del producto
                 </label>
                 <div className="mt-1 flex items-center gap-4">
                   {imagePreview && (
-                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200">
+                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border border-[#333333]">
                       <img
                         src={imagePreview}
                         alt="Preview"
@@ -557,19 +557,19 @@ export default function MenuPage() {
                     accept="image/*"
                     ref={fileInputRef}
                     onChange={handleFileChange}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                    className="block w-full text-sm text-gray-400 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
                   />
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-sm text-gray-700">
+              <label className="flex items-center gap-2 text-sm text-gray-400">
                 <input
                   type="checkbox"
                   checked={formState.isAvailable}
                   onChange={(event) =>
                     handleFormChange("isAvailable", event.target.checked)
                   }
-                  className="h-4 w-4 rounded border-gray-300"
+                  className="h-4 w-4 rounded border-[#333333]"
                 />
                 {formState.isAvailable ? "Disponible en menú" : "No disponible"}
               </label>
@@ -588,17 +588,17 @@ export default function MenuPage() {
             </form>
           </div>
 
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="rounded-lg bg-[#242424] p-6 shadow-md">
+            <h2 className="text-lg font-semibold text-[#E0E0E0]">
               Recetas por producto
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-400">
               Selecciona un producto y registra los ingredientes necesarios.
             </p>
 
             <div className="mt-4 space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-400">
                   Producto del menú
                 </label>
                 <select
@@ -606,7 +606,7 @@ export default function MenuPage() {
                   onChange={(event) =>
                     handleRecipeMenuSelection(event.target.value)
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border border-[#333333] px-3 py-2 text-sm"
                 >
                   <option value="">Selecciona un producto</option>
                   {items.map((item) => (
@@ -624,7 +624,7 @@ export default function MenuPage() {
 
               <form onSubmit={handleRecipeSubmit} className="grid gap-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-400">
                     Ingrediente
                   </label>
                   <input
@@ -633,7 +633,7 @@ export default function MenuPage() {
                     onChange={(event) =>
                       handleRecipeFormChange("ingredientName", event.target.value)
                     }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg border border-[#333333] px-3 py-2 text-sm"
                     placeholder="Ej. Tomate (kg)"
                   />
                   {recipeErrors.ingredientName && (
@@ -644,7 +644,7 @@ export default function MenuPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-400">
                     Cantidad requerida
                   </label>
                   <input
@@ -658,7 +658,7 @@ export default function MenuPage() {
                         event.target.value,
                       )
                     }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg border border-[#333333] px-3 py-2 text-sm"
                     placeholder="Ej. 0.2"
                   />
                   {recipeErrors.quantityRequired && (
@@ -682,15 +682,15 @@ export default function MenuPage() {
               )}
 
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-700">
+                <h3 className="text-sm font-semibold text-gray-400">
                   Ingredientes en receta
                 </h3>
                 {!selectedRecipeMenuItemId ? (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-400">
                     Selecciona un producto para ver su receta.
                   </p>
                 ) : recipeItems.length === 0 ? (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-400">
                     Aún no hay ingredientes registrados.
                   </p>
                 ) : (
@@ -698,11 +698,11 @@ export default function MenuPage() {
                     {recipeItems.map((recipe) => (
                       <div
                         key={recipe.id}
-                        className="rounded-lg border border-gray-200 p-3"
+                        className="rounded-lg border border-[#333333] p-3"
                       >
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
-                            <p className="text-sm font-semibold text-gray-900">
+                            <p className="text-sm font-semibold text-[#E0E0E0]">
                               {recipe.ingredientName}
                             </p>
                           </div>
@@ -718,7 +718,7 @@ export default function MenuPage() {
                                   event.target.value,
                                 )
                               }
-                              className="w-24 rounded-lg border border-gray-300 px-2 py-1 text-sm"
+                              className="w-24 rounded-lg border border-[#333333] px-2 py-1 text-sm"
                             />
                             <button
                               type="button"
@@ -745,9 +745,9 @@ export default function MenuPage() {
           </div>
         </section>
 
-        <section className="rounded-lg bg-white p-6 shadow-md">
+        <section className="rounded-lg bg-[#242424] p-6 shadow-md">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E0E0E0]">
               Productos del menú
             </h2>
             <button
@@ -760,16 +760,16 @@ export default function MenuPage() {
           </div>
 
           {isLoading ? (
-            <p className="mt-4 text-sm text-gray-600">Cargando productos...</p>
+            <p className="mt-4 text-sm text-gray-400">Cargando productos...</p>
           ) : items.length === 0 ? (
-            <p className="mt-4 text-sm text-gray-600">
+            <p className="mt-4 text-sm text-gray-400">
               No hay productos registrados.
             </p>
           ) : (
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b text-gray-500">
+                  <tr className="border-b text-gray-400">
                     <th className="py-2">Producto</th>
                     <th className="py-2">Categoría</th>
                     <th className="py-2">Precio</th>
@@ -783,7 +783,7 @@ export default function MenuPage() {
                       <td className="py-3">
                         <div className="flex items-center gap-3">
                           {item.imageUrl && (
-                            <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200">
+                            <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg border border-[#333333]">
                               <img
                                 src={item.imageUrl}
                                 alt={item.name}
@@ -792,26 +792,26 @@ export default function MenuPage() {
                             </div>
                           )}
                           <div>
-                            <p className="font-medium text-gray-900">{item.name}</p>
+                            <p className="font-medium text-[#E0E0E0]">{item.name}</p>
                             {item.description && (
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-gray-400">
                                 {item.description}
                               </p>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="py-3 text-gray-600">
+                      <td className="py-3 text-gray-400">
                         {item.category || "—"}
                       </td>
-                      <td className="py-3 text-gray-600">
+                      <td className="py-3 text-gray-400">
                         ${item.price.toFixed(2)}
                       </td>
                       <td className="py-3">
                         <span
                           className={`rounded-full px-2 py-1 text-xs ${item.isAvailable
                             ? "bg-green-100 text-green-700"
-                            : "bg-gray-200 text-gray-600"
+                            : "bg-gray-200 text-gray-400"
                             }`}
                         >
                           {item.isAvailable ? "Disponible" : "No disponible"}

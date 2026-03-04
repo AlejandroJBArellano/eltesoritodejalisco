@@ -49,9 +49,9 @@ export default async function KitchenPage() {
   const orders = await getActiveOrders();
 
   return (
-    <main className="p-4 bg-slate-100 min-h-screen grid grid-cols-1">
+    <main className="p-4 bg-[#121212] min-h-screen grid grid-cols-1">
       <div className="w-full">
-        <h1 className="text-2xl font-bold mb-4 text-slate-800">
+        <h1 className="text-2xl font-bold mb-4 text-[#E0E0E0]">
           Comandas en Cocina
         </h1>
         <KitchenDisplaySystem initialOrders={orders} />

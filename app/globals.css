@@ -4,17 +4,19 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* TesoritoOS Brand Palette */
-  --color-primary: #D9048E;    /* Mexican Pink */
-  --color-secondary: #049DD9;  /* Blue */
+  /* TesoritoOS Brand Palette (V2 Aesthetic Dark Mode) */
+  --color-primary: #FFB7CE;    /* Pastel Pink */
+  --color-secondary: #FFD1DC;  /* Lighter Pastel Pink */
   --color-success: #03A63C;    /* Green */
   --color-warning: #F2CB05;    /* Yellow/Gold */
-  --color-dark: #0D0D0D;       /* Black */
+  --color-dark: #121212;       /* Deep Black */
+  --color-card: #202020;       /* Lighter Gray for Cards */
+  --color-text-light: #E0E0E0; /* Off-white for text */
 }
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0D0D0D;
+  --background: #121212;
+  --foreground: #E0E0E0;
 }
 
 @layer base {
@@ -24,6 +26,12 @@
   ::backdrop,
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
+  }
+
+  input,
+  select,
+  textarea {
+    @apply bg-[#181818] text-[#E0E0E0] border-[#333333] placeholder-[#888888] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors;
   }
 }
 
