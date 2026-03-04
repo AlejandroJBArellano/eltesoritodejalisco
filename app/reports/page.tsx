@@ -170,6 +170,7 @@ export default function ReportsPage() {
                   <div className="absolute top-full left-1/2 mt-2 -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
                     {new Date(d.date).toLocaleDateString("es-MX", {
                       weekday: "short",
+                      timeZone: "America/Mexico_City",
                     })}
                   </div>
                 </div>

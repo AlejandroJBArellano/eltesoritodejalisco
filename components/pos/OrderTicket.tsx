@@ -9,6 +9,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
     return new Date(date).toLocaleString("es-MX", {
       dateStyle: "short",
       timeStyle: "short",
+      timeZone: "America/Mexico_City",
     });
   };
 

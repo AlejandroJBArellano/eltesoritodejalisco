@@ -46,7 +46,12 @@ export async function GET() {
     // Sales by Day
     const salesByDay: Record<string, number> = {};
     (completedOrders || []).forEach((order) => {
-      const date = order.created_at.split("T")[0];
+      const date = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date(order.created_at));
       salesByDay[date] = (salesByDay[date] || 0) + (order.total || 0);
     });
 
