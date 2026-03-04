@@ -69,7 +69,7 @@ export default function POSPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Category tab state
-  const [activeCategory, setActiveCategory] = useState<string>("TACOS");
+  const [activeCategory, setActiveCategory] = useState<string>("");
 
   // Checkout & Print State
   const [checkoutOrder, setCheckoutOrder] = useState<Order | null>(null);
@@ -89,6 +89,17 @@ export default function POSPage() {
     () => menuItems.filter((item) => item.isAvailable),
     [menuItems],
   );
+
+  const categories = useMemo(() => {
+    const cats = new Set(availableMenuItems.map(m => (m.category || "OTROS").toUpperCase()));
+    return Array.from(cats);
+  }, [availableMenuItems]);
+
+  useEffect(() => {
+    if (categories.length > 0 && (!activeCategory || !categories.includes(activeCategory))) {
+      setActiveCategory(categories[0]);
+    }
+  }, [categories, activeCategory]);
 
   const fetchMenu = async () => {
     const response = await fetch("/api/menu");
@@ -503,14 +514,14 @@ export default function POSPage() {
 
               <div className="space-y-4">
                 <div className="flex gap-2 overflow-x-auto pb-2">
-                  {["TACOS", "BEBIDAS", "EXTRAS", "PAQUETES"].map(cat => (
+                  {categories.map(cat => (
                     <button
                       key={cat}
                       type="button"
                       onClick={() => setActiveCategory(cat)}
                       className={`px-4 py-3 rounded-xl font-black whitespace-nowrap transition-all ${activeCategory === cat
-                          ? "bg-black text-white shadow-md transform scale-[1.02]"
-                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                        ? "bg-pink-500 text-white shadow-md shadow-pink-500/30 transform scale-[1.02]"
+                        : "bg-pink-50 text-pink-500 hover:bg-pink-100"
                         }`}
                     >
                       {cat}
@@ -521,19 +532,17 @@ export default function POSPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {availableMenuItems
                     .filter(m => {
-                      const itemCat = (m.category || "TACOS").toUpperCase();
-                      if (activeCategory === "TACOS" || activeCategory === "EXTRAS" || activeCategory === "BEBIDAS" || activeCategory === "PAQUETES") {
-                        // We are doing exact match or fallback for specific categories
-                        // Wait, what if the category in db is exactly "Bebidas"? `itemCat` handles it via `.toUpperCase()`
-                        return itemCat.includes(activeCategory) || itemCat === activeCategory;
-                      }
-                      return false;
+                      const itemCat = (m.category || "OTROS").toUpperCase();
+                      return itemCat === activeCategory;
                     })
                     .map(m => {
-                      let colorClass = "bg-gray-100 hover:bg-gray-200 text-gray-800 border-gray-200";
-                      if (activeCategory === "BEBIDAS") colorClass = "bg-blue-600 hover:bg-blue-500 text-white border-blue-700 shadow-blue-500/20 shadow-md";
-                      else if (activeCategory === "TACOS" || activeCategory === "PAQUETES") colorClass = "bg-red-600 hover:bg-red-500 text-white border-red-700 shadow-red-500/20 shadow-md";
-                      else if (activeCategory === "EXTRAS") colorClass = "bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-700 shadow-emerald-500/20 shadow-md";
+                      let colorClass = "bg-pink-400 hover:bg-pink-300 text-white border-pink-500 shadow-pink-400/30 shadow-md";
+
+                      if (activeCategory === "BEBIDAS") {
+                        colorClass = "bg-rose-400 hover:bg-rose-300 text-white border-rose-500 shadow-rose-400/30 shadow-md";
+                      } else if (activeCategory === "POSTRES" || activeCategory === "EXTRAS") {
+                        colorClass = "bg-fuchsia-400 hover:bg-fuchsia-300 text-white border-fuchsia-500 shadow-fuchsia-400/30 shadow-md";
+                      }
 
                       return (
                         <button
