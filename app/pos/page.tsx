@@ -424,7 +424,7 @@ export default function POSPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212]">
+    <div className="min-h-screen bg-dark">
       <header className="bg-[#242424] shadow-sm no-print">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div>
@@ -434,7 +434,7 @@ export default function POSPage() {
             >
               ← Dashboard
             </Link>
-            <h1 className="text-2xl font-bold text-[#E0E0E0]">Punto de Venta</h1>
+            <h1 className="text-2xl font-bold text-text-light">Punto de Venta</h1>
           </div>
         </div>
       </header>
@@ -448,7 +448,7 @@ export default function POSPage() {
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-lg bg-[#242424] p-6 shadow-md">
-            <h2 className="text-lg font-semibold text-[#E0E0E0] mb-4">
+            <h2 className="text-lg font-semibold text-text-light mb-4">
               Nueva orden
             </h2>
             <form onSubmit={handleSubmit} className="grid gap-4">
@@ -504,9 +504,9 @@ export default function POSPage() {
                       key={t}
                       type="button"
                       onClick={() => handleFormChange("table", t)}
-                      className={`h-10 ${t === "Domicilio" ? "px-4" : "w-10"} shrink-0 rounded-full font-bold text-sm transition-all flex items-center justify-center ${formState.table === t
-                          ? "bg-[#FFB7CE] text-[#121212] shadow-md transform scale-[1.05]"
-                          : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
+                      className={`h-12 ${t === "Domicilio" ? "px-6" : "w-12"} shrink-0 rounded-full font-bold text-base transition-all flex items-center justify-center ${formState.table === t
+                        ? "bg-primary text-dark shadow-md transform scale-[1.05]"
+                        : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
                         }`}
                     >
                       {t}
@@ -515,9 +515,9 @@ export default function POSPage() {
                   <button
                     type="button"
                     onClick={() => setShowNotesInput(!showNotesInput)}
-                    className={`ml-auto h-10 w-10 shrink-0 flex items-center justify-center rounded-full transition-all ${showNotesInput || formState.notes
-                        ? "bg-[#FFB7CE] text-[#121212]"
-                        : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
+                    className={`ml-auto h-16 w-16 shrink-0 flex items-center justify-center rounded-full transition-all ${showNotesInput || formState.notes
+                      ? "bg-primary text-dark"
+                      : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
                       }`}
                     title="Añadir notas generales"
                   >
@@ -545,8 +545,8 @@ export default function POSPage() {
                       type="button"
                       onClick={() => setActiveCategory(cat)}
                       className={`px-4 py-3 rounded-xl font-black whitespace-nowrap transition-all ${activeCategory === cat
-                        ? "bg-[#FFB7CE] text-[#121212] shadow-md shadow-[#FFB7CE]/30 transform scale-[1.02]"
-                        : "bg-[#181818] text-[#FFB7CE] hover:bg-[#2A2A2A] border border-[#FFB7CE]/20"
+                        ? "bg-primary text-dark shadow-md shadow-primary/30 transform scale-[1.02]"
+                        : "bg-[#181818] text-text-light hover:bg-[#2A2A2A] border border-primary/20"
                         }`}
                     >
                       {cat}
@@ -605,7 +605,7 @@ export default function POSPage() {
                         <p className="font-black text-gray-300 text-lg leading-tight truncate">{product?.name || "Producto"}</p>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">${product?.price.toFixed(2)} c/u</p>
                       </div>
-                      <div className="flex items-center gap-1 bg-[#121212] rounded-xl p-1">
+                      <div className="flex items-center gap-1 bg-dark rounded-xl p-1">
                         <button
                           type="button"
                           onClick={() => handleQuantityChange(index, -1)}
@@ -613,7 +613,7 @@ export default function POSPage() {
                         >
                           -
                         </button>
-                        <span className="w-8 text-center font-black text-[#E0E0E0] text-lg">{item.quantity}</span>
+                        <span className="w-8 text-center font-black text-text-light text-lg">{item.quantity}</span>
                         <button
                           type="button"
                           onClick={() => handleQuantityChange(index, 1)}
@@ -656,13 +656,13 @@ export default function POSPage() {
           </div>
 
           <div className="rounded-lg bg-[#242424] p-6 shadow-md h-fit">
-            <h2 className="text-lg font-semibold text-[#E0E0E0] mb-4">
+            <h2 className="text-lg font-semibold text-text-light mb-4">
               Resumen de Hoy
             </h2>
             <div className="space-y-2 text-sm text-gray-400">
               <div className="flex justify-between">
                 <span>Órdenes activas:</span>
-                <span className="font-bold text-[#E0E0E0]">
+                <span className="font-bold text-text-light">
                   {orders.filter((o) => o.status !== "PAID").length}
                 </span>
               </div>
@@ -681,7 +681,7 @@ export default function POSPage() {
         </section>
 
         <section className="rounded-lg bg-[#242424] p-6 shadow-md">
-          <h2 className="text-lg font-semibold text-[#E0E0E0] mb-4">
+          <h2 className="text-lg font-semibold text-text-light mb-4">
             Órdenes Recientes
           </h2>
           <div className="overflow-x-auto">
@@ -697,7 +697,7 @@ export default function POSPage() {
               <tbody className="divide-y divide-gray-100">
                 {orders.slice(0, 10).map((order) => (
                   <tr key={order.id}>
-                    <td className="px-4 py-4 font-bold text-[#E0E0E0]">
+                    <td className="px-4 py-4 font-bold text-text-light">
                       #{order.orderNumber}
                     </td>
                     <td className="px-4 py-4">{order.table || "Llevar"}</td>
@@ -773,7 +773,7 @@ export default function POSPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
           <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-[#E0E0E0]">
+              <h3 className="text-xl font-bold text-text-light">
                 Agregar Productos a Orden #{editingOrder.orderNumber}
               </h3>
               <button
@@ -892,7 +892,7 @@ export default function POSPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
           <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-[#E0E0E0]">
+              <h3 className="text-xl font-bold text-text-light">
                 Cerrar Cuenta #{checkoutOrder.orderNumber}
               </h3>
               <button
