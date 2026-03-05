@@ -227,7 +227,25 @@ export default async function Home() {
               </Link>
             )}
 
-
+            {/* History - Admin and Waiter */}
+            {(isAdmin || isWaiter) && (
+              <Link href="/history">
+                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
+                  <div className="mb-6 flex items-center justify-between">
+                    <span className="text-5xl">📖</span>
+                    <span className="rounded-full bg-blue-500/10 px-4 py-1 text-xs font-black text-blue-500 uppercase tracking-widest">
+                      Registro
+                    </span>
+                  </div>
+                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
+                    Historial
+                  </h3>
+                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                    Historial de órdenes y cobros.
+                  </p>
+                </div>
+              </Link>
+            )}
 
             {/* Menu - Admin */}
             {isAdmin && (

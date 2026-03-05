@@ -111,6 +111,49 @@ export default function HistoryPage() {
         return Array.from(tables).sort();
     }, [orders]);
 
+    const resumeTotals = useMemo(() => {
+        let ventaNeta = 0;
+        let ivaAcumulado = 0;
+        let propinasEfectivo = 0;
+        let propinasTarjeta = 0;
+        let cajaEfectivo = 0;
+        let cajaTarjeta = 0;
+
+        filteredOrders.forEach((order) => {
+            const tipAmount = order.payments?.[0]?.tipAmount || 0;
+            const paymentMethod = order.payments?.[0]?.method || "N/A";
+
+            const subtotalFiscal = order.total / 1.16;
+            const ivaFiscal = order.total - subtotalFiscal;
+            const totalPago = order.total + tipAmount;
+
+            ventaNeta += subtotalFiscal;
+            ivaAcumulado += ivaFiscal;
+
+            if (paymentMethod === PaymentMethod.CASH) {
+                propinasEfectivo += tipAmount;
+                cajaEfectivo += totalPago;
+            } else if (paymentMethod === PaymentMethod.CARD || paymentMethod === PaymentMethod.TRANSFER) {
+                propinasTarjeta += tipAmount;
+                cajaTarjeta += totalPago;
+            } else {
+                cajaEfectivo += totalPago; // Fallback
+            }
+        });
+
+        const utilidadReal = ventaNeta + propinasEfectivo + propinasTarjeta;
+
+        return {
+            ventaNeta,
+            ivaAcumulado,
+            propinasEfectivo,
+            propinasTarjeta,
+            cajaEfectivo,
+            cajaTarjeta,
+            utilidadReal,
+        };
+    }, [filteredOrders]);
+
     if (isLoading) {
         return (
             <div className="min-h-screen bg-dark flex justify-center items-center">
@@ -195,6 +238,57 @@ export default function HistoryPage() {
                     </div>
                 </div>
 
+                {/* CORTE DIARIO */}
+                <div className="bg-[#242424] p-6 rounded-lg shadow-md space-y-6 flex flex-col mb-2 border-l-4 border-l-blue-500">
+                    <h2 className="text-lg font-bold text-white mb-2 pb-2 border-b border-gray-700">Corte Diario</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {/* Venta y IVA */}
+                        <div className="flex flex-col space-y-3">
+                            <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Venta Neta Total (Sin IVA)</span>
+                                <span className="text-white text-xl font-mono font-medium">${resumeTotals.ventaNeta.toFixed(2)}</span>
+                            </div>
+                            <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">IVA Acumulado</span>
+                                <span className="text-gray-300 text-xl font-mono">${resumeTotals.ivaAcumulado.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        {/* Propinas */}
+                        <div className="flex flex-col space-y-3">
+                            <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Efectivo)</span>
+                                <span className="text-green-400 text-xl font-mono">${resumeTotals.propinasEfectivo.toFixed(2)}</span>
+                            </div>
+                            <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Tarjeta)</span>
+                                <span className="text-blue-400 text-xl font-mono">${resumeTotals.propinasTarjeta.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        {/* Caja Final */}
+                        <div className="flex flex-col space-y-3">
+                            <div className="bg-[#181818] p-3 rounded-lg border border-green-900/50">
+                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Efectivo)</span>
+                                <span className="text-green-400 text-xl font-mono font-bold">${resumeTotals.cajaEfectivo.toFixed(2)}</span>
+                            </div>
+                            <div className="bg-[#181818] p-3 rounded-lg border border-blue-900/50">
+                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Tarjeta)</span>
+                                <span className="text-blue-400 text-xl font-mono font-bold">${resumeTotals.cajaTarjeta.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        {/* Utilidad Real */}
+                        <div className="bg-gradient-to-br from-[#1c2e4a] to-[#0f172a] p-4 rounded-lg flex flex-col justify-center items-center shadow-lg border border-blue-500/30 lg:col-span-1 md:col-span-2">
+                            <span className="text-blue-200 text-xs font-bold uppercase tracking-wider mb-2">Utilidad Real del Día</span>
+                            <span className="text-white text-3xl font-black font-mono">
+                                ${resumeTotals.utilidadReal.toFixed(2)}
+                            </span>
+                            <span className="text-blue-300/60 text-[10px] mt-2 text-center uppercase">Venta Neta + Tot. Propinas</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="bg-[#242424] rounded-lg shadow-md overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
@@ -256,8 +350,8 @@ export default function HistoryPage() {
                                                 <td className="px-4 py-4 text-gray-300">{order.table || "Llevar"}</td>
                                                 <td className="px-4 py-4 text-gray-300">
                                                     <span className={`px-2 py-1 rounded text-xs font-semibold ${paymentMethod === 'CASH' ? 'bg-green-900/50 text-green-300' :
-                                                            paymentMethod === 'CARD' ? 'bg-blue-900/50 text-blue-300' :
-                                                                'bg-gray-800 text-gray-300'
+                                                        paymentMethod === 'CARD' ? 'bg-blue-900/50 text-blue-300' :
+                                                            'bg-gray-800 text-gray-300'
                                                         }`}>
                                                         {methodLabel}
                                                     </span>
