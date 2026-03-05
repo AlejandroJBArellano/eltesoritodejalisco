@@ -84,6 +84,7 @@ export default function POSPage() {
   const [additionalItems, setAdditionalItems] = useState<OrderItemDraft[]>([
     { menuItemId: "", quantity: "1", notes: "" },
   ]);
+  const [showNotesInput, setShowNotesInput] = useState(false);
 
   const availableMenuItems = useMemo(
     () => menuItems.filter((item) => item.isAvailable),
@@ -495,21 +496,45 @@ export default function POSPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <input
-                  type="text"
-                  value={formState.table}
-                  onChange={(e) => handleFormChange("table", e.target.value)}
-                  className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="Mesa"
-                />
-                <input
-                  type="text"
-                  value={formState.notes}
-                  onChange={(e) => handleFormChange("notes", e.target.value)}
-                  className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="Notas generales"
-                />
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+                  <span className="text-sm font-medium text-gray-400 mr-1">Mesa:</span>
+                  {["1", "2", "3", "4", "5", "Domicilio"].map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => handleFormChange("table", t)}
+                      className={`h-10 ${t === "Domicilio" ? "px-4" : "w-10"} shrink-0 rounded-full font-bold text-sm transition-all flex items-center justify-center ${formState.table === t
+                          ? "bg-[#FFB7CE] text-[#121212] shadow-md transform scale-[1.05]"
+                          : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
+                        }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setShowNotesInput(!showNotesInput)}
+                    className={`ml-auto h-10 w-10 shrink-0 flex items-center justify-center rounded-full transition-all ${showNotesInput || formState.notes
+                        ? "bg-[#FFB7CE] text-[#121212]"
+                        : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
+                      }`}
+                    title="Añadir notas generales"
+                  >
+                    ✎
+                  </button>
+                </div>
+
+                {(showNotesInput || formState.notes !== "") && (
+                  <input
+                    type="text"
+                    value={formState.notes}
+                    onChange={(e) => handleFormChange("notes", e.target.value)}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm w-full"
+                    placeholder="Notas generales..."
+                    autoFocus={showNotesInput && !formState.notes}
+                  />
+                )}
               </div>
 
               <div className="space-y-4">
