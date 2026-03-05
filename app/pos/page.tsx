@@ -504,7 +504,7 @@ export default function POSPage() {
                       key={t}
                       type="button"
                       onClick={() => handleFormChange("table", t)}
-                      className={`h-12 ${t === "Domicilio" ? "px-6" : "w-12"} shrink-0 rounded-full font-bold text-base transition-all flex items-center justify-center ${formState.table === t
+                      className={`h-16 ${t === "Domicilio" ? "px-8" : "w-16"} shrink-0 rounded-full font-black text-xl transition-all flex items-center justify-center ${formState.table === t
                         ? "bg-primary text-dark shadow-md transform scale-[1.05]"
                         : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
                         }`}
