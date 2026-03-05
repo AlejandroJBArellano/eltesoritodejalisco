@@ -1,8 +1,26 @@
 "use client";
 
 import { OrderWithDetails, PaymentMethod } from "@/types";
+import { format, isSameMonth, parseISO, subMonths } from 'date-fns';
+import { es } from 'date-fns/locale';
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Legend,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
+    Tooltip as RechartsTooltip,
+    ResponsiveContainer,
+    XAxis, YAxis
+} from 'recharts';
+
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
 type Order = OrderWithDetails;
 
@@ -154,6 +172,53 @@ export default function HistoryPage() {
         };
     }, [filteredOrders]);
 
+    const chartsData = useMemo(() => {
+        const now = new Date();
+
+        const dailyMap = new Map<string, number>();
+        const categoryMap = new Map<string, number>();
+        let currentMonthTotal = 0;
+        let previousMonthTotal = 0;
+
+        orders.forEach(order => {
+            const date = new Date(order.createdAt);
+            const subtotalFiscal = order.total / 1.16;
+
+            if (isSameMonth(date, now)) {
+                currentMonthTotal += subtotalFiscal;
+
+                const dayKey = format(date, 'yyyy-MM-dd');
+                dailyMap.set(dayKey, (dailyMap.get(dayKey) || 0) + subtotalFiscal);
+
+                order.orderItems?.forEach(item => {
+                    const cat = item.menuItem?.category || 'Otros';
+                    const itemImporteFiscal = (item.quantity * item.unitPrice) / 1.16;
+                    categoryMap.set(cat, (categoryMap.get(cat) || 0) + itemImporteFiscal);
+                });
+            } else if (isSameMonth(date, subMonths(now, 1))) {
+                previousMonthTotal += subtotalFiscal;
+            }
+        });
+
+        const dailySales = Array.from(dailyMap.entries())
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([date, total]) => ({
+                date: format(parseISO(date), 'dd MMM', { locale: es }),
+                total
+            }));
+
+        const salesMix = Array.from(categoryMap.entries())
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value);
+
+        const growth = [
+            { name: format(subMonths(now, 1), 'MMMM', { locale: es }).toUpperCase(), total: previousMonthTotal },
+            { name: format(now, 'MMMM', { locale: es }).toUpperCase(), total: currentMonthTotal }
+        ];
+
+        return { dailySales, salesMix, growth };
+    }, [orders]);
+
     if (isLoading) {
         return (
             <div className="min-h-screen bg-dark flex justify-center items-center">
@@ -285,6 +350,81 @@ export default function HistoryPage() {
                                 ${resumeTotals.utilidadReal.toFixed(2)}
                             </span>
                             <span className="text-blue-300/60 text-[10px] mt-2 text-center uppercase">Venta Neta + Tot. Propinas</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* GRÁFICAS */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    {/* Venta Diaria */}
+                    <div className="bg-[#242424] p-6 rounded-lg shadow-md lg:col-span-2 border border-gray-700">
+                        <h2 className="text-lg font-bold text-white mb-4 uppercase">Venta Diaria ({format(new Date(), 'MMMM', { locale: es })})</h2>
+                        <div className="h-64 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={chartsData.dailySales} margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                                    <XAxis dataKey="date" stroke="#9CA3AF" fontSize={12} />
+                                    <YAxis stroke="#9CA3AF" fontSize={12} tickFormatter={(val) => `$${val}`} />
+                                    <RechartsTooltip
+                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#FFF' }}
+                                        formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Venta Neta']}
+                                    />
+                                    <Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* Mix de Ventas */}
+                    <div className="bg-[#242424] p-6 rounded-lg shadow-md border border-gray-700">
+                        <h2 className="text-lg font-bold text-white mb-4 uppercase">Mix de Ventas</h2>
+                        <div className="h-64 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={chartsData.salesMix}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {chartsData.salesMix.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <RechartsTooltip
+                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#FFF' }}
+                                        formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Importe']}
+                                    />
+                                    <Legend wrapperStyle={{ fontSize: '12px', color: '#9CA3AF' }} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* Trend de Crecimiento */}
+                    <div className="bg-[#242424] p-6 rounded-lg shadow-md lg:col-span-3 border border-gray-700">
+                        <h2 className="text-lg font-bold text-white mb-4 uppercase">Crecimiento Mensual</h2>
+                        <div className="h-64 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={chartsData.growth} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
+                                    <XAxis type="number" stroke="#9CA3AF" fontSize={12} tickFormatter={(val) => `$${val}`} />
+                                    <YAxis dataKey="name" type="category" stroke="#9CA3AF" fontSize={12} width={100} />
+                                    <RechartsTooltip
+                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#FFF' }}
+                                        formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Total Venta Neta']}
+                                        cursor={{ fill: '#2a2a2a' }}
+                                    />
+                                    <Bar dataKey="total" fill="#10b981" barSize={40} radius={[0, 4, 4, 0]}>
+                                        {chartsData.growth.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={index === 0 ? '#4B5563' : '#10b981'} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
                         </div>
                     </div>
                 </div>
