@@ -250,7 +250,11 @@ export default function POSPage() {
       const nextItems = [...prev.items];
       const newQuantity = Number(nextItems[index].quantity) + delta;
       if (newQuantity <= 0) {
-        return { ...prev, items: nextItems.filter((_, idx) => idx !== index) };
+        if (window.confirm("¿Seguro que deseas eliminar el producto?")) {
+          return { ...prev, items: nextItems.filter((_, idx) => idx !== index) };
+        } else {
+          return prev;
+        }
       }
       nextItems[index] = { ...nextItems[index], quantity: newQuantity.toString() };
       return { ...prev, items: nextItems };
@@ -274,6 +278,12 @@ export default function POSPage() {
       ...prev,
       items: prev.items.filter((_, idx) => idx !== index),
     }));
+  };
+
+  const handleClearCart = () => {
+    if (window.confirm("¿Seguro que deseas vaciar todo el carrito?")) {
+      setFormState((prev) => ({ ...prev, items: [] }));
+    }
   };
 
   const validateForm = (state: OrderFormState) => {
@@ -638,36 +648,57 @@ export default function POSPage() {
                         <button
                           type="button"
                           onClick={() => handleQuantityChange(index, -1)}
-                          className="w-10 h-10 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
+                          className="w-8 h-8 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
                         >
                           -
                         </button>
-                        <span className="w-8 text-center font-black text-text-light text-lg">{item.quantity}</span>
+                        <span className="w-6 text-center font-black text-text-light text-lg">{item.quantity}</span>
                         <button
                           type="button"
                           onClick={() => handleQuantityChange(index, 1)}
-                          className="w-10 h-10 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
+                          className="w-8 h-8 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
                         >
                           +
                         </button>
                       </div>
-                      <div className="w-20 text-right">
+                      <div className="w-20 text-right flex flex-col items-end gap-1">
                         <p className="font-black text-blue-600 text-xl">
                           ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
                         </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm("¿Seguro que deseas eliminar el producto?")) {
+                              removeItemRow(index);
+                            }
+                          }}
+                          className="text-red-500 hover:text-red-400 text-sm flex items-center gap-1 mt-1"
+                          title="Eliminar producto"
+                        >
+                          <span className="text-base leading-none">🗑️</span>
+                        </button>
                       </div>
                     </div>
                   );
                 })}
                 {formState.items.length > 0 && (
-                  <div className="pt-4 mt-4 border-t-2 border-dashed border-gray-200 flex justify-between items-center">
-                    <span className="font-black text-gray-400 uppercase tracking-widest text-sm">Total Orden</span>
-                    <span className="text-4xl font-black text-blue-600">
-                      ${formState.items.reduce((total, item) => {
-                        const product = availableMenuItems.find(m => m.id === item.menuItemId);
-                        return total + (product?.price || 0) * Number(item.quantity);
-                      }, 0).toFixed(2)}
-                    </span>
+                  <div className="pt-4 mt-4 border-t-2 border-dashed border-gray-200 flex flex-col gap-4">
+                    <div className="flex justify-between items-center">
+                      <span className="font-black text-gray-400 uppercase tracking-widest text-sm">Total Orden</span>
+                      <span className="text-4xl font-black text-blue-600">
+                        ${formState.items.reduce((total, item) => {
+                          const product = availableMenuItems.find(m => m.id === item.menuItemId);
+                          return total + (product?.price || 0) * Number(item.quantity);
+                        }, 0).toFixed(2)}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleClearCart}
+                      className="w-full flex items-center justify-center gap-2 rounded-lg bg-red-900/20 border border-red-500/30 py-2 text-red-500 font-bold hover:bg-red-900/40 transition-colors"
+                    >
+                      <span className="text-lg">🧹</span> Vaciar Carrito
+                    </button>
                   </div>
                 )}
               </div>
