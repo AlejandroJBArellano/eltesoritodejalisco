@@ -79,6 +79,8 @@ export default function POSPage() {
   const [showKitchenTicket, setShowKitchenTicket] = useState(false);
   const [tipType, setTipType] = useState<"NONE" | "PERCENTAGE" | "FIXED">("NONE");
   const [tipInput, setTipInput] = useState<string>("");
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   // Edit Order State
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [additionalItems, setAdditionalItems] = useState<OrderItemDraft[]>([
@@ -280,6 +282,33 @@ export default function POSPage() {
     if (!state.items.length) errors.items = "Agrega al menos un producto";
     return errors;
   };
+
+  const generateWhatsAppMessage = () => {
+    if (!checkoutOrder) return "";
+    let msg = `¡Gracias por tu visita a El Tesorito de Jalisco! 🌮🤩\n\n`;
+    msg += `🧾 *Ticket #${checkoutOrder.orderNumber}*\n`;
+    if (checkoutOrder.table) {
+      msg += `📍 Mesa: ${checkoutOrder.table}\n`;
+    }
+    msg += `\n*Resumen de tu orden:*\n`;
+    checkoutOrder.orderItems?.forEach((item: any) => {
+      const quantity = item.quantity || 1;
+      const itemName = item.menuItem?.name || "Producto";
+      const itemPrice = item.unitPrice || 0;
+      msg += `▪ ${quantity}x ${itemName} - $${(itemPrice * quantity).toFixed(2)}\n`;
+    });
+
+    // Add tips if available
+    const tipAmount = checkoutOrder.payments && checkoutOrder.payments.length > 0 && checkoutOrder.payments[0].tipAmount ? checkoutOrder.payments[0].tipAmount : 0;
+
+    msg += `\n*Total Pagado: $${(checkoutOrder.total + tipAmount).toFixed(2)}*\n`;
+    if (tipAmount > 0) {
+      msg += `(Incluye propina: $${tipAmount.toFixed(2)})\n`;
+    }
+    msg += `\n¡Esperamos verte pronto! 🌶️`;
+    return encodeURIComponent(msg);
+  };
+
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -867,13 +896,23 @@ export default function POSPage() {
               >
                 🖨️ IMPRIMIR AHORA
               </button>
+              {showTicket && (
+                <button
+                  onClick={() => setShowWhatsAppModal(true)}
+                  className="bg-green-500 text-white px-6 py-3 rounded-xl font-black shadow-lg flex items-center gap-2 hover:bg-green-400"
+                >
+                  <span className="text-xl">📱</span> ENVIAR POR WHATSAPP
+                </button>
+              )}
               <button
                 onClick={() => {
                   setCheckoutOrder(null);
                   setShowTicket(false);
                   setShowKitchenTicket(false);
+                  setWhatsappNumber("");
+                  setShowWhatsAppModal(false);
                 }}
-                className="bg-[#242424] text-black px-6 py-3 rounded-xl font-black shadow-lg"
+                className="bg-[#242424] text-white border-2 border-white/10 px-6 py-3 rounded-xl font-black shadow-lg hover:bg-gray-800"
               >
                 CERRAR
               </button>
@@ -984,6 +1023,51 @@ export default function POSPage() {
                 {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGO E IMPRIMIR"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE WHATSAPP */}
+      {showWhatsAppModal && checkoutOrder && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-60 no-print">
+          <div className="bg-[#242424] rounded-2xl max-w-sm w-full p-8 shadow-2xl border border-green-500/20">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold flex items-center gap-2 text-white">
+                <span className="text-2xl">📱</span> WhatsApp
+              </h3>
+              <button onClick={() => setShowWhatsAppModal(false)} className="text-gray-400 hover:text-white transition-colors">✕</button>
+            </div>
+            <p className="text-sm font-medium text-gray-400 mb-6 text-center leading-relaxed">
+              Ingresa los 10 dígitos del número (sin código de país).
+            </p>
+            <input
+              type="tel"
+              maxLength={10}
+              value={whatsappNumber}
+              onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ''))}
+              placeholder="Ej. 3312345678"
+              autoFocus
+              className="w-full text-3xl font-black p-4 border-2 border-gray-600 rounded-xl focus:border-green-500 outline-none text-center bg-[#181818] text-white tracking-widest mb-8 transition-all"
+            />
+            <button
+              disabled={whatsappNumber.length !== 10}
+              onClick={() => {
+                const url = `https://wa.me/52${whatsappNumber}?text=${generateWhatsAppMessage()}`;
+
+                // Open WA link
+                window.open(url, "_blank");
+
+                // Close flow
+                setShowWhatsAppModal(false);
+                setCheckoutOrder(null);
+                setShowTicket(false);
+                setShowKitchenTicket(false);
+                setWhatsappNumber("");
+              }}
+              className="w-full bg-green-500 text-white py-4 rounded-xl font-black text-xl hover:bg-green-600 disabled:opacity-30 disabled:hover:bg-green-500 transition-all shadow-lg shadow-green-500/20 cursor-pointer"
+            >
+              ENVIAR TICKET
+            </button>
           </div>
         </div>
       )}
