@@ -1,6 +1,125 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
+const TAX_RATE = 0;
+
+/**
+ * PUT /api/orders/:id
+ * Replace the full item list of an existing order.
+ * Accepts { items: [{ id: string, quantity: number }] }.
+ * Items missing from the list (or with quantity ≤ 0) are deleted.
+ * Order totals are recalculated automatically.
+ */
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const { items } = body;
+
+    if (!items || !Array.isArray(items)) {
+      return NextResponse.json(
+        { error: "Items array is required" },
+        { status: 400 },
+      );
+    }
+
+    const supabase = await createClient();
+
+    // Verify the order exists
+    const { data: order, error: fetchError } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // Separate items to keep (quantity > 0) from items to delete (quantity ≤ 0)
+    const itemsToKeep = items.filter(
+      (i: { id: string; quantity: number }) => i.quantity > 0,
+    );
+    const keepIds = itemsToKeep.map((i: { id: string }) => i.id);
+
+    // Fetch current order items
+    const { data: currentItems } = await supabase
+      .from("order_items")
+      .select("id")
+      .eq("order_id", id);
+
+    const currentIds = (currentItems || []).map((i: { id: string }) => i.id);
+
+    // Delete items that are no longer in the list
+    const idsToDelete = currentIds.filter((cid: string) => !keepIds.includes(cid));
+    if (idsToDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from("order_items")
+        .delete()
+        .in("id", idsToDelete);
+      if (deleteError) throw deleteError;
+    }
+
+    // Update quantities for items that remain
+    for (const item of itemsToKeep) {
+      const { error: updateError } = await supabase
+        .from("order_items")
+        .update({ quantity: item.quantity })
+        .eq("id", item.id)
+        .eq("order_id", id);
+      if (updateError) throw updateError;
+    }
+
+    // Recalculate order totals from what's left in the database
+    const { data: remainingItems } = await supabase
+      .from("order_items")
+      .select("unit_price, quantity")
+      .eq("order_id", id);
+
+    const newSubtotal = (remainingItems || []).reduce(
+      (sum: number, item: { unit_price: number; quantity: number }) =>
+        sum + item.unit_price * item.quantity,
+      0,
+    );
+    const newTax = newSubtotal * TAX_RATE;
+    const newTotal = newSubtotal + newTax;
+
+    const { data: updatedOrder, error: updateOrderError } = await supabase
+      .from("orders")
+      .update({
+        subtotal: newSubtotal,
+        tax: newTax,
+        total: newTotal,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .select(
+        `
+        *,
+        order_items (
+          *,
+          menu_items (*)
+        ),
+        customer:customers (*)
+      `,
+      )
+      .single();
+
+    if (updateOrderError) throw updateOrderError;
+
+    return NextResponse.json({ order: updatedOrder });
+  } catch (error) {
+    console.error("Error modifying order:", error);
+    return NextResponse.json(
+      { error: "Failed to modify order" },
+      { status: 500 },
+    );
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -118,6 +237,32 @@ export async function PATCH(
     console.error("Error updating order:", error);
     return NextResponse.json(
       { error: "Failed to update order" },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * DELETE /api/orders/:id
+ * Permanently delete a specific order (and its items via cascade).
+ */
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+
+    const supabase = await createClient();
+    const { error } = await supabase.from("orders").delete().eq("id", id);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    return NextResponse.json(
+      { error: "Failed to delete order" },
       { status: 500 },
     );
   }
