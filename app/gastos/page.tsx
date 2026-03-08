@@ -310,7 +310,7 @@ export default function GastosPage() {
                                                 <Cell key={`cell-${index}`} fill={entry.color} />
                                             ))}
                                         </Pie>
-                                        <RechartsTooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                                        <RechartsTooltip formatter={(value: any) => `$${Number(value).toFixed(2)}`} />
                                         <Legend verticalAlign="bottom" height={36} />
                                     </PieChart>
                                 </ResponsiveContainer>
