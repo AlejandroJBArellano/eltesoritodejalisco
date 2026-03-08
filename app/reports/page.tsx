@@ -10,6 +10,7 @@ type ReportData = {
     averageTicket: number;
     totalTips: number;
     averageCompletionTimeMinutes: number;
+    totalExpenses: number;
   };
   salesByDay: Record<string, number>;
   salesBySource: Record<string, { count: number; total: number }>;
@@ -110,7 +111,7 @@ export default function ReportsPage() {
       {/* Main Content */}
       <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
         {/* KPI Cards */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
           <div className="rounded-lg bg-[#242424] p-6 shadow-md border-l-4 border-green-500">
             <p className="text-sm font-medium text-gray-400">Venta Bruta</p>
             <p className="mt-2 text-2xl font-bold text-[#E0E0E0]">
@@ -120,13 +121,22 @@ export default function ReportsPage() {
               Total ingresado a caja
             </p>
           </div>
-          <div className="rounded-lg bg-[#242424] p-6 shadow-md border-l-4 border-blue-500">
-            <p className="text-sm font-medium text-gray-400">Venta Neta</p>
-            <p className="mt-2 text-2xl font-bold text-[#E0E0E0]">
-              ${(data.summary.totalSales / 1.16).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <div className="rounded-lg bg-[#242424] p-6 shadow-md border-l-4 border-red-500">
+            <p className="text-sm font-medium text-gray-400">Gastos Generales</p>
+            <p className="mt-2 text-2xl font-bold text-red-400">
+              -${(data.summary.totalExpenses || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
             <p className="mt-1 text-xs text-gray-400">
-              Utilidad (Libre de IVA)
+              Insumos, sueldos, etc.
+            </p>
+          </div>
+          <div className="rounded-lg bg-[#242424] p-6 shadow-md border-l-4 border-blue-500">
+            <p className="text-sm font-medium text-gray-400">Utilidad Neta</p>
+            <p className="mt-2 text-2xl font-bold text-blue-400">
+              ${(data.summary.totalSales - (data.summary.totalExpenses || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="mt-1 text-xs text-gray-400">
+              Dinero Real (Ventas - Gastos)
             </p>
           </div>
           <div className="rounded-lg bg-[#242424] p-6 shadow-md border-l-4 border-purple-500">

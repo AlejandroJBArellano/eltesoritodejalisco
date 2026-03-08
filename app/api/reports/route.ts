@@ -28,15 +28,15 @@ export async function GET() {
     // Calculate totals
     let totalCompletionTimeMs = 0;
     let completedOrdersCount = 0;
-    
+
     const totalSales = (completedOrders || []).reduce(
       (sum, order) => {
         if (order.created_at && order.completed_at) {
           const created = new Date(order.created_at).getTime();
           const completed = new Date(order.completed_at).getTime();
           if (completed >= created) {
-             totalCompletionTimeMs += (completed - created);
-             completedOrdersCount++;
+            totalCompletionTimeMs += (completed - created);
+            completedOrdersCount++;
           }
         }
         return sum + (order.total || 0);
@@ -51,7 +51,7 @@ export async function GET() {
       .from("payments")
       .select("tip_amount")
       .gte("created_at", sevenDaysAgo.toISOString());
-    
+
     const totalTips = (payments || []).reduce(
       (sum, p) => sum + (p.tip_amount || 0),
       0
@@ -111,13 +111,26 @@ export async function GET() {
       .limit(5);
 
     if (custError) throw custError;
-    
+
     const { count: newCustomersCount, error: countError } = await supabase
-        .from("customers")
-        .select("*", { count: 'exact', head: true })
-        .gte("created_at", sevenDaysAgo.toISOString());
+      .from("customers")
+      .select("*", { count: 'exact', head: true })
+      .gte("created_at", sevenDaysAgo.toISOString());
 
     if (countError) throw countError;
+
+    // 5. Gastos Operativos
+    const { data: expensesData, error: expError } = await supabase
+      .from("expenses")
+      .select("amount")
+      .gte("date", sevenDaysAgo.toISOString().split("T")[0]);
+
+    if (expError) throw expError;
+
+    const totalExpenses = (expensesData || []).reduce(
+      (sum, exp) => sum + Number(exp.amount),
+      0
+    );
 
     return NextResponse.json({
       summary: {
@@ -126,6 +139,7 @@ export async function GET() {
         averageTicket,
         totalTips,
         averageCompletionTimeMinutes,
+        totalExpenses,
       },
       salesByDay,
       salesBySource,

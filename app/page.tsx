@@ -317,6 +317,26 @@ export default async function Home() {
                 </div>
               </Link>
             )}
+
+            {/* Gastos - Admin */}
+            {isAdmin && (
+              <Link href="/gastos">
+                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
+                  <div className="mb-6 flex items-center justify-between">
+                    <span className="text-5xl">💸</span>
+                    <span className="rounded-full bg-red-500/10 px-4 py-1 text-xs font-black text-red-500 uppercase tracking-widest">
+                      NUEVO
+                    </span>
+                  </div>
+                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
+                    Gastos
+                  </h3>
+                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                    Registro y control de gastos (insumos, sueldos, etc.)
+                  </p>
+                </div>
+              </Link>
+            )}
           </div>
         </div>
 
