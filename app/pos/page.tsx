@@ -81,12 +81,23 @@ export default function POSPage() {
   const [tipInput, setTipInput] = useState<string>("");
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState("");
-  // Edit Order State
+  // Edit Order State (add items)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [additionalItems, setAdditionalItems] = useState<OrderItemDraft[]>([
     { menuItemId: "", quantity: "1", notes: "" },
   ]);
   const [showNotesInput, setShowNotesInput] = useState(false);
+
+  // Modify Order State (edit/remove existing items)
+  type ModifyItem = {
+    id: string;
+    menuItemId: string;
+    quantity: number;
+    unitPrice: number;
+    menuItemName: string;
+  };
+  const [modifyingOrder, setModifyingOrder] = useState<Order | null>(null);
+  const [modifyItems, setModifyItems] = useState<ModifyItem[]>([]);
 
   const availableMenuItems = useMemo(
     () => menuItems.filter((item) => item.isAvailable),
@@ -462,6 +473,94 @@ export default function POSPage() {
     setAdditionalItems((prev) => prev.filter((_, idx) => idx !== index));
   };
 
+  const openModifyModal = (order: Order) => {
+    setModifyingOrder(order);
+    setModifyItems(
+      (order.orderItems || []).map((item) => ({
+        id: item.id,
+        menuItemId: item.menuItemId,
+        quantity: Number(item.quantity),
+        unitPrice: item.unitPrice,
+        menuItemName: item.menuItem?.name || "Producto",
+      })),
+    );
+  };
+
+  const handleModifyQuantityChange = (index: number, delta: number) => {
+    setModifyItems((prev) => {
+      const next = [...prev];
+      const newQty = next[index].quantity + delta;
+      if (newQty <= 0) {
+        if (window.confirm("¿Seguro que deseas eliminar este producto?")) {
+          return next.filter((_, idx) => idx !== index);
+        }
+        return prev;
+      }
+      next[index] = { ...next[index], quantity: newQty };
+      return next;
+    });
+  };
+
+  const handleModifyRemoveItem = (index: number) => {
+    if (window.confirm("¿Seguro que deseas eliminar este producto?")) {
+      setModifyItems((prev) => prev.filter((_, idx) => idx !== index));
+    }
+  };
+
+  const handleSaveModifiedOrder = async () => {
+    if (!modifyingOrder) return;
+    if (modifyItems.length === 0) {
+      alert("La orden debe tener al menos un producto.");
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/orders/${modifyingOrder.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: modifyItems.map((item) => ({
+            id: item.id,
+            quantity: item.quantity,
+          })),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Error al modificar orden");
+      await fetchOrders();
+      setModifyingOrder(null);
+      setModifyItems([]);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Error al modificar orden");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string, orderNumber: string) => {
+    if (
+      !window.confirm(
+        `¿Seguro que deseas cancelar la orden #${orderNumber}? Esta acción no se puede deshacer.`,
+      )
+    )
+      return;
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data?.error || "Error al cancelar orden");
+      }
+      await fetchOrders();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Error al cancelar orden");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-dark">
       <header className="bg-[#242424] shadow-sm no-print">
@@ -819,6 +918,23 @@ export default function POSPage() {
                           AGREGAR
                         </button>
                       )}
+                      {order.status !== "PAID" && (
+                        <button
+                          onClick={() => openModifyModal(order)}
+                          className="bg-yellow-500 text-white px-2 py-1.5 rounded text-[10px] font-bold"
+                        >
+                          ✏️ MODIFICAR
+                        </button>
+                      )}
+                      {order.status !== "PAID" && (
+                        <button
+                          onClick={() => handleCancelOrder(order.id, order.orderNumber)}
+                          disabled={isSubmitting}
+                          className="bg-red-700 text-white px-2 py-1.5 rounded text-[10px] font-bold disabled:opacity-50"
+                        >
+                          🚫 CANCELAR
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -912,6 +1028,112 @@ export default function POSPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE MODIFICAR ORDEN */}
+      {modifyingOrder && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
+          <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-text-light">
+                ✏️ Modificar Orden #{modifyingOrder.orderNumber}
+              </h3>
+              <button
+                onClick={() => { setModifyingOrder(null); setModifyItems([]); }}
+                className="text-gray-400 hover:text-gray-200"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              {modifyItems.length === 0 && (
+                <p className="text-center text-gray-400 py-4">
+                  No quedan productos. Cancela esta orden desde la lista o agrega más productos con el botón AGREGAR.
+                </p>
+              )}
+              {modifyItems.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="flex gap-3 items-center bg-[#181818] p-3 rounded-2xl border border-gray-700"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-gray-300 text-base leading-tight truncate">
+                      {item.menuItemName}
+                    </p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      ${item.unitPrice.toFixed(2)} c/u
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 bg-[#242424] rounded-xl p-1">
+                    <button
+                      type="button"
+                      onClick={() => handleModifyQuantityChange(index, -1)}
+                      className="w-8 h-8 rounded-lg hover:bg-[#181818] flex items-center justify-center font-black text-gray-400 text-lg transition-all"
+                    >
+                      -
+                    </button>
+                    <span className="w-6 text-center font-black text-text-light text-lg">
+                      {item.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleModifyQuantityChange(index, 1)}
+                      className="w-8 h-8 rounded-lg hover:bg-[#181818] flex items-center justify-center font-black text-gray-400 text-lg transition-all"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 w-20">
+                    <p className="font-black text-blue-500 text-lg">
+                      ${(item.unitPrice * item.quantity).toFixed(2)}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handleModifyRemoveItem(index)}
+                      className="text-red-500 hover:text-red-400 text-base"
+                      title="Eliminar producto"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {modifyItems.length > 0 && (
+              <div className="border-t-2 border-dashed border-gray-700 pt-4 mb-6 flex justify-between items-center">
+                <span className="font-black text-gray-400 uppercase tracking-widest text-sm">
+                  Nuevo Total
+                </span>
+                <span className="text-3xl font-black text-blue-500">
+                  $
+                  {modifyItems
+                    .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+                    .toFixed(2)}
+                </span>
+              </div>
+            )}
+
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => { setModifyingOrder(null); setModifyItems([]); }}
+                className="w-full bg-gray-700 text-gray-300 py-3 rounded-lg font-bold hover:bg-gray-600 transition-colors"
+              >
+                CANCELAR
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveModifiedOrder}
+                disabled={isSubmitting || modifyItems.length === 0}
+                className="w-full bg-yellow-500 text-dark py-3 rounded-lg font-bold hover:bg-yellow-400 transition-colors disabled:opacity-50"
+              >
+                {isSubmitting ? "GUARDANDO..." : "GUARDAR CAMBIOS"}
+              </button>
+            </div>
           </div>
         </div>
       )}
