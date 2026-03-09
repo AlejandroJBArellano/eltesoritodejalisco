@@ -841,32 +841,6 @@ export default function POSPage() {
           </form>
         </section>
 
-        <section>
-          <div className="rounded-lg bg-[#242424] p-6 shadow-md h-fit">
-            <h2 className="text-lg font-semibold text-text-light mb-4">
-              Resumen de Hoy
-            </h2>
-            <div className="space-y-2 text-sm text-gray-400">
-              <div className="flex justify-between">
-                <span>Órdenes activas:</span>
-                <span className="font-bold text-text-light">
-                  {orders.filter((o) => o.status !== "PAID").length}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Ventas hoy:</span>
-                <span className="font-bold text-green-600">
-                  $
-                  {orders
-                    .filter((o) => o.status === "PAID")
-                    .reduce((acc, o) => acc + o.total, 0)
-                    .toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section className="rounded-lg bg-[#242424] p-6 shadow-md">
           <h2 className="text-lg font-semibold text-text-light mb-4">
             Órdenes Recientes
