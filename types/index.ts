@@ -57,6 +57,7 @@ export enum OrderStatus {
   DELIVERED = "DELIVERED",
   PAID = "PAID",
   CANCELLED = "CANCELLED",
+  UNCOLLECTED = "UNCOLLECTED",
 }
 
 export interface Order {

@@ -16,8 +16,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const updateData: any = { status };
 
-    // If order is completed, set completion timestamp
-    if (status === "DELIVERED" || status === "PAID") {
+    // If order is completed or uncollected, set completion timestamp
+    if (status === "DELIVERED" || status === "PAID" || status === "UNCOLLECTED") {
       updateData.completed_at = new Date().toISOString();
     }
 

@@ -11,6 +11,7 @@ type ReportData = {
     totalTips: number;
     averageCompletionTimeMinutes: number;
     totalExpenses: number;
+    totalUncollected: number;
   };
   salesByDay: Record<string, number>;
   salesBySource: Record<string, { count: number; total: number }>;
@@ -128,6 +129,15 @@ export default function ReportsPage() {
             </p>
             <p className="mt-1 text-xs text-gray-400">
               Insumos, sueldos, etc.
+            </p>
+          </div>
+          <div className="rounded-lg bg-[#242424] p-6 shadow-md border-l-4 border-gray-500">
+            <p className="text-sm font-medium text-gray-400">Pérdidas por Cobro</p>
+            <p className="mt-2 text-2xl font-bold text-gray-400">
+              ${(data.summary.totalUncollected || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="mt-1 text-xs text-gray-400">
+              Falla de terminal / Cliente se fue
             </p>
           </div>
           <div className="rounded-lg bg-[#242424] p-6 shadow-md border-l-4 border-blue-500">

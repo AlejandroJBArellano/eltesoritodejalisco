@@ -138,6 +138,9 @@ export default function HistoryPage() {
         let cajaTarjeta = 0;
 
         filteredOrders.forEach((order) => {
+            // Only count PAID or DELIVERED orders in successful sales summary
+            if (order.status !== "PAID" && order.status !== "DELIVERED") return;
+
             const tipAmount = order.payments?.[0]?.tipAmount || 0;
             const paymentMethod = order.payments?.[0]?.method || "N/A";
 
@@ -181,6 +184,9 @@ export default function HistoryPage() {
         let previousMonthTotal = 0;
 
         orders.forEach(order => {
+            // Only count PAID or DELIVERED orders in charts
+            if (order.status !== "PAID" && order.status !== "DELIVERED") return;
+
             const date = new Date(order.createdAt);
             const subtotalFiscal = order.total / 1.16;
 
@@ -455,11 +461,20 @@ export default function HistoryPage() {
                                     const totalPago = order.total + tipAmount;
 
                                     let methodLabel = paymentMethod;
-                                    switch (paymentMethod) {
-                                        case PaymentMethod.CASH: methodLabel = "Efectivo"; break;
-                                        case PaymentMethod.CARD: methodLabel = "Tarjeta"; break;
-                                        case PaymentMethod.TRANSFER: methodLabel = "Transferencia"; break;
-                                        case PaymentMethod.OTHER: methodLabel = "Otro"; break;
+                                    let methodColorClass = paymentMethod === 'CASH' ? 'bg-green-900/50 text-green-300' :
+                                        paymentMethod === 'CARD' ? 'bg-blue-900/50 text-blue-300' :
+                                            'bg-gray-800 text-gray-300';
+
+                                    if (order.status === 'UNCOLLECTED') {
+                                        methodLabel = "NO COBRADA";
+                                        methodColorClass = "bg-red-900/50 text-red-300";
+                                    } else {
+                                        switch (paymentMethod) {
+                                            case PaymentMethod.CASH: methodLabel = "Efectivo"; break;
+                                            case PaymentMethod.CARD: methodLabel = "Tarjeta"; break;
+                                            case PaymentMethod.TRANSFER: methodLabel = "Transferencia"; break;
+                                            case PaymentMethod.OTHER: methodLabel = "Otro"; break;
+                                        }
                                     }
 
                                     const isExpanded = expandedRow === order.id;
@@ -489,10 +504,7 @@ export default function HistoryPage() {
                                                 </td>
                                                 <td className="px-4 py-4 text-gray-300">{order.table || "Llevar"}</td>
                                                 <td className="px-4 py-4 text-gray-300">
-                                                    <span className={`px-2 py-1 rounded text-xs font-semibold ${paymentMethod === 'CASH' ? 'bg-green-900/50 text-green-300' :
-                                                        paymentMethod === 'CARD' ? 'bg-blue-900/50 text-blue-300' :
-                                                            'bg-gray-800 text-gray-300'
-                                                        }`}>
+                                                    <span className={`px-2 py-1 rounded text-xs font-semibold ${methodColorClass}`}>
                                                         {methodLabel}
                                                     </span>
                                                 </td>

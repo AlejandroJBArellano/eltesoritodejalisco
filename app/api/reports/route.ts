@@ -132,6 +132,18 @@ export async function GET() {
       0
     );
 
+    // 6. Pérdidas por Cobro (Uncollected Orders)
+    const { data: uncollectedOrders } = await supabase
+      .from("orders")
+      .select("total")
+      .eq("status", "UNCOLLECTED")
+      .gte("created_at", sevenDaysAgo.toISOString());
+
+    const totalUncollected = (uncollectedOrders || []).reduce(
+      (sum, order) => sum + (order.total || 0),
+      0
+    );
+
     return NextResponse.json({
       summary: {
         totalSales,
@@ -140,6 +152,7 @@ export async function GET() {
         totalTips,
         averageCompletionTimeMinutes,
         totalExpenses,
+        totalUncollected,
       },
       salesByDay,
       salesBySource,

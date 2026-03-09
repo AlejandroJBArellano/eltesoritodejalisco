@@ -405,6 +405,34 @@ export default function POSPage() {
     }
   };
 
+  const handleFailedPayment = async (orderToProcess?: Order) => {
+    const order = orderToProcess || checkoutOrder;
+    if (!order) return;
+
+    if (!window.confirm(`¿Seguro que deseas marcar la orden #${order.orderNumber} como PAGO FALLIDO? Esto la quitará de ventas exitosas y la mandará a pérdidas.`)) return;
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/orders/${order.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "UNCOLLECTED",
+        }),
+      });
+
+      if (!response.ok) throw new Error("Error al marcar como pago fallido");
+
+      await fetchOrders();
+      if (!orderToProcess) setCheckoutOrder(null);
+      alert("Orden marcada como 'No Cobrada' exitosamente.");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Error al procesar");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleAddItems = async (e: FormEvent) => {
     e.preventDefault();
     if (!editingOrder) return;
@@ -926,7 +954,22 @@ export default function POSPage() {
                           ✏️ MODIFICAR
                         </button>
                       )}
-                      {order.status !== "PAID" && (
+                      {order.status !== "PAID" && order.status !== "UNCOLLECTED" && (
+                        <button
+                          onClick={async () => {
+                            setCheckoutOrder(order);
+                            // We need to wait for state update or pass it directly.
+                            // To be safe, I'll modify handleFailedPayment to accept an order.
+                            await handleFailedPayment(order);
+                          }}
+                          disabled={isSubmitting}
+                          className="bg-red-900/40 text-red-400 px-2 py-1.5 rounded text-[10px] font-bold border border-red-500/30"
+                          title="Marcar como Pago Fallido"
+                        >
+                          ❌ FALLIDO
+                        </button>
+                      )}
+                      {order.status !== "PAID" && order.status !== "UNCOLLECTED" && (
                         <button
                           onClick={() => handleCancelOrder(order.id, order.orderNumber)}
                           disabled={isSubmitting}
@@ -1263,18 +1306,28 @@ export default function POSPage() {
                   </div>
                 </div>
               )}
-              <button
-                onClick={handleProcessPayment}
-                disabled={
-                  isSubmitting ||
-                  (paymentMethod === "CASH" &&
-                    (!receivedAmount ||
-                      Number(receivedAmount) < (checkoutOrder.total + tipAmountCalculated)))
-                }
-                className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl disabled:opacity-50 transition-all"
-              >
-                {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGO E IMPRIMIR"}
-              </button>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleProcessPayment}
+                  disabled={
+                    isSubmitting ||
+                    (paymentMethod === "CASH" &&
+                      (!receivedAmount ||
+                        Number(receivedAmount) < (checkoutOrder.total + tipAmountCalculated)))
+                  }
+                  className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl disabled:opacity-50 transition-all"
+                >
+                  {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGO E IMPRIMIR"}
+                </button>
+
+                <button
+                  onClick={() => handleFailedPayment()}
+                  disabled={isSubmitting}
+                  className="w-full bg-red-900/20 border-2 border-red-500/30 text-red-500 py-3 rounded-2xl font-black text-sm hover:bg-red-900/40 transition-all uppercase tracking-widest"
+                >
+                  ❌ Pago Fallido (Cliente se fue)
+                </button>
+              </div>
             </div>
           </div>
         </div>
