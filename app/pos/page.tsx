@@ -612,236 +612,236 @@ export default function POSPage() {
           </div>
         )}
 
-        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-lg bg-[#242424] p-6 shadow-md">
-            <h2 className="text-lg font-semibold text-text-light mb-4">
-              Nueva orden
-            </h2>
-            <form onSubmit={handleSubmit} className="grid gap-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="text-sm font-medium text-gray-400">
-                    Cliente
-                  </label>
-                  <select
-                    value={formState.customerId}
-                    onChange={(e) =>
-                      handleFormChange("customerId", e.target.value)
-                    }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  >
-                    <option value="">Sin cliente</option>
-                    {customers.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-400">
-                    Fuente
-                  </label>
-                  <select
-                    value={formState.source}
-                    onChange={(e) => handleFormChange("source", e.target.value)}
-                    className={`mt-1 w-full rounded-lg border ${formErrors.source ? "border-red-500" : "border-gray-300"} px-3 py-2 text-sm`}
-                  >
-                    <option value="">Selecciona una fuente</option>
-                    {SOURCE_OPTIONS.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.source && (
-                    <p className="mt-1 text-xs text-red-600 font-bold">
-                      {formErrors.source}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-                  <span className="text-sm font-medium text-gray-400 mr-1">Mesa:</span>
-                  {["1", "2", "3", "4", "5", "Domicilio"].map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => handleFormChange("table", t)}
-                      className={`h-16 ${t === "Domicilio" ? "px-8" : "w-16"} shrink-0 rounded-full font-black text-xl transition-all flex items-center justify-center ${formState.table === t
-                        ? "bg-primary text-dark shadow-md transform scale-[1.05]"
-                        : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
-                        }`}
-                    >
-                      {t}
-                    </button>
+        <section className="rounded-lg bg-[#242424] p-6 shadow-md">
+          <h2 className="text-lg font-semibold text-text-light mb-4">
+            Nueva orden
+          </h2>
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="text-sm font-medium text-gray-400">
+                  Cliente
+                </label>
+                <select
+                  value={formState.customerId}
+                  onChange={(e) =>
+                    handleFormChange("customerId", e.target.value)
+                  }
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                >
+                  <option value="">Sin cliente</option>
+                  {customers.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => setShowNotesInput(!showNotesInput)}
-                    className={`ml-auto h-16 w-16 shrink-0 flex items-center justify-center rounded-full transition-all ${showNotesInput || formState.notes
-                      ? "bg-primary text-dark"
-                      : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
-                      }`}
-                    title="Añadir notas generales"
-                  >
-                    ✎
-                  </button>
-                </div>
-
-                {(showNotesInput || formState.notes !== "") && (
-                  <input
-                    type="text"
-                    value={formState.notes}
-                    onChange={(e) => handleFormChange("notes", e.target.value)}
-                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm w-full"
-                    placeholder="Notas generales..."
-                    autoFocus={showNotesInput && !formState.notes}
-                  />
-                )}
+                </select>
               </div>
-
-              <div className="space-y-4">
-                <div className="flex gap-2 overflow-x-auto pb-2">
-                  {categories.map(cat => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setActiveCategory(cat)}
-                      className={`px-4 py-3 rounded-xl font-black whitespace-nowrap transition-all ${activeCategory === cat
-                        ? "bg-primary text-dark shadow-md shadow-primary/30 transform scale-[1.02]"
-                        : "bg-[#181818] text-text-light hover:bg-[#2A2A2A] border border-primary/20"
-                        }`}
-                    >
-                      {cat}
-                    </button>
+              <div>
+                <label className="text-sm font-medium text-gray-400">
+                  Fuente
+                </label>
+                <select
+                  value={formState.source}
+                  onChange={(e) => handleFormChange("source", e.target.value)}
+                  className={`mt-1 w-full rounded-lg border ${formErrors.source ? "border-red-500" : "border-gray-300"} px-3 py-2 text-sm`}
+                >
+                  <option value="">Selecciona una fuente</option>
+                  {SOURCE_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
                   ))}
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {availableMenuItems
-                    .filter(m => {
-                      const itemCat = (m.category || "OTROS").toUpperCase();
-                      return itemCat === activeCategory;
-                    })
-                    .map(m => {
-                      let colorClass = "bg-[#FFB7CE] hover:bg-[#FFD1DC] text-[#121212] border-[#FFD1DC] shadow-[#FFD1DC]/30 shadow-md";
-
-                      if (activeCategory === "BEBIDAS") {
-                        colorClass = "bg-rose-400 hover:bg-rose-300 text-white border-rose-500 shadow-rose-400/30 shadow-md";
-                      } else if (activeCategory === "POSTRES" || activeCategory === "EXTRAS") {
-                        colorClass = "bg-fuchsia-400 hover:bg-fuchsia-300 text-white border-fuchsia-500 shadow-fuchsia-400/30 shadow-md";
-                      }
-
-                      return (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onClick={() => handleGridItemClick(m)}
-                          className={`p-3 rounded-[1.25rem] flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all ${colorClass}`}
-                        >
-                          <span className="font-extrabold text-[13px] leading-snug line-clamp-2">{m.name}</span>
-                          <span className="font-black mt-1 opacity-90">${m.price.toFixed(2)}</span>
-                        </button>
-                      );
-                    })}
-                </div>
-              </div>
-
-              <div className="space-y-4 mt-8 bg-[#181818] border border-gray-200 rounded-3xl p-5 shadow-inner">
-                <span className="text-base font-black uppercase text-gray-400 block mb-2 tracking-widest">Pedido</span>
-                {formErrors.items && (
-                  <p className="text-xs text-red-600 font-bold mb-2">
-                    {formErrors.items}
+                </select>
+                {formErrors.source && (
+                  <p className="mt-1 text-xs text-red-600 font-bold">
+                    {formErrors.source}
                   </p>
                 )}
-                {formState.items.length === 0 && (
-                  <div className="text-center py-6 text-gray-400 font-bold">
-                    <p className="text-3xl mb-2">🛒</p>
-                    <p>Agrega productos usando los botones</p>
-                  </div>
-                )}
-                {formState.items.map((item, index) => {
-                  const product = availableMenuItems.find(m => m.id === item.menuItemId);
-                  return (
-                    <div key={index} className="flex gap-3 items-center bg-[#242424] p-3 rounded-2xl border border-gray-200 shadow-sm">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-black text-gray-300 text-lg leading-tight truncate">{product?.name || "Producto"}</p>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">${product?.price.toFixed(2)} c/u</p>
-                      </div>
-                      <div className="flex items-center gap-1 bg-dark rounded-xl p-1">
-                        <button
-                          type="button"
-                          onClick={() => handleQuantityChange(index, -1)}
-                          className="w-8 h-8 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
-                        >
-                          -
-                        </button>
-                        <span className="w-6 text-center font-black text-text-light text-lg">{item.quantity}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleQuantityChange(index, 1)}
-                          className="w-8 h-8 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
-                        >
-                          +
-                        </button>
-                      </div>
-                      <div className="w-20 text-right flex flex-col items-end gap-1">
-                        <p className="font-black text-blue-600 text-xl">
-                          ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (window.confirm("¿Seguro que deseas eliminar el producto?")) {
-                              removeItemRow(index);
-                            }
-                          }}
-                          className="text-red-500 hover:text-red-400 text-sm flex items-center gap-1 mt-1"
-                          title="Eliminar producto"
-                        >
-                          <span className="text-base leading-none">🗑️</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-                {formState.items.length > 0 && (
-                  <div className="pt-4 mt-4 border-t-2 border-dashed border-gray-200 flex flex-col gap-4">
-                    <div className="flex justify-between items-center">
-                      <span className="font-black text-gray-400 uppercase tracking-widest text-sm">Total Orden</span>
-                      <span className="text-4xl font-black text-blue-600">
-                        ${formState.items.reduce((total, item) => {
-                          const product = availableMenuItems.find(m => m.id === item.menuItemId);
-                          return total + (product?.price || 0) * Number(item.quantity);
-                        }, 0).toFixed(2)}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleClearCart}
-                      className="w-full flex items-center justify-center gap-2 rounded-lg bg-red-900/20 border border-red-500/30 py-2 text-red-500 font-bold hover:bg-red-900/40 transition-colors"
-                    >
-                      <span className="text-lg">🧹</span> Vaciar Carrito
-                    </button>
-                  </div>
-                )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+                <span className="text-sm font-medium text-gray-400 mr-1">Mesa:</span>
+                {["1", "2", "3", "4", "5", "Domicilio"].map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => handleFormChange("table", t)}
+                    className={`h-16 ${t === "Domicilio" ? "px-8" : "w-16"} shrink-0 rounded-full font-black text-xl transition-all flex items-center justify-center ${formState.table === t
+                      ? "bg-primary text-dark shadow-md transform scale-[1.05]"
+                      : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
+                      }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setShowNotesInput(!showNotesInput)}
+                  className={`ml-auto h-16 w-16 shrink-0 flex items-center justify-center rounded-full transition-all ${showNotesInput || formState.notes
+                    ? "bg-primary text-dark"
+                    : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
+                    }`}
+                  title="Añadir notas generales"
+                >
+                  ✎
+                </button>
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full rounded-lg bg-green-600 py-3 text-white font-bold hover:bg-green-700 transition-colors"
-              >
-                {isSubmitting
-                  ? "GUARDANDO..."
-                  : "GUARDAR ORDEN E IMPRIMIR COMANDA"}
-              </button>
-            </form>
-          </div>
+              {(showNotesInput || formState.notes !== "") && (
+                <input
+                  type="text"
+                  value={formState.notes}
+                  onChange={(e) => handleFormChange("notes", e.target.value)}
+                  className="rounded-lg border border-gray-300 px-3 py-2 text-sm w-full"
+                  placeholder="Notas generales..."
+                  autoFocus={showNotesInput && !formState.notes}
+                />
+              )}
+            </div>
 
+            <div className="space-y-4">
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setActiveCategory(cat)}
+                    className={`px-4 py-3 rounded-xl font-black whitespace-nowrap transition-all ${activeCategory === cat
+                      ? "bg-primary text-dark shadow-md shadow-primary/30 transform scale-[1.02]"
+                      : "bg-[#181818] text-text-light hover:bg-[#2A2A2A] border border-primary/20"
+                      }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {availableMenuItems
+                  .filter(m => {
+                    const itemCat = (m.category || "OTROS").toUpperCase();
+                    return itemCat === activeCategory;
+                  })
+                  .map(m => {
+                    let colorClass = "bg-[#FFB7CE] hover:bg-[#FFD1DC] text-[#121212] border-[#FFD1DC] shadow-[#FFD1DC]/30 shadow-md";
+
+                    if (activeCategory === "BEBIDAS") {
+                      colorClass = "bg-rose-400 hover:bg-rose-300 text-white border-rose-500 shadow-rose-400/30 shadow-md";
+                    } else if (activeCategory === "POSTRES" || activeCategory === "EXTRAS") {
+                      colorClass = "bg-fuchsia-400 hover:bg-fuchsia-300 text-white border-fuchsia-500 shadow-fuchsia-400/30 shadow-md";
+                    }
+
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => handleGridItemClick(m)}
+                        className={`p-3 rounded-[1.25rem] flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all ${colorClass}`}
+                      >
+                        <span className="font-extrabold text-[13px] leading-snug line-clamp-2">{m.name}</span>
+                        <span className="font-black mt-1 opacity-90">${m.price.toFixed(2)}</span>
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+
+            <div className="space-y-4 mt-8 bg-[#181818] border border-gray-200 rounded-3xl p-5 shadow-inner">
+              <span className="text-base font-black uppercase text-gray-400 block mb-2 tracking-widest">Pedido</span>
+              {formErrors.items && (
+                <p className="text-xs text-red-600 font-bold mb-2">
+                  {formErrors.items}
+                </p>
+              )}
+              {formState.items.length === 0 && (
+                <div className="text-center py-6 text-gray-400 font-bold">
+                  <p className="text-3xl mb-2">🛒</p>
+                  <p>Agrega productos usando los botones</p>
+                </div>
+              )}
+              {formState.items.map((item, index) => {
+                const product = availableMenuItems.find(m => m.id === item.menuItemId);
+                return (
+                  <div key={index} className="flex gap-3 items-center bg-[#242424] p-3 rounded-2xl border border-gray-200 shadow-sm">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black text-gray-300 text-lg leading-tight truncate">{product?.name || "Producto"}</p>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">${product?.price.toFixed(2)} c/u</p>
+                    </div>
+                    <div className="flex items-center gap-1 bg-dark rounded-xl p-1">
+                      <button
+                        type="button"
+                        onClick={() => handleQuantityChange(index, -1)}
+                        className="w-8 h-8 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
+                      >
+                        -
+                      </button>
+                      <span className="w-6 text-center font-black text-text-light text-lg">{item.quantity}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleQuantityChange(index, 1)}
+                        className="w-8 h-8 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div className="w-20 text-right flex flex-col items-end gap-1">
+                      <p className="font-black text-blue-600 text-xl">
+                        ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm("¿Seguro que deseas eliminar el producto?")) {
+                            removeItemRow(index);
+                          }
+                        }}
+                        className="text-red-500 hover:text-red-400 text-sm flex items-center gap-1 mt-1"
+                        title="Eliminar producto"
+                      >
+                        <span className="text-base leading-none">🗑️</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              {formState.items.length > 0 && (
+                <div className="pt-4 mt-4 border-t-2 border-dashed border-gray-200 flex flex-col gap-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-black text-gray-400 uppercase tracking-widest text-sm">Total Orden</span>
+                    <span className="text-4xl font-black text-blue-600">
+                      ${formState.items.reduce((total, item) => {
+                        const product = availableMenuItems.find(m => m.id === item.menuItemId);
+                        return total + (product?.price || 0) * Number(item.quantity);
+                      }, 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleClearCart}
+                    className="w-full flex items-center justify-center gap-2 rounded-lg bg-red-900/20 border border-red-500/30 py-2 text-red-500 font-bold hover:bg-red-900/40 transition-colors"
+                  >
+                    <span className="text-lg">🧹</span> Vaciar Carrito
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full rounded-lg bg-green-600 py-3 text-white font-bold hover:bg-green-700 transition-colors"
+            >
+              {isSubmitting
+                ? "GUARDANDO..."
+                : "GUARDAR ORDEN E IMPRIMIR COMANDA"}
+            </button>
+          </form>
+        </section>
+
+        <section>
           <div className="rounded-lg bg-[#242424] p-6 shadow-md h-fit">
             <h2 className="text-lg font-semibold text-text-light mb-4">
               Resumen de Hoy
