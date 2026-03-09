@@ -73,6 +73,7 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
       [OrderStatus.DELIVERED]: "Entregado",
       [OrderStatus.PAID]: "Pagado",
       [OrderStatus.CANCELLED]: "Cancelado",
+      [OrderStatus.UNCOLLECTED]: "No Cobrada",
     };
     return labels[status];
   };
