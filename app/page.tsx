@@ -227,8 +227,8 @@ export default async function Home() {
               </Link>
             )}
 
-            {/* History - Admin and Waiter */}
-            {(isAdmin || isWaiter) && (
+            {/* History - Admin Only */}
+            {isAdmin && (
               <Link href="/history">
                 <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
                   <div className="mb-6 flex items-center justify-between">

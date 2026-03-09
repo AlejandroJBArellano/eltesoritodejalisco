@@ -20,6 +20,8 @@ import {
     XAxis, YAxis
 } from 'recharts';
 
+import { createClient } from "@/lib/supabase/client";
+
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
 type Order = OrderWithDetails;
@@ -27,6 +29,8 @@ type Order = OrderWithDetails;
 export default function HistoryPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCheckingRole, setIsCheckingRole] = useState(true);
+    const [userRole, setUserRole] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     // Filters
@@ -36,6 +40,25 @@ export default function HistoryPage() {
     const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
 
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
+    const checkRole = async () => {
+        try {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+                setUserRole(profile?.role || null);
+            }
+        } catch (error) {
+            console.error("Error checking role:", error);
+        } finally {
+            setIsCheckingRole(false);
+        }
+    };
 
     const fetchOrders = async () => {
         try {
@@ -84,37 +107,23 @@ export default function HistoryPage() {
     };
 
     useEffect(() => {
+        checkRole();
         fetchOrders();
     }, []);
 
     const filteredOrders = useMemo(() => {
+        // ... (rest of the filteredOrders logic remains the same)
         return orders.filter((order) => {
-            // 1. Search Query (Folio)
-            if (searchQuery && !order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())) {
-                return false;
-            }
-
-            // 2. Date Filter
+            if (searchQuery && !order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())) return false;
             if (dateFilter) {
                 const orderDate = new Date(order.createdAt).toISOString().substring(0, 10);
-                if (orderDate !== dateFilter) {
-                    return false;
-                }
+                if (orderDate !== dateFilter) return false;
             }
-
-            // 3. Table Filter
-            if (tableFilter && order.table !== tableFilter) {
-                return false;
-            }
-
-            // 4. Payment Method Filter
+            if (tableFilter && order.table !== tableFilter) return false;
             if (paymentMethodFilter) {
                 const primaryPayment = order.payments && order.payments[0] ? order.payments[0].method : null;
-                if (primaryPayment !== paymentMethodFilter) {
-                    return false;
-                }
+                if (primaryPayment !== paymentMethodFilter) return false;
             }
-
             return true;
         });
     }, [orders, searchQuery, dateFilter, tableFilter, paymentMethodFilter]);
@@ -138,7 +147,6 @@ export default function HistoryPage() {
         let cajaTarjeta = 0;
 
         filteredOrders.forEach((order) => {
-            // Only count PAID or DELIVERED orders in successful sales summary
             if (order.status !== "PAID" && order.status !== "DELIVERED") return;
 
             const tipAmount = order.payments?.[0]?.tipAmount || 0;
@@ -158,7 +166,7 @@ export default function HistoryPage() {
                 propinasTarjeta += tipAmount;
                 cajaTarjeta += totalPago;
             } else {
-                cajaEfectivo += totalPago; // Fallback
+                cajaEfectivo += totalPago;
             }
         });
 
@@ -177,14 +185,12 @@ export default function HistoryPage() {
 
     const chartsData = useMemo(() => {
         const now = new Date();
-
         const dailyMap = new Map<string, number>();
         const categoryMap = new Map<string, number>();
         let currentMonthTotal = 0;
         let previousMonthTotal = 0;
 
         orders.forEach(order => {
-            // Only count PAID or DELIVERED orders in charts
             if (order.status !== "PAID" && order.status !== "DELIVERED") return;
 
             const date = new Date(order.createdAt);
@@ -192,7 +198,6 @@ export default function HistoryPage() {
 
             if (isSameMonth(date, now)) {
                 currentMonthTotal += subtotalFiscal;
-
                 const dayKey = format(date, 'yyyy-MM-dd');
                 dailyMap.set(dayKey, (dailyMap.get(dayKey) || 0) + subtotalFiscal);
 
@@ -224,6 +229,34 @@ export default function HistoryPage() {
 
         return { dailySales, salesMix, growth };
     }, [orders]);
+
+    if (isCheckingRole) {
+        return (
+            <div className="min-h-screen bg-dark flex justify-center items-center">
+                <p className="text-white">Verificando permisos...</p>
+            </div>
+        );
+    }
+
+    if (userRole === "WAITER") {
+        return (
+            <div className="min-h-screen bg-dark flex flex-col justify-center items-center p-4">
+                <div className="bg-[#242424] p-8 rounded-2xl shadow-xl border border-red-900/30 max-w-md w-full text-center">
+                    <div className="text-6xl mb-4">🚫</div>
+                    <h1 className="text-2xl font-bold text-white mb-2">Acceso Denegado</h1>
+                    <p className="text-gray-400 mb-8">
+                        Lo sentimos, el rol de <strong>MESERO</strong> no tiene permisos para acceder al historial y estadísticas financieras.
+                    </p>
+                    <Link
+                        href="/"
+                        className="inline-block w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                        Volver al Dashboard
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     if (isLoading) {
         return (
