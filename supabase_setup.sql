@@ -37,3 +37,26 @@ VALUES
     ('Servicios', '#F59E0B'),
     ('Otros', '#6B7280')
 ON CONFLICT (name) DO NOTHING;
+
+-- Daily Cuts historical archive
+CREATE TABLE IF NOT EXISTS public.daily_cuts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    cut_date DATE NOT NULL,
+    venta_neta NUMERIC(10, 2) DEFAULT 0,
+    iva_acumulado NUMERIC(10, 2) DEFAULT 0,
+    propinas_efectivo NUMERIC(10, 2) DEFAULT 0,
+    propinas_tarjeta NUMERIC(10, 2) DEFAULT 0,
+    caja_efectivo NUMERIC(10, 2) DEFAULT 0,
+    caja_tarjeta NUMERIC(10, 2) DEFAULT 0,
+    utilidad_real NUMERIC(10, 2) DEFAULT 0,
+    total_gastos NUMERIC(10, 2) DEFAULT 0,
+    utilidad_final NUMERIC(10, 2) DEFAULT 0,
+    total_orders INTEGER DEFAULT 0,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.daily_cuts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all operations for anon on daily_cuts"
+ON public.daily_cuts FOR ALL USING (true);

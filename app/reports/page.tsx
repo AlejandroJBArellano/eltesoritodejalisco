@@ -2,8 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 type ReportData = {
+  period: string;
   summary: {
     totalSales: number;
     totalOrders: number;
@@ -14,6 +25,7 @@ type ReportData = {
     totalUncollected: number;
   };
   salesByDay: Record<string, number>;
+  itemsByDay: Record<string, { name: string; quantity: number; revenue: number }[]>;
   salesBySource: Record<string, { count: number; total: number }>;
   topSellingItems: { name: string; quantity: number; revenue: number }[];
   customers: {
@@ -22,44 +34,59 @@ type ReportData = {
   };
 };
 
+type Period = "today" | "7days" | "month";
+
+const PERIOD_LABELS: Record<Period, string> = {
+  today: "Hoy",
+  "7days": "Últimos 7 días",
+  month: "Mes Actual",
+};
+
 export default function ReportsPage() {
   const [data, setData] = useState<ReportData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [period, setPeriod] = useState<Period>("7days");
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+
+  const fetchData = async (p: Period) => {
+    try {
+      setIsLoading(true);
+      setSelectedDay(null);
+      const response = await fetch(`/api/reports?period=${p}`);
+      if (!response.ok) throw new Error("Error al cargar reportes");
+      const json = await response.json();
+      setData(json);
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error ? err.message : "Error desconocido",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch("/api/reports");
-        if (!response.ok) throw new Error("Error al cargar reportes");
-        const json = await response.json();
-        // Calculate sales by source properly if returned as object
-        setData(json);
-      } catch (err) {
-        setErrorMessage(
-          err instanceof Error ? err.message : "Error desconocido",
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+    fetchData(period);
+  }, [period]);
 
   const chartData = useMemo(() => {
     if (!data) return [];
     return Object.entries(data.salesByDay).map(([date, total]) => ({
       date,
       total,
+      label: new Date(`${date}T12:00:00-06:00`).toLocaleDateString("es-MX", {
+        weekday: "short",
+        day: "numeric",
+        timeZone: "America/Mexico_City",
+      }),
     }));
   }, [data]);
 
-  const maxSales = useMemo(() => {
-    if (!chartData.length) return 0;
-    return Math.max(...chartData.map((d) => d.total));
-  }, [chartData]);
+  const selectedDayItems = useMemo(() => {
+    if (!selectedDay || !data?.itemsByDay) return [];
+    return data.itemsByDay[selectedDay] || [];
+  }, [selectedDay, data]);
 
   if (isLoading) {
     return (
@@ -95,7 +122,7 @@ export default function ReportsPage() {
               Reportes & Analytics
             </h1>
             <p className="text-sm text-gray-400">
-              Resumen de los últimos 7 días
+              {PERIOD_LABELS[period]}
             </p>
           </div>
           <div className="flex gap-3">
@@ -111,6 +138,25 @@ export default function ReportsPage() {
 
       {/* Main Content */}
       <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+
+        {/* Period Selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-400 mr-2">Ver estadísticas de:</span>
+          {(["today", "7days", "month"] as Period[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+                period === p
+                  ? "bg-blue-600 text-white"
+                  : "bg-[#242424] text-gray-400 hover:bg-[#2a2a2a] hover:text-white"
+              }`}
+            >
+              {PERIOD_LABELS[p]}
+            </button>
+          ))}
+        </div>
+
         {/* KPI Cards */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
           <div className="rounded-lg bg-[#242424] p-6 shadow-md border-l-4 border-green-500">
@@ -173,44 +219,119 @@ export default function ReportsPage() {
               {data.customers.newCustomersCount}
             </p>
             <p className="mt-1 text-xs text-gray-400">
-              En la última semana
+              En el periodo seleccionado
             </p>
           </div>
         </div>
 
-        {/* Sales Chart */}
+        {/* Interactive Sales Chart */}
         <section className="rounded-lg bg-[#242424] p-6 shadow-md">
-          <h2 className="mb-6 text-lg font-bold text-[#E0E0E0]">
-            Ventas por Día
-          </h2>
-          <div className="flex h-64 items-end gap-4 border-b border-l border-gray-200 p-4">
-            {chartData.length > 0 ? (
-              chartData.map((d) => (
-                <div
-                  key={d.date}
-                  className="group relative flex-1 bg-blue-500 hover:bg-blue-600 transition-all rounded-t"
-                  style={{
-                    height: `${(d.total / maxSales) * 100}%`,
-                    minHeight: "4px",
-                  }}
-                >
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
-                    ${d.total}
-                  </div>
-                  <div className="absolute top-full left-1/2 mt-2 -translate-x-1/2 text-xs text-gray-400 whitespace-nowrap">
-                    {new Date(`${d.date}T12:00:00-06:00`).toLocaleDateString("es-MX", {
-                      weekday: "short",
-                      timeZone: "America/Mexico_City",
-                    })}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="w-full text-center text-gray-400 self-center">
-                No hay datos de ventas recientes.
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-[#E0E0E0]">
+                Ventas por Día
+              </h2>
+              <p className="text-xs text-gray-400 mt-1">
+                Haz clic en una barra para ver los productos más vendidos ese día
               </p>
+            </div>
+            {selectedDay && (
+              <button
+                onClick={() => setSelectedDay(null)}
+                className="text-xs text-gray-400 hover:text-white transition-colors"
+              >
+                ✕ Cerrar detalle
+              </button>
             )}
           </div>
+
+          {chartData.length > 0 ? (
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis
+                    dataKey="label"
+                    stroke="#9CA3AF"
+                    fontSize={12}
+                    tick={{ fill: "#9CA3AF" }}
+                  />
+                  <YAxis
+                    stroke="#9CA3AF"
+                    fontSize={12}
+                    tick={{ fill: "#9CA3AF" }}
+                    tickFormatter={(val) => `$${val}`}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{ backgroundColor: "#1F2937", borderColor: "#374151", color: "#FFF" }}
+                    formatter={(value: number | undefined) => [`$${(value ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, "Ventas"]}
+                    cursor={{ fill: "rgba(59,130,246,0.1)" }}
+                  />
+                  <Bar
+                    dataKey="total"
+                    radius={[4, 4, 0, 0]}
+                    style={{ cursor: "pointer" }}
+                    onClick={(barData) => {
+                      const date = (barData.payload as { date: string })?.date;
+                      if (date) setSelectedDay((prev) => prev === date ? null : date);
+                    }}
+                  >
+                    {chartData.map((entry) => (
+                      <Cell
+                        key={entry.date}
+                        fill={selectedDay === entry.date ? "#F59E0B" : "#3B82F6"}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p className="py-16 text-center text-gray-400">
+              No hay datos de ventas en el periodo seleccionado.
+            </p>
+          )}
+
+          {/* Day Drill-Down Panel */}
+          {selectedDay && (
+            <div className="mt-4 rounded-lg bg-[#181818] border border-yellow-500/40 p-4">
+              <h3 className="text-sm font-bold text-yellow-400 mb-3 uppercase tracking-wider">
+                📊 Top productos —{" "}
+                {new Date(`${selectedDay}T12:00:00-06:00`).toLocaleDateString("es-MX", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  timeZone: "America/Mexico_City",
+                })}
+              </h3>
+              {selectedDayItems.length > 0 ? (
+                <div className="space-y-2">
+                  {selectedDayItems.map((item, i) => (
+                    <div key={i} className="flex items-center justify-between py-1">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow-500/20 text-xs font-bold text-yellow-400">
+                          {i + 1}
+                        </span>
+                        <span className="text-sm font-medium text-[#E0E0E0]">{item.name}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-bold text-[#E0E0E0]">{item.quantity} vendidos</span>
+                        <span className="ml-3 text-xs text-gray-400">
+                          ${item.revenue.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400">No hay detalle de productos para este día.</p>
+              )}
+            </div>
+          )}
         </section>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -317,3 +438,4 @@ export default function ReportsPage() {
     </div>
   );
 }
+
