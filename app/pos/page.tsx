@@ -605,353 +605,358 @@ export default function POSPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 no-print">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 no-print">
         {errorMessage && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
             {errorMessage}
           </div>
         )}
 
-        <section className="rounded-lg bg-[#242424] p-6 shadow-md">
-          <h2 className="text-lg font-semibold text-text-light mb-4">
-            Nueva orden
-          </h2>
-          <form onSubmit={handleSubmit} className="grid gap-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="text-sm font-medium text-gray-400">
-                  Cliente
-                </label>
-                <select
-                  value={formState.customerId}
-                  onChange={(e) =>
-                    handleFormChange("customerId", e.target.value)
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                >
-                  <option value="">Sin cliente</option>
-                  {customers.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            {/* COLUMNA IZQUIERDA: Configuración y Menú */}
+            <div className="lg:col-span-7 xl:col-span-8 space-y-6">
+
+              {/* Configuración de la Orden */}
+              <section className="rounded-2xl bg-[#242424] p-5 shadow-md border border-white/5">
+                <h2 className="text-lg font-bold text-text-light mb-4 flex items-center gap-2">
+                  <span className="text-primary">📋</span> Configuración de Orden
+                </h2>
+                <div className="grid gap-4 sm:grid-cols-2 mb-6">
+                  <div>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">
+                      Cliente
+                    </label>
+                    <select
+                      value={formState.customerId}
+                      onChange={(e) => handleFormChange("customerId", e.target.value)}
+                      className="w-full rounded-xl border border-gray-700 bg-[#181818] px-3 py-2.5 text-sm outline-none focus:border-primary transition-all"
+                    >
+                      <option value="">Sin cliente (General)</option>
+                      {customers.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">
+                      ¿Cómo nos conoció? *
+                    </label>
+                    <select
+                      value={formState.source}
+                      onChange={(e) => handleFormChange("source", e.target.value)}
+                      className={`w-full rounded-xl border ${formErrors.source ? "border-red-500" : "border-gray-300"} bg-[#181818] px-3 py-2.5 text-sm outline-none focus:border-primary transition-all`}
+                    >
+                      <option value="">Selecciona una opción</option>
+                      {SOURCE_OPTIONS.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    {formErrors.source && (
+                      <p className="mt-1 text-[10px] text-red-500 font-bold uppercase">{formErrors.source}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Seleccionar Mesa / Entrega</label>
+                  <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+                    {["1", "2", "3", "4", "5", "Domicilio"].map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => handleFormChange("table", t)}
+                        className={`h-14 ${t === "Domicilio" ? "px-6" : "w-14"} shrink-0 rounded-2xl font-black text-lg transition-all flex items-center justify-center border-2 ${formState.table === t
+                          ? "bg-primary text-dark border-primary shadow-lg shadow-primary/20 scale-105"
+                          : "bg-[#181818] text-gray-400 border-gray-800 hover:border-gray-600"
+                          }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setShowNotesInput(!showNotesInput)}
+                      className={`ml-auto h-14 w-14 shrink-0 flex items-center justify-center rounded-2xl transition-all border-2 ${showNotesInput || formState.notes
+                        ? "bg-amber-500 text-dark border-amber-500"
+                        : "bg-[#181818] text-gray-400 border-gray-800 hover:border-gray-600"
+                        }`}
+                      title="Notas"
+                    >
+                      📝
+                    </button>
+                  </div>
+
+                  {(showNotesInput || formState.notes !== "") && (
+                    <input
+                      type="text"
+                      value={formState.notes}
+                      onChange={(e) => handleFormChange("notes", e.target.value)}
+                      className="rounded-xl border border-gray-700 bg-[#181818] px-4 py-3 text-sm w-full focus:border-primary outline-none transition-all"
+                      placeholder="Escribe notas adicionales aquí..."
+                      autoFocus={showNotesInput && !formState.notes}
+                    />
+                  )}
+                </div>
+              </section>
+
+              {/* Selector de Productos */}
+              <section className="rounded-2xl bg-[#242424] p-5 shadow-md border border-white/5">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-text-light flex items-center gap-2">
+                    <span className="text-primary">🌮</span> Menú
+                  </h2>
+                </div>
+
+                <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+                  {categories.map(cat => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setActiveCategory(cat)}
+                      className={`px-5 py-2.5 rounded-full font-bold whitespace-nowrap transition-all text-sm border-2 ${activeCategory === cat
+                        ? "bg-primary text-dark border-primary shadow-md shadow-primary/10"
+                        : "bg-[#181818] text-gray-400 border-gray-800 hover:border-gray-700"
+                        }`}
+                    >
+                      {cat}
+                    </button>
                   ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-400">
-                  Fuente
-                </label>
-                <select
-                  value={formState.source}
-                  onChange={(e) => handleFormChange("source", e.target.value)}
-                  className={`mt-1 w-full rounded-lg border ${formErrors.source ? "border-red-500" : "border-gray-300"} px-3 py-2 text-sm`}
-                >
-                  <option value="">Selecciona una fuente</option>
-                  {SOURCE_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-                {formErrors.source && (
-                  <p className="mt-1 text-xs text-red-600 font-bold">
-                    {formErrors.source}
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {availableMenuItems
+                    .filter(m => (m.category || "OTROS").toUpperCase() === activeCategory)
+                    .map(m => {
+                      let colorClass = "bg-[#FFB7CE] hover:bg-[#FFD1DC] text-[#121212] border-[#FFD1DC]";
+                      if (activeCategory === "BEBIDAS") colorClass = "bg-rose-400 hover:bg-rose-300 text-white border-rose-500";
+                      else if (activeCategory === "POSTRES" || activeCategory === "EXTRAS") colorClass = "bg-fuchsia-400 hover:bg-fuchsia-300 text-white border-fuchsia-500";
+
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => handleGridItemClick(m)}
+                          className={`p-3 rounded-2xl flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all shadow-lg ${colorClass}`}
+                        >
+                          <span className="font-extrabold text-[12px] leading-tight line-clamp-2 uppercase">{m.name}</span>
+                          <span className="font-black mt-1 text-base">${m.price.toFixed(2)}</span>
+                        </button>
+                      );
+                    })}
+                </div>
+              </section>
+            </div>
+
+            {/* COLUMNA DERECHA: Carrito y Resumen (Sticky en Desktop) */}
+            <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-6">
+
+              {/* Detalle del Pedido */}
+              <section className="rounded-2xl bg-[#181818] border border-gray-800 p-5 shadow-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-black uppercase text-gray-400 tracking-widest">Tu Pedido</h3>
+                  {formState.items.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleClearCart}
+                      className="text-[10px] font-bold text-red-500 uppercase hover:underline"
+                    >
+                      Vaciar
+                    </button>
+                  )}
+                </div>
+
+                {formErrors.items && (
+                  <p className="text-xs text-red-500 font-bold mb-4 bg-red-500/10 p-2 rounded-lg border border-red-500/20 text-center">
+                    ⚠️ {formErrors.items}
                   </p>
                 )}
-              </div>
-            </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-                <span className="text-sm font-medium text-gray-400 mr-1">Mesa:</span>
-                {["1", "2", "3", "4", "5", "Domicilio"].map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => handleFormChange("table", t)}
-                    className={`h-16 ${t === "Domicilio" ? "px-8" : "w-16"} shrink-0 rounded-full font-black text-xl transition-all flex items-center justify-center ${formState.table === t
-                      ? "bg-primary text-dark shadow-md transform scale-[1.05]"
-                      : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
-                      }`}
-                  >
-                    {t}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => setShowNotesInput(!showNotesInput)}
-                  className={`ml-auto h-16 w-16 shrink-0 flex items-center justify-center rounded-full transition-all ${showNotesInput || formState.notes
-                    ? "bg-primary text-dark"
-                    : "bg-[#181818] text-gray-400 border border-gray-700 hover:bg-[#2A2A2A]"
-                    }`}
-                  title="Añadir notas generales"
-                >
-                  ✎
-                </button>
-              </div>
-
-              {(showNotesInput || formState.notes !== "") && (
-                <input
-                  type="text"
-                  value={formState.notes}
-                  onChange={(e) => handleFormChange("notes", e.target.value)}
-                  className="rounded-lg border border-gray-300 px-3 py-2 text-sm w-full"
-                  placeholder="Notas generales..."
-                  autoFocus={showNotesInput && !formState.notes}
-                />
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setActiveCategory(cat)}
-                    className={`px-4 py-3 rounded-xl font-black whitespace-nowrap transition-all ${activeCategory === cat
-                      ? "bg-primary text-dark shadow-md shadow-primary/30 transform scale-[1.02]"
-                      : "bg-[#181818] text-text-light hover:bg-[#2A2A2A] border border-primary/20"
-                      }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {availableMenuItems
-                  .filter(m => {
-                    const itemCat = (m.category || "OTROS").toUpperCase();
-                    return itemCat === activeCategory;
-                  })
-                  .map(m => {
-                    let colorClass = "bg-[#FFB7CE] hover:bg-[#FFD1DC] text-[#121212] border-[#FFD1DC] shadow-[#FFD1DC]/30 shadow-md";
-
-                    if (activeCategory === "BEBIDAS") {
-                      colorClass = "bg-rose-400 hover:bg-rose-300 text-white border-rose-500 shadow-rose-400/30 shadow-md";
-                    } else if (activeCategory === "POSTRES" || activeCategory === "EXTRAS") {
-                      colorClass = "bg-fuchsia-400 hover:bg-fuchsia-300 text-white border-fuchsia-500 shadow-fuchsia-400/30 shadow-md";
-                    }
-
-                    return (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => handleGridItemClick(m)}
-                        className={`p-3 rounded-[1.25rem] flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all ${colorClass}`}
-                      >
-                        <span className="font-extrabold text-[13px] leading-snug line-clamp-2">{m.name}</span>
-                        <span className="font-black mt-1 opacity-90">${m.price.toFixed(2)}</span>
-                      </button>
-                    );
-                  })}
-              </div>
-            </div>
-
-            <div className="space-y-4 mt-8 bg-[#181818] border border-gray-200 rounded-3xl p-5 shadow-inner">
-              <span className="text-base font-black uppercase text-gray-400 block mb-2 tracking-widest">Pedido</span>
-              {formErrors.items && (
-                <p className="text-xs text-red-600 font-bold mb-2">
-                  {formErrors.items}
-                </p>
-              )}
-              {formState.items.length === 0 && (
-                <div className="text-center py-6 text-gray-400 font-bold">
-                  <p className="text-3xl mb-2">🛒</p>
-                  <p>Agrega productos usando los botones</p>
+                <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1 custom-scrollbar">
+                  {formState.items.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      <p className="text-4xl mb-3 opacity-20">🛒</p>
+                      <p className="text-sm font-bold opacity-40 uppercase tracking-tighter">El carrito está vacío</p>
+                    </div>
+                  ) : (
+                    formState.items.map((item, index) => {
+                      const product = availableMenuItems.find(m => m.id === item.menuItemId);
+                      return (
+                        <div key={index} className="flex gap-3 items-center bg-[#242424] p-3 rounded-xl border border-white/5 shadow-sm group">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-200 text-sm leading-tight truncate uppercase">{product?.name || "Producto"}</p>
+                            <p className="text-[10px] font-bold text-gray-500 mt-0.5">${product?.price.toFixed(2)} c/u</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 bg-[#121212] rounded-lg p-1 border border-white/5">
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(index, -1)}
+                              className="w-7 h-7 rounded-md hover:bg-red-500/20 text-gray-400 hover:text-red-500 flex items-center justify-center font-black transition-all"
+                            >
+                              -
+                            </button>
+                            <span className="w-5 text-center font-black text-text-light text-sm">{item.quantity}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(index, 1)}
+                              className="w-7 h-7 rounded-md hover:bg-green-500/20 text-gray-400 hover:text-green-500 flex items-center justify-center font-black transition-all"
+                            >
+                              +
+                            </button>
+                          </div>
+                          <div className="text-right flex flex-col items-end min-w-[60px]">
+                            <p className="font-black text-primary text-sm">
+                              ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
-              )}
-              {formState.items.map((item, index) => {
-                const product = availableMenuItems.find(m => m.id === item.menuItemId);
-                return (
-                  <div key={index} className="flex gap-3 items-center bg-[#242424] p-3 rounded-2xl border border-gray-200 shadow-sm">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-black text-gray-300 text-lg leading-tight truncate">{product?.name || "Producto"}</p>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">${product?.price.toFixed(2)} c/u</p>
+
+                {formState.items.length > 0 && (
+                  <div className="mt-6 pt-5 border-t border-dashed border-gray-700 space-y-4">
+                    <div className="flex justify-between items-end">
+                      <span className="font-bold text-gray-500 uppercase tracking-widest text-[10px]">Total a pagar</span>
+                      <span className="text-4xl font-black text-primary tabular-nums">
+                        ${formState.items.reduce((total, item) => {
+                          const product = availableMenuItems.find(m => m.id === item.menuItemId);
+                          return total + (product?.price || 0) * Number(item.quantity);
+                        }, 0).toFixed(2)}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-1 bg-dark rounded-xl p-1">
-                      <button
-                        type="button"
-                        onClick={() => handleQuantityChange(index, -1)}
-                        className="w-8 h-8 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
-                      >
-                        -
-                      </button>
-                      <span className="w-6 text-center font-black text-text-light text-lg">{item.quantity}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleQuantityChange(index, 1)}
-                        className="w-8 h-8 rounded-lg hover:bg-[#242424] hover:shadow-sm flex items-center justify-center font-black text-gray-400 text-lg transition-all"
-                      >
-                        +
-                      </button>
-                    </div>
-                    <div className="w-20 text-right flex flex-col items-end gap-1">
-                      <p className="font-black text-blue-600 text-xl">
-                        ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm("¿Seguro que deseas eliminar el producto?")) {
-                            removeItemRow(index);
-                          }
-                        }}
-                        className="text-red-500 hover:text-red-400 text-sm flex items-center gap-1 mt-1"
-                        title="Eliminar producto"
-                      >
-                        <span className="text-base leading-none">🗑️</span>
-                      </button>
-                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full rounded-2xl bg-success py-4 text-white font-black text-lg hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-success/20 disabled:opacity-50 uppercase"
+                    >
+                      {isSubmitting ? "GUARDANDO..." : "GUARDAR E IMPRIMIR"}
+                    </button>
                   </div>
-                );
-              })}
-              {formState.items.length > 0 && (
-                <div className="pt-4 mt-4 border-t-2 border-dashed border-gray-200 flex flex-col gap-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-black text-gray-400 uppercase tracking-widest text-sm">Total Orden</span>
-                    <span className="text-4xl font-black text-blue-600">
-                      ${formState.items.reduce((total, item) => {
-                        const product = availableMenuItems.find(m => m.id === item.menuItemId);
-                        return total + (product?.price || 0) * Number(item.quantity);
-                      }, 0).toFixed(2)}
-                    </span>
+                )}
+              </section>
+              {/* Resumen Diario (También a la derecha) */}
+              <section className="rounded-2xl bg-[#242424] p-5 border border-white/5">
+                <h3 className="text-xs font-black uppercase text-gray-500 mb-4 tracking-widest">Estadísticas de Hoy</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-[#181818] p-3 rounded-xl border border-white/5">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase">Órdenes</p>
+                    <p className="text-xl font-black text-text-light">{orders.filter((o) => o.status !== "PAID").length}</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleClearCart}
-                    className="w-full flex items-center justify-center gap-2 rounded-lg bg-red-900/20 border border-red-500/30 py-2 text-red-500 font-bold hover:bg-red-900/40 transition-colors"
-                  >
-                    <span className="text-lg">🧹</span> Vaciar Carrito
-                  </button>
+                  <div className="bg-[#181818] p-3 rounded-xl border border-white/5">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase">Ventas</p>
+                    <p className="text-xl font-black text-success">
+                      ${orders.filter((o) => o.status === "PAID").reduce((acc, o) => acc + o.total, 0).toFixed(2)}
+                    </p>
+                  </div>
                 </div>
-              )}
+              </section>
             </div>
+          </div>
+        </form>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full rounded-lg bg-green-600 py-3 text-white font-bold hover:bg-green-700 transition-colors"
-            >
-              {isSubmitting
-                ? "GUARDANDO..."
-                : "GUARDAR ORDEN E IMPRIMIR COMANDA"}
-            </button>
-          </form>
-        </section>
+        {/* Listado de Órdenes Recientes */}
+        <section className="mt-12 rounded-2xl bg-[#242424] p-5 shadow-md border border-white/5 overflow-hidden">
+          <div className="flex items-center justify-between mb-6 px-1">
+            <h2 className="text-lg font-bold text-text-light flex items-center gap-2">
+              <span className="text-primary">🕒</span> Últimas Órdenes
+            </h2>
+            <Link href="/history" className="text-xs font-bold text-primary hover:underline uppercase tracking-tighter">Ver todo</Link>
+          </div>
 
-        <section className="rounded-lg bg-[#242424] p-6 shadow-md">
-          <h2 className="text-lg font-semibold text-text-light mb-4">
-            Órdenes Recientes
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[#181818] text-gray-400 uppercase text-xs font-bold">
-                <tr>
-                  <th className="px-4 py-3">Orden</th>
-                  <th className="px-4 py-3">Mesa</th>
-                  <th className="px-4 py-3">Total</th>
-                  <th className="px-4 py-3">Acciones</th>
+          <div className="overflow-x-auto -mx-5 px-5 no-scrollbar">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-gray-800">
+                  <th className="pb-4 px-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">#</th>
+                  <th className="pb-4 px-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">Mesa</th>
+                  <th className="pb-4 px-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">Total</th>
+                  <th className="pb-4 px-2 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-800/50">
                 {orders.slice(0, 10).map((order) => (
-                  <tr key={order.id}>
-                    <td className="px-4 py-4 font-bold text-text-light">
-                      #{order.orderNumber}
+                  <tr key={order.id} className="hover:bg-white/5 transition-colors">
+                    <td className="py-4 px-2">
+                      <span className="font-bold text-text-light text-sm">#{order.orderNumber}</span>
                     </td>
-                    <td className="px-4 py-4">{order.table || "Llevar"}</td>
-                    <td className="px-4 py-4 font-bold">
-                      ${order.total.toFixed(2)}
-                      {order.payments && order.payments.length > 0 && order.payments[0].tipAmount ? (
-                        <span className="text-xs text-blue-500 ml-1 block">
-                          (+${order.payments[0].tipAmount.toFixed(2)} propina)
-                        </span>
-                      ) : null}
+                    <td className="py-4 px-2">
+                      <span className="text-xs bg-gray-800 px-2 py-1 rounded-md text-gray-300 font-bold">{order.table || "Llevar"}</span>
                     </td>
-                    <td className="px-4 py-4 flex gap-2">
-                      {order.status !== "PAID" && (
+                    <td className="py-4 px-2">
+                      <div className="flex flex-col">
+                        <span className="font-black text-sm text-text-light">${order.total.toFixed(2)}</span>
+                        {order.payments?.[0]?.tipAmount ? (
+                          <span className="text-[9px] font-bold text-blue-400">
+                            +${order.payments[0].tipAmount.toFixed(2)} propina
+                          </span>
+                        ) : null}
+                      </div>
+                    </td>
+                    <td className="py-4 px-2">
+                      <div className="flex justify-end gap-1.5 flex-wrap max-w-[240px] ml-auto">
+                        {order.status !== "PAID" && (
+                          <button
+                            onClick={() => {
+                              setCheckoutOrder(order);
+                              setShowTicket(false);
+                              setShowKitchenTicket(false);
+                              setTipType("NONE");
+                              setTipInput("");
+                              setPaymentMethod("CASH");
+                              setReceivedAmount("");
+                            }}
+                            className="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg text-[10px] font-black uppercase shadow-sm"
+                            title="COBRAR"
+                          >
+                            💰 Cobrar
+                          </button>
+                        )}
                         <button
                           onClick={() => {
                             setCheckoutOrder(order);
+                            setShowKitchenTicket(true);
                             setShowTicket(false);
-                            setShowKitchenTicket(false);
-                            setTipType("NONE");
-                            setTipInput("");
-                            setPaymentMethod("CASH");
-                            setReceivedAmount("");
                           }}
-                          className="bg-blue-600 text-white px-2 py-1.5 rounded text-[10px] font-bold"
+                          className="bg-orange-500 hover:bg-orange-400 text-white p-2 rounded-lg text-[10px] font-black uppercase"
+                          title="COMANDA"
                         >
-                          COBRAR
+                          👨‍🍳 Comanda
                         </button>
-                      )}
-                      <button
-                        onClick={() => {
-                          setCheckoutOrder(order);
-                          setShowKitchenTicket(true);
-                          setShowTicket(false);
-                        }}
-                        className="bg-orange-500 text-white px-2 py-1.5 rounded text-[10px] font-bold"
-                      >
-                        COMANDA
-                      </button>
-                      <button
-                        onClick={() => {
-                          setCheckoutOrder(order);
-                          setShowTicket(true);
-                          setShowKitchenTicket(false);
-                        }}
-                        className="border border-gray-300 px-2 py-1.5 rounded text-[10px] font-bold"
-                      >
-                        TICKET
-                      </button>
-                      {order.status !== "PAID" && (
+                        {order.status !== "PAID" && (
+                          <button
+                            onClick={() => openModifyModal(order)}
+                            className="bg-amber-500 hover:bg-amber-400 text-dark p-2 rounded-lg text-[10px] font-black uppercase"
+                            title="MODIFICAR"
+                          >
+                            ✏️ Modificar
+                          </button>
+                        )}
                         <button
                           onClick={() => {
-                            setEditingOrder(order);
-                            setAdditionalItems([
-                              { menuItemId: availableMenuItems[0]?.id || "", quantity: "1", notes: "" },
-                            ]);
-                          }}
-                          className="bg-purple-600 text-white px-2 py-1.5 rounded text-[10px] font-bold"
-                        >
-                          AGREGAR
-                        </button>
-                      )}
-                      {order.status !== "PAID" && (
-                        <button
-                          onClick={() => openModifyModal(order)}
-                          className="bg-yellow-500 text-white px-2 py-1.5 rounded text-[10px] font-bold"
-                        >
-                          ✏️ MODIFICAR
-                        </button>
-                      )}
-                      {order.status !== "PAID" && order.status !== "UNCOLLECTED" && (
-                        <button
-                          onClick={async () => {
                             setCheckoutOrder(order);
-                            // We need to wait for state update or pass it directly.
-                            // To be safe, I'll modify handleFailedPayment to accept an order.
-                            await handleFailedPayment(order);
+                            setShowTicket(true);
+                            setShowKitchenTicket(false);
                           }}
-                          disabled={isSubmitting}
-                          className="bg-red-900/40 text-red-400 px-2 py-1.5 rounded text-[10px] font-bold border border-red-500/30"
-                          title="Marcar como Pago Fallido"
+                          className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-lg text-[10px] font-black uppercase"
+                          title="TICKET"
                         >
-                          ❌ FALLIDO
+                          📄 Ticket
                         </button>
-                      )}
-                      {order.status !== "PAID" && order.status !== "UNCOLLECTED" && (
-                        <button
-                          onClick={() => handleCancelOrder(order.id, order.orderNumber)}
-                          disabled={isSubmitting}
-                          className="bg-red-700 text-white px-2 py-1.5 rounded text-[10px] font-bold disabled:opacity-50"
-                        >
-                          🚫 CANCELAR
-                        </button>
-                      )}
+                        {order.status !== "PAID" && order.status !== "UNCOLLECTED" && (
+                          <button
+                            onClick={() => handleCancelOrder(order.id, order.orderNumber)}
+                            disabled={isSubmitting}
+                            className="bg-red-600/20 hover:bg-red-600/40 text-red-500 p-2 rounded-lg text-[10px] font-black uppercase border border-red-500/20"
+                            title="CANCELAR"
+                          >
+                            🚫
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -962,395 +967,405 @@ export default function POSPage() {
       </main>
 
       {/* MODAL DE AGREGAR PRODUCTOS */}
-      {editingOrder && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
-          <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-text-light">
-                Agregar Productos a Orden #{editingOrder.orderNumber}
-              </h3>
-              <button
-                onClick={() => setEditingOrder(null)}
-                className="text-gray-400 hover:text-gray-400"
-              >
-                ✕
-              </button>
-            </div>
+      {
+        editingOrder && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
+            <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-text-light">
+                  Agregar Productos a Orden #{editingOrder.orderNumber}
+                </h3>
+                <button
+                  onClick={() => setEditingOrder(null)}
+                  className="text-gray-400 hover:text-gray-400"
+                >
+                  ✕
+                </button>
+              </div>
 
-            <form onSubmit={handleAddItems} className="space-y-6">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold">Nuevos Productos</span>
-                  <button
-                    type="button"
-                    onClick={addAdditionalItemRow}
-                    className="text-sm text-blue-600 font-bold"
-                  >
-                    + Añadir
-                  </button>
-                </div>
-
-                {additionalItems.map((item, index) => (
-                  <div key={index} className="flex gap-2 items-start">
-                    <select
-                      value={item.menuItemId}
-                      onChange={(e) =>
-                        handleAdditionalItemChange(index, "menuItemId", e.target.value)
-                      }
-                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                      required
-                    >
-                      <option value="">Producto</option>
-                      {availableMenuItems.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} (${m.price})
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) =>
-                        handleAdditionalItemChange(index, "quantity", e.target.value)
-                      }
-                      className="w-16 rounded-lg border border-gray-300 px-2 py-2 text-sm text-center"
-                      min="1"
-                      required
-                    />
+              <form onSubmit={handleAddItems} className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold">Nuevos Productos</span>
                     <button
                       type="button"
-                      onClick={() => removeAdditionalItemRow(index)}
-                      className="text-red-500 font-bold"
+                      onClick={addAdditionalItemRow}
+                      className="text-sm text-blue-600 font-bold"
                     >
-                      ✕
+                      + Añadir
                     </button>
+                  </div>
+
+                  {additionalItems.map((item, index) => (
+                    <div key={index} className="flex gap-2 items-start">
+                      <select
+                        value={item.menuItemId}
+                        onChange={(e) =>
+                          handleAdditionalItemChange(index, "menuItemId", e.target.value)
+                        }
+                        className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                        required
+                      >
+                        <option value="">Producto</option>
+                        {availableMenuItems.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.name} (${m.price})
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="number"
+                        value={item.quantity}
+                        onChange={(e) =>
+                          handleAdditionalItemChange(index, "quantity", e.target.value)
+                        }
+                        className="w-16 rounded-lg border border-gray-300 px-2 py-2 text-sm text-center"
+                        min="1"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeAdditionalItemRow(index)}
+                        className="text-red-500 font-bold"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setEditingOrder(null)}
+                    className="w-full bg-gray-200 text-gray-300 py-3 rounded-lg font-bold hover:bg-gray-300 transition-colors"
+                  >
+                    CANCELAR
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 transition-colors"
+                  >
+                    {isSubmitting ? "GUARDANDO..." : "AGREGAR"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )
+      }
+
+      {/* MODAL DE MODIFICAR ORDEN */}
+      {
+        modifyingOrder && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
+            <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-text-light">
+                  ✏️ Modificar Orden #{modifyingOrder.orderNumber}
+                </h3>
+                <button
+                  onClick={() => { setModifyingOrder(null); setModifyItems([]); }}
+                  className="text-gray-400 hover:text-gray-200"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                {modifyItems.length === 0 && (
+                  <p className="text-center text-gray-400 py-4">
+                    No quedan productos. Cancela esta orden desde la lista o agrega más productos con el botón AGREGAR.
+                  </p>
+                )}
+                {modifyItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="flex gap-3 items-center bg-[#181818] p-3 rounded-2xl border border-gray-700"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black text-gray-300 text-base leading-tight truncate">
+                        {item.menuItemName}
+                      </p>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        ${item.unitPrice.toFixed(2)} c/u
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 bg-[#242424] rounded-xl p-1">
+                      <button
+                        type="button"
+                        onClick={() => handleModifyQuantityChange(index, -1)}
+                        className="w-8 h-8 rounded-lg hover:bg-[#181818] flex items-center justify-center font-black text-gray-400 text-lg transition-all"
+                      >
+                        -
+                      </button>
+                      <span className="w-6 text-center font-black text-text-light text-lg">
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleModifyQuantityChange(index, 1)}
+                        className="w-8 h-8 rounded-lg hover:bg-[#181818] flex items-center justify-center font-black text-gray-400 text-lg transition-all"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 w-20">
+                      <p className="font-black text-blue-500 text-lg">
+                        ${(item.unitPrice * item.quantity).toFixed(2)}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => handleModifyRemoveItem(index)}
+                        className="text-red-500 hover:text-red-400 text-base"
+                        title="Eliminar producto"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
 
+              {modifyItems.length > 0 && (
+                <div className="border-t-2 border-dashed border-gray-700 pt-4 mb-6 flex justify-between items-center">
+                  <span className="font-black text-gray-400 uppercase tracking-widest text-sm">
+                    Nuevo Total
+                  </span>
+                  <span className="text-3xl font-black text-blue-500">
+                    $
+                    {modifyItems
+                      .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+                      .toFixed(2)}
+                  </span>
+                </div>
+              )}
+
               <div className="flex gap-4">
                 <button
                   type="button"
-                  onClick={() => setEditingOrder(null)}
-                  className="w-full bg-gray-200 text-gray-300 py-3 rounded-lg font-bold hover:bg-gray-300 transition-colors"
+                  onClick={() => { setModifyingOrder(null); setModifyItems([]); }}
+                  className="w-full bg-gray-700 text-gray-300 py-3 rounded-lg font-bold hover:bg-gray-600 transition-colors"
                 >
                   CANCELAR
                 </button>
                 <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 transition-colors"
+                  type="button"
+                  onClick={handleSaveModifiedOrder}
+                  disabled={isSubmitting || modifyItems.length === 0}
+                  className="w-full bg-yellow-500 text-dark py-3 rounded-lg font-bold hover:bg-yellow-400 transition-colors disabled:opacity-50"
                 >
-                  {isSubmitting ? "GUARDANDO..." : "AGREGAR"}
+                  {isSubmitting ? "GUARDANDO..." : "GUARDAR CAMBIOS"}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DE MODIFICAR ORDEN */}
-      {modifyingOrder && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
-          <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-text-light">
-                ✏️ Modificar Orden #{modifyingOrder.orderNumber}
-              </h3>
-              <button
-                onClick={() => { setModifyingOrder(null); setModifyItems([]); }}
-                className="text-gray-400 hover:text-gray-200"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-3 mb-6">
-              {modifyItems.length === 0 && (
-                <p className="text-center text-gray-400 py-4">
-                  No quedan productos. Cancela esta orden desde la lista o agrega más productos con el botón AGREGAR.
-                </p>
-              )}
-              {modifyItems.map((item, index) => (
-                <div
-                  key={item.id}
-                  className="flex gap-3 items-center bg-[#181818] p-3 rounded-2xl border border-gray-700"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-black text-gray-300 text-base leading-tight truncate">
-                      {item.menuItemName}
-                    </p>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                      ${item.unitPrice.toFixed(2)} c/u
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 bg-[#242424] rounded-xl p-1">
-                    <button
-                      type="button"
-                      onClick={() => handleModifyQuantityChange(index, -1)}
-                      className="w-8 h-8 rounded-lg hover:bg-[#181818] flex items-center justify-center font-black text-gray-400 text-lg transition-all"
-                    >
-                      -
-                    </button>
-                    <span className="w-6 text-center font-black text-text-light text-lg">
-                      {item.quantity}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleModifyQuantityChange(index, 1)}
-                      className="w-8 h-8 rounded-lg hover:bg-[#181818] flex items-center justify-center font-black text-gray-400 text-lg transition-all"
-                    >
-                      +
-                    </button>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 w-20">
-                    <p className="font-black text-blue-500 text-lg">
-                      ${(item.unitPrice * item.quantity).toFixed(2)}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => handleModifyRemoveItem(index)}
-                      className="text-red-500 hover:text-red-400 text-base"
-                      title="Eliminar producto"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {modifyItems.length > 0 && (
-              <div className="border-t-2 border-dashed border-gray-700 pt-4 mb-6 flex justify-between items-center">
-                <span className="font-black text-gray-400 uppercase tracking-widest text-sm">
-                  Nuevo Total
-                </span>
-                <span className="text-3xl font-black text-blue-500">
-                  $
-                  {modifyItems
-                    .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
-                    .toFixed(2)}
-                </span>
-              </div>
-            )}
-
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => { setModifyingOrder(null); setModifyItems([]); }}
-                className="w-full bg-gray-700 text-gray-300 py-3 rounded-lg font-bold hover:bg-gray-600 transition-colors"
-              >
-                CANCELAR
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveModifiedOrder}
-                disabled={isSubmitting || modifyItems.length === 0}
-                className="w-full bg-yellow-500 text-dark py-3 rounded-lg font-bold hover:bg-yellow-400 transition-colors disabled:opacity-50"
-              >
-                {isSubmitting ? "GUARDANDO..." : "GUARDAR CAMBIOS"}
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* MODALES DE IMPRESIÓN */}
-      {(showTicket || showKitchenTicket) && checkoutOrder && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="max-w-md w-full py-10">
-            <div className="flex justify-center gap-4 mb-6 no-print">
-              <button
-                onClick={() => window.print()}
-                className="bg-green-600 text-white px-6 py-3 rounded-xl font-black shadow-lg"
-              >
-                🖨️ IMPRIMIR AHORA
-              </button>
-              {showTicket && (
+      {
+        (showTicket || showKitchenTicket) && checkoutOrder && (
+          <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <div className="max-w-md w-full py-10">
+              <div className="flex justify-center gap-4 mb-6 no-print">
                 <button
-                  onClick={() => setShowWhatsAppModal(true)}
-                  className="bg-green-500 text-white px-6 py-3 rounded-xl font-black shadow-lg flex items-center gap-2 hover:bg-green-400"
+                  onClick={() => window.print()}
+                  className="bg-green-600 text-white px-6 py-3 rounded-xl font-black shadow-lg"
                 >
-                  <span className="text-xl">📱</span> ENVIAR POR WHATSAPP
+                  🖨️ IMPRIMIR AHORA
                 </button>
+                {showTicket && (
+                  <button
+                    onClick={() => setShowWhatsAppModal(true)}
+                    className="bg-green-500 text-white px-6 py-3 rounded-xl font-black shadow-lg flex items-center gap-2 hover:bg-green-400"
+                  >
+                    <span className="text-xl">📱</span> ENVIAR POR WHATSAPP
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setCheckoutOrder(null);
+                    setShowTicket(false);
+                    setShowKitchenTicket(false);
+                    setWhatsappNumber("");
+                    setShowWhatsAppModal(false);
+                  }}
+                  className="bg-[#242424] text-white border-2 border-white/10 px-6 py-3 rounded-xl font-black shadow-lg hover:bg-gray-800"
+                >
+                  CERRAR
+                </button>
+              </div>
+              {showTicket ? (
+                <OrderTicket order={checkoutOrder} />
+              ) : (
+                <KitchenTicket order={checkoutOrder} />
               )}
+            </div>
+          </div>
+        )
+      }
+
+      {/* MODAL DE CHECKOUT */}
+      {
+        checkoutOrder && !showTicket && !showKitchenTicket && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
+            <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-text-light">
+                  Cerrar Cuenta #{checkoutOrder.orderNumber}
+                </h3>
+                <button
+                  onClick={() => setCheckoutOrder(null)}
+                  className="text-gray-400 hover:text-gray-400"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="space-y-6">
+                <div className="text-center bg-blue-50 py-6 rounded-2xl">
+                  <p className="text-blue-600 text-sm font-bold">TOTAL A PAGAR</p>
+                  <p className="text-5xl font-black text-blue-700">
+                    ${(checkoutOrder.total + tipAmountCalculated).toFixed(2)}
+                  </p>
+                  {tipAmountCalculated > 0 && (
+                    <p className="text-sm font-bold text-gray-400 mt-2">
+                      Incluye ${(tipAmountCalculated).toFixed(2)} de propina
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-400 block mb-2 uppercase">
+                    Propina
+                  </label>
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    <button onClick={() => { setTipType("NONE"); setTipInput(""); }} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "NONE" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Sin propina</button>
+                    <button onClick={() => setTipType("PERCENTAGE")} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "PERCENTAGE" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Porcentaje %</button>
+                    <button onClick={() => setTipType("FIXED")} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "FIXED" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Monto fijo $</button>
+                  </div>
+                  {tipType !== "NONE" && (
+                    <input
+                      type="number"
+                      value={tipInput}
+                      onChange={(e) => setTipInput(e.target.value)}
+                      placeholder={tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"}
+                      className="w-full text-lg font-bold p-3 border-2 border-gray-100 rounded-xl focus:border-blue-600 outline-none text-center"
+                    />
+                  )}
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-400 block mb-2 uppercase">
+                    Método
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {PAYMENT_METHODS.map((m) => (
+                      <button
+                        key={m.value}
+                        onClick={() => setPaymentMethod(m.value)}
+                        className={`py-3 text-xs rounded-xl font-black border-2 transition-all ${paymentMethod === m.value
+                          ? "border-blue-600 bg-blue-50 text-blue-700"
+                          : "border-gray-100 text-gray-400"
+                          }`}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {paymentMethod === "CASH" && (
+                  <div className="space-y-4">
+                    <input
+                      type="number"
+                      value={receivedAmount}
+                      onChange={(e) => setReceivedAmount(e.target.value)}
+                      className="w-full text-3xl font-black p-4 border-2 border-gray-100 rounded-xl focus:border-blue-600 outline-none text-center"
+                      placeholder="EFECTIVO RECIBIDO"
+                      autoFocus
+                    />
+                    <div className="flex justify-between items-center bg-[#181818] p-4 rounded-xl">
+                      <span className="font-bold text-gray-400">CAMBIO:</span>
+                      <span className="text-3xl font-black text-green-600">
+                        ${change.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={handleProcessPayment}
+                    disabled={
+                      isSubmitting ||
+                      (paymentMethod === "CASH" &&
+                        (!receivedAmount ||
+                          Number(receivedAmount) < (checkoutOrder.total + tipAmountCalculated)))
+                    }
+                    className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl disabled:opacity-50 transition-all"
+                  >
+                    {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGO E IMPRIMIR"}
+                  </button>
+
+                  <button
+                    onClick={() => handleFailedPayment()}
+                    disabled={isSubmitting}
+                    className="w-full bg-red-900/20 border-2 border-red-500/30 text-red-500 py-3 rounded-2xl font-black text-sm hover:bg-red-900/40 transition-all uppercase tracking-widest"
+                  >
+                    ❌ Pago Fallido (Cliente se fue)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* MODAL DE WHATSAPP */}
+      {
+        showWhatsAppModal && checkoutOrder && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-60 no-print">
+            <div className="bg-[#242424] rounded-2xl max-w-sm w-full p-8 shadow-2xl border border-green-500/20">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold flex items-center gap-2 text-white">
+                  <span className="text-2xl">📱</span> WhatsApp
+                </h3>
+                <button onClick={() => setShowWhatsAppModal(false)} className="text-gray-400 hover:text-white transition-colors">✕</button>
+              </div>
+              <p className="text-sm font-medium text-gray-400 mb-6 text-center leading-relaxed">
+                Ingresa los 10 dígitos del número (sin código de país).
+              </p>
+              <input
+                type="tel"
+                maxLength={10}
+                value={whatsappNumber}
+                onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ''))}
+                placeholder="Ej. 3312345678"
+                autoFocus
+                className="w-full text-3xl font-black p-4 border-2 border-gray-600 rounded-xl focus:border-green-500 outline-none text-center bg-[#181818] text-white tracking-widest mb-8 transition-all"
+              />
               <button
+                disabled={whatsappNumber.length !== 10}
                 onClick={() => {
+                  const url = `https://wa.me/52${whatsappNumber}?text=${generateWhatsAppMessage()}`;
+
+                  // Open WA link
+                  window.open(url, "_blank");
+
+                  // Close flow
+                  setShowWhatsAppModal(false);
                   setCheckoutOrder(null);
                   setShowTicket(false);
                   setShowKitchenTicket(false);
                   setWhatsappNumber("");
-                  setShowWhatsAppModal(false);
                 }}
-                className="bg-[#242424] text-white border-2 border-white/10 px-6 py-3 rounded-xl font-black shadow-lg hover:bg-gray-800"
+                className="w-full bg-green-500 text-white py-4 rounded-xl font-black text-xl hover:bg-green-600 disabled:opacity-30 disabled:hover:bg-green-500 transition-all shadow-lg shadow-green-500/20 cursor-pointer"
               >
-                CERRAR
+                ENVIAR TICKET
               </button>
             </div>
-            {showTicket ? (
-              <OrderTicket order={checkoutOrder} />
-            ) : (
-              <KitchenTicket order={checkoutOrder} />
-            )}
           </div>
-        </div>
-      )}
-
-      {/* MODAL DE CHECKOUT */}
-      {checkoutOrder && !showTicket && !showKitchenTicket && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
-          <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-text-light">
-                Cerrar Cuenta #{checkoutOrder.orderNumber}
-              </h3>
-              <button
-                onClick={() => setCheckoutOrder(null)}
-                className="text-gray-400 hover:text-gray-400"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="space-y-6">
-              <div className="text-center bg-blue-50 py-6 rounded-2xl">
-                <p className="text-blue-600 text-sm font-bold">TOTAL A PAGAR</p>
-                <p className="text-5xl font-black text-blue-700">
-                  ${(checkoutOrder.total + tipAmountCalculated).toFixed(2)}
-                </p>
-                {tipAmountCalculated > 0 && (
-                  <p className="text-sm font-bold text-gray-400 mt-2">
-                    Incluye ${(tipAmountCalculated).toFixed(2)} de propina
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-gray-400 block mb-2 uppercase">
-                  Propina
-                </label>
-                <div className="grid grid-cols-3 gap-2 mb-2">
-                  <button onClick={() => { setTipType("NONE"); setTipInput(""); }} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "NONE" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Sin propina</button>
-                  <button onClick={() => setTipType("PERCENTAGE")} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "PERCENTAGE" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Porcentaje %</button>
-                  <button onClick={() => setTipType("FIXED")} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "FIXED" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Monto fijo $</button>
-                </div>
-                {tipType !== "NONE" && (
-                  <input
-                    type="number"
-                    value={tipInput}
-                    onChange={(e) => setTipInput(e.target.value)}
-                    placeholder={tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"}
-                    className="w-full text-lg font-bold p-3 border-2 border-gray-100 rounded-xl focus:border-blue-600 outline-none text-center"
-                  />
-                )}
-              </div>
-              <div>
-                <label className="text-xs font-bold text-gray-400 block mb-2 uppercase">
-                  Método
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {PAYMENT_METHODS.map((m) => (
-                    <button
-                      key={m.value}
-                      onClick={() => setPaymentMethod(m.value)}
-                      className={`py-3 text-xs rounded-xl font-black border-2 transition-all ${paymentMethod === m.value
-                        ? "border-blue-600 bg-blue-50 text-blue-700"
-                        : "border-gray-100 text-gray-400"
-                        }`}
-                    >
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {paymentMethod === "CASH" && (
-                <div className="space-y-4">
-                  <input
-                    type="number"
-                    value={receivedAmount}
-                    onChange={(e) => setReceivedAmount(e.target.value)}
-                    className="w-full text-3xl font-black p-4 border-2 border-gray-100 rounded-xl focus:border-blue-600 outline-none text-center"
-                    placeholder="EFECTIVO RECIBIDO"
-                    autoFocus
-                  />
-                  <div className="flex justify-between items-center bg-[#181818] p-4 rounded-xl">
-                    <span className="font-bold text-gray-400">CAMBIO:</span>
-                    <span className="text-3xl font-black text-green-600">
-                      ${change.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              )}
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={handleProcessPayment}
-                  disabled={
-                    isSubmitting ||
-                    (paymentMethod === "CASH" &&
-                      (!receivedAmount ||
-                        Number(receivedAmount) < (checkoutOrder.total + tipAmountCalculated)))
-                  }
-                  className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl disabled:opacity-50 transition-all"
-                >
-                  {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGO E IMPRIMIR"}
-                </button>
-
-                <button
-                  onClick={() => handleFailedPayment()}
-                  disabled={isSubmitting}
-                  className="w-full bg-red-900/20 border-2 border-red-500/30 text-red-500 py-3 rounded-2xl font-black text-sm hover:bg-red-900/40 transition-all uppercase tracking-widest"
-                >
-                  ❌ Pago Fallido (Cliente se fue)
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DE WHATSAPP */}
-      {showWhatsAppModal && checkoutOrder && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-60 no-print">
-          <div className="bg-[#242424] rounded-2xl max-w-sm w-full p-8 shadow-2xl border border-green-500/20">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold flex items-center gap-2 text-white">
-                <span className="text-2xl">📱</span> WhatsApp
-              </h3>
-              <button onClick={() => setShowWhatsAppModal(false)} className="text-gray-400 hover:text-white transition-colors">✕</button>
-            </div>
-            <p className="text-sm font-medium text-gray-400 mb-6 text-center leading-relaxed">
-              Ingresa los 10 dígitos del número (sin código de país).
-            </p>
-            <input
-              type="tel"
-              maxLength={10}
-              value={whatsappNumber}
-              onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ''))}
-              placeholder="Ej. 3312345678"
-              autoFocus
-              className="w-full text-3xl font-black p-4 border-2 border-gray-600 rounded-xl focus:border-green-500 outline-none text-center bg-[#181818] text-white tracking-widest mb-8 transition-all"
-            />
-            <button
-              disabled={whatsappNumber.length !== 10}
-              onClick={() => {
-                const url = `https://wa.me/52${whatsappNumber}?text=${generateWhatsAppMessage()}`;
-
-                // Open WA link
-                window.open(url, "_blank");
-
-                // Close flow
-                setShowWhatsAppModal(false);
-                setCheckoutOrder(null);
-                setShowTicket(false);
-                setShowKitchenTicket(false);
-                setWhatsappNumber("");
-              }}
-              className="w-full bg-green-500 text-white py-4 rounded-xl font-black text-xl hover:bg-green-600 disabled:opacity-30 disabled:hover:bg-green-500 transition-all shadow-lg shadow-green-500/20 cursor-pointer"
-            >
-              ENVIAR TICKET
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }
