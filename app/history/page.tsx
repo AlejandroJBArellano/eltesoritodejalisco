@@ -26,6 +26,23 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 
 type Order = OrderWithDetails;
 
+type DailyCut = {
+    id: string;
+    cut_date: string;
+    venta_neta: number;
+    iva_acumulado: number;
+    propinas_efectivo: number;
+    propinas_tarjeta: number;
+    caja_efectivo: number;
+    caja_tarjeta: number;
+    utilidad_real: number;
+    total_gastos: number;
+    utilidad_final: number;
+    total_orders: number;
+    notes: string | null;
+    created_at: string;
+};
+
 export default function HistoryPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +57,15 @@ export default function HistoryPage() {
     const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
 
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
+    // Corte Diario state
+    const [todayExpenses, setTodayExpenses] = useState(0);
+    const [isFinalizing, setIsFinalizing] = useState(false);
+    const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+    const [finalizeSuccess, setFinalizeSuccess] = useState(false);
+    const [showCutsArchive, setShowCutsArchive] = useState(false);
+    const [dailyCuts, setDailyCuts] = useState<DailyCut[]>([]);
+    const [isLoadingCuts, setIsLoadingCuts] = useState(false);
 
     const checkRole = async () => {
         try {
@@ -109,7 +135,82 @@ export default function HistoryPage() {
     useEffect(() => {
         checkRole();
         fetchOrders();
+        fetchTodayExpenses();
     }, []);
+
+    const fetchTodayExpenses = async () => {
+        try {
+            const supabase = createClient();
+            const mxDateStr = new Intl.DateTimeFormat("en-CA", {
+                timeZone: "America/Mexico_City",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+            }).format(new Date());
+            const { data } = await supabase
+                .from("expenses")
+                .select("amount")
+                .eq("date", mxDateStr);
+            const total = (data || []).reduce((sum, e) => sum + Number(e.amount), 0);
+            setTodayExpenses(total);
+        } catch (err) {
+            console.error("Error fetching today expenses:", err);
+        }
+    };
+
+    const fetchDailyCuts = async () => {
+        try {
+            setIsLoadingCuts(true);
+            const response = await fetch("/api/daily-cuts");
+            const data = await response.json();
+            setDailyCuts(data.cuts || []);
+        } catch (err) {
+            console.error("Error fetching daily cuts:", err);
+        } finally {
+            setIsLoadingCuts(false);
+        }
+    };
+
+    const handleFinalizarDia = async () => {
+        try {
+            setIsFinalizing(true);
+            const mxDateStr = new Intl.DateTimeFormat("en-CA", {
+                timeZone: "America/Mexico_City",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+            }).format(new Date());
+
+            const response = await fetch("/api/daily-cuts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    cut_date: mxDateStr,
+                    venta_neta: todayTotals.ventaNeta,
+                    iva_acumulado: todayTotals.ivaAcumulado,
+                    propinas_efectivo: todayTotals.propinasEfectivo,
+                    propinas_tarjeta: todayTotals.propinasTarjeta,
+                    caja_efectivo: todayTotals.cajaEfectivo,
+                    caja_tarjeta: todayTotals.cajaTarjeta,
+                    utilidad_real: todayTotals.utilidadReal,
+                    total_gastos: todayExpenses,
+                    utilidad_final: todayTotals.utilidadReal - todayExpenses,
+                    total_orders: todayOrders.length,
+                }),
+            });
+
+            if (!response.ok) throw new Error("Error al guardar el corte");
+
+            setFinalizeSuccess(true);
+            setShowFinalizeModal(false);
+        } catch (err) {
+            console.error("Error finalizing day:", err);
+        } finally {
+            setIsFinalizing(false);
+        }
+    };
+
+
 
     const filteredOrders = useMemo(() => {
         // ... (rest of the filteredOrders logic remains the same)
@@ -138,7 +239,28 @@ export default function HistoryPage() {
         return Array.from(tables).sort();
     }, [orders]);
 
-    const resumeTotals = useMemo(() => {
+    // Today's orders and totals for the Corte Diario (always filtered to today in MX timezone)
+    const todayDateStr = useMemo(() => new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).format(new Date()), []);
+
+    const todayOrders = useMemo(() => {
+        return orders.filter((order) => {
+            const orderDate = new Intl.DateTimeFormat("en-CA", {
+                timeZone: "America/Mexico_City",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+            }).format(new Date(order.createdAt));
+            return orderDate === todayDateStr &&
+                (order.status === "PAID" || order.status === "DELIVERED");
+        });
+    }, [orders, todayDateStr]);
+
+    const todayTotals = useMemo(() => {
         let ventaNeta = 0;
         let ivaAcumulado = 0;
         let propinasEfectivo = 0;
@@ -146,12 +268,9 @@ export default function HistoryPage() {
         let cajaEfectivo = 0;
         let cajaTarjeta = 0;
 
-        filteredOrders.forEach((order) => {
-            if (order.status !== "PAID" && order.status !== "DELIVERED") return;
-
+        todayOrders.forEach((order) => {
             const tipAmount = order.payments?.[0]?.tipAmount || 0;
             const paymentMethod = order.payments?.[0]?.method || "N/A";
-
             const subtotalFiscal = order.total / 1.16;
             const ivaFiscal = order.total - subtotalFiscal;
             const totalPago = order.total + tipAmount;
@@ -171,17 +290,10 @@ export default function HistoryPage() {
         });
 
         const utilidadReal = ventaNeta + propinasEfectivo + propinasTarjeta;
+        const utilidadFinal = utilidadReal - todayExpenses;
 
-        return {
-            ventaNeta,
-            ivaAcumulado,
-            propinasEfectivo,
-            propinasTarjeta,
-            cajaEfectivo,
-            cajaTarjeta,
-            utilidadReal,
-        };
-    }, [filteredOrders]);
+        return { ventaNeta, ivaAcumulado, propinasEfectivo, propinasTarjeta, cajaEfectivo, cajaTarjeta, utilidadReal, utilidadFinal };
+    }, [todayOrders, todayExpenses]);
 
     const chartsData = useMemo(() => {
         const now = new Date();
@@ -343,55 +455,252 @@ export default function HistoryPage() {
                 </div>
 
                 {/* CORTE DIARIO */}
-                <div className="bg-[#242424] p-6 rounded-lg shadow-md space-y-6 flex flex-col mb-2 border-l-4 border-l-blue-500">
-                    <h2 className="text-lg font-bold text-white mb-2 pb-2 border-b border-gray-700">Corte Diario</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {/* Venta y IVA */}
-                        <div className="flex flex-col space-y-3">
-                            <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Venta Neta Total (Sin IVA)</span>
-                                <span className="text-white text-xl font-mono font-medium">${resumeTotals.ventaNeta.toFixed(2)}</span>
-                            </div>
-                            <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">IVA Acumulado</span>
-                                <span className="text-gray-300 text-xl font-mono">${resumeTotals.ivaAcumulado.toFixed(2)}</span>
-                            </div>
+                <div className={`bg-[#242424] p-6 rounded-lg shadow-md space-y-4 flex flex-col mb-2 border-l-4 ${finalizeSuccess ? 'border-l-green-500' : 'border-l-blue-500'}`}>
+                    <div className="flex items-center justify-between pb-2 border-b border-gray-700">
+                        <div>
+                            <h2 className="text-lg font-bold text-white">Corte Diario</h2>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                                {finalizeSuccess
+                                    ? '✅ Corte guardado — contadores reiniciados para mañana'
+                                    : `Hoy · ${todayOrders.length} orden${todayOrders.length !== 1 ? 'es' : ''} completada${todayOrders.length !== 1 ? 's' : ''}`}
+                            </p>
                         </div>
-
-                        {/* Propinas */}
-                        <div className="flex flex-col space-y-3">
-                            <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Efectivo)</span>
-                                <span className="text-green-400 text-xl font-mono">${resumeTotals.propinasEfectivo.toFixed(2)}</span>
-                            </div>
-                            <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Tarjeta)</span>
-                                <span className="text-blue-400 text-xl font-mono">${resumeTotals.propinasTarjeta.toFixed(2)}</span>
-                            </div>
-                        </div>
-
-                        {/* Caja Final */}
-                        <div className="flex flex-col space-y-3">
-                            <div className="bg-[#181818] p-3 rounded-lg border border-green-900/50">
-                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Efectivo)</span>
-                                <span className="text-green-400 text-xl font-mono font-bold">${resumeTotals.cajaEfectivo.toFixed(2)}</span>
-                            </div>
-                            <div className="bg-[#181818] p-3 rounded-lg border border-blue-900/50">
-                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Tarjeta)</span>
-                                <span className="text-blue-400 text-xl font-mono font-bold">${resumeTotals.cajaTarjeta.toFixed(2)}</span>
-                            </div>
-                        </div>
-
-                        {/* Utilidad Real */}
-                        <div className="bg-gradient-to-br from-[#1c2e4a] to-[#0f172a] p-4 rounded-lg flex flex-col justify-center items-center shadow-lg border border-blue-500/30 lg:col-span-1 md:col-span-2">
-                            <span className="text-blue-200 text-xs font-bold uppercase tracking-wider mb-2">Utilidad Real del Día</span>
-                            <span className="text-white text-3xl font-black font-mono">
-                                ${resumeTotals.utilidadReal.toFixed(2)}
-                            </span>
-                            <span className="text-blue-300/60 text-[10px] mt-2 text-center uppercase">Venta Neta + Tot. Propinas</span>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowCutsArchive((v) => !v);
+                                    if (!showCutsArchive) fetchDailyCuts();
+                                }}
+                                className="rounded-lg border border-gray-600 bg-[#181818] px-3 py-2 text-xs font-semibold text-gray-300 hover:border-blue-500 hover:text-white transition-all"
+                            >
+                                📁 Archivo de Cortes
+                            </button>
+                            {!finalizeSuccess && (
+                                <button
+                                    onClick={() => setShowFinalizeModal(true)}
+                                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700 transition-all"
+                                >
+                                    ✅ Finalizar Día
+                                </button>
+                            )}
                         </div>
                     </div>
+
+                    {finalizeSuccess ? (
+                        // After finalizing: show reset state ($0.00)
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="flex flex-col space-y-3">
+                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Venta Neta Total (Sin IVA)</span>
+                                    <span className="text-gray-500 text-xl font-mono font-medium">$0.00</span>
+                                </div>
+                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">IVA Acumulado</span>
+                                    <span className="text-gray-500 text-xl font-mono">$0.00</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col space-y-3">
+                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Efectivo)</span>
+                                    <span className="text-gray-500 text-xl font-mono">$0.00</span>
+                                </div>
+                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Tarjeta)</span>
+                                    <span className="text-gray-500 text-xl font-mono">$0.00</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col space-y-3">
+                                <div className="bg-[#181818] p-3 rounded-lg border border-green-900/50">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Efectivo)</span>
+                                    <span className="text-gray-500 text-xl font-mono font-bold">$0.00</span>
+                                </div>
+                                <div className="bg-[#181818] p-3 rounded-lg border border-blue-900/50">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Tarjeta)</span>
+                                    <span className="text-gray-500 text-xl font-mono font-bold">$0.00</span>
+                                </div>
+                            </div>
+                            <div className="bg-gradient-to-br from-[#1a3a1a] to-[#0f1f0f] p-4 rounded-lg flex flex-col justify-center items-center shadow-lg border border-green-500/30 lg:col-span-1 md:col-span-2">
+                                <span className="text-green-300 text-xs font-bold uppercase tracking-wider mb-2">Día Finalizado ✓</span>
+                                <span className="text-white text-3xl font-black font-mono">$0.00</span>
+                                <span className="text-green-400/60 text-[10px] mt-2 text-center uppercase">Nuevo día — caja en cero</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            {/* Venta y IVA */}
+                            <div className="flex flex-col space-y-3">
+                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Venta Neta Total (Sin IVA)</span>
+                                    <span className="text-white text-xl font-mono font-medium">${todayTotals.ventaNeta.toFixed(2)}</span>
+                                </div>
+                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">IVA Acumulado</span>
+                                    <span className="text-gray-300 text-xl font-mono">${todayTotals.ivaAcumulado.toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            {/* Propinas */}
+                            <div className="flex flex-col space-y-3">
+                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Efectivo)</span>
+                                    <span className="text-green-400 text-xl font-mono">${todayTotals.propinasEfectivo.toFixed(2)}</span>
+                                </div>
+                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Tarjeta)</span>
+                                    <span className="text-blue-400 text-xl font-mono">${todayTotals.propinasTarjeta.toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            {/* Caja Final */}
+                            <div className="flex flex-col space-y-3">
+                                <div className="bg-[#181818] p-3 rounded-lg border border-green-900/50">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Efectivo)</span>
+                                    <span className="text-green-400 text-xl font-mono font-bold">${todayTotals.cajaEfectivo.toFixed(2)}</span>
+                                </div>
+                                <div className="bg-[#181818] p-3 rounded-lg border border-blue-900/50">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Tarjeta)</span>
+                                    <span className="text-blue-400 text-xl font-mono font-bold">${todayTotals.cajaTarjeta.toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            {/* Gastos del día */}
+                            <div className="bg-[#181818] p-3 rounded-lg border border-red-900/50 flex flex-col justify-center">
+                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Gastos del Día</span>
+                                <span className="text-red-400 text-2xl font-mono font-bold">-${todayExpenses.toFixed(2)}</span>
+                                <span className="text-gray-500 text-[10px] mt-1 uppercase">Insumos, sueldos, etc.</span>
+                            </div>
+
+                            {/* Utilidad Final */}
+                            <div className="bg-gradient-to-br from-[#1c2e4a] to-[#0f172a] p-4 rounded-lg flex flex-col justify-center items-center shadow-lg border border-blue-500/30">
+                                <span className="text-blue-200 text-xs font-bold uppercase tracking-wider mb-1">Utilidad Real</span>
+                                <span className="text-white text-2xl font-black font-mono">
+                                    ${todayTotals.utilidadReal.toFixed(2)}
+                                </span>
+                                <div className="mt-2 pt-2 border-t border-blue-500/20 w-full text-center">
+                                    <span className="text-blue-200 text-xs font-bold uppercase tracking-wider block mb-1">Utilidad Final</span>
+                                    <span className={`text-xl font-black font-mono ${todayTotals.utilidadFinal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                        ${todayTotals.utilidadFinal.toFixed(2)}
+                                    </span>
+                                    <span className="text-blue-300/60 text-[10px] mt-1 block uppercase">Utilidad - Gastos</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
+
+                {/* ARCHIVO DE CORTES */}
+                {showCutsArchive && (
+                    <div className="bg-[#242424] p-6 rounded-lg shadow-md border border-gray-700">
+                        <h2 className="text-lg font-bold text-white mb-4 pb-2 border-b border-gray-700 flex items-center gap-2">
+                            📁 Archivo de Cortes Diarios
+                        </h2>
+                        {isLoadingCuts ? (
+                            <p className="text-gray-400 text-sm">Cargando archivo...</p>
+                        ) : dailyCuts.length === 0 ? (
+                            <p className="text-gray-400 text-sm">No hay cortes registrados aún.</p>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="text-gray-400 uppercase text-xs font-bold border-b border-gray-700">
+                                        <tr>
+                                            <th className="py-3 pr-4">Fecha</th>
+                                            <th className="py-3 pr-4 text-right">Órdenes</th>
+                                            <th className="py-3 pr-4 text-right">Ventas</th>
+                                            <th className="py-3 pr-4 text-right">Gastos</th>
+                                            <th className="py-3 text-right">Utilidad Final</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-700/50">
+                                        {dailyCuts.map((cut) => (
+                                            <tr key={cut.id} className="hover:bg-[#2a2a2a] transition-colors">
+                                                <td className="py-3 pr-4 font-medium text-white">
+                                                    {new Date(`${cut.cut_date}T12:00:00`).toLocaleDateString('es-MX', {
+                                                        weekday: 'short',
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                    })}
+                                                </td>
+                                                <td className="py-3 pr-4 text-right text-gray-300">{cut.total_orders}</td>
+                                                <td className="py-3 pr-4 text-right text-green-400 font-mono">
+                                                    ${Number(cut.utilidad_real).toFixed(2)}
+                                                </td>
+                                                <td className="py-3 pr-4 text-right text-red-400 font-mono">
+                                                    -${Number(cut.total_gastos).toFixed(2)}
+                                                </td>
+                                                <td className={`py-3 text-right font-mono font-bold ${Number(cut.utilidad_final) >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
+                                                    ${Number(cut.utilidad_final).toFixed(2)}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* MODAL FINALIZAR DÍA */}
+                {showFinalizeModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+                        <div className="w-full max-w-md rounded-2xl bg-[#242424] p-6 shadow-2xl border border-green-500/30">
+                            <h3 className="text-xl font-black text-white mb-1">✅ Finalizar Día</h3>
+                            <p className="text-gray-400 text-sm mb-6">
+                                Se guardará el siguiente resumen en el archivo de cortes:
+                            </p>
+
+                            <div className="space-y-2 bg-[#181818] rounded-lg p-4 mb-6 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">Órdenes completadas</span>
+                                    <span className="text-white font-bold">{todayOrders.length}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">Venta Neta (sin IVA)</span>
+                                    <span className="text-white font-mono">${todayTotals.ventaNeta.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">IVA Acumulado</span>
+                                    <span className="text-white font-mono">${todayTotals.ivaAcumulado.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">Propinas Totales</span>
+                                    <span className="text-green-400 font-mono">${(todayTotals.propinasEfectivo + todayTotals.propinasTarjeta).toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">Gastos del Día</span>
+                                    <span className="text-red-400 font-mono">-${todayExpenses.toFixed(2)}</span>
+                                </div>
+                                <div className="border-t border-gray-600 pt-2 mt-2 flex justify-between font-bold">
+                                    <span className="text-blue-200">Utilidad Final</span>
+                                    <span className={`font-mono ${todayTotals.utilidadFinal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                        ${todayTotals.utilidadFinal.toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <p className="text-xs text-gray-500 mb-6">
+                                Los datos serán guardados en el historial. Los contadores del Corte Diario se reiniciarán a $0.00.
+                            </p>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowFinalizeModal(false)}
+                                    disabled={isFinalizing}
+                                    className="flex-1 rounded-xl border border-gray-600 py-3 text-sm font-bold text-gray-300 hover:bg-[#181818] transition-all disabled:opacity-50"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={handleFinalizarDia}
+                                    disabled={isFinalizing}
+                                    className="flex-1 rounded-xl bg-green-600 py-3 text-sm font-bold text-white hover:bg-green-700 transition-all disabled:opacity-70"
+                                >
+                                    {isFinalizing ? 'Guardando...' : 'Confirmar y Finalizar'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* GRÁFICAS */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
