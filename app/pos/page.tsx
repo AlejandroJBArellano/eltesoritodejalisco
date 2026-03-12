@@ -928,6 +928,15 @@ export default function POSPage() {
                         </button>
                         {order.status !== "PAID" && (
                           <button
+                            onClick={() => setEditingOrder(order)}
+                            className="bg-purple-600 hover:bg-purple-500 text-white p-2 rounded-lg text-[10px] font-black uppercase"
+                            title="AGREGAR"
+                          >
+                            ➕ Agregar
+                          </button>
+                        )}
+                        {order.status !== "PAID" && (
+                          <button
                             onClick={() => openModifyModal(order)}
                             className="bg-amber-500 hover:bg-amber-400 text-dark p-2 rounded-lg text-[10px] font-black uppercase"
                             title="MODIFICAR"
