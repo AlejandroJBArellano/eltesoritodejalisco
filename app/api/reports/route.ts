@@ -1,11 +1,40 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const period = searchParams.get("period") || "7days"; // today | 7days | month
+
     const today = new Date();
-    const sevenDaysAgo = new Date(today);
-    sevenDaysAgo.setDate(today.getDate() - 7);
+    let startDate: Date;
+
+    if (period === "today") {
+      // Start of today in Mexico City time
+      const mxDateStr = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(today);
+      startDate = new Date(`${mxDateStr}T00:00:00-06:00`);
+    } else if (period === "month") {
+      // Start of current month in Mexico City time
+      const mxDateStr = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(today);
+      const [year, month] = mxDateStr.split("-");
+      startDate = new Date(`${year}-${month}-01T00:00:00-06:00`);
+    } else {
+      // Default: last 7 days
+      startDate = new Date(today);
+      startDate.setDate(today.getDate() - 7);
+    }
+
+    
 
     const supabase = await createClient();
 
@@ -20,7 +49,7 @@ export async function GET() {
         )
       `)
       .in("status", ["DELIVERED", "PAID"])
-      .gte("created_at", sevenDaysAgo.toISOString())
+      .gte("created_at", startDate.toISOString())
       .order("created_at", { ascending: true });
 
     if (ordersError) throw ordersError;
@@ -50,7 +79,7 @@ export async function GET() {
     const { data: payments } = await supabase
       .from("payments")
       .select("tip_amount")
-      .gte("created_at", sevenDaysAgo.toISOString());
+      .gte("created_at", startDate.toISOString());
 
     const totalTips = (payments || []).reduce(
       (sum, p) => sum + (p.tip_amount || 0),
@@ -59,6 +88,9 @@ export async function GET() {
 
     // Sales by Day
     const salesByDay: Record<string, number> = {};
+    // Items by Day for interactive drill-down
+    const itemsByDay: Record<string, Record<string, { name: string; quantity: number; revenue: number }>> = {};
+
     (completedOrders || []).forEach((order) => {
       const date = new Intl.DateTimeFormat("en-CA", {
         timeZone: "America/Mexico_City",
@@ -67,6 +99,29 @@ export async function GET() {
         day: "2-digit",
       }).format(new Date(order.created_at));
       salesByDay[date] = (salesByDay[date] || 0) + (order.total || 0);
+
+      // Track items per day
+      if (!itemsByDay[date]) itemsByDay[date] = {};
+      (order as any).order_items.forEach((item: any) => {
+        const key = item.menu_item_id;
+        if (!itemsByDay[date][key]) {
+          itemsByDay[date][key] = {
+            name: item.menu_items?.name || "Unknown",
+            quantity: 0,
+            revenue: 0,
+          };
+        }
+        itemsByDay[date][key].quantity += item.quantity;
+        itemsByDay[date][key].revenue += item.quantity * item.unit_price;
+      });
+    });
+
+    // Convert itemsByDay values to sorted arrays
+    const itemsByDaySorted: Record<string, { name: string; quantity: number; revenue: number }[]> = {};
+    Object.entries(itemsByDay).forEach(([date, items]) => {
+      itemsByDaySorted[date] = Object.values(items)
+        .sort((a, b) => b.quantity - a.quantity)
+        .slice(0, 5);
     });
 
     // Sales by Source
@@ -80,7 +135,7 @@ export async function GET() {
       salesBySource[source].total += (order.total || 0);
     });
 
-    // 2. Top Selling Items
+    // 2. Top Selling Items (aggregate across the period)
     const itemSales: Record<string, { name: string; quantity: number; revenue: number }> =
       {};
     (completedOrders || []).forEach((order) => {
@@ -115,7 +170,7 @@ export async function GET() {
     const { count: newCustomersCount, error: countError } = await supabase
       .from("customers")
       .select("*", { count: 'exact', head: true })
-      .gte("created_at", sevenDaysAgo.toISOString());
+      .gte("created_at", startDate.toISOString());
 
     if (countError) throw countError;
 
@@ -123,7 +178,7 @@ export async function GET() {
     const { data: expensesData, error: expError } = await supabase
       .from("expenses")
       .select("amount")
-      .gte("date", sevenDaysAgo.toISOString().split("T")[0]);
+      .gte("date", startDate.toISOString().split("T")[0]);
 
     if (expError) throw expError;
 
@@ -137,7 +192,7 @@ export async function GET() {
       .from("orders")
       .select("total")
       .eq("status", "UNCOLLECTED")
-      .gte("created_at", sevenDaysAgo.toISOString());
+      .gte("created_at", startDate.toISOString());
 
     const totalUncollected = (uncollectedOrders || []).reduce(
       (sum, order) => sum + (order.total || 0),
@@ -145,6 +200,7 @@ export async function GET() {
     );
 
     return NextResponse.json({
+      period,
       summary: {
         totalSales,
         totalOrders,
@@ -155,6 +211,7 @@ export async function GET() {
         totalUncollected,
       },
       salesByDay,
+      itemsByDay: itemsByDaySorted,
       salesBySource,
       topSellingItems,
       customers: {
