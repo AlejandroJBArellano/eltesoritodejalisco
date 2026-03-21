@@ -335,7 +335,24 @@ export default function HistoryPage() {
         const utilidadReal = ventaNeta + propinasEfectivo + propinasTarjeta;
         const utilidadFinal = utilidadReal - todayExpenses;
 
-        return { ventaNeta, ivaAcumulado, propinasEfectivo, propinasTarjeta, cajaEfectivo, cajaTarjeta, utilidadReal, utilidadFinal };
+        // NEW: Operational Summary Calculations
+        const ordersAtTable = todayOrders.filter(o => o.table && o.table !== "Domicilio").length;
+        const ordersDelivery = todayOrders.filter(o => o.table === "Domicilio").length;
+        const averageTicket = todayOrders.length > 0 ? (ventaNeta + ivaAcumulado) / todayOrders.length : 0;
+
+        return { 
+            ventaNeta, 
+            ivaAcumulado, 
+            propinasEfectivo, 
+            propinasTarjeta, 
+            cajaEfectivo, 
+            cajaTarjeta, 
+            utilidadReal, 
+            utilidadFinal,
+            ordersAtTable,
+            ordersDelivery,
+            averageTicket
+        };
     }, [todayOrders, todayExpenses]);
 
     const chartsData = useMemo(() => {
@@ -635,6 +652,44 @@ export default function HistoryPage() {
                                         ${todayTotals.utilidadFinal.toFixed(2)}
                                     </span>
                                     <span className="text-blue-300/60 text-[10px] mt-1 block uppercase">Utilidad - Gastos</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* NEW: Resumen Operativo Card */}
+                    {!finalizeSuccess && todayOrders.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-gray-700">
+                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                📊 Resumen Operativo del Día
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="bg-[#181818] p-4 rounded-xl border border-white/5 flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center text-xl">📜</div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 font-bold uppercase">Folios Generados</p>
+                                        <p className="text-xl font-black text-white">{todayOrders.length} <span className="text-xs text-blue-500 font-normal">órdenes hoy</span></p>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-[#181818] p-4 rounded-xl border border-white/5 flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center text-xl">🏠</div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 font-bold uppercase">Servicio Mesa vs Domicilio</p>
+                                        <p className="text-lg font-black text-white">
+                                            {todayTotals.ordersAtTable} <span className="text-[10px] text-gray-500 font-normal">Mesa</span>
+                                            <span className="mx-2 text-gray-700">|</span>
+                                            {todayTotals.ordersDelivery} <span className="text-[10px] text-gray-500 font-normal">Domicilio</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-[#181818] p-4 rounded-xl border border-white/5 flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center text-xl">📈</div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 font-bold uppercase">Consumo Promedio</p>
+                                        <p className="text-xl font-black text-green-400">${todayTotals.averageTicket.toFixed(2)} <span className="text-[10px] text-gray-500 font-normal">por orden</span></p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
