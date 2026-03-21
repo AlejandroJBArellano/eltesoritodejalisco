@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentCDMXDate } from "@/lib/utils";
+import { getCurrentCDMXDate, getCurrentCDMXDay } from "@/lib/utils";
 import type { CreateOrderRequest } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -71,12 +71,27 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Generate order number
-    const { data: lastOrder } = await supabase
-      .from("orders")
-      .select("order_number")
-      .order("order_number", { ascending: false })
+    // Reset at the start of the day or after the most recent daily cut
+    const todayStart = getCurrentCDMXDay() + "T00:00:00-06:00";
+    const { data: latestCut } = await supabase
+      .from("daily_cuts")
+      .select("created_at")
+      .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
+
+    let query = supabase
+      .from("orders")
+      .select("order_number")
+      .order("order_number", { ascending: false });
+
+    const filterDate = latestCut && latestCut.created_at > todayStart 
+      ? latestCut.created_at 
+      : todayStart;
+
+    query = query.gt("created_at", filterDate);
+
+    const { data: lastOrder } = await query.limit(1).maybeSingle();
 
     const nextNumber = lastOrder
       ? (parseInt(lastOrder.order_number) + 1).toString().padStart(3, "0")

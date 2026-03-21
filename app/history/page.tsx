@@ -66,6 +66,10 @@ export default function HistoryPage() {
     const [showCutsArchive, setShowCutsArchive] = useState(false);
     const [dailyCuts, setDailyCuts] = useState<DailyCut[]>([]);
     const [isLoadingCuts, setIsLoadingCuts] = useState(false);
+    const [manualCash, setManualCash] = useState<string>("");
+    const [manualCard, setManualCard] = useState<string>("");
+    const [manualTipsEfectivo, setManualTipsEfectivo] = useState<string>("");
+    const [manualTipsTarjeta, setManualTipsTarjeta] = useState<string>("");
 
     const checkRole = async () => {
         try {
@@ -172,6 +176,12 @@ export default function HistoryPage() {
     };
 
     const handleFinalizarDia = async () => {
+        if (openOrders.length > 0) {
+            alert(`No se puede cerrar: Hay ${openOrders.length} órdenes pendientes de pago. Favor de cobrarlas o cancelarlas antes de continuar.`);
+            setShowFinalizeModal(false);
+            return;
+        }
+
         try {
             setIsFinalizing(true);
             const mxDateStr = new Intl.DateTimeFormat("en-CA", {
@@ -181,6 +191,11 @@ export default function HistoryPage() {
                 day: "2-digit",
             }).format(new Date());
 
+            const cashFinal = manualCash !== "" ? Number(manualCash) : todayTotals.cajaEfectivo;
+            const cardFinal = manualCard !== "" ? Number(manualCard) : todayTotals.cajaTarjeta;
+            const tipsEfectivoFinal = manualTipsEfectivo !== "" ? Number(manualTipsEfectivo) : todayTotals.propinasEfectivo;
+            const tipsTarjetaFinal = manualTipsTarjeta !== "" ? Number(manualTipsTarjeta) : todayTotals.propinasTarjeta;
+
             const response = await fetch("/api/daily-cuts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -188,13 +203,13 @@ export default function HistoryPage() {
                     cut_date: mxDateStr,
                     venta_neta: todayTotals.ventaNeta,
                     iva_acumulado: todayTotals.ivaAcumulado,
-                    propinas_efectivo: todayTotals.propinasEfectivo,
-                    propinas_tarjeta: todayTotals.propinasTarjeta,
-                    caja_efectivo: todayTotals.cajaEfectivo,
-                    caja_tarjeta: todayTotals.cajaTarjeta,
-                    utilidad_real: todayTotals.utilidadReal,
+                    propinas_efectivo: tipsEfectivoFinal,
+                    propinas_tarjeta: tipsTarjetaFinal,
+                    caja_efectivo: cashFinal,
+                    caja_tarjeta: cardFinal,
+                    utilidad_real: todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal,
                     total_gastos: todayExpenses,
-                    utilidad_final: todayTotals.utilidadReal - todayExpenses,
+                    utilidad_final: (todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal) - todayExpenses,
                     total_orders: todayOrders.length,
                 }),
             });
@@ -203,8 +218,10 @@ export default function HistoryPage() {
 
             setFinalizeSuccess(true);
             setShowFinalizeModal(false);
+            alert("¡Corte de día finalizado con éxito! Los folios de órdenes se han reiniciado.");
         } catch (err) {
             console.error("Error finalizing day:", err);
+            alert("Error al finalizar el día. Por favor intente de nuevo.");
         } finally {
             setIsFinalizing(false);
         }
@@ -261,7 +278,20 @@ export default function HistoryPage() {
                 day: "2-digit",
             }).format(new Date(order.createdAt));
             return orderDate === todayDateStr &&
-                (order.status === "PAID" || order.status === "DELIVERED");
+                (order.status === "PAID" || order.status === "DELIVERED" || order.status === "UNCOLLECTED");
+        });
+    }, [orders, todayDateStr]);
+
+    const openOrders = useMemo(() => {
+        return orders.filter((order) => {
+            const orderDate = new Intl.DateTimeFormat("en-CA", {
+                timeZone: "America/Mexico_City",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+            }).format(new Date(order.createdAt));
+            return orderDate === todayDateStr &&
+                !(order.status === "PAID" || order.status === "CANCELLED" || order.status === "UNCOLLECTED");
         });
     }, [orders, todayDateStr]);
 
@@ -274,23 +304,31 @@ export default function HistoryPage() {
         let cajaTarjeta = 0;
 
         todayOrders.forEach((order) => {
-            const tipAmount = order.payments?.[0]?.tipAmount || 0;
-            const paymentMethod = order.payments?.[0]?.method || "N/A";
+            const payment = order.payments?.[0];
+            const tipAmount = payment?.tipAmount || 0;
+            const paymentMethod = payment?.method || "N/A";
             const subtotalFiscal = order.total / 1.16;
             const ivaFiscal = order.total - subtotalFiscal;
             const totalPago = order.total + tipAmount;
 
+            // Venta neta always counts if the order was served (delivered/paid/uncollected)
             ventaNeta += subtotalFiscal;
             ivaAcumulado += ivaFiscal;
 
-            if (paymentMethod === PaymentMethod.CASH) {
-                propinasEfectivo += tipAmount;
-                cajaEfectivo += totalPago;
-            } else if (paymentMethod === PaymentMethod.CARD || paymentMethod === PaymentMethod.TRANSFER) {
-                propinasTarjeta += tipAmount;
-                cajaTarjeta += totalPago;
-            } else {
-                cajaEfectivo += totalPago;
+            if (payment) {
+                if (paymentMethod === PaymentMethod.CASH) {
+                    propinasEfectivo += tipAmount;
+                    cajaEfectivo += totalPago;
+                } else if (paymentMethod === PaymentMethod.CARD || paymentMethod === PaymentMethod.TRANSFER) {
+                    propinasTarjeta += tipAmount;
+                    cajaTarjeta += totalPago;
+                } else {
+                    cajaEfectivo += totalPago;
+                }
+            } else if (order.status === "UNCOLLECTED") {
+                // For uncollected, we count the sale but don't add to caja (it's a loss later)
+                // Actually, if it's a loss, it should probably be subtracted from utility
+                // But typically ventaNeta is "what was sold".
             }
         });
 
@@ -482,7 +520,17 @@ export default function HistoryPage() {
                             </button>
                             {!finalizeSuccess && (
                                 <button
-                                    onClick={() => setShowFinalizeModal(true)}
+                                    onClick={() => {
+                                        if (openOrders.length > 0) {
+                                            alert(`No se puede cerrar: Hay ${openOrders.length} órdenes pendientes de pago.`);
+                                            return;
+                                        }
+                                        setManualCash(todayTotals.cajaEfectivo.toString());
+                                        setManualCard(todayTotals.cajaTarjeta.toString());
+                                        setManualTipsEfectivo(todayTotals.propinasEfectivo.toString());
+                                        setManualTipsTarjeta(todayTotals.propinasTarjeta.toString());
+                                        setShowFinalizeModal(true);
+                                    }}
                                     className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700 transition-all"
                                 >
                                     ✅ Finalizar Día
@@ -654,31 +702,63 @@ export default function HistoryPage() {
                                 Se guardará el siguiente resumen en el archivo de cortes:
                             </p>
 
-                            <div className="space-y-2 bg-[#181818] rounded-lg p-4 mb-6 text-sm">
-                                <div className="flex justify-between">
+                             <div className="space-y-3 bg-[#181818] rounded-lg p-4 mb-6 text-sm">
+                                <div className="flex justify-between items-center bg-[#242424] p-2 rounded-md">
+                                    <span className="text-gray-400">Venta Neta (sin IVA)</span>
+                                    <span className="text-white font-mono font-bold">${todayTotals.ventaNeta.toFixed(2)}</span>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-3 mt-4">
+                                    <div>
+                                        <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Efectivo Caja</label>
+                                        <input 
+                                            type="number" 
+                                            value={manualCash}
+                                            onChange={(e) => setManualCash(e.target.value)}
+                                            className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-green-400 font-mono focus:border-green-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Tarjeta Caja</label>
+                                        <input 
+                                            type="number" 
+                                            value={manualCard}
+                                            onChange={(e) => setManualCard(e.target.value)}
+                                            className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-blue-400 font-mono focus:border-blue-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Propinas Efec.</label>
+                                        <input 
+                                            type="number" 
+                                            value={manualTipsEfectivo}
+                                            onChange={(e) => setManualTipsEfectivo(e.target.value)}
+                                            className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-green-500/70 font-mono focus:border-green-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Propinas Tarj.</label>
+                                        <input 
+                                            type="number" 
+                                            value={manualTipsTarjeta}
+                                            onChange={(e) => setManualTipsTarjeta(e.target.value)}
+                                            className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-blue-500/70 font-mono focus:border-blue-500 outline-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-between border-t border-gray-700 pt-3">
                                     <span className="text-gray-400">Órdenes completadas</span>
                                     <span className="text-white font-bold">{todayOrders.length}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Venta Neta (sin IVA)</span>
-                                    <span className="text-white font-mono">${todayTotals.ventaNeta.toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">IVA Acumulado</span>
-                                    <span className="text-white font-mono">${todayTotals.ivaAcumulado.toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Propinas Totales</span>
-                                    <span className="text-green-400 font-mono">${(todayTotals.propinasEfectivo + todayTotals.propinasTarjeta).toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-400">Gastos del Día</span>
                                     <span className="text-red-400 font-mono">-${todayExpenses.toFixed(2)}</span>
                                 </div>
                                 <div className="border-t border-gray-600 pt-2 mt-2 flex justify-between font-bold">
-                                    <span className="text-blue-200">Utilidad Final</span>
-                                    <span className={`font-mono ${todayTotals.utilidadFinal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        ${todayTotals.utilidadFinal.toFixed(2)}
+                                    <span className="text-blue-200 uppercase text-xs">Utilidad Final Estimada</span>
+                                    <span className={`font-mono ${(todayTotals.ventaNeta + Number(manualTipsEfectivo || 0) + Number(manualTipsTarjeta || 0) - todayExpenses) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                        ${(todayTotals.ventaNeta + Number(manualTipsEfectivo || 0) + Number(manualTipsTarjeta || 0) - todayExpenses).toFixed(2)}
                                     </span>
                                 </div>
                             </div>
