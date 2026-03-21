@@ -109,11 +109,42 @@ export default function POSPage() {
     return Array.from(cats);
   }, [availableMenuItems]);
 
+  // NEW: Calculate next folio for display
+  const nextFolioDisplay = useMemo(() => {
+    const todayDateStr = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Mexico_City",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+
+    const sortedOrders = [...orders].filter(o => {
+      const orderDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date(o.createdAt));
+      return orderDate === todayDateStr;
+    });
+
+    if (sortedOrders.length === 0) return "001";
+    const lastNum = Math.max(...sortedOrders.map(o => parseInt(o.orderNumber || "0")));
+    return (lastNum + 1).toString().padStart(3, "0");
+  }, [orders]);
+
   useEffect(() => {
     if (categories.length > 0 && (!activeCategory || !categories.includes(activeCategory))) {
       setActiveCategory(categories[0]);
     }
   }, [categories, activeCategory]);
+
+  // Default source to avoid friction
+  useEffect(() => {
+    if (!formState.source) {
+      setFormState(prev => ({ ...prev, source: "Otro" }));
+    }
+  }, []);
 
   const fetchMenu = async () => {
     const response = await fetch("/api/menu");
@@ -602,6 +633,12 @@ export default function POSPage() {
             </Link>
             <h1 className="text-2xl font-bold text-text-light">Punto de Venta</h1>
           </div>
+          <div className="flex items-center gap-4">
+             <div className="bg-[#181818] px-6 py-2 rounded-2xl border-2 border-primary shadow-lg shadow-primary/20">
+                <span className="text-[10px] font-black text-primary uppercase block tracking-widest leading-none mb-1">Próximo Folio</span>
+                <span className="text-2xl font-black text-white font-mono">#{nextFolioDisplay}</span>
+             </div>
+          </div>
         </div>
       </header>
 
@@ -615,97 +652,14 @@ export default function POSPage() {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-            {/* COLUMNA IZQUIERDA: Configuración y Menú */}
+            {/* COLUMNA IZQUIERDA: Menú (PRIODIDAD) */}
             <div className="lg:col-span-7 xl:col-span-8 space-y-6">
-
-              {/* Configuración de la Orden */}
-              <section className="rounded-2xl bg-[#242424] p-5 shadow-md border border-white/5">
-                <h2 className="text-lg font-bold text-text-light mb-4 flex items-center gap-2">
-                  <span className="text-primary">📋</span> Configuración de Orden
-                </h2>
-                <div className="grid gap-4 sm:grid-cols-2 mb-6">
-                  <div>
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">
-                      Cliente
-                    </label>
-                    <select
-                      value={formState.customerId}
-                      onChange={(e) => handleFormChange("customerId", e.target.value)}
-                      className="w-full rounded-xl border border-gray-700 bg-[#181818] px-3 py-2.5 text-sm outline-none focus:border-primary transition-all"
-                    >
-                      <option value="">Sin cliente (General)</option>
-                      {customers.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">
-                      ¿Cómo nos conoció? *
-                    </label>
-                    <select
-                      value={formState.source}
-                      onChange={(e) => handleFormChange("source", e.target.value)}
-                      className={`w-full rounded-xl border ${formErrors.source ? "border-red-500" : "border-gray-300"} bg-[#181818] px-3 py-2.5 text-sm outline-none focus:border-primary transition-all`}
-                    >
-                      <option value="">Selecciona una opción</option>
-                      {SOURCE_OPTIONS.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                    {formErrors.source && (
-                      <p className="mt-1 text-[10px] text-red-500 font-bold uppercase">{formErrors.source}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Seleccionar Mesa / Entrega</label>
-                  <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-                    {["1", "2", "3", "4", "5", "Domicilio"].map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => handleFormChange("table", t)}
-                        className={`h-14 ${t === "Domicilio" ? "px-6" : "w-14"} shrink-0 rounded-2xl font-black text-lg transition-all flex items-center justify-center border-2 ${formState.table === t
-                          ? "bg-primary text-dark border-primary shadow-lg shadow-primary/20 scale-105"
-                          : "bg-[#181818] text-gray-400 border-gray-800 hover:border-gray-600"
-                          }`}
-                      >
-                        {t}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => setShowNotesInput(!showNotesInput)}
-                      className={`ml-auto h-14 w-14 shrink-0 flex items-center justify-center rounded-2xl transition-all border-2 ${showNotesInput || formState.notes
-                        ? "bg-amber-500 text-dark border-amber-500"
-                        : "bg-[#181818] text-gray-400 border-gray-800 hover:border-gray-600"
-                        }`}
-                      title="Notas"
-                    >
-                      📝
-                    </button>
-                  </div>
-
-                  {(showNotesInput || formState.notes !== "") && (
-                    <input
-                      type="text"
-                      value={formState.notes}
-                      onChange={(e) => handleFormChange("notes", e.target.value)}
-                      className="rounded-xl border border-gray-700 bg-[#181818] px-4 py-3 text-sm w-full focus:border-primary outline-none transition-all"
-                      placeholder="Escribe notas adicionales aquí..."
-                      autoFocus={showNotesInput && !formState.notes}
-                    />
-                  )}
-                </div>
-              </section>
 
               {/* Selector de Productos */}
               <section className="rounded-2xl bg-[#242424] p-5 shadow-md border border-white/5">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-text-light flex items-center gap-2">
-                    <span className="text-primary">🌮</span> Menú
+                  <h2 className="text-xl font-black text-text-light flex items-center gap-2 uppercase tracking-tighter">
+                    <span className="text-primary">🌮</span> Seleccionar Productos
                   </h2>
                 </div>
 
@@ -715,9 +669,9 @@ export default function POSPage() {
                       key={cat}
                       type="button"
                       onClick={() => setActiveCategory(cat)}
-                      className={`px-5 py-2.5 rounded-full font-bold whitespace-nowrap transition-all text-sm border-2 ${activeCategory === cat
-                        ? "bg-primary text-dark border-primary shadow-md shadow-primary/10"
-                        : "bg-[#181818] text-gray-400 border-gray-800 hover:border-gray-700"
+                      className={`px-5 py-2.5 rounded-xl font-black whitespace-nowrap transition-all text-xs border-2 ${activeCategory === cat
+                        ? "bg-primary text-dark border-primary shadow-lg shadow-primary/10"
+                        : "bg-[#181818] text-gray-500 border-gray-800 hover:border-gray-600"
                         }`}
                     >
                       {cat}
@@ -745,6 +699,64 @@ export default function POSPage() {
                         </button>
                       );
                     })}
+                </div>
+              </section>
+
+              {/* Configuración de la Orden (Secundaria / Opcional) */}
+              <section className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 opacity-80 hover:opacity-100 transition-opacity">
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    <span className="grayscale">📋</span> Detalles Adicionales
+                    </h2>
+                    <div className="flex items-center gap-4">
+                        <button 
+                            type="button"
+                            onClick={() => handleFormChange("table", formState.table === "Domicilio" ? "" : "Domicilio")}
+                            className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all border-2 ${formState.table === "Domicilio" 
+                                ? "bg-amber-500 border-amber-500 text-dark" 
+                                : "bg-[#181818] border-gray-800 text-gray-500 hover:border-gray-600"}`}
+                        >
+                            🛵 DOMICILIO
+                        </button>
+                    </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-3 mb-4">
+                  <div>
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Cliente</label>
+                    <select
+                      value={formState.customerId}
+                      onChange={(e) => handleFormChange("customerId", e.target.value)}
+                      className="w-full rounded-xl border border-gray-800 bg-[#181818] px-3 py-2 text-xs text-gray-300 outline-none focus:border-primary transition-all"
+                    >
+                      <option value="">General</option>
+                      {customers.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Origen</label>
+                    <select
+                      value={formState.source}
+                      onChange={(e) => handleFormChange("source", e.target.value)}
+                      className="w-full rounded-xl border border-gray-800 bg-[#181818] px-3 py-2 text-xs text-gray-300 outline-none focus:border-primary transition-all"
+                    >
+                      {SOURCE_OPTIONS.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Notas / Mesa Esp.</label>
+                    <input
+                      type="text"
+                      value={formState.notes}
+                      onChange={(e) => handleFormChange("notes", e.target.value)}
+                      className="rounded-xl border border-gray-800 bg-[#181818] px-3 py-2 text-xs text-gray-300 w-full focus:border-primary outline-none transition-all"
+                      placeholder="Ej. Mesa 7, Ventana..."
+                    />
+                  </div>
                 </div>
               </section>
             </div>
