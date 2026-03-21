@@ -6,9 +6,9 @@ export const mapOrderData = (dbOrder: any) => {
     ...dbOrder,
     orderNumber: dbOrder.order_number,
     customerId: dbOrder.customer_id,
-    createdAt: dbOrder.created_at,
-    updatedAt: dbOrder.updated_at,
-    orderItems: Array.isArray(dbOrder.order_items)
+                createdAt: dbOrder.created_at ? (dbOrder.created_at.includes('Z') || dbOrder.created_at.includes('+') ? dbOrder.created_at : `${dbOrder.created_at.replace(' ', 'T')}Z`) : null,
+                updatedAt: dbOrder.updated_at ? (dbOrder.updated_at.includes('Z') || dbOrder.updated_at.includes('+') ? dbOrder.updated_at : `${dbOrder.updated_at.replace(' ', 'T')}Z`) : null,
+                orderItems: Array.isArray(dbOrder.order_items)
       ? dbOrder.order_items.map((item: any) => ({
         ...item,
         orderId: item.order_id,

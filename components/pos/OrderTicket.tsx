@@ -6,7 +6,10 @@ interface OrderTicketProps {
 
 export function OrderTicket({ order }: OrderTicketProps) {
   const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleString("es-MX", {
+    const dateStr = typeof date === 'string' && !date.includes('Z') && !date.includes('+')
+      ? `${date.replace(' ', 'T')}Z`
+      : date;
+    return new Date(dateStr).toLocaleString("es-MX", {
       dateStyle: "short",
       timeStyle: "short",
       timeZone: "America/Mexico_City",
