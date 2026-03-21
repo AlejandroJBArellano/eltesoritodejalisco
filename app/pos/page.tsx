@@ -788,7 +788,7 @@ export default function POSPage() {
                             <p className="font-bold text-gray-200 text-sm leading-tight truncate uppercase">{product?.name || "Producto"}</p>
                             <p className="text-[10px] font-bold text-gray-500 mt-0.5">${product?.price.toFixed(2)} c/u</p>
                           </div>
-                          <div className="flex items-center gap-1.5 bg-[#121212] rounded-lg p-1 border border-white/5">
+                          <div className="flex items-center gap-1.5 bg-dark rounded-lg p-1 border border-white/5">
                             <button
                               type="button"
                               onClick={() => handleQuantityChange(index, -1)}
@@ -841,18 +841,39 @@ export default function POSPage() {
               {/* Resumen Diario (También a la derecha) */}
               <section className="rounded-2xl bg-[#242424] p-5 border border-white/5">
                 <h3 className="text-xs font-black uppercase text-gray-500 mb-4 tracking-widest">Estadísticas de Hoy</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-[#181818] p-3 rounded-xl border border-white/5">
-                    <p className="text-[10px] font-bold text-gray-500 uppercase">Órdenes</p>
-                    <p className="text-xl font-black text-text-light">{orders.filter((o) => o.status !== "PAID").length}</p>
-                  </div>
-                  <div className="bg-[#181818] p-3 rounded-xl border border-white/5">
-                    <p className="text-[10px] font-bold text-gray-500 uppercase">Ventas</p>
-                    <p className="text-xl font-black text-success">
-                      ${orders.filter((o) => o.status === "PAID").reduce((acc, o) => acc + o.total, 0).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
+                {(() => {
+                  const todayDateStr = new Intl.DateTimeFormat("en-CA", {
+                    timeZone: "America/Mexico_City",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  }).format(new Date());
+
+                  const todayOrders = orders.filter((o) => {
+                    const orderDate = new Intl.DateTimeFormat("en-CA", {
+                      timeZone: "America/Mexico_City",
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    }).format(new Date(o.createdAt));
+                    return orderDate === todayDateStr;
+                  });
+
+                  return (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-[#181818] p-3 rounded-xl border border-white/5">
+                        <p className="text-[10px] font-bold text-gray-500 uppercase">Órdenes</p>
+                        <p className="text-xl font-black text-text-light">{todayOrders.length}</p>
+                      </div>
+                      <div className="bg-[#181818] p-3 rounded-xl border border-white/5">
+                        <p className="text-[10px] font-bold text-gray-500 uppercase">Ventas</p>
+                        <p className="text-xl font-black text-success">
+                          ${todayOrders.filter((o) => o.status === "PAID" || o.status === "DELIVERED").reduce((acc, o) => acc + o.total, 0).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
               </section>
             </div>
           </div>
