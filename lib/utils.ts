@@ -21,13 +21,61 @@ export function formatTime(seconds: number): string {
 }
 
 /**
- * Format date and time
+ * Mexico City timezone name
  */
-export function formatDateTime(date: Date): string {
+export const MEX_TIMEZONE = "America/Mexico_City";
+
+/**
+ * Get current date and time in Mexico City as a string with timezone offset
+ * Returns ISO string format but adjusted for MX timezone (e.g., 2024-03-20T10:00:00-06:00)
+ */
+export function getCurrentCDMXDate(): string {
+  const now = new Date();
+  
+  // Format as YYYY-MM-DDTHH:MM:SS
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: MEX_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+  
+  const parts = formatter.formatToParts(now);
+  const partMap = parts.reduce((acc, part) => {
+    acc[part.type] = part.value;
+    return acc;
+  }, {} as Record<string, string>);
+
+  const iso = `${partMap.year}-${partMap.month}-${partMap.day}T${partMap.hour}:${partMap.minute}:${partMap.second}-06:00`;
+  return iso;
+}
+
+/**
+ * Get current date in Mexico City (YYYY-MM-DD)
+ */
+export function getCurrentCDMXDay(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: MEX_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+/**
+ * Format date and time for Mexico City display
+ */
+export function formatDateTime(date: Date | string | number): string {
+  if (!date) return "N/A";
+  
   return new Intl.DateTimeFormat("es-MX", {
     dateStyle: "medium",
     timeStyle: "short",
-    timeZone: "America/Mexico_City",
+    timeZone: MEX_TIMEZONE,
   }).format(new Date(date));
 }
 

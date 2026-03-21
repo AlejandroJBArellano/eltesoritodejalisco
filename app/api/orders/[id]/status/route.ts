@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
@@ -18,7 +19,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     // If order is completed or uncollected, set completion timestamp
     if (status === "DELIVERED" || status === "PAID" || status === "UNCOLLECTED") {
-      updateData.completed_at = new Date().toISOString();
+      updateData.completed_at = getCurrentCDMXDate();
     }
 
     const supabase = await createClient();

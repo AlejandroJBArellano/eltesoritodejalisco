@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { MEX_TIMEZONE } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
     if (period === "today") {
       // Start of today in Mexico City time
       const mxDateStr = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Mexico_City",
+        timeZone: MEX_TIMEZONE,
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
     } else if (period === "month") {
       // Start of current month in Mexico City time
       const mxDateStr = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Mexico_City",
+        timeZone: MEX_TIMEZONE,
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -93,7 +94,7 @@ export async function GET(request: NextRequest) {
 
     (completedOrders || []).forEach((order) => {
       const date = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Mexico_City",
+        timeZone: MEX_TIMEZONE,
         year: "numeric",
         month: "2-digit",
         day: "2-digit",

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentCDMXDay } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -57,7 +58,7 @@ export async function POST(req: Request) {
                 amount: parseFloat(amount),
                 description,
                 has_invoice: Boolean(has_invoice),
-                date: date || new Date().toISOString().split("T")[0]
+                date: date || getCurrentCDMXDay()
             }])
             .select(`
         *,

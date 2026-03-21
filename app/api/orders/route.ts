@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentCDMXDate } from "@/lib/utils";
 import type { CreateOrderRequest } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
         subtotal,
         tax,
         total,
-        updated_at: new Date().toISOString()
+        updated_at: getCurrentCDMXDate()
       })
       .select()
       .single();

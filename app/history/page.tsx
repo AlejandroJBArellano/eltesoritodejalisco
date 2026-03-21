@@ -217,7 +217,12 @@ export default function HistoryPage() {
         return orders.filter((order) => {
             if (searchQuery && !order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())) return false;
             if (dateFilter) {
-                const orderDate = new Date(order.createdAt).toISOString().substring(0, 10);
+                const orderDate = new Intl.DateTimeFormat("en-CA", {
+                    timeZone: "America/Mexico_City",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                }).format(new Date(order.createdAt));
                 if (orderDate !== dateFilter) return false;
             }
             if (tableFilter && order.table !== tableFilter) return false;
@@ -519,7 +524,7 @@ export default function HistoryPage() {
                                     <span className="text-gray-500 text-xl font-mono font-bold">$0.00</span>
                                 </div>
                             </div>
-                            <div className="bg-gradient-to-br from-[#1a3a1a] to-[#0f1f0f] p-4 rounded-lg flex flex-col justify-center items-center shadow-lg border border-green-500/30 lg:col-span-1 md:col-span-2">
+                            <div className="bg-linear-to-br from-[#1a3a1a] to-[#0f1f0f] p-4 rounded-lg flex flex-col justify-center items-center shadow-lg border border-green-500/30 lg:col-span-1 md:col-span-2">
                                 <span className="text-green-300 text-xs font-bold uppercase tracking-wider mb-2">Día Finalizado ✓</span>
                                 <span className="text-white text-3xl font-black font-mono">$0.00</span>
                                 <span className="text-green-400/60 text-[10px] mt-2 text-center uppercase">Nuevo día — caja en cero</span>
@@ -571,7 +576,7 @@ export default function HistoryPage() {
                             </div>
 
                             {/* Utilidad Final */}
-                            <div className="bg-gradient-to-br from-[#1c2e4a] to-[#0f172a] p-4 rounded-lg flex flex-col justify-center items-center shadow-lg border border-blue-500/30">
+                            <div className="bg-linear-to-br from-[#1c2e4a] to-[#0f172a] p-4 rounded-lg flex flex-col justify-center items-center shadow-lg border border-blue-500/30">
                                 <span className="text-blue-200 text-xs font-bold uppercase tracking-wider mb-1">Utilidad Real</span>
                                 <span className="text-white text-2xl font-black font-mono">
                                     ${todayTotals.utilidadReal.toFixed(2)}
@@ -841,7 +846,8 @@ export default function HistoryPage() {
                                                         month: 'short',
                                                         day: 'numeric',
                                                         hour: '2-digit',
-                                                        minute: '2-digit'
+                                                        minute: '2-digit',
+                                                        timeZone: 'America/Mexico_City'
                                                     })}
                                                 </td>
                                                 <td className="px-4 py-4 text-gray-300">{order.table || "Llevar"}</td>

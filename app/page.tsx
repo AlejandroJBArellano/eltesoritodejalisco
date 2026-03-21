@@ -1,5 +1,6 @@
 import { getProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { MEX_TIMEZONE } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -36,16 +37,14 @@ export default async function Home() {
 
     // 2. Ventas Hoy
     const mxDateString = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Mexico_City",
+      timeZone: MEX_TIMEZONE,
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
     }).format(new Date());
 
-    // Convertir el inicio del día en CDMX a UTC literal para que Postgres 
-    // lo compare correctamente contra "timestamp without time zone"
-    const mxMidnight = new Date(`${mxDateString}T00:00:00-06:00`);
-    const todayStartUTC = mxMidnight.toISOString().replace("Z", "");
+    // Convert the start of the day in CDMX to UTC for the query
+    const todayStartUTC = new Date(`${mxDateString}T00:00:00-06:00`).toISOString();
 
     const { data: todayOrders } = await supabase
       .from("orders")

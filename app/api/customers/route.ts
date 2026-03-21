@@ -2,6 +2,7 @@
 // Handles customer CRUD operations
 
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
         phone: phone || null,
         email: email || null,
         birthday: parsedBirthday,
-        updated_at: new Date().toISOString(),
+        updated_at: getCurrentCDMXDate(),
       })
       .select()
       .single();

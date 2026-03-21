@@ -38,14 +38,27 @@ export default function GastosPage() {
     const [amount, setAmount] = useState("");
     const [description, setDescription] = useState("");
     const [categoryId, setCategoryId] = useState("");
-    const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+    const [date, setDate] = useState(() => {
+        // Init with Mexico City date
+        return new Intl.DateTimeFormat("en-CA", {
+            timeZone: "America/Mexico_City",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+        }).format(new Date());
+    });
     const [hasInvoice, setHasInvoice] = useState(false);
     const [isSubmittingExp, setIsSubmittingExp] = useState(false);
 
     // Filter
     const [currentMonth, setCurrentMonth] = useState(() => {
         const today = new Date();
-        return `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, "0")}`;
+        const mxDate = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "America/Mexico_City",
+            year: "numeric",
+            month: "2-digit",
+        }).format(today);
+        return mxDate; // e.g. "2024-03"
     });
 
     const fetchData = async () => {

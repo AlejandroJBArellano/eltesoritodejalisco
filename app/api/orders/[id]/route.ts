@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
 const TAX_RATE = 0;
@@ -93,7 +94,7 @@ export async function PUT(
         subtotal: newSubtotal,
         tax: newTax,
         total: newTotal,
-        updated_at: new Date().toISOString(),
+        updated_at: getCurrentCDMXDate(),
       })
       .eq("id", id)
       .select(
@@ -208,7 +209,7 @@ export async function PATCH(
       subtotal: (order.subtotal || 0) + additionalSubtotal,
       tax: (order.tax || 0) + additionalTax,
       total: (order.total || 0) + additionalTotal,
-      updated_at: new Date().toISOString(),
+      updated_at: getCurrentCDMXDate(),
     };
 
     if (["DELIVERED", "READY", "COMPLETED"].includes(order.status)) {
