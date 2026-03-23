@@ -35,7 +35,11 @@ VALUES
     ('Insumos', '#10B981'),
     ('Sueldos', '#6366F1'),
     ('Servicios', '#F59E0B'),
-    ('Otros', '#6B7280')
+    ('Otros', '#6B7280'),
+    ('Transporte (Ida)', '#06B6D4'),
+    ('Transporte (Regreso)', '#0EA5E9'),
+    ('Gastos Personales', '#F97316'),
+    ('Créditos del Negocio', '#A855F7')
 ON CONFLICT (name) DO NOTHING;
 
 -- Daily Cuts historical archive
