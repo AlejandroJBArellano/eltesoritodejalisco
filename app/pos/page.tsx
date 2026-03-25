@@ -129,7 +129,10 @@ export default function POSPage() {
     });
 
     if (sortedOrders.length === 0) return "001";
-    const lastNum = Math.max(...sortedOrders.map(o => parseInt(o.orderNumber || "0")));
+    const lastNum = Math.max(...sortedOrders.map(o => {
+      const parts = (o.orderNumber || "0").split('-');
+      return parseInt(parts[parts.length - 1], 10) || 0;
+    }));
     return (lastNum + 1).toString().padStart(3, "0");
   }, [orders]);
 

@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     let query = supabase
       .from("orders")
       .select("order_number")
-      .order("order_number", { ascending: false });
+      .order("created_at", { ascending: false });
 
     const filterDate = latestCut && latestCut.created_at > todayStart 
       ? latestCut.created_at 
@@ -93,9 +93,15 @@ export async function POST(request: NextRequest) {
 
     const { data: lastOrder } = await query.limit(1).maybeSingle();
 
-    const nextNumber = lastOrder
-      ? (parseInt(lastOrder.order_number) + 1).toString().padStart(3, "0")
-      : "001";
+    let nextSeq = 1;
+    if (lastOrder && lastOrder.order_number) {
+      const parts = lastOrder.order_number.split('-');
+      const lastSeqStr = parts[parts.length - 1];
+      nextSeq = parseInt(lastSeqStr, 10) + 1;
+    }
+
+    const todayStr = getCurrentCDMXDay().replace(/-/g, "").slice(2);
+    const nextNumber = `${todayStr}-${nextSeq.toString().padStart(3, "0")}`;
 
     // Calculate order totals
     let subtotal = 0;
