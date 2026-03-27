@@ -58,6 +58,72 @@ const PAYMENT_METHODS = [
   { label: "Transferencia", value: "TRANSFER" },
 ];
 
+// ─── Pastel colour palette helpers ───────────────────────────────────────────
+
+/** Parse a "#rrggbb" hex colour into [r, g, b] */
+function hexToRgb(hex: string): [number, number, number] {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return [r, g, b];
+}
+
+/** Encode [r, g, b] back to "#rrggbb" */
+function rgbToHex(r: number, g: number, b: number): string {
+  const clamp = (v: number) => Math.min(255, Math.max(0, Math.round(v)));
+  return `#${[clamp(r), clamp(g), clamp(b)].map(v => v.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/**
+ * Generate a subtle tonal variation of a pastel base colour for product index
+ * `i`.  The adjustments shift lightness and introduce a tiny hue drift so that
+ * each product card in the same category looks slightly different while staying
+ * harmonious (mosaico armónico).
+ */
+const PRODUCT_ADJUSTMENTS: [number, number, number][] = [
+  [  0,   0,   0],  // base (index 0)
+  [ 12,  12,  12],  // slightly lighter
+  [-10, -10,  -8],  // slightly darker / more saturated
+  [ 20,  16,  10],  // warm lighter
+  [ -8,   5,  15],  // cool shift
+  [ 15,  -8,  -5],  // warm-rose shift
+  [  5,  18,   5],  // fresh / minty shift
+  [-15,  -5,  10],  // deeper / slate shift
+];
+
+function getProductVariantColor(baseHex: string, index: number): string {
+  const [r, g, b] = hexToRgb(baseHex);
+  const [dr, dg, db] = PRODUCT_ADJUSTMENTS[index % PRODUCT_ADJUSTMENTS.length];
+  return rgbToHex(r + dr, g + dg, b + db);
+}
+
+/** Convert a hex colour to rgba() with the given alpha (0–1) */
+function hexToRgba(hex: string, alpha: number): string {
+  const [r, g, b] = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/** Slightly darken a colour for use as a bottom-border accent */
+const BORDER_DARKEN_OFFSET = 28;
+function darkenColor(hex: string, amount = BORDER_DARKEN_OFFSET): string {
+  const [r, g, b] = hexToRgb(hex);
+  return rgbToHex(r - amount, g - amount, b - amount);
+}
+
+// ─── Category configuration (pastel / tender palette) ────────────────────────
+
+const CATEGORY_CONFIG: Record<string, { label: string; color: string; hover: string; border: string; text: string }> = {
+  ANTOJITOS:          { label: "Antojitos",        color: "#FFB7C5", hover: "#FFCDD6", border: "#F08FA0", text: "#333333" },
+  TACOS:              { label: "Tacos",            color: "#B2FBA5", hover: "#C8FCB8", border: "#88E87A", text: "#333333" },
+  "PLATILLOS FUERTES":{ label: "Platillos Fuertes",color: "#E6E6FA", hover: "#F0F0FF", border: "#C0C0F0", text: "#333333" },
+  BEBIDAS:            { label: "Bebidas",          color: "#89CFF0", hover: "#A8DFFF", border: "#5BAFD8", text: "#333333" },
+  EXTRAS:             { label: "Extras",           color: "#FDFD96", hover: "#FEFEC0", border: "#E8E860", text: "#333333" },
+  POSTRES:            { label: "Postres",          color: "#FFDAB9", hover: "#FFE8CF", border: "#F0B888", text: "#333333" },
+  OTROS:              { label: "Otros",            color: "#E0E0E0", hover: "#EFEFEF", border: "#B8B8B8", text: "#333333" },
+};
+
+const CATEGORY_ORDER = ["ANTOJITOS", "TACOS", "PLATILLOS FUERTES", "BEBIDAS", "EXTRAS", "POSTRES", "OTROS"];
+
 export default function POSPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -103,18 +169,6 @@ export default function POSPage() {
     () => menuItems.filter((item) => item.isAvailable),
     [menuItems],
   );
-
-  const CATEGORY_CONFIG: Record<string, { label: string, color: string, hover: string, border: string, text: string }> = {
-    ANTOJITOS: { label: "Antojitos", color: "#FF6B00", hover: "#FF8533", border: "#CC5500", text: "white" },
-    TACOS: { label: "Tacos", color: "#7CB342", hover: "#8BC34A", border: "#558B2F", text: "white" },
-    "PLATILLOS FUERTES": { label: "Platillos Fuertes", color: "#B91C1C", hover: "#DC2626", border: "#991B1B", text: "white" },
-    BEBIDAS: { label: "Bebidas", color: "#06B6D4", hover: "#22D3EE", border: "#0891B2", text: "white" },
-    EXTRAS: { label: "Extras", color: "#EAB308", hover: "#FACC15", border: "#CA8A04", text: "black" },
-    POSTRES: { label: "Postres", color: "#EC4899", hover: "#F472B6", border: "#DB2777", text: "white" },
-    OTROS: { label: "Otros", color: "#71717A", hover: "#A1A1AA", border: "#52525B", text: "white" },
-  };
-
-  const CATEGORY_ORDER = ["ANTOJITOS", "TACOS", "PLATILLOS FUERTES", "BEBIDAS", "EXTRAS", "POSTRES", "OTROS"];
 
   const categories = useMemo(() => {
     return CATEGORY_ORDER;
@@ -689,14 +743,18 @@ export default function POSPage() {
                           onClick={() => setActiveCategory(cat)}
                           className={`px-4 py-2 rounded-xl font-black whitespace-nowrap transition-all text-[10px] border-2 ${isActive
                             ? "shadow-lg scale-105"
-                            : "bg-[#181818] text-gray-500 border-gray-800 hover:border-gray-600"
+                            : "hover:scale-105"
                             }`}
                           style={isActive ? {
                             backgroundColor: config.color,
                             color: config.text,
-                            borderColor: config.color,
-                            boxShadow: `0 8px 20px -5px ${config.color}55`
-                          } : {}}
+                            borderColor: config.border,
+                            boxShadow: `0 8px 20px -5px ${config.color}88`
+                          } : {
+                            backgroundColor: hexToRgba(config.color, 0.19),
+                            color: "#9ca3af",
+                            borderColor: hexToRgba(config.color, 0.31),
+                          }}
                         >
                           {config.label.toUpperCase()}
                         </button>
@@ -713,19 +771,21 @@ export default function POSPage() {
                   ) : (
                     availableMenuItems
                       .filter(m => (m.category || "OTROS").toUpperCase() === activeCategory)
-                      .map(m => {
+                      .map((m, idx) => {
                         const config = CATEGORY_CONFIG[activeCategory] || CATEGORY_CONFIG.OTROS;
+                        const productColor = getProductVariantColor(config.color, idx);
+                        const productBorder = darkenColor(productColor);
 
                         return (
                           <button
                             key={m.id}
                             type="button"
                             onClick={() => handleGridItemClick(m)}
-                            className="p-3 rounded-2xl flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all shadow-lg overflow-hidden group"
+                            className="p-3 rounded-2xl flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all shadow-md overflow-hidden group"
                             style={{
-                              backgroundColor: config.color,
-                              color: config.text,
-                              borderColor: config.border
+                              backgroundColor: productColor,
+                              color: "#333333",
+                              borderColor: productBorder,
                             }}
                           >
                             <span className="font-black text-[13px] leading-tight line-clamp-2 uppercase mb-1.5 transition-transform group-active:scale-95">{m.name}</span>
