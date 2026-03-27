@@ -104,10 +104,21 @@ export default function POSPage() {
     [menuItems],
   );
 
+  const CATEGORY_CONFIG: Record<string, { label: string, color: string, hover: string, border: string, text: string }> = {
+    ANTOJITOS: { label: "Antojitos", color: "#FF6B00", hover: "#FF8533", border: "#CC5500", text: "white" },
+    TACOS: { label: "Tacos", color: "#7CB342", hover: "#8BC34A", border: "#558B2F", text: "white" },
+    "PLATILLOS FUERTES": { label: "Platillos Fuertes", color: "#B91C1C", hover: "#DC2626", border: "#991B1B", text: "white" },
+    BEBIDAS: { label: "Bebidas", color: "#06B6D4", hover: "#22D3EE", border: "#0891B2", text: "white" },
+    EXTRAS: { label: "Extras", color: "#EAB308", hover: "#FACC15", border: "#CA8A04", text: "black" },
+    POSTRES: { label: "Postres", color: "#EC4899", hover: "#F472B6", border: "#DB2777", text: "white" },
+    OTROS: { label: "Otros", color: "#71717A", hover: "#A1A1AA", border: "#52525B", text: "white" },
+  };
+
+  const CATEGORY_ORDER = ["ANTOJITOS", "TACOS", "PLATILLOS FUERTES", "BEBIDAS", "EXTRAS", "POSTRES", "OTROS"];
+
   const categories = useMemo(() => {
-    const cats = new Set(availableMenuItems.map(m => (m.category || "OTROS").toUpperCase()));
-    return Array.from(cats);
-  }, [availableMenuItems]);
+    return CATEGORY_ORDER;
+  }, []);
 
   // NEW: Calculate next folio for display
   const nextFolioDisplay = useMemo(() => {
@@ -666,42 +677,63 @@ export default function POSPage() {
                   </h2>
                 </div>
 
-                <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
-                  {categories.map(cat => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setActiveCategory(cat)}
-                      className={`px-5 py-2.5 rounded-xl font-black whitespace-nowrap transition-all text-xs border-2 ${activeCategory === cat
-                        ? "bg-primary text-dark border-primary shadow-lg shadow-primary/10"
-                        : "bg-[#181818] text-gray-500 border-gray-800 hover:border-gray-600"
-                        }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {availableMenuItems
-                    .filter(m => (m.category || "OTROS").toUpperCase() === activeCategory)
-                    .map(m => {
-                      let colorClass = "bg-[#FFB7CE] hover:bg-[#FFD1DC] text-[#121212] border-[#FFD1DC]";
-                      if (activeCategory === "BEBIDAS") colorClass = "bg-rose-400 hover:bg-rose-300 text-white border-rose-500";
-                      else if (activeCategory === "POSTRES" || activeCategory === "EXTRAS") colorClass = "bg-fuchsia-400 hover:bg-fuchsia-300 text-white border-fuchsia-500";
-
+                <div className="sticky top-[-21px] bg-[#242424] z-20 -mx-5 px-5 pt-1 pb-4 mb-2 border-b border-white/5">
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                    {categories.map(cat => {
+                      const config = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG.OTROS;
+                      const isActive = activeCategory === cat;
                       return (
                         <button
-                          key={m.id}
+                          key={cat}
                           type="button"
-                          onClick={() => handleGridItemClick(m)}
-                          className={`p-3 rounded-2xl flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all shadow-lg ${colorClass}`}
+                          onClick={() => setActiveCategory(cat)}
+                          className={`px-4 py-2 rounded-xl font-black whitespace-nowrap transition-all text-[10px] border-2 ${isActive
+                            ? "shadow-lg scale-105"
+                            : "bg-[#181818] text-gray-500 border-gray-800 hover:border-gray-600"
+                            }`}
+                          style={isActive ? {
+                            backgroundColor: config.color,
+                            color: config.text,
+                            borderColor: config.color,
+                            boxShadow: `0 8px 20px -5px ${config.color}55`
+                          } : {}}
                         >
-                          <span className="font-extrabold text-[12px] leading-tight line-clamp-2 uppercase">{m.name}</span>
-                          <span className="font-black mt-1 text-base">${m.price.toFixed(2)}</span>
+                          {config.label.toUpperCase()}
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {availableMenuItems.filter(m => (m.category || "OTROS").toUpperCase() === activeCategory).length === 0 ? (
+                    <div className="col-span-full py-12 text-center text-gray-500 italic text-sm">
+                      No hay productos en esta categoría
+                    </div>
+                  ) : (
+                    availableMenuItems
+                      .filter(m => (m.category || "OTROS").toUpperCase() === activeCategory)
+                      .map(m => {
+                        const config = CATEGORY_CONFIG[activeCategory] || CATEGORY_CONFIG.OTROS;
+
+                        return (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => handleGridItemClick(m)}
+                            className="p-3 rounded-2xl flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all shadow-lg overflow-hidden group"
+                            style={{
+                              backgroundColor: config.color,
+                              color: config.text,
+                              borderColor: config.border
+                            }}
+                          >
+                            <span className="font-black text-[13px] leading-tight line-clamp-2 uppercase mb-1.5 transition-transform group-active:scale-95">{m.name}</span>
+                            <span className="font-bold text-[10px] bg-black/10 px-2 py-0.5 rounded-full">${m.price.toFixed(2)}</span>
+                          </button>
+                        );
+                      })
+                  )}
                 </div>
               </section>
 
