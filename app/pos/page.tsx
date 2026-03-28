@@ -105,13 +105,13 @@ export default function POSPage() {
   );
 
   const CATEGORY_CONFIG: Record<string, { label: string, color: string, hover: string, border: string, text: string }> = {
-    ANTOJITOS: { label: "Antojitos", color: "#FFB7C5", hover: "#FFC2D1", border: "#FFB7C5", text: "#333333" },
-    TACOS: { label: "Tacos", color: "#B2FBA5", hover: "#C2FCAF", border: "#B2FBA5", text: "#333333" },
-    "PLATILLOS FUERTES": { label: "Platillos Fuertes", color: "#E6E6FA", hover: "#F0F0FF", border: "#E6E6FA", text: "#333333" },
-    BEBIDAS: { label: "Bebidas", color: "#89CFF0", hover: "#9ADFFF", border: "#89CFF0", text: "#333333" },
-    EXTRAS: { label: "Extras", color: "#FDFD96", hover: "#FEFEA6", border: "#FDFD96", text: "#333333" },
-    POSTRES: { label: "Postres", color: "#FFDAB9", hover: "#FFE4C9", border: "#FFDAB9", text: "#333333" },
-    OTROS: { label: "Otros", color: "#E0E0E0", hover: "#EBEBEB", border: "#E0E0E0", text: "#333333" },
+    ANTOJITOS: { label: "Antojitos", color: "#FFB7C5", hover: "#FFC2D1", border: "#FFB7C5", text: "#000000" },
+    TACOS: { label: "Tacos", color: "#B2FBA5", hover: "#C2FCAF", border: "#B2FBA5", text: "#000000" },
+    "PLATILLOS FUERTES": { label: "Platillos Fuertes", color: "#E6E6FA", hover: "#F0F0FF", border: "#E6E6FA", text: "#000000" },
+    BEBIDAS: { label: "Bebidas", color: "#89CFF0", hover: "#9ADFFF", border: "#89CFF0", text: "#000000" },
+    EXTRAS: { label: "Extras", color: "#FDFD96", hover: "#FEFEA6", border: "#FDFD96", text: "#000000" },
+    POSTRES: { label: "Postres", color: "#FFDAB9", hover: "#FFE4C9", border: "#FFDAB9", text: "#000000" },
+    OTROS: { label: "Otros", color: "#E0E0E0", hover: "#EBEBEB", border: "#E0E0E0", text: "#000000" },
   };
 
   const CATEGORY_ORDER = ["ANTOJITOS", "TACOS", "PLATILLOS FUERTES", "BEBIDAS", "EXTRAS", "POSTRES", "OTROS"];
@@ -713,14 +713,15 @@ export default function POSPage() {
                           key={cat}
                           type="button"
                           onClick={() => setActiveCategory(cat)}
-                          className={`px-4 py-2 rounded-2xl font-black whitespace-nowrap transition-all text-[10px] border-2 ${isActive
-                            ? "shadow-md scale-105"
+                          className={`px-4 py-2 rounded-full font-black whitespace-nowrap transition-all text-[10px] border-2 ${isActive
+                            ? "scale-105"
                             : "bg-white/5 text-zinc-500 border-transparent hover:border-white/10"
                             }`}
                           style={isActive ? {
                             backgroundColor: config.color,
                             color: config.text,
                             borderColor: config.color,
+                            boxShadow: `0 0 15px ${config.color}44`,
                           } : {}}
                         >
                           {config.label.toUpperCase()}
@@ -746,15 +747,15 @@ export default function POSPage() {
                             key={m.id}
                             type="button"
                             onClick={() => handleGridItemClick(m)}
-                            className="p-3 rounded-[2rem] flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all shadow-sm hover:shadow-md overflow-hidden group border-black/5"
+                            className="p-3 rounded-[2.5rem] flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all shadow-sm hover:shadow-md overflow-hidden group border-black/5"
                             style={{
                               backgroundColor: productColor,
-                              color: "#FFFFFF",
-                              textShadow: "0px 1px 2px rgba(0,0,0,0.1)"
+                              color: "#000000",
+                              boxShadow: `0 0 20px ${productColor}33`,
                             }}
                           >
                             <span className="font-black text-[13px] leading-tight line-clamp-2 uppercase mb-1.5 transition-transform group-active:scale-95">{m.name}</span>
-                            <span className="font-bold text-[10px] bg-white/20 px-2 py-0.5 rounded-full">${m.price.toFixed(2)}</span>
+                            <span className="font-bold text-[10px] bg-black/10 px-2 py-0.5 rounded-full">${m.price.toFixed(2)}</span>
                           </button>
                         );
                       })
@@ -772,8 +773,8 @@ export default function POSPage() {
                         <button 
                             type="button"
                             onClick={() => handleFormChange("table", formState.table === "Domicilio" ? "" : "Domicilio")}
-                            className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all border-2 ${formState.table === "Domicilio" 
-                                ? "bg-[#FFDAB9] border-[#FFDAB9] text-[#333333]" 
+                            className={`px-4 py-1.5 rounded-full text-xs font-black transition-all border-2 ${formState.table === "Domicilio" 
+                                ? "bg-[#FFDAB9] border-[#FFDAB9] text-[#000000] shadow-[0_0_15px_#FFDAB944]" 
                                 : "bg-white/5 border-transparent text-zinc-500 hover:border-white/10"}`}
                         >
                             🛵 DOMICILIO
@@ -903,7 +904,7 @@ export default function POSPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full rounded-2xl bg-[#B2FBA5] py-4 text-[#333333] font-black text-lg hover:brightness-105 active:scale-[0.98] transition-all shadow-sm shadow-green-900/20 disabled:opacity-50 uppercase"
+                      className="w-full rounded-full bg-[#B2FBA5] py-4 text-[#000000] font-black text-lg hover:brightness-105 active:scale-[0.98] transition-all shadow-[0_0_20px_#B2FBA544] disabled:opacity-50 uppercase"
                     >
                       {isSubmitting ? "GUARDANDO..." : "GUARDAR E IMPRIMIR"}
                     </button>
@@ -1002,7 +1003,7 @@ export default function POSPage() {
                               setPaymentMethod("CASH");
                               setReceivedAmount("");
                             }}
-                            className="bg-[#B2FBA5] hover:brightness-105 text-[#333333] p-2 rounded-xl text-[10px] font-black uppercase shadow-sm shadow-green-900/20"
+                            className="bg-[#B2FBA5] hover:brightness-105 text-[#000000] p-2 rounded-xl text-[10px] font-black uppercase shadow-[0_0_10px_#B2FBA533]"
                             title="COBRAR"
                           >
                             💰 Cobrar
@@ -1256,7 +1257,7 @@ export default function POSPage() {
                   type="button"
                   onClick={handleSaveModifiedOrder}
                   disabled={isSubmitting || modifyItems.length === 0}
-                  className="w-full bg-[#B2FBA5] text-[#333333] py-3 rounded-2xl font-black hover:brightness-105 transition-colors disabled:opacity-50 uppercase text-sm"
+                  className="w-full bg-[#B2FBA5] text-[#000000] py-3 rounded-full font-black hover:brightness-105 transition-colors shadow-[0_0_15px_#B2FBA544] disabled:opacity-50 uppercase text-sm"
                 >
                   {isSubmitting ? "GUARDANDO..." : "GUARDAR CAMBIOS"}
                 </button>
@@ -1343,9 +1344,9 @@ export default function POSPage() {
                     Propina
                   </label>
                   <div className="grid grid-cols-3 gap-2 mb-2">
-                    <button onClick={() => { setTipType("NONE"); setTipInput(""); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "NONE" ? "border-[#FFB7C5] bg-[#FFB7C5]/10 text-white" : "border-white/5 text-zinc-600 bg-white/5"}`}>Sin propina</button>
-                    <button onClick={() => setTipType("PERCENTAGE")} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "PERCENTAGE" ? "border-[#FFB7C5] bg-[#FFB7C5]/10 text-white" : "border-white/5 text-zinc-600 bg-white/5"}`}>10% Sugerido</button>
-                    <button onClick={() => setTipType("FIXED")} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "FIXED" ? "border-[#FFB7C5] bg-[#FFB7C5]/10 text-white" : "border-white/5 text-zinc-600 bg-white/5"}`}>Monto fijo</button>
+                    <button onClick={() => { setTipType("NONE"); setTipInput(""); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "NONE" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>Sin propina</button>
+                    <button onClick={() => setTipType("PERCENTAGE")} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "PERCENTAGE" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>10% Sugerido</button>
+                    <button onClick={() => setTipType("FIXED")} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "FIXED" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>Monto fijo</button>
                   </div>
                   {tipType !== "NONE" && (
                     <input
@@ -1367,7 +1368,7 @@ export default function POSPage() {
                         key={m.value}
                         onClick={() => setPaymentMethod(m.value)}
                         className={`py-3 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${paymentMethod === m.value
-                          ? "border-[#89CFF0] bg-[#89CFF0]/10 text-white"
+                          ? "border-[#89CFF0] bg-[#89CFF0] text-[#000000] shadow-[0_0_10px_#89CFF044]"
                           : "border-white/5 text-zinc-600 bg-white/5"
                           }`}
                       >
@@ -1403,7 +1404,7 @@ export default function POSPage() {
                         (!receivedAmount ||
                           Number(receivedAmount) < (checkoutOrder.total + tipAmountCalculated)))
                     }
-                    className="w-full bg-[#B2FBA5] text-[#333333] py-5 rounded-[2rem] font-black text-xl hover:brightness-105 shadow-xl shadow-green-900/20 disabled:opacity-30 transition-all uppercase"
+                    className="w-full bg-[#B2FBA5] text-[#000000] py-5 rounded-full font-black text-xl hover:brightness-105 shadow-[0_0_25px_#B2FBA544] disabled:opacity-30 transition-all uppercase"
                   >
                     {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGO"}
                   </button>
@@ -1460,7 +1461,7 @@ export default function POSPage() {
                   setShowKitchenTicket(false);
                   setWhatsappNumber("");
                 }}
-                className="w-full bg-[#B2FBA5] text-[#333333] py-5 rounded-[2rem] font-black text-xl hover:brightness-105 disabled:opacity-30 transition-all shadow-xl shadow-green-900/20 uppercase"
+                className="w-full bg-[#B2FBA5] text-[#000000] py-5 rounded-full font-black text-xl hover:brightness-105 disabled:opacity-30 transition-all shadow-[0_0_20px_#B2FBA544] uppercase"
               >
                 ENVIAR TICKET
               </button>
