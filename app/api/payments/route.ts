@@ -39,7 +39,15 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError) throw orderError;
-
+    
+    // 3. Descontar inventario automáticamente al cobrar
+    const { deductInventoryForOrder } = await import("@/lib/services/inventory");
+    try {
+      await deductInventoryForOrder(orderId);
+    } catch (deductError) {
+      console.error("Error deducting inventory:", deductError);
+    }
+ 
     return NextResponse.json({ payment, order }, { status: 201 });
   } catch (error) {
     console.error("Error processing payment:", error);

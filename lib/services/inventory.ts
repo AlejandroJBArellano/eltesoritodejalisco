@@ -132,6 +132,133 @@ export async function deductInventoryForOrder(
 }
 
 /**
+ * Reverses ingredient deductions for an order
+ * This function should be called when an order status changes from PAID/DELIVERED back to PENDING/CANCELLED
+ *
+ * @param orderId - The ID of the order to process
+ * @returns Result object with reversal details and any errors
+ */
+export async function reverseInventoryForOrder(
+  orderId: string,
+): Promise<InventoryDeductionResult> {
+  const result: InventoryDeductionResult = {
+    success: true,
+    deductions: [],
+    errors: [],
+  };
+
+  try {
+    const supabase = await createClient();
+
+    // Fetch the order with all its items and recipe information
+    const { data: order, error: fetchError } = await supabase
+      .from("orders")
+      .select(`
+        *,
+        order_items (
+          *,
+          menu_items (
+            *,
+            recipe_items (
+              *,
+              ingredients (*)
+            )
+          )
+        )
+      `)
+      .eq("id", orderId)
+      .single();
+
+    if (fetchError || !order) {
+      result.success = false;
+      result.errors = ["Order not found"];
+      return result;
+    }
+
+    // Calculate total ingredient requirements to reverse
+    const ingredientRequirements = new Map<
+      string,
+      { ingredient: any; totalRequired: number }
+    >();
+
+    for (const orderItem of (order as any).order_items) {
+      const { menu_items: menuItem, quantity } = orderItem;
+
+      if (!menuItem || !menuItem.recipe_items) continue;
+
+      for (const recipeItem of menuItem.recipe_items) {
+        const { ingredients: ingredient, quantity_required } = recipeItem;
+        if (!ingredient) continue;
+        
+        const totalNeeded = quantity_required * quantity;
+
+        if (ingredientRequirements.has(ingredient.id)) {
+          const existing = ingredientRequirements.get(ingredient.id)!;
+          existing.totalRequired += totalNeeded;
+        } else {
+          ingredientRequirements.set(ingredient.id, {
+            ingredient,
+            totalRequired: totalNeeded,
+          });
+        }
+      }
+    }
+
+    // Process reversals
+    for (const [
+      ingredientId,
+      { ingredient, totalRequired },
+    ] of ingredientRequirements) {
+      const previousStock = ingredient.current_stock;
+      const newStock = previousStock + totalRequired;
+
+      // Update the ingredient stock
+      const { error: updateError } = await supabase
+        .from("ingredients")
+        .update({ current_stock: newStock })
+        .eq("id", ingredientId);
+
+      if (updateError) {
+        result.success = false;
+        result.errors?.push(`Failed to update stock for ${ingredient.name}`);
+        continue;
+      }
+
+      // Log the reversal
+      const { error: logError } = await supabase
+        .from("stock_adjustments")
+        .insert({
+          ingredient_id: ingredient.id,
+          adjustment: totalRequired,
+          reason: `Order reversal (undo)`,
+          created_at: new Date().toISOString(),
+        });
+
+      if (logError) {
+        console.error("Failed to log stock adjustment:", logError);
+      }
+
+      // Record the deduction
+      result.deductions.push({
+        ingredientId,
+        ingredientName: ingredient.name,
+        quantityDeducted: -totalRequired, // Negative means we added it back
+        previousStock,
+        newStock,
+      });
+    }
+
+    return result;
+  } catch (error) {
+    result.success = false;
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    result.errors?.push(`Failed to reverse inventory: ${errorMessage}`);
+    return result;
+  }
+}
+
+/**
  * Manually adjust ingredient stock (for purchases, corrections, or waste)
  *
  * @param ingredientId - The ID of the ingredient to adjust

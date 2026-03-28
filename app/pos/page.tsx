@@ -476,6 +476,28 @@ export default function POSPage() {
     }
   };
 
+  const handleUndoPayment = async (orderId: string, orderNumber: string) => {
+    if (!window.confirm(`¿Seguro que deseas deshacer el pago de la orden #${orderNumber}? La orden volverá a estar pendiente para edición.`)) return;
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/orders/${orderId}/undo-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: "Corrección post-cobro (3 min window)" }),
+      });
+
+      if (!response.ok) throw new Error("Error al deshacer el pago");
+
+      await fetchOrders();
+      alert("Pago revertido exitosamente. La orden ahora puede ser editada.");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Error al deshacer pago");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleFailedPayment = async (orderToProcess?: Order) => {
     const order = orderToProcess || checkoutOrder;
     if (!order) return;
@@ -1038,6 +1060,26 @@ export default function POSPage() {
                             ✏️ Modificar
                           </button>
                         )}
+                        {order.status === "PAID" && (
+                          (() => {
+                            const lastUpdate = new Date(order.updatedAt || order.createdAt).getTime();
+                            const now = new Date().getTime();
+                            const isWithin3Min = now - lastUpdate < 3 * 60 * 1000;
+                            
+                            if (isWithin3Min) {
+                              return (
+                                <button
+                                  onClick={() => handleUndoPayment(order.id, order.orderNumber)}
+                                  className="bg-red-500 hover:brightness-110 text-white p-2 rounded-xl text-[10px] font-black uppercase shadow-[0_0_10px_rgba(239,68,68,0.3)] animate-pulse"
+                                  title="DESHACER PAGO"
+                                >
+                                  ↩️ Deshacer
+                                </button>
+                              );
+                            }
+                            return null;
+                          })()
+                        )}
                         <button
                           onClick={() => {
                             setCheckoutOrder(order);
@@ -1407,6 +1449,16 @@ export default function POSPage() {
                     className="w-full bg-[#B2FBA5] text-[#000000] py-5 rounded-full font-black text-xl hover:brightness-105 shadow-[0_0_25px_#B2FBA544] disabled:opacity-30 transition-all uppercase"
                   >
                     {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGO"}
+                  </button>
+
+                  <button
+                    onClick={() => {
+                        openModifyModal(checkoutOrder);
+                        setCheckoutOrder(null);
+                    }}
+                    className="w-full bg-white/5 text-zinc-500 py-3 rounded-2xl font-black text-[10px] hover:bg-white/10 transition-all uppercase tracking-widest border border-white/5"
+                  >
+                    ⬅️ Regresar a Editar
                   </button>
 
                   <button
