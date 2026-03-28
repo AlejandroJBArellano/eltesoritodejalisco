@@ -81,6 +81,12 @@ export default function POSPage() {
   const [tipInput, setTipInput] = useState<string>("");
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState("");
+  
+  // Tip Modification State for Paid Orders
+  const [editingTipOrder, setEditingTipOrder] = useState<Order | null>(null);
+  const [editTipType, setEditTipType] = useState<"NONE" | "PERCENTAGE" | "FIXED">("NONE");
+  const [editTipInput, setEditTipInput] = useState<string>("");
+
   // Edit Order State (add items)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [additionalItems, setAdditionalItems] = useState<OrderItemDraft[]>([
@@ -299,6 +305,17 @@ export default function POSPage() {
     return 0;
   }, [checkoutOrder, tipType, tipInput]);
 
+  const editTipAmountCalculated = useMemo(() => {
+    if (!editingTipOrder) return 0;
+    if (editTipType === "PERCENTAGE") {
+      return (editingTipOrder.total * (Number(editTipInput) || 0)) / 100;
+    }
+    if (editTipType === "FIXED") {
+      return Number(editTipInput) || 0;
+    }
+    return 0;
+  }, [editingTipOrder, editTipType, editTipInput]);
+
   const change = useMemo(() => {
     if (!checkoutOrder || !receivedAmount) return 0;
     const diff = Number(receivedAmount) - (checkoutOrder.total + tipAmountCalculated);
@@ -447,6 +464,16 @@ export default function POSPage() {
 
   const handleProcessPayment = async () => {
     if (!checkoutOrder) return;
+
+    // Check for unusual tip amount
+    const percentage = (tipAmountCalculated / checkoutOrder.total) * 100;
+    const isUnusual = tipAmountCalculated > 0 && (percentage > 30 || tipAmountCalculated > 500);
+    if (isUnusual) {
+      if (!window.confirm(`La propina es de $${tipAmountCalculated.toFixed(2)} (${percentage.toFixed(1)}%). ¿Confirmar cantidad?`)) {
+        return;
+      }
+    }
+
     try {
       setIsSubmitting(true);
       const response = await fetch("/api/payments", {
@@ -471,6 +498,38 @@ export default function POSPage() {
       setShowTicket(true);
     } catch (error) {
       alert("Error al procesar el pago");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateTip = async () => {
+    if (!editingTipOrder) return;
+
+    // Check for unusual tip amount
+    const percentage = (editTipAmountCalculated / editingTipOrder.total) * 100;
+    const isUnusual = editTipAmountCalculated > 0 && (percentage > 30 || editTipAmountCalculated > 500);
+    if (isUnusual) {
+      if (!window.confirm(`La nueva propina es de $${editTipAmountCalculated.toFixed(2)} (${percentage.toFixed(1)}%). ¿Confirmar cantidad?`)) {
+        return;
+      }
+    }
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/payments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: editingTipOrder.id,
+          tipAmount: editTipAmountCalculated,
+        }),
+      });
+      if (!response.ok) throw new Error("Error al actualizar propina");
+      await fetchOrders();
+      setEditingTipOrder(null);
+    } catch (error) {
+      alert("Error al actualizar propina");
     } finally {
       setIsSubmitting(false);
     }
@@ -1061,6 +1120,19 @@ export default function POSPage() {
                           </button>
                         )}
                         {order.status === "PAID" && (
+                          <button
+                            onClick={() => {
+                              setEditingTipOrder(order);
+                              setEditTipType("FIXED");
+                              setEditTipInput(order.payments?.[0]?.tipAmount?.toString() || "0");
+                            }}
+                            className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 p-2 rounded-xl text-[10px] font-black uppercase"
+                            title="EDITAR PROPINA"
+                          >
+                            🪙 Propina
+                          </button>
+                        )}
+                        {order.status === "PAID" && (
                           (() => {
                             const lastUpdate = new Date(order.updatedAt || order.createdAt).getTime();
                             const now = new Date().getTime();
@@ -1385,10 +1457,15 @@ export default function POSPage() {
                   <label className="text-[10px] font-black text-zinc-600 block mb-2 uppercase tracking-widest">
                     Propina
                   </label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <button onClick={() => { setTipType("NONE"); setTipInput(""); }} className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "NONE" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>Sin propina</button>
+                    <button onClick={() => { setTipType("PERCENTAGE"); }} className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "PERCENTAGE" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>%</button>
+                    <button onClick={() => setTipType("FIXED")} className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "FIXED" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>$ Fijo</button>
+                  </div>
                   <div className="grid grid-cols-3 gap-2 mb-2">
-                    <button onClick={() => { setTipType("NONE"); setTipInput(""); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "NONE" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>Sin propina</button>
-                    <button onClick={() => setTipType("PERCENTAGE")} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "PERCENTAGE" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>10% Sugerido</button>
-                    <button onClick={() => setTipType("FIXED")} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "FIXED" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>Monto fijo</button>
+                    <button onClick={() => { setTipType("PERCENTAGE"); setTipInput("10"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "PERCENTAGE" && tipInput === "10" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>10%</button>
+                    <button onClick={() => { setTipType("PERCENTAGE"); setTipInput("15"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "PERCENTAGE" && tipInput === "15" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>15%</button>
+                    <button onClick={() => { setTipType("PERCENTAGE"); setTipInput("20"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "PERCENTAGE" && tipInput === "20" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>20%</button>
                   </div>
                   {tipType !== "NONE" && (
                     <input
@@ -1521,6 +1598,77 @@ export default function POSPage() {
           </div>
         )
       }
+
+      {/* MODAL DE EDITAR PROPINA */}
+      {editingTipOrder && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 no-print">
+          <div className="bg-[#1E1E1E] rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl border border-white/10">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-black text-white uppercase tracking-tighter">
+                Editar Propina
+              </h3>
+              <button
+                onClick={() => setEditingTipOrder(null)}
+                className="text-zinc-600 hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-6">
+              <div className="text-center bg-white/5 py-6 rounded-[2rem] border border-white/5">
+                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Orden #{editingTipOrder.orderNumber}</p>
+                <p className="text-3xl font-black text-white">
+                  Total: ${editingTipOrder.total.toFixed(2)}
+                </p>
+                <p className="text-sm font-black text-blue-400 mt-2">
+                  Nueva Propina: ${editTipAmountCalculated.toFixed(2)}
+                </p>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-zinc-600 block mb-2 uppercase tracking-widest">
+                  Propina
+                </label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <button onClick={() => { setEditTipType("NONE"); setEditTipInput(""); }} className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "NONE" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>Sin propina</button>
+                  <button onClick={() => setEditTipType("PERCENTAGE")} className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "PERCENTAGE" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>%</button>
+                  <button onClick={() => setEditTipType("FIXED")} className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "FIXED" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>$ Fijo</button>
+                </div>
+                <div className="grid grid-cols-3 gap-2 mb-2">
+                    <button onClick={() => { setEditTipType("PERCENTAGE"); setEditTipInput("10"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "PERCENTAGE" && editTipInput === "10" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>10%</button>
+                    <button onClick={() => { setEditTipType("PERCENTAGE"); setEditTipInput("15"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "PERCENTAGE" && editTipInput === "15" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>15%</button>
+                    <button onClick={() => { setEditTipType("PERCENTAGE"); setEditTipInput("20"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "PERCENTAGE" && editTipInput === "20" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>20%</button>
+                  </div>
+                {editTipType !== "NONE" && (
+                  <input
+                    type="number"
+                    value={editTipInput}
+                    onChange={(e) => setEditTipInput(e.target.value)}
+                    placeholder={editTipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"}
+                    className="w-full text-lg font-black p-4 border border-white/5 bg-white/5 rounded-2xl focus:border-[#FFB7C5] outline-none text-center text-white transition-all placeholder:text-zinc-800"
+                  />
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleUpdateTip}
+                  disabled={isSubmitting}
+                  className="w-full bg-[#B2FBA5] text-[#000000] py-4 rounded-full font-black text-lg hover:brightness-105 shadow-[0_0_20px_#B2FBA544] disabled:opacity-30 transition-all uppercase"
+                >
+                  {isSubmitting ? "ACTUALIZANDO..." : "ACTUALIZAR PROPINA"}
+                </button>
+                <button
+                  onClick={() => setEditingTipOrder(null)}
+                  className="w-full bg-white/5 text-zinc-500 py-3 rounded-2xl font-black text-[10px] hover:bg-white/10 transition-all uppercase tracking-widest border border-white/5"
+                >
+                  CANCELAR
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

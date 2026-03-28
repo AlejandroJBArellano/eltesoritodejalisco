@@ -54,3 +54,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to process payment" }, { status: 500 });
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { orderId, tipAmount } = body;
+
+    if (!orderId) {
+      return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
+    }
+
+    const supabase = await createClient();
+
+    // Actualizar la propina en el registro de pago asociado a la orden
+    const { data: payment, error: paymentError } = await supabase
+      .from("payments")
+      .update({
+        tip_amount: Number(tipAmount) || 0,
+      })
+      .eq("order_id", orderId)
+      .select()
+      .single();
+
+    if (paymentError) throw paymentError;
+
+    return NextResponse.json({ payment }, { status: 200 });
+  } catch (error) {
+    console.error("Error updating tip:", error);
+    return NextResponse.json({ error: "Failed to update tip" }, { status: 500 });
+  }
+}
