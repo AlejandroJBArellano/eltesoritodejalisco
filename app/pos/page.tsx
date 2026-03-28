@@ -105,16 +105,42 @@ export default function POSPage() {
   );
 
   const CATEGORY_CONFIG: Record<string, { label: string, color: string, hover: string, border: string, text: string }> = {
-    ANTOJITOS: { label: "Antojitos", color: "#FF6B00", hover: "#FF8533", border: "#CC5500", text: "white" },
-    TACOS: { label: "Tacos", color: "#7CB342", hover: "#8BC34A", border: "#558B2F", text: "white" },
-    "PLATILLOS FUERTES": { label: "Platillos Fuertes", color: "#B91C1C", hover: "#DC2626", border: "#991B1B", text: "white" },
-    BEBIDAS: { label: "Bebidas", color: "#06B6D4", hover: "#22D3EE", border: "#0891B2", text: "white" },
-    EXTRAS: { label: "Extras", color: "#EAB308", hover: "#FACC15", border: "#CA8A04", text: "black" },
-    POSTRES: { label: "Postres", color: "#EC4899", hover: "#F472B6", border: "#DB2777", text: "white" },
-    OTROS: { label: "Otros", color: "#71717A", hover: "#A1A1AA", border: "#52525B", text: "white" },
+    ANTOJITOS: { label: "Antojitos", color: "#FFB7C5", hover: "#FFC2D1", border: "#FFB7C5", text: "#333333" },
+    TACOS: { label: "Tacos", color: "#B2FBA5", hover: "#C2FCAF", border: "#B2FBA5", text: "#333333" },
+    "PLATILLOS FUERTES": { label: "Platillos Fuertes", color: "#E6E6FA", hover: "#F0F0FF", border: "#E6E6FA", text: "#333333" },
+    BEBIDAS: { label: "Bebidas", color: "#89CFF0", hover: "#9ADFFF", border: "#89CFF0", text: "#333333" },
+    EXTRAS: { label: "Extras", color: "#FDFD96", hover: "#FEFEA6", border: "#FDFD96", text: "#333333" },
+    POSTRES: { label: "Postres", color: "#FFDAB9", hover: "#FFE4C9", border: "#FFDAB9", text: "#333333" },
+    OTROS: { label: "Otros", color: "#E0E0E0", hover: "#EBEBEB", border: "#E0E0E0", text: "#333333" },
   };
 
   const CATEGORY_ORDER = ["ANTOJITOS", "TACOS", "PLATILLOS FUERTES", "BEBIDAS", "EXTRAS", "POSTRES", "OTROS"];
+
+  const PRODUCT_PASTEL_POOL = [
+    "#FFB7B2", "#FFDAC1", "#E2F0CB", "#B5EAD7", "#C7CEEA", "#FF9AA2",
+    "#FFB7C5", "#B2FBA5", "#E6E6FA", "#89CFF0", "#FDFD96", "#FFDAB9",
+    "#E0E0E0", "#FFFDD0", "#D4F1F4", "#DEECFF"
+  ];
+
+  const BEBIDAS_COLORS: Record<string, string> = {
+    "Agua de Horchata": "#FFFDD0",
+    "Agua de Jamaica": "#FFB7B2",
+    "Cerveza": "#C1E1C1",
+    "Coca Cola": "#89CFF0",
+    "Tejuino": "#FDFD96",
+    "Agua de Piña": "#B2FBA5",
+    "Agua del Día": "#FFD1DC",
+    "Clamato Preparado": "#FFDAB9",
+    "Victoria": "#E6E6FA",
+    "Vaso Preparado": "#E0E0E0",
+  };
+
+  const getProductColor = (productName: string, category: string, index: number) => {
+    if (category === "BEBIDAS" && BEBIDAS_COLORS[productName]) {
+      return BEBIDAS_COLORS[productName];
+    }
+    return PRODUCT_PASTEL_POOL[index % PRODUCT_PASTEL_POOL.length];
+  };
 
   const categories = useMemo(() => {
     return CATEGORY_ORDER;
@@ -635,22 +661,22 @@ export default function POSPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark">
-      <header className="bg-[#242424] shadow-sm no-print">
+    <div className="min-h-screen bg-[#FFFFFF]">
+      <header className="bg-white shadow-sm border-b border-gray-100 no-print">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div>
             <Link
               href="/"
-              className="text-sm text-blue-600 hover:text-blue-800"
+              className="text-xs font-bold text-gray-400 hover:text-primary transition-colors"
             >
               ← Dashboard
             </Link>
-            <h1 className="text-2xl font-bold text-text-light">Punto de Venta</h1>
+            <h1 className="text-2xl font-black text-[#333333] tracking-tight">Punto de Venta</h1>
           </div>
           <div className="flex items-center gap-4">
-             <div className="bg-[#181818] px-6 py-2 rounded-2xl border-2 border-primary shadow-lg shadow-primary/20">
-                <span className="text-[10px] font-black text-primary uppercase block tracking-widest leading-none mb-1">Próximo Folio</span>
-                <span className="text-2xl font-black text-white font-mono">#{nextFolioDisplay}</span>
+             <div className="bg-gray-50 px-6 py-2 rounded-2xl border-2 border-gray-100 shadow-sm">
+                <span className="text-[10px] font-black text-gray-400 uppercase block tracking-widest leading-none mb-1">Próximo Folio</span>
+                <span className="text-2xl font-black text-[#333333] font-mono">#{nextFolioDisplay}</span>
              </div>
           </div>
         </div>
@@ -670,14 +696,14 @@ export default function POSPage() {
             <div className="lg:col-span-7 xl:col-span-8 space-y-6">
 
               {/* Selector de Productos */}
-              <section className="rounded-2xl bg-[#242424] p-5 shadow-md border border-white/5">
+              <section className="rounded-3xl bg-white p-5 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-black text-text-light flex items-center gap-2 uppercase tracking-tighter">
-                    <span className="text-primary">🌮</span> Seleccionar Productos
+                  <h2 className="text-xl font-black text-[#333333] flex items-center gap-2 uppercase tracking-tighter">
+                    <span className="text-primary">🌈</span> Seleccionar Productos
                   </h2>
                 </div>
 
-                <div className="sticky top-[-21px] bg-[#242424] z-20 -mx-5 px-5 pt-1 pb-4 mb-2 border-b border-white/5">
+                <div className="sticky top-[-21px] bg-white z-20 -mx-5 px-5 pt-1 pb-4 mb-2 border-b border-gray-50">
                   <div className="flex gap-2 overflow-x-auto no-scrollbar">
                     {categories.map(cat => {
                       const config = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG.OTROS;
@@ -687,15 +713,14 @@ export default function POSPage() {
                           key={cat}
                           type="button"
                           onClick={() => setActiveCategory(cat)}
-                          className={`px-4 py-2 rounded-xl font-black whitespace-nowrap transition-all text-[10px] border-2 ${isActive
-                            ? "shadow-lg scale-105"
-                            : "bg-[#181818] text-gray-500 border-gray-800 hover:border-gray-600"
+                          className={`px-4 py-2 rounded-2xl font-black whitespace-nowrap transition-all text-[10px] border-2 ${isActive
+                            ? "shadow-md scale-105"
+                            : "bg-gray-50 text-gray-400 border-transparent hover:border-gray-200"
                             }`}
                           style={isActive ? {
                             backgroundColor: config.color,
                             color: config.text,
                             borderColor: config.color,
-                            boxShadow: `0 8px 20px -5px ${config.color}55`
                           } : {}}
                         >
                           {config.label.toUpperCase()}
@@ -713,23 +738,22 @@ export default function POSPage() {
                   ) : (
                     availableMenuItems
                       .filter(m => (m.category || "OTROS").toUpperCase() === activeCategory)
-                      .map(m => {
-                        const config = CATEGORY_CONFIG[activeCategory] || CATEGORY_CONFIG.OTROS;
+                      .map((m, idx) => {
+                        const productColor = getProductColor(m.name, activeCategory, idx);
 
                         return (
                           <button
                             key={m.id}
                             type="button"
                             onClick={() => handleGridItemClick(m)}
-                            className="p-3 rounded-2xl flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all shadow-lg overflow-hidden group"
+                            className="p-3 rounded-3xl flex flex-col items-center justify-center text-center h-28 border-b-4 active:border-b-0 active:translate-y-1 transition-all shadow-sm hover:shadow-md overflow-hidden group border-black/5"
                             style={{
-                              backgroundColor: config.color,
-                              color: config.text,
-                              borderColor: config.border
+                              backgroundColor: productColor,
+                              color: "#333333",
                             }}
                           >
                             <span className="font-black text-[13px] leading-tight line-clamp-2 uppercase mb-1.5 transition-transform group-active:scale-95">{m.name}</span>
-                            <span className="font-bold text-[10px] bg-black/10 px-2 py-0.5 rounded-full">${m.price.toFixed(2)}</span>
+                            <span className="font-bold text-[10px] bg-black/5 px-2 py-0.5 rounded-full">${m.price.toFixed(2)}</span>
                           </button>
                         );
                       })
@@ -738,18 +762,18 @@ export default function POSPage() {
               </section>
 
               {/* Configuración de la Orden (Secundaria / Opcional) */}
-              <section className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 opacity-80 hover:opacity-100 transition-opacity">
+              <section className="rounded-3xl bg-white p-5 shadow-sm border border-gray-100 transition-opacity">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
                     <span className="grayscale">📋</span> Detalles Adicionales
                     </h2>
                     <div className="flex items-center gap-4">
                         <button 
                             type="button"
                             onClick={() => handleFormChange("table", formState.table === "Domicilio" ? "" : "Domicilio")}
-                            className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all border-2 ${formState.table === "Domicilio" 
-                                ? "bg-amber-500 border-amber-500 text-dark" 
-                                : "bg-[#181818] border-gray-800 text-gray-500 hover:border-gray-600"}`}
+                            className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all border-2 ${formState.table === "Domicilio" 
+                                ? "bg-[#FFDAB9] border-[#FFDAB9] text-[#333333]" 
+                                : "bg-gray-50 border-transparent text-gray-400 hover:border-gray-200"}`}
                         >
                             🛵 DOMICILIO
                         </button>
@@ -758,11 +782,11 @@ export default function POSPage() {
 
                 <div className="grid gap-4 sm:grid-cols-3 mb-4">
                   <div>
-                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Cliente</label>
+                    <label className="text-[10px] font-black text-gray-300 uppercase tracking-wider mb-1 block">Cliente</label>
                     <select
                       value={formState.customerId}
                       onChange={(e) => handleFormChange("customerId", e.target.value)}
-                      className="w-full rounded-xl border border-gray-800 bg-[#181818] px-3 py-2 text-xs text-gray-300 outline-none focus:border-primary transition-all"
+                      className="w-full rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 text-xs text-[#333333] outline-none focus:border-primary transition-all"
                     >
                       <option value="">General</option>
                       {customers.map((c) => (
@@ -771,11 +795,11 @@ export default function POSPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Origen</label>
+                    <label className="text-[10px] font-black text-gray-300 uppercase tracking-wider mb-1 block">Origen</label>
                     <select
                       value={formState.source}
                       onChange={(e) => handleFormChange("source", e.target.value)}
-                      className="w-full rounded-xl border border-gray-800 bg-[#181818] px-3 py-2 text-xs text-gray-300 outline-none focus:border-primary transition-all"
+                      className="w-full rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 text-xs text-[#333333] outline-none focus:border-primary transition-all"
                     >
                       {SOURCE_OPTIONS.map((s) => (
                         <option key={s} value={s}>{s}</option>
@@ -783,12 +807,12 @@ export default function POSPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Notas / Mesa Esp.</label>
+                    <label className="text-[10px] font-black text-gray-300 uppercase tracking-wider mb-1 block">Notas / Mesa Esp.</label>
                     <input
                       type="text"
                       value={formState.notes}
                       onChange={(e) => handleFormChange("notes", e.target.value)}
-                      className="rounded-xl border border-gray-800 bg-[#181818] px-3 py-2 text-xs text-gray-300 w-full focus:border-primary outline-none transition-all"
+                      className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 text-xs text-[#333333] w-full focus:border-primary outline-none transition-all"
                       placeholder="Ej. Mesa 7, Ventana..."
                     />
                   </div>
@@ -800,14 +824,14 @@ export default function POSPage() {
             <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-6">
 
               {/* Detalle del Pedido */}
-              <section className="rounded-2xl bg-[#181818] border border-gray-800 p-5 shadow-xl">
+              <section className="rounded-3xl bg-white border border-gray-100 p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base font-black uppercase text-gray-400 tracking-widest">Tu Pedido</h3>
+                  <h3 className="text-base font-black uppercase text-gray-300 tracking-widest">Tu Pedido</h3>
                   {formState.items.length > 0 && (
                     <button
                       type="button"
                       onClick={handleClearCart}
-                      className="text-[10px] font-bold text-red-500 uppercase hover:underline"
+                      className="text-[10px] font-bold text-red-300 uppercase hover:underline"
                     >
                       Vaciar
                     </button>
@@ -815,14 +839,14 @@ export default function POSPage() {
                 </div>
 
                 {formErrors.items && (
-                  <p className="text-xs text-red-500 font-bold mb-4 bg-red-500/10 p-2 rounded-lg border border-red-500/20 text-center">
+                  <p className="text-xs text-red-500 font-bold mb-4 bg-red-50 p-2 rounded-xl border border-red-100 text-center">
                     ⚠️ {formErrors.items}
                   </p>
                 )}
 
                 <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1 custom-scrollbar">
                   {formState.items.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
+                    <div className="text-center py-12 text-gray-300">
                       <p className="text-4xl mb-3 opacity-20">🛒</p>
                       <p className="text-sm font-bold opacity-40 uppercase tracking-tighter">El carrito está vacío</p>
                     </div>
@@ -830,30 +854,30 @@ export default function POSPage() {
                     formState.items.map((item, index) => {
                       const product = availableMenuItems.find(m => m.id === item.menuItemId);
                       return (
-                        <div key={index} className="flex gap-3 items-center bg-[#242424] p-3 rounded-xl border border-white/5 shadow-sm group">
+                        <div key={index} className="flex gap-3 items-center bg-gray-50 p-3 rounded-2xl border border-transparent shadow-sm group">
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-gray-200 text-sm leading-tight truncate uppercase">{product?.name || "Producto"}</p>
-                            <p className="text-[10px] font-bold text-gray-500 mt-0.5">${product?.price.toFixed(2)} c/u</p>
+                            <p className="font-bold text-[#333333] text-sm leading-tight truncate uppercase">{product?.name || "Producto"}</p>
+                            <p className="text-[10px] font-bold text-gray-400 mt-0.5">${product?.price.toFixed(2)} c/u</p>
                           </div>
-                          <div className="flex items-center gap-1.5 bg-dark rounded-lg p-1 border border-white/5">
+                          <div className="flex items-center gap-1.5 bg-white rounded-xl p-1 border border-gray-100">
                             <button
                               type="button"
                               onClick={() => handleQuantityChange(index, -1)}
-                              className="w-7 h-7 rounded-md hover:bg-red-500/20 text-gray-400 hover:text-red-500 flex items-center justify-center font-black transition-all"
+                              className="w-7 h-7 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 flex items-center justify-center font-black transition-all"
                             >
                               -
                             </button>
-                            <span className="w-5 text-center font-black text-text-light text-sm">{item.quantity}</span>
+                            <span className="w-5 text-center font-black text-[#333333] text-sm">{item.quantity}</span>
                             <button
                               type="button"
                               onClick={() => handleQuantityChange(index, 1)}
-                              className="w-7 h-7 rounded-md hover:bg-green-500/20 text-gray-400 hover:text-green-500 flex items-center justify-center font-black transition-all"
+                              className="w-7 h-7 rounded-lg hover:bg-green-50 text-gray-400 hover:text-green-500 flex items-center justify-center font-black transition-all"
                             >
                               +
                             </button>
                           </div>
                           <div className="text-right flex flex-col items-end min-w-[60px]">
-                            <p className="font-black text-primary text-sm">
+                            <p className="font-black text-[#333333] text-sm">
                               ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
                             </p>
                           </div>
@@ -864,10 +888,10 @@ export default function POSPage() {
                 </div>
 
                 {formState.items.length > 0 && (
-                  <div className="mt-6 pt-5 border-t border-dashed border-gray-700 space-y-4">
+                  <div className="mt-6 pt-5 border-t border-dashed border-gray-100 space-y-4">
                     <div className="flex justify-between items-end">
-                      <span className="font-bold text-gray-500 uppercase tracking-widest text-[10px]">Total a pagar</span>
-                      <span className="text-4xl font-black text-primary tabular-nums">
+                      <span className="font-black text-gray-300 uppercase tracking-widest text-[10px]">Total a pagar</span>
+                      <span className="text-4xl font-black text-[#333333] tabular-nums">
                         ${formState.items.reduce((total, item) => {
                           const product = availableMenuItems.find(m => m.id === item.menuItemId);
                           return total + (product?.price || 0) * Number(item.quantity);
@@ -878,7 +902,7 @@ export default function POSPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full rounded-2xl bg-success py-4 text-white font-black text-lg hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-success/20 disabled:opacity-50 uppercase"
+                      className="w-full rounded-2xl bg-[#B2FBA5] py-4 text-[#333333] font-black text-lg hover:brightness-105 active:scale-[0.98] transition-all shadow-sm shadow-green-100 disabled:opacity-50 uppercase"
                     >
                       {isSubmitting ? "GUARDANDO..." : "GUARDAR E IMPRIMIR"}
                     </button>
@@ -886,8 +910,8 @@ export default function POSPage() {
                 )}
               </section>
               {/* Resumen Diario (También a la derecha) */}
-              <section className="rounded-2xl bg-[#242424] p-5 border border-white/5">
-                <h3 className="text-xs font-black uppercase text-gray-500 mb-4 tracking-widest">Estadísticas de Hoy</h3>
+              <section className="rounded-3xl bg-white p-5 border border-gray-100 shadow-sm">
+                <h3 className="text-xs font-black uppercase text-gray-300 mb-4 tracking-widest">Estadísticas de Hoy</h3>
                 {(() => {
                   const todayDateStr = new Intl.DateTimeFormat("en-CA", {
                     timeZone: "America/Mexico_City",
@@ -908,13 +932,13 @@ export default function POSPage() {
 
                   return (
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-[#181818] p-3 rounded-xl border border-white/5">
-                        <p className="text-[10px] font-bold text-gray-500 uppercase">Órdenes</p>
-                        <p className="text-xl font-black text-text-light">{todayOrders.length}</p>
+                      <div className="bg-gray-50 p-3 rounded-2xl border border-transparent">
+                        <p className="text-[10px] font-black text-gray-300 uppercase">Órdenes</p>
+                        <p className="text-xl font-black text-[#333333]">{todayOrders.length}</p>
                       </div>
-                      <div className="bg-[#181818] p-3 rounded-xl border border-white/5">
-                        <p className="text-[10px] font-bold text-gray-500 uppercase">Ventas</p>
-                        <p className="text-xl font-black text-success">
+                      <div className="bg-gray-50 p-3 rounded-2xl border border-transparent">
+                        <p className="text-[10px] font-black text-gray-300 uppercase">Ventas</p>
+                        <p className="text-xl font-black text-[#B2FBA5] contrast-125">
                           ${todayOrders.filter((o) => o.status === "PAID" || o.status === "DELIVERED").reduce((acc, o) => acc + o.total, 0).toFixed(2)}
                         </p>
                       </div>
@@ -927,38 +951,38 @@ export default function POSPage() {
         </form>
 
         {/* Listado de Órdenes Recientes */}
-        <section className="mt-12 rounded-2xl bg-[#242424] p-5 shadow-md border border-white/5 overflow-hidden">
+        <section className="mt-12 rounded-3xl bg-white p-5 shadow-sm border border-gray-100 overflow-hidden">
           <div className="flex items-center justify-between mb-6 px-1">
-            <h2 className="text-lg font-bold text-text-light flex items-center gap-2">
+            <h2 className="text-lg font-black text-[#333333] flex items-center gap-2">
               <span className="text-primary">🕒</span> Últimas Órdenes
             </h2>
-            <Link href="/history" className="text-xs font-bold text-primary hover:underline uppercase tracking-tighter">Ver todo</Link>
+            <Link href="/history" className="text-xs font-black text-primary hover:underline uppercase tracking-tighter">Ver todo</Link>
           </div>
 
           <div className="overflow-x-auto -mx-5 px-5 no-scrollbar">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-gray-800">
-                  <th className="pb-4 px-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">#</th>
-                  <th className="pb-4 px-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">Mesa</th>
-                  <th className="pb-4 px-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">Total</th>
-                  <th className="pb-4 px-2 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">Acciones</th>
+                <tr className="border-b border-gray-50">
+                  <th className="pb-4 px-2 text-[10px] font-black text-gray-300 uppercase tracking-widest">#</th>
+                  <th className="pb-4 px-2 text-[10px] font-black text-gray-300 uppercase tracking-widest">Mesa</th>
+                  <th className="pb-4 px-2 text-[10px] font-black text-gray-300 uppercase tracking-widest">Total</th>
+                  <th className="pb-4 px-2 text-[10px] font-black text-gray-300 uppercase tracking-widest text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800/50">
+              <tbody className="divide-y divide-gray-50">
                 {orders.slice(0, 10).map((order) => (
-                  <tr key={order.id} className="hover:bg-white/5 transition-colors">
+                  <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-2">
-                      <span className="font-bold text-text-light text-sm">#{order.orderNumber}</span>
+                      <span className="font-black text-[#333333] text-sm">#{order.orderNumber}</span>
                     </td>
                     <td className="py-4 px-2">
-                      <span className="text-xs bg-gray-800 px-2 py-1 rounded-md text-gray-300 font-bold">{order.table || "Llevar"}</span>
+                      <span className="text-[10px] bg-gray-50 px-2 py-1 rounded-lg text-gray-400 font-black uppercase">{order.table || "Llevar"}</span>
                     </td>
                     <td className="py-4 px-2">
                       <div className="flex flex-col">
-                        <span className="font-black text-sm text-text-light">${order.total.toFixed(2)}</span>
+                        <span className="font-black text-sm text-[#333333]">${order.total.toFixed(2)}</span>
                         {order.payments?.[0]?.tipAmount ? (
-                          <span className="text-[9px] font-bold text-blue-400">
+                          <span className="text-[9px] font-black text-blue-300 uppercase">
                             +${order.payments[0].tipAmount.toFixed(2)} propina
                           </span>
                         ) : null}
@@ -977,7 +1001,7 @@ export default function POSPage() {
                               setPaymentMethod("CASH");
                               setReceivedAmount("");
                             }}
-                            className="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg text-[10px] font-black uppercase shadow-sm"
+                            className="bg-[#B2FBA5] hover:brightness-105 text-[#333333] p-2 rounded-xl text-[10px] font-black uppercase shadow-sm"
                             title="COBRAR"
                           >
                             💰 Cobrar
@@ -989,7 +1013,7 @@ export default function POSPage() {
                             setShowKitchenTicket(true);
                             setShowTicket(false);
                           }}
-                          className="bg-orange-500 hover:bg-orange-400 text-white p-2 rounded-lg text-[10px] font-black uppercase"
+                          className="bg-[#89CFF0]/20 hover:bg-[#89CFF0]/40 text-[#4A90E2] p-2 rounded-xl text-[10px] font-black uppercase"
                           title="COMANDA"
                         >
                           👨‍🍳 Comanda
@@ -997,7 +1021,7 @@ export default function POSPage() {
                         {order.status !== "PAID" && (
                           <button
                             onClick={() => setEditingOrder(order)}
-                            className="bg-purple-600 hover:bg-purple-500 text-white p-2 rounded-lg text-[10px] font-black uppercase"
+                            className="bg-[#E6E6FA] hover:brightness-105 text-[#333333] p-2 rounded-xl text-[10px] font-black uppercase"
                             title="AGREGAR"
                           >
                             ➕ Agregar
@@ -1006,7 +1030,7 @@ export default function POSPage() {
                         {order.status !== "PAID" && (
                           <button
                             onClick={() => openModifyModal(order)}
-                            className="bg-amber-500 hover:bg-amber-400 text-dark p-2 rounded-lg text-[10px] font-black uppercase"
+                            className="bg-[#FFDAB9] hover:brightness-105 text-[#333333] p-2 rounded-xl text-[10px] font-black uppercase"
                             title="MODIFICAR"
                           >
                             ✏️ Modificar
@@ -1018,7 +1042,7 @@ export default function POSPage() {
                             setShowTicket(true);
                             setShowKitchenTicket(false);
                           }}
-                          className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-lg text-[10px] font-black uppercase"
+                          className="bg-gray-50 hover:bg-gray-100 text-gray-400 p-2 rounded-xl text-[10px] font-black uppercase"
                           title="TICKET"
                         >
                           📄 Ticket
@@ -1027,7 +1051,7 @@ export default function POSPage() {
                           <button
                             onClick={() => handleCancelOrder(order.id, order.orderNumber)}
                             disabled={isSubmitting}
-                            className="bg-red-600/20 hover:bg-red-600/40 text-red-500 p-2 rounded-lg text-[10px] font-black uppercase border border-red-500/20"
+                            className="bg-red-50 hover:bg-red-100 text-red-300 p-2 rounded-xl text-[10px] font-black uppercase"
                             title="CANCELAR"
                           >
                             🚫
@@ -1047,14 +1071,14 @@ export default function POSPage() {
       {
         editingOrder && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
-            <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-text-light">
-                  Agregar Productos a Orden #{editingOrder.orderNumber}
+                <h3 className="text-xl font-black text-[#333333]">
+                   Agregar Productos
                 </h3>
                 <button
                   onClick={() => setEditingOrder(null)}
-                  className="text-gray-400 hover:text-gray-400"
+                  className="text-gray-300 hover:text-gray-500 transition-colors"
                 >
                   ✕
                 </button>
@@ -1080,7 +1104,7 @@ export default function POSPage() {
                         onChange={(e) =>
                           handleAdditionalItemChange(index, "menuItemId", e.target.value)
                         }
-                        className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                        className="flex-1 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-[#333333]"
                         required
                       >
                         <option value="">Producto</option>
@@ -1096,14 +1120,14 @@ export default function POSPage() {
                         onChange={(e) =>
                           handleAdditionalItemChange(index, "quantity", e.target.value)
                         }
-                        className="w-16 rounded-lg border border-gray-300 px-2 py-2 text-sm text-center"
+                        className="w-16 rounded-xl border border-gray-100 bg-gray-50 px-2 py-2 text-sm text-center text-[#333333]"
                         min="1"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => removeAdditionalItemRow(index)}
-                        className="text-red-500 font-bold"
+                        className="text-red-300 font-black px-2"
                       >
                         ✕
                       </button>
@@ -1115,14 +1139,14 @@ export default function POSPage() {
                   <button
                     type="button"
                     onClick={() => setEditingOrder(null)}
-                    className="w-full bg-gray-200 text-gray-300 py-3 rounded-lg font-bold hover:bg-gray-300 transition-colors"
+                    className="w-full bg-gray-50 text-gray-400 py-3 rounded-2xl font-black hover:bg-gray-100 transition-colors uppercase text-sm"
                   >
                     CANCELAR
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 transition-colors"
+                    className="w-full bg-[#E6E6FA] text-[#333333] py-3 rounded-2xl font-black hover:brightness-105 transition-colors uppercase text-sm"
                   >
                     {isSubmitting ? "GUARDANDO..." : "AGREGAR"}
                   </button>
@@ -1137,14 +1161,14 @@ export default function POSPage() {
       {
         modifyingOrder && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
-            <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-text-light">
-                  ✏️ Modificar Orden #{modifyingOrder.orderNumber}
+                <h3 className="text-xl font-black text-[#333333]">
+                  ✏️ Modificar Orden
                 </h3>
                 <button
                   onClick={() => { setModifyingOrder(null); setModifyItems([]); }}
-                  className="text-gray-400 hover:text-gray-200"
+                  className="text-gray-300 hover:text-gray-500 transition-colors"
                 >
                   ✕
                 </button>
@@ -1159,43 +1183,43 @@ export default function POSPage() {
                 {modifyItems.map((item, index) => (
                   <div
                     key={item.id}
-                    className="flex gap-3 items-center bg-[#181818] p-3 rounded-2xl border border-gray-700"
+                    className="flex gap-3 items-center bg-gray-50 p-3 rounded-2xl border border-transparent shadow-sm"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="font-black text-gray-300 text-base leading-tight truncate">
+                      <p className="font-black text-[#333333] text-base leading-tight truncate">
                         {item.menuItemName}
                       </p>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      <p className="text-xs font-black text-gray-300 uppercase tracking-wider">
                         ${item.unitPrice.toFixed(2)} c/u
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 bg-[#242424] rounded-xl p-1">
+                    <div className="flex items-center gap-1 bg-white rounded-xl p-1 border border-gray-100">
                       <button
                         type="button"
                         onClick={() => handleModifyQuantityChange(index, -1)}
-                        className="w-8 h-8 rounded-lg hover:bg-[#181818] flex items-center justify-center font-black text-gray-400 text-lg transition-all"
+                        className="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center font-black text-gray-400 text-lg transition-all"
                       >
                         -
                       </button>
-                      <span className="w-6 text-center font-black text-text-light text-lg">
+                      <span className="w-6 text-center font-black text-[#333333] text-lg">
                         {item.quantity}
                       </span>
                       <button
                         type="button"
                         onClick={() => handleModifyQuantityChange(index, 1)}
-                        className="w-8 h-8 rounded-lg hover:bg-[#181818] flex items-center justify-center font-black text-gray-400 text-lg transition-all"
+                        className="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center font-black text-gray-400 text-lg transition-all"
                       >
                         +
                       </button>
                     </div>
                     <div className="flex flex-col items-end gap-1 w-20">
-                      <p className="font-black text-blue-500 text-lg">
+                      <p className="font-black text-[#333333] text-lg">
                         ${(item.unitPrice * item.quantity).toFixed(2)}
                       </p>
                       <button
                         type="button"
                         onClick={() => handleModifyRemoveItem(index)}
-                        className="text-red-500 hover:text-red-400 text-base"
+                        className="text-red-300 hover:text-red-500 text-base"
                         title="Eliminar producto"
                       >
                         🗑️
@@ -1206,11 +1230,11 @@ export default function POSPage() {
               </div>
 
               {modifyItems.length > 0 && (
-                <div className="border-t-2 border-dashed border-gray-700 pt-4 mb-6 flex justify-between items-center">
-                  <span className="font-black text-gray-400 uppercase tracking-widest text-sm">
+                <div className="border-t-2 border-dashed border-gray-100 pt-4 mb-6 flex justify-between items-center">
+                  <span className="font-black text-gray-300 uppercase tracking-widest text-sm">
                     Nuevo Total
                   </span>
-                  <span className="text-3xl font-black text-blue-500">
+                  <span className="text-3xl font-black text-[#333333]">
                     $
                     {modifyItems
                       .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
@@ -1223,7 +1247,7 @@ export default function POSPage() {
                 <button
                   type="button"
                   onClick={() => { setModifyingOrder(null); setModifyItems([]); }}
-                  className="w-full bg-gray-700 text-gray-300 py-3 rounded-lg font-bold hover:bg-gray-600 transition-colors"
+                  className="w-full bg-gray-50 text-gray-400 py-3 rounded-2xl font-black hover:bg-gray-100 transition-colors uppercase text-sm"
                 >
                   CANCELAR
                 </button>
@@ -1231,7 +1255,7 @@ export default function POSPage() {
                   type="button"
                   onClick={handleSaveModifiedOrder}
                   disabled={isSubmitting || modifyItems.length === 0}
-                  className="w-full bg-yellow-500 text-dark py-3 rounded-lg font-bold hover:bg-yellow-400 transition-colors disabled:opacity-50"
+                  className="w-full bg-[#B2FBA5] text-[#333333] py-3 rounded-2xl font-black hover:brightness-105 transition-colors disabled:opacity-50 uppercase text-sm"
                 >
                   {isSubmitting ? "GUARDANDO..." : "GUARDAR CAMBIOS"}
                 </button>
@@ -1288,39 +1312,39 @@ export default function POSPage() {
       {
         checkoutOrder && !showTicket && !showKitchenTicket && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
-            <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-text-light">
-                  Cerrar Cuenta #{checkoutOrder.orderNumber}
+                <h3 className="text-xl font-black text-[#333333]">
+                  Cerrar Pedido
                 </h3>
                 <button
                   onClick={() => setCheckoutOrder(null)}
-                  className="text-gray-400 hover:text-gray-400"
+                  className="text-gray-300 hover:text-gray-500 transition-colors"
                 >
                   ✕
                 </button>
               </div>
               <div className="space-y-6">
-                <div className="text-center bg-blue-50 py-6 rounded-2xl">
-                  <p className="text-blue-600 text-sm font-bold">TOTAL A PAGAR</p>
-                  <p className="text-5xl font-black text-blue-700">
+                <div className="text-center bg-gray-50 py-6 rounded-3xl border border-gray-100">
+                  <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Total a pagar</p>
+                  <p className="text-5xl font-black text-[#333333]">
                     ${(checkoutOrder.total + tipAmountCalculated).toFixed(2)}
                   </p>
                   {tipAmountCalculated > 0 && (
-                    <p className="text-sm font-bold text-gray-400 mt-2">
+                    <p className="text-xs font-black text-blue-300 mt-2 uppercase">
                       Incluye ${(tipAmountCalculated).toFixed(2)} de propina
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-400 block mb-2 uppercase">
+                  <label className="text-[10px] font-black text-gray-300 block mb-2 uppercase tracking-widest">
                     Propina
                   </label>
                   <div className="grid grid-cols-3 gap-2 mb-2">
-                    <button onClick={() => { setTipType("NONE"); setTipInput(""); }} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "NONE" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Sin propina</button>
-                    <button onClick={() => setTipType("PERCENTAGE")} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "PERCENTAGE" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Porcentaje %</button>
-                    <button onClick={() => setTipType("FIXED")} className={`py-2 text-xs rounded-xl font-bold border-2 transition-all ${tipType === "FIXED" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-400"}`}>Monto fijo $</button>
+                    <button onClick={() => { setTipType("NONE"); setTipInput(""); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "NONE" ? "border-[#FFB7C5] bg-[#FFB7C5]/10 text-[#333333]" : "border-gray-50 text-gray-300 bg-gray-50"}`}>Sin propina</button>
+                    <button onClick={() => setTipType("PERCENTAGE")} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "PERCENTAGE" ? "border-[#FFB7C5] bg-[#FFB7C5]/10 text-[#333333]" : "border-gray-50 text-gray-300 bg-gray-50"}`}>Casi el 10%</button>
+                    <button onClick={() => setTipType("FIXED")} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${tipType === "FIXED" ? "border-[#FFB7C5] bg-[#FFB7C5]/10 text-[#333333]" : "border-gray-50 text-gray-300 bg-gray-50"}`}>Monto fijo</button>
                   </div>
                   {tipType !== "NONE" && (
                     <input
@@ -1328,22 +1352,22 @@ export default function POSPage() {
                       value={tipInput}
                       onChange={(e) => setTipInput(e.target.value)}
                       placeholder={tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"}
-                      className="w-full text-lg font-bold p-3 border-2 border-gray-100 rounded-xl focus:border-blue-600 outline-none text-center"
+                      className="w-full text-lg font-black p-3 border-2 border-gray-50 bg-gray-50 rounded-2xl focus:border-[#FFB7C5] outline-none text-center text-[#333333]"
                     />
                   )}
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-400 block mb-2 uppercase">
-                    Método
+                  <label className="text-[10px] font-black text-gray-300 block mb-2 uppercase tracking-widest">
+                    Método de Pago
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {PAYMENT_METHODS.map((m) => (
                       <button
                         key={m.value}
                         onClick={() => setPaymentMethod(m.value)}
-                        className={`py-3 text-xs rounded-xl font-black border-2 transition-all ${paymentMethod === m.value
-                          ? "border-blue-600 bg-blue-50 text-blue-700"
-                          : "border-gray-100 text-gray-400"
+                        className={`py-3 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${paymentMethod === m.value
+                          ? "border-[#89CFF0] bg-[#89CFF0]/10 text-[#333333]"
+                          : "border-gray-50 text-gray-300 bg-gray-50"
                           }`}
                       >
                         {m.label}
@@ -1357,13 +1381,13 @@ export default function POSPage() {
                       type="number"
                       value={receivedAmount}
                       onChange={(e) => setReceivedAmount(e.target.value)}
-                      className="w-full text-3xl font-black p-4 border-2 border-gray-100 rounded-xl focus:border-blue-600 outline-none text-center"
-                      placeholder="EFECTIVO RECIBIDO"
+                      className="w-full text-3xl font-black p-4 border-2 border-gray-50 bg-gray-50 rounded-2xl focus:border-[#B2FBA5] outline-none text-center text-[#333333]"
+                      placeholder="EFECTIVO..."
                       autoFocus
                     />
-                    <div className="flex justify-between items-center bg-[#181818] p-4 rounded-xl">
-                      <span className="font-bold text-gray-400">CAMBIO:</span>
-                      <span className="text-3xl font-black text-green-600">
+                    <div className="flex justify-between items-center bg-gray-50 p-4 rounded-3xl border border-gray-100">
+                      <span className="font-black text-gray-300 text-[10px] uppercase tracking-widest">Cambio</span>
+                      <span className="text-3xl font-black text-[#B2FBA5] contrast-125">
                         ${change.toFixed(2)}
                       </span>
                     </div>
@@ -1378,17 +1402,17 @@ export default function POSPage() {
                         (!receivedAmount ||
                           Number(receivedAmount) < (checkoutOrder.total + tipAmountCalculated)))
                     }
-                    className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl disabled:opacity-50 transition-all"
+                    className="w-full bg-[#B2FBA5] text-[#333333] py-5 rounded-3xl font-black text-xl hover:brightness-105 shadow-sm shadow-green-100 disabled:opacity-30 transition-all uppercase"
                   >
-                    {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGO E IMPRIMIR"}
+                    {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGO"}
                   </button>
 
                   <button
                     onClick={() => handleFailedPayment()}
                     disabled={isSubmitting}
-                    className="w-full bg-red-900/20 border-2 border-red-500/30 text-red-500 py-3 rounded-2xl font-black text-sm hover:bg-red-900/40 transition-all uppercase tracking-widest"
+                    className="w-full bg-red-50 text-red-300 py-3 rounded-2xl font-black text-xs hover:bg-red-100 transition-all uppercase tracking-widest"
                   >
-                    ❌ Pago Fallido (Cliente se fue)
+                    ❌ Pago Fallido
                   </button>
                 </div>
               </div>
@@ -1401,24 +1425,24 @@ export default function POSPage() {
       {
         showWhatsAppModal && checkoutOrder && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-60 no-print">
-            <div className="bg-[#242424] rounded-2xl max-w-sm w-full p-8 shadow-2xl border border-green-500/20">
+            <div className="bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold flex items-center gap-2 text-white">
+                <h3 className="text-xl font-black flex items-center gap-2 text-[#333333]">
                   <span className="text-2xl">📱</span> WhatsApp
                 </h3>
-                <button onClick={() => setShowWhatsAppModal(false)} className="text-gray-400 hover:text-white transition-colors">✕</button>
+                <button onClick={() => setShowWhatsAppModal(false)} className="text-gray-300 hover:text-gray-500 transition-colors">✕</button>
               </div>
-              <p className="text-sm font-medium text-gray-400 mb-6 text-center leading-relaxed">
-                Ingresa los 10 dígitos del número (sin código de país).
+              <p className="text-sm font-black text-gray-300 mb-6 text-center uppercase tracking-tighter">
+                Ingresa los 10 dígitos
               </p>
               <input
                 type="tel"
                 maxLength={10}
                 value={whatsappNumber}
                 onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ''))}
-                placeholder="Ej. 3312345678"
+                placeholder="3312345678"
                 autoFocus
-                className="w-full text-3xl font-black p-4 border-2 border-gray-600 rounded-xl focus:border-green-500 outline-none text-center bg-[#181818] text-white tracking-widest mb-8 transition-all"
+                className="w-full text-3xl font-black p-4 border-2 border-gray-50 bg-gray-50 rounded-2xl focus:border-[#B2FBA5] outline-none text-center text-[#333333] tracking-widest mb-8 transition-all"
               />
               <button
                 disabled={whatsappNumber.length !== 10}
@@ -1435,7 +1459,7 @@ export default function POSPage() {
                   setShowKitchenTicket(false);
                   setWhatsappNumber("");
                 }}
-                className="w-full bg-green-500 text-white py-4 rounded-xl font-black text-xl hover:bg-green-600 disabled:opacity-30 disabled:hover:bg-green-500 transition-all shadow-lg shadow-green-500/20 cursor-pointer"
+                className="w-full bg-[#B2FBA5] text-[#333333] py-4 rounded-2xl font-black text-xl hover:brightness-105 disabled:opacity-30 transition-all shadow-sm shadow-green-100 uppercase"
               >
                 ENVIAR TICKET
               </button>
