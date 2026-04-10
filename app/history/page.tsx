@@ -26,6 +26,13 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 
 type Order = OrderWithDetails;
 
+type ExpenseDetailItem = {
+    description: string;
+    amount: number;
+    category?: string;
+    has_invoice?: boolean;
+};
+
 type DailyCut = {
     id: string;
     cut_date: string;
@@ -40,6 +47,7 @@ type DailyCut = {
     utilidad_final: number;
     total_orders: number;
     notes: string | null;
+    expenses_detail: ExpenseDetailItem[] | null;
     created_at: string;
 };
 
@@ -70,6 +78,7 @@ export default function HistoryPage() {
     const [manualCard, setManualCard] = useState<string>("");
     const [manualTipsEfectivo, setManualTipsEfectivo] = useState<string>("");
     const [manualTipsTarjeta, setManualTipsTarjeta] = useState<string>("");
+    const [selectedCutDetail, setSelectedCutDetail] = useState<DailyCut | null>(null);
 
     const checkRole = async () => {
         try {
@@ -184,12 +193,26 @@ export default function HistoryPage() {
 
         try {
             setIsFinalizing(true);
+            const supabase = createClient();
             const mxDateStr = new Intl.DateTimeFormat("en-CA", {
                 timeZone: "America/Mexico_City",
                 year: "numeric",
                 month: "2-digit",
                 day: "2-digit",
             }).format(new Date());
+
+            // Fetch today's itemized expenses to store as a snapshot
+            const { data: expensesData } = await supabase
+                .from("expenses")
+                .select("description, amount, has_invoice, expense_categories(name)")
+                .eq("date", mxDateStr);
+
+            const expensesDetail: ExpenseDetailItem[] = (expensesData || []).map((e) => ({
+                description: (e as { description: string; amount: number; has_invoice: boolean; expense_categories?: { name?: string } }).description,
+                amount: Number((e as { amount: number }).amount),
+                category: (e as { expense_categories?: { name?: string } }).expense_categories?.name ?? undefined,
+                has_invoice: (e as { has_invoice?: boolean }).has_invoice ?? false,
+            }));
 
             const cashFinal = manualCash !== "" ? Number(manualCash) : todayTotals.cajaEfectivo;
             const cardFinal = manualCard !== "" ? Number(manualCard) : todayTotals.cajaTarjeta;
@@ -211,6 +234,7 @@ export default function HistoryPage() {
                     total_gastos: todayExpenses,
                     utilidad_final: (todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal) - todayExpenses,
                     total_orders: todayOrders.length,
+                    expenses_detail: expensesDetail,
                 }),
             });
 
@@ -713,38 +737,166 @@ export default function HistoryPage() {
                                         <tr>
                                             <th className="py-3 pr-4">Fecha</th>
                                             <th className="py-3 pr-4 text-right">Órdenes</th>
-                                            <th className="py-3 pr-4 text-right">Ventas</th>
+                                            <th className="py-3 pr-4 text-right">Venta Bruta</th>
+                                            <th className="py-3 pr-4 text-right">Venta Neta</th>
+                                            <th className="py-3 pr-4 text-right">IVA</th>
                                             <th className="py-3 pr-4 text-right">Gastos</th>
-                                            <th className="py-3 text-right">Utilidad Final</th>
+                                            <th className="py-3 pr-4 text-right">Utilidad Final</th>
+                                            <th className="py-3 text-center">Detalle</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-700/50">
-                                        {dailyCuts.map((cut) => (
-                                            <tr key={cut.id} className="hover:bg-[#2a2a2a] transition-colors">
-                                                <td className="py-3 pr-4 font-medium text-white">
-                                                    {new Date(`${cut.cut_date}T12:00:00`).toLocaleDateString('es-MX', {
-                                                        weekday: 'short',
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                    })}
-                                                </td>
-                                                <td className="py-3 pr-4 text-right text-gray-300">{cut.total_orders}</td>
-                                                <td className="py-3 pr-4 text-right text-green-400 font-mono">
-                                                    ${Number(cut.utilidad_real).toFixed(2)}
-                                                </td>
-                                                <td className="py-3 pr-4 text-right text-red-400 font-mono">
-                                                    -${Number(cut.total_gastos).toFixed(2)}
-                                                </td>
-                                                <td className={`py-3 text-right font-mono font-bold ${Number(cut.utilidad_final) >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
-                                                    ${Number(cut.utilidad_final).toFixed(2)}
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {dailyCuts.map((cut) => {
+                                            const ventaBruta = Number(cut.venta_neta) + Number(cut.iva_acumulado);
+                                            return (
+                                                <tr key={cut.id} className="hover:bg-[#2a2a2a] transition-colors">
+                                                    <td className="py-3 pr-4 font-medium text-white">
+                                                        {new Date(`${cut.cut_date}T12:00:00`).toLocaleDateString('es-MX', {
+                                                            weekday: 'short',
+                                                            year: 'numeric',
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                        })}
+                                                    </td>
+                                                    <td className="py-3 pr-4 text-right text-gray-300">{cut.total_orders}</td>
+                                                    <td className="py-3 pr-4 text-right text-green-400 font-mono">
+                                                        ${ventaBruta.toFixed(2)}
+                                                    </td>
+                                                    <td className="py-3 pr-4 text-right text-gray-300 font-mono">
+                                                        ${Number(cut.venta_neta).toFixed(2)}
+                                                    </td>
+                                                    <td className="py-3 pr-4 text-right text-yellow-400 font-mono">
+                                                        ${Number(cut.iva_acumulado).toFixed(2)}
+                                                    </td>
+                                                    <td className="py-3 pr-4 text-right text-red-400 font-mono">
+                                                        -${Number(cut.total_gastos).toFixed(2)}
+                                                    </td>
+                                                    <td className={`py-3 pr-4 text-right font-mono font-bold ${Number(cut.utilidad_final) >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
+                                                        ${Number(cut.utilidad_final).toFixed(2)}
+                                                    </td>
+                                                    <td className="py-3 text-center">
+                                                        <button
+                                                            onClick={() => setSelectedCutDetail(cut)}
+                                                            className="rounded-lg bg-[#181818] border border-gray-600 px-3 py-1 text-xs font-semibold text-gray-300 hover:border-blue-500 hover:text-white transition-all"
+                                                        >
+                                                            Ver Detalle
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* MODAL DETALLE DE CORTE */}
+                {selectedCutDetail && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+                        <div className="w-full max-w-lg rounded-2xl bg-[#242424] p-6 shadow-2xl border border-blue-500/30 max-h-[90vh] overflow-y-auto">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 className="text-xl font-black text-white">📋 Detalle del Corte</h3>
+                                    <p className="text-sm text-gray-400 mt-0.5">
+                                        {new Date(`${selectedCutDetail.cut_date}T12:00:00`).toLocaleDateString('es-MX', {
+                                            weekday: 'long',
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                        })}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedCutDetail(null)}
+                                    className="rounded-lg border border-gray-600 px-3 py-1.5 text-sm text-gray-400 hover:text-white hover:border-gray-400 transition-all"
+                                >
+                                    ✕ Cerrar
+                                </button>
+                            </div>
+
+                            {/* Financial Grid */}
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Venta Neta Total (Sin IVA)</span>
+                                    <span className="text-white text-lg font-mono font-medium">${Number(selectedCutDetail.venta_neta).toFixed(2)}</span>
+                                </div>
+                                <div className="bg-[#181818] p-3 rounded-lg border border-yellow-900/50">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">IVA Acumulado</span>
+                                    <span className="text-yellow-400 text-lg font-mono">${Number(selectedCutDetail.iva_acumulado).toFixed(2)}</span>
+                                </div>
+                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Efectivo)</span>
+                                    <span className="text-green-400 text-lg font-mono">${Number(selectedCutDetail.propinas_efectivo).toFixed(2)}</span>
+                                </div>
+                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Tarjeta)</span>
+                                    <span className="text-blue-400 text-lg font-mono">${Number(selectedCutDetail.propinas_tarjeta).toFixed(2)}</span>
+                                    <span className="text-gray-500 text-[10px] block mt-0.5">No suma a utilidad</span>
+                                </div>
+                                <div className="bg-[#181818] p-3 rounded-lg border border-green-900/50">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Efectivo)</span>
+                                    <span className="text-green-400 text-lg font-mono font-bold">${Number(selectedCutDetail.caja_efectivo).toFixed(2)}</span>
+                                </div>
+                                <div className="bg-[#181818] p-3 rounded-lg border border-blue-900/50">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Tarjeta/Banco)</span>
+                                    <span className="text-blue-400 text-lg font-mono font-bold">${Number(selectedCutDetail.caja_tarjeta).toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            {/* Expenses Detail */}
+                            <div className="bg-[#181818] rounded-lg border border-red-900/50 p-4 mb-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Gastos del Día</span>
+                                    <span className="text-red-400 font-mono font-bold">-${Number(selectedCutDetail.total_gastos).toFixed(2)}</span>
+                                </div>
+                                {selectedCutDetail.expenses_detail && selectedCutDetail.expenses_detail.length > 0 ? (
+                                    <div className="space-y-1.5">
+                                        {selectedCutDetail.expenses_detail.map((expense, i) => (
+                                            <div key={i} className="flex items-center justify-between text-sm">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    {expense.has_invoice && (
+                                                        <span className="text-[10px] bg-green-900/40 text-green-400 px-1.5 py-0.5 rounded font-semibold shrink-0">FAC</span>
+                                                    )}
+                                                    {expense.category && (
+                                                        <span className="text-[10px] text-gray-500 shrink-0">[{expense.category}]</span>
+                                                    )}
+                                                    <span className="text-gray-300 truncate">{expense.description}</span>
+                                                </div>
+                                                <span className="text-red-400 font-mono shrink-0 ml-3">-${Number(expense.amount).toFixed(2)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 text-xs italic">Sin desglose de gastos disponible para este corte.</p>
+                                )}
+                            </div>
+
+                            {/* Utilidad Summary */}
+                            <div className="bg-linear-to-br from-[#1c2e4a] to-[#0f172a] p-4 rounded-lg border border-blue-500/30">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-blue-200 text-xs font-bold uppercase tracking-wider">Utilidad Real</span>
+                                    <span className="text-white font-black font-mono">${Number(selectedCutDetail.utilidad_real).toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between items-center pt-2 border-t border-blue-500/20">
+                                    <span className="text-blue-200 text-xs font-bold uppercase tracking-wider">Utilidad Final (- Gastos)</span>
+                                    <span className={`text-xl font-black font-mono ${Number(selectedCutDetail.utilidad_final) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                        ${Number(selectedCutDetail.utilidad_final).toFixed(2)}
+                                    </span>
+                                </div>
+                                <p className="text-blue-300/40 text-[10px] mt-2 uppercase">
+                                    {selectedCutDetail.total_orders} orden{selectedCutDetail.total_orders !== 1 ? 'es' : ''} completada{selectedCutDetail.total_orders !== 1 ? 's' : ''}
+                                </p>
+                            </div>
+
+                            {selectedCutDetail.notes && (
+                                <div className="mt-3 bg-[#181818] rounded-lg border border-gray-700 p-3">
+                                    <span className="text-gray-400 text-xs font-semibold uppercase block mb-1">Notas</span>
+                                    <p className="text-gray-300 text-sm">{selectedCutDetail.notes}</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 
