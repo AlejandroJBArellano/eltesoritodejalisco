@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
       utilidad_final,
       total_orders,
       notes,
+      expenses_detail,
     } = body;
 
     if (!cut_date) {
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
           utilidad_final: utilidad_final ?? 0,
           total_orders: total_orders ?? 0,
           notes: notes ?? null,
+          expenses_detail: expenses_detail ?? [],
         })
         .eq("id", existing.id)
         .select()
@@ -98,6 +100,7 @@ export async function POST(request: NextRequest) {
         utilidad_final: utilidad_final ?? 0,
         total_orders: total_orders ?? 0,
         notes: notes ?? null,
+        expenses_detail: expenses_detail ?? [],
       })
       .select()
       .single();
