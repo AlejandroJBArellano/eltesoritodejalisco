@@ -33,6 +33,13 @@ type ExpenseDetailItem = {
     has_invoice?: boolean;
 };
 
+type ExpenseRow = {
+    description: string;
+    amount: number;
+    has_invoice: boolean;
+    expense_categories?: { name?: string } | null;
+};
+
 type DailyCut = {
     id: string;
     cut_date: string;
@@ -207,11 +214,11 @@ export default function HistoryPage() {
                 .select("description, amount, has_invoice, expense_categories(name)")
                 .eq("date", mxDateStr);
 
-            const expensesDetail: ExpenseDetailItem[] = (expensesData || []).map((e) => ({
-                description: (e as { description: string; amount: number; has_invoice: boolean; expense_categories?: { name?: string } }).description,
-                amount: Number((e as { amount: number }).amount),
-                category: (e as { expense_categories?: { name?: string } }).expense_categories?.name ?? undefined,
-                has_invoice: (e as { has_invoice?: boolean }).has_invoice ?? false,
+            const expensesDetail: ExpenseDetailItem[] = ((expensesData || []) as ExpenseRow[]).map((e) => ({
+                description: e.description,
+                amount: Number(e.amount),
+                category: e.expense_categories?.name ?? undefined,
+                has_invoice: e.has_invoice ?? false,
             }));
 
             const cashFinal = manualCash !== "" ? Number(manualCash) : todayTotals.cajaEfectivo;
