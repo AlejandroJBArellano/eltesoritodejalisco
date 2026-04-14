@@ -5,13 +5,13 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 // ─── CFDI Catalogues (SAT) ────────────────────────────────────────────────────
 
 const USO_CFDI_OPTIONS = [
-  { value: "G01", label: "G01 – Adquisición de mercancias" },
+  { value: "G01", label: "G01 – Adquisición de mercancías" },
   { value: "G02", label: "G02 – Devoluciones, descuentos o bonificaciones" },
   { value: "G03", label: "G03 – Gastos en general" },
   { value: "I01", label: "I01 – Construcciones" },
-  { value: "I02", label: "I02 – Mobilario y equipo de oficina" },
+  { value: "I02", label: "I02 – Mobiliario y equipo de oficina" },
   { value: "I03", label: "I03 – Equipo de transporte" },
-  { value: "I04", label: "I04 – Equipo de computo" },
+  { value: "I04", label: "I04 – Equipo de cómputo" },
   { value: "I08", label: "I08 – Otra maquinaria y equipo" },
   { value: "D01", label: "D01 – Honorarios médicos y dentales" },
   { value: "D10", label: "D10 – Pagos por servicios educativos" },
@@ -65,7 +65,8 @@ function validateRfc(rfc: string): string | null {
 }
 
 function isPersonaMoral(rfc: string): boolean {
-  return rfc.trim().length === 12 && !RFC_GENERICO.test(rfc.trim());
+  const trimmed = rfc.trim();
+  return trimmed.length === 12 && !RFC_GENERICO.test(trimmed);
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────

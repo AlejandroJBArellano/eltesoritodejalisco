@@ -5,6 +5,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+/** IVA rate in Mexico (16%) */
+const IVA_RATE = 0.16;
+/** Divisor to extract the pre-tax base from a total-with-IVA amount */
+const IVA_DIVISOR = 1 + IVA_RATE;
+/** ISR retention rate under RESICO for Personas Morales */
+const ISR_RESICO_RATE = 0.0125;
+/** SAT product code for prepared food consumed on premises */
+const SAT_PRODUCT_CODE_RESTAURANT = "90101501";
+
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 /** Returns true when the RFC corresponds to a Persona Moral (12-char RFC) */
@@ -78,10 +89,10 @@ function buildCfdiPayload(params: {
   } = params;
 
   const cfdiItems = items.map((item, idx) => {
-    const base = parseFloat((item.unitPrice * item.quantity / 1.16).toFixed(6));
-    const iva = parseFloat((base * 0.16).toFixed(6));
+    const base = parseFloat((item.unitPrice * item.quantity / IVA_DIVISOR).toFixed(6));
+    const iva = parseFloat((base * IVA_RATE).toFixed(6));
     const isrRetencion = applyIsrRetencion
-      ? parseFloat((base * 0.0125).toFixed(6))
+      ? parseFloat((base * ISR_RESICO_RATE).toFixed(6))
       : 0;
 
     const taxes: object[] = [
@@ -89,7 +100,7 @@ function buildCfdiPayload(params: {
         Total: iva,
         Name: "IVA",
         Base: base,
-        Rate: 0.16,
+        Rate: IVA_RATE,
         IsRetention: false,
       },
     ];
@@ -99,7 +110,7 @@ function buildCfdiPayload(params: {
         Total: isrRetencion,
         Name: "ISR",
         Base: base,
-        Rate: 0.0125,
+        Rate: ISR_RESICO_RATE,
         IsRetention: true,
       });
     }
@@ -108,7 +119,7 @@ function buildCfdiPayload(params: {
     const total = parseFloat((base + iva - isrRetencion).toFixed(6));
 
     return {
-      ProductCode: "90101501", // Alimentos preparados para consumo en el establecimiento
+      ProductCode: SAT_PRODUCT_CODE_RESTAURANT, // Alimentos preparados para consumo en el establecimiento
       IdentificationNumber: String(idx + 1).padStart(3, "0"),
       Description: item.description,
       Unit: "Servicio",
@@ -305,10 +316,10 @@ export async function POST(request: NextRequest) {
     let isrSum = 0;
 
     for (const item of orderItems) {
-      const base = item.unitPrice * item.quantity / 1.16;
+      const base = item.unitPrice * item.quantity / IVA_DIVISOR;
       subtotalSum += base;
-      ivaSum += base * 0.16;
-      if (applyIsrRetencion) isrSum += base * 0.0125;
+      ivaSum += base * IVA_RATE;
+      if (applyIsrRetencion) isrSum += base * ISR_RESICO_RATE;
     }
 
     const totalInvoice = subtotalSum + ivaSum - isrSum;
