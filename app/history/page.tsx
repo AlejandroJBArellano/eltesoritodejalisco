@@ -1,5 +1,6 @@
 "use client";
 
+import FacturarModal from "@/components/FacturarModal";
 import { OrderWithDetails, PaymentMethod } from "@/types";
 import { format, isSameMonth, parseISO, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -87,6 +88,11 @@ export default function HistoryPage() {
     const [manualTipsTarjeta, setManualTipsTarjeta] = useState<string>("");
     const [selectedCutDetail, setSelectedCutDetail] = useState<DailyCut | null>(null);
 
+    // Facturar state
+    const [facturarOrder, setFacturarOrder] = useState<Order | null>(null);
+    // Map of orderId -> cfdi_uid for already-invoiced orders
+    const [invoicedOrders, setInvoicedOrders] = useState<Record<string, string>>({});
+
     const checkRole = async () => {
         try {
             const supabase = createClient();
@@ -156,6 +162,7 @@ export default function HistoryPage() {
         checkRole();
         fetchOrders();
         fetchTodayExpenses();
+        fetchAllInvoices();
     }, []);
 
     const fetchTodayExpenses = async () => {
@@ -175,6 +182,25 @@ export default function HistoryPage() {
             setTodayExpenses(total);
         } catch (err) {
             console.error("Error fetching today expenses:", err);
+        }
+    };
+
+    const fetchAllInvoices = async () => {
+        try {
+            const supabase = createClient();
+            const { data } = await supabase
+                .from("invoices")
+                .select("order_id, cfdi_uid")
+                .eq("status", "issued");
+            if (data) {
+                const map: Record<string, string> = {};
+                data.forEach((inv: { order_id: string; cfdi_uid: string }) => {
+                    map[inv.order_id] = inv.cfdi_uid;
+                });
+                setInvoicedOrders(map);
+            }
+        } catch (err) {
+            console.error("Error fetching invoices:", err);
         }
     };
 
@@ -1168,7 +1194,28 @@ export default function HistoryPage() {
                                                 <tr className="bg-[#1e1e1e]">
                                                     <td colSpan={8} className="px-10 py-4">
                                                         <div className="bg-[#181818] rounded border border-gray-700 p-4">
-                                                            <h4 className="text-sm font-bold text-gray-400 uppercase mb-3">Detalle de la Orden</h4>
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <h4 className="text-sm font-bold text-gray-400 uppercase">Detalle de la Orden</h4>
+                                                                {/* Facturar button */}
+                                                                {invoicedOrders[order.id] ? (
+                                                                    <span className="flex items-center gap-1.5 rounded-lg bg-green-900/30 border border-green-700/40 px-3 py-1.5 text-xs font-bold text-green-400">
+                                                                        ✅ Facturada
+                                                                    </span>
+                                                                ) : (
+                                                                    (order.status === "PAID" || order.status === "DELIVERED" || order.status === "UNCOLLECTED") && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setFacturarOrder(order);
+                                                                            }}
+                                                                            className="flex items-center gap-1.5 rounded-lg bg-blue-600/20 border border-blue-500/40 px-3 py-1.5 text-xs font-bold text-blue-400 hover:bg-blue-600/30 hover:border-blue-400 transition-all"
+                                                                        >
+                                                                            🧾 Facturar
+                                                                        </button>
+                                                                    )
+                                                                )}
+                                                            </div>
                                                             <table className="w-full text-sm">
                                                                 <thead>
                                                                     <tr className="text-gray-500 border-b border-gray-700">
@@ -1217,6 +1264,23 @@ export default function HistoryPage() {
                     </div>
                 </div>
             </main>
+
+            {/* MODAL FACTURAR */}
+            {facturarOrder && (
+                <FacturarModal
+                    orderId={facturarOrder.id}
+                    orderNumber={facturarOrder.orderNumber}
+                    orderTotal={facturarOrder.total}
+                    onClose={() => setFacturarOrder(null)}
+                    onSuccess={(cfdiUid) => {
+                        setInvoicedOrders((prev) => ({
+                            ...prev,
+                            [facturarOrder.id]: cfdiUid,
+                        }));
+                        setFacturarOrder(null);
+                    }}
+                />
+            )}
         </div>
     );
 }
