@@ -1,5 +1,6 @@
 "use client";
 
+import { FacturacionModal } from "@/components/pos/FacturacionModal";
 import { KitchenTicket } from "@/components/pos/KitchenTicket";
 import { OrderTicket } from "@/components/pos/OrderTicket";
 import { OrderWithDetails } from "@/types";
@@ -81,7 +82,7 @@ export default function POSPage() {
   const [tipInput, setTipInput] = useState<string>("");
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState("");
-  
+
   // Tip Modification State for Paid Orders
   const [editingTipOrder, setEditingTipOrder] = useState<Order | null>(null);
   const [editTipType, setEditTipType] = useState<"NONE" | "PERCENTAGE" | "FIXED">("NONE");
@@ -104,6 +105,9 @@ export default function POSPage() {
   };
   const [modifyingOrder, setModifyingOrder] = useState<Order | null>(null);
   const [modifyItems, setModifyItems] = useState<ModifyItem[]>([]);
+
+  // Billing (Facturación) State
+  const [billingOrder, setBillingOrder] = useState<Order | null>(null);
 
   const availableMenuItems = useMemo(
     () => menuItems.filter((item) => item.isAvailable),
@@ -742,8 +746,8 @@ export default function POSPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white">
-      <header className="bg-[#121212]/80 backdrop-blur-md sticky top-0 z-30 border-b border-white/5 no-print">
+    <div className="min-h-screen bg-dark text-white">
+      <header className="bg-dark/80 backdrop-blur-md sticky top-0 z-30 border-b border-white/5 no-print">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div>
             <Link
@@ -755,10 +759,10 @@ export default function POSPage() {
             <h1 className="text-2xl font-black text-white tracking-tight">Punto de Venta</h1>
           </div>
           <div className="flex items-center gap-4">
-             <div className="bg-white/5 px-6 py-2 rounded-2xl border border-white/10 shadow-sm">
-                <span className="text-[10px] font-black text-zinc-500 uppercase block tracking-widest leading-none mb-1">Próximo Folio</span>
-                <span className="text-2xl font-black text-white font-mono">#{nextFolioDisplay}</span>
-             </div>
+            <div className="bg-white/5 px-6 py-2 rounded-2xl border border-white/10 shadow-sm">
+              <span className="text-[10px] font-black text-zinc-500 uppercase block tracking-widest leading-none mb-1">Próximo Folio</span>
+              <span className="text-2xl font-black text-white font-mono">#{nextFolioDisplay}</span>
+            </div>
           </div>
         </div>
       </header>
@@ -847,20 +851,20 @@ export default function POSPage() {
               {/* Configuración de la Orden (Secundaria / Opcional) */}
               <section className="rounded-[2.5rem] bg-[#1E1E1E] p-6 shadow-2xl border border-white/5 transition-opacity">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                  <h2 className="text-sm font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                     <span className="grayscale">📋</span> Detalles Adicionales
-                    </h2>
-                    <div className="flex items-center gap-4">
-                        <button 
-                            type="button"
-                            onClick={() => handleFormChange("table", formState.table === "Domicilio" ? "" : "Domicilio")}
-                            className={`px-4 py-1.5 rounded-full text-xs font-black transition-all border-2 ${formState.table === "Domicilio" 
-                                ? "bg-[#FFDAB9] border-[#FFDAB9] text-[#000000] shadow-[0_0_15px_#FFDAB944]" 
-                                : "bg-white/5 border-transparent text-zinc-500 hover:border-white/10"}`}
-                        >
-                            🛵 DOMICILIO
-                        </button>
-                    </div>
+                  </h2>
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => handleFormChange("table", formState.table === "Domicilio" ? "" : "Domicilio")}
+                      className={`px-4 py-1.5 rounded-full text-xs font-black transition-all border-2 ${formState.table === "Domicilio"
+                        ? "bg-[#FFDAB9] border-[#FFDAB9] text-[#000000] shadow-[0_0_15px_#FFDAB944]"
+                        : "bg-white/5 border-transparent text-zinc-500 hover:border-white/10"}`}
+                    >
+                      🛵 DOMICILIO
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-3 mb-4">
@@ -1137,7 +1141,7 @@ export default function POSPage() {
                             const lastUpdate = new Date(order.updatedAt || order.createdAt).getTime();
                             const now = new Date().getTime();
                             const isWithin3Min = now - lastUpdate < 3 * 60 * 1000;
-                            
+
                             if (isWithin3Min) {
                               return (
                                 <button
@@ -1151,6 +1155,17 @@ export default function POSPage() {
                             }
                             return null;
                           })()
+                        )}
+                        {order.status === "PAID" && (
+                          <button
+                            onClick={() => {
+                              setBillingOrder(order);
+                            }}
+                            className="bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 p-2 rounded-xl text-[10px] font-black uppercase"
+                            title="FACTURAR"
+                          >
+                            🧾 Facturar
+                          </button>
                         )}
                         <button
                           onClick={() => {
@@ -1190,7 +1205,7 @@ export default function POSPage() {
             <div className="bg-[#1E1E1E] rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl border border-white/10">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-black text-white">
-                   Agregar Productos
+                  Agregar Productos
                 </h3>
                 <button
                   onClick={() => setEditingOrder(null)}
@@ -1441,7 +1456,7 @@ export default function POSPage() {
                 </button>
               </div>
               <div className="space-y-6">
-                <div className="text-center bg-white/5 py-8 rounded-[2rem] border border-white/5 shadow-inner">
+                <div className="text-center bg-white/5 py-8 rounded-4xl border border-white/5 shadow-inner">
                   <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Total a pagar</p>
                   <p className="text-5xl font-black text-white tabular-nums">
                     ${(checkoutOrder.total + tipAmountCalculated).toFixed(2)}
@@ -1502,11 +1517,11 @@ export default function POSPage() {
                       type="number"
                       value={receivedAmount}
                       onChange={(e) => setReceivedAmount(e.target.value)}
-                      className="w-full text-4xl font-black p-5 border border-white/5 bg-white/5 rounded-[2rem] focus:border-[#B2FBA5] outline-none text-center text-white transition-all placeholder:text-zinc-800"
+                      className="w-full text-4xl font-black p-5 border border-white/5 bg-white/5 rounded-4xl focus:border-[#B2FBA5] outline-none text-center text-white transition-all placeholder:text-zinc-800"
                       placeholder="EFECTIVO..."
                       autoFocus
                     />
-                    <div className="flex justify-between items-center bg-white/5 p-4 rounded-[2rem] border border-white/5">
+                    <div className="flex justify-between items-center bg-white/5 p-4 rounded-4xl border border-white/5">
                       <span className="font-black text-zinc-600 text-[10px] uppercase tracking-widest">Cambio</span>
                       <span className="text-3xl font-black text-[#B2FBA5]">
                         ${change.toFixed(2)}
@@ -1530,8 +1545,8 @@ export default function POSPage() {
 
                   <button
                     onClick={() => {
-                        openModifyModal(checkoutOrder);
-                        setCheckoutOrder(null);
+                      openModifyModal(checkoutOrder);
+                      setCheckoutOrder(null);
                     }}
                     className="w-full bg-white/5 text-zinc-500 py-3 rounded-2xl font-black text-[10px] hover:bg-white/10 transition-all uppercase tracking-widest border border-white/5"
                   >
@@ -1573,7 +1588,7 @@ export default function POSPage() {
                 onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ''))}
                 placeholder="3312345678"
                 autoFocus
-                className="w-full text-4xl font-black p-5 border border-white/5 bg-white/5 rounded-[2rem] focus:border-[#B2FBA5] outline-none text-center text-white tracking-[0.2em] mb-8 transition-all placeholder:text-zinc-800"
+                className="w-full text-4xl font-black p-5 border border-white/5 bg-white/5 rounded-4xl focus:border-[#B2FBA5] outline-none text-center text-white tracking-[0.2em] mb-8 transition-all placeholder:text-zinc-800"
               />
               <button
                 disabled={whatsappNumber.length !== 10}
@@ -1599,6 +1614,14 @@ export default function POSPage() {
         )
       }
 
+      {/* MODAL DE FACTURACION */}
+      {billingOrder && (
+        <FacturacionModal
+          order={billingOrder}
+          onClose={() => setBillingOrder(null)}
+        />
+      )}
+
       {/* MODAL DE EDITAR PROPINA */}
       {editingTipOrder && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 no-print">
@@ -1615,7 +1638,7 @@ export default function POSPage() {
               </button>
             </div>
             <div className="space-y-6">
-              <div className="text-center bg-white/5 py-6 rounded-[2rem] border border-white/5">
+              <div className="text-center bg-white/5 py-6 rounded-4xl border border-white/5">
                 <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Orden #{editingTipOrder.orderNumber}</p>
                 <p className="text-3xl font-black text-white">
                   Total: ${editingTipOrder.total.toFixed(2)}
@@ -1635,10 +1658,10 @@ export default function POSPage() {
                   <button onClick={() => setEditTipType("FIXED")} className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "FIXED" ? "border-[#FFB7C5] bg-[#FFB7C5] text-[#000000] shadow-[0_0_10px_#FFB7C544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>$ Fijo</button>
                 </div>
                 <div className="grid grid-cols-3 gap-2 mb-2">
-                    <button onClick={() => { setEditTipType("PERCENTAGE"); setEditTipInput("10"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "PERCENTAGE" && editTipInput === "10" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>10%</button>
-                    <button onClick={() => { setEditTipType("PERCENTAGE"); setEditTipInput("15"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "PERCENTAGE" && editTipInput === "15" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>15%</button>
-                    <button onClick={() => { setEditTipType("PERCENTAGE"); setEditTipInput("20"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "PERCENTAGE" && editTipInput === "20" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>20%</button>
-                  </div>
+                  <button onClick={() => { setEditTipType("PERCENTAGE"); setEditTipInput("10"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "PERCENTAGE" && editTipInput === "10" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>10%</button>
+                  <button onClick={() => { setEditTipType("PERCENTAGE"); setEditTipInput("15"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "PERCENTAGE" && editTipInput === "15" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>15%</button>
+                  <button onClick={() => { setEditTipType("PERCENTAGE"); setEditTipInput("20"); }} className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${editTipType === "PERCENTAGE" && editTipInput === "20" ? "border-primary bg-primary text-[#000000] shadow-[0_0_10px_#B2FBA544]" : "border-white/5 text-zinc-600 bg-white/5"}`}>20%</button>
+                </div>
                 {editTipType !== "NONE" && (
                   <input
                     type="number"
