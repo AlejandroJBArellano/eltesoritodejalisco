@@ -20,6 +20,7 @@ import {
     XAxis, YAxis
 } from 'recharts';
 
+import { FacturacionModal } from "@/components/pos/FacturacionModal";
 import { createClient } from "@/lib/supabase/client";
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
@@ -72,6 +73,7 @@ export default function HistoryPage() {
     const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
 
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
+    const [billingOrder, setBillingOrder] = useState<Order | null>(null);
 
     // Corte Diario state
     const [todayExpenses, setTodayExpenses] = useState(0);
@@ -371,14 +373,14 @@ export default function HistoryPage() {
         const ordersDelivery = todayOrders.filter(o => o.table === "Domicilio").length;
         const averageTicket = todayOrders.length > 0 ? (ventaNeta + ivaAcumulado) / todayOrders.length : 0;
 
-        return { 
-            ventaNeta, 
-            ivaAcumulado, 
-            propinasEfectivo, 
-            propinasTarjeta, 
-            cajaEfectivo, 
-            cajaTarjeta, 
-            utilidadReal, 
+        return {
+            ventaNeta,
+            ivaAcumulado,
+            propinasEfectivo,
+            propinasTarjeta,
+            cajaEfectivo,
+            cajaTarjeta,
+            utilidadReal,
             utilidadFinal,
             ordersAtTable,
             ordersDelivery,
@@ -702,7 +704,7 @@ export default function HistoryPage() {
                                         <p className="text-xl font-black text-white">{todayOrders.length} <span className="text-xs text-blue-500 font-normal">órdenes hoy</span></p>
                                     </div>
                                 </div>
-                                
+
                                 <div className="bg-[#181818] p-4 rounded-xl border border-white/5 flex items-center gap-4">
                                     <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center text-xl">🏠</div>
                                     <div>
@@ -916,17 +918,17 @@ export default function HistoryPage() {
                                 Se guardará el siguiente resumen en el archivo de cortes:
                             </p>
 
-                             <div className="space-y-3 bg-[#181818] rounded-lg p-4 mb-6 text-sm">
+                            <div className="space-y-3 bg-[#181818] rounded-lg p-4 mb-6 text-sm">
                                 <div className="flex justify-between items-center bg-[#242424] p-2 rounded-md">
                                     <span className="text-gray-400">Venta Neta (sin IVA)</span>
                                     <span className="text-white font-mono font-bold">${todayTotals.ventaNeta.toFixed(2)}</span>
                                 </div>
-                                
+
                                 <div className="grid grid-cols-2 gap-3 mt-4">
                                     <div>
                                         <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Efectivo Caja</label>
-                                        <input 
-                                            type="number" 
+                                        <input
+                                            type="number"
                                             value={manualCash}
                                             onChange={(e) => setManualCash(e.target.value)}
                                             className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-green-400 font-mono focus:border-green-500 outline-none"
@@ -934,8 +936,8 @@ export default function HistoryPage() {
                                     </div>
                                     <div>
                                         <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Tarjeta Caja</label>
-                                        <input 
-                                            type="number" 
+                                        <input
+                                            type="number"
                                             value={manualCard}
                                             onChange={(e) => setManualCard(e.target.value)}
                                             className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-blue-400 font-mono focus:border-blue-500 outline-none"
@@ -943,8 +945,8 @@ export default function HistoryPage() {
                                     </div>
                                     <div>
                                         <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Propinas Efec.</label>
-                                        <input 
-                                            type="number" 
+                                        <input
+                                            type="number"
                                             value={manualTipsEfectivo}
                                             onChange={(e) => setManualTipsEfectivo(e.target.value)}
                                             className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-green-500/70 font-mono focus:border-green-500 outline-none"
@@ -952,8 +954,8 @@ export default function HistoryPage() {
                                     </div>
                                     <div>
                                         <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Propinas Tarj.</label>
-                                        <input 
-                                            type="number" 
+                                        <input
+                                            type="number"
                                             value={manualTipsTarjeta}
                                             onChange={(e) => setManualTipsTarjeta(e.target.value)}
                                             className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-blue-500/70 font-mono focus:border-blue-500 outline-none"
@@ -1198,6 +1200,17 @@ export default function HistoryPage() {
                                                                     })}
                                                                 </tbody>
                                                             </table>
+                                                            <div className="mt-4 flex justify-end">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setBillingOrder(order);
+                                                                    }}
+                                                                    className="rounded bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 transition-colors"
+                                                                >
+                                                                    📄 Facturar
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -1217,6 +1230,13 @@ export default function HistoryPage() {
                     </div>
                 </div>
             </main>
+
+            {billingOrder && (
+                <FacturacionModal
+                    order={billingOrder}
+                    onClose={() => setBillingOrder(null)}
+                />
+            )}
         </div>
     );
 }
