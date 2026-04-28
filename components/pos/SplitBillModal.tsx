@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { OrderWithDetails } from "@/types";
 
 type SplitMode = "EQUAL" | "ITEMS";
@@ -48,7 +48,10 @@ export function SplitBillModal({
 }: SplitBillModalProps) {
   const [mode, setMode] = useState<SplitMode>("EQUAL");
   const [partCount, setPartCount] = useState(2);
-  const [itemAssignments, setItemAssignments] = useState<Record<string, number>>({});
+  // For items with quantity === 1: maps itemId → person number (1-N)
+  const [singleAssignments, setSingleAssignments] = useState<Record<string, number>>({});
+  // For items with quantity > 1: maps itemId → array of qty per person (0-indexed, length = partCount)
+  const [multiAssignments, setMultiAssignments] = useState<Record<string, number[]>>({});
   const [parts, setParts] = useState<SplitPart[]>([defaultPart(), defaultPart()]);
 
   const syncParts = (count: number, current: SplitPart[]): SplitPart[] => {
@@ -67,12 +70,20 @@ export function SplitBillModal({
     const clamped = Math.max(2, Math.min(8, count));
     setPartCount(clamped);
     setParts((prev: SplitPart[]) => syncParts(clamped, prev));
-    // Clear assignments that reference a removed person
     if (clamped < partCount) {
-      setItemAssignments((prev) => {
+      // Clear single assignments that reference a removed person
+      setSingleAssignments((prev: Record<string, number>) => {
         const next: Record<string, number> = {};
         for (const [id, n] of Object.entries(prev)) {
-          if (n <= clamped) next[id] = n;
+          if ((n as number) <= clamped) next[id] = n as number;
+        }
+        return next;
+      });
+      // Trim multi-qty arrays to new partCount
+      setMultiAssignments((prev: Record<string, number[]>) => {
+        const next: Record<string, number[]> = {};
+        for (const [id, qtys] of Object.entries(prev)) {
+          next[id] = (qtys as number[]).slice(0, clamped);
         }
         return next;
       });
@@ -93,14 +104,24 @@ export function SplitBillModal({
     // Items mode: sum assigned items per part
     const amounts = Array(partCount).fill(0) as number[];
     order.orderItems.forEach((item) => {
-      const assigned = itemAssignments[item.id];
-      if (assigned >= 1 && assigned <= partCount) {
-        amounts[assigned - 1] =
-          Math.round((amounts[assigned - 1] + item.unitPrice * item.quantity) * 100) / 100;
+      if (item.quantity === 1) {
+        const assigned = singleAssignments[item.id];
+        if (assigned >= 1 && assigned <= partCount) {
+          amounts[assigned - 1] =
+            Math.round((amounts[assigned - 1] + item.unitPrice) * 100) / 100;
+        }
+      } else {
+        const qtys = multiAssignments[item.id] ?? [];
+        qtys.forEach((qty: number, i: number) => {
+          if (i < partCount && qty > 0) {
+            amounts[i] =
+              Math.round((amounts[i] + qty * item.unitPrice) * 100) / 100;
+          }
+        });
       }
     });
     return amounts;
-  }, [mode, partCount, order.total, order.orderItems, itemAssignments]);
+  }, [mode, partCount, order.total, order.orderItems, singleAssignments, multiAssignments]);
 
   const tipAmounts = useMemo(
     () =>
@@ -132,10 +153,17 @@ export function SplitBillModal({
   const allItemsAssigned = useMemo(() => {
     if (mode !== "ITEMS") return true;
     return order.orderItems.every((item) => {
-      const assigned = itemAssignments[item.id];
-      return assigned >= 1 && assigned <= partCount;
+      if (item.quantity === 1) {
+        const assigned = singleAssignments[item.id];
+        return assigned >= 1 && assigned <= partCount;
+      } else {
+        const qtys = multiAssignments[item.id];
+        if (!qtys) return false;
+        const total = qtys.reduce((s: number, q: number) => s + (q || 0), 0);
+        return total === item.quantity;
+      }
     });
-  }, [mode, order.orderItems, itemAssignments, partCount]);
+  }, [mode, order.orderItems, singleAssignments, multiAssignments, partCount]);
 
   const canConfirm = useMemo(() => {
     if (!allItemsAssigned) return false;
@@ -258,44 +286,93 @@ export function SplitBillModal({
                 ⚠️ Todos los artículos deben asignarse
               </p>
             )}
-            {order.orderItems.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center gap-3 bg-white/5 p-3 rounded-2xl"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-black text-white text-xs uppercase truncate">
-                    {item.menuItem?.name || "Producto"}
-                  </p>
-                  <p className="text-[10px] text-zinc-500 font-bold">
-                    {item.quantity > 1 ? `${item.quantity}× ` : ""}$
-                    {(item.unitPrice * item.quantity).toFixed(2)}
-                  </p>
-                </div>
-                <div className="flex gap-1 flex-wrap justify-end">
-                  {Array.from({ length: partCount }, (_, i) => i + 1).map(
-                    (n) => (
-                      <button
-                        key={n}
-                        onClick={() =>
-                          setItemAssignments((prev) => ({
-                            ...prev,
-                            [item.id]: n,
-                          }))
-                        }
-                        className={`w-8 h-8 rounded-lg text-xs font-black transition-all ${
-                          itemAssignments[item.id] === n
-                            ? "bg-[#B2FBA5] text-black shadow-md"
-                            : "bg-white/10 text-zinc-500 hover:bg-white/20"
-                        }`}
-                      >
-                        {n}
-                      </button>
-                    ),
+            {order.orderItems.map((item) => {
+              const isMulti = item.quantity > 1;
+              const qtys = multiAssignments[item.id] ?? Array(partCount).fill(0);
+              const assignedTotal = qtys.reduce((s: number, q: number) => s + (q || 0), 0);
+              const isExact = isMulti && assignedTotal === item.quantity;
+
+              return (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 bg-white/5 p-3 rounded-2xl"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-white text-xs uppercase truncate">
+                      {item.menuItem?.name || "Producto"}
+                    </p>
+                    <p className="text-[10px] text-zinc-500 font-bold">
+                      {item.quantity > 1 ? `${item.quantity}× ` : ""}$
+                      {(item.unitPrice * item.quantity).toFixed(2)}
+                    </p>
+                  </div>
+
+                  {isMulti ? (
+                    /* Quantity > 1: numeric inputs per person */
+                    <div className="flex items-end gap-1.5 flex-wrap justify-end">
+                      {Array.from({ length: partCount }, (_, i) => i).map((i) => (
+                        <div key={i} className="flex flex-col items-center gap-0.5">
+                          <span className="text-[8px] text-zinc-500 font-black">{i + 1}</span>
+                          <input
+                            type="number"
+                            min={0}
+                            max={item.quantity}
+                            value={qtys[i] ?? 0}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              const val = Math.max(0, Math.min(item.quantity, Number(e.target.value) || 0));
+                              setMultiAssignments((prev: Record<string, number[]>) => {
+                                const current = prev[item.id] ?? Array(partCount).fill(0);
+                                const next = [...current];
+                                while (next.length < partCount) next.push(0);
+                                next[i] = val;
+                                return { ...prev, [item.id]: next };
+                              });
+                            }}
+                            className={`w-10 h-8 text-center text-xs font-black rounded-lg border-2 bg-white/5 text-white outline-none transition-all ${
+                              isExact
+                                ? "border-[#B2FBA5]"
+                                : "border-white/10 focus:border-white/30"
+                            }`}
+                          />
+                        </div>
+                      ))}
+                      <div className="flex flex-col items-center gap-0.5 justify-end">
+                        <span className="text-[8px] text-zinc-500 font-black">✓</span>
+                        <span
+                          className={`text-xs font-black tabular-nums h-8 flex items-center ${
+                            isExact ? "text-[#B2FBA5]" : "text-yellow-400"
+                          }`}
+                        >
+                          {assignedTotal}/{item.quantity}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Quantity === 1: person-selector buttons */
+                    <div className="flex gap-1 flex-wrap justify-end">
+                      {Array.from({ length: partCount }, (_, i) => i + 1).map((n) => (
+                        <button
+                          key={n}
+                          onClick={() =>
+                            setSingleAssignments((prev: Record<string, number>) => ({
+                              ...prev,
+                              [item.id]: n,
+                            }))
+                          }
+                          className={`w-8 h-8 rounded-lg text-xs font-black transition-all ${
+                            singleAssignments[item.id] === n
+                              ? "bg-[#B2FBA5] text-black shadow-md"
+                              : "bg-white/10 text-zinc-500 hover:bg-white/20"
+                          }`}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
