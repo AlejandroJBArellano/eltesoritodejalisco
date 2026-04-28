@@ -67,6 +67,16 @@ export function SplitBillModal({
     const clamped = Math.max(2, Math.min(8, count));
     setPartCount(clamped);
     setParts((prev: SplitPart[]) => syncParts(clamped, prev));
+    // Clear assignments that reference a removed person
+    if (clamped < partCount) {
+      setItemAssignments((prev) => {
+        const next: Record<string, number> = {};
+        for (const [id, n] of Object.entries(prev)) {
+          if (n <= clamped) next[id] = n;
+        }
+        return next;
+      });
+    }
   };
 
   const partAmounts = useMemo(() => {
