@@ -3,6 +3,7 @@
 import { FacturacionModal } from "@/components/pos/FacturacionModal";
 import { KitchenTicket } from "@/components/pos/KitchenTicket";
 import { OrderTicket } from "@/components/pos/OrderTicket";
+import { SplitBillModal, type SplitPayment } from "@/components/pos/SplitBillModal";
 import { OrderWithDetails } from "@/types";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
@@ -108,6 +109,9 @@ export default function POSPage() {
 
   // Billing (Facturación) State
   const [billingOrder, setBillingOrder] = useState<Order | null>(null);
+
+  // Split bill State
+  const [showSplitBill, setShowSplitBill] = useState(false);
 
   const availableMenuItems = useMemo(
     () => menuItems.filter((item) => item.isAvailable),
@@ -499,6 +503,38 @@ export default function POSPage() {
       const updatedOrders = await fetchOrders();
       const updatedOrder = updatedOrders.find((o: Order) => o.id === checkoutOrder.id) || checkoutOrder;
       setCheckoutOrder(updatedOrder);
+      setShowTicket(true);
+    } catch (error) {
+      alert("Error al procesar el pago");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSplitPayment = async (splits: SplitPayment[]) => {
+    if (!checkoutOrder) return;
+
+    const totalTip = splits.reduce((sum, s) => sum + s.tipAmount, 0);
+    const percentage = totalTip > 0 ? (totalTip / checkoutOrder.total) * 100 : 0;
+    const isUnusual = totalTip > 0 && (percentage > 30 || totalTip > 500);
+    if (isUnusual) {
+      if (!window.confirm(`La propina total es de $${totalTip.toFixed(2)} (${percentage.toFixed(1)}%). ¿Confirmar?`)) {
+        return;
+      }
+    }
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: checkoutOrder.id, splits }),
+      });
+      if (!response.ok) throw new Error("Error al procesar el pago dividido");
+      const updatedOrders = await fetchOrders();
+      const updatedOrder = updatedOrders.find((o: Order) => o.id === checkoutOrder.id) || checkoutOrder;
+      setCheckoutOrder(updatedOrder);
+      setShowSplitBill(false);
       setShowTicket(true);
     } catch (error) {
       alert("Error al procesar el pago");
@@ -1443,7 +1479,7 @@ export default function POSPage() {
       {
         checkoutOrder && !showTicket && !showKitchenTicket && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 no-print">
-            <div className="bg-[#1E1E1E] rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl border border-white/10">
+            <div className="bg-[#1E1E1E] rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto custom-scrollbar">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-black text-white uppercase tracking-tighter">
                   Cerrar Pedido
@@ -1544,6 +1580,14 @@ export default function POSPage() {
                   </button>
 
                   <button
+                    onClick={() => setShowSplitBill(true)}
+                    disabled={isSubmitting}
+                    className="w-full bg-[#89CFF0]/10 text-[#89CFF0] border border-[#89CFF0]/20 py-3 rounded-full font-black text-sm hover:bg-[#89CFF0]/20 transition-all uppercase tracking-widest shadow-[0_0_15px_#89CFF022]"
+                  >
+                    ✂️ Dividir Cuenta
+                  </button>
+
+                  <button
                     onClick={() => {
                       openModifyModal(checkoutOrder);
                       setCheckoutOrder(null);
@@ -1619,6 +1663,16 @@ export default function POSPage() {
         <FacturacionModal
           order={billingOrder}
           onClose={() => setBillingOrder(null)}
+        />
+      )}
+
+      {/* MODAL DE DIVIDIR CUENTA */}
+      {showSplitBill && checkoutOrder && (
+        <SplitBillModal
+          order={checkoutOrder}
+          onConfirm={handleSplitPayment}
+          onClose={() => setShowSplitBill(false)}
+          isSubmitting={isSubmitting}
         />
       )}
 
