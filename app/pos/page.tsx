@@ -53,7 +53,7 @@ type MixedFlavor = (typeof MIXED_ORDER_FLAVORS)[number];
 const isMixedOrderItem = (name: string) =>
   name.toLowerCase().includes(MIXED_ORDER_KEYWORD);
 
-/** Serialise flavor counts to notes string: "1x Birria, 2x Pastor" */
+/** Serialize flavor counts to notes string: "1x Birria, 2x Pastor" */
 const formatMixedNotes = (counts: Record<MixedFlavor, number>) =>
   MIXED_ORDER_FLAVORS.filter((f) => counts[f] > 0)
     .map((f) => `${counts[f]}x ${f}`)
@@ -357,7 +357,7 @@ export default function POSPage() {
   };
 
   const handleGridItemClick = (menuItem: MenuItem) => {
-    // Orden Mixta: open flavour selector instead of adding directly
+    // Orden Mixta: open flavor selector instead of adding directly
     if (isMixedOrderItem(menuItem.name)) {
       setMixedOrderMenuItem(menuItem);
       setMixedFlavorCounts(emptyFlavorCounts());
@@ -396,7 +396,7 @@ export default function POSPage() {
   const handleMixedOrderConfirm = () => {
     if (!mixedOrderMenuItem) return;
     const notes = formatMixedNotes(mixedFlavorCounts);
-    // Always add as a NEW separate item (no grouping) so each Orden Mixta keeps its own flavours
+    // Always add as a NEW separate item (no grouping) so each Orden Mixta keeps its own flavors
     setFormState((prev) => ({
       ...prev,
       items: [
