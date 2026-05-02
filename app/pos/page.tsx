@@ -44,6 +44,28 @@ const emptyForm: OrderFormState = {
   items: [],
 };
 
+// ── Orden Mixta ──────────────────────────────────────────────────
+const MIXED_ORDER_KEYWORD = "orden mixta";
+const MIXED_ORDER_TOTAL = 3;
+const MIXED_ORDER_FLAVORS = ["Carnitas", "Birria", "Pastor", "Jamaica"] as const;
+type MixedFlavor = (typeof MIXED_ORDER_FLAVORS)[number];
+
+const isMixedOrderItem = (name: string) =>
+  name.toLowerCase().includes(MIXED_ORDER_KEYWORD);
+
+/** Serialize flavor counts to notes string: "1x Birria, 2x Pastor" */
+const formatMixedNotes = (counts: Record<MixedFlavor, number>) =>
+  MIXED_ORDER_FLAVORS.filter((f) => counts[f] > 0)
+    .map((f) => `${counts[f]}x ${f}`)
+    .join(", ");
+
+const emptyFlavorCounts = (): Record<MixedFlavor, number> =>
+  Object.fromEntries(MIXED_ORDER_FLAVORS.map((f) => [f, 0])) as Record<
+    MixedFlavor,
+    number
+  >;
+// ─────────────────────────────────────────────────────────────────
+
 const SOURCE_OPTIONS = [
   "TikTok",
   "Instagram",
@@ -108,6 +130,10 @@ export default function POSPage() {
 
   // Billing (Facturación) State
   const [billingOrder, setBillingOrder] = useState<Order | null>(null);
+
+  // Orden Mixta Modal State
+  const [mixedOrderMenuItem, setMixedOrderMenuItem] = useState<MenuItem | null>(null);
+  const [mixedFlavorCounts, setMixedFlavorCounts] = useState<Record<MixedFlavor, number>>(emptyFlavorCounts());
 
   const availableMenuItems = useMemo(
     () => menuItems.filter((item) => item.isAvailable),
@@ -331,6 +357,13 @@ export default function POSPage() {
   };
 
   const handleGridItemClick = (menuItem: MenuItem) => {
+    // Orden Mixta: open flavor selector instead of adding directly
+    if (isMixedOrderItem(menuItem.name)) {
+      setMixedOrderMenuItem(menuItem);
+      setMixedFlavorCounts(emptyFlavorCounts());
+      return;
+    }
+
     setFormState((prev) => {
       const existingIndex = prev.items.findIndex((item) => item.menuItemId === menuItem.id);
       if (existingIndex >= 0) {
@@ -346,6 +379,32 @@ export default function POSPage() {
         items: [...prev.items, { menuItemId: menuItem.id, quantity: "1", notes: "" }],
       };
     });
+  };
+
+  const handleMixedFlavorChange = (flavor: MixedFlavor, delta: number) => {
+    setMixedFlavorCounts((prev) => {
+      const next = { ...prev };
+      const newVal = (next[flavor] || 0) + delta;
+      const total = Object.values(next).reduce((s, v) => s + v, 0) + delta;
+      // Don't go below 0 or above MIXED_ORDER_TOTAL total
+      if (newVal < 0 || total > MIXED_ORDER_TOTAL) return prev;
+      next[flavor] = newVal;
+      return next;
+    });
+  };
+
+  const handleMixedOrderConfirm = () => {
+    if (!mixedOrderMenuItem) return;
+    const notes = formatMixedNotes(mixedFlavorCounts);
+    // Always add as a NEW separate item (no grouping) so each Orden Mixta keeps its own flavors
+    setFormState((prev) => ({
+      ...prev,
+      items: [
+        ...prev.items,
+        { menuItemId: mixedOrderMenuItem.id, quantity: "1", notes },
+      ],
+    }));
+    setMixedOrderMenuItem(null);
   };
 
   const handleQuantityChange = (index: number, delta: number) => {
@@ -940,11 +999,16 @@ export default function POSPage() {
                   ) : (
                     formState.items.map((item, index) => {
                       const product = availableMenuItems.find(m => m.id === item.menuItemId);
+                      const isMixed = product && isMixedOrderItem(product.name);
                       return (
                         <div key={index} className="flex gap-3 items-center bg-white/5 p-3 rounded-2xl border border-transparent shadow-sm group">
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-white text-sm leading-tight truncate uppercase">{product?.name || "Producto"}</p>
-                            <p className="text-[10px] font-bold text-zinc-500 mt-0.5">${product?.price.toFixed(2)} c/u</p>
+                            {isMixed && item.notes ? (
+                              <p className="text-[10px] font-bold text-amber-400/80 mt-0.5">{item.notes}</p>
+                            ) : (
+                              <p className="text-[10px] font-bold text-zinc-500 mt-0.5">${product?.price.toFixed(2)} c/u</p>
+                            )}
                           </div>
                           <div className="flex items-center gap-1.5 bg-white/5 rounded-xl p-1 border border-white/10">
                             <button
@@ -1395,6 +1459,91 @@ export default function POSPage() {
           </div>
         )
       }
+
+      {/* MODAL ORDEN MIXTA */}
+      {mixedOrderMenuItem && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 no-print">
+          <div className="bg-[#1E1E1E] rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl border border-white/10">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-xl font-black text-white uppercase tracking-tighter">
+                🌮 {mixedOrderMenuItem.name}
+              </h3>
+              <button
+                onClick={() => setMixedOrderMenuItem(null)}
+                className="text-zinc-600 hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-6">
+              Elige exactamente {MIXED_ORDER_TOTAL} piezas
+            </p>
+
+            <div className="space-y-3 mb-6">
+              {MIXED_ORDER_FLAVORS.map((flavor) => (
+                <div key={flavor} className="flex items-center justify-between bg-white/5 px-4 py-3 rounded-2xl border border-white/5">
+                  <span className="font-black text-white text-sm uppercase">{flavor}</span>
+                  <div className="flex items-center gap-3 bg-white/5 rounded-xl p-1 border border-white/10">
+                    <button
+                      type="button"
+                      onClick={() => handleMixedFlavorChange(flavor, -1)}
+                      disabled={mixedFlavorCounts[flavor] === 0}
+                      className="w-8 h-8 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-500 flex items-center justify-center font-black transition-all disabled:opacity-30"
+                    >
+                      -
+                    </button>
+                    <span className="w-6 text-center font-black text-white text-lg tabular-nums">
+                      {mixedFlavorCounts[flavor]}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleMixedFlavorChange(flavor, 1)}
+                      disabled={Object.values(mixedFlavorCounts).reduce((s, v) => s + v, 0) >= MIXED_ORDER_TOTAL}
+                      className="w-8 h-8 rounded-lg hover:bg-green-500/10 text-zinc-500 hover:text-green-500 flex items-center justify-center font-black transition-all disabled:opacity-30"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Progress indicator */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              {Array.from({ length: MIXED_ORDER_TOTAL }).map((_, i) => {
+                const filled = i < Object.values(mixedFlavorCounts).reduce((s, v) => s + v, 0);
+                return (
+                  <div
+                    key={i}
+                    className={`w-4 h-4 rounded-full border-2 transition-all ${filled ? "bg-[#B2FBA5] border-[#B2FBA5] shadow-[0_0_8px_#B2FBA588]" : "border-zinc-700 bg-transparent"}`}
+                  />
+                );
+              })}
+              <span className="text-xs font-black text-zinc-600 ml-2 uppercase">
+                {Object.values(mixedFlavorCounts).reduce((s, v) => s + v, 0)}/{MIXED_ORDER_TOTAL} pzas
+              </span>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setMixedOrderMenuItem(null)}
+                className="w-full bg-white/5 text-zinc-500 py-3 rounded-2xl font-black hover:bg-white/10 transition-colors uppercase text-sm"
+              >
+                CANCELAR
+              </button>
+              <button
+                type="button"
+                onClick={handleMixedOrderConfirm}
+                disabled={Object.values(mixedFlavorCounts).reduce((s, v) => s + v, 0) !== MIXED_ORDER_TOTAL}
+                className="w-full bg-[#B2FBA5] text-[#000000] py-3 rounded-full font-black hover:brightness-105 transition-all shadow-[0_0_15px_#B2FBA544] disabled:opacity-30 disabled:cursor-not-allowed uppercase text-sm"
+              >
+                CONFIRMAR
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODALES DE IMPRESIÓN */}
       {
