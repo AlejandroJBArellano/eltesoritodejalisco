@@ -50,6 +50,13 @@ export default function GastosPage() {
     const [hasInvoice, setHasInvoice] = useState(false);
     const [isSubmittingExp, setIsSubmittingExp] = useState(false);
 
+    // Gastos Operativos Rápidos
+    const [transporteIda, setTransporteIda] = useState("");
+    const [transporteRegreso, setTransporteRegreso] = useState("");
+    const [gastosPersonales, setGastosPersonales] = useState("");
+    const [creditosNegocio, setCreditosNegocio] = useState("");
+    const [isSubmittingRapidos, setIsSubmittingRapidos] = useState(false);
+
     // Filter
     const [currentMonth, setCurrentMonth] = useState(() => {
         const today = new Date();
@@ -139,6 +146,64 @@ export default function GastosPage() {
         }
     };
 
+    const handleGastosRapidos = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const entradas: { categoryName: string; amount: number }[] = [
+            { categoryName: "Transporte (Ida)", amount: parseFloat(transporteIda) || 0 },
+            { categoryName: "Transporte (Regreso)", amount: parseFloat(transporteRegreso) || 0 },
+            { categoryName: "Gastos Personales", amount: parseFloat(gastosPersonales) || 0 },
+            { categoryName: "Créditos del Negocio", amount: parseFloat(creditosNegocio) || 0 },
+        ].filter((e) => e.amount > 0);
+
+        if (entradas.length === 0) {
+            alert("Ingresa al menos un monto para registrar.");
+            return;
+        }
+
+        // Pre-validate all categories before making any API calls
+        const missing = entradas
+            .map((e) => e.categoryName)
+            .filter((name) => !categories.find((c) => c.name === name));
+        if (missing.length > 0) {
+            alert(`Categorías no encontradas: ${missing.join(", ")}. Verifica la configuración.`);
+            return;
+        }
+
+        setIsSubmittingRapidos(true);
+        try {
+            const results = await Promise.all(
+                entradas.map((entrada) => {
+                    const cat = categories.find((c) => c.name === entrada.categoryName)!;
+                    return fetch("/api/gastos", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            category_id: cat.id,
+                            amount: entrada.amount,
+                            description: entrada.categoryName,
+                            has_invoice: false,
+                            date,
+                        }),
+                    });
+                })
+            );
+            const failed = entradas.filter((_, i) => !results[i].ok).map((e) => e.categoryName);
+            if (failed.length > 0) {
+                alert(`Error al registrar: ${failed.join(", ")}`);
+                return;
+            }
+            setTransporteIda("");
+            setTransporteRegreso("");
+            setGastosPersonales("");
+            setCreditosNegocio("");
+            fetchData();
+        } catch {
+            alert("Error de conexión");
+        } finally {
+            setIsSubmittingRapidos(false);
+        }
+    };
+
     const totalExpenses = useMemo(() => {
         return expenses.reduce((sum, exp) => sum + exp.amount, 0);
     }, [expenses]);
@@ -193,7 +258,8 @@ export default function GastosPage() {
                 <div className="grid gap-6 lg:grid-cols-3">
 
                     {/* Formulario Inteligente */}
-                    <section className="lg:col-span-1 rounded-lg bg-[#242424] p-6 shadow-md border border-white/5">
+                    <section className="lg:col-span-1 space-y-6">
+                        <div className="rounded-lg bg-[#242424] p-6 shadow-md border border-white/5">
                         <h2 className="mb-6 text-lg font-bold text-[#E0E0E0]">Registrar Gasto</h2>
                         <form onSubmit={handleAddExpense} className="space-y-4">
 
@@ -283,6 +349,70 @@ export default function GastosPage() {
                                 {isSubmittingExp ? "Registrando..." : "Guardar Gasto"}
                             </button>
                         </form>
+                        </div>
+
+                        {/* Gastos Operativos del Día */}
+                        <div className="rounded-lg bg-[#242424] p-6 shadow-md border border-white/5">
+                            <h2 className="mb-2 text-lg font-bold text-[#E0E0E0]">Gastos Operativos del Día</h2>
+                            <p className="mb-4 text-xs text-gray-500">Captura cada concepto de forma independiente para un cierre de caja exacto.</p>
+                            <form onSubmit={handleGastosRapidos} className="space-y-3">
+                                <div>
+                                    <label className="mb-1 block text-sm text-gray-400">🚗 Transporte (Ida)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={transporteIda}
+                                        onChange={(e) => setTransporteIda(e.target.value)}
+                                        placeholder="$0.00"
+                                        className="w-full rounded-lg border border-gray-600 bg-[#333] px-4 py-2 text-white outline-none focus:border-cyan-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm text-gray-400">🚗 Transporte (Regreso)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={transporteRegreso}
+                                        onChange={(e) => setTransporteRegreso(e.target.value)}
+                                        placeholder="$0.00"
+                                        className="w-full rounded-lg border border-gray-600 bg-[#333] px-4 py-2 text-white outline-none focus:border-sky-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm text-gray-400">💵 Gastos Personales</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={gastosPersonales}
+                                        onChange={(e) => setGastosPersonales(e.target.value)}
+                                        placeholder="$0.00"
+                                        className="w-full rounded-lg border border-gray-600 bg-[#333] px-4 py-2 text-white outline-none focus:border-orange-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm text-gray-400">🏦 Créditos del Negocio</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={creditosNegocio}
+                                        onChange={(e) => setCreditosNegocio(e.target.value)}
+                                        placeholder="$0.00"
+                                        className="w-full rounded-lg border border-gray-600 bg-[#333] px-4 py-2 text-white outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={isSubmittingRapidos || categories.length === 0}
+                                    className="w-full mt-2 rounded-lg bg-emerald-600 px-4 py-3 font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                                >
+                                    {isSubmittingRapidos ? "Registrando..." : "Registrar Gastos del Día"}
+                                </button>
+                            </form>
+                        </div>
                     </section>
 
                     {/* Gráficas Automáticas */}
