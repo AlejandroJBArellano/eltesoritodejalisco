@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { format, differenceInMinutes } from "date-fns-tz";
+import { format } from "date-fns-tz";
+import { differenceInMinutes } from "date-fns";
 
 const TZ = "America/Mexico_City";
 

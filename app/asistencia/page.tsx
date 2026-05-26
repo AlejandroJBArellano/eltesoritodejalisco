@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { format, differenceInHours, differenceInMinutes } from "date-fns-tz";
+import { format } from "date-fns-tz";
+import { differenceInHours, differenceInMinutes } from "date-fns";
 import { Attendance, User } from "@/types";
 
 const TZ = "America/Mexico_City";
