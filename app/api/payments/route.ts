@@ -5,6 +5,59 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+
+    // Split-bill flow: array of individual payments for a single order
+    if (body.splits && Array.isArray(body.splits)) {
+      const { orderId, splits } = body as {
+        orderId: string;
+        splits: {
+          amount: number;
+          method: string;
+          tipAmount: number;
+          receivedAmount?: number;
+          change?: number;
+        }[];
+      };
+
+      if (!orderId || !splits.length) {
+        return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      }
+
+      const supabase = await createClient();
+
+      // 1. Insertar un registro de pago por cada parte
+      for (const split of splits) {
+        const { error: splitError } = await supabase.from("payments").insert({
+          id: crypto.randomUUID(),
+          order_id: orderId,
+          method: split.method,
+          amount: Number(split.amount),
+          received_amount: split.receivedAmount != null ? Number(split.receivedAmount) : null,
+          change: split.change != null ? Number(split.change) : null,
+          tip_amount: split.tipAmount ? Number(split.tipAmount) : 0,
+        });
+        if (splitError) throw splitError;
+      }
+
+      // 2. Actualizar el estado de la orden a PAID
+      const { error: orderError } = await supabase
+        .from("orders")
+        .update({ status: "PAID" })
+        .eq("id", orderId);
+      if (orderError) throw orderError;
+
+      // 3. Descontar inventario automáticamente al cobrar
+      const { deductInventoryForOrder } = await import("@/lib/services/inventory");
+      try {
+        await deductInventoryForOrder(orderId);
+      } catch (deductError) {
+        console.error("Error deducting inventory:", deductError);
+      }
+
+      return NextResponse.json({ success: true }, { status: 201 });
+    }
+
+    // Standard single-payment flow
     const { orderId, method, amount, receivedAmount, change, tipAmount } = body;
 
     if (!orderId || !method || !amount) {
