@@ -1158,7 +1158,7 @@ export default function HistoryPage() {
                                 {filteredOrders.map((order) => {
                                     const tipAmount = getOrderTipAmount(order);
                                     const paymentMethods = getOrderPaymentMethods(order);
-                                    const paymentMethod = paymentMethods[0] || "N/A";
+                                    const primaryPaymentMethod = paymentMethods[0] || "N/A";
 
                                     // Desglose
                                     const subtotalFiscal = order.total / 1.16;
@@ -1166,8 +1166,8 @@ export default function HistoryPage() {
                                     const totalPago = order.total + tipAmount;
 
                                     let methodLabel = getOrderPaymentLabel(order);
-                                    let methodColorClass = paymentMethod === 'CASH' ? 'bg-green-900/50 text-green-300' :
-                                        paymentMethod === 'CARD' ? 'bg-blue-900/50 text-blue-300' :
+                                    let methodColorClass = primaryPaymentMethod === 'CASH' ? 'bg-green-900/50 text-green-300' :
+                                        primaryPaymentMethod === 'CARD' ? 'bg-blue-900/50 text-blue-300' :
                                             'bg-gray-800 text-gray-300';
 
                                     if (order.status === 'UNCOLLECTED') {

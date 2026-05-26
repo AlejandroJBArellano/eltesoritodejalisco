@@ -143,12 +143,16 @@ export async function PATCH(request: NextRequest) {
     }
 
     const totalTipCents = Math.round((Number(tipAmount) || 0) * 100);
-    const totalAmount = payments.reduce(
-      (sum, payment) => sum + Number(payment.amount || 0),
+    const paymentAmountCents = payments.map((payment) =>
+      Math.round(Number(payment.amount || 0) * 100),
+    );
+    const totalAmountCents = paymentAmountCents.reduce(
+      (sum, amount) => sum + amount,
       0,
     );
 
     let assignedTipCents = 0;
+    const paymentUpdates: { id: string; tip_amount: number }[] = [];
 
     for (let index = 0; index < payments.length; index += 1) {
       const payment = payments[index];
@@ -158,21 +162,31 @@ export async function PATCH(request: NextRequest) {
           ? totalTipCents
           : isLastPayment
             ? totalTipCents - assignedTipCents
-            : totalAmount > 0
+            : totalAmountCents > 0
               ? Math.round(
-                  (totalTipCents * Number(payment.amount || 0)) / totalAmount,
+                  (totalTipCents * paymentAmountCents[index]) / totalAmountCents,
                 )
               : Math.round(totalTipCents / payments.length);
 
       assignedTipCents += paymentTipCents;
+      paymentUpdates.push({
+        id: payment.id,
+        tip_amount: paymentTipCents / 100,
+      });
+    }
 
-      const { error: updateError } = await supabase
-        .from("payments")
-        .update({
-          tip_amount: paymentTipCents / 100,
-        })
-        .eq("id", payment.id);
+    const updateResults = await Promise.all(
+      paymentUpdates.map((paymentUpdate) =>
+        supabase
+          .from("payments")
+          .update({
+            tip_amount: paymentUpdate.tip_amount,
+          })
+          .eq("id", paymentUpdate.id),
+      ),
+    );
 
+    for (const { error: updateError } of updateResults) {
       if (updateError) throw updateError;
     }
 
