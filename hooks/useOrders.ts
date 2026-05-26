@@ -19,9 +19,10 @@ export const mapOrderData = (dbOrder: any): OrderWithDetails => {
           menuItemId: item.menu_item_id,
           unitPrice: item.unit_price,
           status: item.status,
-          menuItem: item.menu_items
-            ? {
-                ...item.menu_items,
+        preparationTimeSeconds: item.tiempo_preparacion_segundos ?? null,
+        menuItem: item.menu_items
+          ? {
+              ...item.menu_items,
                 imageUrl: item.menu_items?.image_url,
                 isAvailable: item.menu_items?.is_available,
               }

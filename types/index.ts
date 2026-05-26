@@ -86,6 +86,7 @@ export interface OrderItem {
   unitPrice: number;
   notes?: string;
   status?: OrderStatus;
+  preparationTimeSeconds?: number | null;
   createdAt: Date;
   menuItem?: MenuItem;
 }
