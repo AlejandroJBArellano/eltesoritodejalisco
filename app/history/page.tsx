@@ -387,31 +387,29 @@ export default function HistoryPage() {
         let cajaTarjeta = 0;
 
         todayOrders.forEach((order) => {
-            const payment = order.payments?.[0];
-            const tipAmount = payment?.tipAmount || 0;
-            const paymentMethod = payment?.method || "N/A";
             const subtotalFiscal = order.total / 1.16;
             const ivaFiscal = order.total - subtotalFiscal;
-            const totalPago = order.total + tipAmount;
 
-            // Venta neta always counts if the order was served (delivered/paid/uncollected)
+            // Venta neta y el IVA se suman una vez por orden
             ventaNeta += subtotalFiscal;
             ivaAcumulado += ivaFiscal;
 
-            if (payment) {
-                if (paymentMethod === PaymentMethod.CASH) {
-                    propinasEfectivo += tipAmount;
-                    cajaEfectivo += totalPago;
-                } else if (paymentMethod === PaymentMethod.CARD || paymentMethod === PaymentMethod.TRANSFER) {
-                    propinasTarjeta += tipAmount;
-                    cajaTarjeta += totalPago;
-                } else {
-                    cajaEfectivo += totalPago;
-                }
-            } else if (order.status === "UNCOLLECTED") {
-                // For uncollected, we count the sale but don't add to caja (it's a loss later)
-                // Actually, if it's a loss, it should probably be subtracted from utility
-                // But typically ventaNeta is "what was sold".
+            if (order.payments && order.payments.length > 0) {
+                order.payments.forEach((payment) => {
+                    const tipAmount = payment.tipAmount || 0;
+                    const paymentMethod = payment.method;
+                    const totalPago = Number(payment.amount || 0) + Number(tipAmount);
+
+                    if (paymentMethod === PaymentMethod.CASH) {
+                        propinasEfectivo += tipAmount;
+                        cajaEfectivo += totalPago;
+                    } else if (paymentMethod === PaymentMethod.CARD || paymentMethod === PaymentMethod.TRANSFER) {
+                        propinasTarjeta += tipAmount;
+                        cajaTarjeta += totalPago;
+                    } else {
+                        cajaEfectivo += totalPago;
+                    }
+                });
             }
         });
 
