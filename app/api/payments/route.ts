@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
 
     // Split-bill flow: array of individual payments for a single order
     if (body.splits && Array.isArray(body.splits)) {
+      console.log("[Split Payments] Processing split payment request:", { orderId: body.orderId, splitsCount: body.splits.length });
       const { orderId, splits } = body as {
         orderId: string;
         splits: {
@@ -65,33 +66,45 @@ export async function POST(request: NextRequest) {
       };
 
       if (!orderId || !splits.length) {
+        console.warn("[Split Payments] Missing required fields for split payment");
         return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
       }
 
       const supabase = await createClient();
 
       // 1. Insertar un registro de pago por cada parte
+      console.log(`[Split Payments] Inserting ${splits.length} payment records for order:`, orderId);
       const { error: splitError } = await supabase
         .from("payments")
         .insert(splits.map((split) => toPaymentInsert(orderId, split)));
 
-      if (splitError) throw splitError;
+      if (splitError) {
+        console.error("[Split Payments] Error inserting payment records:", splitError);
+        throw splitError;
+      }
 
       // 2. Actualizar el estado de la orden a PAID
+      console.log(`[Split Payments] Updating order ${orderId} status to PAID`);
       const { error: orderError } = await supabase
         .from("orders")
         .update({ status: "PAID" })
         .eq("id", orderId);
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error(`[Split Payments] Error updating order ${orderId} status:`, orderError);
+        throw orderError;
+      }
 
       // 3. Descontar inventario automáticamente al cobrar
+      console.log(`[Split Payments] Deducting inventory for order ${orderId}`);
       const { deductInventoryForOrder } = await import("@/lib/services/inventory");
       try {
         await deductInventoryForOrder(orderId);
+        console.log(`[Split Payments] Successfully deducted inventory for order ${orderId}`);
       } catch (deductError) {
-        console.error("Error deducting inventory:", deductError);
+        console.error(`[Split Payments] Error deducting inventory for order ${orderId}:`, deductError);
       }
 
+      console.log(`[Split Payments] Successfully processed split payment for order ${orderId}`);
       return NextResponse.json({ success: true }, { status: 201 });
     }
 
