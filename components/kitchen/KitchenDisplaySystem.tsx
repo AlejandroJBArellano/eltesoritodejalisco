@@ -20,6 +20,9 @@ export function KitchenDisplaySystem({
   const { orders, setOrders } = useRealtimeOrders(initialOrders);
   const [view, setView] = useState<"kanban" | "batching">("kanban");
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const [updatingItemIds, setUpdatingItemIds] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const handleStatusChange = async (
     orderId: string,
@@ -46,6 +49,56 @@ export function KitchenDisplaySystem({
     } catch (error) {
       console.error("Error updating order status:", error);
       alert("Error al actualizar el estado de la orden");
+    }
+  };
+
+  const handleItemReady = async (orderId: string, itemId: string) => {
+    try {
+      setUpdatingItemIds((prev) => {
+        const next = new Set(prev);
+        next.add(itemId);
+        return next;
+      });
+
+      const response = await fetch(`/api/orders/${orderId}/items/${itemId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: OrderStatus.READY }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update item status");
+
+      const data = await response.json();
+
+      setOrders((prevOrders) =>
+        prevOrders.map((order) => {
+          if (order.id !== orderId) return order;
+
+          return {
+            ...order,
+            status: data.orderStatus,
+            updatedAt: new Date(),
+            orderItems: order.orderItems.map((item) =>
+              item.id === itemId
+                ? {
+                  ...item,
+                  status: data.item.status,
+                  preparationTimeSeconds: data.item.preparationTimeSeconds ?? null,
+                }
+                : item,
+            ),
+          };
+        }),
+      );
+    } catch (error) {
+      console.error("Error updating item status:", error);
+      alert("Error al actualizar el estado del artículo");
+    } finally {
+      setUpdatingItemIds((prev) => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
     }
   };
 
@@ -110,6 +163,8 @@ export function KitchenDisplaySystem({
                   key={order.id}
                   order={order}
                   onStatusChange={handleStatusChange}
+                  onItemReady={handleItemReady}
+                  updatingItemIds={updatingItemIds}
                 />
               ))}
               {ordersByStatus.pending.length === 0 && (
@@ -131,6 +186,8 @@ export function KitchenDisplaySystem({
                   key={order.id}
                   order={order}
                   onStatusChange={handleStatusChange}
+                  onItemReady={handleItemReady}
+                  updatingItemIds={updatingItemIds}
                 />
               ))}
               {ordersByStatus.preparing.length === 0 && (
@@ -152,6 +209,8 @@ export function KitchenDisplaySystem({
                   key={order.id}
                   order={order}
                   onStatusChange={handleStatusChange}
+                  onItemReady={handleItemReady}
+                  updatingItemIds={updatingItemIds}
                 />
               ))}
               {ordersByStatus.ready.length === 0 && (
