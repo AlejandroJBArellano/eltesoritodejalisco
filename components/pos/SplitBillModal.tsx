@@ -75,7 +75,7 @@ export function SplitBillModal({
       setSingleAssignments((prev: Record<string, number>) => {
         const next: Record<string, number> = {};
         for (const [id, n] of Object.entries(prev)) {
-          if ((n as number) <= clamped) next[id] = n as number;
+          if (n <= clamped) next[id] = n;
         }
         return next;
       });
@@ -83,7 +83,7 @@ export function SplitBillModal({
       setMultiAssignments((prev: Record<string, number[]>) => {
         const next: Record<string, number[]> = {};
         for (const [id, qtys] of Object.entries(prev)) {
-          next[id] = (qtys as number[]).slice(0, clamped);
+          next[id] = qtys.slice(0, clamped);
         }
         return next;
       });
@@ -97,12 +97,12 @@ export function SplitBillModal({
         Math.round((order.total - base * partCount) * 100) / 100;
       return Array(partCount)
         .fill(base)
-        .map((v: number, i: number) =>
+        .map((v, i) =>
           i === partCount - 1 ? Math.round((v + remainder) * 100) / 100 : v,
         );
     }
     // Items mode: sum assigned items per part
-    const amounts = Array(partCount).fill(0) as number[];
+    const amounts = Array<number>(partCount).fill(0);
     order.orderItems.forEach((item) => {
       if (item.quantity === 1) {
         const assigned = singleAssignments[item.id];
@@ -112,7 +112,7 @@ export function SplitBillModal({
         }
       } else {
         const qtys = multiAssignments[item.id] ?? [];
-        qtys.forEach((qty: number, i: number) => {
+        qtys.forEach((qty, i) => {
           if (i < partCount && qty > 0) {
             amounts[i] =
               Math.round((amounts[i] + qty * item.unitPrice) * 100) / 100;
@@ -125,7 +125,7 @@ export function SplitBillModal({
 
   const tipAmounts = useMemo(
     () =>
-      parts.slice(0, partCount).map((part: SplitPart, i: number) => {
+      parts.slice(0, partCount).map((part, i) => {
         const base = partAmounts[i];
         if (part.tipType === "PERCENTAGE") {
           return (
@@ -179,7 +179,7 @@ export function SplitBillModal({
   }, [allItemsAssigned, partCount, parts, partAmounts, tipAmounts]);
 
   const handleConfirm = () => {
-    const splits: SplitPayment[] = parts.slice(0, partCount).map((part: SplitPart, i: number) => {
+    const splits: SplitPayment[] = parts.slice(0, partCount).map((part, i) => {
       const amount = partAmounts[i];
       const tip = tipAmounts[i];
       const total = amount + tip;
