@@ -1,4 +1,5 @@
 import { OrderWithDetails } from "@/types";
+import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 
 interface OrderTicketProps {
   order: OrderWithDetails;
@@ -20,7 +21,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
   const total = order.total;
   const subtotal = total / 1.16;
   const iva = total - subtotal;
-  const tipAmount = order.payments && order.payments.length > 0 ? order.payments[0].tipAmount || 0 : 0;
+  const tipAmount = getOrderTipAmount(order);
   const finalTotal = total + tipAmount;
 
   return (

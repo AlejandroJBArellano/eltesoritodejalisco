@@ -21,6 +21,11 @@ import {
 } from 'recharts';
 
 import { FacturacionModal } from "@/components/pos/FacturacionModal";
+import {
+    getOrderPaymentLabel,
+    getOrderPaymentMethods,
+    getOrderTipAmount,
+} from "@/components/pos/paymentUtils";
 import { usePendingCut } from "@/hooks/usePendingCut";
 import { createClient } from "@/lib/supabase/client";
 
@@ -322,8 +327,8 @@ export default function HistoryPage() {
             }
             if (tableFilter && order.table !== tableFilter) return false;
             if (paymentMethodFilter) {
-                const primaryPayment = order.payments && order.payments[0] ? order.payments[0].method : null;
-                if (primaryPayment !== paymentMethodFilter) return false;
+                const paymentMethods = getOrderPaymentMethods(order);
+                if (!paymentMethods.includes(paymentMethodFilter as PaymentMethod)) return false;
             }
             return true;
         });
@@ -1151,29 +1156,25 @@ export default function HistoryPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-700">
                                 {filteredOrders.map((order) => {
-                                    const tipAmount = order.payments?.[0]?.tipAmount || 0;
-                                    const paymentMethod = order.payments?.[0]?.method || "N/A";
+                                    const tipAmount = getOrderTipAmount(order);
+                                    const paymentMethods = getOrderPaymentMethods(order);
+                                    const primaryPaymentMethod = paymentMethods[0] || "N/A";
 
                                     // Desglose
                                     const subtotalFiscal = order.total / 1.16;
                                     const ivaFiscal = order.total - subtotalFiscal;
                                     const totalPago = order.total + tipAmount;
 
-                                    let methodLabel = paymentMethod;
-                                    let methodColorClass = paymentMethod === 'CASH' ? 'bg-green-900/50 text-green-300' :
-                                        paymentMethod === 'CARD' ? 'bg-blue-900/50 text-blue-300' :
+                                    let methodLabel = getOrderPaymentLabel(order);
+                                    let methodColorClass = primaryPaymentMethod === 'CASH' ? 'bg-green-900/50 text-green-300' :
+                                        primaryPaymentMethod === 'CARD' ? 'bg-blue-900/50 text-blue-300' :
                                             'bg-gray-800 text-gray-300';
 
                                     if (order.status === 'UNCOLLECTED') {
                                         methodLabel = "NO COBRADA";
                                         methodColorClass = "bg-red-900/50 text-red-300";
-                                    } else {
-                                        switch (paymentMethod) {
-                                            case PaymentMethod.CASH: methodLabel = "Efectivo"; break;
-                                            case PaymentMethod.CARD: methodLabel = "Tarjeta"; break;
-                                            case PaymentMethod.TRANSFER: methodLabel = "Transferencia"; break;
-                                            case PaymentMethod.OTHER: methodLabel = "Otro"; break;
-                                        }
+                                    } else if (paymentMethods.length > 1) {
+                                        methodColorClass = "bg-purple-900/50 text-purple-300";
                                     }
 
                                     const isExpanded = expandedRow === order.id;
