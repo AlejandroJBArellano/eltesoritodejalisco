@@ -621,7 +621,7 @@ export default function HistoryPage() {
                                 >
                                     {isGeneratingPendingCut
                                         ? "Generando..."
-                                        : `⏳ Generar corte pendiente (Ayer · ${pendingOrders})`}
+                                        : `⏳ Generar corte pendiente (${pendingDate} · ${pendingOrders})`}
                                 </button>
                             )}
                             {!finalizeSuccess && (

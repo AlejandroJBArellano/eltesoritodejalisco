@@ -3,15 +3,18 @@ import { MEX_TIMEZONE } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
 function getCDMXDateString(offsetDays: number): string {
-  const now = new Date();
-  const shifted = new Date(now);
-  shifted.setUTCDate(shifted.getUTCDate() + offsetDays);
-  return new Intl.DateTimeFormat("en-CA", {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: MEX_TIMEZONE,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(shifted);
+  });
+  const todayMx = formatter.format(new Date());
+  const [year, month, day] = todayMx.split("-").map(Number);
+  // Use noon UTC to avoid crossing date boundaries during timezone conversion.
+  const shifted = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  shifted.setUTCDate(shifted.getUTCDate() + offsetDays);
+  return formatter.format(shifted);
 }
 
 export async function GET() {

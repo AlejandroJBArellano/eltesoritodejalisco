@@ -17,9 +17,16 @@ export function usePendingCut() {
     setLoading(true);
     try {
       const response = await fetch("/api/cortes/pendiente-ayer");
+      if (!response.ok) {
+        throw new Error("No se pudo verificar el corte pendiente");
+      }
       const data: PendingCutResponse = await response.json();
       setPendingDate(data?.pendingDate ?? null);
-      setPendingOrders(Number(data?.pendingOrders ?? 0));
+      setPendingOrders(data?.pendingOrders ?? 0);
+    } catch (error) {
+      console.error("Error checking pending cut:", error);
+      setPendingDate(null);
+      setPendingOrders(0);
     } finally {
       setLoading(false);
     }

@@ -66,6 +66,7 @@ AS $$
 DECLARE
     v_corte_id UUID;
     v_now_mx_date DATE := (now() AT TIME ZONE 'America/Mexico_City')::date;
+    v_tax_rate NUMERIC := 1.16;
 BEGIN
     IF p_cut_date IS NULL THEN
         RAISE EXCEPTION 'La fecha del corte es requerida';
@@ -101,8 +102,8 @@ BEGIN
     ),
     totales AS (
         SELECT
-            COALESCE(SUM(c.total / 1.16), 0)::numeric(10, 2) AS venta_neta,
-            COALESCE(SUM(c.total - (c.total / 1.16)), 0)::numeric(10, 2) AS iva_acumulado,
+            COALESCE(SUM(c.total / v_tax_rate), 0)::numeric(10, 2) AS venta_neta,
+            COALESCE(SUM(c.total - (c.total / v_tax_rate)), 0)::numeric(10, 2) AS iva_acumulado,
             COALESCE(SUM(pay.tips_cash), 0)::numeric(10, 2) AS propinas_efectivo,
             COALESCE(SUM(pay.tips_card), 0)::numeric(10, 2) AS propinas_tarjeta,
             (COALESCE(SUM(pay.caja_cash), 0) + COALESCE(SUM(pay.caja_other), 0))::numeric(10, 2) AS caja_efectivo,
