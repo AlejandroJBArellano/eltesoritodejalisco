@@ -15,6 +15,7 @@ export const mapOrderData = (dbOrder: any) => {
         menuItemId: item.menu_item_id,
         unitPrice: item.unit_price,
         preparationTimeSeconds: item.tiempo_preparacion_segundos ?? null,
+        createdAt: item.created_at ? (item.created_at.includes('Z') || item.created_at.includes('+') ? item.created_at : `${item.created_at.replace(' ', 'T')}Z`) : null,
         menuItem: item.menu_items
           ? {
             ...item.menu_items,

@@ -46,6 +46,19 @@ export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds 
     return () => clearInterval(interval);
   }, [order.createdAt]);
 
+  const getElapsedSeconds = (dateStr: any) => {
+    if (!dateStr) return 0;
+    const now = new Date();
+    const rawDate = dateStr as unknown as string;
+    const createdAtStr = typeof rawDate === 'string' && !rawDate.endsWith('Z')
+      ? `${rawDate}Z`
+      : rawDate;
+
+    const created = new Date(createdAtStr);
+    const diffMs = Math.max(0, now.getTime() - created.getTime());
+    return Math.floor(diffMs / 1000);
+  };
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -145,11 +158,15 @@ export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds 
                     {updatingItemIds?.has(item.id) ? "..." : "Listo"}
                   </button>
                 )}
-                {item.preparationTimeSeconds != null && (
+                {item.preparationTimeSeconds != null ? (
                   <span className="mt-1 text-[10px] text-gray-400">
                     {formatTime(item.preparationTimeSeconds)}
                   </span>
-                )}
+                ) : item.status !== OrderStatus.READY && item.createdAt ? (
+                  <span className="mt-1 text-[10px] text-gray-400 font-mono">
+                    {formatTime(getElapsedSeconds(item.createdAt))}
+                  </span>
+                ) : null}
               </div>
             )}
           </div>
