@@ -10,6 +10,8 @@ type PaymentInput = {
   change?: number;
 };
 
+const CENTS_PER_PESO = 100;
+
 const toPaymentInsert = (orderId: string, payment: PaymentInput) => ({
   id: crypto.randomUUID(),
   order_id: orderId,
@@ -20,6 +22,30 @@ const toPaymentInsert = (orderId: string, payment: PaymentInput) => ({
   change: payment.change != null ? Number(payment.change) : null,
   tip_amount: payment.tipAmount ? Number(payment.tipAmount) : 0,
 });
+
+const getDistributedTipCents = ({
+  index,
+  paymentsCount,
+  totalTipCents,
+  assignedTipCents,
+  paymentAmountCents,
+  totalAmountCents,
+}: {
+  index: number;
+  paymentsCount: number;
+  totalTipCents: number;
+  assignedTipCents: number;
+  paymentAmountCents: number;
+  totalAmountCents: number;
+}) => {
+  if (paymentsCount === 1) return totalTipCents;
+  if (index === paymentsCount - 1) return totalTipCents - assignedTipCents;
+  if (totalAmountCents > 0) {
+    return Math.round((totalTipCents * paymentAmountCents) / totalAmountCents);
+  }
+
+  return Math.round(totalTipCents / paymentsCount);
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -142,9 +168,11 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Payment not found" }, { status: 404 });
     }
 
-    const totalTipCents = Math.round((Number(tipAmount) || 0) * 100);
+    const totalTipCents = Math.round(
+      (Number(tipAmount) || 0) * CENTS_PER_PESO,
+    );
     const paymentAmountCents = payments.map((payment) =>
-      Math.round(Number(payment.amount || 0) * 100),
+      Math.round(Number(payment.amount || 0) * CENTS_PER_PESO),
     );
     const totalAmountCents = paymentAmountCents.reduce(
       (sum, amount) => sum + amount,
@@ -156,22 +184,19 @@ export async function PATCH(request: NextRequest) {
 
     for (let index = 0; index < payments.length; index += 1) {
       const payment = payments[index];
-      const isLastPayment = index === payments.length - 1;
-      const paymentTipCents =
-        payments.length === 1
-          ? totalTipCents
-          : isLastPayment
-            ? totalTipCents - assignedTipCents
-            : totalAmountCents > 0
-              ? Math.round(
-                  (totalTipCents * paymentAmountCents[index]) / totalAmountCents,
-                )
-              : Math.round(totalTipCents / payments.length);
+      const paymentTipCents = getDistributedTipCents({
+        index,
+        paymentsCount: payments.length,
+        totalTipCents,
+        assignedTipCents,
+        paymentAmountCents: paymentAmountCents[index],
+        totalAmountCents,
+      });
 
       assignedTipCents += paymentTipCents;
       paymentUpdates.push({
         id: payment.id,
-        tip_amount: paymentTipCents / 100,
+        tip_amount: paymentTipCents / CENTS_PER_PESO,
       });
     }
 
