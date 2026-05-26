@@ -150,6 +150,43 @@ export interface User {
 }
 
 // ============================================
+// ATTENDANCE & TIPS TYPES
+// ============================================
+
+export interface Attendance {
+  id: string;
+  user_id: string;
+  date: string;
+  check_in: string;
+  check_out?: string;
+  status: "ACTIVE" | "FINISHED";
+  created_at: string;
+  updated_at: string;
+  user?: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface TipBreakdownItem {
+  userId: string;
+  name: string;
+  hours: number;
+  tipAmount: number;
+}
+
+export interface DailyTip {
+  id: string;
+  cut_date: string;
+  total_card_tips: number;
+  total_cash_tips: number;
+  total_tips: number;
+  total_hours: number;
+  breakdown: TipBreakdownItem[];
+  created_at: string;
+}
+
+// ============================================
 // EXTENDED TYPES FOR KDS & SMART BATCHING
 // ============================================
 

@@ -95,6 +95,12 @@ export default function HistoryPage() {
     const [manualTipsTarjeta, setManualTipsTarjeta] = useState<string>("");
     const [selectedCutDetail, setSelectedCutDetail] = useState<DailyCut | null>(null);
     const [isGeneratingPendingCut, setIsGeneratingPendingCut] = useState(false);
+    
+    // Propinas Distribution state
+    const [tipBreakdown, setTipBreakdown] = useState<any[]>([]);
+    const [tipTotalHours, setTipTotalHours] = useState<number>(0);
+    const [isCalculatingTips, setIsCalculatingTips] = useState(false);
+
     const {
         loading: pendingCutLoading,
         hasPendingCut,
@@ -207,6 +213,36 @@ export default function HistoryPage() {
         }
     };
 
+    useEffect(() => {
+        if (!showFinalizeModal) return;
+        
+        const calculateTips = async () => {
+            setIsCalculatingTips(true);
+            try {
+                const res = await fetch("/api/tips/calculate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        total_cash_tips: manualTipsEfectivo,
+                        total_card_tips: manualTipsTarjeta
+                    })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setTipBreakdown(data.breakdown || []);
+                    setTipTotalHours(data.total_hours || 0);
+                }
+            } catch (err) {
+                console.error("Error calculating tips:", err);
+            } finally {
+                setIsCalculatingTips(false);
+            }
+        };
+
+        const timer = setTimeout(calculateTips, 500);
+        return () => clearTimeout(timer);
+    }, [showFinalizeModal, manualTipsEfectivo, manualTipsTarjeta]);
+
     const handleFinalizarDia = async () => {
         if (openOrders.length > 0) {
             alert(`No se puede cerrar: Hay ${openOrders.length} órdenes pendientes de pago. Favor de cobrarlas o cancelarlas antes de continuar.`);
@@ -262,6 +298,22 @@ export default function HistoryPage() {
             });
 
             if (!response.ok) throw new Error("Error al guardar el corte");
+
+            // Also save to daily_tips
+            const { error: tipsError } = await supabase.from('daily_tips').insert({
+                cut_date: mxDateStr,
+                total_card_tips: tipsTarjetaFinal,
+                total_cash_tips: tipsEfectivoFinal,
+                total_tips: tipsTarjetaFinal + tipsEfectivoFinal,
+                total_hours: tipTotalHours,
+                breakdown: tipBreakdown
+            });
+
+            if (tipsError) {
+                console.error("Error saving daily tips:", tipsError);
+                // We don't abort the whole process, just log it. 
+                // Or maybe alert the user that tips weren't saved correctly but cut was successful.
+            }
 
             setFinalizeSuccess(true);
             setShowFinalizeModal(false);
@@ -1038,8 +1090,38 @@ export default function HistoryPage() {
                                 </div>
                             </div>
 
+                            {/* Tip Distribution Block */}
+                            <div className="bg-[#181818] p-4 rounded-xl border border-gray-700 mb-6">
+                                <h4 className="text-sm font-bold text-white mb-2 uppercase flex items-center justify-between">
+                                    <span>Distribución de Propinas</span>
+                                    {isCalculatingTips && <span className="text-xs text-blue-400">Calculando...</span>}
+                                </h4>
+                                {!isCalculatingTips && tipBreakdown.length > 0 ? (
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-xs text-gray-500 font-bold border-b border-gray-700 pb-1">
+                                            <span>Empleado</span>
+                                            <span>Horas</span>
+                                            <span>Monto</span>
+                                        </div>
+                                        {tipBreakdown.map((item, idx) => (
+                                            <div key={idx} className="flex justify-between text-sm">
+                                                <span className="text-gray-300">{item.employee_name}</span>
+                                                <span className="text-gray-400 font-mono">{item.hours_worked.toFixed(2)}h</span>
+                                                <span className="text-green-400 font-mono font-bold">${item.tip_amount.toFixed(2)}</span>
+                                            </div>
+                                        ))}
+                                        <div className="flex justify-between text-xs text-gray-400 font-bold border-t border-gray-700 pt-1 mt-2">
+                                            <span>Total Horas: {tipTotalHours.toFixed(2)}h</span>
+                                            <span>Total: ${(Number(manualTipsEfectivo || 0) + Number(manualTipsTarjeta || 0)).toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                ) : !isCalculatingTips ? (
+                                    <p className="text-xs text-gray-500 italic">No hay empleados con asistencia finalizada hoy.</p>
+                                ) : null}
+                            </div>
+
                             <p className="text-xs text-gray-500 mb-6">
-                                Los datos serán guardados en el historial. Los contadores del Corte Diario se reiniciarán a $0.00.
+                                Los datos y la distribución de propinas serán guardados en el historial. Los contadores del Corte Diario se reiniciarán a $0.00.
                             </p>
 
                             <div className="flex gap-3">
