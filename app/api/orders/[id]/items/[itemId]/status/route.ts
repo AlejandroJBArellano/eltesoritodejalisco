@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
@@ -75,30 +74,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     if (updateItemError) throw updateItemError;
 
-    const { data: allItems, error: itemsError } = await supabase
-      .from("order_items")
-      .select("status")
-      .eq("order_id", orderId);
-
-    if (itemsError) throw itemsError;
-
-    const everyItemReady = (allItems || []).every(
-      (item) => item.status === "READY" || item.status === "DELIVERED",
-    );
-
-    const nextOrderStatus = everyItemReady ? "READY" : "PREPARING";
-
-    if (order.status !== nextOrderStatus) {
-      const { error: updateOrderError } = await supabase
-        .from("orders")
-        .update({
-          status: nextOrderStatus,
-          updated_at: getCurrentCDMXDate(),
-        })
-        .eq("id", orderId);
-
-      if (updateOrderError) throw updateOrderError;
-    }
+    // We no longer automatically update the order status here.
+    // The frontend will call a separate endpoint to close the order
+    // once all items are marked as READY.
 
     return NextResponse.json({
       item: {
@@ -106,7 +84,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         status: updatedItem.status,
         preparationTimeSeconds: updatedItem.tiempo_preparacion_segundos,
       },
-      orderStatus: nextOrderStatus,
+      orderStatus: order.status,
     });
   } catch (error) {
     console.error("Error updating order item status:", error);

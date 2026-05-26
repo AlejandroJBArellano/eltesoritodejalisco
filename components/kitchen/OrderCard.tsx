@@ -6,13 +6,15 @@ import { useEffect, useState } from "react";
 interface OrderCardProps {
   order: OrderWithDetails;
   onStatusChange: (orderId: string, newStatus: OrderStatus) => void;
+  onItemReady?: (orderId: string, itemId: string) => void;
+  updatingItemIds?: Set<string>;
 }
 
 /**
  * KDS Order Card Component
  * Displays order details with real-time timer and status management
  */
-export function OrderCard({ order, onStatusChange }: OrderCardProps) {
+export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds }: OrderCardProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isOverdue, setIsOverdue] = useState(false);
 
@@ -78,6 +80,10 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
     return labels[status];
   };
 
+  const allReady = order.orderItems
+    .filter((item) => item.status !== OrderStatus.DELIVERED)
+    .every((item) => item.status === OrderStatus.READY);
+
   return (
     <div
       className={`rounded-lg border-2 p-4 shadow-lg transition-all duration-300 ${isOverdue &&
@@ -114,11 +120,6 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
             key={item.id}
             className="flex items-start justify-between rounded border border-[#333333] bg-[#181818] p-2 relative overflow-hidden"
           >
-            {item.status === OrderStatus.PENDING && (
-              <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">
-                NUEVO
-              </div>
-            )}
             <div className="flex-1">
               <p className="font-semibold text-[#E0E0E0]">
                 {item.quantity}x {item.menuItem.name}
@@ -129,6 +130,28 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
                 </p>
               )}
             </div>
+            {order.status === OrderStatus.PREPARING && (
+              <div className="ml-3 flex flex-col items-end justify-center">
+                {item.status === OrderStatus.READY ? (
+                  <span className="rounded bg-green-600 px-2 py-1 text-[10px] font-bold text-white">
+                    LISTO
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => onItemReady?.(order.id, item.id)}
+                    disabled={updatingItemIds?.has(item.id)}
+                    className="rounded border border-green-600 bg-green-600/20 px-2 py-1 text-[10px] font-bold text-green-500 transition-colors hover:bg-green-600 hover:text-white disabled:opacity-50"
+                  >
+                    {updatingItemIds?.has(item.id) ? "..." : "Listo"}
+                  </button>
+                )}
+                {item.preparationTimeSeconds != null && (
+                  <span className="mt-1 text-[10px] text-gray-400">
+                    {formatTime(item.preparationTimeSeconds)}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -167,9 +190,10 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
         {order.status === OrderStatus.PREPARING && (
           <button
             onClick={() => onStatusChange(order.id, OrderStatus.READY)}
-            className="flex-1 rounded-md bg-green-600 px-4 py-2 text-white font-semibold hover:bg-green-700 transition-colors"
+            disabled={!allReady}
+            className="flex-1 rounded-md bg-green-600 px-4 py-2 text-white font-semibold hover:bg-green-700 transition-colors disabled:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Marcar Listo
+            Cerrar Orden
           </button>
         )}
 
