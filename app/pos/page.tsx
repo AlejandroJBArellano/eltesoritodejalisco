@@ -3,6 +3,7 @@
 import { FacturacionModal } from "@/components/pos/FacturacionModal";
 import { KitchenTicket } from "@/components/pos/KitchenTicket";
 import { OrderTicket } from "@/components/pos/OrderTicket";
+import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { SplitBillModal, type SplitPayment } from "@/components/pos/SplitBillModal";
 import { OrderWithDetails } from "@/types";
 import Link from "next/link";
@@ -475,7 +476,7 @@ export default function POSPage() {
     });
 
     // Add tips if available
-    const tipAmount = checkoutOrder.payments && checkoutOrder.payments.length > 0 && checkoutOrder.payments[0].tipAmount ? checkoutOrder.payments[0].tipAmount : 0;
+    const tipAmount = getOrderTipAmount(checkoutOrder);
 
     msg += `\n*Total Pagado: $${(checkoutOrder.total + tipAmount).toFixed(2)}*\n`;
     if (tipAmount > 0) {
@@ -1168,9 +1169,9 @@ export default function POSPage() {
                     <td className="py-4 px-2">
                       <div className="flex flex-col">
                         <span className="font-black text-sm text-white">${order.total.toFixed(2)}</span>
-                        {order.payments?.[0]?.tipAmount ? (
+                        {getOrderTipAmount(order) > 0 ? (
                           <span className="text-[9px] font-black text-blue-400/60 uppercase">
-                            +${order.payments[0].tipAmount.toFixed(2)} propina
+                            +${getOrderTipAmount(order).toFixed(2)} propina
                           </span>
                         ) : null}
                       </div>
