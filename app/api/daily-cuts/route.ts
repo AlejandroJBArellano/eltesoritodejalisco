@@ -1,6 +1,23 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
+async function archiveOrdersForCut(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  cutDate: string,
+  cutId: string,
+) {
+  await supabase
+    .from("orders")
+    .update({
+      corte_id: cutId,
+      estado_cierre: "ARCHIVADA",
+      closed_at: new Date().toISOString(),
+    })
+    .eq("operational_date", cutDate)
+    .is("corte_id", null)
+    .in("status", ["PAID", "DELIVERED", "UNCOLLECTED"]);
+}
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -82,6 +99,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (error) throw error;
+      await archiveOrdersForCut(supabase, cut_date, data.id);
       return NextResponse.json({ cut: data, updated: true });
     }
 
@@ -106,6 +124,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
+    await archiveOrdersForCut(supabase, cut_date, data.id);
 
     return NextResponse.json({ cut: data, updated: false }, { status: 201 });
   } catch (error) {

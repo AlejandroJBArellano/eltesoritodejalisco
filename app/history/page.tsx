@@ -21,6 +21,7 @@ import {
 } from 'recharts';
 
 import { FacturacionModal } from "@/components/pos/FacturacionModal";
+import { usePendingCut } from "@/hooks/usePendingCut";
 import { createClient } from "@/lib/supabase/client";
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
@@ -88,6 +89,14 @@ export default function HistoryPage() {
     const [manualTipsEfectivo, setManualTipsEfectivo] = useState<string>("");
     const [manualTipsTarjeta, setManualTipsTarjeta] = useState<string>("");
     const [selectedCutDetail, setSelectedCutDetail] = useState<DailyCut | null>(null);
+    const [isGeneratingPendingCut, setIsGeneratingPendingCut] = useState(false);
+    const {
+        loading: pendingCutLoading,
+        hasPendingCut,
+        pendingDate,
+        pendingOrders,
+        refresh: refreshPendingCut,
+    } = usePendingCut();
 
     const checkRole = async () => {
         try {
@@ -257,6 +266,42 @@ export default function HistoryPage() {
             alert("Error al finalizar el día. Por favor intente de nuevo.");
         } finally {
             setIsFinalizing(false);
+        }
+    };
+
+    const handleGeneratePendingCut = async () => {
+        if (!pendingDate) return;
+
+        const confirmed = window.confirm(
+            `Se generará el corte pendiente del día ${pendingDate} con ${pendingOrders} orden(es). ¿Deseas continuar?`
+        );
+        if (!confirmed) return;
+
+        try {
+            setIsGeneratingPendingCut(true);
+            const response = await fetch("/api/cortes/extemporaneo", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cutDate: pendingDate }),
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 409) {
+                    alert("Ese corte ya existe. Se actualizará la vista.");
+                    await refreshPendingCut();
+                    return;
+                }
+                throw new Error(data?.error || "Error al generar el corte pendiente");
+            }
+
+            alert(`Corte extemporáneo generado correctamente para ${pendingDate}.`);
+            await Promise.all([fetchOrders(), fetchDailyCuts(), refreshPendingCut()]);
+        } catch (err) {
+            console.error("Error generating pending cut:", err);
+            alert("No fue posible generar el corte pendiente.");
+        } finally {
+            setIsGeneratingPendingCut(false);
         }
     };
 
@@ -568,6 +613,17 @@ export default function HistoryPage() {
                             >
                                 📁 Archivo de Cortes
                             </button>
+                            {!pendingCutLoading && hasPendingCut && (
+                                <button
+                                    onClick={handleGeneratePendingCut}
+                                    disabled={isGeneratingPendingCut}
+                                    className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700 transition-all disabled:opacity-70"
+                                >
+                                    {isGeneratingPendingCut
+                                        ? "Generando..."
+                                        : `⏳ Generar corte pendiente (${pendingDate} · ${pendingOrders})`}
+                                </button>
+                            )}
                             {!finalizeSuccess && (
                                 <button
                                     onClick={() => {

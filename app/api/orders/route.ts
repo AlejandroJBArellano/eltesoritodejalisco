@@ -155,6 +155,8 @@ export async function POST(request: NextRequest) {
         subtotal,
         tax,
         total,
+        operational_date: getCurrentCDMXDay(),
+        estado_cierre: "ABIERTA",
         updated_at: getCurrentCDMXDate()
       })
       .select()

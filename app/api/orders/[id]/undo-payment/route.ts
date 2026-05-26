@@ -42,7 +42,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // We'll use PENDING to allow editing
     const { data: updatedOrder, error: orderUpdateError } = await supabase
       .from("orders")
-      .update({ status: "PENDING", updated_at: new Date().toISOString() })
+      .update({
+        status: "PENDING",
+        estado_cierre: "ABIERTA",
+        corte_id: null,
+        closed_at: null,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", id)
       .select()
       .single();
