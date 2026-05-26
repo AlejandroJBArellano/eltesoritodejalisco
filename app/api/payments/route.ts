@@ -182,7 +182,7 @@ export async function PATCH(request: NextRequest) {
     let assignedTipCents = 0;
     const paymentUpdates: { id: string; tip_amount: number }[] = [];
 
-    for (let index = 0; index < payments.length; index += 1) {
+    for (let index = 0; index < payments.length; index++) {
       const payment = payments[index];
       const paymentTipCents = getDistributedTipCents({
         index,
