@@ -275,3 +275,51 @@ export interface SmartBatch {
   isActive: boolean;
   ingredient?: Ingredient;
 }
+
+// ============================================
+// TASKS & CHECKLIST TYPES
+// ============================================
+
+export type TaskFrequency =
+  | "CONTINUOUS"
+  | "VARIABLE"
+  | "ROUTINE"
+  | "DAILY"
+  | "WEEKLY"
+  | "CLOSING";
+
+export type TaskStatus =
+  | "PENDING"
+  | "IN_PROGRESS"
+  | "PAUSED"
+  | "COMPLETED"
+  | "APPROVED";
+
+export interface PrimordialTask {
+  id: string;
+  name: string;
+  frequency_type: TaskFrequency;
+  requires_photo: boolean;
+  timeout_minutes: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TaskExecution {
+  id: string;
+  task_id: string;
+  user_id?: string;
+  status: TaskStatus;
+  start_time?: string;
+  end_time?: string;
+  last_resumed_at?: string;
+  paused_seconds: number;
+  net_duration_minutes?: number;
+  photo_url?: string;
+  approved_at?: string;
+  created_at: string;
+  updated_at: string;
+  task?: PrimordialTask;
+  user?: User;
+}
