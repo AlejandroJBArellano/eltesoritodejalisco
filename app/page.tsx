@@ -283,6 +283,46 @@ export default async function Home() {
               </Link>
             )}
 
+            {/* Tareas - Admin and Waiter */}
+            {(isAdmin || isWaiter) && (
+              <Link href="/tareas">
+                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
+                  <div className="mb-6 flex items-center justify-between">
+                    <span className="text-5xl">✅</span>
+                    <span className="rounded-full bg-primary/10 px-4 py-1 text-xs font-black text-primary uppercase tracking-widest">
+                      Checklist
+                    </span>
+                  </div>
+                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
+                    Tareas Diarias
+                  </h3>
+                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                    Checklist de tareas primordiales y operación diaria.
+                  </p>
+                </div>
+              </Link>
+            )}
+
+            {/* Admin Tareas - Admin Only */}
+            {isAdmin && (
+              <Link href="/admin/tareas">
+                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
+                  <div className="mb-6 flex items-center justify-between">
+                    <span className="text-5xl">📊</span>
+                    <span className="rounded-full bg-blue-500/10 px-4 py-1 text-xs font-black text-blue-500 uppercase tracking-widest">
+                      Control
+                    </span>
+                  </div>
+                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
+                    Control de Tareas
+                  </h3>
+                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                    Aprobación de tareas críticas y monitoreo de tiempos netos.
+                  </p>
+                </div>
+              </Link>
+            )}
+
             {/* Asistencia - Todos */}
             <Link href="/asistencia">
               <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
@@ -375,6 +415,13 @@ export default async function Home() {
                 VER COCINA
               </button>
             </Link>
+            {(isAdmin || isWaiter) && (
+              <Link href="/tareas">
+                <button className="rounded-xl bg-purple-600 px-6 py-3 text-sm font-black text-white hover:bg-purple-500 transition-all">
+                  CHECKLIST TAREAS
+                </button>
+              </Link>
+            )}
 
           </div>
         </div>
