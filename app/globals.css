@@ -15,8 +15,8 @@
 }
 
 :root {
-  --background: #121212;
-  --foreground: #E0E0E0;
+  --background: var(--color-dark);
+  --foreground: var(--color-text-light);
 }
 
 @layer base {

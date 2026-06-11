@@ -52,6 +52,9 @@ Sigue estos pasos para aprovisionar una instancia aislada y personalizada de la 
 | `NEXT_PUBLIC_SITE_URL` | Dominio personalizado del cliente | `https://pos.restaurantecliente.com` |
 | `NEXT_PUBLIC_APP_NAME` | Nombre comercial del restaurante (para tickets/mensajes) | `Tacos El Pastor` |
 | `NEXT_PUBLIC_SYSTEM_NAME` | Nombre del software personalizado para el login | `PastorOS` |
+| `NEXT_PUBLIC_THEME_PRIMARY_COLOR` | Color primario de acento (ej. botones, focus) | `#FFB7CE` |
+| `NEXT_PUBLIC_THEME_SECONDARY_COLOR` | Color secundario (ej. hovers) | `#FFD1DC` |
+| `NEXT_PUBLIC_THEME_DARK_BG_COLOR` | Color de fondo de la aplicación (oscuro) | `#121212` |
 
 3. Haz clic en **Deploy**.
 

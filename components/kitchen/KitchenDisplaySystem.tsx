@@ -110,7 +110,7 @@ export function KitchenDisplaySystem({
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] p-4">
+    <div className="min-h-screen bg-dark p-4">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-[#E0E0E0]">
@@ -132,7 +132,7 @@ export function KitchenDisplaySystem({
             onClick={() => setView("kanban")}
             className={`rounded px-4 py-2 font-semibold transition-colors ${view === "kanban"
                 ? "bg-blue-600 text-white"
-                : "text-gray-400 hover:bg-[#121212]"
+                : "text-gray-400 hover:bg-dark"
               }`}
           >
             Vista Kanban
@@ -141,7 +141,7 @@ export function KitchenDisplaySystem({
             onClick={() => setView("batching")}
             className={`rounded px-4 py-2 font-semibold transition-colors ${view === "batching"
                 ? "bg-blue-600 text-white"
-                : "text-gray-400 hover:bg-[#121212]"
+                : "text-gray-400 hover:bg-dark"
               }`}
           >
             Vista de Lotes

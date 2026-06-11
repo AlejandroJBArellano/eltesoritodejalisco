@@ -12,7 +12,7 @@ export default async function LoginPage({
   console.log("======================");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#121212] px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-dark px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div>
           <h1 className="text-center text-4xl font-extrabold text-[#E0E0E0]">
@@ -37,7 +37,7 @@ export default async function LoginPage({
                 type="email"
                 autoComplete="email"
                 required
-                className="relative block w-full rounded-t-md border-0 bg-[#181818] py-2.5 text-[#E0E0E0] ring-1 ring-inset ring-[#333333] placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[#FFB7CE] sm:text-sm sm:leading-6 transition-colors"
+                className="relative block w-full rounded-t-md border-0 bg-[#181818] py-2.5 text-[#E0E0E0] ring-1 ring-inset ring-[#333333] placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 transition-colors"
                 placeholder="Correo electrónico"
               />
             </div>
@@ -51,7 +51,7 @@ export default async function LoginPage({
                 type="password"
                 autoComplete="current-password"
                 required
-                className="relative block w-full rounded-b-md border-0 bg-[#181818] py-2.5 text-[#E0E0E0] ring-1 ring-inset ring-[#333333] placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[#FFB7CE] sm:text-sm sm:leading-6 transition-colors"
+                className="relative block w-full rounded-b-md border-0 bg-[#181818] py-2.5 text-[#E0E0E0] ring-1 ring-inset ring-[#333333] placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 transition-colors"
                 placeholder="Contraseña"
               />
             </div>
@@ -66,7 +66,7 @@ export default async function LoginPage({
           <div>
             <button
               type="submit"
-              className="group relative flex w-full justify-center rounded-md bg-[#FFB7CE] px-3 py-2 text-sm font-bold text-[#121212] hover:bg-[#FFD1DC] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFB7CE] shadow-[#FFB7CE]/20 shadow-lg transition-all"
+              className="group relative flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-bold text-dark hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary shadow-primary/20 shadow-lg transition-all"
             >
               Entrar
             </button>
@@ -75,7 +75,7 @@ export default async function LoginPage({
 
         <div className="mt-6 flex items-center justify-center">
           <div className="w-full border-t border-[#333333]"></div>
-          <div className="px-3 text-sm text-gray-500 bg-[#121212] uppercase font-bold tracking-widest">O</div>
+          <div className="px-3 text-sm text-gray-500 bg-dark uppercase font-bold tracking-widest">O</div>
           <div className="w-full border-t border-[#333333]"></div>
         </div>
 
