@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS public.orders (
     customer_id TEXT REFERENCES public.customers(id) ON DELETE SET NULL,
     source TEXT NOT NULL, -- 'TikTok', 'Instagram', 'Pasaba por ahí', 'Recomendación', 'Otro'
     status TEXT DEFAULT 'PENDING' NOT NULL, -- 'PENDING', 'PREPARING', 'READY', 'DELIVERED', 'PAID', 'CANCELLED', 'UNCOLLECTED'
-    table TEXT,
+    "table" TEXT,
     notes TEXT,
     subtotal DOUBLE PRECISION DEFAULT 0 NOT NULL,
     tax DOUBLE PRECISION DEFAULT 0 NOT NULL,
