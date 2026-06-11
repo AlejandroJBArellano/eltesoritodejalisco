@@ -215,107 +215,125 @@ export function TareasClient({
         </div>
       )}
 
-      {/* Lista de Tareas */}
-      <div className="grid gap-4">
-        {initialTasks.map(task => {
-          const activeExecution = executions.find(
-            e => e.task_id === task.id && (e.status === 'IN_PROGRESS' || e.status === 'PAUSED')
-          )
-          
-          return (
-            <div 
-              key={task.id} 
-              className={`p-6 rounded-2xl border transition-all ${
-                activeExecution 
-                  ? 'bg-primary/5 border-primary/20 shadow-[0_0_15px_rgba(235,94,85,0.05)]' 
-                  : 'bg-[#242424] border-white/5 hover:border-white/10'
-              }`}
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-lg font-black text-white tracking-tight uppercase">
-                    {task.name}
-                  </h3>
-                  <div className="flex gap-2 mt-2">
-                    <span className="text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 rounded-full text-white/60 font-bold uppercase tracking-wider">
-                      {task.frequency_type}
-                    </span>
-                    {task.requires_photo && (
-                      <span className="text-[10px] bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-full text-yellow-500 font-bold uppercase tracking-wider">
-                        📸 Requiere Foto
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
+      {/* Lista de Tareas Agrupadas por Categoría */}
+      <div className="space-y-8">
+        {Object.entries(
+          initialTasks.reduce((acc, task) => {
+            const catName = task.category?.name || "Sin Categoría";
+            if (!acc[catName]) {
+              acc[catName] = [];
+            }
+            acc[catName].push(task);
+            return acc;
+          }, {} as { [categoryName: string]: PrimordialTask[] })
+        ).map(([categoryName, tasks]) => (
+          <div key={categoryName} className="space-y-4">
+            <h2 className="text-sm font-black text-zinc-500 uppercase tracking-widest border-b border-white/5 pb-2 flex items-center gap-2">
+              <span>📂</span> {categoryName}
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {tasks.map((task) => {
+                const activeExecution = executions.find(
+                  (e) => e.task_id === task.id && (e.status === 'IN_PROGRESS' || e.status === 'PAUSED')
+                )
 
-              {activeExecution ? (
-                <div className="mt-6 border-t border-white/5 pt-4 space-y-4 animate-slide-down">
-                  <div className="flex justify-between items-center bg-white/5 px-4 py-3 rounded-xl">
-                    <span className="text-sm font-bold text-white/50 uppercase tracking-wider">
-                      {activeExecution.status === 'PAUSED' ? '⏱️ Pausado' : '⚡ En progreso'}
-                    </span>
-                    <span className="text-lg font-black text-white font-mono tracking-wider">
-                      {getLiveTimerString(activeExecution)}
-                    </span>
-                  </div>
-
-                  {/* Input de Cámara si requiere foto */}
-                  {task.requires_photo && (
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-white/60 uppercase tracking-wider block">
-                        Subir Foto de Evidencia
-                      </label>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        capture="environment" 
-                        onChange={(e) => handleFileChange(activeExecution.id, e.target.files?.[0] || null)}
-                        className="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-primary file:text-white hover:file:bg-primary/95 file:cursor-pointer"
-                      />
+                return (
+                  <div 
+                    key={task.id} 
+                    className={`p-6 rounded-2xl border transition-all ${
+                      activeExecution 
+                        ? 'bg-primary/5 border-primary/20 shadow-[0_0_15px_rgba(235,94,85,0.05)]' 
+                        : 'bg-[#242424] border-white/5 hover:border-white/10'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-lg font-black text-white tracking-tight uppercase">
+                          {task.name}
+                        </h3>
+                        <div className="flex gap-2 mt-2">
+                          <span className="text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 rounded-full text-white/60 font-bold uppercase tracking-wider">
+                            {task.frequency_type}
+                          </span>
+                          {task.requires_photo && (
+                            <span className="text-[10px] bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-full text-yellow-500 font-bold uppercase tracking-wider">
+                              📸 Requiere Foto
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  )}
 
-                  <div className="flex gap-3">
-                    {activeExecution.status === 'IN_PROGRESS' ? (
-                      <button 
-                        onClick={() => handlePause(activeExecution.id)}
-                        disabled={loadingTaskId === activeExecution.id}
-                        className="bg-yellow-600 hover:bg-yellow-500 text-white font-black text-xs uppercase tracking-widest py-3 px-4 rounded-xl flex-1 transition-all disabled:opacity-50"
-                      >
-                        Pausar
-                      </button>
+                    {activeExecution ? (
+                      <div className="mt-6 border-t border-white/5 pt-4 space-y-4 animate-slide-down">
+                        <div className="flex justify-between items-center bg-white/5 px-4 py-3 rounded-xl">
+                          <span className="text-sm font-bold text-white/50 uppercase tracking-wider">
+                            {activeExecution.status === 'PAUSED' ? '⏱️ Pausado' : '⚡ En progreso'}
+                          </span>
+                          <span className="text-lg font-black text-white font-mono tracking-wider">
+                            {getLiveTimerString(activeExecution)}
+                          </span>
+                        </div>
+
+                        {/* Input de Cámara si requiere foto */}
+                        {task.requires_photo && (
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold text-white/60 uppercase tracking-wider block">
+                              Subir Foto de Evidencia
+                            </label>
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              capture="environment" 
+                              onChange={(e) => handleFileChange(activeExecution.id, e.target.files?.[0] || null)}
+                              className="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-primary file:text-white hover:file:bg-primary/95 file:cursor-pointer"
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex gap-3">
+                          {activeExecution.status === 'IN_PROGRESS' ? (
+                            <button 
+                              onClick={() => handlePause(activeExecution.id)}
+                              disabled={loadingTaskId === activeExecution.id}
+                              className="bg-yellow-600 hover:bg-yellow-500 text-white font-black text-xs uppercase tracking-widest py-3 px-4 rounded-xl flex-1 transition-all disabled:opacity-50"
+                            >
+                              Pausar
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => handleResume(activeExecution.id)}
+                              disabled={loadingTaskId === activeExecution.id}
+                              className="bg-green-600 hover:bg-green-500 text-white font-black text-xs uppercase tracking-widest py-3 px-4 rounded-xl flex-1 transition-all disabled:opacity-50"
+                            >
+                              Reanudar
+                            </button>
+                          )}
+                          
+                          <button 
+                            onClick={() => handleComplete(activeExecution, task)}
+                            disabled={loadingTaskId === activeExecution.id}
+                            className="bg-primary hover:bg-primary/95 text-white font-black text-xs uppercase tracking-widest py-3 px-4 rounded-xl flex-1 transition-all disabled:opacity-50"
+                          >
+                            Completar
+                          </button>
+                        </div>
+                      </div>
                     ) : (
                       <button 
-                        onClick={() => handleResume(activeExecution.id)}
-                        disabled={loadingTaskId === activeExecution.id}
-                        className="bg-green-600 hover:bg-green-500 text-white font-black text-xs uppercase tracking-widest py-3 px-4 rounded-xl flex-1 transition-all disabled:opacity-50"
+                        onClick={() => handleStart(task.id)}
+                        disabled={loadingTaskId === task.id}
+                        className="mt-6 w-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white font-black text-xs uppercase tracking-widest py-3 px-4 rounded-xl transition-all disabled:opacity-50 cursor-pointer"
                       >
-                        Reanudar
+                        {loadingTaskId === task.id ? 'Iniciando...' : 'Iniciar Tarea'}
                       </button>
                     )}
-                    
-                    <button 
-                      onClick={() => handleComplete(activeExecution, task)}
-                      disabled={loadingTaskId === activeExecution.id}
-                      className="bg-primary hover:bg-primary/95 text-white font-black text-xs uppercase tracking-widest py-3 px-4 rounded-xl flex-1 transition-all disabled:opacity-50"
-                    >
-                      Completar
-                    </button>
                   </div>
-                </div>
-              ) : (
-                <button 
-                  onClick={() => handleStart(task.id)}
-                  disabled={loadingTaskId === task.id}
-                  className="mt-6 w-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white font-black text-xs uppercase tracking-widest py-3 px-4 rounded-xl transition-all disabled:opacity-50 cursor-pointer"
-                >
-                  {loadingTaskId === task.id ? 'Iniciando...' : 'Iniciar Tarea'}
-                </button>
-              )}
+                )
+              })}
             </div>
-          )
-        })}
+          </div>
+        ))}
       </div>
     </div>
   )

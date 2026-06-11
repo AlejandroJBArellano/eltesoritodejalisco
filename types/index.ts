@@ -295,8 +295,16 @@ export type TaskStatus =
   | "COMPLETED"
   | "APPROVED";
 
+export interface TaskCategory {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface PrimordialTask {
   id: string;
+  category_id?: string;
   name: string;
   frequency_type: TaskFrequency;
   requires_photo: boolean;
@@ -304,6 +312,7 @@ export interface PrimordialTask {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  category?: TaskCategory;
 }
 
 export interface TaskExecution {
@@ -321,5 +330,9 @@ export interface TaskExecution {
   created_at: string;
   updated_at: string;
   task?: PrimordialTask;
-  user?: User;
+  user?: {
+    id: string;
+    full_name?: string;
+    email?: string;
+  };
 }
