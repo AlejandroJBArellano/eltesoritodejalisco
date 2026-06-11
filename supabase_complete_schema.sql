@@ -220,8 +220,16 @@ CREATE TABLE IF NOT EXISTS public.attendance (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS public.task_categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS public.primordial_tasks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    category_id UUID REFERENCES public.task_categories(id) ON DELETE SET NULL,
     name TEXT NOT NULL UNIQUE,
     frequency_type TEXT NOT NULL, -- 'CONTINUOUS', 'VARIABLE', 'ROUTINE', 'DAILY', 'WEEKLY', 'CLOSING'
     requires_photo BOOLEAN DEFAULT FALSE,
@@ -244,7 +252,8 @@ CREATE TABLE IF NOT EXISTS public.task_executions (
     photo_url TEXT,
     approved_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT fk_task_executions_profiles FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS public.daily_cuts (
@@ -283,6 +292,7 @@ ALTER TABLE public.daily_tips ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.expense_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.attendance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.task_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.primordial_tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.task_executions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.daily_cuts ENABLE ROW LEVEL SECURITY;
@@ -301,6 +311,7 @@ CREATE POLICY "Allow all for daily_tips" ON public.daily_tips FOR ALL USING (tru
 CREATE POLICY "Allow all for expense_categories" ON public.expense_categories FOR ALL USING (true);
 CREATE POLICY "Allow all for expenses" ON public.expenses FOR ALL USING (true);
 CREATE POLICY "Allow all for attendance" ON public.attendance FOR ALL USING (true);
+CREATE POLICY "Allow all for task_categories" ON public.task_categories FOR ALL USING (true);
 CREATE POLICY "Allow all for primordial_tasks" ON public.primordial_tasks FOR ALL USING (true);
 CREATE POLICY "Allow all for task_executions" ON public.task_executions FOR ALL USING (true);
 CREATE POLICY "Allow all for daily_cuts" ON public.daily_cuts FOR ALL USING (true);
@@ -319,24 +330,29 @@ VALUES
     ('Otros', '#6B7280')
 ON CONFLICT (name) DO NOTHING;
 
+-- Seed task categories
+INSERT INTO public.task_categories (name) 
+VALUES ('Limpieza y Organización')
+ON CONFLICT (name) DO NOTHING;
+
 -- Seed primordial tasks
-INSERT INTO public.primordial_tasks (name, frequency_type, requires_photo, timeout_minutes)
+INSERT INTO public.primordial_tasks (category_id, name, frequency_type, requires_photo, timeout_minutes)
 VALUES
-    ('Lavar los trastes (Evitar acumulación)', 'CONTINUOUS', FALSE, 60),
-    ('Desinfectar los cubiertos y armarlos', 'VARIABLE', FALSE, 30),
-    ('Limpiar y organizar rack y especias', 'ROUTINE', FALSE, 45),
-    ('Limpiar refrigeradores (interior y exterior)', 'VARIABLE', TRUE, 60),
-    ('Limpiar parrilla y estufa con fibra', 'DAILY', TRUE, 90),
-    ('Limpiar contenedores y tapas', 'DAILY', FALSE, 45),
-    ('Limpiar mueble de trastes', 'ROUTINE', FALSE, 30),
-    ('Limpiar mueble blanco', 'ROUTINE', FALSE, 30),
-    ('Limpiar campana interior/exterior', 'ROUTINE', TRUE, 60),
-    ('Mover muebles para limpieza profunda', 'VARIABLE', TRUE, 90),
-    ('Barrer y trapear el área', 'VARIABLE', FALSE, 45),
-    ('Lavar jerga y dejar en cubeta limpia', 'CLOSING', FALSE, 15),
-    ('Lavar trapos de cocina', 'ROUTINE', FALSE, 20),
-    ('Limpiar charolas y libritos para cuentas', 'CLOSING', FALSE, 15),
-    ('Limpiar maquinaria (Air fryer, licuadora)', 'CLOSING', TRUE, 30)
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Lavar los trastes (Evitar acumulación)', 'CONTINUOUS', FALSE, 60),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Desinfectar los cubiertos y armarlos', 'VARIABLE', FALSE, 30),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Limpiar y organizar rack y especias', 'ROUTINE', FALSE, 45),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Limpiar refrigeradores (interior y exterior)', 'VARIABLE', TRUE, 60),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Limpiar parrilla y estufa con fibra', 'DAILY', TRUE, 90),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Limpiar contenedores y tapas', 'DAILY', FALSE, 45),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Limpiar mueble de trastes', 'ROUTINE', FALSE, 30),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Limpiar mueble blanco', 'ROUTINE', FALSE, 30),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Limpiar campana interior/exterior', 'ROUTINE', TRUE, 60),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Mover muebles para limpieza profunda', 'VARIABLE', TRUE, 90),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Barrer y trapear el área', 'VARIABLE', FALSE, 45),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Lavar jerga y dejar en cubeta limpia', 'CLOSING', FALSE, 15),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Lavar trapos de cocina', 'ROUTINE', FALSE, 20),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Limpiar charolas y libritos para cuentas', 'CLOSING', FALSE, 15),
+    ((SELECT id FROM public.task_categories WHERE name = 'Limpieza y Organización'), 'Limpiar maquinaria (Air fryer, licuadora)', 'CLOSING', TRUE, 30)
 ON CONFLICT (name) DO NOTHING;
 
 -- =====================================================================
