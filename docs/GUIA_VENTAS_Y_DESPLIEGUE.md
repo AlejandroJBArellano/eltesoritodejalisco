@@ -62,3 +62,24 @@ Sigue estos pasos para aprovisionar una instancia aislada y personalizada de la 
    - Ve a **Usuarios** y da de alta a los meseros (rol `WAITER`) y cocineros (rol `CHEF`).
    - Ve a **Gestión de Menú** y da de alta los platillos con sus respectivas categorías y recetas técnicas.
    - Ve a **Inventario** para cargar las existencias de ingredientes.
+
+---
+
+## 🛠️ 4. Solución de Problemas Frecuentes (Troubleshooting)
+
+### 1. Error `DNS_PROBE_FINISHED_NXDOMAIN` al Conectar con Google Auth
+* **Síntoma**: Al hacer clic en "Continuar con Google", el navegador muestra que no se puede acceder a la URL `[REF].supabase.co`.
+* **Causa**: La propagación DNS para un nuevo subdominio de Supabase puede tardar unos minutos en ser reconocida por tu proveedor de internet local.
+* **Solución**: 
+  - Limpia la caché DNS en tu computadora ejecutando en terminal (en macOS): `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder`.
+  - Prueba ingresando a la URL desde una ventana de incógnito o utilizando datos móviles.
+  - Si persiste, cambia los DNS de tu conexión de red local a los de Google (`8.8.8.8`) o Cloudflare (`1.1.1.1`).
+
+### 2. Redirección Incorrecta a `http://localhost:3000` en Producción
+* **Síntoma**: Al iniciar sesión con Google desde la aplicación desplegada en Vercel, Supabase procesa el inicio de sesión pero te redirige de vuelta a `http://localhost:3000/?code=...` en lugar del dominio en producción.
+* **Causa**: Supabase bloquea redirecciones a hosts no autorizados por seguridad y recurre a la URL predeterminada (`Site URL`).
+* **Solución**:
+  - Ve a **Supabase Dashboard** > **Authentication** > **URL Configuration**.
+  - Cambia el **Site URL** al dominio real en producción (ej. `https://birrialacuevita.vercel.app`).
+  - Agrega en **Redirect URLs** tanto tu entorno local (`http://localhost:3000/**`) como el de producción (`https://birrialacuevita.vercel.app/**`) utilizando los comodines `/**` al final.
+
