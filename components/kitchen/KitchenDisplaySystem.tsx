@@ -114,7 +114,7 @@ export function KitchenDisplaySystem({
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-[#E0E0E0]">
-          TesoritoOS - Sistema de Cocina
+          {process.env.NEXT_PUBLIC_SYSTEM_NAME || "TesoritoOS"} - Sistema de Cocina
         </h1>
 
         {!soundEnabled && (

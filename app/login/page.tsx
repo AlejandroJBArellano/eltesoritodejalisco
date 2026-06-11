@@ -12,7 +12,7 @@ export default async function LoginPage({
       <div className="w-full max-w-md space-y-8">
         <div>
           <h1 className="text-center text-4xl font-extrabold text-[#E0E0E0]">
-            🍽️ TesoritoOS
+            🍽️ {process.env.NEXT_PUBLIC_SYSTEM_NAME || "TesoritoOS"}
           </h1>
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-[#E0E0E0]">
             Iniciar sesión

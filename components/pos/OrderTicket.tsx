@@ -27,7 +27,9 @@ export function OrderTicket({ order }: OrderTicketProps) {
   return (
     <div className="ticket-container bg-white p-4 w-[80mm] mx-auto text-black font-mono text-sm border shadow-sm">
       <div className="text-center mb-4">
-        <h2 className="text-lg font-bold">EL TESORITO DE JALISCO</h2>
+        <h2 className="text-lg font-bold">
+          {process.env.NEXT_PUBLIC_APP_NAME?.toUpperCase() || "EL TESORITO DE JALISCO"}
+        </h2>
         <p className="text-xs">RFC: AIVK991104QJ0</p>
         <p className="text-xs">C.P.: 09090</p>
         <p className="text-xs">Régimen: 626 - Simplificado de Confianza (RESICO)</p>
@@ -81,7 +83,9 @@ export function OrderTicket({ order }: OrderTicketProps) {
       <div className="text-center mt-6">
         <p className="text-xs font-bold">Venta al público en general</p>
         <p className="text-xs mt-2">¡Gracias por su preferencia!</p>
-        <p className="text-[10px] text-gray-400 mt-2">TesoritoOS</p>
+        <p className="text-[10px] text-gray-400 mt-2">
+          {process.env.NEXT_PUBLIC_SYSTEM_NAME || "TesoritoOS"}
+        </p>
       </div>
 
       <style jsx global>{`

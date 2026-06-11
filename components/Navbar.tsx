@@ -5,8 +5,12 @@ import { logout } from '@/app/login/actions'
 export default async function Navbar() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) return null
+
+  const systemName = process.env.NEXT_PUBLIC_SYSTEM_NAME || "TesoritoOS";
+  const endsWithOS = systemName.toLowerCase().endsWith("os");
+  const prefix = endsWithOS ? systemName.slice(0, -2) : systemName;
+  const suffix = endsWithOS ? systemName.slice(-2) : "";
 
   return (
     <nav className="bg-dark border-b border-dark/20 text-white">
@@ -14,8 +18,8 @@ export default async function Navbar() {
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">
             <Link href="/" className="text-xl font-black tracking-tighter">
-              <span className="text-primary">TESORITO</span>
-              <span className="text-warning">OS</span>
+              <span className="text-primary">{prefix.toUpperCase()}</span>
+              {suffix && <span className="text-warning">{suffix.toUpperCase()}</span>}
             </Link>
           </div>
           <div className="flex items-center gap-4">

@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TesoritoOS - Restaurant Management",
-  description: "Sistema de gestión integral para El Tesorito de Jalisco",
+  title: `${process.env.NEXT_PUBLIC_SYSTEM_NAME || "TesoritoOS"} - Restaurant Management`,
+  description: `Sistema de gestión integral para ${process.env.NEXT_PUBLIC_APP_NAME || "El Tesorito de Jalisco"}`,
 };
 
 export default function RootLayout({
