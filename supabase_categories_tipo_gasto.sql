@@ -1,64 +1,31 @@
--- Migration: Support extemporaneous cash cuts (corte extemporáneo)
--- Adds operational closing metadata to orders, prevents duplicate daily cuts,
--- and creates an atomic function to close orphaned past days safely.
+-- =====================================================================
+-- TESORITO OS - MIGRATION: SEPARATE FIXED AND VARIABLE OPERATING EXPENSES
+-- Run this in your Supabase SQL Editor to update your tables and functions.
+-- =====================================================================
 
-ALTER TABLE IF EXISTS public.orders
-    ADD COLUMN IF NOT EXISTS operational_date DATE,
-    ADD COLUMN IF NOT EXISTS corte_id UUID REFERENCES public.daily_cuts(id),
-    ADD COLUMN IF NOT EXISTS estado_cierre TEXT DEFAULT 'ABIERTA',
-    ADD COLUMN IF NOT EXISTS closed_at TIMESTAMP WITH TIME ZONE;
+-- 1. Add 'tipo_gasto' column to expense_categories table
+ALTER TABLE public.expense_categories 
+ADD COLUMN IF NOT EXISTS tipo_gasto TEXT NOT NULL DEFAULT 'variable' CHECK (tipo_gasto IN ('fijo', 'variable'));
 
--- Backfill operational date from created_at in Mexico City timezone
-UPDATE public.orders
-SET operational_date = (created_at AT TIME ZONE 'America/Mexico_City')::date
-WHERE operational_date IS NULL;
+-- 2. Update existing categories with appropriate tipo_gasto
+-- Fixed Expenses (Costos Fijos)
+UPDATE public.expense_categories 
+SET tipo_gasto = 'fijo' 
+WHERE name ILIKE 'Sueldos' 
+   OR name ILIKE 'Servicios' 
+   OR name ILIKE 'Marketing' 
+   OR name ILIKE 'Konta Sat' 
+   OR name ILIKE '%konta%';
 
-ALTER TABLE IF EXISTS public.orders
-    ALTER COLUMN operational_date SET NOT NULL;
+-- Variable Expenses (Costos Variables)
+UPDATE public.expense_categories 
+SET tipo_gasto = 'variable' 
+WHERE name ILIKE 'Insumos' 
+   OR name ILIKE 'Transportes' 
+   OR name ILIKE 'Otros'
+   OR name ILIKE '%jornada%';
 
-DO $$
-BEGIN
-    IF to_regclass('public.orders') IS NOT NULL
-       AND NOT EXISTS (
-        SELECT 1
-        FROM pg_constraint
-        WHERE conname = 'orders_estado_cierre_check'
-    ) THEN
-        ALTER TABLE public.orders
-            ADD CONSTRAINT orders_estado_cierre_check
-            CHECK (estado_cierre IN ('ABIERTA', 'CERRADA', 'ARCHIVADA'))
-            NOT VALID;
-    END IF;
-END;
-$$;
-
-ALTER TABLE IF EXISTS public.orders
-    VALIDATE CONSTRAINT orders_estado_cierre_check;
-
--- Keep future inserts consistent
-ALTER TABLE IF EXISTS public.orders
-    ALTER COLUMN estado_cierre SET DEFAULT 'ABIERTA';
-
-CREATE INDEX IF NOT EXISTS idx_orders_operational_cut_status
-    ON public.orders (operational_date, corte_id, status);
-
--- Prevent duplicate cuts per date
-CREATE UNIQUE INDEX IF NOT EXISTS ux_daily_cuts_cut_date
-    ON public.daily_cuts (cut_date);
-
--- Track cut origin (manual vs extemporaneous)
-ALTER TABLE IF EXISTS public.daily_cuts
-    ADD COLUMN IF NOT EXISTS cut_type TEXT DEFAULT 'MANUAL',
-    ADD COLUMN IF NOT EXISTS created_by UUID;
-
--- Example query: orphan sales from previous day with no cut association
--- SELECT o.id, o.created_at, o.total
--- FROM public.orders o
--- LEFT JOIN public.daily_cuts c ON c.id = o.corte_id
--- WHERE o.operational_date = ((now() AT TIME ZONE 'America/Mexico_City')::date - INTERVAL '1 day')::date
---   AND o.corte_id IS NULL
---   AND o.status IN ('PAID', 'DELIVERED', 'UNCOLLECTED');
-
+-- 3. Replace the generar_corte_extemporaneo function to only sum Variable expenses
 CREATE OR REPLACE FUNCTION public.generar_corte_extemporaneo(p_cut_date DATE, p_user_id UUID)
 RETURNS TABLE(corte_id UUID, total_ventas NUMERIC, total_ordenes INTEGER)
 LANGUAGE plpgsql

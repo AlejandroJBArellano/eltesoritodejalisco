@@ -188,6 +188,7 @@ CREATE TABLE IF NOT EXISTS public.expense_categories (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL UNIQUE,
     color TEXT DEFAULT '#3B82F6',
+    tipo_gasto TEXT NOT NULL DEFAULT 'variable' CHECK (tipo_gasto IN ('fijo', 'variable')),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -322,12 +323,12 @@ CREATE POLICY "Allow all for daily_cuts" ON public.daily_cuts FOR ALL USING (tru
 -- =====================================================================
 
 -- Seed expense categories
-INSERT INTO public.expense_categories (name, color) 
+INSERT INTO public.expense_categories (name, color, tipo_gasto) 
 VALUES 
-    ('Insumos', '#10B981'),
-    ('Sueldos', '#6366F1'),
-    ('Servicios', '#F59E0B'),
-    ('Otros', '#6B7280')
+    ('Insumos', '#10B981', 'variable'),
+    ('Sueldos', '#6366F1', 'fijo'),
+    ('Servicios', '#F59E0B', 'fijo'),
+    ('Otros', '#6B7280', 'variable')
 ON CONFLICT (name) DO NOTHING;
 
 -- Seed task categories

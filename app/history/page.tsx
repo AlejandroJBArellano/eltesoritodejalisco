@@ -191,9 +191,15 @@ export default function HistoryPage() {
             }).format(new Date());
             const { data } = await supabase
                 .from("expenses")
-                .select("amount")
+                .select("amount, expense_categories(tipo_gasto)")
                 .eq("date", mxDateStr);
-            const total = (data || []).reduce((sum, e) => sum + Number(e.amount), 0);
+            const total = (data || []).reduce((sum, e: any) => {
+                const tipo = e.expense_categories?.tipo_gasto;
+                if (!tipo || tipo === "variable") {
+                    return sum + Number(e.amount);
+                }
+                return sum;
+            }, 0);
             setTodayExpenses(total);
         } catch (err) {
             console.error("Error fetching today expenses:", err);
@@ -260,18 +266,23 @@ export default function HistoryPage() {
                 day: "2-digit",
             }).format(new Date());
 
-            // Fetch today's itemized expenses to store as a snapshot
+            // Fetch today's itemized expenses to store as a snapshot (only variable ones)
             const { data: expensesData } = await supabase
                 .from("expenses")
-                .select("description, amount, has_invoice, expense_categories(name)")
+                .select("description, amount, has_invoice, expense_categories(name, tipo_gasto)")
                 .eq("date", mxDateStr);
 
-            const expensesDetail: ExpenseDetailItem[] = ((expensesData || []) as ExpenseRow[]).map((e) => ({
-                description: e.description,
-                amount: Number(e.amount),
-                category: e.expense_categories?.name ?? undefined,
-                has_invoice: e.has_invoice ?? false,
-            }));
+            const expensesDetail: ExpenseDetailItem[] = ((expensesData || []) as any[])
+                .filter((e) => {
+                    const tipo = e.expense_categories?.tipo_gasto;
+                    return !tipo || tipo === "variable";
+                })
+                .map((e) => ({
+                    description: e.description,
+                    amount: Number(e.amount),
+                    category: e.expense_categories?.name ?? undefined,
+                    has_invoice: e.has_invoice ?? false,
+                }));
 
             const cashFinal = manualCash !== "" ? Number(manualCash) : todayTotals.cajaEfectivo;
             const cardFinal = manualCard !== "" ? Number(manualCard) : todayTotals.cajaTarjeta;

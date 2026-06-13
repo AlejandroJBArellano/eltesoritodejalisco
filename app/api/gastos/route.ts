@@ -12,10 +12,12 @@ export async function GET(req: Request) {
             .from("expenses")
             .select(`
         *,
-        expense_categories (name, color)
+        expense_categories (name, color, tipo_gasto)
       `)
             .order("date", { ascending: false })
             .order("created_at", { ascending: false });
+
+        let totalSales = 0;
 
         if (month) {
             const startDate = `${month}-01`;
@@ -30,11 +32,23 @@ export async function GET(req: Request) {
             const endDate = `${year}-${(nextMonth + 1).toString().padStart(2, '0')}-01`;
 
             query = query.gte("date", startDate).lt("date", endDate);
+
+            // Fetch monthly sales (completed orders) using operational_date
+            const { data: salesData, error: salesError } = await supabase
+                .from("orders")
+                .select("total")
+                .in("status", ["DELIVERED", "PAID"])
+                .gte("operational_date", startDate)
+                .lt("operational_date", endDate);
+
+            if (!salesError && salesData) {
+                totalSales = salesData.reduce((sum, order) => sum + (order.total || 0), 0);
+            }
         }
 
         const { data, error } = await query;
         if (error) throw error;
-        return NextResponse.json(data);
+        return NextResponse.json({ expenses: data || [], totalSales });
     } catch (error) {
         console.error("Error fetching expenses:", error);
         return NextResponse.json({ error: "Error fetching expenses" }, { status: 500 });
@@ -62,7 +76,7 @@ export async function POST(req: Request) {
             }])
             .select(`
         *,
-        expense_categories (name, color)
+        expense_categories (name, color, tipo_gasto)
       `)
             .single();
 
