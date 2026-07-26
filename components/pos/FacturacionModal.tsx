@@ -22,7 +22,9 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
     codigoPostal: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -39,7 +41,7 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
       // Example: total = subtotal * 1.16
       const subtotal = order.total / 1.16;
       const iva = order.total - subtotal;
-      
+
       const payload = {
         orderId: order.id,
         venta: {
@@ -63,7 +65,9 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
         throw new Error(data.error || "Error al facturar");
       }
 
-      setSuccess(`Factura generada con éxito. ID: ${data.facturaId || data.ticketId}`);
+      setSuccess(
+        `Factura generada con éxito. ID: ${data.facturaId || data.ticketId}`,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
@@ -80,7 +84,10 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
           <h3 className="text-xl font-black text-white uppercase tracking-tighter">
             🧾 Facturación
           </h3>
-          <button onClick={onClose} className="text-zinc-600 hover:text-white transition-colors">
+          <button
+            onClick={onClose}
+            className="text-zinc-600 hover:text-white transition-colors"
+          >
             ✕
           </button>
         </div>
@@ -100,8 +107,12 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center">
-              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Total a facturar</p>
-              <p className="text-3xl font-black text-white tabular-nums">${order.total.toFixed(2)}</p>
+              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">
+                Total a facturar
+              </p>
+              <p className="text-3xl font-black text-white tabular-nums">
+                ${order.total.toFixed(2)}
+              </p>
             </div>
 
             <div className="flex gap-2 p-1 bg-white/5 rounded-2xl">

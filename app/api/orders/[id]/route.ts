@@ -55,7 +55,9 @@ export async function PUT(
     const currentIds = (currentItems || []).map((i: { id: string }) => i.id);
 
     // Delete items that are no longer in the list
-    const idsToDelete = currentIds.filter((cid: string) => !keepIds.includes(cid));
+    const idsToDelete = currentIds.filter(
+      (cid: string) => !keepIds.includes(cid),
+    );
     if (idsToDelete.length > 0) {
       const { error: deleteError } = await supabase
         .from("order_items")
@@ -221,14 +223,16 @@ export async function PATCH(
       .from("orders")
       .update(orderUpdate)
       .eq("id", id)
-      .select(`
+      .select(
+        `
         *,
         order_items (
           *,
           menu_items (*)
         ),
         customer:customers (*)
-      `)
+      `,
+      )
       .single();
 
     if (updateError) throw updateError;

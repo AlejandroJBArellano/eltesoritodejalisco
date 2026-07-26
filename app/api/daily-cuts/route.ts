@@ -35,7 +35,7 @@ export async function GET() {
     console.error("Error fetching daily cuts:", error);
     return NextResponse.json(
       { error: "Error al obtener los cortes diarios" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     if (!cut_date) {
       return NextResponse.json(
         { error: "La fecha del corte es requerida" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
     console.error("Error saving daily cut:", error);
     return NextResponse.json(
       { error: "Error al guardar el corte diario" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

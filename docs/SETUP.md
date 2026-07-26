@@ -17,6 +17,7 @@ npm install
 ```
 
 Esto instalará:
+
 - Next.js 16
 - Prisma Client y CLI
 - TypeScript
@@ -28,6 +29,7 @@ Esto instalará:
 ### Opción A: PostgreSQL Local
 
 1. **Instalar PostgreSQL** (si no lo tienes):
+
 ```bash
 # macOS con Homebrew
 brew install postgresql@16
@@ -39,6 +41,7 @@ sudo systemctl start postgresql
 ```
 
 2. **Crear la base de datos**:
+
 ```bash
 psql -U postgres
 CREATE DATABASE tesoritoos;
@@ -46,11 +49,13 @@ CREATE DATABASE tesoritoos;
 ```
 
 3. **Configurar .env**:
+
 ```bash
 cp .env.example .env
 ```
 
 Edita `.env` y actualiza:
+
 ```env
 DATABASE_URL="postgresql://postgres:tu_password@localhost:5432/tesoritoos?schema=public"
 ```
@@ -60,6 +65,7 @@ DATABASE_URL="postgresql://postgres:tu_password@localhost:5432/tesoritoos?schema
 1. Ve a [supabase.com](https://supabase.com) y crea un proyecto
 2. Copia tu Connection String de la configuración del proyecto
 3. En `.env`:
+
 ```env
 DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres"
 ```
@@ -100,9 +106,11 @@ La aplicación estará disponible en [http://localhost:3000](http://localhost:30
 ## Paso 6: Verificar la Instalación
 
 ### Probar la Pantalla de Cocina
+
 Visita: [http://localhost:3000/kitchen](http://localhost:3000/kitchen)
 
 ### Probar API de Órdenes
+
 ```bash
 # Crear una orden de prueba
 curl -X POST http://localhost:3000/api/orders \
@@ -121,6 +129,7 @@ curl -X POST http://localhost:3000/api/orders \
 ```
 
 ### Verificar Inventario
+
 ```bash
 # Ver todos los ingredientes
 curl http://localhost:3000/api/inventory
@@ -134,6 +143,7 @@ curl http://localhost:3000/api/inventory?lowStock=true
 ### 1. Variables de Entorno
 
 Crea `.env.production` con:
+
 ```env
 DATABASE_URL="tu_url_de_producción"
 NEXTAUTH_SECRET="genera_un_secreto_seguro"
@@ -158,16 +168,19 @@ npm run start
 ## Troubleshooting
 
 ### Error: Cannot connect to database
+
 - Verifica que PostgreSQL esté corriendo: `pg_isready`
 - Revisa la URL de conexión en `.env`
 - Asegúrate de que el puerto 5432 esté abierto
 
 ### Error: Prisma Client not generated
+
 ```bash
 npm run prisma:generate
 ```
 
 ### Error: Module not found
+
 ```bash
 # Limpia caché y reinstala
 rm -rf node_modules .next
@@ -175,6 +188,7 @@ npm install
 ```
 
 ### Base de datos desactualizada
+
 ```bash
 npm run prisma:push
 # O
@@ -184,17 +198,21 @@ npm run prisma:migrate
 ## Herramientas Útiles
 
 ### Prisma Studio
+
 Interfaz visual para administrar la base de datos:
+
 ```bash
 npm run prisma:studio
 ```
 
 ### Reset de Base de Datos (⚠️ Cuidado: borra todos los datos)
+
 ```bash
 npx prisma migrate reset
 ```
 
 ### Ver logs de Prisma
+
 ```bash
 # En development, los queries se muestran en la consola
 # Para más detalle:

@@ -30,7 +30,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ ok: true, result: data?.[0] ?? null }, { status: 201 });
+    return NextResponse.json(
+      { ok: true, result: data?.[0] ?? null },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Error generating extemporaneous cut:", error);
     return NextResponse.json({ error: "Error interno" }, { status: 500 });

@@ -52,7 +52,7 @@ export function usePOSData() {
 
   const availableMenuItems = useMemo(
     () => menuItems.filter((item) => item.isAvailable),
-    [menuItems]
+    [menuItems],
   );
 
   const [activeCategory, setActiveCategory] = useState<string>("");
@@ -84,7 +84,7 @@ export function usePOSData() {
         ...item,
         category: item.category,
         isAvailable: item.is_available,
-      }))
+      })),
     );
   };
 
@@ -101,7 +101,7 @@ export function usePOSData() {
     const data = await response.json();
     if (!response.ok) throw new Error(data?.error || "Error al cargar órdenes");
     const mappedOrders = (data.orders || []).map((dbOrder: DbOrderPayload) =>
-      mapOrderData(dbOrder)
+      mapOrderData(dbOrder),
     ) as Order[];
     setOrders(mappedOrders);
     return mappedOrders;
@@ -119,7 +119,7 @@ export function usePOSData() {
         setErrorMessage(null);
       } catch (error) {
         setErrorMessage(
-          error instanceof Error ? error.message : "Error al cargar"
+          error instanceof Error ? error.message : "Error al cargar",
         );
       } finally {
         setIsLoading(false);
@@ -133,7 +133,7 @@ export function usePOSData() {
     const todayDateStr = getTodayDateStr();
 
     const todayOrders = orders.filter(
-      (o) => getOrderDateStr(o.createdAt) === todayDateStr
+      (o) => getOrderDateStr(o.createdAt) === todayDateStr,
     );
 
     if (todayOrders.length === 0) return "001";
@@ -151,12 +151,15 @@ export function usePOSData() {
     const todayDateStr = getTodayDateStr();
 
     const todayOrders = orders.filter(
-      (o) => getOrderDateStr(o.createdAt) === todayDateStr
+      (o) => getOrderDateStr(o.createdAt) === todayDateStr,
     );
 
-    const paidOrders = todayOrders.filter((o) => o.status === "PAID" || o.status === "DELIVERED");
+    const paidOrders = todayOrders.filter(
+      (o) => o.status === "PAID" || o.status === "DELIVERED",
+    );
     const salesTotal = paidOrders.reduce((acc, o) => acc + o.total, 0);
-    const avgTicket = paidOrders.length > 0 ? salesTotal / paidOrders.length : 0;
+    const avgTicket =
+      paidOrders.length > 0 ? salesTotal / paidOrders.length : 0;
 
     return {
       count: todayOrders.length,

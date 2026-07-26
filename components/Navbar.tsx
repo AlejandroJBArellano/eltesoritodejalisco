@@ -35,15 +35,21 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center gap-4">
           {/* Logo */}
-          <Link href="/" className="text-xl font-black tracking-tighter shrink-0">
+          <Link
+            href="/"
+            className="text-xl font-black tracking-tighter shrink-0"
+          >
             <span className="text-primary">{prefix.toUpperCase()}</span>
-            {suffix && <span className="text-warning">{suffix.toUpperCase()}</span>}
+            {suffix && (
+              <span className="text-warning">{suffix.toUpperCase()}</span>
+            )}
           </Link>
 
           {/* Quick nav links */}
           <div className="hidden sm:flex items-center gap-1">
             {navLinks.map((link) => {
-              const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
+              const isActive =
+                pathname === link.href || pathname.startsWith(link.href + "/");
               return (
                 <Link
                   key={link.href}
@@ -63,7 +69,10 @@ export default function Navbar() {
           {/* Right: email + logout */}
           <div className="flex items-center gap-3 shrink-0">
             {email && (
-              <span className="hidden sm:block text-xs font-medium text-[#E0E0E0]/40 max-w-[180px] truncate" title={email}>
+              <span
+                className="hidden sm:block text-xs font-medium text-[#E0E0E0]/40 max-w-[180px] truncate"
+                title={email}
+              >
                 {email}
               </span>
             )}

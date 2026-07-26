@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     let query = supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         *,
         order_items (
           *,
@@ -23,7 +24,8 @@ export async function GET(request: NextRequest) {
         ),
         payments (*),
         customer:customers (*)
-      `)
+      `,
+      )
       .order("created_at", { ascending: false });
 
     if (statusParam) {
@@ -85,9 +87,10 @@ export async function POST(request: NextRequest) {
       .select("order_number")
       .order("created_at", { ascending: false });
 
-    const filterDate = latestCut && latestCut.created_at > todayStart 
-      ? latestCut.created_at 
-      : todayStart;
+    const filterDate =
+      latestCut && latestCut.created_at > todayStart
+        ? latestCut.created_at
+        : todayStart;
 
     query = query.gt("created_at", filterDate);
 
@@ -95,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     let nextSeq = 1;
     if (lastOrder && lastOrder.order_number) {
-      const parts = lastOrder.order_number.split('-');
+      const parts = lastOrder.order_number.split("-");
       const lastSeqStr = parts[parts.length - 1];
       nextSeq = parseInt(lastSeqStr, 10) + 1;
     }
@@ -157,7 +160,7 @@ export async function POST(request: NextRequest) {
         total,
         operational_date: getCurrentCDMXDay(),
         estado_cierre: "ABIERTA",
-        updated_at: getCurrentCDMXDate()
+        updated_at: getCurrentCDMXDate(),
       })
       .select()
       .single();
@@ -165,22 +168,21 @@ export async function POST(request: NextRequest) {
     if (orderError) throw orderError;
 
     // Create order items
-    const { error: itemsError } = await supabase
-      .from("order_items")
-      .insert(
-        itemsWithPrices.map((item) => ({
-          ...item,
-          id: crypto.randomUUID(),
-          order_id: order.id,
-        }))
-      );
+    const { error: itemsError } = await supabase.from("order_items").insert(
+      itemsWithPrices.map((item) => ({
+        ...item,
+        id: crypto.randomUUID(),
+        order_id: order.id,
+      })),
+    );
 
     if (itemsError) throw itemsError;
 
     // Fetch full order for response
     const { data: fullOrder } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         *,
         order_items (
           *,
@@ -188,14 +190,15 @@ export async function POST(request: NextRequest) {
         ),
         payments (*),
         customer:customers (*)
-      `)
+      `,
+      )
       .eq("id", order.id)
       .single();
 
     // If customer exists, update loyalty points
     if (customerId) {
       const pointsEarned = Math.floor(total / 10);
-      
+
       const { data: customer } = await supabase
         .from("customers")
         .select("loyalty_points, total_spend")

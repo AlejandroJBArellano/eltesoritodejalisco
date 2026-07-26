@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+
 import { useEffect, useMemo, useState } from "react";
 import {
   Bar,
@@ -25,20 +25,14 @@ import {
   Calendar,
   Plus,
   Edit3,
-  CheckCircle2,
-  ArrowLeft,
   AlertTriangle,
   X,
-  PieChart as PieChartIcon,
-  Check,
-  Building,
   Search,
   ChevronLeft,
   ChevronRight,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  Filter,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 
@@ -76,7 +70,9 @@ export default function GastosPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [newCatName, setNewCatName] = useState("");
   const [newCatColor, setNewCatColor] = useState("#FFB7CE");
-  const [newCatTipoGasto, setNewCatTipoGasto] = useState<"fijo" | "variable">("variable");
+  const [newCatTipoGasto, setNewCatTipoGasto] = useState<"fijo" | "variable">(
+    "variable",
+  );
   const [isSubmittingCat, setIsSubmittingCat] = useState(false);
   const [catError, setCatError] = useState<string | null>(null);
 
@@ -113,11 +109,17 @@ export default function GastosPage() {
   // Table Filters State
   const [tableSearch, setTableSearch] = useState("");
   const [tableCategoryFilter, setTableCategoryFilter] = useState("");
-  const [tableInvoiceFilter, setTableInvoiceFilter] = useState<"all" | "invoiced" | "no_invoice">("all");
-  const [tableTypeFilter, setTableTypeFilter] = useState<"all" | "fijo" | "variable">("all");
+  const [tableInvoiceFilter, setTableInvoiceFilter] = useState<
+    "all" | "invoiced" | "no_invoice"
+  >("all");
+  const [tableTypeFilter, setTableTypeFilter] = useState<
+    "all" | "fijo" | "variable"
+  >("all");
 
   // Table Sorting State
-  const [sortField, setSortField] = useState<"date" | "amount" | "description" | "category">("date");
+  const [sortField, setSortField] = useState<
+    "date" | "amount" | "description" | "category"
+  >("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   // Table Pagination State
@@ -146,6 +148,7 @@ export default function GastosPage() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentMonth]);
 
   const handleAddCategory = async (e: React.FormEvent) => {
@@ -171,7 +174,9 @@ export default function GastosPage() {
       });
       if (!res.ok) {
         const d = await res.json();
-        setCatError(d.error || `Error al ${isEditing ? "editar" : "crear"} categoría`);
+        setCatError(
+          d.error || `Error al ${isEditing ? "editar" : "crear"} categoría`,
+        );
         return;
       }
       setIsCategoryModalOpen(false);
@@ -179,7 +184,7 @@ export default function GastosPage() {
       setNewCatName("");
       setEditingCategory(null);
       fetchData();
-    } catch (error) {
+    } catch {
       setCatError("Error de conexión");
     } finally {
       setIsSubmittingCat(false);
@@ -214,7 +219,7 @@ export default function GastosPage() {
       setDescription("");
       setIsExpenseModalOpen(false);
       fetchData();
-    } catch (error) {
+    } catch {
       setExpError("Error de conexión");
     } finally {
       setIsSubmittingExp(false);
@@ -244,7 +249,10 @@ export default function GastosPage() {
 
   // Gráfica Lineal de Gastos por Día del Mes (Fijos vs Variables)
   const dailyExpensesData = useMemo(() => {
-    const map = new Map<string, { fijos: number; variables: number; total: number }>();
+    const map = new Map<
+      string,
+      { fijos: number; variables: number; total: number }
+    >();
 
     expenses.forEach((exp) => {
       const dateKey = exp.date;
@@ -265,7 +273,8 @@ export default function GastosPage() {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([dateStr, values]) => {
         const parts = dateStr.split("-");
-        const dayLabel = parts.length === 3 ? `${parts[2]}/${parts[1]}` : dateStr;
+        const dayLabel =
+          parts.length === 3 ? `${parts[2]}/${parts[1]}` : dateStr;
         return {
           date: dayLabel,
           rawDate: dateStr,
@@ -278,14 +287,22 @@ export default function GastosPage() {
 
   // Gráfica por Categorías de Gastos
   const categoryExpensesData = useMemo(() => {
-    const map = new Map<string, { name: string; value: number; color: string; tipo: string }>();
+    const map = new Map<
+      string,
+      { name: string; value: number; color: string; tipo: string }
+    >();
 
     expenses.forEach((exp) => {
       const catName = exp.expense_categories?.name || "Sin Categoría";
       const catColor = exp.expense_categories?.color || "#FFB7CE";
       const catTipo = exp.expense_categories?.tipo_gasto || "variable";
       if (!map.has(catName)) {
-        map.set(catName, { name: catName, value: 0, color: catColor, tipo: catTipo });
+        map.set(catName, {
+          name: catName,
+          value: 0,
+          color: catColor,
+          tipo: catTipo,
+        });
       }
       map.get(catName)!.value += exp.amount;
     });
@@ -299,7 +316,9 @@ export default function GastosPage() {
       if (tableSearch.trim()) {
         const q = tableSearch.toLowerCase();
         const matchDesc = exp.description.toLowerCase().includes(q);
-        const matchCat = (exp.expense_categories?.name || "").toLowerCase().includes(q);
+        const matchCat = (exp.expense_categories?.name || "")
+          .toLowerCase()
+          .includes(q);
         if (!matchDesc && !matchCat) return false;
       }
 
@@ -316,7 +335,13 @@ export default function GastosPage() {
 
       return true;
     });
-  }, [expenses, tableSearch, tableCategoryFilter, tableInvoiceFilter, tableTypeFilter]);
+  }, [
+    expenses,
+    tableSearch,
+    tableCategoryFilter,
+    tableInvoiceFilter,
+    tableTypeFilter,
+  ]);
 
   const sortedExpenses = useMemo(() => {
     return [...filteredExpenses].sort((a, b) => {
@@ -338,7 +363,15 @@ export default function GastosPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [tableSearch, tableCategoryFilter, tableInvoiceFilter, tableTypeFilter, sortField, sortDirection, pageSize]);
+  }, [
+    tableSearch,
+    tableCategoryFilter,
+    tableInvoiceFilter,
+    tableTypeFilter,
+    sortField,
+    sortDirection,
+    pageSize,
+  ]);
 
   const totalPages = Math.ceil(sortedExpenses.length / pageSize) || 1;
   const paginatedExpenses = useMemo(() => {
@@ -346,7 +379,9 @@ export default function GastosPage() {
     return sortedExpenses.slice(start, start + pageSize);
   }, [sortedExpenses, currentPage, pageSize]);
 
-  const handleSort = (field: "date" | "amount" | "description" | "category") => {
+  const handleSort = (
+    field: "date" | "amount" | "description" | "category",
+  ) => {
     if (sortField === field) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
@@ -424,7 +459,11 @@ export default function GastosPage() {
               </div>
             </div>
             <p className="mt-2 text-2xl font-black text-[#E0E0E0] tracking-tight tabular-nums">
-              ${totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              $
+              {totalExpenses.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </p>
           </div>
 
@@ -439,10 +478,14 @@ export default function GastosPage() {
               </div>
             </div>
             <p className="mt-2 text-2xl font-black text-[#E0E0E0] tracking-tight tabular-nums">
-              ${expenses
+              $
+              {expenses
                 .filter((e) => e.has_invoice)
                 .reduce((acc, e) => acc + e.amount, 0)
-                .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                .toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
             </p>
           </div>
 
@@ -457,7 +500,11 @@ export default function GastosPage() {
               </div>
             </div>
             <p className="mt-2 text-2xl font-black text-[#E0E0E0] tracking-tight tabular-nums">
-              ${totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              $
+              {totalSales.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </p>
           </div>
 
@@ -477,7 +524,11 @@ export default function GastosPage() {
                   netUtility >= 0 ? "text-emerald-400" : "text-red-400"
                 }`}
               >
-                ${netUtility.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {netUtility.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </p>
               <span
                 className={`text-xs font-black uppercase rounded-md px-1.5 py-0.5 ${
@@ -538,7 +589,11 @@ export default function GastosPage() {
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
                   <XAxis dataKey="date" stroke="#888888" fontSize={11} />
-                  <YAxis stroke="#888888" fontSize={11} tickFormatter={(val) => `$${val}`} />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={11}
+                    tickFormatter={(val) => `$${val}`}
+                  />
                   <RechartsTooltip
                     contentStyle={{
                       backgroundColor: "#1D1D1D",
@@ -548,12 +603,18 @@ export default function GastosPage() {
                     }}
                     formatter={(value: any, name: any) => [
                       `$${Number(value).toFixed(2)}`,
-                      name === "fijos" ? "Gasto Fijo" : name === "variables" ? "Gasto Variable" : "Total",
+                      name === "fijos"
+                        ? "Gasto Fijo"
+                        : name === "variables"
+                          ? "Gasto Variable"
+                          : "Total",
                     ]}
                   />
                   <Legend
                     wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }}
-                    formatter={(value) => (value === "fijos" ? "Gastos Fijos" : "Gastos Variables")}
+                    formatter={(value) =>
+                      value === "fijos" ? "Gastos Fijos" : "Gastos Variables"
+                    }
                   />
                   <Line
                     type="monotone"
@@ -603,7 +664,11 @@ export default function GastosPage() {
                   layout="vertical"
                   margin={{ top: 10, right: 30, left: 20, bottom: 10 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" horizontal={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#2A2A2A"
+                    horizontal={false}
+                  />
                   <XAxis
                     type="number"
                     stroke="#888888"
@@ -728,7 +793,8 @@ export default function GastosPage() {
               Historial de Gastos
             </h2>
             <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
-              Mostrando {paginatedExpenses.length} de {filteredExpenses.length} egresos ({expenses.length} totales)
+              Mostrando {paginatedExpenses.length} de {filteredExpenses.length}{" "}
+              egresos ({expenses.length} totales)
             </span>
           </div>
 
@@ -894,11 +960,14 @@ export default function GastosPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {paginatedExpenses.map((exp) => (
-                    <tr key={exp.id} className="hover:bg-white/5 transition-colors">
+                    <tr
+                      key={exp.id}
+                      className="hover:bg-white/5 transition-colors"
+                    >
                       <td className="py-3.5 px-3 text-[#E0E0E0]/80 font-medium">
-                        {new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City" }).format(
-                          new Date(exp.date + "T12:00:00Z"),
-                        )}
+                        {new Intl.DateTimeFormat("es-MX", {
+                          timeZone: "America/Mexico_City",
+                        }).format(new Date(exp.date + "T12:00:00Z"))}
                       </td>
                       <td className="py-3.5 px-3">
                         <span
@@ -912,7 +981,9 @@ export default function GastosPage() {
                           {exp.expense_categories?.name || "Sin Categoría"}
                         </span>
                       </td>
-                      <td className="py-3.5 px-3 text-[#E0E0E0] font-bold">{exp.description}</td>
+                      <td className="py-3.5 px-3 text-[#E0E0E0] font-bold">
+                        {exp.description}
+                      </td>
                       <td className="py-3.5 px-3 text-center">
                         {exp.has_invoice ? (
                           <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-[9px] font-black text-blue-400 uppercase">
@@ -929,8 +1000,12 @@ export default function GastosPage() {
                   ))}
                   {filteredExpenses.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-[#E0E0E0]/40 italic">
-                        No hay registros de gastos encontrados para los filtros seleccionados.
+                      <td
+                        colSpan={5}
+                        className="py-8 text-center text-[#E0E0E0]/40 italic"
+                      >
+                        No hay registros de gastos encontrados para los filtros
+                        seleccionados.
                       </td>
                     </tr>
                   )}
@@ -957,13 +1032,16 @@ export default function GastosPage() {
 
               <div className="flex items-center gap-4">
                 <span>
-                  Página <strong className="text-[#E0E0E0]">{currentPage}</strong> de{" "}
+                  Página{" "}
+                  <strong className="text-[#E0E0E0]">{currentPage}</strong> de{" "}
                   <strong className="text-[#E0E0E0]">{totalPages}</strong>
                 </span>
 
                 <div className="flex items-center gap-1">
                   <button
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
                     disabled={currentPage === 1}
                     className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 transition-all"
                     title="Página anterior"
@@ -972,7 +1050,9 @@ export default function GastosPage() {
                   </button>
 
                   <button
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
                     disabled={currentPage === totalPages}
                     className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 transition-all"
                     title="Página siguiente"
@@ -1036,8 +1116,13 @@ export default function GastosPage() {
                         Selecciona un rubro...
                       </option>
                       {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id} className="bg-[#242424]">
-                          {cat.name} ({cat.tipo_gasto === "fijo" ? "Fijo" : "Variable"})
+                        <option
+                          key={cat.id}
+                          value={cat.id}
+                          className="bg-[#242424]"
+                        >
+                          {cat.name} (
+                          {cat.tipo_gasto === "fijo" ? "Fijo" : "Variable"})
                         </option>
                       ))}
                     </select>
@@ -1142,7 +1227,9 @@ export default function GastosPage() {
             <div className="flex justify-between items-center border-b border-white/5 pb-3">
               <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
                 <Tag className="h-4 w-4 text-purple-400" />
-                {editingCategory ? "Editar Categoría" : "Crear Categoría de Gasto"}
+                {editingCategory
+                  ? "Editar Categoría"
+                  : "Crear Categoría de Gasto"}
               </h3>
               <button
                 onClick={() => {

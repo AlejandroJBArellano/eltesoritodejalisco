@@ -51,7 +51,10 @@ type ReportData = {
     totalUncollected: number;
   };
   salesByDay: Record<string, number>;
-  itemsByDay: Record<string, { name: string; quantity: number; revenue: number }[]>;
+  itemsByDay: Record<
+    string,
+    { name: string; quantity: number; revenue: number }[]
+  >;
   salesBySource: Record<string, { count: number; total: number }>;
   topSellingItems: { name: string; quantity: number; revenue: number }[];
   productSales?: ProductSaleItem[];
@@ -62,7 +65,14 @@ type ReportData = {
   };
 };
 
-type Period = "today" | "yesterday" | "7days" | "30days" | "month" | "last_month" | "custom";
+type Period =
+  | "today"
+  | "yesterday"
+  | "7days"
+  | "30days"
+  | "month"
+  | "last_month"
+  | "custom";
 
 const PERIOD_LABELS: Record<Period, string> = {
   today: "Hoy",
@@ -87,9 +97,15 @@ export default function ReportsPage() {
 
   // States for Product Sales Distribution Chart
   const [selectedCategory, setSelectedCategory] = useState<string>("TODAS");
-  const [productMetric, setProductMetric] = useState<"revenue" | "quantity">("revenue");
+  const [productMetric, setProductMetric] = useState<"revenue" | "quantity">(
+    "revenue",
+  );
 
-  const fetchData = async (p: Period, startDateStr?: string, endDateStr?: string) => {
+  const fetchData = async (
+    p: Period,
+    startDateStr?: string,
+    endDateStr?: string,
+  ) => {
     try {
       setIsLoading(true);
       setSelectedDay(null);
@@ -103,9 +119,7 @@ export default function ReportsPage() {
       const json = await response.json();
       setData(json);
     } catch (err) {
-      setErrorMessage(
-        err instanceof Error ? err.message : "Error desconocido",
-      );
+      setErrorMessage(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setIsLoading(false);
     }
@@ -125,6 +139,7 @@ export default function ReportsPage() {
 
   useEffect(() => {
     fetchData(period);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const chartData = useMemo(() => {
@@ -147,7 +162,9 @@ export default function ReportsPage() {
 
   const categoriesList = useMemo(() => {
     if (!data?.productSales) return ["TODAS"];
-    const cats = Array.from(new Set(data.productSales.map((p) => p.category).filter(Boolean)));
+    const cats = Array.from(
+      new Set(data.productSales.map((p) => p.category).filter(Boolean)),
+    );
     return ["TODAS", ...cats];
   }, [data]);
 
@@ -158,7 +175,11 @@ export default function ReportsPage() {
       list = list.filter((p) => p.category === selectedCategory);
     }
     return [...list]
-      .sort((a, b) => (productMetric === "revenue" ? b.revenue - a.revenue : b.quantity - a.quantity))
+      .sort((a, b) =>
+        productMetric === "revenue"
+          ? b.revenue - a.revenue
+          : b.quantity - a.quantity,
+      )
       .slice(0, 10);
   }, [data, selectedCategory, productMetric]);
 
@@ -186,7 +207,9 @@ export default function ReportsPage() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-[#121212] p-4 text-center">
         <div className="rounded-2xl bg-[#242424] p-8 shadow-sm border border-red-500/20 max-w-md">
           <AlertTriangle className="mx-auto h-12 w-12 text-red-400 mb-4" />
-          <h2 className="text-lg font-black text-[#E0E0E0] uppercase tracking-tight mb-2">Error al Cargar Datos</h2>
+          <h2 className="text-lg font-black text-[#E0E0E0] uppercase tracking-tight mb-2">
+            Error al Cargar Datos
+          </h2>
           <p className="text-xs text-[#E0E0E0]/60 mb-6">{errorMessage}</p>
           <button
             onClick={() => fetchData(period)}
@@ -201,7 +224,8 @@ export default function ReportsPage() {
 
   if (!data) return null;
 
-  const netUtility = data.summary.totalSales - (data.summary.totalExpenses || 0);
+  const netUtility =
+    data.summary.totalSales - (data.summary.totalExpenses || 0);
 
   return (
     <div className="min-h-screen bg-[#121212] pb-16">
@@ -222,24 +246,35 @@ export default function ReportsPage() {
 
       {/* Main Content Area */}
       <main className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6 lg:px-8">
-
         {/* Period Selector Card */}
         <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-primary" /> Filtro de Período y Fechas
+              <Calendar className="h-4 w-4 text-primary" /> Filtro de Período y
+              Fechas
             </h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {(["today", "yesterday", "7days", "30days", "month", "last_month", "custom"] as Period[]).map((p) => (
+            {(
+              [
+                "today",
+                "yesterday",
+                "7days",
+                "30days",
+                "month",
+                "last_month",
+                "custom",
+              ] as Period[]
+            ).map((p) => (
               <button
                 key={p}
                 onClick={() => handlePeriodChange(p)}
-                className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${period === p
+                className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
+                  period === p
                     ? "bg-primary text-black shadow-md shadow-primary/20 scale-[1.02]"
                     : "bg-[#181818] text-[#E0E0E0]/60 hover:bg-white/10 hover:text-white border border-white/5"
-                  }`}
+                }`}
               >
                 {PERIOD_LABELS[p]}
               </button>
@@ -303,7 +338,11 @@ export default function ReportsPage() {
                 </div>
               </div>
               <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
-                ${data.summary.totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {data.summary.totalSales.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </p>
               <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
                 Total ingresado a caja ({data.summary.totalOrders} órdenes)
@@ -321,7 +360,11 @@ export default function ReportsPage() {
                 </div>
               </div>
               <p className="mt-3 text-3xl font-black text-red-400 tracking-tight">
-                -${(data.summary.totalExpenses || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                -$
+                {(data.summary.totalExpenses || 0).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </p>
               <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
                 Insumos, sueldos y servicios
@@ -338,8 +381,14 @@ export default function ReportsPage() {
                   <Wallet className="h-5 w-5" />
                 </div>
               </div>
-              <p className={`mt-3 text-3xl font-black tracking-tight ${netUtility >= 0 ? "text-primary" : "text-red-400"}`}>
-                ${netUtility.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <p
+                className={`mt-3 text-3xl font-black tracking-tight ${netUtility >= 0 ? "text-primary" : "text-red-400"}`}
+              >
+                $
+                {netUtility.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </p>
               <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
                 Ventas brutas menos gastos
@@ -357,7 +406,11 @@ export default function ReportsPage() {
                 </div>
               </div>
               <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
-                ${data.summary.averageTicket.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {data.summary.averageTicket.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </p>
               <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
                 Promedio ingresado por orden
@@ -376,7 +429,9 @@ export default function ReportsPage() {
               </div>
               <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
                 {Math.round(data.summary.averageCompletionTimeMinutes)}{" "}
-                <span className="text-sm font-bold text-[#E0E0E0]/50 uppercase">min</span>
+                <span className="text-sm font-bold text-[#E0E0E0]/50 uppercase">
+                  min
+                </span>
               </p>
               <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
                 Tiempo de preparación en cocina
@@ -412,7 +467,11 @@ export default function ReportsPage() {
                 </div>
               </div>
               <p className="mt-3 text-3xl font-black text-amber-400 tracking-tight">
-                ${(data.summary.totalUncollected || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {(data.summary.totalUncollected || 0).toLocaleString(
+                  undefined,
+                  { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+                )}
               </p>
               <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
                 Órdenes no cobradas / canceladas
@@ -430,7 +489,11 @@ export default function ReportsPage() {
                 </div>
               </div>
               <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
-                ${(data.summary.totalTips || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {(data.summary.totalTips || 0).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </p>
               <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
                 Propinas acumuladas para staff
@@ -457,7 +520,8 @@ export default function ReportsPage() {
           </div>
 
           <p className="text-xs text-[#E0E0E0]/60 mb-6 font-medium">
-            Haz clic en cualquiera de las barras para desplegar el desglose de productos vendidos ese día.
+            Haz clic en cualquiera de las barras para desplegar el desglose de
+            productos vendidos ese día.
           </p>
 
           {chartData.length > 0 ? (
@@ -500,13 +564,16 @@ export default function ReportsPage() {
                     style={{ cursor: "pointer" }}
                     onClick={(barData) => {
                       const date = (barData.payload as { date: string })?.date;
-                      if (date) setSelectedDay((prev) => (prev === date ? null : date));
+                      if (date)
+                        setSelectedDay((prev) => (prev === date ? null : date));
                     }}
                   >
                     {chartData.map((entry) => (
                       <Cell
                         key={entry.date}
-                        fill={selectedDay === entry.date ? "#F59E0B" : "#3B82F6"}
+                        fill={
+                          selectedDay === entry.date ? "#F59E0B" : "#3B82F6"
+                        }
                       />
                     ))}
                   </Bar>
@@ -524,13 +591,16 @@ export default function ReportsPage() {
             <div className="mt-6 rounded-2xl bg-[#181818] border border-amber-500/30 p-6">
               <h3 className="text-sm font-black text-amber-400 mb-4 uppercase tracking-wider flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" /> Top Productos —{" "}
-                {new Date(`${selectedDay}T12:00:00-06:00`).toLocaleDateString("es-MX", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  timeZone: "America/Mexico_City",
-                })}
+                {new Date(`${selectedDay}T12:00:00-06:00`).toLocaleDateString(
+                  "es-MX",
+                  {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    timeZone: "America/Mexico_City",
+                  },
+                )}
               </h3>
               {selectedDayItems.length > 0 ? (
                 <div className="space-y-3">
@@ -543,7 +613,9 @@ export default function ReportsPage() {
                         <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/20 text-xs font-black text-amber-400">
                           #{i + 1}
                         </span>
-                        <span className="text-sm font-bold text-[#E0E0E0]">{item.name}</span>
+                        <span className="text-sm font-bold text-[#E0E0E0]">
+                          {item.name}
+                        </span>
                       </div>
                       <div className="text-right">
                         <span className="text-sm font-black text-[#E0E0E0]">
@@ -574,7 +646,8 @@ export default function ReportsPage() {
                 Distribución de Ventas por Producto
               </h2>
               <p className="text-xs text-[#E0E0E0]/60 mt-1 font-medium">
-                Analiza el volumen y concentración de ventas individuales por producto y categoría.
+                Analiza el volumen y concentración de ventas individuales por
+                producto y categoría.
               </p>
             </div>
 
@@ -582,14 +655,20 @@ export default function ReportsPage() {
               {/* Category Filter Dropdown */}
               <div className="flex items-center gap-2 bg-[#181818] px-3 py-1.5 rounded-xl border border-white/10 text-xs">
                 <Layers className="h-3.5 w-3.5 text-purple-400" />
-                <span className="text-[#E0E0E0]/60 font-bold uppercase tracking-wider">Cat:</span>
+                <span className="text-[#E0E0E0]/60 font-bold uppercase tracking-wider">
+                  Cat:
+                </span>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="bg-transparent text-[#E0E0E0] text-xs font-bold uppercase tracking-wider outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none rounded px-1"
                 >
                   {categoriesList.map((cat) => (
-                    <option key={cat} value={cat} className="bg-[#242424] text-[#E0E0E0]">
+                    <option
+                      key={cat}
+                      value={cat}
+                      className="bg-[#242424] text-[#E0E0E0]"
+                    >
                       {cat}
                     </option>
                   ))}
@@ -600,19 +679,21 @@ export default function ReportsPage() {
               <div className="flex items-center bg-[#181818] p-1 rounded-xl border border-white/10">
                 <button
                   onClick={() => setProductMetric("revenue")}
-                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-success focus-visible:outline-none ${productMetric === "revenue"
+                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-success focus-visible:outline-none ${
+                    productMetric === "revenue"
                       ? "bg-success text-white shadow-md"
                       : "text-[#E0E0E0]/60 hover:text-white"
-                    }`}
+                  }`}
                 >
                   $ Ingresos
                 </button>
                 <button
                   onClick={() => setProductMetric("quantity")}
-                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:outline-none ${productMetric === "quantity"
+                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:outline-none ${
+                    productMetric === "quantity"
                       ? "bg-purple-600 text-white shadow-md"
                       : "text-[#E0E0E0]/60 hover:text-white"
-                    }`}
+                  }`}
                 >
                   # Unidades
                 </button>
@@ -627,7 +708,10 @@ export default function ReportsPage() {
                 Total Recaudado ({selectedCategory})
               </span>
               <span className="text-lg font-black text-emerald-400 mt-1 block">
-                ${totalCategoryRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                $
+                {totalCategoryRevenue.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
               </span>
             </div>
             <div className="bg-[#181818] p-4 rounded-xl border border-white/5">
@@ -651,14 +735,20 @@ export default function ReportsPage() {
           {/* Horizontal Bar Chart Container */}
           {productChartData.length > 0 ? (
             <div className="w-full overflow-hidden">
-              <div style={{ height: Math.max(260, productChartData.length * 48) }}>
+              <div
+                style={{ height: Math.max(260, productChartData.length * 48) }}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     layout="vertical"
                     data={productChartData}
                     margin={{ top: 10, right: 30, left: 10, bottom: 5 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#374151"
+                      horizontal={false}
+                    />
                     <XAxis
                       type="number"
                       stroke="#9CA3AF"
@@ -690,13 +780,17 @@ export default function ReportsPage() {
                         productMetric === "revenue"
                           ? `$${(value ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`
                           : `${value} unidades vendidas`,
-                        productMetric === "revenue" ? "Ingresos Generados" : "Volumen Vendido",
+                        productMetric === "revenue"
+                          ? "Ingresos Generados"
+                          : "Volumen Vendido",
                       ]}
                       labelFormatter={(label) => `Producto: ${label}`}
                       cursor={{ fill: "rgba(255,255,255,0.05)" }}
                     />
                     <Bar
-                      dataKey={productMetric === "revenue" ? "revenue" : "quantity"}
+                      dataKey={
+                        productMetric === "revenue" ? "revenue" : "quantity"
+                      }
                       fill={productMetric === "revenue" ? "#10B981" : "#8B5CF6"}
                       radius={[0, 6, 6, 0]}
                       barSize={20}
@@ -707,7 +801,8 @@ export default function ReportsPage() {
             </div>
           ) : (
             <p className="py-12 text-center text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest">
-              No hay productos registrados en la categoría o período seleccionado.
+              No hay productos registrados en la categoría o período
+              seleccionado.
             </p>
           )}
         </section>
@@ -798,7 +893,10 @@ export default function ReportsPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-base font-black text-[#E0E0E0]">
-                      ${stats.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      $
+                      {stats.total.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -825,20 +923,31 @@ export default function ReportsPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-white/10 text-xs font-black text-[#E0E0E0]/40 uppercase tracking-wider">
-                  <th scope="col" className="py-3 px-3">Cliente</th>
-                  <th scope="col" className="py-3 px-3 text-right">Gasto Total</th>
-                  <th scope="col" className="py-3 px-3 text-right">Puntos Lealtad</th>
+                  <th scope="col" className="py-3 px-3">
+                    Cliente
+                  </th>
+                  <th scope="col" className="py-3 px-3 text-right">
+                    Gasto Total
+                  </th>
+                  <th scope="col" className="py-3 px-3 text-right">
+                    Puntos Lealtad
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {data.customers.topCustomers.map((customer, index) => (
-                  <tr key={index} className="hover:bg-white/[0.02] transition-colors">
+                  <tr
+                    key={index}
+                    className="hover:bg-white/[0.02] transition-colors"
+                  >
                     <td className="py-3.5 px-3">
                       <div className="flex items-center gap-3">
                         <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-xs font-black text-primary">
                           {customer.name.substring(0, 2).toUpperCase()}
                         </span>
-                        <span className="font-bold text-[#E0E0E0] uppercase">{customer.name}</span>
+                        <span className="font-bold text-[#E0E0E0] uppercase">
+                          {customer.name}
+                        </span>
                       </div>
                     </td>
                     <td className="py-3.5 px-3 text-right text-base font-black text-emerald-400">
@@ -853,7 +962,10 @@ export default function ReportsPage() {
                 ))}
                 {data.customers.topCustomers.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="py-8 text-center text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest">
+                    <td
+                      colSpan={3}
+                      className="py-8 text-center text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest"
+                    >
                       No hay clientes registrados en este período.
                     </td>
                   </tr>

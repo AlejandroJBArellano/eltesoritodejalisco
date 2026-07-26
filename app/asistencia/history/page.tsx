@@ -3,16 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { format } from "date-fns-tz";
 import { differenceInMinutes } from "date-fns";
-import {
-  Calendar,
-  Clock,
-  Filter,
-  Users,
-  CheckCircle2,
-  FileText,
-  Search,
-  RefreshCw,
-} from "lucide-react";
+import { Clock, Filter, Users, FileText, RefreshCw } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import {
   TableSearchInput,
@@ -56,7 +47,8 @@ export default function AttendanceHistoryPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Table Sort & Pagination State
-  type SortField = "name" | "role" | "date" | "check_in" | "duration" | "status";
+  type SortField =
+    "name" | "role" | "date" | "check_in" | "duration" | "status";
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
@@ -79,8 +71,10 @@ export default function AttendanceHistoryPage() {
       }
       const data = await res.json();
       setAttendances(data.attendances || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Error al cargar historial",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -101,6 +95,7 @@ export default function AttendanceHistoryPage() {
   useEffect(() => {
     fetchUsers();
     fetchHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleApplyFilters = () => {
@@ -132,8 +127,12 @@ export default function AttendanceHistoryPage() {
       } else if (sortField === "check_in") {
         comp = new Date(a.check_in).getTime() - new Date(b.check_in).getTime();
       } else if (sortField === "duration") {
-        const durA = a.check_out ? differenceInMinutes(new Date(a.check_out), new Date(a.check_in)) : 0;
-        const durB = b.check_out ? differenceInMinutes(new Date(b.check_out), new Date(b.check_in)) : 0;
+        const durA = a.check_out
+          ? differenceInMinutes(new Date(a.check_out), new Date(a.check_in))
+          : 0;
+        const durB = b.check_out
+          ? differenceInMinutes(new Date(b.check_out), new Date(b.check_in))
+          : 0;
         comp = durA - durB;
       } else if (sortField === "status") {
         comp = a.status.localeCompare(b.status);
@@ -164,7 +163,10 @@ export default function AttendanceHistoryPage() {
   const totalHoursWorked = useMemo(() => {
     return filteredAttendances.reduce((acc, curr) => {
       if (curr.check_in && curr.check_out) {
-        const mins = differenceInMinutes(new Date(curr.check_out), new Date(curr.check_in));
+        const mins = differenceInMinutes(
+          new Date(curr.check_out),
+          new Date(curr.check_in),
+        );
         return acc + Math.max(0, mins) / 60;
       }
       return acc;
@@ -206,7 +208,9 @@ export default function AttendanceHistoryPage() {
               onClick={handleApplyFilters}
               className="rounded-xl bg-[#FFB7CE] px-4 py-1.5 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-1.5"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`}
+              />
               Filtrar
             </button>
           </div>
@@ -274,7 +278,9 @@ export default function AttendanceHistoryPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Total Registros
               </p>
-              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">{filteredAttendances.length}</p>
+              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">
+                {filteredAttendances.length}
+              </p>
             </div>
             <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
               <FileText className="h-5 w-5" />
@@ -300,7 +306,9 @@ export default function AttendanceHistoryPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Turnos Activos Ahora
               </p>
-              <p className="mt-1 text-2xl font-black text-amber-400">{activeCount}</p>
+              <p className="mt-1 text-2xl font-black text-amber-400">
+                {activeCount}
+              </p>
             </div>
             <div className="rounded-xl bg-amber-500/10 p-3 text-amber-400">
               <Users className="h-5 w-5" />
@@ -379,7 +387,10 @@ export default function AttendanceHistoryPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {paginatedAttendances.map((rec) => (
-                    <tr key={rec.id} className="hover:bg-white/[0.02] transition-colors">
+                    <tr
+                      key={rec.id}
+                      className="hover:bg-white/[0.02] transition-colors"
+                    >
                       <td className="py-3.5 px-3">
                         <span className="font-bold text-[#E0E0E0] uppercase">
                           {rec.users?.name || "Desconocido"}
@@ -394,11 +405,15 @@ export default function AttendanceHistoryPage() {
                         {rec.date}
                       </td>
                       <td className="py-3.5 px-3 text-emerald-400 font-mono text-xs font-bold">
-                        {format(new Date(rec.check_in), "HH:mm:ss", { timeZone: TZ })}
+                        {format(new Date(rec.check_in), "HH:mm:ss", {
+                          timeZone: TZ,
+                        })}
                       </td>
                       <td className="py-3.5 px-3 text-red-400 font-mono text-xs font-bold">
                         {rec.check_out
-                          ? format(new Date(rec.check_out), "HH:mm:ss", { timeZone: TZ })
+                          ? format(new Date(rec.check_out), "HH:mm:ss", {
+                              timeZone: TZ,
+                            })
                           : "—"}
                       </td>
                       <td className="py-3.5 px-3 text-right font-bold text-[#E0E0E0]">
@@ -424,7 +439,8 @@ export default function AttendanceHistoryPage() {
                         colSpan={7}
                         className="py-12 text-center text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest"
                       >
-                        No se encontraron registros de asistencia con los filtros seleccionados.
+                        No se encontraron registros de asistencia con los
+                        filtros seleccionados.
                       </td>
                     </tr>
                   )}

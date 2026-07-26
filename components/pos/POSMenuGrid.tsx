@@ -3,14 +3,52 @@ import { Search, X, Plus, PackageSearch } from "lucide-react";
 import { MenuItem } from "@/types/pos";
 import { isMixedOrderItem } from "@/hooks/pos/usePOSCart";
 
-const CATEGORY_CONFIG: Record<string, { label: string; color: string; badgeBg: string; text: string }> = {
-  ANTOJITOS: { label: "Antojitos", color: "#FFB7CE", badgeBg: "bg-primary/10 text-primary border-primary/20", text: "#FFB7CE" },
-  TACOS: { label: "Tacos", color: "#B2FBA5", badgeBg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", text: "#34D399" },
-  "PLATILLOS FUERTES": { label: "Platillos Fuertes", color: "#E6E6FA", badgeBg: "bg-purple-500/10 text-purple-300 border-purple-500/20", text: "#C084FC" },
-  BEBIDAS: { label: "Bebidas", color: "#89CFF0", badgeBg: "bg-blue-500/10 text-blue-400 border-blue-500/20", text: "#60A5FA" },
-  EXTRAS: { label: "Extras", color: "#FDFD96", badgeBg: "bg-amber-500/10 text-amber-400 border-amber-500/20", text: "#FBBF24" },
-  POSTRES: { label: "Postres", color: "#FFDAB9", badgeBg: "bg-orange-500/10 text-orange-400 border-orange-500/20", text: "#FB923C" },
-  OTROS: { label: "Otros", color: "#E0E0E0", badgeBg: "bg-zinc-500/10 text-zinc-300 border-zinc-500/20", text: "#E4E4E7" },
+const CATEGORY_CONFIG: Record<
+  string,
+  { label: string; color: string; badgeBg: string; text: string }
+> = {
+  ANTOJITOS: {
+    label: "Antojitos",
+    color: "#FFB7CE",
+    badgeBg: "bg-primary/10 text-primary border-primary/20",
+    text: "#FFB7CE",
+  },
+  TACOS: {
+    label: "Tacos",
+    color: "#B2FBA5",
+    badgeBg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    text: "#34D399",
+  },
+  "PLATILLOS FUERTES": {
+    label: "Platillos Fuertes",
+    color: "#E6E6FA",
+    badgeBg: "bg-purple-500/10 text-purple-300 border-purple-500/20",
+    text: "#C084FC",
+  },
+  BEBIDAS: {
+    label: "Bebidas",
+    color: "#89CFF0",
+    badgeBg: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    text: "#60A5FA",
+  },
+  EXTRAS: {
+    label: "Extras",
+    color: "#FDFD96",
+    badgeBg: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    text: "#FBBF24",
+  },
+  POSTRES: {
+    label: "Postres",
+    color: "#FFDAB9",
+    badgeBg: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+    text: "#FB923C",
+  },
+  OTROS: {
+    label: "Otros",
+    color: "#E0E0E0",
+    badgeBg: "bg-zinc-500/10 text-zinc-300 border-zinc-500/20",
+    text: "#E4E4E7",
+  },
 };
 
 interface POSMenuGridProps {
@@ -67,7 +105,7 @@ export function POSMenuGrid({
       <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
         <button
           type="button"
-          onClick={() => setActiveCategory("")} 
+          onClick={() => setActiveCategory("")}
           className={`px-4 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${
             activeCategory === ""
               ? "bg-white/10 border-white/20 text-[#E0E0E0] shadow-sm scale-105"

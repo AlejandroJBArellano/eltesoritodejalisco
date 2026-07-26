@@ -9,7 +9,7 @@ import {
   RefreshCw,
   Sparkles,
   Trash2,
-  UtensilsCrossed
+  UtensilsCrossed,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -31,7 +31,9 @@ export function IngredientBatchControl({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
-  const [summaryData, setSummaryData] = useState<BatchSummaryResponse | null>(null);
+  const [summaryData, setSummaryData] = useState<BatchSummaryResponse | null>(
+    null,
+  );
   const [isArmed, setIsArmed] = useState(false);
 
   // Helper for duration display
@@ -54,7 +56,7 @@ export function IngredientBatchControl({
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/inventory/smart-batch?ingredientId=${ingredientId}`
+        `/api/inventory/smart-batch?ingredientId=${ingredientId}`,
       );
       if (res.ok) {
         const data = await res.json();
@@ -126,7 +128,7 @@ export function IngredientBatchControl({
         `/api/inventory/smart-batch/${activeBatch.id}/finish`,
         {
           method: "POST",
-        }
+        },
       );
 
       if (res.ok) {
@@ -166,7 +168,10 @@ export function IngredientBatchControl({
         </h3>
         {activeBatch ? (
           <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" aria-hidden="true" />
+            <span
+              className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"
+              aria-hidden="true"
+            />
             En Uso
           </span>
         ) : (
@@ -195,27 +200,25 @@ export function IngredientBatchControl({
                 </div>
                 <div className="max-h-32 space-y-1.5 overflow-y-auto pr-1 text-amber-200/90 custom-scrollbar">
                   {summaryData.summary &&
-                    Object.entries(summaryData.summary).map(
-                      ([item, count]) => (
-                        <div
-                          key={item}
-                          className="flex justify-between items-center text-xs"
-                        >
-                          <span className="truncate pr-2 text-[#E0E0E0]/80">
-                            {item}
-                          </span>
-                          <span className="font-mono font-bold text-amber-300">
-                            {count}
-                          </span>
-                        </div>
-                      )
-                    )}
+                    Object.entries(summaryData.summary).map(([item, count]) => (
+                      <div
+                        key={item}
+                        className="flex justify-between items-center text-xs"
+                      >
+                        <span className="truncate pr-2 text-[#E0E0E0]/80">
+                          {item}
+                        </span>
+                        <span className="font-mono font-bold text-amber-300">
+                          {count}
+                        </span>
+                      </div>
+                    ))}
                   {(!summaryData.summary ||
                     Object.keys(summaryData.summary).length === 0) && (
-                      <p className="italic text-amber-200/60">
-                        No se registraron ventas en este lote.
-                      </p>
-                    )}
+                    <p className="italic text-amber-200/60">
+                      No se registraron ventas en este lote.
+                    </p>
+                  )}
                 </div>
                 <div className="mt-3 flex justify-between border-t border-amber-500/20 pt-2 font-black text-amber-300">
                   <span>Total Producido:</span>
@@ -276,11 +279,16 @@ export function IngredientBatchControl({
               type="button"
               onClick={handleFinishBatch}
               disabled={loading}
-              aria-label={isArmed ? `Confirmar cierre de lote para ${ingredientName}` : `Marcar lote de ${ingredientName} como agotado`}
-              className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl p-4 transition-all shadow-md active:scale-[0.98] ${isArmed
+              aria-label={
+                isArmed
+                  ? `Confirmar cierre de lote para ${ingredientName}`
+                  : `Marcar lote de ${ingredientName} como agotado`
+              }
+              className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl p-4 transition-all shadow-md active:scale-[0.98] ${
+                isArmed
                   ? "border-2 border-red-500 bg-red-600/90 text-white shadow-lg shadow-red-500/30 scale-[1.01]"
                   : "border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/50"
-                }`}
+              }`}
             >
               <div className="flex items-center gap-2 text-sm font-black uppercase tracking-wider">
                 {isArmed ? (
@@ -296,8 +304,9 @@ export function IngredientBatchControl({
                 )}
               </div>
               <span
-                className={`text-[10px] font-medium ${isArmed ? "text-white/90 font-bold" : "text-red-400/70"
-                  }`}
+                className={`text-[10px] font-medium ${
+                  isArmed ? "text-white/90 font-bold" : "text-red-400/70"
+                }`}
               >
                 {isArmed
                   ? "Presiona nuevamente para finalizar"
@@ -310,4 +319,3 @@ export function IngredientBatchControl({
     </div>
   );
 }
-

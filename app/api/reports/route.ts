@@ -49,7 +49,9 @@ export async function GET(request: NextRequest) {
       const prevMonthStr = String(month).padStart(2, "0");
       startDate = new Date(`${year}-${prevMonthStr}-01T00:00:00-06:00`);
       const lastDayOfPrevMonth = new Date(year, month, 0).getDate();
-      endDate = new Date(`${year}-${prevMonthStr}-${String(lastDayOfPrevMonth).padStart(2, "0")}T23:59:59-06:00`);
+      endDate = new Date(
+        `${year}-${prevMonthStr}-${String(lastDayOfPrevMonth).padStart(2, "0")}T23:59:59-06:00`,
+      );
     } else if (period === "custom" && customStartParam) {
       startDate = new Date(`${customStartParam}T00:00:00-06:00`);
       if (customEndParam) {
@@ -66,13 +68,15 @@ export async function GET(request: NextRequest) {
     // 1. Sales Summary (Completed Orders)
     let ordersQuery = supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         *,
         order_items (
           *,
           menu_items (*)
         )
-      `)
+      `,
+      )
       .in("status", ["DELIVERED", "PAID"])
       .gte("created_at", startDate.toISOString())
       .order("created_at", { ascending: true });
@@ -89,23 +93,23 @@ export async function GET(request: NextRequest) {
     let totalCompletionTimeMs = 0;
     let completedOrdersCount = 0;
 
-    const totalSales = (completedOrders || []).reduce(
-      (sum, order) => {
-        if (order.created_at && order.completed_at) {
-          const created = new Date(order.created_at).getTime();
-          const completed = new Date(order.completed_at).getTime();
-          if (completed >= created) {
-            totalCompletionTimeMs += (completed - created);
-            completedOrdersCount++;
-          }
+    const totalSales = (completedOrders || []).reduce((sum, order) => {
+      if (order.created_at && order.completed_at) {
+        const created = new Date(order.created_at).getTime();
+        const completed = new Date(order.completed_at).getTime();
+        if (completed >= created) {
+          totalCompletionTimeMs += completed - created;
+          completedOrdersCount++;
         }
-        return sum + (order.total || 0);
-      },
-      0,
-    );
+      }
+      return sum + (order.total || 0);
+    }, 0);
     const totalOrders = (completedOrders || []).length;
     const averageTicket = totalOrders > 0 ? totalSales / totalOrders : 0;
-    const averageCompletionTimeMinutes = completedOrdersCount > 0 ? (totalCompletionTimeMs / completedOrdersCount) / (1000 * 60) : 0;
+    const averageCompletionTimeMinutes =
+      completedOrdersCount > 0
+        ? totalCompletionTimeMs / completedOrdersCount / (1000 * 60)
+        : 0;
 
     let paymentsQuery = supabase
       .from("payments")
@@ -118,13 +122,16 @@ export async function GET(request: NextRequest) {
 
     const totalTips = (payments || []).reduce(
       (sum, p) => sum + (p.tip_amount || 0),
-      0
+      0,
     );
 
     // Sales by Day
     const salesByDay: Record<string, number> = {};
     // Items by Day for interactive drill-down
-    const itemsByDay: Record<string, Record<string, { name: string; quantity: number; revenue: number }>> = {};
+    const itemsByDay: Record<
+      string,
+      Record<string, { name: string; quantity: number; revenue: number }>
+    > = {};
 
     (completedOrders || []).forEach((order) => {
       const date = new Intl.DateTimeFormat("en-CA", {
@@ -152,7 +159,10 @@ export async function GET(request: NextRequest) {
     });
 
     // Convert itemsByDay values to sorted arrays
-    const itemsByDaySorted: Record<string, { name: string; quantity: number; revenue: number }[]> = {};
+    const itemsByDaySorted: Record<
+      string,
+      { name: string; quantity: number; revenue: number }[]
+    > = {};
     Object.entries(itemsByDay).forEach(([date, items]) => {
       itemsByDaySorted[date] = Object.values(items)
         .sort((a, b) => b.quantity - a.quantity)
@@ -167,11 +177,20 @@ export async function GET(request: NextRequest) {
         salesBySource[source] = { count: 0, total: 0 };
       }
       salesBySource[source].count += 1;
-      salesBySource[source].total += (order.total || 0);
+      salesBySource[source].total += order.total || 0;
     });
 
     // 2. Product Sales Aggregation (for top items & distribution chart)
-    const itemSales: Record<string, { id: string; name: string; category: string; quantity: number; revenue: number }> = {};
+    const itemSales: Record<
+      string,
+      {
+        id: string;
+        name: string;
+        category: string;
+        quantity: number;
+        revenue: number;
+      }
+    > = {};
     const categorySet = new Set<string>();
 
     (completedOrders || []).forEach((order) => {
@@ -193,7 +212,9 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    const productSales = Object.values(itemSales).sort((a, b) => b.revenue - a.revenue);
+    const productSales = Object.values(itemSales).sort(
+      (a, b) => b.revenue - a.revenue,
+    );
 
     const topSellingItems = [...productSales]
       .sort((a, b) => b.quantity - a.quantity)
@@ -212,7 +233,7 @@ export async function GET(request: NextRequest) {
 
     let newCustQuery = supabase
       .from("customers")
-      .select("*", { count: 'exact', head: true })
+      .select("*", { count: "exact", head: true })
       .gte("created_at", startDate.toISOString());
     if (endDate) {
       newCustQuery = newCustQuery.lte("created_at", endDate.toISOString());
@@ -227,7 +248,10 @@ export async function GET(request: NextRequest) {
       .select("amount")
       .gte("date", startDate.toISOString().split("T")[0]);
     if (endDate) {
-      expensesQuery = expensesQuery.lte("date", endDate.toISOString().split("T")[0]);
+      expensesQuery = expensesQuery.lte(
+        "date",
+        endDate.toISOString().split("T")[0],
+      );
     }
     const { data: expensesData, error: expError } = await expensesQuery;
 
@@ -235,7 +259,7 @@ export async function GET(request: NextRequest) {
 
     const totalExpenses = (expensesData || []).reduce(
       (sum, exp) => sum + Number(exp.amount),
-      0
+      0,
     );
 
     // 6. Pérdidas por Cobro (Uncollected Orders)
@@ -245,13 +269,16 @@ export async function GET(request: NextRequest) {
       .eq("status", "UNCOLLECTED")
       .gte("created_at", startDate.toISOString());
     if (endDate) {
-      uncollectedQuery = uncollectedQuery.lte("created_at", endDate.toISOString());
+      uncollectedQuery = uncollectedQuery.lte(
+        "created_at",
+        endDate.toISOString(),
+      );
     }
     const { data: uncollectedOrders } = await uncollectedQuery;
 
     const totalUncollected = (uncollectedOrders || []).reduce(
       (sum, order) => sum + (order.total || 0),
-      0
+      0,
     );
 
     return NextResponse.json({
@@ -273,8 +300,8 @@ export async function GET(request: NextRequest) {
       categories,
       customers: {
         topCustomers: customers,
-        newCustomersCount: newCustomersCount || 0
-      }
+        newCustomersCount: newCustomersCount || 0,
+      },
     });
   } catch (error) {
     console.error("Error generating reports:", error);

@@ -1,19 +1,23 @@
-import { getTodayExecutions, getTaskCategories, getPrimordialTasks } from '@/lib/actions/tasks'
-import { AdminTareasClient } from '@/components/tareas/AdminTareasClient'
-import { getUser } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import { PageHeader } from '@/components/PageHeader'
-import { CheckSquare } from 'lucide-react'
+import {
+  getTodayExecutions,
+  getTaskCategories,
+  getPrimordialTasks,
+} from "@/lib/actions/tasks";
+import { AdminTareasClient } from "@/components/tareas/AdminTareasClient";
+import { getUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { PageHeader } from "@/components/PageHeader";
+import { CheckSquare } from "lucide-react";
 
 export default async function AdminTareasPage() {
-  const user = await getUser()
+  const user = await getUser();
   if (!user) {
-    redirect('/login')
+    redirect("/login");
   }
 
-  const executions = await getTodayExecutions()
-  const categories = await getTaskCategories()
-  const tasks = await getPrimordialTasks()
+  const executions = await getTodayExecutions();
+  const categories = await getTaskCategories();
+  const tasks = await getPrimordialTasks();
 
   return (
     <main className="min-h-screen bg-[#121212] text-[#E0E0E0]">
@@ -25,12 +29,12 @@ export default async function AdminTareasPage() {
       />
 
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <AdminTareasClient 
-          initialExecutions={executions} 
+        <AdminTareasClient
+          initialExecutions={executions}
           initialCategories={categories}
           initialTasks={tasks}
         />
       </div>
     </main>
-  )
+  );
 }

@@ -77,7 +77,9 @@ function ModuleCard({
               <Icon className="h-7 w-7" />
             </div>
             {badge && (
-              <span className={`rounded-full px-4 py-1 text-xs font-black uppercase tracking-widest ${themeClass}`}>
+              <span
+                className={`rounded-full px-4 py-1 text-xs font-black uppercase tracking-widest ${themeClass}`}
+              >
                 {badge}
               </span>
             )}
@@ -86,7 +88,9 @@ function ModuleCard({
             className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase transition-colors flex items-center justify-between"
             style={{ "--hover-color": hoverColor } as React.CSSProperties}
           >
-            <span className="group-hover:text-[var(--hover-color)] transition-colors">{title}</span>
+            <span className="group-hover:text-[var(--hover-color)] transition-colors">
+              {title}
+            </span>
             <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </h3>
           <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
@@ -140,7 +144,9 @@ export default async function Home() {
     }).format(new Date());
 
     // Convert the start of the day in CDMX to UTC for the query
-    const todayStartUTC = new Date(`${mxDateString}T00:00:00-06:00`).toISOString();
+    const todayStartUTC = new Date(
+      `${mxDateString}T00:00:00-06:00`,
+    ).toISOString();
 
     const { data: todayOrders } = await supabase
       .from("orders")
@@ -150,7 +156,7 @@ export default async function Home() {
 
     salesToday = (todayOrders || []).reduce(
       (sum, order) => sum + (order.total || 0),
-      0
+      0,
     );
 
     // 2.5 Propinas Hoy
@@ -161,7 +167,7 @@ export default async function Home() {
 
     tipsToday = (todayPayments || []).reduce(
       (sum, payment) => sum + (payment.tip_amount || 0),
-      0
+      0,
     );
 
     // 3. Clientes
@@ -175,7 +181,6 @@ export default async function Home() {
   return (
     <div className="min-h-screen">
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-
         {/* Quick Stats - Only for Admins */}
         {isAdmin && (
           <div className="mb-12">
@@ -192,7 +197,10 @@ export default async function Home() {
               <StatCard
                 title="Venta Bruta"
                 icon={DollarSign}
-                value={new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(salesToday)}
+                value={new Intl.NumberFormat("es-MX", {
+                  style: "currency",
+                  currency: "MXN",
+                }).format(salesToday)}
                 themeClass="bg-secondary/10 text-secondary"
               />
               <StatCard
@@ -204,7 +212,10 @@ export default async function Home() {
               <StatCard
                 title="Propinas Hoy"
                 icon={HandCoins}
-                value={new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(tipsToday)}
+                value={new Intl.NumberFormat("es-MX", {
+                  style: "currency",
+                  currency: "MXN",
+                }).format(tipsToday)}
                 themeClass="bg-blue-500/10 text-blue-500"
               />
             </div>
@@ -370,7 +381,6 @@ export default async function Home() {
             </div>
           </section>
         )}
-
       </main>
     </div>
   );

@@ -39,6 +39,7 @@ curl -X POST http://localhost:3000/api/orders \
 ```
 
 **Respuesta:**
+
 ```json
 {
   "order": {
@@ -108,6 +109,7 @@ curl http://localhost:3000/api/inventory?lowStock=true
 ```
 
 **Respuesta:**
+
 ```json
 {
   "ingredients": [
@@ -181,6 +183,7 @@ curl -X POST http://localhost:3000/api/inventory/deduct \
 ```
 
 **Respuesta:**
+
 ```json
 {
   "success": true,
@@ -232,6 +235,7 @@ curl http://localhost:3000/api/customers/cust1
 ```
 
 **Respuesta:**
+
 ```json
 {
   "customer": {
@@ -316,20 +320,21 @@ curl http://localhost:3000/api/analytics/by-source?from=2026-02-01&to=2026-02-28
 ```
 
 **Respuesta:**
+
 ```json
 {
   "analytics": [
     {
       "source": "TikTok",
       "totalOrders": 45,
-      "totalRevenue": 12350.00,
+      "totalRevenue": 12350.0,
       "averageOrderValue": 274.44
     },
     {
       "source": "Instagram",
       "totalOrders": 32,
-      "totalRevenue": 8960.00,
-      "averageOrderValue": 280.00
+      "totalRevenue": 8960.0,
+      "averageOrderValue": 280.0
     }
   ]
 }
@@ -358,20 +363,20 @@ curl http://localhost:3000/api/analytics/inventory-usage?from=2026-02-01&to=2026
 ### React Hook para Órdenes en Tiempo Real
 
 ```typescript
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export function useRealtimeOrders() {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     // Fetch inicial
-    fetch('/api/orders?status=PENDING,PREPARING,READY')
-      .then(res => res.json())
-      .then(data => setOrders(data.orders));
+    fetch("/api/orders?status=PENDING,PREPARING,READY")
+      .then((res) => res.json())
+      .then((data) => setOrders(data.orders));
 
     // Polling cada 5 segundos (reemplazar con WebSocket)
     const interval = setInterval(async () => {
-      const res = await fetch('/api/orders?status=PENDING,PREPARING,READY');
+      const res = await fetch("/api/orders?status=PENDING,PREPARING,READY");
       const data = await res.json();
       setOrders(data.orders);
     }, 5000);
@@ -388,20 +393,20 @@ export function useRealtimeOrders() {
 ```typescript
 async function updateOrderStatus(orderId: string, newStatus: string) {
   const response = await fetch(`/api/orders/${orderId}/status`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status: newStatus }),
   });
 
   if (!response.ok) {
-    throw new Error('Failed to update order');
+    throw new Error("Failed to update order");
   }
 
   return response.json();
 }
 
 // Uso
-await updateOrderStatus('ord_xyz123', 'READY');
+await updateOrderStatus("ord_xyz123", "READY");
 ```
 
 ---
@@ -423,7 +428,7 @@ Puedes importar esta colección en Postman:
       "name": "Create Order",
       "request": {
         "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
         "url": "{{baseUrl}}/api/orders",
         "body": {
           "mode": "raw",
@@ -432,9 +437,7 @@ Puedes importar esta colección en Postman:
       }
     }
   ],
-  "variable": [
-    {"key": "baseUrl", "value": "http://localhost:3000"}
-  ]
+  "variable": [{ "key": "baseUrl", "value": "http://localhost:3000" }]
 }
 ```
 
@@ -452,6 +455,7 @@ Todas las APIs devuelven errores en este formato:
 ```
 
 **Códigos HTTP:**
+
 - `200`: Success
 - `201`: Created
 - `400`: Bad Request (datos inválidos)

@@ -31,7 +31,7 @@ export const MEX_TIMEZONE = "America/Mexico_City";
  */
 export function getCurrentCDMXDate(): string {
   const now = new Date();
-  
+
   // Format as YYYY-MM-DDTHH:MM:SS
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: MEX_TIMEZONE,
@@ -43,12 +43,15 @@ export function getCurrentCDMXDate(): string {
     second: "2-digit",
     hourCycle: "h23",
   });
-  
+
   const parts = formatter.formatToParts(now);
-  const partMap = parts.reduce((acc, part) => {
-    acc[part.type] = part.value;
-    return acc;
-  }, {} as Record<string, string>);
+  const partMap = parts.reduce(
+    (acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 
   // Dynamically calculate the CDMX UTC offset (handles DST correctly)
   const cdmxStr = `${partMap.year}-${partMap.month}-${partMap.day}T${partMap.hour}:${partMap.minute}:${partMap.second}`;
@@ -80,7 +83,7 @@ export function getCurrentCDMXDay(): string {
  */
 export function formatDateTime(date: Date | string | number): string {
   if (!date) return "N/A";
-  
+
   return new Intl.DateTimeFormat("es-MX", {
     dateStyle: "medium",
     timeStyle: "short",

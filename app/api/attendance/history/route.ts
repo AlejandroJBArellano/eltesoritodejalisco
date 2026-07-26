@@ -5,8 +5,10 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -21,14 +23,12 @@ export async function GET(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
 
-
     // 2. Secondary check: users table
     const { data: dbUserById } = await adminSupabase
       .from("users")
       .select("id, name, email, role")
       .eq("id", user.id)
       .maybeSingle();
-
 
     let dbUserByEmail = null;
     if (!dbUserById && user.email) {
@@ -41,18 +41,20 @@ export async function GET(request: NextRequest) {
     }
 
     // Prioritize profileData.role (from profiles table)
-    let role =
+    const role =
       profileData?.role ||
       dbUserById?.role ||
       dbUserByEmail?.role ||
       (user.user_metadata?.role as string);
 
-
     const isAdmin = role === "ADMIN" || role === "MANAGER" || !role;
 
-
     // Sync users table role if profileData has ADMIN but users table has obsolete role
-    if (profileData?.role === "ADMIN" && dbUserById && dbUserById.role !== "ADMIN") {
+    if (
+      profileData?.role === "ADMIN" &&
+      dbUserById &&
+      dbUserById.role !== "ADMIN"
+    ) {
       await adminSupabase
         .from("users")
         .update({ role: "ADMIN" })
@@ -62,8 +64,10 @@ export async function GET(request: NextRequest) {
     if (!isAdmin) {
       console.warn("[ATTENDANCE_HISTORY] Permission DENIED for role:", role);
       return NextResponse.json(
-        { error: `No tienes permisos para ver el historial completo de asistencias (Rol actual: ${role}).` },
-        { status: 403 }
+        {
+          error: `No tienes permisos para ver el historial completo de asistencias (Rol actual: ${role}).`,
+        },
+        { status: 403 },
       );
     }
 
@@ -92,7 +96,10 @@ export async function GET(request: NextRequest) {
     const { data: attendanceList, error: attError } = await attendanceQuery;
 
     if (attError) {
-      console.error("[ATTENDANCE_HISTORY] Error fetching attendance list:", attError);
+      console.error(
+        "[ATTENDANCE_HISTORY] Error fetching attendance list:",
+        attError,
+      );
       throw attError;
     }
 
@@ -108,17 +115,20 @@ export async function GET(request: NextRequest) {
       const u = usersMap.get(att.user_id);
       return {
         ...att,
-        users: u ? { id: u.id, name: u.name, email: u.email, role: u.role } : { id: att.user_id, name: "Empleado", email: "", role: "STAFF" },
+        users: u
+          ? { id: u.id, name: u.name, email: u.email, role: u.role }
+          : { id: att.user_id, name: "Empleado", email: "", role: "STAFF" },
       };
     });
-
 
     return NextResponse.json({ attendances: enrichedAttendances });
   } catch (error: any) {
     console.error("[ATTENDANCE_HISTORY] GET internal error:", error);
     return NextResponse.json(
-      { error: error?.message || "Error al obtener el historial de asistencias" },
-      { status: 500 }
+      {
+        error: error?.message || "Error al obtener el historial de asistencias",
+      },
+      { status: 500 },
     );
   }
 }

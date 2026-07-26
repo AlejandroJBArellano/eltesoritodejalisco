@@ -14,7 +14,6 @@ import {
   Trash2,
   RefreshCw,
   Gift,
-  Search,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Modal } from "@/components/ui/Modal";
@@ -67,7 +66,7 @@ export default function CustomersPage() {
 
   // Table Filters, Sort & Pagination State
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   type SortField = "name" | "loyalty_points" | "total_spend" | "birthday";
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -81,24 +80,26 @@ export default function CustomersPage() {
     () =>
       customers.reduce(
         (acc, customer) => acc + (customer.loyalty_points || 0),
-        0
+        0,
       ),
-    [customers]
+    [customers],
   );
 
   const totalSpendSum = useMemo(
     () =>
       customers.reduce(
         (acc, customer) => acc + Number(customer.total_spend || 0),
-        0
+        0,
       ),
-    [customers]
+    [customers],
   );
 
   const avgPointsPerCustomer = useMemo(
     () =>
-      customers.length > 0 ? (totalLoyaltyPoints / customers.length).toFixed(1) : "0",
-    [customers, totalLoyaltyPoints]
+      customers.length > 0
+        ? (totalLoyaltyPoints / customers.length).toFixed(1)
+        : "0",
+    [customers, totalLoyaltyPoints],
   );
 
   const fetchCustomers = async () => {
@@ -113,7 +114,7 @@ export default function CustomersPage() {
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al cargar"
+        error instanceof Error ? error.message : "Error inesperado al cargar",
       );
     } finally {
       setIsLoading(false);
@@ -201,7 +202,7 @@ export default function CustomersPage() {
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al guardar"
+        error instanceof Error ? error.message : "Error inesperado al guardar",
       );
     } finally {
       setIsSubmitting(false);
@@ -231,7 +232,7 @@ export default function CustomersPage() {
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al eliminar"
+        error instanceof Error ? error.message : "Error inesperado al eliminar",
       );
     } finally {
       setIsSubmitting(false);
@@ -319,7 +320,9 @@ export default function CustomersPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Total Registrados
               </p>
-              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">{customers.length}</p>
+              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">
+                {customers.length}
+              </p>
             </div>
             <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
               <Users className="h-5 w-5" />
@@ -331,7 +334,9 @@ export default function CustomersPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Puntos de Lealtad
               </p>
-              <p className="mt-1 text-2xl font-black text-amber-400">{totalLoyaltyPoints}</p>
+              <p className="mt-1 text-2xl font-black text-amber-400">
+                {totalLoyaltyPoints}
+              </p>
             </div>
             <div className="rounded-xl bg-amber-500/10 p-3 text-amber-400">
               <Award className="h-5 w-5" />
@@ -344,7 +349,10 @@ export default function CustomersPage() {
                 Consumo Acumulado
               </p>
               <p className="mt-1 text-2xl font-black text-emerald-400">
-                ${totalSpendSum.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                $
+                {totalSpendSum.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
               </p>
             </div>
             <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
@@ -357,7 +365,9 @@ export default function CustomersPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Prom. Puntos/Cliente
               </p>
-              <p className="mt-1 text-2xl font-black text-purple-400">{avgPointsPerCustomer}</p>
+              <p className="mt-1 text-2xl font-black text-purple-400">
+                {avgPointsPerCustomer}
+              </p>
             </div>
             <div className="rounded-xl bg-purple-500/10 p-3 text-purple-400">
               <Gift className="h-5 w-5" />
@@ -382,7 +392,9 @@ export default function CustomersPage() {
                 onClick={fetchCustomers}
                 className="text-xs text-[#E0E0E0]/60 hover:text-white flex items-center gap-1.5 font-bold"
               >
-                <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`}
+                />
               </button>
             </div>
           </div>
@@ -450,7 +462,9 @@ export default function CustomersPage() {
                           </p>
                         )}
                         {!c.phone && !c.email && (
-                          <span className="text-[#E0E0E0]/30 italic">Sin datos</span>
+                          <span className="text-[#E0E0E0]/30 italic">
+                            Sin datos
+                          </span>
                         )}
                       </div>
                     </td>
@@ -492,9 +506,17 @@ export default function CustomersPage() {
                               ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
                               : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
                           }`}
-                          title={deleteArmedId === c.id ? "Confirmar eliminación" : "Eliminar Cliente"}
+                          title={
+                            deleteArmedId === c.id
+                              ? "Confirmar eliminación"
+                              : "Eliminar Cliente"
+                          }
                         >
-                          {deleteArmedId === c.id ? "¿Seguro?" : <Trash2 className="h-4 w-4" />}
+                          {deleteArmedId === c.id ? (
+                            "¿Seguro?"
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </td>
@@ -619,8 +641,8 @@ export default function CustomersPage() {
               {isSubmitting
                 ? "Guardando..."
                 : isEditing
-                ? "Actualizar Cliente"
-                : "Guardar Cliente"}
+                  ? "Actualizar Cliente"
+                  : "Guardar Cliente"}
             </button>
           </div>
         </form>

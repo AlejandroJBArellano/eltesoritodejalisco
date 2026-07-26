@@ -23,15 +23,16 @@ export async function createUser(formData: FormData) {
     const adminClient = createAdminClient();
 
     // Crear el usuario en auth
-    const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: fullName,
-        role: role,
-      }
-    });
+    const { data: newUser, error: createError } =
+      await adminClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: fullName,
+          role: role,
+        },
+      });
 
     if (createError) {
       if (createError.message.includes("already existing")) {
@@ -44,14 +45,12 @@ export async function createUser(formData: FormData) {
     // El trigger en la BD podría estar creando el profile vacío. Nosotros lo actualizamos.
     // O si no hay trigger, lo insertamos. Primero intentamos update, si no afecta, insert.
     if (newUser.user) {
-      const { error: upsertError } = await adminClient
-        .from("profiles")
-        .upsert({
-          id: newUser.user.id,
-          email: email,
-          full_name: fullName,
-          role: role,
-        });
+      const { error: upsertError } = await adminClient.from("profiles").upsert({
+        id: newUser.user.id,
+        email: email,
+        full_name: fullName,
+        role: role,
+      });
 
       if (upsertError) {
         console.error("Error upserting profile:", upsertError);
@@ -80,24 +79,24 @@ export async function updateUserRole(id: string, newRole: string) {
 
     // Actualizamos perfil
     const { error: updateError } = await adminClient
-        .from("profiles")
-        .update({ role: newRole })
-        .eq("id", id);
-    
+      .from("profiles")
+      .update({ role: newRole })
+      .eq("id", id);
+
     if (updateError) {
-        return { error: "Error al actualizar el rol" };
+      return { error: "Error al actualizar el rol" };
     }
 
     // Opcional: actualizar user_metadata
     await adminClient.auth.admin.updateUserById(id, {
-        user_metadata: { role: newRole }
+      user_metadata: { role: newRole },
     });
 
     revalidatePath("/admin/users");
     return { success: true };
   } catch (err) {
-      console.error(err);
-      return { error: "Ocurrió un error inesperado." };
+    console.error(err);
+    return { error: "Ocurrió un error inesperado." };
   }
 }
 
@@ -107,9 +106,9 @@ export async function deleteUser(id: string) {
     if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
       return { error: "No autorizado" };
     }
-    
+
     if (profile.id === id) {
-        return { error: "No te puedes borrar a ti mismo" };
+      return { error: "No te puedes borrar a ti mismo" };
     }
 
     const adminClient = createAdminClient();
@@ -118,7 +117,7 @@ export async function deleteUser(id: string) {
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(id);
 
     if (deleteError) {
-        return { error: "Error al eliminar usuario de Auth" };
+      return { error: "Error al eliminar usuario de Auth" };
     }
 
     revalidatePath("/admin/users");

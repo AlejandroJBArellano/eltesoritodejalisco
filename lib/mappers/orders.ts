@@ -8,7 +8,9 @@ import type { Customer, OrderStatus, OrderWithDetails, Payment } from "@/types";
  * Safely parses any date string, timestamp, or Date object into a valid JS Date.
  * Handles ISO strings with or without timezone offsets (e.g. +00:00, -06:00, Z).
  */
-export function safeParseDate(input: string | Date | number | null | undefined): Date {
+export function safeParseDate(
+  input: string | Date | number | null | undefined,
+): Date {
   if (!input) return new Date();
   if (input instanceof Date) return isNaN(input.getTime()) ? new Date() : input;
   if (typeof input === "number") return new Date(input);
@@ -84,7 +86,9 @@ export interface DbOrderPayload {
 export const mapOrderData = (dbOrder: DbOrderPayload): OrderWithDetails => {
   const createdAt = safeParseDate(dbOrder.created_at);
   const updatedAt = safeParseDate(dbOrder.updated_at);
-  const completedAt = dbOrder.completed_at ? safeParseDate(dbOrder.completed_at) : undefined;
+  const completedAt = dbOrder.completed_at
+    ? safeParseDate(dbOrder.completed_at)
+    : undefined;
 
   return {
     id: dbOrder.id,
@@ -132,7 +136,7 @@ export const mapOrderData = (dbOrder: DbOrderPayload): OrderWithDetails => {
         }))
       : [],
     payments: Array.isArray(dbOrder.payments)
-      ? dbOrder.payments.map((p) => ({
+      ? (dbOrder.payments.map((p) => ({
           id: p.id,
           orderId: p.order_id,
           method: p.method,
@@ -141,8 +145,9 @@ export const mapOrderData = (dbOrder: DbOrderPayload): OrderWithDetails => {
           change: p.change,
           tipAmount: p.tip_amount || 0,
           createdAt: safeParseDate(p.created_at),
-        })) as Payment[]
+        })) as Payment[])
       : [],
-    customer: (dbOrder.customers || dbOrder.customer || undefined) as Customer | undefined,
+    customer: (dbOrder.customers || dbOrder.customer || undefined) as
+      Customer | undefined,
   };
 };

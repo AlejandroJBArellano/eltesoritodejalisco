@@ -3,7 +3,17 @@
 import { useRealtimeOrders } from "@/hooks/useOrders";
 import { OrderStatus, type OrderWithDetails } from "@/types";
 import { useState } from "react";
-import { BellRing, Bell, LayoutGrid, Layers, ChefHat, CheckCircle2, Clock, AlertCircle, X } from "lucide-react";
+import {
+  BellRing,
+  Bell,
+  LayoutGrid,
+  Layers,
+  ChefHat,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  X,
+} from "lucide-react";
 import { OrderCard } from "./OrderCard";
 import { SmartBatchingView } from "./SmartBatchingView";
 import { PageHeader } from "@/components/PageHeader";
@@ -67,10 +77,14 @@ function KanbanColumn({
     <div className="rounded-2xl bg-zinc-900/80 p-5 shadow-lg border border-zinc-800/80 backdrop-blur-sm">
       <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4 mb-5">
         <h2 className="text-base font-black text-zinc-100 uppercase tracking-tight flex items-center gap-2.5">
-          <span className={`h-3 w-3 rounded-full ${theme.bg} shadow-sm ${theme.shadow}`}></span>
+          <span
+            className={`h-3 w-3 rounded-full ${theme.bg} shadow-sm ${theme.shadow}`}
+          ></span>
           {title}
         </h2>
-        <span className={`rounded-full ${theme.badgeBg} px-3 py-1 text-xs font-black ${theme.text} uppercase tracking-widest border ${theme.border}`}>
+        <span
+          className={`rounded-full ${theme.badgeBg} px-3 py-1 text-xs font-black ${theme.text} uppercase tracking-widest border ${theme.border}`}
+        >
           {count}
         </span>
       </div>
@@ -90,9 +104,7 @@ function KanbanColumn({
             <p className="text-xs font-black text-zinc-500 uppercase tracking-widest">
               {emptyTitle}
             </p>
-            <p className="text-[11px] text-zinc-600 mt-1">
-              {emptyDescription}
-            </p>
+            <p className="text-[11px] text-zinc-600 mt-1">{emptyDescription}</p>
           </div>
         )}
       </div>
@@ -156,7 +168,9 @@ export function KitchenDisplaySystem({
       );
     } catch (error) {
       console.error("Error updating order status:", error);
-      showToast("Error al actualizar el estado de la orden. Por favor reintenta.");
+      showToast(
+        "Error al actualizar el estado de la orden. Por favor reintenta.",
+      );
     }
   };
 
@@ -168,11 +182,14 @@ export function KitchenDisplaySystem({
         return next;
       });
 
-      const response = await fetch(`/api/orders/${orderId}/items/${itemId}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: OrderStatus.READY }),
-      });
+      const response = await fetch(
+        `/api/orders/${orderId}/items/${itemId}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: OrderStatus.READY }),
+        },
+      );
 
       if (!response.ok) throw new Error("Failed to update item status");
 
@@ -189,10 +206,11 @@ export function KitchenDisplaySystem({
             orderItems: order.orderItems.map((item) =>
               item.id === itemId
                 ? {
-                  ...item,
-                  status: data.item.status,
-                  preparationTimeSeconds: data.item.preparationTimeSeconds ?? null,
-                }
+                    ...item,
+                    status: data.item.status,
+                    preparationTimeSeconds:
+                      data.item.preparationTimeSeconds ?? null,
+                  }
                 : item,
             ),
           };
@@ -329,4 +347,3 @@ export function KitchenDisplaySystem({
     </div>
   );
 }
-

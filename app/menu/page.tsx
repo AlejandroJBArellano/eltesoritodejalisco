@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import Link from "next/link";
+
 import {
   Image as ImageIcon,
   Pencil,
@@ -72,13 +72,17 @@ export default function MenuPage() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [recipeItems, setRecipeItems] = useState<RecipeItem[]>([]);
   const [selectedRecipeMenuItemId, setSelectedRecipeMenuItemId] = useState("");
-  const [recipeForm, setRecipeForm] = useState<RecipeFormState>(emptyRecipeForm);
+  const [recipeForm, setRecipeForm] =
+    useState<RecipeFormState>(emptyRecipeForm);
   const [recipeErrors, setRecipeErrors] = useState<Record<string, string>>({});
 
-  const [deleteArmedItemId, setDeleteArmedItemId] = useState<string | null>(null);
-  const [deleteArmedRecipeId, setDeleteArmedRecipeId] = useState<string | null>(null);
-  const [recipeQuantities, setRecipeQuantities] = useState<Record<string, string>>({});
-  
+  const [deleteArmedItemId, setDeleteArmedItemId] = useState<string | null>(
+    null,
+  );
+  const [deleteArmedRecipeId, setDeleteArmedRecipeId] = useState<string | null>(
+    null,
+  );
+
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -97,7 +101,9 @@ export default function MenuPage() {
   // Table Filters, Sort & Pagination State
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [availabilityFilter, setAvailabilityFilter] = useState<"all" | "available" | "unavailable">("all");
+  const [availabilityFilter, setAvailabilityFilter] = useState<
+    "all" | "available" | "unavailable"
+  >("all");
 
   type SortField = "name" | "price" | "category" | "isAvailable";
   const [sortField, setSortField] = useState<SortField>("name");
@@ -118,7 +124,7 @@ export default function MenuPage() {
 
   const activeCount = useMemo(
     () => items.filter((item) => item.isAvailable).length,
-    [items]
+    [items],
   );
 
   const fetchMenu = async () => {
@@ -134,12 +140,12 @@ export default function MenuPage() {
           ...item,
           isAvailable: item.is_available,
           imageUrl: item.image_url,
-        }))
+        })),
       );
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al cargar"
+        error instanceof Error ? error.message : "Error inesperado al cargar",
       );
     } finally {
       setIsLoading(false);
@@ -163,7 +169,7 @@ export default function MenuPage() {
       recipes.reduce((acc: Record<string, string>, item: RecipeItem) => {
         acc[item.id] = String(item.quantityRequired);
         return acc;
-      }, {})
+      }, {}),
     );
   };
 
@@ -183,7 +189,7 @@ export default function MenuPage() {
 
   const handleFormChange = (
     field: keyof MenuFormState,
-    value: string | boolean
+    value: string | boolean,
   ) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
@@ -265,7 +271,7 @@ export default function MenuPage() {
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al guardar"
+        error instanceof Error ? error.message : "Error inesperado al guardar",
       );
     } finally {
       setIsSubmitting(false);
@@ -295,7 +301,7 @@ export default function MenuPage() {
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al eliminar"
+        error instanceof Error ? error.message : "Error inesperado al eliminar",
       );
     } finally {
       setIsSubmitting(false);
@@ -342,12 +348,15 @@ export default function MenuPage() {
         }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "Error al guardar receta");
+      if (!response.ok)
+        throw new Error(data?.error || "Error al guardar receta");
       await fetchRecipes(selectedRecipeMenuItemId);
       setRecipeForm(emptyRecipeForm);
       setRecipeErrors({});
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Error al guardar");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error al guardar",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -392,7 +401,8 @@ export default function MenuPage() {
       }
 
       if (availabilityFilter === "available" && !item.isAvailable) return false;
-      if (availabilityFilter === "unavailable" && item.isAvailable) return false;
+      if (availabilityFilter === "unavailable" && item.isAvailable)
+        return false;
 
       return true;
     });
@@ -416,7 +426,14 @@ export default function MenuPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, categoryFilter, availabilityFilter, sortField, sortDirection, pageSize]);
+  }, [
+    searchQuery,
+    categoryFilter,
+    availabilityFilter,
+    sortField,
+    sortDirection,
+    pageSize,
+  ]);
 
   const totalPages = Math.ceil(sortedItems.length / pageSize) || 1;
   const paginatedItems = useMemo(() => {
@@ -474,7 +491,9 @@ export default function MenuPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Total Platillos
               </p>
-              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">{items.length}</p>
+              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">
+                {items.length}
+              </p>
             </div>
             <div className="rounded-xl bg-primary/10 p-3 text-primary">
               <Utensils className="h-5 w-5" />
@@ -486,7 +505,9 @@ export default function MenuPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Platillos Activos
               </p>
-              <p className="mt-1 text-2xl font-black text-emerald-400">{activeCount}</p>
+              <p className="mt-1 text-2xl font-black text-emerald-400">
+                {activeCount}
+              </p>
             </div>
             <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
               <CheckCircle2 className="h-5 w-5" />
@@ -498,7 +519,9 @@ export default function MenuPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Categorías Registradas
               </p>
-              <p className="mt-1 text-2xl font-black text-purple-400">{categories.length}</p>
+              <p className="mt-1 text-2xl font-black text-purple-400">
+                {categories.length}
+              </p>
             </div>
             <div className="rounded-xl bg-purple-500/10 p-3 text-purple-400">
               <Filter className="h-5 w-5" />
@@ -517,7 +540,9 @@ export default function MenuPage() {
               onClick={fetchMenu}
               className="text-xs text-[#E0E0E0]/60 hover:text-white flex items-center gap-1.5 font-bold"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`}
+              />
               Actualizar Lista
             </button>
           </div>
@@ -559,9 +584,7 @@ export default function MenuPage() {
               </label>
               <select
                 value={availabilityFilter}
-                onChange={(e) =>
-                  setAvailabilityFilter(e.target.value as any)
-                }
+                onChange={(e) => setAvailabilityFilter(e.target.value as any)}
                 className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-[#E0E0E0] outline-none focus:border-primary"
               >
                 <option value="all">Todos los Estados</option>
@@ -687,9 +710,17 @@ export default function MenuPage() {
                               ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
                               : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
                           }`}
-                          title={deleteArmedItemId === item.id ? "Confirmar eliminación" : "Eliminar Producto"}
+                          title={
+                            deleteArmedItemId === item.id
+                              ? "Confirmar eliminación"
+                              : "Eliminar Producto"
+                          }
                         >
-                          {deleteArmedItemId === item.id ? "¿Seguro?" : <Trash2 className="h-4 w-4" />}
+                          {deleteArmedItemId === item.id ? (
+                            "¿Seguro?"
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </td>
@@ -835,7 +866,9 @@ export default function MenuPage() {
               type="checkbox"
               id="isAvailable"
               checked={formState.isAvailable}
-              onChange={(e) => handleFormChange("isAvailable", e.target.checked)}
+              onChange={(e) =>
+                handleFormChange("isAvailable", e.target.checked)
+              }
               className="h-4 w-4 rounded border-white/10 bg-[#181818] text-primary focus:ring-primary"
             />
             <label
@@ -862,8 +895,8 @@ export default function MenuPage() {
               {isSubmitting
                 ? "Guardando..."
                 : isEditing
-                ? "Actualizar Producto"
-                : "Guardar Producto"}
+                  ? "Actualizar Producto"
+                  : "Guardar Producto"}
             </button>
           </div>
         </form>
@@ -902,7 +935,10 @@ export default function MenuPage() {
 
           {selectedRecipeMenuItemId ? (
             <>
-              <form onSubmit={handleRecipeSubmit} className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#181818] p-4 rounded-xl border border-white/5">
+              <form
+                onSubmit={handleRecipeSubmit}
+                className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#181818] p-4 rounded-xl border border-white/5"
+              >
                 <div className="sm:col-span-2">
                   <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
                     Nombre del Ingrediente
@@ -986,9 +1022,17 @@ export default function MenuPage() {
                               ? "text-red-300 bg-red-500/30 px-2"
                               : "text-red-400 hover:text-red-300"
                           }`}
-                          title={deleteArmedRecipeId === rec.id ? "Confirmar" : "Quitar de receta"}
+                          title={
+                            deleteArmedRecipeId === rec.id
+                              ? "Confirmar"
+                              : "Quitar de receta"
+                          }
                         >
-                          {deleteArmedRecipeId === rec.id ? "¿Quitar?" : <Trash2 className="h-3.5 w-3.5" />}
+                          {deleteArmedRecipeId === rec.id ? (
+                            "¿Quitar?"
+                          ) : (
+                            <Trash2 className="h-3.5 w-3.5" />
+                          )}
                         </button>
                       </div>
                     </div>

@@ -22,9 +22,13 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
       <div className="space-y-4">
         {order.orderItems.map((item) => {
           const mixed = isMixedOrderItem(item.menuItem.name);
-          const flavorLines = mixed && item.notes
-            ? item.notes.split(",").map((s) => s.trim()).filter(Boolean)
-            : [];
+          const flavorLines =
+            mixed && item.notes
+              ? item.notes
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+              : [];
 
           return (
             <div key={item.id} className="border-b border-gray-100 pb-2">
@@ -69,7 +73,8 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
           body * {
             visibility: hidden;
           }
-          .kitchen-ticket, .kitchen-ticket * {
+          .kitchen-ticket,
+          .kitchen-ticket * {
             visibility: visible;
           }
           .kitchen-ticket {

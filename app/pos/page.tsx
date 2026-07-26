@@ -40,7 +40,6 @@ import {
   Send,
   History,
 } from "lucide-react";
-import { Order } from "@/types/pos";
 
 export default function POSPage() {
   const {
@@ -64,12 +63,14 @@ export default function POSPage() {
     formState,
     formErrors,
     cartError,
-    setCartError,
-    editingOrder, setEditingOrder,
+    editingOrder,
+    setEditingOrder,
     additionalItems,
-    modifyingOrder, setModifyingOrder,
+    modifyingOrder,
+    setModifyingOrder,
     modifyItems,
-    mixedOrderMenuItem, setMixedOrderMenuItem,
+    mixedOrderMenuItem,
+    setMixedOrderMenuItem,
     mixedFlavorCounts,
     handleFormChange,
     handleGridItemClick,
@@ -95,25 +96,40 @@ export default function POSPage() {
   const {
     isSubmittingCheckout,
     checkoutError,
-    checkoutOrder, setCheckoutOrder,
-    paymentMethod, setPaymentMethod,
-    receivedAmount, setReceivedAmount,
-    showTicket, setShowTicket,
-    showKitchenTicket, setShowKitchenTicket,
-    tipType, setTipType,
-    tipInput, setTipInput,
+    checkoutOrder,
+    setCheckoutOrder,
+    paymentMethod,
+    setPaymentMethod,
+    receivedAmount,
+    setReceivedAmount,
+    showTicket,
+    setShowTicket,
+    showKitchenTicket,
+    setShowKitchenTicket,
+    tipType,
+    setTipType,
+    tipInput,
+    setTipInput,
     tipAmountCalculated,
     change,
-    unusualTipInfo, setUnusualTipInfo,
-    showWhatsAppModal, setShowWhatsAppModal,
-    whatsappNumber, setWhatsappNumber,
+    unusualTipInfo,
+    setUnusualTipInfo,
+    showWhatsAppModal,
+    setShowWhatsAppModal,
+    whatsappNumber,
+    setWhatsappNumber,
     generateWhatsAppMessage,
-    editingTipOrder, setEditingTipOrder,
-    editTipType, setEditTipType,
-    editTipInput, setEditTipInput,
+    editingTipOrder,
+    setEditingTipOrder,
+    editTipType,
+    setEditTipType,
+    editTipInput,
+    setEditTipInput,
     editTipAmountCalculated,
-    showSplitBill, setShowSplitBill,
-    billingOrder, setBillingOrder,
+    showSplitBill,
+    setShowSplitBill,
+    billingOrder,
+    setBillingOrder,
     handleProcessPayment,
     handleSplitPayment,
     handleUpdateTip,
@@ -131,7 +147,7 @@ export default function POSPage() {
 
   const handleCancelConfirm = async (orderId: string) => {
     setCancelArmedId(null);
-    await handleCancelOrder(orderId, "");
+    await handleCancelOrder(orderId);
   };
 
   const sourceOptions = [
@@ -163,7 +179,9 @@ export default function POSPage() {
           <h2 className="mb-3 text-lg font-black text-red-400 uppercase tracking-wider">
             Error de Conexión
           </h2>
-          <p className="text-sm font-medium text-red-400/80 mb-6">{errorMessage}</p>
+          <p className="text-sm font-medium text-red-400/80 mb-6">
+            {errorMessage}
+          </p>
           <button
             onClick={() => window.location.reload()}
             className="bg-red-500 text-white px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider hover:brightness-110 transition-all"
@@ -225,7 +243,10 @@ export default function POSPage() {
               Ticket Promedio
             </p>
             <p className="text-2xl font-black text-[#E0E0E0] tabular-nums tracking-tight">
-              ${isNaN(todayStats.avgTicket) ? "0.00" : todayStats.avgTicket.toFixed(2)}
+              $
+              {isNaN(todayStats.avgTicket)
+                ? "0.00"
+                : todayStats.avgTicket.toFixed(2)}
             </p>
           </div>
         </div>
@@ -265,7 +286,10 @@ export default function POSPage() {
         </div>
 
         {/* SECCIÓN DEL CARRITO */}
-        <form onSubmit={(e) => handleCheckoutSubmit(e, setCheckoutOrder)} className="lg:col-span-5 xl:col-span-4 h-full">
+        <form
+          onSubmit={(e) => handleCheckoutSubmit(e, setCheckoutOrder)}
+          className="lg:col-span-5 xl:col-span-4 h-full"
+        >
           <POSCartSidebar
             formState={formState}
             handleFormChange={handleFormChange}
@@ -303,11 +327,21 @@ export default function POSPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-white/5">
-                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">Folio</th>
-                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">Mesa / Tipo</th>
-                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">Estado</th>
-                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">Total</th>
-                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest text-right">Acciones</th>
+                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                  Folio
+                </th>
+                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                  Mesa / Tipo
+                </th>
+                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                  Estado
+                </th>
+                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                  Total
+                </th>
+                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest text-right">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -323,15 +357,22 @@ export default function POSPage() {
                 orders.slice(0, 10).map((order) => {
                   const tipAmt = getOrderTipAmount(order);
                   const isUndoable = (() => {
-                    const lastUpdate = new Date(order.updatedAt || order.createdAt).getTime();
+                    const lastUpdate = new Date(
+                      order.updatedAt || order.createdAt,
+                    ).getTime();
                     const now = new Date().getTime();
                     return now - lastUpdate < 3 * 60 * 1000;
                   })();
 
                   return (
-                    <tr key={order.id} className="hover:bg-white/5 transition-colors">
+                    <tr
+                      key={order.id}
+                      className="hover:bg-white/5 transition-colors"
+                    >
                       <td className="py-3.5 px-3">
-                        <span className="font-mono font-black text-sm text-[#E0E0E0]">#{order.orderNumber}</span>
+                        <span className="font-mono font-black text-sm text-[#E0E0E0]">
+                          #{order.orderNumber}
+                        </span>
                       </td>
                       <td className="py-3.5 px-3">
                         <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black text-[#E0E0E0]/70 uppercase tracking-wider">
@@ -423,7 +464,10 @@ export default function POSPage() {
                               onClick={() => {
                                 setEditingTipOrder(order);
                                 setEditTipType("FIXED");
-                                setEditTipInput(order.payments?.[0]?.tipAmount?.toString() || "0");
+                                setEditTipInput(
+                                  order.payments?.[0]?.tipAmount?.toString() ||
+                                    "0",
+                                );
                               }}
                               className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
                             >
@@ -439,7 +483,10 @@ export default function POSPage() {
                               title="Revertir pago (ventana de 3 min)"
                             >
                               <Undo2 className="h-3 w-3" />
-                              Deshacer <span className="opacity-60 normal-case font-bold">(3 min)</span>
+                              Deshacer{" "}
+                              <span className="opacity-60 normal-case font-bold">
+                                (3 min)
+                              </span>
                             </button>
                           )}
                           {order.status === "PAID" && (
@@ -464,25 +511,36 @@ export default function POSPage() {
                             <Printer className="h-3 w-3" />
                             Ticket
                           </button>
-                          {order.status !== "PAID" && order.status !== "UNCOLLECTED" && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                cancelArmedId === order.id
-                                  ? handleCancelConfirm(order.id)
-                                  : handleCancelArm(order.id)
-                              }
-                              disabled={isSubmittingCart || isSubmittingCheckout}
-                              className={`rounded-xl p-1 text-[10px] font-black uppercase transition-all disabled:opacity-50 ${
-                                cancelArmedId === order.id
-                                  ? "bg-red-500/30 border border-red-500/50 text-red-300 px-2"
-                                  : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
-                              }`}
-                              title={cancelArmedId === order.id ? "Confirmar cancelación" : "Cancelar orden"}
-                            >
-                              {cancelArmedId === order.id ? "¿Seguro?" : <Ban className="h-3.5 w-3.5" />}
-                            </button>
-                          )}
+                          {order.status !== "PAID" &&
+                            order.status !== "UNCOLLECTED" && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  cancelArmedId === order.id
+                                    ? handleCancelConfirm(order.id)
+                                    : handleCancelArm(order.id)
+                                }
+                                disabled={
+                                  isSubmittingCart || isSubmittingCheckout
+                                }
+                                className={`rounded-xl p-1 text-[10px] font-black uppercase transition-all disabled:opacity-50 ${
+                                  cancelArmedId === order.id
+                                    ? "bg-red-500/30 border border-red-500/50 text-red-300 px-2"
+                                    : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
+                                }`}
+                                title={
+                                  cancelArmedId === order.id
+                                    ? "Confirmar cancelación"
+                                    : "Cancelar orden"
+                                }
+                              >
+                                {cancelArmedId === order.id ? (
+                                  "¿Seguro?"
+                                ) : (
+                                  <Ban className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                            )}
                         </div>
                       </td>
                     </tr>
@@ -617,7 +675,9 @@ export default function POSPage() {
               type="tel"
               maxLength={10}
               value={whatsappNumber}
-              onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) =>
+                setWhatsappNumber(e.target.value.replace(/\D/g, ""))
+              }
               placeholder="3312345678"
               autoFocus
               className="w-full text-2xl font-black p-4 border border-white/5 bg-[#181818] rounded-xl focus:border-emerald-400 outline-none text-center text-[#E0E0E0] tracking-[0.2em] transition-colors placeholder:text-[#E0E0E0]/20"

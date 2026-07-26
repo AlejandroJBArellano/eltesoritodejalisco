@@ -50,10 +50,17 @@ export function SplitBillModal({
   const [mode, setMode] = useState<SplitMode>("EQUAL");
   const [partCount, setPartCount] = useState(2);
   // For items with quantity === 1: maps itemId → person number (1-N)
-  const [singleAssignments, setSingleAssignments] = useState<Record<string, number>>({});
+  const [singleAssignments, setSingleAssignments] = useState<
+    Record<string, number>
+  >({});
   // For items with quantity > 1: maps itemId → array of qty per person (0-indexed, length = partCount)
-  const [multiAssignments, setMultiAssignments] = useState<Record<string, number[]>>({});
-  const [parts, setParts] = useState<SplitPart[]>([defaultPart(), defaultPart()]);
+  const [multiAssignments, setMultiAssignments] = useState<
+    Record<string, number[]>
+  >({});
+  const [parts, setParts] = useState<SplitPart[]>([
+    defaultPart(),
+    defaultPart(),
+  ]);
 
   const syncParts = (count: number, current: SplitPart[]): SplitPart[] => {
     if (count > current.length) {
@@ -122,7 +129,14 @@ export function SplitBillModal({
       }
     });
     return amounts;
-  }, [mode, partCount, order.total, order.orderItems, singleAssignments, multiAssignments]);
+  }, [
+    mode,
+    partCount,
+    order.total,
+    order.orderItems,
+    singleAssignments,
+    multiAssignments,
+  ]);
 
   const tipAmounts = useMemo(
     () =>
@@ -130,9 +144,8 @@ export function SplitBillModal({
         const base = partAmounts[i];
         if (part.tipType === "PERCENTAGE") {
           return (
-            Math.round(
-              ((base * (Number(part.tipInput) || 0)) / 100) * 100,
-            ) / 100
+            Math.round(((base * (Number(part.tipInput) || 0)) / 100) * 100) /
+            100
           );
         }
         if (part.tipType === "FIXED") {
@@ -290,13 +303,18 @@ export function SplitBillModal({
             </p>
             {!allItemsAssigned && (
               <p className="text-[10px] text-yellow-400 font-black bg-yellow-500/10 p-2 rounded-xl border border-yellow-500/20 text-center mb-2 flex items-center justify-center gap-1.5">
-                <AlertTriangle className="h-3 w-3 shrink-0" /> Todos los artículos deben asignarse
+                <AlertTriangle className="h-3 w-3 shrink-0" /> Todos los
+                artículos deben asignarse
               </p>
             )}
             {order.orderItems.map((item) => {
               const isMulti = item.quantity > 1;
-              const qtys = multiAssignments[item.id] ?? Array(partCount).fill(0);
-              const assignedTotal = qtys.reduce((s: number, q: number) => s + (q || 0), 0);
+              const qtys =
+                multiAssignments[item.id] ?? Array(partCount).fill(0);
+              const assignedTotal = qtys.reduce(
+                (s: number, q: number) => s + (q || 0),
+                0,
+              );
               const isExact = isMulti && assignedTotal === item.quantity;
 
               return (
@@ -317,34 +335,55 @@ export function SplitBillModal({
                   {isMulti ? (
                     /* Quantity > 1: numeric inputs per person */
                     <div className="flex items-end gap-1.5 flex-wrap justify-end">
-                      {Array.from({ length: partCount }, (_, i) => i).map((i) => (
-                        <div key={i} className="flex flex-col items-center gap-0.5">
-                          <span className="text-[8px] text-zinc-500 font-black">{i + 1}</span>
-                          <input
-                            type="number"
-                            min={0}
-                            max={item.quantity}
-                            value={qtys[i] ?? 0}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                              const val = Math.max(0, Math.min(item.quantity, Number(e.target.value) || 0));
-                              setMultiAssignments((prev: Record<string, number[]>) => {
-                                const current = prev[item.id] ?? Array(partCount).fill(0);
-                                const next = [...current];
-                                while (next.length < partCount) next.push(0);
-                                next[i] = val;
-                                return { ...prev, [item.id]: next };
-                              });
-                            }}
-                            className={`w-10 h-8 text-center text-xs font-black rounded-lg border-2 bg-white/5 text-white outline-none transition-all ${
-                              isExact
-                                ? "border-[#B2FBA5]"
-                                : "border-white/10 focus:border-white/30"
-                            }`}
-                          />
-                        </div>
-                      ))}
+                      {Array.from({ length: partCount }, (_, i) => i).map(
+                        (i) => (
+                          <div
+                            key={i}
+                            className="flex flex-col items-center gap-0.5"
+                          >
+                            <span className="text-[8px] text-zinc-500 font-black">
+                              {i + 1}
+                            </span>
+                            <input
+                              type="number"
+                              min={0}
+                              max={item.quantity}
+                              value={qtys[i] ?? 0}
+                              onChange={(
+                                e: React.ChangeEvent<HTMLInputElement>,
+                              ) => {
+                                const val = Math.max(
+                                  0,
+                                  Math.min(
+                                    item.quantity,
+                                    Number(e.target.value) || 0,
+                                  ),
+                                );
+                                setMultiAssignments(
+                                  (prev: Record<string, number[]>) => {
+                                    const current =
+                                      prev[item.id] ?? Array(partCount).fill(0);
+                                    const next = [...current];
+                                    while (next.length < partCount)
+                                      next.push(0);
+                                    next[i] = val;
+                                    return { ...prev, [item.id]: next };
+                                  },
+                                );
+                              }}
+                              className={`w-10 h-8 text-center text-xs font-black rounded-lg border-2 bg-white/5 text-white outline-none transition-all ${
+                                isExact
+                                  ? "border-[#B2FBA5]"
+                                  : "border-white/10 focus:border-white/30"
+                              }`}
+                            />
+                          </div>
+                        ),
+                      )}
                       <div className="flex flex-col items-center gap-0.5 justify-end">
-                        <span className="text-[8px] text-zinc-500 font-black">✓</span>
+                        <span className="text-[8px] text-zinc-500 font-black">
+                          ✓
+                        </span>
                         <span
                           className={`text-xs font-black tabular-nums h-8 flex items-center ${
                             isExact ? "text-[#B2FBA5]" : "text-yellow-400"
@@ -357,25 +396,29 @@ export function SplitBillModal({
                   ) : (
                     /* Quantity === 1: person-selector buttons */
                     <div className="flex gap-1 flex-wrap justify-end">
-                      {Array.from({ length: partCount }, (_, i) => i + 1).map((n) => (
-                        <button
-                          key={n}
-                          type="button"
-                          onClick={() =>
-                            setSingleAssignments((prev: Record<string, number>) => ({
-                              ...prev,
-                              [item.id]: n,
-                            }))
-                          }
-                          className={`w-8 h-8 rounded-lg text-xs font-black transition-all ${
-                            singleAssignments[item.id] === n
-                              ? "bg-[#B2FBA5] text-black shadow-md"
-                              : "bg-white/10 text-zinc-500 hover:bg-white/20"
-                          }`}
-                        >
-                          {n}
-                        </button>
-                      ))}
+                      {Array.from({ length: partCount }, (_, i) => i + 1).map(
+                        (n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() =>
+                              setSingleAssignments(
+                                (prev: Record<string, number>) => ({
+                                  ...prev,
+                                  [item.id]: n,
+                                }),
+                              )
+                            }
+                            className={`w-8 h-8 rounded-lg text-xs font-black transition-all ${
+                              singleAssignments[item.id] === n
+                                ? "bg-[#B2FBA5] text-black shadow-md"
+                                : "bg-white/10 text-zinc-500 hover:bg-white/20"
+                            }`}
+                          >
+                            {n}
+                          </button>
+                        ),
+                      )}
                     </div>
                   )}
                 </div>
@@ -418,9 +461,7 @@ export function SplitBillModal({
                     <button
                       key={m.value}
                       type="button"
-                      onClick={() =>
-                        updatePart(i, "paymentMethod", m.value)
-                      }
+                      onClick={() => updatePart(i, "paymentMethod", m.value)}
                       className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${
                         part.paymentMethod === m.value
                           ? "border-[#89CFF0] bg-[#89CFF0] text-black shadow-md"

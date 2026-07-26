@@ -8,8 +8,10 @@ const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
 };
 
 export const getOrderTipAmount = (order?: OrderWithDetails | null) =>
-  order?.payments?.reduce((sum, payment) => sum + (payment.tipAmount || 0), 0) ||
-  0;
+  order?.payments?.reduce(
+    (sum, payment) => sum + (payment.tipAmount || 0),
+    0,
+  ) || 0;
 
 export const getOrderPaymentMethods = (order?: OrderWithDetails | null) =>
   Array.from(new Set(order?.payments?.map((payment) => payment.method) || []));

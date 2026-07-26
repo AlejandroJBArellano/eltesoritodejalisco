@@ -243,11 +243,7 @@ export interface CreateRecipeRequest {
 // ============================================
 
 export type LeadSource =
-  | "TikTok"
-  | "Instagram"
-  | "Pasaba por ahí"
-  | "Recomendación"
-  | string;
+  "TikTok" | "Instagram" | "Pasaba por ahí" | "Recomendación" | string;
 
 export interface InventoryDeductionResult {
   success: boolean;
@@ -281,19 +277,10 @@ export interface SmartBatch {
 // ============================================
 
 export type TaskFrequency =
-  | "CONTINUOUS"
-  | "VARIABLE"
-  | "ROUTINE"
-  | "DAILY"
-  | "WEEKLY"
-  | "CLOSING";
+  "CONTINUOUS" | "VARIABLE" | "ROUTINE" | "DAILY" | "WEEKLY" | "CLOSING";
 
 export type TaskStatus =
-  | "PENDING"
-  | "IN_PROGRESS"
-  | "PAUSED"
-  | "COMPLETED"
-  | "APPROVED";
+  "PENDING" | "IN_PROGRESS" | "PAUSED" | "COMPLETED" | "APPROVED";
 
 export interface TaskCategory {
   id: string;

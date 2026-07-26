@@ -24,18 +24,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const primaryColor = process.env.NEXT_PUBLIC_THEME_PRIMARY_COLOR || "#FFB7CE";
-  const secondaryColor = process.env.NEXT_PUBLIC_THEME_SECONDARY_COLOR || "#FFD1DC";
+  const secondaryColor =
+    process.env.NEXT_PUBLIC_THEME_SECONDARY_COLOR || "#FFD1DC";
   const darkBgColor = process.env.NEXT_PUBLIC_THEME_DARK_BG_COLOR || "#121212";
 
   return (
     <html
       lang="es"
-      style={{
-        ["--color-primary" as any]: primaryColor,
-        ["--color-secondary" as any]: secondaryColor,
-        ["--color-dark" as any]: darkBgColor,
-        ["--background" as any]: darkBgColor,
-      }}
+      style={
+        {
+          "--color-primary": primaryColor,
+          "--color-secondary": secondaryColor,
+          "--color-dark": darkBgColor,
+          "--background": darkBgColor,
+        } as React.CSSProperties
+      }
     >
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-dark text-text-light`}

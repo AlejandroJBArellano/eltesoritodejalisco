@@ -26,7 +26,8 @@ export async function deductInventoryForOrder(
     // Fetch the order with all its items and recipe information
     const { data: order, error: fetchError } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         *,
         order_items (
           *,
@@ -38,7 +39,8 @@ export async function deductInventoryForOrder(
             )
           )
         )
-      `)
+      `,
+      )
       .eq("id", orderId)
       .single();
 
@@ -62,7 +64,7 @@ export async function deductInventoryForOrder(
       for (const recipeItem of menuItem.recipe_items) {
         const { ingredients: ingredient, quantity_required } = recipeItem;
         if (!ingredient) continue;
-        
+
         const totalNeeded = quantity_required * quantity;
 
         if (ingredientRequirements.has(ingredient.id)) {
@@ -153,7 +155,8 @@ export async function reverseInventoryForOrder(
     // Fetch the order with all its items and recipe information
     const { data: order, error: fetchError } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         *,
         order_items (
           *,
@@ -165,7 +168,8 @@ export async function reverseInventoryForOrder(
             )
           )
         )
-      `)
+      `,
+      )
       .eq("id", orderId)
       .single();
 
@@ -189,7 +193,7 @@ export async function reverseInventoryForOrder(
       for (const recipeItem of menuItem.recipe_items) {
         const { ingredients: ingredient, quantity_required } = recipeItem;
         if (!ingredient) continue;
-        
+
         const totalNeeded = quantity_required * quantity;
 
         if (ingredientRequirements.has(ingredient.id)) {
@@ -338,8 +342,10 @@ export async function checkLowStockIngredients() {
     .order("current_stock", { ascending: true });
 
   if (error) throw error;
-  
-  return (ingredients || []).filter((ing: any) => ing.current_stock <= ing.minimum_stock);
+
+  return (ingredients || []).filter(
+    (ing: any) => ing.current_stock <= ing.minimum_stock,
+  );
 }
 
 /**

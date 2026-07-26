@@ -2,7 +2,7 @@
 
 import type { BatchedMenuItem, OrderWithDetails } from "@/types";
 import { useMemo } from "react";
-import { Layers, Utensils, Hash } from "lucide-react";
+import { Utensils } from "lucide-react";
 
 interface SmartBatchingViewProps {
   orders: OrderWithDetails[];
@@ -92,7 +92,10 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
                 </h3>
                 <div className="rounded-xl bg-secondary/10 border border-secondary/20 px-4 py-2 text-center">
                   <span className="text-2xl font-black text-secondary">
-                    {item.totalQuantity} <span className="text-xs font-bold uppercase text-secondary/70">total</span>
+                    {item.totalQuantity}{" "}
+                    <span className="text-xs font-bold uppercase text-secondary/70">
+                      total
+                    </span>
                   </span>
                 </div>
               </div>
@@ -120,7 +123,10 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
 
             {/* Footer Summary */}
             <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-[#E0E0E0]/40 font-medium">
-              <span>Presente en {item.orders.length} orden{item.orders.length !== 1 ? "es" : ""}</span>
+              <span>
+                Presente en {item.orders.length} orden
+                {item.orders.length !== 1 ? "es" : ""}
+              </span>
             </div>
           </div>
         ))}

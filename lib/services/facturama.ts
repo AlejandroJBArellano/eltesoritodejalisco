@@ -15,7 +15,8 @@ export interface ClienteFactura {
   email?: string;
 }
 
-const FACTURAMA_API_URL = process.env.FACTURAMA_API_URL || "https://api.facturama.mx";
+const FACTURAMA_API_URL =
+  process.env.FACTURAMA_API_URL || "https://api.facturama.mx";
 const FACTURAMA_USER = process.env.FACTURAMA_USER || "";
 const FACTURAMA_PASSWORD = process.env.FACTURAMA_PASSWORD || "";
 
@@ -27,7 +28,7 @@ const EMISOR = {
 
 const PRODUCTO_SAT = {
   ClaveProdServ: "90101501", // Restaurantes
-  ClaveUnidad: "E48",        // Servicio
+  ClaveUnidad: "E48", // Servicio
   Unidad: "Servicio",
   Descripcion: "Consumo de alimentos",
 };
@@ -36,12 +37,15 @@ const PRODUCTO_SAT = {
  * Obtiene el header de autorización básico usando las credenciales de entorno.
  */
 function getAuthHeader() {
-  return "Basic " + Buffer.from(`${FACTURAMA_USER}:${FACTURAMA_PASSWORD}`).toString("base64");
+  return (
+    "Basic " +
+    Buffer.from(`${FACTURAMA_USER}:${FACTURAMA_PASSWORD}`).toString("base64")
+  );
 }
 
 /**
  * Llama al endpoint de Facturama para generar un folio de autofactura.
- * 
+ *
  * @param venta Objeto con los datos de la venta. Se ignora la propina.
  * @param orderId ID de la orden en la base de datos para relacionar el ticket.
  * @returns El ticket generado.
@@ -54,18 +58,21 @@ export async function generarTicketAutofactura(venta: Venta, orderId: string) {
     Date: new Date().toISOString(),
     Total: totalTicket,
     // Agregamos un identificador único para rastrearlo si es necesario
-    Folio: orderId.slice(0, 10), 
+    Folio: orderId.slice(0, 10),
   };
 
   try {
-    const response = await fetch(`${FACTURAMA_API_URL}/api/BranchOffice/WebTickets`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: getAuthHeader(),
+    const response = await fetch(
+      `${FACTURAMA_API_URL}/api/BranchOffice/WebTickets`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: getAuthHeader(),
+        },
+        body: JSON.stringify(payload),
       },
-      body: JSON.stringify(payload),
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.text();
@@ -96,13 +103,17 @@ export async function generarTicketAutofactura(venta: Venta, orderId: string) {
 
 /**
  * Emite un CFDI 4.0 directamente con los datos del cliente.
- * 
+ *
  * @param venta Objeto con los datos de la venta. Se ignora la propina.
  * @param cliente Datos fiscales del cliente.
  * @param orderId ID de la orden para asociar la factura en la base de datos.
  * @returns Los datos de la factura incluyendo ID y URLs del PDF y XML.
  */
-export async function crearFacturaDirecta(venta: Venta, cliente: ClienteFactura, orderId: string) {
+export async function crearFacturaDirecta(
+  venta: Venta,
+  cliente: ClienteFactura,
+  orderId: string,
+) {
   // Ignoramos la propina, solo tomamos subtotal e iva.
   const totalFactura = venta.subtotal + venta.iva;
 

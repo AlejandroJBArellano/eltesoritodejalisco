@@ -7,9 +7,10 @@ interface OrderTicketProps {
 
 export function OrderTicket({ order }: OrderTicketProps) {
   const formatDate = (date: Date | string) => {
-    const dateStr = typeof date === 'string' && !date.includes('Z') && !date.includes('+')
-      ? `${date.replace(' ', 'T')}Z`
-      : date;
+    const dateStr =
+      typeof date === "string" && !date.includes("Z") && !date.includes("+")
+        ? `${date.replace(" ", "T")}Z`
+        : date;
     return new Date(dateStr).toLocaleString("es-MX", {
       dateStyle: "short",
       timeStyle: "short",
@@ -28,11 +29,14 @@ export function OrderTicket({ order }: OrderTicketProps) {
     <div className="ticket-container bg-white p-4 w-[80mm] mx-auto text-black font-mono text-sm border shadow-sm">
       <div className="text-center mb-4">
         <h2 className="text-lg font-bold">
-          {process.env.NEXT_PUBLIC_APP_NAME?.toUpperCase() || "EL TESORITO DE JALISCO"}
+          {process.env.NEXT_PUBLIC_APP_NAME?.toUpperCase() ||
+            "EL TESORITO DE JALISCO"}
         </h2>
         <p className="text-xs">RFC: AIVK991104QJ0</p>
         <p className="text-xs">C.P.: 09090</p>
-        <p className="text-xs">Régimen: 626 - Simplificado de Confianza (RESICO)</p>
+        <p className="text-xs">
+          Régimen: 626 - Simplificado de Confianza (RESICO)
+        </p>
         <div className="border-b border-dashed my-2"></div>
       </div>
 
@@ -58,7 +62,9 @@ export function OrderTicket({ order }: OrderTicketProps) {
             <tr key={item.id}>
               <td>{item.quantity}</td>
               <td className="max-w-[40mm] truncate">{item.menuItem.name}</td>
-              <td className="text-right">${(item.quantity * item.unitPrice).toFixed(2)}</td>
+              <td className="text-right">
+                ${(item.quantity * item.unitPrice).toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -72,7 +78,9 @@ export function OrderTicket({ order }: OrderTicketProps) {
         <p className="font-bold text-md">TOTAL VENTA: ${total.toFixed(2)}</p>
 
         {tipAmount > 0 && (
-          <p className="font-bold text-md text-gray-700">PROPINA: ${tipAmount.toFixed(2)}</p>
+          <p className="font-bold text-md text-gray-700">
+            PROPINA: ${tipAmount.toFixed(2)}
+          </p>
         )}
 
         <p className="font-black text-xl mt-2 border-t border-black pt-1">
@@ -93,7 +101,8 @@ export function OrderTicket({ order }: OrderTicketProps) {
           body * {
             visibility: hidden;
           }
-          .ticket-container, .ticket-container * {
+          .ticket-container,
+          .ticket-container * {
             visibility: visible;
           }
           .ticket-container {

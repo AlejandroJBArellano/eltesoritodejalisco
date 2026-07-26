@@ -122,7 +122,9 @@ export function POSTipModal({
                 type="number"
                 value={editTipInput}
                 onChange={(e) => setEditTipInput(e.target.value)}
-                placeholder={editTipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"}
+                placeholder={
+                  editTipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"
+                }
                 className="w-full text-base font-black p-3 border border-white/5 bg-[#181818] rounded-xl focus:border-primary outline-none text-center text-[#E0E0E0] transition-colors placeholder:text-[#E0E0E0]/30"
               />
             )}

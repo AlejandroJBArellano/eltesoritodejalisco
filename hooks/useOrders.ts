@@ -15,7 +15,10 @@ export type { DbOrderPayload } from "@/lib/mappers/orders";
 /**
  * Hook to fetch and subscribe to real-time orders using Supabase
  */
-export function useRealtimeOrders(initialData: OrderWithDetails[] = [], soundEnabled: boolean = false) {
+export function useRealtimeOrders(
+  initialData: OrderWithDetails[] = [],
+  soundEnabled: boolean = false,
+) {
   const [orders, setOrders] = useState<OrderWithDetails[]>(initialData);
   const [loading, setLoading] = useState(initialData.length === 0);
   const [error, setError] = useState<string | null>(null);
@@ -50,10 +53,11 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = [], soundEna
     const playBell = () => {
       if (!soundEnabled) return;
       const now = Date.now();
-      if (now - lastAudioTime > 2000) { // 2 seconds debounce
+      if (now - lastAudioTime > 2000) {
+        // 2 seconds debounce
         lastAudioTime = now;
         try {
-          const audio = new Audio('/new_order.mp3');
+          const audio = new Audio("/new_order.mp3");
           audio.play().catch(() => {});
         } catch {
           // Audio playback fail fallback
@@ -68,7 +72,7 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = [], soundEna
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
         (payload) => {
-          if (payload.eventType === 'INSERT') {
+          if (payload.eventType === "INSERT") {
             playBell();
           }
           fetchOrders();
@@ -118,7 +122,9 @@ export function useOrderTimer(createdAt: Date | string) {
 /**
  * Utility to get elapsed seconds since a given date
  */
-export function getElapsedSeconds(dateInput: Date | string | null | undefined): number {
+export function getElapsedSeconds(
+  dateInput: Date | string | null | undefined,
+): number {
   if (!dateInput) return 0;
   const now = new Date();
   const created = safeParseDate(dateInput);

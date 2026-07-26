@@ -1,8 +1,14 @@
 "use client";
 
 import { OrderStatus, type OrderWithDetails } from "@/types";
-import { useEffect, useState } from "react";
-import { Clock, Check, Utensils, AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  Clock,
+  Check,
+  Utensils,
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 import { useOrderTimer, getElapsedSeconds } from "@/hooks/useOrders";
 import { formatTime } from "@/lib/utils";
 
@@ -17,7 +23,12 @@ interface OrderCardProps {
  * KDS Order Card Component
  * Displays order details with real-time timer and status management
  */
-export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds }: OrderCardProps) {
+export function OrderCard({
+  order,
+  onStatusChange,
+  onItemReady,
+  updatingItemIds,
+}: OrderCardProps) {
   const ALERT_THRESHOLD_MINUTES = 15;
   const elapsedSeconds = useOrderTimer(order.createdAt);
   const isOverdue = elapsedSeconds / 60 >= ALERT_THRESHOLD_MINUTES;
@@ -53,8 +64,12 @@ export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds 
     }
   };
 
-  const activeItems = order.orderItems.filter((item) => item.status !== OrderStatus.DELIVERED);
-  const allReady = activeItems.length > 0 && activeItems.every((item) => item.status === OrderStatus.READY);
+  const activeItems = order.orderItems.filter(
+    (item) => item.status !== OrderStatus.DELIVERED,
+  );
+  const allReady =
+    activeItems.length > 0 &&
+    activeItems.every((item) => item.status === OrderStatus.READY);
 
   return (
     <div
@@ -74,7 +89,8 @@ export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds 
           </h3>
           {order.table && (
             <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-400 uppercase tracking-wider mt-0.5">
-              <Utensils className="h-3.5 w-3.5 text-amber-500" /> Mesa: {order.table}
+              <Utensils className="h-3.5 w-3.5 text-amber-500" /> Mesa:{" "}
+              {order.table}
             </span>
           )}
         </div>
@@ -82,12 +98,17 @@ export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds 
         {/* Timer Badge */}
         <div
           className={`rounded-xl px-3.5 py-1.5 font-mono text-base font-black shadow-inner flex items-center gap-1.5 transition-colors ${
-            isOverdue && order.status !== OrderStatus.DELIVERED && order.status !== OrderStatus.READY
+            isOverdue &&
+            order.status !== OrderStatus.DELIVERED &&
+            order.status !== OrderStatus.READY
               ? "bg-red-600 text-white shadow-red-900/50 ring-2 ring-red-400/40"
               : "bg-zinc-900 text-zinc-200 border border-zinc-700/50"
           }`}
         >
-          <Clock className={`h-4 w-4 ${isOverdue ? "animate-spin" : ""}`} style={{ animationDuration: "3s" }} />
+          <Clock
+            className={`h-4 w-4 ${isOverdue ? "animate-spin" : ""}`}
+            style={{ animationDuration: "3s" }}
+          />
           {formatTime(elapsedSeconds)}
         </div>
       </div>
@@ -101,11 +122,15 @@ export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds 
           >
             <div className="flex-1 pr-3">
               <p className="font-bold text-zinc-100 text-sm leading-snug">
-                <span className="text-amber-400 font-black mr-1 text-base">{item.quantity}x</span> {item.menuItem.name}
+                <span className="text-amber-400 font-black mr-1 text-base">
+                  {item.quantity}x
+                </span>{" "}
+                {item.menuItem.name}
               </p>
               {item.notes && (
                 <p className="mt-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20 flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3 flex-shrink-0 text-amber-400" /> Nota: {item.notes}
+                  <AlertTriangle className="h-3 w-3 flex-shrink-0 text-amber-400" />{" "}
+                  Nota: {item.notes}
                 </p>
               )}
             </div>
@@ -148,7 +173,8 @@ export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds 
       {order.notes && (
         <div className="mb-4 rounded-xl border-l-4 border-amber-500 bg-amber-500/10 p-3">
           <p className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-            <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-400" /> Nota de Orden: {order.notes}
+            <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-400" />{" "}
+            Nota de Orden: {order.notes}
           </p>
         </div>
       )}
@@ -191,4 +217,3 @@ export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds 
     </div>
   );
 }
-

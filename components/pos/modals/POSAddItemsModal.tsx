@@ -8,7 +8,11 @@ interface POSAddItemsModalProps {
   handleAddItems: (e: React.FormEvent) => void;
   additionalItems: { menuItemId: string; quantity: string }[];
   addAdditionalItemRow: () => void;
-  handleAdditionalItemChange: (index: number, field: keyof OrderItemDraft, value: string) => void;
+  handleAdditionalItemChange: (
+    index: number,
+    field: keyof OrderItemDraft,
+    value: string,
+  ) => void;
   removeAdditionalItemRow: (index: number) => void;
   availableMenuItems: MenuItem[];
   isSubmitting: boolean;
@@ -65,7 +69,11 @@ export function POSAddItemsModal({
                 <select
                   value={item.menuItemId}
                   onChange={(e) =>
-                    handleAdditionalItemChange(index, "menuItemId", e.target.value)
+                    handleAdditionalItemChange(
+                      index,
+                      "menuItemId",
+                      e.target.value,
+                    )
                   }
                   className="flex-1 rounded-xl border border-white/5 bg-[#181818] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
                   required
@@ -83,7 +91,11 @@ export function POSAddItemsModal({
                   type="number"
                   value={item.quantity}
                   onChange={(e) =>
-                    handleAdditionalItemChange(index, "quantity", e.target.value)
+                    handleAdditionalItemChange(
+                      index,
+                      "quantity",
+                      e.target.value,
+                    )
                   }
                   className="w-16 rounded-xl border border-white/5 bg-[#181818] px-2 py-2 text-xs text-center font-black text-[#E0E0E0] outline-none focus:border-primary transition-colors"
                   min="1"

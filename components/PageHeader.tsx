@@ -41,7 +41,10 @@ export function PageHeader({
                   <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
                   {backLabel}
                 </Link>
-                <span className="w-px h-4 bg-white/10 shrink-0" aria-hidden="true" />
+                <span
+                  className="w-px h-4 bg-white/10 shrink-0"
+                  aria-hidden="true"
+                />
               </>
             )}
             <div>
@@ -49,7 +52,9 @@ export function PageHeader({
                 {icon ? (
                   icon
                 ) : (
-                  <span className={`h-2.5 w-2.5 rounded-full ${badgeColor} shrink-0`} />
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full ${badgeColor} shrink-0`}
+                  />
                 )}
                 {title}
               </h1>
@@ -61,7 +66,9 @@ export function PageHeader({
             </div>
           </div>
 
-          {actions && <div className="flex items-center gap-2.5 flex-wrap">{actions}</div>}
+          {actions && (
+            <div className="flex items-center gap-2.5 flex-wrap">{actions}</div>
+          )}
         </div>
 
         {extra && <div className="pt-1">{extra}</div>}

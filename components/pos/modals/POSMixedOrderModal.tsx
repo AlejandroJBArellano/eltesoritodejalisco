@@ -1,6 +1,11 @@
 import React from "react";
 import { X, Minus, Plus, UtensilsCrossed } from "lucide-react";
-import { MenuItem, MIXED_ORDER_TOTAL, MIXED_ORDER_FLAVORS, MixedFlavor } from "@/types/pos";
+import {
+  MenuItem,
+  MIXED_ORDER_TOTAL,
+  MIXED_ORDER_FLAVORS,
+  MixedFlavor,
+} from "@/types/pos";
 
 interface POSMixedOrderModalProps {
   mixedOrderMenuItem: MenuItem | null;
@@ -65,8 +70,10 @@ export function POSMixedOrderModal({
                   type="button"
                   onClick={() => handleMixedFlavorChange(flavor, 1)}
                   disabled={
-                    Object.values(mixedFlavorCounts).reduce((s, v) => s + v, 0) >=
-                    MIXED_ORDER_TOTAL
+                    Object.values(mixedFlavorCounts).reduce(
+                      (s, v) => s + v,
+                      0,
+                    ) >= MIXED_ORDER_TOTAL
                   }
                   className="h-6 w-6 rounded-lg bg-white/5 hover:bg-emerald-500/20 text-[#E0E0E0] flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-30"
                 >
@@ -93,7 +100,8 @@ export function POSMixedOrderModal({
             );
           })}
           <span className="text-xs font-bold text-[#E0E0E0]/50 ml-2 uppercase tracking-wider">
-            {Object.values(mixedFlavorCounts).reduce((s, v) => s + v, 0)}/{MIXED_ORDER_TOTAL} pzas
+            {Object.values(mixedFlavorCounts).reduce((s, v) => s + v, 0)}/
+            {MIXED_ORDER_TOTAL} pzas
           </span>
         </div>
 

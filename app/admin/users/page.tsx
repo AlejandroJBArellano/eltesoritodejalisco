@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { createUser, deleteUser, updateUserRole } from "./actions";
 import {
@@ -15,11 +14,6 @@ import {
   AlertTriangle,
   ChefHat,
   Receipt,
-  Info,
-  Shield,
-  Check,
-  X,
-  Search,
   RefreshCw,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
@@ -101,7 +95,8 @@ const ROLE_PERMISSIONS: Record<
   },
   CHEF: {
     title: "Cocinero / Chef (CHEF)",
-    subtitle: "Pantalla KDS de cocina, preparación de pedidos y tareas de cocina",
+    subtitle:
+      "Pantalla KDS de cocina, preparación de pedidos y tareas de cocina",
     color: "text-purple-400",
     badgeBg: "bg-purple-500/10",
     badgeBorder: "border-purple-500/20",
@@ -156,7 +151,7 @@ export default function AdminUsersPage() {
       } else {
         setErrorMsg("Error al obtener usuarios.");
       }
-    } catch (e) {
+    } catch {
       setErrorMsg("Error desconocido.");
     } finally {
       setIsLoading(false);
@@ -213,11 +208,14 @@ export default function AdminUsersPage() {
   };
 
   // Stats calculation
-  const totalAdmins = profiles.filter((p) => p.role === "ADMIN" || p.role === "MANAGER").length;
+  const totalAdmins = profiles.filter(
+    (p) => p.role === "ADMIN" || p.role === "MANAGER",
+  ).length;
   const totalWaiters = profiles.filter((p) => p.role === "WAITER").length;
   const totalChefs = profiles.filter((p) => p.role === "CHEF").length;
 
-  const currentRoleInfo = ROLE_PERMISSIONS[selectedFormRole] || ROLE_PERMISSIONS.WAITER;
+  const currentRoleInfo =
+    ROLE_PERMISSIONS[selectedFormRole] || ROLE_PERMISSIONS.WAITER;
 
   // Filtered & Sorted Profiles
   const filteredProfiles = useMemo(() => {
@@ -308,7 +306,9 @@ export default function AdminUsersPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Total Usuarios
               </p>
-              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">{profiles.length}</p>
+              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">
+                {profiles.length}
+              </p>
             </div>
             <div className="rounded-xl bg-primary/10 p-3 text-primary">
               <Users className="h-5 w-5" />
@@ -320,7 +320,9 @@ export default function AdminUsersPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Administradores
               </p>
-              <p className="mt-1 text-2xl font-black text-blue-400">{totalAdmins}</p>
+              <p className="mt-1 text-2xl font-black text-blue-400">
+                {totalAdmins}
+              </p>
             </div>
             <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
               <ShieldCheck className="h-5 w-5" />
@@ -332,7 +334,9 @@ export default function AdminUsersPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Meseros / POS
               </p>
-              <p className="mt-1 text-2xl font-black text-amber-400">{totalWaiters}</p>
+              <p className="mt-1 text-2xl font-black text-amber-400">
+                {totalWaiters}
+              </p>
             </div>
             <div className="rounded-xl bg-amber-500/10 p-3 text-amber-400">
               <Receipt className="h-5 w-5" />
@@ -344,7 +348,9 @@ export default function AdminUsersPage() {
               <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                 Cocineros / KDS
               </p>
-              <p className="mt-1 text-2xl font-black text-purple-400">{totalChefs}</p>
+              <p className="mt-1 text-2xl font-black text-purple-400">
+                {totalChefs}
+              </p>
             </div>
             <div className="rounded-xl bg-purple-500/10 p-3 text-purple-400">
               <ChefHat className="h-5 w-5" />
@@ -363,7 +369,9 @@ export default function AdminUsersPage() {
               onClick={fetchProfiles}
               className="text-xs text-[#E0E0E0]/60 hover:text-white flex items-center gap-1.5 font-bold"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`}
+              />
               Actualizar Lista
             </button>
           </div>
@@ -437,16 +445,22 @@ export default function AdminUsersPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {paginatedProfiles.map((p) => {
-                  const roleConfig = ROLE_PERMISSIONS[p.role] || ROLE_PERMISSIONS.WAITER;
+                  const roleConfig =
+                    ROLE_PERMISSIONS[p.role] || ROLE_PERMISSIONS.WAITER;
                   return (
-                    <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
+                    <tr
+                      key={p.id}
+                      className="hover:bg-white/[0.02] transition-colors"
+                    >
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           <div className="h-9 w-9 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black">
                             {(p.full_name || p.email).charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-bold text-[#E0E0E0]">{p.full_name || "Sin Nombre"}</p>
+                            <p className="font-bold text-[#E0E0E0]">
+                              {p.full_name || "Sin Nombre"}
+                            </p>
                           </div>
                         </div>
                       </td>
@@ -456,13 +470,35 @@ export default function AdminUsersPage() {
                       <td className="py-3 px-4">
                         <select
                           value={p.role}
-                          onChange={(e) => handleRoleChange(p.id, e.target.value)}
+                          onChange={(e) =>
+                            handleRoleChange(p.id, e.target.value)
+                          }
                           className={`rounded-xl border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer ${roleConfig.badgeBg} ${roleConfig.color} ${roleConfig.badgeBorder}`}
                         >
-                          <option value="ADMIN" className="bg-[#1E1E1E] text-white">ADMIN</option>
-                          <option value="MANAGER" className="bg-[#1E1E1E] text-white">MANAGER</option>
-                          <option value="WAITER" className="bg-[#1E1E1E] text-white">WAITER</option>
-                          <option value="CHEF" className="bg-[#1E1E1E] text-white">CHEF</option>
+                          <option
+                            value="ADMIN"
+                            className="bg-[#1E1E1E] text-white"
+                          >
+                            ADMIN
+                          </option>
+                          <option
+                            value="MANAGER"
+                            className="bg-[#1E1E1E] text-white"
+                          >
+                            MANAGER
+                          </option>
+                          <option
+                            value="WAITER"
+                            className="bg-[#1E1E1E] text-white"
+                          >
+                            WAITER
+                          </option>
+                          <option
+                            value="CHEF"
+                            className="bg-[#1E1E1E] text-white"
+                          >
+                            CHEF
+                          </option>
                         </select>
                       </td>
                       <td className="py-3 px-4 text-xs text-[#E0E0E0]/50">
@@ -474,15 +510,25 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="py-3 px-4 text-right">
                         <button
-                          onClick={() => handleDelete(p.id, p.full_name || p.email)}
+                          onClick={() =>
+                            handleDelete(p.id, p.full_name || p.email)
+                          }
                           className={`rounded-lg border p-2 transition-all text-xs font-black ${
                             deleteArmedId === p.id
                               ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
                               : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
                           }`}
-                          title={deleteArmedId === p.id ? "Confirmar eliminación" : "Eliminar Usuario"}
+                          title={
+                            deleteArmedId === p.id
+                              ? "Confirmar eliminación"
+                              : "Eliminar Usuario"
+                          }
                         >
-                          {deleteArmedId === p.id ? "¿Seguro?" : <Trash2 className="h-4 w-4" />}
+                          {deleteArmedId === p.id ? (
+                            "¿Seguro?"
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </button>
                       </td>
                     </tr>
@@ -490,8 +536,13 @@ export default function AdminUsersPage() {
                 })}
                 {paginatedProfiles.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-xs text-[#E0E0E0]/40 italic">
-                      {isLoading ? "Cargando usuarios..." : "No se encontraron usuarios."}
+                    <td
+                      colSpan={5}
+                      className="py-8 text-center text-xs text-[#E0E0E0]/40 italic"
+                    >
+                      {isLoading
+                        ? "Cargando usuarios..."
+                        : "No se encontraron usuarios."}
                     </td>
                   </tr>
                 )}
@@ -587,8 +638,12 @@ export default function AdminUsersPage() {
           </div>
 
           {/* Resumen dinámico del rol seleccionado */}
-          <div className={`p-4 rounded-xl border ${currentRoleInfo.badgeBg} ${currentRoleInfo.badgeBorder} space-y-2`}>
-            <p className={`text-xs font-black uppercase ${currentRoleInfo.color}`}>
+          <div
+            className={`p-4 rounded-xl border ${currentRoleInfo.badgeBg} ${currentRoleInfo.badgeBorder} space-y-2`}
+          >
+            <p
+              className={`text-xs font-black uppercase ${currentRoleInfo.color}`}
+            >
               {currentRoleInfo.title}
             </p>
             <p className="text-xs text-[#E0E0E0]/70 font-medium">

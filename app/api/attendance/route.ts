@@ -5,10 +5,13 @@ import { format } from "date-fns-tz";
 // Timezone used in the app
 const TZ = "America/Mexico_City";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -29,7 +32,8 @@ export async function GET(request: Request) {
       .eq("id", user.id)
       .maybeSingle();
 
-    const role = profileData?.role || dbUser?.role || (user.user_metadata?.role as string);
+    const role =
+      profileData?.role || dbUser?.role || (user.user_metadata?.role as string);
     const isAdmin = role === "ADMIN" || role === "MANAGER";
 
     if (isAdmin) {
@@ -40,10 +44,7 @@ export async function GET(request: Request) {
           .from("attendance")
           .select("id, user_id, check_in, check_out, status, date")
           .eq("date", todayDate),
-        supabase
-          .from("users")
-          .select("id, name, role")
-          .neq("role", "ADMIN") // Maybe admins don't track attendance? Let's exclude or include depending. Let's include everyone just in case.
+        supabase.from("users").select("id, name, role").neq("role", "ADMIN"), // Maybe admins don't track attendance? Let's exclude or include depending. Let's include everyone just in case.
       ]);
 
       return NextResponse.json({
@@ -68,14 +69,20 @@ export async function GET(request: Request) {
     }
   } catch (error) {
     console.error("GET /api/attendance error:", error);
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -94,13 +101,18 @@ export async function POST(request: Request) {
         .eq("id", user.id)
         .single();
       if (dbUser?.role !== "ADMIN" && dbUser?.role !== "MANAGER") {
-        return NextResponse.json({ error: "No tienes permisos de administrador" }, { status: 403 });
+        return NextResponse.json(
+          { error: "No tienes permisos de administrador" },
+          { status: 403 },
+        );
       }
       actualUserId = targetUserId;
     }
 
     // Determine the timestamp to use
-    const actionTime = timestamp ? new Date(timestamp).toISOString() : new Date().toISOString();
+    const actionTime = timestamp
+      ? new Date(timestamp).toISOString()
+      : new Date().toISOString();
 
     if (action === "CHECK_IN") {
       // Resolve target user ID in `users` table
@@ -120,7 +132,10 @@ export async function POST(request: Request) {
           .maybeSingle();
 
         if (emailSearchError) {
-          console.error("[Attendance API] Error searching user by email:", emailSearchError);
+          console.error(
+            "[Attendance API] Error searching user by email:",
+            emailSearchError,
+          );
         }
 
         if (userByEmail) {
@@ -143,22 +158,33 @@ export async function POST(request: Request) {
             .single();
 
           if (autoCreateError) {
-            console.error("[Attendance API] autoCreateError detail:", autoCreateError);
+            console.error(
+              "[Attendance API] autoCreateError detail:",
+              autoCreateError,
+            );
           }
 
           if (!autoCreateError && newUser) {
             dbUserId = newUser.id;
           } else {
             return NextResponse.json(
-              { error: `No se pudo registrar automáticamente al usuario: ${autoCreateError?.message || 'Error desconocido'}` },
-              { status: 500 }
+              {
+                error: `No se pudo registrar automáticamente al usuario: ${autoCreateError?.message || "Error desconocido"}`,
+              },
+              { status: 500 },
             );
           }
         } else {
-          console.error("[Attendance API] User has no email in auth context:", user);
+          console.error(
+            "[Attendance API] User has no email in auth context:",
+            user,
+          );
           return NextResponse.json(
-            { error: "No se encontró el registro de usuario en la base de datos." },
-            { status: 400 }
+            {
+              error:
+                "No se encontró el registro de usuario en la base de datos.",
+            },
+            { status: 400 },
           );
         }
       }
@@ -209,7 +235,10 @@ export async function POST(request: Request) {
         .limit(1);
 
       if (fetchError || !activeRecords || activeRecords.length === 0) {
-        return NextResponse.json({ error: "No hay un turno activo para finalizar" }, { status: 400 });
+        return NextResponse.json(
+          { error: "No hay un turno activo para finalizar" },
+          { status: 400 },
+        );
       }
 
       const activeRecordId = activeRecords[0].id;
@@ -232,6 +261,9 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error("POST /api/attendance error:", error);
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 },
+    );
   }
 }

@@ -18,7 +18,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const updateData: any = { status };
 
     // If order is completed or uncollected, set completion timestamp
-    if (status === "DELIVERED" || status === "PAID" || status === "UNCOLLECTED") {
+    if (
+      status === "DELIVERED" ||
+      status === "PAID" ||
+      status === "UNCOLLECTED"
+    ) {
       updateData.completed_at = getCurrentCDMXDate();
     }
 
@@ -34,13 +38,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .from("orders")
       .update(updateData)
       .eq("id", id)
-      .select(`
+      .select(
+        `
         *,
         order_items (
           *,
           menu_items (*)
         )
-      `)
+      `,
+      )
       .single();
 
     if (error) throw error;

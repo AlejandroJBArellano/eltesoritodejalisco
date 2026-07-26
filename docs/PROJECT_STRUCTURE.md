@@ -66,36 +66,48 @@ eltesoritodejalisco/
 ## 📋 Descripción de Carpetas Clave
 
 ### `/app/api/` - Backend API
+
 Contiene todas las rutas de API siguiendo el patrón de Next.js App Router:
+
 - **RESTful endpoints** para CRUD de entidades
 - **Server-side logic** para operaciones complejas
 - **Transacciones de base de datos** con Prisma
 
 ### `/components/` - Componentes React
+
 Componentes reutilizables de UI organizados por funcionalidad:
+
 - **Client Components** ('use client') para interactividad
 - **Optimizados** para performance y accesibilidad
 
 ### `/lib/` - Lógica de Negocio
+
 Servicios y utilidades separados de la UI:
+
 - **Services**: Lógica de negocio compleja (inventario, pagos, etc.)
 - **Utils**: Funciones helper (formateo, validaciones, etc.)
 - **Prisma**: Cliente de base de datos singleton
 
 ### `/types/` - TypeScript Types
+
 Definiciones de tipos compartidas en todo el proyecto:
+
 - **Interfaces** de entidades de base de datos
 - **Enums** para estados y categorías
 - **Types** para requests/responses de API
 
 ### `/prisma/` - Database Layer
+
 Todo lo relacionado con la base de datos:
+
 - **schema.prisma**: Definición del modelo de datos
 - **migrations/**: Historial de cambios en DB
 - **seed.sql**: Datos iniciales para testing
 
 ### `/docs/` - Documentación
+
 Documentación completa del proyecto:
+
 - **Guías de instalación** y configuración
 - **Arquitectura** y decisiones técnicas
 - **Ejemplos** de uso de APIs
@@ -103,17 +115,20 @@ Documentación completa del proyecto:
 ## 🎯 Archivos Importantes
 
 ### Configuración
+
 - **`.env`**: Variables de entorno (DATABASE_URL, secrets)
 - **`tsconfig.json`**: Configuración TypeScript
 - **`next.config.ts`**: Configuración Next.js
 - **`package.json`**: Dependencias y scripts npm
 
 ### Entry Points
+
 - **`app/layout.tsx`**: Layout principal de la app
 - **`app/page.tsx`**: Página de inicio
 - **`app/kitchen/page.tsx`**: Pantalla de cocina (KDS)
 
 ### Core Logic
+
 - **`lib/services/inventory.ts`**: Lógica de desconteo automático
 - **`components/kitchen/KitchenDisplaySystem.tsx`**: Sistema KDS completo
 - **`components/kitchen/OrderCard.tsx`**: Tarjeta con temporizador
@@ -188,46 +203,52 @@ npm run prisma:studio    # UI visual para DB
 ## 📝 Convenciones de Código
 
 ### Naming
+
 - **Componentes**: PascalCase (`OrderCard.tsx`)
 - **Funciones**: camelCase (`deductInventory()`)
 - **Constantes**: UPPER_SNAKE_CASE (`ALERT_THRESHOLD_MINUTES`)
 - **Archivos**: kebab-case para utilidades (`use-orders.ts`)
 
 ### Organización
+
 - **Un componente por archivo**
 - **Exports nombrados** para funciones
 - **Default export** para componentes de página
 - **Tipos junto al código** que los usa
 
 ### Imports
+
 ```typescript
 // External libraries
-import { useState } from 'react';
-import { PrismaClient } from '@prisma/client';
+import { useState } from "react";
+import { PrismaClient } from "@prisma/client";
 
 // Internal modules
-import { OrderCard } from '@/components/kitchen/OrderCard';
-import type { Order } from '@/types';
+import { OrderCard } from "@/components/kitchen/OrderCard";
+import type { Order } from "@/types";
 
 // Relative imports
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency } from "../lib/utils";
 ```
 
 ## 🎨 Patrones de Diseño
 
 ### API Routes
+
 - **RESTful endpoints** (GET, POST, PATCH, DELETE)
 - **Manejo de errores** consistente
 - **Validación de input** con TypeScript
 - **Transacciones** para operaciones críticas
 
 ### React Components
+
 - **Composición** sobre herencia
 - **Hooks** para lógica reutilizable
 - **Props typing** estricto con TypeScript
 - **Client/Server components** según necesidad
 
 ### Database
+
 - **Normalized schema** con foreign keys
 - **Índices** en campos frecuentes
 - **Soft deletes** cuando sea necesario

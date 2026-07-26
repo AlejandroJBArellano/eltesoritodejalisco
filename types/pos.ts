@@ -39,5 +39,10 @@ export type ModifyItem = {
 };
 
 export const MIXED_ORDER_TOTAL = 3;
-export const MIXED_ORDER_FLAVORS = ["Carnitas", "Birria", "Pastor", "Jamaica"] as const;
+export const MIXED_ORDER_FLAVORS = [
+  "Carnitas",
+  "Birria",
+  "Pastor",
+  "Jamaica",
+] as const;
 export type MixedFlavor = (typeof MIXED_ORDER_FLAVORS)[number];

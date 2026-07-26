@@ -1,7 +1,16 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { Order, OrderFormState, MenuItem, OrderItemDraft, ModifyItem, MixedFlavor, MIXED_ORDER_TOTAL, MIXED_ORDER_FLAVORS } from "@/types/pos";
+import { useState, useEffect } from "react";
+import {
+  Order,
+  OrderFormState,
+  MenuItem,
+  OrderItemDraft,
+  ModifyItem,
+  MixedFlavor,
+  MIXED_ORDER_TOTAL,
+  MIXED_ORDER_FLAVORS,
+} from "@/types/pos";
 
 const emptyForm: OrderFormState = {
   customerId: "",
@@ -14,7 +23,10 @@ const emptyForm: OrderFormState = {
 const MIXED_ORDER_KEYWORD = "orden mixta";
 
 const emptyFlavorCounts = (): Record<MixedFlavor, number> =>
-  Object.fromEntries(MIXED_ORDER_FLAVORS.map((f) => [f, 0])) as Record<MixedFlavor, number>;
+  Object.fromEntries(MIXED_ORDER_FLAVORS.map((f) => [f, 0])) as Record<
+    MixedFlavor,
+    number
+  >;
 
 export const isMixedOrderItem = (name: string) =>
   name.toLowerCase().includes(MIXED_ORDER_KEYWORD);
@@ -24,14 +36,20 @@ export const formatMixedNotes = (counts: Record<MixedFlavor, number>) =>
     .map((f) => `${counts[f]}x ${f}`)
     .join(", ");
 
-export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => Promise<Order[]>) {
+export function usePOSCart(
+  availableMenuItems: MenuItem[],
+  refreshOrders: () => Promise<Order[]>,
+) {
   const [formState, setFormState] = useState<OrderFormState>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [cartError, setCartError] = useState<string | null>(null);
 
   // Mixed Order State
-  const [mixedOrderMenuItem, setMixedOrderMenuItem] = useState<MenuItem | null>(null);
-  const [mixedFlavorCounts, setMixedFlavorCounts] = useState<Record<MixedFlavor, number>>(emptyFlavorCounts());
+  const [mixedOrderMenuItem, setMixedOrderMenuItem] = useState<MenuItem | null>(
+    null,
+  );
+  const [mixedFlavorCounts, setMixedFlavorCounts] =
+    useState<Record<MixedFlavor, number>>(emptyFlavorCounts());
 
   // Edit Order State (add items)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
@@ -53,7 +71,10 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
       setFormState((prev) => {
         if (prev.items.length === 1 && prev.items[0].menuItemId === "") {
           const nextItems = [...prev.items];
-          nextItems[0] = { ...nextItems[0], menuItemId: availableMenuItems[0].id };
+          nextItems[0] = {
+            ...nextItems[0],
+            menuItemId: availableMenuItems[0].id,
+          };
           return { ...prev, items: nextItems };
         }
         return prev;
@@ -62,7 +83,10 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
       setAdditionalItems((prev) => {
         if (prev.length === 1 && prev[0].menuItemId === "") {
           const nextItems = [...prev];
-          nextItems[0] = { ...nextItems[0], menuItemId: availableMenuItems[0].id };
+          nextItems[0] = {
+            ...nextItems[0],
+            menuItemId: availableMenuItems[0].id,
+          };
           return nextItems;
         }
         return prev;
@@ -82,7 +106,9 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
     }
 
     setFormState((prev) => {
-      const existingIndex = prev.items.findIndex((item) => item.menuItemId === menuItem.id && item.notes === "");
+      const existingIndex = prev.items.findIndex(
+        (item) => item.menuItemId === menuItem.id && item.notes === "",
+      );
       if (existingIndex >= 0) {
         const nextItems = [...prev.items];
         nextItems[existingIndex] = {
@@ -93,7 +119,10 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
       }
       return {
         ...prev,
-        items: [...prev.items, { menuItemId: menuItem.id, quantity: "1", notes: "" }],
+        items: [
+          ...prev.items,
+          { menuItemId: menuItem.id, quantity: "1", notes: "" },
+        ],
       };
     });
   };
@@ -129,7 +158,10 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
       if (newQuantity <= 0) {
         return { ...prev, items: nextItems.filter((_, idx) => idx !== index) };
       }
-      nextItems[index] = { ...nextItems[index], quantity: newQuantity.toString() };
+      nextItems[index] = {
+        ...nextItems[index],
+        quantity: newQuantity.toString(),
+      };
       return { ...prev, items: nextItems };
     });
   };
@@ -174,7 +206,7 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
 
   const handleCheckoutSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
-    setCheckoutOrder: (order: Order) => void
+    setCheckoutOrder: (order: Order) => void,
   ) => {
     event.preventDefault();
     const errors = validateForm();
@@ -204,11 +236,14 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
       if (!response.ok) throw new Error(data?.error || "Error al crear orden");
 
       const orders = await refreshOrders();
-      const newOrder = orders.find((o: Order) => o.id === data.order.id) || data.order;
+      const newOrder =
+        orders.find((o: Order) => o.id === data.order.id) || data.order;
       setCheckoutOrder(newOrder);
       clearForm();
     } catch (error) {
-      setCartError(error instanceof Error ? error.message : "Error al procesar");
+      setCartError(
+        error instanceof Error ? error.message : "Error al procesar",
+      );
     } finally {
       setIsSubmittingCart(false);
     }
@@ -248,9 +283,17 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
 
       await refreshOrders();
       setEditingOrder(null);
-      setAdditionalItems([{ menuItemId: availableMenuItems[0]?.id || "", quantity: "1", notes: "" }]);
+      setAdditionalItems([
+        {
+          menuItemId: availableMenuItems[0]?.id || "",
+          quantity: "1",
+          notes: "",
+        },
+      ]);
     } catch (error) {
-      setCartError(error instanceof Error ? error.message : "Error al actualizar orden");
+      setCartError(
+        error instanceof Error ? error.message : "Error al actualizar orden",
+      );
     } finally {
       setIsSubmittingCart(false);
     }
@@ -328,18 +371,21 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
         }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "Error al modificar orden");
+      if (!response.ok)
+        throw new Error(data?.error || "Error al modificar orden");
       await refreshOrders();
       setModifyingOrder(null);
       setModifyItems([]);
     } catch (error) {
-      setCartError(error instanceof Error ? error.message : "Error al modificar orden");
+      setCartError(
+        error instanceof Error ? error.message : "Error al modificar orden",
+      );
     } finally {
       setIsSubmittingCart(false);
     }
   };
 
-  const handleCancelOrder = async (orderId: string, orderNumber: string) => {
+  const handleCancelOrder = async (orderId: string) => {
     // cancelOrderArmed state is managed in the UI (page.tsx) via a separate per-row mechanism
     // This function is called only after the UI has done its two-step confirm
     try {
@@ -354,7 +400,9 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
       }
       await refreshOrders();
     } catch (error) {
-      setCartError(error instanceof Error ? error.message : "Error al cancelar orden");
+      setCartError(
+        error instanceof Error ? error.message : "Error al cancelar orden",
+      );
     } finally {
       setIsSubmittingCart(false);
     }

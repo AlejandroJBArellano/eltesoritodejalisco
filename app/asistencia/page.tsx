@@ -4,13 +4,12 @@ import { Attendance, User } from "@/types";
 import { differenceInMinutes } from "date-fns";
 import { format } from "date-fns-tz";
 import {
-  ArrowLeft,
   FileText,
   LogIn,
   LogOut,
   ShieldAlert,
   UserCheck,
-  UserX
+  UserX,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -26,7 +25,9 @@ export default function AsistenciaPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Time overrides for admin
-  const [customTime, setCustomTime] = useState<string>(format(new Date(), "HH:mm", { timeZone: TZ }));
+  const [customTime, setCustomTime] = useState<string>(
+    format(new Date(), "HH:mm", { timeZone: TZ }),
+  );
 
   const fetchAttendance = async () => {
     try {
@@ -37,8 +38,10 @@ export default function AsistenciaPage() {
       setIsAdmin(data.isAdmin);
       setUsers(data.users || []);
       setAttendances(data.attendances || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Error al cargar asistencia",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +51,10 @@ export default function AsistenciaPage() {
     fetchAttendance();
   }, []);
 
-  const handleAction = async (action: "CHECK_IN" | "CHECK_OUT", targetUserId?: string) => {
+  const handleAction = async (
+    action: "CHECK_IN" | "CHECK_OUT",
+    targetUserId?: string,
+  ) => {
     try {
       setIsLoading(true);
 
@@ -70,18 +76,24 @@ export default function AsistenciaPage() {
       }
 
       await fetchAttendance();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Error al registrar asistencia",
+      );
       setIsLoading(false);
     }
   };
 
   const getActiveAttendance = (userId: string) => {
-    return attendances.find(a => a.user_id === userId && a.status === "ACTIVE");
+    return attendances.find(
+      (a) => a.user_id === userId && a.status === "ACTIVE",
+    );
   };
 
   const getFinishedAttendances = (userId: string) => {
-    return attendances.filter(a => a.user_id === userId && a.status === "FINISHED");
+    return attendances.filter(
+      (a) => a.user_id === userId && a.status === "FINISHED",
+    );
   };
 
   const renderAdminView = () => {
@@ -91,10 +103,12 @@ export default function AsistenciaPage() {
         <div className="rounded-2xl bg-[#242424] p-6 border border-white/5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-primary" /> Modo Administrador
+              <ShieldAlert className="h-4 w-4 text-primary" /> Modo
+              Administrador
             </h3>
             <p className="text-xs text-[#E0E0E0]/60 mt-1 font-medium">
-              Puedes registrar entradas o salidas manuales usando una hora personalizada.
+              Puedes registrar entradas o salidas manuales usando una hora
+              personalizada.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -126,12 +140,19 @@ export default function AsistenciaPage() {
 
         {/* User Cards Grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {users.map(user => {
+          {users.map((user) => {
             const active = getActiveAttendance(user.id);
             const finished = getFinishedAttendances(user.id);
             const totalHoursFinished = finished.reduce((acc, curr) => {
               if (curr.check_in && curr.check_out) {
-                return acc + differenceInMinutes(new Date(curr.check_out), new Date(curr.check_in)) / 60;
+                return (
+                  acc +
+                  differenceInMinutes(
+                    new Date(curr.check_out),
+                    new Date(curr.check_in),
+                  ) /
+                    60
+                );
               }
               return acc;
             }, 0);
@@ -139,14 +160,17 @@ export default function AsistenciaPage() {
             return (
               <div
                 key={user.id}
-                className={`rounded-2xl p-6 border transition-all duration-300 flex flex-col justify-between ${active
+                className={`rounded-2xl p-6 border transition-all duration-300 flex flex-col justify-between ${
+                  active
                     ? "bg-[#242424] border-emerald-500/30 shadow-md shadow-emerald-500/5"
                     : "bg-[#242424] border-white/5 hover:border-white/10"
-                  }`}
+                }`}
               >
                 <div>
                   <div className="flex justify-between items-start mb-3">
-                    <h4 className="font-black text-lg text-[#E0E0E0] uppercase tracking-tight">{user.name}</h4>
+                    <h4 className="font-black text-lg text-[#E0E0E0] uppercase tracking-tight">
+                      {user.name}
+                    </h4>
                     <span className="rounded-full bg-white/5 border border-white/10 px-2.5 py-0.5 text-[10px] font-black text-[#E0E0E0]/60 uppercase tracking-widest">
                       {user.role}
                     </span>
@@ -159,7 +183,12 @@ export default function AsistenciaPage() {
                         En Turno
                       </span>
                       <p className="text-xs text-[#E0E0E0]/60 font-mono mt-2.5">
-                        Entrada: <strong className="text-emerald-400">{format(new Date(active.check_in), "HH:mm", { timeZone: TZ })}</strong>
+                        Entrada:{" "}
+                        <strong className="text-emerald-400">
+                          {format(new Date(active.check_in), "HH:mm", {
+                            timeZone: TZ,
+                          })}
+                        </strong>
                       </p>
                     </div>
                   ) : (
@@ -172,8 +201,18 @@ export default function AsistenciaPage() {
 
                   {finished.length > 0 && (
                     <div className="mb-4 text-xs text-[#E0E0E0]/50 border-t border-white/5 pt-3 space-y-1 font-medium">
-                      <p>Turnos completados hoy: <strong className="text-[#E0E0E0] font-bold">{finished.length}</strong></p>
-                      <p>Horas totales acumuladas: <strong className="text-emerald-400 font-bold">{totalHoursFinished.toFixed(2)} hrs</strong></p>
+                      <p>
+                        Turnos completados hoy:{" "}
+                        <strong className="text-[#E0E0E0] font-bold">
+                          {finished.length}
+                        </strong>
+                      </p>
+                      <p>
+                        Horas totales acumuladas:{" "}
+                        <strong className="text-emerald-400 font-bold">
+                          {totalHoursFinished.toFixed(2)} hrs
+                        </strong>
+                      </p>
                     </div>
                   )}
                 </div>
@@ -204,20 +243,28 @@ export default function AsistenciaPage() {
   };
 
   const renderEmployeeView = () => {
-    const active = attendances.find(a => a.status === "ACTIVE");
+    const active = attendances.find((a) => a.status === "ACTIVE");
 
     return (
       <div className="max-w-md mx-auto bg-[#242424] p-8 rounded-2xl border border-white/5 shadow-sm text-center">
-        <h2 className="text-xl font-black text-[#E0E0E0] uppercase tracking-tight mb-2">Control de Asistencia</h2>
-        <p className="text-xs text-[#E0E0E0]/60 mb-8 font-medium">Registra tu hora de entrada y salida del turno actual.</p>
+        <h2 className="text-xl font-black text-[#E0E0E0] uppercase tracking-tight mb-2">
+          Control de Asistencia
+        </h2>
+        <p className="text-xs text-[#E0E0E0]/60 mb-8 font-medium">
+          Registra tu hora de entrada y salida del turno actual.
+        </p>
 
         {active ? (
           <div>
             <div className="w-36 h-36 mx-auto rounded-full bg-emerald-500/10 border-4 border-emerald-500 flex flex-col items-center justify-center mb-6 shadow-lg shadow-emerald-500/10">
               <UserCheck className="h-8 w-8 text-emerald-400 mb-1" />
-              <span className="text-emerald-400 font-black text-sm uppercase tracking-wider">Turno Activo</span>
+              <span className="text-emerald-400 font-black text-sm uppercase tracking-wider">
+                Turno Activo
+              </span>
             </div>
-            <p className="text-xs text-[#E0E0E0]/60 font-bold uppercase tracking-wider mb-1">Hora de entrada</p>
+            <p className="text-xs text-[#E0E0E0]/60 font-bold uppercase tracking-wider mb-1">
+              Hora de entrada
+            </p>
             <p className="text-3xl font-mono font-black text-emerald-400 mb-8">
               {format(new Date(active.check_in), "HH:mm", { timeZone: TZ })}
             </p>
@@ -226,22 +273,28 @@ export default function AsistenciaPage() {
               disabled={isLoading}
               className="w-full inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-black py-4 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-red-500/20 transition-all active:scale-95 cursor-pointer"
             >
-              <LogOut className="h-4 w-4" /> {isLoading ? "Registrando..." : "Registrar Salida"}
+              <LogOut className="h-4 w-4" />{" "}
+              {isLoading ? "Registrando..." : "Registrar Salida"}
             </button>
           </div>
         ) : (
           <div>
             <div className="w-36 h-36 mx-auto rounded-full bg-white/5 border-4 border-white/10 flex flex-col items-center justify-center mb-6">
               <UserX className="h-8 w-8 text-[#E0E0E0]/40 mb-1" />
-              <span className="text-[#E0E0E0]/50 font-black text-sm uppercase tracking-wider">Fuera de Turno</span>
+              <span className="text-[#E0E0E0]/50 font-black text-sm uppercase tracking-wider">
+                Fuera de Turno
+              </span>
             </div>
-            <p className="text-xs text-[#E0E0E0]/50 font-medium mb-8">No tienes un turno activo en este momento.</p>
+            <p className="text-xs text-[#E0E0E0]/50 font-medium mb-8">
+              No tienes un turno activo en este momento.
+            </p>
             <button
               onClick={() => handleAction("CHECK_IN")}
               disabled={isLoading}
               className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-black py-4 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer"
             >
-              <LogIn className="h-4 w-4" /> {isLoading ? "Registrando..." : "Registrar Entrada"}
+              <LogIn className="h-4 w-4" />{" "}
+              {isLoading ? "Registrando..." : "Registrar Entrada"}
             </button>
           </div>
         )}

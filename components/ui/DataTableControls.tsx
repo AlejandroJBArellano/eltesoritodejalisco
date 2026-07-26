@@ -66,7 +66,9 @@ export function TableHeaderSortCell<T extends string>({
   const isSelected = currentSortField === field;
 
   return (
-    <th className={`py-3 px-4 font-bold text-[#E0E0E0]/70 select-none ${className}`}>
+    <th
+      className={`py-3 px-4 font-bold text-[#E0E0E0]/70 select-none ${className}`}
+    >
       <button
         type="button"
         onClick={() => onSort(field)}

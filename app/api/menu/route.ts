@@ -52,12 +52,14 @@ async function uploadImageToStorage(imageFile: File): Promise<string> {
 
   if (uploadError) {
     console.error("Storage upload error:", uploadError);
-    throw new Error(`Error al subir imagen a almacenamiento: ${uploadError.message}`);
+    throw new Error(
+      `Error al subir imagen a almacenamiento: ${uploadError.message}`,
+    );
   }
 
-  const { data: { publicUrl } } = supabaseAdmin.storage
-    .from("menu-items")
-    .getPublicUrl(filePath);
+  const {
+    data: { publicUrl },
+  } = supabaseAdmin.storage.from("menu-items").getPublicUrl(filePath);
 
   return publicUrl;
 }
@@ -78,7 +80,10 @@ export async function POST(request: NextRequest) {
     let imageUrl = (formData.get("imageUrl") as string) || null;
 
     if (!name) {
-      return NextResponse.json({ error: "El nombre es obligatorio" }, { status: 400 });
+      return NextResponse.json(
+        { error: "El nombre es obligatorio" },
+        { status: 400 },
+      );
     }
 
     const parsedPrice = Number(price);
@@ -117,7 +122,12 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error creating menu item:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "No se pudo crear el producto" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "No se pudo crear el producto",
+      },
       { status: 500 },
     );
   }
@@ -181,7 +191,12 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error("Error updating menu item:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "No se pudo actualizar el producto" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "No se pudo actualizar el producto",
+      },
       { status: 500 },
     );
   }
@@ -203,7 +218,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabaseAdmin = createAdminClient();
-    const { error } = await supabaseAdmin.from("menu_items").delete().eq("id", id);
+    const { error } = await supabaseAdmin
+      .from("menu_items")
+      .delete()
+      .eq("id", id);
 
     if (error) throw error;
 

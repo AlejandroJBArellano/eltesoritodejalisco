@@ -1,18 +1,18 @@
-import { getPrimordialTasks, getTodayExecutions } from '@/lib/actions/tasks'
-import { TareasClient } from '@/components/tareas/TareasClient'
-import { getUser } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import { PageHeader } from '@/components/PageHeader'
-import { CheckSquare } from 'lucide-react'
+import { getPrimordialTasks, getTodayExecutions } from "@/lib/actions/tasks";
+import { TareasClient } from "@/components/tareas/TareasClient";
+import { getUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { PageHeader } from "@/components/PageHeader";
+import { CheckSquare } from "lucide-react";
 
 export default async function TareasPage() {
-  const user = await getUser()
+  const user = await getUser();
   if (!user) {
-    redirect('/login')
+    redirect("/login");
   }
 
-  const tasks = await getPrimordialTasks()
-  const executions = await getTodayExecutions()
+  const tasks = await getPrimordialTasks();
+  const executions = await getTodayExecutions();
 
   return (
     <main className="min-h-screen bg-[#121212] text-[#E0E0E0]">
@@ -24,12 +24,12 @@ export default async function TareasPage() {
       />
 
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <TareasClient 
-          initialTasks={tasks} 
-          initialExecutions={executions} 
-          userId={user.id} 
+        <TareasClient
+          initialTasks={tasks}
+          initialExecutions={executions}
+          userId={user.id}
         />
       </div>
     </main>
-  )
+  );
 }

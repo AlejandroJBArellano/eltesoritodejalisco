@@ -21,51 +21,48 @@ import {
   YAxis,
 } from "recharts";
 
+import { PageHeader } from "@/components/PageHeader";
 import { FacturacionModal } from "@/components/pos/FacturacionModal";
 import {
   getOrderPaymentLabel,
   getOrderPaymentMethods,
   getOrderTipAmount,
 } from "@/components/pos/paymentUtils";
-import { PageHeader } from "@/components/PageHeader";
 import {
-  TableSearchInput,
   TableHeaderSortCell,
-  TablePagination,
+  TablePagination
 } from "@/components/ui/DataTableControls";
 import { usePendingCut } from "@/hooks/usePendingCut";
 import { createClient } from "@/lib/supabase/client";
 import {
+  AlertTriangle,
   ArrowLeft,
-  Search,
-  Calendar,
-  UtensilsCrossed,
-  CreditCard,
   BarChart3,
+  Calendar,
   CheckCircle2,
-  Folder,
-  FileText,
   ChevronDown,
   ChevronRight,
-  ShieldAlert,
   Clock,
-  DollarSign,
-  Wallet,
-  Receipt,
-  HandCoins,
-  Users,
-  TrendingUp,
-  Plus,
-  X,
-  AlertTriangle,
-  Printer,
-  PieChart as PieChartIcon,
-  ShoppingBag,
+  Folder,
   Home,
-  CheckSquare,
+  PieChart as PieChartIcon,
+  Receipt,
+  Search,
+  ShieldAlert,
+  ShoppingBag,
+  TrendingUp,
+  X
 } from "lucide-react";
 
-const COLORS = ["#FFB7CE", "#34D399", "#60A5FA", "#FBBF24", "#C084FC", "#F472B6", "#38BDF8"];
+const COLORS = [
+  "#FFB7CE",
+  "#34D399",
+  "#60A5FA",
+  "#FBBF24",
+  "#C084FC",
+  "#F472B6",
+  "#38BDF8",
+];
 
 type Order = OrderWithDetails;
 
@@ -109,13 +106,15 @@ export default function HistoryPage() {
 
   // Table Controls State - Orders Table
   type OrderSortField = "orderNumber" | "createdAt" | "table" | "total";
-  const [ordersSortField, setOrdersSortField] = useState<OrderSortField>("createdAt");
+  const [ordersSortField, setOrdersSortField] =
+    useState<OrderSortField>("createdAt");
   const [ordersSortDir, setOrdersSortDir] = useState<"asc" | "desc">("desc");
   const [ordersPage, setOrdersPage] = useState(1);
   const [ordersPageSize, setOrdersPageSize] = useState(10);
 
   // Table Controls State - Cuts Table
-  type CutSortField = "cut_date" | "total_orders" | "venta_neta" | "utilidad_final";
+  type CutSortField =
+    "cut_date" | "total_orders" | "venta_neta" | "utilidad_final";
   const [cutsSortField, setCutsSortField] = useState<CutSortField>("cut_date");
   const [cutsSortDir, setCutsSortDir] = useState<"asc" | "desc">("desc");
   const [cutsPage, setCutsPage] = useState(1);
@@ -136,7 +135,9 @@ export default function HistoryPage() {
   const [manualCard, setManualCard] = useState<string>("");
   const [manualTipsEfectivo, setManualTipsEfectivo] = useState<string>("");
   const [manualTipsTarjeta, setManualTipsTarjeta] = useState<string>("");
-  const [selectedCutDetail, setSelectedCutDetail] = useState<DailyCut | null>(null);
+  const [selectedCutDetail, setSelectedCutDetail] = useState<DailyCut | null>(
+    null,
+  );
   const [isGeneratingPendingCut, setIsGeneratingPendingCut] = useState(false);
 
   // Inline feedback states (replacing alert/confirm)
@@ -183,7 +184,8 @@ export default function HistoryPage() {
       setIsLoading(true);
       const response = await fetch("/api/orders");
       const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "Error al cargar órdenes");
+      if (!response.ok)
+        throw new Error(data?.error || "Error al cargar órdenes");
 
       const mappedOrders = (data.orders || []).map((dbOrder: any) => ({
         ...dbOrder,
@@ -201,32 +203,34 @@ export default function HistoryPage() {
           : null,
         orderItems: Array.isArray(dbOrder.order_items)
           ? dbOrder.order_items.map((item: any) => ({
-              ...item,
-              orderId: item.order_id,
-              menuItemId: item.menu_item_id,
-              unitPrice: item.unit_price,
-              menuItem: item.menu_items
-                ? {
-                    ...item.menu_items,
-                    imageUrl: item.menu_items?.image_url,
-                    isAvailable: item.menu_items?.is_available,
-                  }
-                : { name: "Producto", price: item.unit_price || 0 },
-            }))
+            ...item,
+            orderId: item.order_id,
+            menuItemId: item.menu_item_id,
+            unitPrice: item.unit_price,
+            menuItem: item.menu_items
+              ? {
+                ...item.menu_items,
+                imageUrl: item.menu_items?.image_url,
+                isAvailable: item.menu_items?.is_available,
+              }
+              : { name: "Producto", price: item.unit_price || 0 },
+          }))
           : [],
         payments: Array.isArray(dbOrder.payments)
           ? dbOrder.payments.map((p: any) => ({
-              ...p,
-              orderId: p.order_id,
-              tipAmount: p.tip_amount,
-            }))
+            ...p,
+            orderId: p.order_id,
+            tipAmount: p.tip_amount,
+          }))
           : [],
         customer: dbOrder.customers || dbOrder.customer || undefined,
       })) as Order[];
 
       setOrders(mappedOrders);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Error inesperado");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error inesperado",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -310,10 +314,8 @@ export default function HistoryPage() {
   const handleFinalizarDia = async () => {
     if (openOrders.length > 0) {
       setHistoryError(
-        `No se puede cerrar: Hay ${openOrders.length} orden${
-          openOrders.length !== 1 ? "es" : ""
-        } pendiente${
-          openOrders.length !== 1 ? "s" : ""
+        `No se puede cerrar: Hay ${openOrders.length} orden${openOrders.length !== 1 ? "es" : ""
+        } pendiente${openOrders.length !== 1 ? "s" : ""
         } de pago. Cóbralas o cancélalas antes de continuar.`,
       );
       setShowFinalizeModal(false);
@@ -332,10 +334,14 @@ export default function HistoryPage() {
 
       const { data: expensesData } = await supabase
         .from("expenses")
-        .select("description, amount, has_invoice, expense_categories(name, tipo_gasto)")
+        .select(
+          "description, amount, has_invoice, expense_categories(name, tipo_gasto)",
+        )
         .eq("date", mxDateStr);
 
-      const expensesDetail: ExpenseDetailItem[] = ((expensesData || []) as any[])
+      const expensesDetail: ExpenseDetailItem[] = (
+        (expensesData || []) as any[]
+      )
         .filter((e) => {
           const tipo = e.expense_categories?.tipo_gasto;
           return !tipo || tipo === "variable";
@@ -347,12 +353,18 @@ export default function HistoryPage() {
           has_invoice: e.has_invoice ?? false,
         }));
 
-      const cashFinal = manualCash !== "" ? Number(manualCash) : todayTotals.cajaEfectivo;
-      const cardFinal = manualCard !== "" ? Number(manualCard) : todayTotals.cajaTarjeta;
+      const cashFinal =
+        manualCash !== "" ? Number(manualCash) : todayTotals.cajaEfectivo;
+      const cardFinal =
+        manualCard !== "" ? Number(manualCard) : todayTotals.cajaTarjeta;
       const tipsEfectivoFinal =
-        manualTipsEfectivo !== "" ? Number(manualTipsEfectivo) : todayTotals.propinasEfectivo;
+        manualTipsEfectivo !== ""
+          ? Number(manualTipsEfectivo)
+          : todayTotals.propinasEfectivo;
       const tipsTarjetaFinal =
-        manualTipsTarjeta !== "" ? Number(manualTipsTarjeta) : todayTotals.propinasTarjeta;
+        manualTipsTarjeta !== ""
+          ? Number(manualTipsTarjeta)
+          : todayTotals.propinasTarjeta;
 
       const response = await fetch("/api/daily-cuts", {
         method: "POST",
@@ -365,10 +377,14 @@ export default function HistoryPage() {
           propinas_tarjeta: tipsTarjetaFinal,
           caja_efectivo: cashFinal,
           caja_tarjeta: cardFinal,
-          utilidad_real: todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal,
+          utilidad_real:
+            todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal,
           total_gastos: todayExpenses,
           utilidad_final:
-            todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal - todayExpenses,
+            todayTotals.ventaNeta +
+            tipsEfectivoFinal +
+            tipsTarjetaFinal -
+            todayExpenses,
           total_orders: todayOrders.length,
           expenses_detail: expensesDetail,
         }),
@@ -391,7 +407,9 @@ export default function HistoryPage() {
 
       setFinalizeSuccess(true);
       setShowFinalizeModal(false);
-      setHistorySuccess("¡Corte de día finalizado con éxito! Los folios de órdenes se han reiniciado.");
+      setHistorySuccess(
+        "¡Corte de día finalizado con éxito! Los folios de órdenes se han reiniciado.",
+      );
       setTimeout(() => setHistorySuccess(null), 6000);
     } catch (err) {
       console.error("Error finalizing day:", err);
@@ -428,7 +446,9 @@ export default function HistoryPage() {
         throw new Error(data?.error || "Error al generar el corte pendiente");
       }
 
-      setHistorySuccess(`Corte extemporáneo generado correctamente para ${pendingDate}.`);
+      setHistorySuccess(
+        `Corte extemporáneo generado correctamente para ${pendingDate}.`,
+      );
       setTimeout(() => setHistorySuccess(null), 5000);
       await Promise.all([fetchOrders(), fetchDailyCuts(), refreshPendingCut()]);
     } catch (err) {
@@ -441,7 +461,10 @@ export default function HistoryPage() {
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      if (searchQuery && !order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()))
+      if (
+        searchQuery &&
+        !order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())
+      )
         return false;
       if (dateFilter) {
         const orderDate = new Intl.DateTimeFormat("en-CA", {
@@ -455,7 +478,8 @@ export default function HistoryPage() {
       if (tableFilter && order.table !== tableFilter) return false;
       if (paymentMethodFilter) {
         const paymentMethods = getOrderPaymentMethods(order);
-        if (!paymentMethods.includes(paymentMethodFilter as PaymentMethod)) return false;
+        if (!paymentMethods.includes(paymentMethodFilter as PaymentMethod))
+          return false;
       }
       return true;
     });
@@ -464,9 +488,13 @@ export default function HistoryPage() {
   const sortedOrders = useMemo(() => {
     return [...filteredOrders].sort((a, b) => {
       let comp = 0;
-      if (ordersSortField === "orderNumber") comp = a.orderNumber.localeCompare(b.orderNumber);
-      else if (ordersSortField === "createdAt") comp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      else if (ordersSortField === "table") comp = (a.table || "").localeCompare(b.table || "");
+      if (ordersSortField === "orderNumber")
+        comp = a.orderNumber.localeCompare(b.orderNumber);
+      else if (ordersSortField === "createdAt")
+        comp =
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      else if (ordersSortField === "table")
+        comp = (a.table || "").localeCompare(b.table || "");
       else if (ordersSortField === "total") comp = a.total - b.total;
       return ordersSortDir === "asc" ? comp : -comp;
     });
@@ -474,7 +502,15 @@ export default function HistoryPage() {
 
   useEffect(() => {
     setOrdersPage(1);
-  }, [searchQuery, dateFilter, tableFilter, paymentMethodFilter, ordersSortField, ordersSortDir, ordersPageSize]);
+  }, [
+    searchQuery,
+    dateFilter,
+    tableFilter,
+    paymentMethodFilter,
+    ordersSortField,
+    ordersSortDir,
+    ordersPageSize,
+  ]);
 
   const ordersTotalPages = Math.ceil(sortedOrders.length / ordersPageSize) || 1;
   const paginatedOrders = useMemo(() => {
@@ -485,10 +521,14 @@ export default function HistoryPage() {
   const sortedDailyCuts = useMemo(() => {
     return [...dailyCuts].sort((a, b) => {
       let comp = 0;
-      if (cutsSortField === "cut_date") comp = a.cut_date.localeCompare(b.cut_date);
-      else if (cutsSortField === "total_orders") comp = a.total_orders - b.total_orders;
-      else if (cutsSortField === "venta_neta") comp = a.venta_neta - b.venta_neta;
-      else if (cutsSortField === "utilidad_final") comp = a.utilidad_final - b.utilidad_final;
+      if (cutsSortField === "cut_date")
+        comp = a.cut_date.localeCompare(b.cut_date);
+      else if (cutsSortField === "total_orders")
+        comp = a.total_orders - b.total_orders;
+      else if (cutsSortField === "venta_neta")
+        comp = a.venta_neta - b.venta_neta;
+      else if (cutsSortField === "utilidad_final")
+        comp = a.utilidad_final - b.utilidad_final;
       return cutsSortDir === "asc" ? comp : -comp;
     });
   }, [dailyCuts, cutsSortField, cutsSortDir]);
@@ -508,7 +548,9 @@ export default function HistoryPage() {
   };
 
   const availableTables = useMemo(() => {
-    const tables = new Set(orders.map((o) => o.table).filter(Boolean) as string[]);
+    const tables = new Set(
+      orders.map((o) => o.table).filter(Boolean) as string[],
+    );
     return Array.from(tables).sort();
   }, [orders]);
 
@@ -533,7 +575,9 @@ export default function HistoryPage() {
       }).format(new Date(order.createdAt));
       return (
         orderDate === todayDateStr &&
-        (order.status === "PAID" || order.status === "DELIVERED" || order.status === "UNCOLLECTED")
+        (order.status === "PAID" ||
+          order.status === "DELIVERED" ||
+          order.status === "UNCOLLECTED")
       );
     });
   }, [orders, todayDateStr]);
@@ -548,7 +592,11 @@ export default function HistoryPage() {
       }).format(new Date(order.createdAt));
       return (
         orderDate === todayDateStr &&
-        !(order.status === "PAID" || order.status === "CANCELLED" || order.status === "UNCOLLECTED")
+        !(
+          order.status === "PAID" ||
+          order.status === "CANCELLED" ||
+          order.status === "UNCOLLECTED"
+        )
       );
     });
   }, [orders, todayDateStr]);
@@ -577,7 +625,10 @@ export default function HistoryPage() {
           if (paymentMethod === PaymentMethod.CASH) {
             propinasEfectivo += tipAmount;
             cajaEfectivo += totalPago;
-          } else if (paymentMethod === PaymentMethod.CARD || paymentMethod === PaymentMethod.TRANSFER) {
+          } else if (
+            paymentMethod === PaymentMethod.CARD ||
+            paymentMethod === PaymentMethod.TRANSFER
+          ) {
             propinasTarjeta += tipAmount;
             cajaTarjeta += totalPago;
           } else {
@@ -590,10 +641,16 @@ export default function HistoryPage() {
     const utilidadReal = ventaNeta + propinasEfectivo + propinasTarjeta;
     const utilidadFinal = utilidadReal - todayExpenses;
 
-    const ordersAtTable = todayOrders.filter((o) => o.table && o.table !== "Domicilio").length;
-    const ordersDelivery = todayOrders.filter((o) => o.table === "Domicilio").length;
+    const ordersAtTable = todayOrders.filter(
+      (o) => o.table && o.table !== "Domicilio",
+    ).length;
+    const ordersDelivery = todayOrders.filter(
+      (o) => o.table === "Domicilio",
+    ).length;
     const averageTicket =
-      todayOrders.length > 0 ? (ventaNeta + ivaAcumulado) / todayOrders.length : 0;
+      todayOrders.length > 0
+        ? (ventaNeta + ivaAcumulado) / todayOrders.length
+        : 0;
 
     return {
       ventaNeta,
@@ -654,7 +711,10 @@ export default function HistoryPage() {
         name: format(subMonths(now, 1), "MMMM", { locale: es }).toUpperCase(),
         total: previousMonthTotal,
       },
-      { name: format(now, "MMMM", { locale: es }).toUpperCase(), total: currentMonthTotal },
+      {
+        name: format(now, "MMMM", { locale: es }).toUpperCase(),
+        total: currentMonthTotal,
+      },
     ];
 
     return { dailySales, salesMix, growth };
@@ -663,7 +723,9 @@ export default function HistoryPage() {
   if (isCheckingRole) {
     return (
       <div className="min-h-screen bg-[#121212] flex justify-center items-center">
-        <p className="text-[#E0E0E0]/60 font-bold text-sm">Verificando permisos...</p>
+        <p className="text-[#E0E0E0]/60 font-bold text-sm">
+          Verificando permisos...
+        </p>
       </div>
     );
   }
@@ -679,7 +741,9 @@ export default function HistoryPage() {
             Acceso Denegado
           </h1>
           <p className="text-sm text-[#E0E0E0]/60 leading-relaxed font-medium">
-            El rol de <strong className="text-[#E0E0E0]">MESERO</strong> no cuenta con permisos para acceder al historial ni estadísticas financieras.
+            El rol de <strong className="text-[#E0E0E0]">MESERO</strong> no
+            cuenta con permisos para acceder al historial ni estadísticas
+            financieras.
           </p>
           <Link
             href="/"
@@ -695,7 +759,9 @@ export default function HistoryPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#121212] flex justify-center items-center">
-        <p className="text-[#E0E0E0]/60 font-bold text-sm">Cargando historial y datos...</p>
+        <p className="text-[#E0E0E0]/60 font-bold text-sm">
+          Cargando historial y datos...
+        </p>
       </div>
     );
   }
@@ -723,7 +789,11 @@ export default function HistoryPage() {
               <AlertTriangle className="h-5 w-5 shrink-0" />
               <span>{historyError}</span>
             </div>
-            <button type="button" onClick={() => setHistoryError(null)} className="text-red-400/60 hover:text-red-400 shrink-0">
+            <button
+              type="button"
+              onClick={() => setHistoryError(null)}
+              className="text-red-400/60 hover:text-red-400 shrink-0"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -735,7 +805,11 @@ export default function HistoryPage() {
               <CheckCircle2 className="h-5 w-5 shrink-0" />
               <span>{historySuccess}</span>
             </div>
-            <button type="button" onClick={() => setHistorySuccess(null)} className="text-success/60 hover:text-success shrink-0">
+            <button
+              type="button"
+              onClick={() => setHistorySuccess(null)}
+              className="text-success/60 hover:text-success shrink-0"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -819,26 +893,23 @@ export default function HistoryPage() {
 
         {/* CORTE DIARIO */}
         <section
-          className={`rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 border-l-4 space-y-6 ${
-            finalizeSuccess ? "border-l-success" : "border-l-blue-500"
-          }`}
+          className={`rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 border-l-4 space-y-6 ${finalizeSuccess ? "border-l-success" : "border-l-blue-500"
+            }`}
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
             <div>
               <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
                 <span
-                  className={`h-2 w-2 rounded-full ${
-                    finalizeSuccess ? "bg-success" : "bg-blue-500"
-                  }`}
+                  className={`h-2 w-2 rounded-full ${finalizeSuccess ? "bg-success" : "bg-blue-500"
+                    }`}
                 ></span>
                 Corte Diario
               </h2>
               <p className="text-xs font-medium text-[#E0E0E0]/50 mt-0.5">
                 {finalizeSuccess
                   ? "✅ Corte guardado — contadores reiniciados para el siguiente ciclo"
-                  : `Hoy · ${todayOrders.length} orden${
-                      todayOrders.length !== 1 ? "es" : ""
-                    } completada${todayOrders.length !== 1 ? "s" : ""}`}
+                  : `Hoy · ${todayOrders.length} orden${todayOrders.length !== 1 ? "es" : ""
+                  } completada${todayOrders.length !== 1 ? "s" : ""}`}
               </p>
             </div>
 
@@ -860,18 +931,17 @@ export default function HistoryPage() {
                   type="button"
                   onClick={handleGeneratePendingCut}
                   disabled={isGeneratingPendingCut}
-                  className={`rounded-xl border px-3.5 py-2 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 disabled:opacity-50 transition-all ${
-                    pendingCutArmed
+                  className={`rounded-xl border px-3.5 py-2 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 disabled:opacity-50 transition-all ${pendingCutArmed
                       ? "bg-amber-500/30 border-amber-500/50 text-amber-300 animate-[pulse_0.6s_ease-in-out_infinite]"
                       : "bg-amber-500/20 border-amber-500/30 text-amber-400 hover:bg-amber-500/30"
-                  }`}
+                    }`}
                 >
                   <Clock className="h-3.5 w-3.5" />
                   {isGeneratingPendingCut
                     ? "Generando..."
                     : pendingCutArmed
-                    ? "¿Confirmar corte?"
-                    : `Corte pendiente (${pendingDate} · ${pendingOrders})`}
+                      ? "¿Confirmar corte?"
+                      : `Corte pendiente (${pendingDate} · ${pendingOrders})`}
                 </button>
               )}
 
@@ -887,8 +957,12 @@ export default function HistoryPage() {
                     }
                     setManualCash(todayTotals.cajaEfectivo.toString());
                     setManualCard(todayTotals.cajaTarjeta.toString());
-                    setManualTipsEfectivo(todayTotals.propinasEfectivo.toString());
-                    setManualTipsTarjeta(todayTotals.propinasTarjeta.toString());
+                    setManualTipsEfectivo(
+                      todayTotals.propinasEfectivo.toString(),
+                    );
+                    setManualTipsTarjeta(
+                      todayTotals.propinasTarjeta.toString(),
+                    );
                     setShowFinalizeModal(true);
                   }}
                   className="rounded-xl bg-success px-4 py-2 text-xs font-black text-white hover:brightness-110 transition-all uppercase tracking-wider shadow-lg shadow-success/20 flex items-center gap-1.5"
@@ -907,13 +981,17 @@ export default function HistoryPage() {
                   <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                     Venta Neta Total (Sin IVA)
                   </span>
-                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">
+                    $0.00
+                  </span>
                 </div>
                 <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-white/5">
                   <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                     IVA Acumulado
                   </span>
-                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">
+                    $0.00
+                  </span>
                 </div>
               </div>
               <div className="space-y-3">
@@ -921,13 +999,17 @@ export default function HistoryPage() {
                   <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                     Propinas (Efectivo)
                   </span>
-                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">
+                    $0.00
+                  </span>
                 </div>
                 <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-white/5">
                   <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                     Propinas (Tarjeta)
                   </span>
-                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">
+                    $0.00
+                  </span>
                 </div>
               </div>
               <div className="space-y-3">
@@ -935,20 +1017,26 @@ export default function HistoryPage() {
                   <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                     Caja Final (Efectivo)
                   </span>
-                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">
+                    $0.00
+                  </span>
                 </div>
                 <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-blue-500/20">
                   <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                     Caja Final (Tarjeta)
                   </span>
-                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">
+                    $0.00
+                  </span>
                 </div>
               </div>
               <div className="bg-emerald-500/10 p-5 rounded-2xl flex flex-col justify-center items-center border border-emerald-500/20 lg:col-span-1 md:col-span-2">
                 <span className="text-emerald-400 text-xs font-black uppercase tracking-widest mb-1 flex items-center gap-1">
                   <CheckCircle2 className="h-4 w-4" /> Día Finalizado
                 </span>
-                <span className="text-[#E0E0E0] text-3xl font-black font-mono">$0.00</span>
+                <span className="text-[#E0E0E0] text-3xl font-black font-mono">
+                  $0.00
+                </span>
                 <span className="text-emerald-400/60 text-[10px] font-bold mt-1 text-center uppercase tracking-widest">
                   Nuevo ciclo — caja en cero
                 </span>
@@ -1042,9 +1130,10 @@ export default function HistoryPage() {
                     Utilidad Final
                   </span>
                   <span
-                    className={`text-xl font-black font-mono ${
-                      todayTotals.utilidadFinal >= 0 ? "text-emerald-400" : "text-red-400"
-                    }`}
+                    className={`text-xl font-black font-mono ${todayTotals.utilidadFinal >= 0
+                        ? "text-emerald-400"
+                        : "text-red-400"
+                      }`}
                   >
                     ${todayTotals.utilidadFinal.toFixed(2)}
                   </span>
@@ -1074,7 +1163,9 @@ export default function HistoryPage() {
                     </p>
                     <p className="text-lg font-black text-[#E0E0E0]">
                       {todayOrders.length}{" "}
-                      <span className="text-xs font-normal text-blue-400">órdenes hoy</span>
+                      <span className="text-xs font-normal text-blue-400">
+                        órdenes hoy
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -1089,10 +1180,14 @@ export default function HistoryPage() {
                     </p>
                     <p className="text-base font-black text-[#E0E0E0]">
                       {todayTotals.ordersAtTable}{" "}
-                      <span className="text-[10px] text-[#E0E0E0]/50 font-normal">Mesa</span>
+                      <span className="text-[10px] text-[#E0E0E0]/50 font-normal">
+                        Mesa
+                      </span>
                       <span className="mx-2 text-[#E0E0E0]/20">|</span>
                       {todayTotals.ordersDelivery}{" "}
-                      <span className="text-[10px] text-[#E0E0E0]/50 font-normal">Domicilio</span>
+                      <span className="text-[10px] text-[#E0E0E0]/50 font-normal">
+                        Domicilio
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -1107,7 +1202,9 @@ export default function HistoryPage() {
                     </p>
                     <p className="text-lg font-black text-emerald-400">
                       ${todayTotals.averageTicket.toFixed(2)}{" "}
-                      <span className="text-[10px] text-[#E0E0E0]/50 font-normal">por orden</span>
+                      <span className="text-[10px] text-[#E0E0E0]/50 font-normal">
+                        por orden
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -1142,14 +1239,20 @@ export default function HistoryPage() {
                         label="Fecha"
                         currentSortField={cutsSortField}
                         sortDirection={cutsSortDir}
-                        onSort={(f) => { setCutsSortField(f); setCutsSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                        onSort={(f) => {
+                          setCutsSortField(f);
+                          setCutsSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                        }}
                       />
                       <TableHeaderSortCell
                         field="total_orders"
                         label="Órdenes"
                         currentSortField={cutsSortField}
                         sortDirection={cutsSortDir}
-                        onSort={(f) => { setCutsSortField(f); setCutsSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                        onSort={(f) => {
+                          setCutsSortField(f);
+                          setCutsSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                        }}
                         className="text-right"
                       />
                       <th className="py-3 px-3 text-right">Venta Bruta</th>
@@ -1158,7 +1261,10 @@ export default function HistoryPage() {
                         label="Venta Neta"
                         currentSortField={cutsSortField}
                         sortDirection={cutsSortDir}
-                        onSort={(f) => { setCutsSortField(f); setCutsSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                        onSort={(f) => {
+                          setCutsSortField(f);
+                          setCutsSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                        }}
                         className="text-right"
                       />
                       <th className="py-3 px-3 text-right">IVA</th>
@@ -1168,7 +1274,10 @@ export default function HistoryPage() {
                         label="Utilidad Final"
                         currentSortField={cutsSortField}
                         sortDirection={cutsSortDir}
-                        onSort={(f) => { setCutsSortField(f); setCutsSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                        onSort={(f) => {
+                          setCutsSortField(f);
+                          setCutsSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                        }}
                         className="text-right"
                       />
                       <th className="py-3 px-3 text-center">Acción</th>
@@ -1176,11 +1285,17 @@ export default function HistoryPage() {
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {paginatedDailyCuts.map((cut) => {
-                      const ventaBruta = Number(cut.venta_neta) + Number(cut.iva_acumulado);
+                      const ventaBruta =
+                        Number(cut.venta_neta) + Number(cut.iva_acumulado);
                       return (
-                        <tr key={cut.id} className="hover:bg-white/5 transition-colors">
+                        <tr
+                          key={cut.id}
+                          className="hover:bg-white/5 transition-colors"
+                        >
                           <td className="py-3.5 px-3 font-bold text-[#E0E0E0]">
-                            {new Date(`${cut.cut_date}T12:00:00`).toLocaleDateString("es-MX", {
+                            {new Date(
+                              `${cut.cut_date}T12:00:00`,
+                            ).toLocaleDateString("es-MX", {
                               weekday: "short",
                               year: "numeric",
                               month: "short",
@@ -1203,9 +1318,10 @@ export default function HistoryPage() {
                             -${Number(cut.total_gastos).toFixed(2)}
                           </td>
                           <td
-                            className={`py-3.5 px-3 text-right font-mono font-black ${
-                              Number(cut.utilidad_final) >= 0 ? "text-blue-400" : "text-red-400"
-                            }`}
+                            className={`py-3.5 px-3 text-right font-mono font-black ${Number(cut.utilidad_final) >= 0
+                                ? "text-blue-400"
+                                : "text-red-400"
+                              }`}
                           >
                             ${Number(cut.utilidad_final).toFixed(2)}
                           </td>
@@ -1257,7 +1373,11 @@ export default function HistoryPage() {
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
                     <XAxis dataKey="date" stroke="#888888" fontSize={11} />
-                    <YAxis stroke="#888888" fontSize={11} tickFormatter={(val) => `$${val}`} />
+                    <YAxis
+                      stroke="#888888"
+                      fontSize={11}
+                      tickFormatter={(val) => `$${val}`}
+                    />
                     <RechartsTooltip
                       contentStyle={{
                         backgroundColor: "#1D1D1D",
@@ -1265,7 +1385,10 @@ export default function HistoryPage() {
                         borderRadius: "12px",
                         color: "#E0E0E0",
                       }}
-                      formatter={(value: any) => [`$${Number(value).toFixed(2)}`, "Venta Neta"]}
+                      formatter={(value: any) => [
+                        `$${Number(value).toFixed(2)}`,
+                        "Venta Neta",
+                      ]}
                     />
                     <Line
                       type="monotone"
@@ -1299,7 +1422,10 @@ export default function HistoryPage() {
                       dataKey="value"
                     >
                       {chartsData.salesMix.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <RechartsTooltip
@@ -1309,9 +1435,14 @@ export default function HistoryPage() {
                         borderRadius: "12px",
                         color: "#E0E0E0",
                       }}
-                      formatter={(value: any) => [`$${Number(value).toFixed(2)}`, "Importe"]}
+                      formatter={(value: any) => [
+                        `$${Number(value).toFixed(2)}`,
+                        "Importe",
+                      ]}
                     />
-                    <Legend wrapperStyle={{ fontSize: "11px", color: "#888888" }} />
+                    <Legend
+                      wrapperStyle={{ fontSize: "11px", color: "#888888" }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -1330,9 +1461,24 @@ export default function HistoryPage() {
                     layout="vertical"
                     margin={{ top: 5, right: 20, left: 30, bottom: 5 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" horizontal={false} />
-                    <XAxis type="number" stroke="#888888" fontSize={11} tickFormatter={(val) => `$${val}`} />
-                    <YAxis dataKey="name" type="category" stroke="#888888" fontSize={11} width={90} />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#2A2A2A"
+                      horizontal={false}
+                    />
+                    <XAxis
+                      type="number"
+                      stroke="#888888"
+                      fontSize={11}
+                      tickFormatter={(val) => `$${val}`}
+                    />
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      stroke="#888888"
+                      fontSize={11}
+                      width={90}
+                    />
                     <RechartsTooltip
                       contentStyle={{
                         backgroundColor: "#1D1D1D",
@@ -1340,12 +1486,23 @@ export default function HistoryPage() {
                         borderRadius: "12px",
                         color: "#E0E0E0",
                       }}
-                      formatter={(value: any) => [`$${Number(value).toFixed(2)}`, "Total Venta Neta"]}
+                      formatter={(value: any) => [
+                        `$${Number(value).toFixed(2)}`,
+                        "Total Venta Neta",
+                      ]}
                       cursor={{ fill: "#242424" }}
                     />
-                    <Bar dataKey="total" fill="#03A63C" barSize={36} radius={[0, 8, 8, 0]}>
+                    <Bar
+                      dataKey="total"
+                      fill="#03A63C"
+                      barSize={36}
+                      radius={[0, 8, 8, 0]}
+                    >
                       {chartsData.growth.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={index === 0 ? "#4B5563" : "#03A63C"} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={index === 0 ? "#4B5563" : "#03A63C"}
+                        />
                       ))}
                     </Bar>
                   </BarChart>
@@ -1363,7 +1520,8 @@ export default function HistoryPage() {
               Registros de Órdenes
             </h2>
             <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
-              Mostrando {filteredOrders.length} orden{filteredOrders.length !== 1 ? "es" : ""}
+              Mostrando {filteredOrders.length} orden
+              {filteredOrders.length !== 1 ? "es" : ""}
             </span>
           </div>
 
@@ -1376,21 +1534,30 @@ export default function HistoryPage() {
                     label="Folio"
                     currentSortField={ordersSortField}
                     sortDirection={ordersSortDir}
-                    onSort={(f) => { setOrdersSortField(f); setOrdersSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                    onSort={(f) => {
+                      setOrdersSortField(f);
+                      setOrdersSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                    }}
                   />
                   <TableHeaderSortCell
                     field="createdAt"
                     label="Fecha"
                     currentSortField={ordersSortField}
                     sortDirection={ordersSortDir}
-                    onSort={(f) => { setOrdersSortField(f); setOrdersSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                    onSort={(f) => {
+                      setOrdersSortField(f);
+                      setOrdersSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                    }}
                   />
                   <TableHeaderSortCell
                     field="table"
                     label="Mesa"
                     currentSortField={ordersSortField}
                     sortDirection={ordersSortDir}
-                    onSort={(f) => { setOrdersSortField(f); setOrdersSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                    onSort={(f) => {
+                      setOrdersSortField(f);
+                      setOrdersSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                    }}
                   />
                   <th className="py-3 px-3">Método</th>
                   <th className="py-3 px-3 text-right">Subtotal</th>
@@ -1401,7 +1568,10 @@ export default function HistoryPage() {
                     label="TOTAL PAGO"
                     currentSortField={ordersSortField}
                     sortDirection={ordersSortDir}
-                    onSort={(f) => { setOrdersSortField(f); setOrdersSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                    onSort={(f) => {
+                      setOrdersSortField(f);
+                      setOrdersSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                    }}
                     className="text-right text-primary"
                   />
                 </tr>
@@ -1417,15 +1587,22 @@ export default function HistoryPage() {
                   const totalPago = order.total + tipAmount;
 
                   let methodLabel = getOrderPaymentLabel(order);
-                  let methodBadgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                  let methodBadgeClass =
+                    "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
 
                   if (order.status === "UNCOLLECTED") {
                     methodLabel = "NO COBRADA";
-                    methodBadgeClass = "bg-red-500/10 text-red-400 border-red-500/20";
-                  } else if (primaryPaymentMethod === "CARD" || primaryPaymentMethod === "TRANSFER") {
-                    methodBadgeClass = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+                    methodBadgeClass =
+                      "bg-red-500/10 text-red-400 border-red-500/20";
+                  } else if (
+                    primaryPaymentMethod === "CARD" ||
+                    primaryPaymentMethod === "TRANSFER"
+                  ) {
+                    methodBadgeClass =
+                      "bg-blue-500/10 text-blue-400 border-blue-500/20";
                   } else if (paymentMethods.length > 1) {
-                    methodBadgeClass = "bg-purple-500/10 text-purple-300 border-purple-500/20";
+                    methodBadgeClass =
+                      "bg-purple-500/10 text-purple-300 border-purple-500/20";
                   }
 
                   const isExpanded = expandedRow === order.id;
@@ -1449,14 +1626,17 @@ export default function HistoryPage() {
                           </div>
                         </td>
                         <td className="py-3.5 px-3 text-[#E0E0E0]/80 font-medium">
-                          {new Date(order.createdAt).toLocaleDateString("es-MX", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            timeZone: "America/Mexico_City",
-                          })}
+                          {new Date(order.createdAt).toLocaleDateString(
+                            "es-MX",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              timeZone: "America/Mexico_City",
+                            },
+                          )}
                         </td>
                         <td className="py-3.5 px-3">
                           <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black text-[#E0E0E0]/70 uppercase tracking-wider">
@@ -1502,7 +1682,8 @@ export default function HistoryPage() {
                                   }}
                                   className="flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 text-[10px] font-black text-blue-400 hover:bg-blue-500/20 transition-all uppercase tracking-wider"
                                 >
-                                  <Receipt className="h-3.5 w-3.5" /> Facturar Orden
+                                  <Receipt className="h-3.5 w-3.5" /> Facturar
+                                  Orden
                                 </button>
                               </div>
 
@@ -1512,12 +1693,16 @@ export default function HistoryPage() {
                                     <th className="pb-1 text-left">Producto</th>
                                     <th className="pb-1 text-center">Cant.</th>
                                     <th className="pb-1 text-right">P. Unit</th>
-                                    <th className="pb-1 text-right">Subtotal</th>
+                                    <th className="pb-1 text-right">
+                                      Subtotal
+                                    </th>
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                   {order.orderItems?.map((item) => {
-                                    const unitPrice = Number(item.unitPrice || 0);
+                                    const unitPrice = Number(
+                                      item.unitPrice || 0,
+                                    );
                                     const subtotal = item.quantity * unitPrice;
                                     return (
                                       <tr key={item.id}>
@@ -1529,7 +1714,9 @@ export default function HistoryPage() {
                                             </span>
                                           )}
                                         </td>
-                                        <td className="py-1.5 text-center font-mono">{item.quantity}</td>
+                                        <td className="py-1.5 text-center font-mono">
+                                          {item.quantity}
+                                        </td>
                                         <td className="py-1.5 text-right font-mono text-[#E0E0E0]/60">
                                           ${unitPrice.toFixed(2)}
                                         </td>
@@ -1551,8 +1738,12 @@ export default function HistoryPage() {
 
                 {paginatedOrders.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="px-4 py-8 text-center text-[#E0E0E0]/40 italic">
-                      No se encontraron órdenes que coincidan con los filtros seleccionados.
+                    <td
+                      colSpan={8}
+                      className="px-4 py-8 text-center text-[#E0E0E0]/40 italic"
+                    >
+                      No se encontraron órdenes que coincidan con los filtros
+                      seleccionados.
                     </td>
                   </tr>
                 )}
@@ -1581,7 +1772,9 @@ export default function HistoryPage() {
                   Detalle del Corte
                 </h3>
                 <p className="text-xs font-bold text-[#E0E0E0]/50 mt-0.5">
-                  {new Date(`${selectedCutDetail.cut_date}T12:00:00`).toLocaleDateString("es-MX", {
+                  {new Date(
+                    `${selectedCutDetail.cut_date}T12:00:00`,
+                  ).toLocaleDateString("es-MX", {
                     weekday: "long",
                     year: "numeric",
                     month: "long",
@@ -1658,17 +1851,23 @@ export default function HistoryPage() {
                   -${Number(selectedCutDetail.total_gastos).toFixed(2)}
                 </span>
               </div>
-              {selectedCutDetail.expenses_detail && selectedCutDetail.expenses_detail.length > 0 ? (
+              {selectedCutDetail.expenses_detail &&
+                selectedCutDetail.expenses_detail.length > 0 ? (
                 <div className="space-y-1 pt-2 border-t border-white/5">
                   {selectedCutDetail.expenses_detail.map((expense, i) => (
-                    <div key={i} className="flex items-center justify-between text-xs">
+                    <div
+                      key={i}
+                      className="flex items-center justify-between text-xs"
+                    >
                       <div className="flex items-center gap-2 min-w-0">
                         {expense.has_invoice && (
                           <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-black uppercase">
                             FAC
                           </span>
                         )}
-                        <span className="text-[#E0E0E0]/70 truncate">{expense.description}</span>
+                        <span className="text-[#E0E0E0]/70 truncate">
+                          {expense.description}
+                        </span>
                       </div>
                       <span className="text-red-400 font-mono font-bold shrink-0 ml-2">
                         -${Number(expense.amount).toFixed(2)}
@@ -1697,11 +1896,10 @@ export default function HistoryPage() {
                   Utilidad Final (- Gastos)
                 </span>
                 <span
-                  className={`text-lg font-black font-mono ${
-                    Number(selectedCutDetail.utilidad_final) >= 0
+                  className={`text-lg font-black font-mono ${Number(selectedCutDetail.utilidad_final) >= 0
                       ? "text-emerald-400"
                       : "text-red-400"
-                  }`}
+                    }`}
                 >
                   ${Number(selectedCutDetail.utilidad_final).toFixed(2)}
                 </span>
@@ -1736,12 +1934,15 @@ export default function HistoryPage() {
             </div>
 
             <p className="text-xs font-medium text-[#E0E0E0]/60">
-              Se guardará el resumen financiero en el archivo de cortes y se iniciará un nuevo ciclo.
+              Se guardará el resumen financiero en el archivo de cortes y se
+              iniciará un nuevo ciclo.
             </p>
 
             <div className="space-y-3 bg-[#1A1A1A] rounded-xl p-4 border border-white/5 text-xs">
               <div className="flex justify-between items-center bg-[#242424] p-2.5 rounded-lg border border-white/5">
-                <span className="text-[#E0E0E0]/60 font-bold">Venta Neta (sin IVA)</span>
+                <span className="text-[#E0E0E0]/60 font-bold">
+                  Venta Neta (sin IVA)
+                </span>
                 <span className="text-[#E0E0E0] font-mono font-black">
                   ${todayTotals.ventaNeta.toFixed(2)}
                 </span>
@@ -1796,7 +1997,9 @@ export default function HistoryPage() {
 
               <div className="flex justify-between border-t border-white/5 pt-2 text-[#E0E0E0]/60">
                 <span>Órdenes completadas</span>
-                <span className="text-[#E0E0E0] font-bold">{todayOrders.length}</span>
+                <span className="text-[#E0E0E0] font-bold">
+                  {todayOrders.length}
+                </span>
               </div>
               <div className="flex justify-between text-[#E0E0E0]/60">
                 <span>Gastos del Día</span>
@@ -1811,7 +2014,9 @@ export default function HistoryPage() {
               <h4 className="text-xs font-black text-[#E0E0E0] uppercase tracking-wider flex items-center justify-between">
                 <span>Distribución de Propinas</span>
                 {isCalculatingTips && (
-                  <span className="text-[10px] text-blue-400">Calculando...</span>
+                  <span className="text-[10px] text-blue-400">
+                    Calculando...
+                  </span>
                 )}
               </h4>
               {!isCalculatingTips && tipBreakdown.length > 0 ? (
@@ -1823,7 +2028,9 @@ export default function HistoryPage() {
                   </div>
                   {tipBreakdown.map((item, idx) => (
                     <div key={idx} className="flex justify-between text-xs">
-                      <span className="text-[#E0E0E0]/80 font-bold">{item.employee_name}</span>
+                      <span className="text-[#E0E0E0]/80 font-bold">
+                        {item.employee_name}
+                      </span>
                       <span className="text-[#E0E0E0]/50 font-mono">
                         {item.hours_worked.toFixed(2)}h
                       </span>
@@ -1864,7 +2071,10 @@ export default function HistoryPage() {
 
       {/* MODAL DE FACTURACIÓN */}
       {billingOrder && (
-        <FacturacionModal order={billingOrder} onClose={() => setBillingOrder(null)} />
+        <FacturacionModal
+          order={billingOrder}
+          onClose={() => setBillingOrder(null)}
+        />
       )}
     </div>
   );

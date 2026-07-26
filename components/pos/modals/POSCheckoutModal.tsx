@@ -1,5 +1,13 @@
 import React from "react";
-import { X, DollarSign, CreditCard, Landmark, Scissors, AlertTriangle, AlertCircle } from "lucide-react";
+import {
+  X,
+  DollarSign,
+  CreditCard,
+  Landmark,
+  Scissors,
+  AlertTriangle,
+  AlertCircle,
+} from "lucide-react";
 import { Order } from "@/types/pos";
 
 const PAYMENT_METHODS = [
@@ -28,7 +36,9 @@ interface POSCheckoutModalProps {
   handleFailedPayment: () => void;
   checkoutError: string | null;
   unusualTipInfo: { amount: number; percentage: number } | null;
-  setUnusualTipInfo: (info: { amount: number; percentage: number } | null) => void;
+  setUnusualTipInfo: (
+    info: { amount: number; percentage: number } | null,
+  ) => void;
 }
 
 export function POSCheckoutModal({
@@ -87,9 +97,12 @@ export function POSCheckoutModal({
             <div className="flex items-start gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-black text-amber-400 uppercase tracking-wide">Propina inusual</p>
+                <p className="text-xs font-black text-amber-400 uppercase tracking-wide">
+                  Propina inusual
+                </p>
                 <p className="text-[11px] font-bold text-amber-400/80 mt-0.5">
-                  ${unusualTipInfo.amount.toFixed(2)} ({unusualTipInfo.percentage.toFixed(1)}%) — ¿es correcto?
+                  ${unusualTipInfo.amount.toFixed(2)} (
+                  {unusualTipInfo.percentage.toFixed(1)}%) — ¿es correcto?
                 </p>
               </div>
             </div>
@@ -200,7 +213,9 @@ export function POSCheckoutModal({
                 type="number"
                 value={tipInput}
                 onChange={(e) => setTipInput(e.target.value)}
-                placeholder={tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto propina"}
+                placeholder={
+                  tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto propina"
+                }
                 className="w-full text-base font-black p-3 border border-white/5 bg-[#181818] rounded-xl focus:border-primary outline-none text-center text-[#E0E0E0] transition-colors placeholder:text-[#E0E0E0]/30"
               />
             )}
@@ -265,7 +280,8 @@ export function POSCheckoutModal({
                 !!unusualTipInfo ||
                 (paymentMethod === "CASH" &&
                   (!receivedAmount ||
-                    Number(receivedAmount) < checkoutOrder.total + tipAmountCalculated))
+                    Number(receivedAmount) <
+                      checkoutOrder.total + tipAmountCalculated))
               }
               className="w-full bg-success text-white py-4 rounded-xl font-black text-base hover:brightness-110 active:scale-[0.98] shadow-lg shadow-success/20 disabled:opacity-30 transition-all uppercase tracking-wider"
             >

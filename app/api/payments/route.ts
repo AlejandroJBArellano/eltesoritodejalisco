@@ -65,7 +65,10 @@ export async function POST(request: NextRequest) {
       };
 
       if (!orderId || !splits.length) {
-        return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Missing required fields" },
+          { status: 400 },
+        );
       }
 
       const supabase = await createClient();
@@ -76,7 +79,10 @@ export async function POST(request: NextRequest) {
         .insert(splits.map((split) => toPaymentInsert(orderId, split)));
 
       if (splitError) {
-        console.error("[Split Payments] Error inserting payment records:", splitError);
+        console.error(
+          "[Split Payments] Error inserting payment records:",
+          splitError,
+        );
         throw splitError;
       }
 
@@ -86,18 +92,24 @@ export async function POST(request: NextRequest) {
         .update({ status: "PAID" })
         .eq("id", orderId);
       if (orderError) {
-        console.error(`[Split Payments] Error updating order ${orderId} status:`, orderError);
+        console.error(
+          `[Split Payments] Error updating order ${orderId} status:`,
+          orderError,
+        );
         throw orderError;
       }
 
       // 3. Descontar inventario automáticamente al cobrar
-      const { deductInventoryForOrder } = await import("@/lib/services/inventory");
+      const { deductInventoryForOrder } =
+        await import("@/lib/services/inventory");
       try {
         await deductInventoryForOrder(orderId);
       } catch (deductError) {
-        console.error(`[Split Payments] Error deducting inventory for order ${orderId}:`, deductError);
+        console.error(
+          `[Split Payments] Error deducting inventory for order ${orderId}:`,
+          deductError,
+        );
       }
-
 
       return NextResponse.json({ success: true }, { status: 201 });
     }
@@ -106,7 +118,10 @@ export async function POST(request: NextRequest) {
     const { orderId, method, amount, receivedAmount, change, tipAmount } = body;
 
     if (!orderId || !method || !amount) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
     }
 
     const supabase = await createClient();
@@ -137,19 +152,23 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError) throw orderError;
-    
+
     // 3. Descontar inventario automáticamente al cobrar
-    const { deductInventoryForOrder } = await import("@/lib/services/inventory");
+    const { deductInventoryForOrder } =
+      await import("@/lib/services/inventory");
     try {
       await deductInventoryForOrder(orderId);
     } catch (deductError) {
       console.error("Error deducting inventory:", deductError);
     }
- 
+
     return NextResponse.json({ payment, order }, { status: 201 });
   } catch (error) {
     console.error("Error processing payment:", error);
-    return NextResponse.json({ error: "Failed to process payment" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to process payment" },
+      { status: 500 },
+    );
   }
 }
 
@@ -175,9 +194,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Payment not found" }, { status: 404 });
     }
 
-    const totalTipCents = Math.round(
-      (Number(tipAmount) || 0) * CENTS_PER_PESO,
-    );
+    const totalTipCents = Math.round((Number(tipAmount) || 0) * CENTS_PER_PESO);
     const paymentAmountCents = payments.map((payment) =>
       Math.round(Number(payment.amount || 0) * CENTS_PER_PESO),
     );
@@ -234,6 +251,9 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ payments: updatedPayments }, { status: 200 });
   } catch (error) {
     console.error("Error updating tip:", error);
-    return NextResponse.json({ error: "Failed to update tip" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update tip" },
+      { status: 500 },
+    );
   }
 }

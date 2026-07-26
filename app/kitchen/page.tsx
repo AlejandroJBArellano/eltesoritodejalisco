@@ -8,17 +8,21 @@ async function getActiveOrders() {
   const supabase = await createClient();
   const { data: orders } = await supabase
     .from("orders")
-    .select(`
+    .select(
+      `
       *,
       order_items (
         *,
         menu_items (*)
       )
-    `)
+    `,
+    )
     .in("status", ["PENDING", "PREPARING", "READY"])
     .order("created_at", { ascending: true });
 
-  return (orders || []).map((o) => mapOrderData(o as unknown as DbOrderPayload));
+  return (orders || []).map((o) =>
+    mapOrderData(o as unknown as DbOrderPayload),
+  );
 }
 
 export default async function KitchenPage() {

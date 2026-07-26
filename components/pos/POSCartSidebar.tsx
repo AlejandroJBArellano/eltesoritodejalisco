@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { ShoppingBag, Minus, Plus, Printer, Bike, AlertTriangle, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  ShoppingBag,
+  Minus,
+  Plus,
+  Printer,
+  Bike,
+  AlertTriangle,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { OrderFormState, MenuItem, Customer } from "@/types/pos";
 import { isMixedOrderItem } from "@/hooks/pos/usePOSCart";
 
@@ -174,7 +184,9 @@ export function POSCartSidebar({
             </div>
           ) : (
             formState.items.map((item, index) => {
-              const product = availableMenuItems.find((m) => m.id === item.menuItemId);
+              const product = availableMenuItems.find(
+                (m) => m.id === item.menuItemId,
+              );
               const isMixed = product && isMixedOrderItem(product.name);
               const noteExpanded = expandedNotes.has(index);
               return (
@@ -220,7 +232,10 @@ export function POSCartSidebar({
 
                     <div className="flex items-center gap-2 min-w-[55px] justify-end">
                       <p className="font-black text-xs text-[#E0E0E0] tabular-nums">
-                        ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
+                        $
+                        {(
+                          (product?.price || 0) * Number(item.quantity)
+                        ).toFixed(2)}
                       </p>
                       {!isMixed && (
                         <button
@@ -245,7 +260,9 @@ export function POSCartSidebar({
                       <input
                         type="text"
                         value={item.notes}
-                        onChange={(e) => handleItemNoteChange(index, e.target.value)}
+                        onChange={(e) =>
+                          handleItemNoteChange(index, e.target.value)
+                        }
                         placeholder="Nota especial (sin cebolla, extra salsa...)"
                         className="w-full rounded-lg border border-white/5 bg-[#141414] px-3 py-1.5 text-[11px] text-[#E0E0E0] outline-none focus:border-primary/40 transition-colors placeholder:text-[#E0E0E0]/25"
                         autoFocus
@@ -266,10 +283,15 @@ export function POSCartSidebar({
                 Total a Pagar
               </span>
               <span className="text-3xl font-black text-[#E0E0E0] tracking-tight tabular-nums">
-                ${formState.items
+                $
+                {formState.items
                   .reduce((total, item) => {
-                    const product = availableMenuItems.find((m) => m.id === item.menuItemId);
-                    return total + (product?.price || 0) * Number(item.quantity);
+                    const product = availableMenuItems.find(
+                      (m) => m.id === item.menuItemId,
+                    );
+                    return (
+                      total + (product?.price || 0) * Number(item.quantity)
+                    );
                   }, 0)
                   .toFixed(2)}
               </span>

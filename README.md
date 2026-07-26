@@ -12,18 +12,21 @@
 ## 🚀 Características Principales
 
 ### 1. Sistema de Cocina (KDS - Kitchen Display System)
+
 - ⏱️ **Temporizador en tiempo real** para cada orden
 - 🎨 **Vista Kanban** con columnas: Pendiente → En Preparación → Listo
 - 📦 **Smart Batching**: Agrupación inteligente de ítems idénticos
 - 🔴 **Alertas visuales** cuando una orden supera 15 minutos
 
 ### 2. Gestión de Inventario Inteligente
+
 - 📝 **Recetas con ingredientes** (relación many-to-many)
 - 🔄 **Desconteo automático** al completar órdenes
 - 📊 **Alertas de stock bajo**
 - ✏️ **Ajustes manuales** con historial
 
 ### 3. CRM y Marketing
+
 - 📱 **Captura de fuente de visita** (TikTok, Instagram, etc.)
 - 💎 **Programa de lealtad**: $10 pesos = 1 punto
 - 👥 **Perfiles de cliente** con gasto histórico
@@ -59,6 +62,7 @@ npm run dev
 ```
 
 Visita:
+
 - **App**: [http://localhost:3000](http://localhost:3000)
 - **KDS**: [http://localhost:3000/kitchen](http://localhost:3000/kitchen)
 
@@ -113,12 +117,12 @@ npm run start            # Servidor de producción
 
 ## 📚 Documentación
 
-| Documento | Descripción |
-|-----------|-------------|
-| [SETUP.md](docs/SETUP.md) | Guía de instalación y configuración |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitectura del sistema |
-| [API_EXAMPLES.md](docs/API_EXAMPLES.md) | Ejemplos de uso de APIs |
-| [PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | Estructura de carpetas |
+| Documento                                         | Descripción                         |
+| ------------------------------------------------- | ----------------------------------- |
+| [SETUP.md](docs/SETUP.md)                         | Guía de instalación y configuración |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md)           | Arquitectura del sistema            |
+| [API_EXAMPLES.md](docs/API_EXAMPLES.md)           | Ejemplos de uso de APIs             |
+| [PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | Estructura de carpetas              |
 
 ---
 
@@ -139,18 +143,21 @@ npm run start            # Servidor de producción
 ## 🔄 Flujo de Trabajo
 
 ### Creación de Orden
+
 1. Mesero selecciona productos del menú
 2. Añade notas específicas y fuente de visita
 3. Orden se crea con número único (001, 002...)
 4. Aparece en KDS en columna "Pendiente"
 
 ### Preparación en Cocina
+
 1. Chef ve la orden en KDS con temporizador
 2. Cambia a "En Preparación"
 3. Smart Batching muestra ítems agrupados
 4. Marca "Listo" cuando termina
 
 ### Entrega y Pago
+
 1. Mesero marca como "Entregado"
 2. **Sistema descuenta inventario automáticamente**
 3. Se suman puntos de lealtad al cliente
@@ -161,6 +168,7 @@ npm run start            # Servidor de producción
 ## 🗺️ Roadmap
 
 ### ✅ Fase 1: MVP (Completado)
+
 - [x] Schema completo de base de datos
 - [x] KDS con temporizador en tiempo real
 - [x] Sistema de desconteo automático
@@ -168,12 +176,14 @@ npm run start            # Servidor de producción
 - [x] API RESTful completa
 
 ### 🚧 Fase 2: Real-time & UX
+
 - [x] WebSockets para actualizaciones en vivo (Polling implementado)
 - [ ] Drag & drop en vista Kanban
 - [ ] Notificaciones push
 - [x] Dashboard de analytics
 
 ### 📅 Fase 3: Avanzado
+
 - [ ] Autenticación (NextAuth.js)
 - [ ] Módulo de gestión de mesas
 - [ ] Reportes automáticos

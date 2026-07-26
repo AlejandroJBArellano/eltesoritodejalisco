@@ -82,7 +82,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     console.error("Error undoing payment:", error);
     return NextResponse.json(
       { error: "Failed to undo payment" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
