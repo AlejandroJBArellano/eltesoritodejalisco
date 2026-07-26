@@ -151,7 +151,6 @@ export function TareasClient({
       delete c[exec.id];
       return c;
     });
-    setTaskError(null);
 
     setLoadingTaskId(exec.id);
     try {
@@ -191,9 +190,11 @@ export function TareasClient({
         ),
       );
     } catch (e) {
-      setTaskError(
-        e instanceof Error ? e.message : "Error al completar la tarea",
-      );
+      setPhotoErrors((prev) => ({
+        ...prev,
+        [exec.id]:
+          e instanceof Error ? e.message : "Error al completar la tarea",
+      }));
       console.error(e);
     } finally {
       setLoadingTaskId(null);

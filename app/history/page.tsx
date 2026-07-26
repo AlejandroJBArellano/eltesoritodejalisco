@@ -304,14 +304,13 @@ export default function HistoryPage() {
         .from("expenses")
         .select("amount, expense_categories(tipo_gasto)")
         .eq("date", mxDateStr);
-      const total = (data || []).reduce(
-        (
-          sum,
-          e: {
-            amount: number;
-            expense_categories: { tipo_gasto: string } | null;
-          },
-        ) => {
+      const typedData =
+        (data as unknown as {
+          amount: number;
+          expense_categories: { tipo_gasto: string } | null;
+        }[]) || [];
+      const total = typedData.reduce(
+        (sum, e) => {
           const tipo = e.expense_categories?.tipo_gasto;
           if (!tipo || tipo === "variable") {
             return sum + Number(e.amount);
@@ -1443,7 +1442,7 @@ export default function HistoryPage() {
                         borderRadius: "12px",
                         color: "#E0E0E0",
                       }}
-                      formatter={(value: number | string) => [
+                      formatter={(value: number | string | undefined) => [
                         `$${Number(value).toFixed(2)}`,
                         "Venta Neta",
                       ]}
@@ -1493,7 +1492,7 @@ export default function HistoryPage() {
                         borderRadius: "12px",
                         color: "#E0E0E0",
                       }}
-                      formatter={(value: number | string) => [
+                      formatter={(value: number | string | undefined) => [
                         `$${Number(value).toFixed(2)}`,
                         "Importe",
                       ]}
@@ -1544,7 +1543,7 @@ export default function HistoryPage() {
                         borderRadius: "12px",
                         color: "#E0E0E0",
                       }}
-                      formatter={(value: number | string) => [
+                      formatter={(value: number | string | undefined) => [
                         `$${Number(value).toFixed(2)}`,
                         "Total Venta Neta",
                       ]}

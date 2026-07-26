@@ -602,8 +602,8 @@ export default function GastosPage() {
                       color: "#E0E0E0",
                     }}
                     formatter={(
-                      value: number | string,
-                      name: string | number,
+                      value: number | string | undefined,
+                      name: string | number | undefined,
                     ) => [
                       `$${Number(value).toFixed(2)}`,
                       name === "fijos"
@@ -694,16 +694,16 @@ export default function GastosPage() {
                       color: "#E0E0E0",
                     }}
                     formatter={(
-                      value: number | string,
-                      name: string | number,
-                      item: { payload: { tipo: string } },
+                      value: number | string | undefined,
+                      name: string | number | undefined,
+                      item: { payload?: { tipo?: string } },
                     ) => [
                       `$${Number(value).toFixed(2)} (${
                         totalExpenses > 0
                           ? ((Number(value) / totalExpenses) * 100).toFixed(1)
                           : 0
                       }%)`,
-                      `Gasto ${item.payload.tipo === "fijo" ? "Fijo" : "Variable"}`,
+                      `Gasto ${item.payload?.tipo === "fijo" ? "Fijo" : "Variable"}`,
                     ]}
                     cursor={{ fill: "#1F1F1F" }}
                   />

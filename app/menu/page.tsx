@@ -165,7 +165,6 @@ export default function MenuPage() {
   const fetchRecipes = async (menuItemId: string) => {
     if (!menuItemId) {
       setRecipeItems([]);
-      setRecipeQuantities({});
       return;
     }
     const response = await fetch(`/api/recipes?menuItemId=${menuItemId}`);
@@ -175,12 +174,6 @@ export default function MenuPage() {
     }
     const recipes = data.recipeItems || [];
     setRecipeItems(recipes);
-    setRecipeQuantities(
-      recipes.reduce((acc: Record<string, string>, item: RecipeItem) => {
-        acc[item.id] = String(item.quantityRequired);
-        return acc;
-      }, {}),
-    );
   };
 
   useEffect(() => {
