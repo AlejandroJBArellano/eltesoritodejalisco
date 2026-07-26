@@ -20,16 +20,15 @@ export async function GET(req: Request) {
         let totalSales = 0;
 
         if (month) {
-            const startDate = `${month}-01`;
-            const dateObj = new Date(startDate);
-            // Calcula el primer día del siguiente mes usando timezone neutral (UTC-ish)
-            let nextMonth = dateObj.getMonth() + 1;
-            let year = dateObj.getFullYear();
-            if (nextMonth > 11) {
-                nextMonth = 0;
-                year++;
+            const [yearNum, monthNum] = month.split("-").map(Number);
+            let nextYear = yearNum;
+            let nextMonth = monthNum + 1;
+            if (nextMonth > 12) {
+                nextMonth = 1;
+                nextYear++;
             }
-            const endDate = `${year}-${(nextMonth + 1).toString().padStart(2, '0')}-01`;
+            const startDate = `${yearNum}-${String(monthNum).padStart(2, "0")}-01`;
+            const endDate = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
 
             query = query.gte("date", startDate).lt("date", endDate);
 
