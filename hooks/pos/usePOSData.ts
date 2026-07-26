@@ -1,5 +1,9 @@
+"use client";
+
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { MenuItem, Customer, Order } from "@/types/pos";
+import { mapOrderData } from "@/lib/mappers/orders";
+import type { DbOrderPayload } from "@/lib/mappers/orders";
 
 const CATEGORY_ORDER = [
   "ANTOJITOS",
@@ -10,6 +14,34 @@ const CATEGORY_ORDER = [
   "POSTRES",
   "OTROS",
 ];
+
+/** Raw menu item shape from the API (snake_case). */
+interface DbMenuItem {
+  id: string;
+  name: string;
+  price: number;
+  category?: string;
+  image_url?: string;
+  is_available: boolean;
+}
+
+/** Get today's date string in CDMX timezone (YYYY-MM-DD). */
+const getTodayDateStr = (): string =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Mexico_City",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+
+/** Get the order's date string in CDMX timezone (YYYY-MM-DD). */
+const getOrderDateStr = (createdAt: Date | string): string =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Mexico_City",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(createdAt));
 
 export function usePOSData() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -43,53 +75,12 @@ export function usePOSData() {
 
   const categories = useMemo(() => CATEGORY_ORDER, []);
 
-  const mapOrderData = (dbOrder: any): Order => {
-    return {
-      ...dbOrder,
-      orderNumber: dbOrder.order_number,
-      customerId: dbOrder.customer_id,
-      createdAt: dbOrder.created_at
-        ? dbOrder.created_at.includes("Z") || dbOrder.created_at.includes("+")
-          ? dbOrder.created_at
-          : `${dbOrder.created_at.replace(" ", "T")}Z`
-        : dbOrder.created_at,
-      updatedAt: dbOrder.updated_at
-        ? dbOrder.updated_at.includes("Z") || dbOrder.updated_at.includes("+")
-          ? dbOrder.updated_at
-          : `${dbOrder.updated_at.replace(" ", "T")}Z`
-        : dbOrder.updated_at,
-      orderItems: Array.isArray(dbOrder.order_items)
-        ? dbOrder.order_items.map((item: any) => ({
-            ...item,
-            orderId: item.order_id,
-            menuItemId: item.menu_item_id,
-            unitPrice: item.unit_price,
-            menuItem: item.menu_items
-              ? {
-                  ...item.menu_items,
-                  imageUrl: item.menu_items?.image_url,
-                  isAvailable: item.menu_items?.is_available,
-                }
-              : { name: "Producto", price: item.unit_price || 0 },
-          }))
-        : [],
-      payments: Array.isArray(dbOrder.payments)
-        ? dbOrder.payments.map((p: any) => ({
-            ...p,
-            orderId: p.order_id,
-            tipAmount: p.tip_amount,
-          }))
-        : [],
-      customer: dbOrder.customers || dbOrder.customer || undefined,
-    } as Order;
-  };
-
   const fetchMenu = async () => {
     const response = await fetch("/api/menu");
     const data = await response.json();
     if (!response.ok) throw new Error(data?.error || "Error al cargar menú");
     setMenuItems(
-      (data.items || []).map((item: any) => ({
+      (data.items || []).map((item: DbMenuItem) => ({
         ...item,
         category: item.category,
         isAvailable: item.is_available,
@@ -109,7 +100,9 @@ export function usePOSData() {
     const response = await fetch("/api/orders");
     const data = await response.json();
     if (!response.ok) throw new Error(data?.error || "Error al cargar órdenes");
-    const mappedOrders = (data.orders || []).map(mapOrderData);
+    const mappedOrders = (data.orders || []).map((dbOrder: DbOrderPayload) =>
+      mapOrderData(dbOrder)
+    ) as Order[];
     setOrders(mappedOrders);
     return mappedOrders;
   }, []);
@@ -137,26 +130,15 @@ export function usePOSData() {
 
   // Calculate next folio for display
   const nextFolioDisplay = useMemo(() => {
-    const todayDateStr = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Mexico_City",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date());
+    const todayDateStr = getTodayDateStr();
 
-    const sortedOrders = [...orders].filter((o) => {
-      const orderDate = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Mexico_City",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(new Date(o.createdAt));
-      return orderDate === todayDateStr;
-    });
+    const todayOrders = orders.filter(
+      (o) => getOrderDateStr(o.createdAt) === todayDateStr
+    );
 
-    if (sortedOrders.length === 0) return "001";
+    if (todayOrders.length === 0) return "001";
     const lastNum = Math.max(
-      ...sortedOrders.map((o) => {
+      ...todayOrders.map((o) => {
         const parts = (o.orderNumber || "0").split("-");
         return parseInt(parts[parts.length - 1], 10) || 0;
       }),
@@ -166,22 +148,11 @@ export function usePOSData() {
 
   // Today metrics summary
   const todayStats = useMemo(() => {
-    const todayDateStr = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Mexico_City",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date());
+    const todayDateStr = getTodayDateStr();
 
-    const todayOrders = orders.filter((o) => {
-      const orderDate = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Mexico_City",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(new Date(o.createdAt));
-      return orderDate === todayDateStr;
-    });
+    const todayOrders = orders.filter(
+      (o) => getOrderDateStr(o.createdAt) === todayDateStr
+    );
 
     const paidOrders = todayOrders.filter((o) => o.status === "PAID" || o.status === "DELIVERED");
     const salesTotal = paidOrders.reduce((acc, o) => acc + o.total, 0);
