@@ -79,15 +79,6 @@ export default async function Home() {
   return (
     <div className="min-h-screen">
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        {/* Welcome Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-black text-[#E0E0E0] tracking-tight">
-            ¡Hola, {profile.full_name || profile.email.split("@")[0]}! 👋
-          </h1>
-          <p className="text-[#E0E0E0]/50 font-bold uppercase tracking-widest text-xs mt-2">
-            Rol: <span className="text-primary">{profile.role}</span>
-          </p>
-        </div>
 
         {/* Quick Stats - Only for Admins */}
         {isAdmin && (
@@ -121,25 +112,6 @@ export default async function Home() {
                       style: "currency",
                       currency: "MXN",
                     }).format(salesToday)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5">
-              <div className="flex items-center">
-                <div className="rounded-xl bg-green-500/10 p-3 text-green-500 text-2xl">
-                  🍃
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                    Venta Neta
-                  </p>
-                  <p className="text-3xl font-black text-[#E0E0E0] tracking-tight">
-                    {new Intl.NumberFormat("es-MX", {
-                      style: "currency",
-                      currency: "MXN",
-                    }).format(salesToday / 1.16)}
                   </p>
                 </div>
               </div>
@@ -394,35 +366,6 @@ export default async function Home() {
                 </div>
               </Link>
             )}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="rounded-3xl bg-[#181818] p-8 shadow-2xl">
-          <h3 className="mb-6 text-lg font-black text-white uppercase tracking-widest">
-            Acciones Rápidas
-          </h3>
-          <div className="flex flex-wrap gap-4">
-            {(isAdmin || isWaiter) && (
-              <Link href="/pos">
-                <button className="rounded-xl bg-secondary px-6 py-3 text-sm font-black text-white hover:bg-secondary/90 transition-all">
-                  + NUEVA ORDEN
-                </button>
-              </Link>
-            )}
-            <Link href="/kitchen">
-              <button className="rounded-xl bg-primary px-6 py-3 text-sm font-black text-white hover:bg-primary/90 transition-all">
-                VER COCINA
-              </button>
-            </Link>
-            {(isAdmin || isWaiter) && (
-              <Link href="/tareas">
-                <button className="rounded-xl bg-purple-600 px-6 py-3 text-sm font-black text-white hover:bg-purple-500 transition-all">
-                  CHECKLIST TAREAS
-                </button>
-              </Link>
-            )}
-
           </div>
         </div>
       </main>
