@@ -6,7 +6,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { mapOrderData, safeParseDate } from "@/lib/mappers/orders";
 import type { OrderWithDetails } from "@/types";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // Re-export shared mapper utilities so existing consumers don't break
 export { mapOrderData, safeParseDate } from "@/lib/mappers/orders";
@@ -26,7 +26,9 @@ export function useRealtimeOrders(
   // Stabilise the Supabase client — avoid re-creating on every render
   const supabase = useMemo(() => createClient(), []);
 
-  const fetchOrders = async () => {
+  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const fetchOrders = useCallback(async () => {
     try {
       const response = await fetch(
         "/api/orders?status=PENDING,PREPARING,READY",
@@ -41,7 +43,16 @@ export function useRealtimeOrders(
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const debouncedFetchOrders = useCallback(() => {
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
+    fetchTimeoutRef.current = setTimeout(() => {
+      fetchOrders();
+    }, 300);
+  }, [fetchOrders]);
 
   useEffect(() => {
     if (initialData.length === 0) {
@@ -75,7 +86,7 @@ export function useRealtimeOrders(
           if (payload.eventType === "INSERT") {
             playBell();
           }
-          fetchOrders();
+          debouncedFetchOrders();
         },
       )
       .on(
@@ -83,15 +94,18 @@ export function useRealtimeOrders(
         { event: "INSERT", schema: "public", table: "order_items" },
         () => {
           playBell();
-          fetchOrders();
+          debouncedFetchOrders();
         },
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
     };
-  }, [soundEnabled, supabase, initialData.length]);
+  }, [soundEnabled, supabase, initialData.length, fetchOrders, debouncedFetchOrders]);
 
   return { orders, loading, error, refetch: fetchOrders, setOrders };
 }
