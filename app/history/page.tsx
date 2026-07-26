@@ -79,7 +79,7 @@ import {
 } from "@/components/pos/paymentUtils";
 import {
   TableHeaderSortCell,
-  TablePagination
+  TablePagination,
 } from "@/components/ui/DataTableControls";
 import { usePendingCut } from "@/hooks/usePendingCut";
 import { createClient } from "@/lib/supabase/client";
@@ -100,7 +100,7 @@ import {
   ShieldAlert,
   ShoppingBag,
   TrendingUp,
-  X
+  X,
 } from "lucide-react";
 
 const COLORS = [
@@ -252,25 +252,25 @@ export default function HistoryPage() {
           : null,
         orderItems: Array.isArray(dbOrder.order_items)
           ? dbOrder.order_items.map((item: DBOrderItem) => ({
-            ...item,
-            orderId: item.order_id,
-            menuItemId: item.menu_item_id,
-            unitPrice: item.unit_price,
-            menuItem: item.menu_items
-              ? {
-                ...item.menu_items,
-                imageUrl: item.menu_items?.image_url,
-                isAvailable: item.menu_items?.is_available,
-              }
-              : { name: "Producto", price: item.unit_price || 0 },
-          }))
+              ...item,
+              orderId: item.order_id,
+              menuItemId: item.menu_item_id,
+              unitPrice: item.unit_price,
+              menuItem: item.menu_items
+                ? {
+                    ...item.menu_items,
+                    imageUrl: item.menu_items?.image_url,
+                    isAvailable: item.menu_items?.is_available,
+                  }
+                : { name: "Producto", price: item.unit_price || 0 },
+            }))
           : [],
         payments: Array.isArray(dbOrder.payments)
           ? dbOrder.payments.map((p: DBPayment) => ({
-            ...p,
-            orderId: p.order_id,
-            tipAmount: p.tip_amount,
-          }))
+              ...p,
+              orderId: p.order_id,
+              tipAmount: p.tip_amount,
+            }))
           : [],
         customer: dbOrder.customers || dbOrder.customer || undefined,
       })) as Order[];
@@ -309,16 +309,13 @@ export default function HistoryPage() {
           amount: number;
           expense_categories: { tipo_gasto: string } | null;
         }[]) || [];
-      const total = typedData.reduce(
-        (sum, e) => {
-          const tipo = e.expense_categories?.tipo_gasto;
-          if (!tipo || tipo === "variable") {
-            return sum + Number(e.amount);
-          }
-          return sum;
-        },
-        0,
-      );
+      const total = typedData.reduce((sum, e) => {
+        const tipo = e.expense_categories?.tipo_gasto;
+        if (!tipo || tipo === "variable") {
+          return sum + Number(e.amount);
+        }
+        return sum;
+      }, 0);
       setTodayExpenses(total);
     } catch (err) {
       console.error("Error fetching today expenses:", err);
@@ -371,8 +368,10 @@ export default function HistoryPage() {
   const handleFinalizarDia = async () => {
     if (openOrders.length > 0) {
       setHistoryError(
-        `No se puede cerrar: Hay ${openOrders.length} orden${openOrders.length !== 1 ? "es" : ""
-        } pendiente${openOrders.length !== 1 ? "s" : ""
+        `No se puede cerrar: Hay ${openOrders.length} orden${
+          openOrders.length !== 1 ? "es" : ""
+        } pendiente${
+          openOrders.length !== 1 ? "s" : ""
         } de pago. Cóbralas o cancélalas antes de continuar.`,
       );
       setShowFinalizeModal(false);
@@ -950,23 +949,26 @@ export default function HistoryPage() {
 
         {/* CORTE DIARIO */}
         <section
-          className={`rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 border-l-4 space-y-6 ${finalizeSuccess ? "border-l-success" : "border-l-blue-500"
-            }`}
+          className={`rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 border-l-4 space-y-6 ${
+            finalizeSuccess ? "border-l-success" : "border-l-blue-500"
+          }`}
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
             <div>
               <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
                 <span
-                  className={`h-2 w-2 rounded-full ${finalizeSuccess ? "bg-success" : "bg-blue-500"
-                    }`}
+                  className={`h-2 w-2 rounded-full ${
+                    finalizeSuccess ? "bg-success" : "bg-blue-500"
+                  }`}
                 ></span>
                 Corte Diario
               </h2>
               <p className="text-xs font-medium text-[#E0E0E0]/50 mt-0.5">
                 {finalizeSuccess
                   ? "✅ Corte guardado — contadores reiniciados para el siguiente ciclo"
-                  : `Hoy · ${todayOrders.length} orden${todayOrders.length !== 1 ? "es" : ""
-                  } completada${todayOrders.length !== 1 ? "s" : ""}`}
+                  : `Hoy · ${todayOrders.length} orden${
+                      todayOrders.length !== 1 ? "es" : ""
+                    } completada${todayOrders.length !== 1 ? "s" : ""}`}
               </p>
             </div>
 
@@ -988,10 +990,11 @@ export default function HistoryPage() {
                   type="button"
                   onClick={handleGeneratePendingCut}
                   disabled={isGeneratingPendingCut}
-                  className={`rounded-xl border px-3.5 py-2 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 disabled:opacity-50 transition-all ${pendingCutArmed
+                  className={`rounded-xl border px-3.5 py-2 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 disabled:opacity-50 transition-all ${
+                    pendingCutArmed
                       ? "bg-amber-500/30 border-amber-500/50 text-amber-300 animate-[pulse_0.6s_ease-in-out_infinite]"
                       : "bg-amber-500/20 border-amber-500/30 text-amber-400 hover:bg-amber-500/30"
-                    }`}
+                  }`}
                 >
                   <Clock className="h-3.5 w-3.5" />
                   {isGeneratingPendingCut
@@ -1187,10 +1190,11 @@ export default function HistoryPage() {
                     Utilidad Final
                   </span>
                   <span
-                    className={`text-xl font-black font-mono ${todayTotals.utilidadFinal >= 0
+                    className={`text-xl font-black font-mono ${
+                      todayTotals.utilidadFinal >= 0
                         ? "text-emerald-400"
                         : "text-red-400"
-                      }`}
+                    }`}
                   >
                     ${todayTotals.utilidadFinal.toFixed(2)}
                   </span>
@@ -1375,10 +1379,11 @@ export default function HistoryPage() {
                             -${Number(cut.total_gastos).toFixed(2)}
                           </td>
                           <td
-                            className={`py-3.5 px-3 text-right font-mono font-black ${Number(cut.utilidad_final) >= 0
+                            className={`py-3.5 px-3 text-right font-mono font-black ${
+                              Number(cut.utilidad_final) >= 0
                                 ? "text-blue-400"
                                 : "text-red-400"
-                              }`}
+                            }`}
                           >
                             ${Number(cut.utilidad_final).toFixed(2)}
                           </td>
@@ -1909,7 +1914,7 @@ export default function HistoryPage() {
                 </span>
               </div>
               {selectedCutDetail.expenses_detail &&
-                selectedCutDetail.expenses_detail.length > 0 ? (
+              selectedCutDetail.expenses_detail.length > 0 ? (
                 <div className="space-y-1 pt-2 border-t border-white/5">
                   {selectedCutDetail.expenses_detail.map((expense, i) => (
                     <div
@@ -1953,10 +1958,11 @@ export default function HistoryPage() {
                   Utilidad Final (- Gastos)
                 </span>
                 <span
-                  className={`text-lg font-black font-mono ${Number(selectedCutDetail.utilidad_final) >= 0
+                  className={`text-lg font-black font-mono ${
+                    Number(selectedCutDetail.utilidad_final) >= 0
                       ? "text-emerald-400"
                       : "text-red-400"
-                    }`}
+                  }`}
                 >
                   ${Number(selectedCutDetail.utilidad_final).toFixed(2)}
                 </span>

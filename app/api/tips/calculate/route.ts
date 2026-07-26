@@ -62,9 +62,7 @@ export async function POST(request: Request) {
 
         const userId = record.user_id;
         const usersField = record.users as unknown as
-          | { name: string }
-          | { name: string }[]
-          | null;
+          { name: string } | { name: string }[] | null;
         const userName = Array.isArray(usersField)
           ? usersField[0]?.name
           : usersField?.name || "Desconocido";

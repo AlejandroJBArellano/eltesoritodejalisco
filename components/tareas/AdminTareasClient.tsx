@@ -22,13 +22,7 @@ import {
   TableHeaderSortCell,
   TablePagination,
 } from "@/components/ui/DataTableControls";
-import {
-  CheckSquare,
-  Plus,
-  FolderPlus,
-  Edit3,
-  Trash2,
-} from "lucide-react";
+import { CheckSquare, Plus, FolderPlus, Edit3, Trash2 } from "lucide-react";
 
 type StaffPerformanceMetric = {
   userId: string;
@@ -176,7 +170,9 @@ export function AdminTareasClient({
         ),
       );
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Error al aprobar tarea");
+      setErrorMsg(
+        err instanceof Error ? err.message : "Error al aprobar tarea",
+      );
     } finally {
       setLoading(null);
     }
@@ -200,8 +196,6 @@ export function AdminTareasClient({
       setLoading(null);
     }
   };
-
-
 
   // Task CRUD
   const openNewTaskModal = () => {
@@ -269,7 +263,9 @@ export function AdminTareasClient({
       setEditingTaskId(null);
       setIsTaskModalOpen(false);
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Error al actualizar tarea");
+      setErrorMsg(
+        err instanceof Error ? err.message : "Error al actualizar tarea",
+      );
     } finally {
       setLoading(null);
     }
@@ -287,7 +283,9 @@ export function AdminTareasClient({
       await deletePrimordialTask(id);
       setTasks((prev) => prev.filter((t) => t.id !== id));
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Error al desactivar la tarea");
+      setErrorMsg(
+        err instanceof Error ? err.message : "Error al desactivar la tarea",
+      );
     } finally {
       setLoading(null);
     }
@@ -366,7 +364,14 @@ export function AdminTareasClient({
     if (taskPage !== 1) {
       setTaskPage(1);
     }
-  }, [taskSearch, taskCatFilter, taskFreqFilter, taskSortField, taskSortDir, taskPage]);
+  }, [
+    taskSearch,
+    taskCatFilter,
+    taskFreqFilter,
+    taskSortField,
+    taskSortDir,
+    taskPage,
+  ]);
 
   const taskTotalPages = Math.ceil(sortedTasks.length / taskPageSize) || 1;
   const paginatedTasks = useMemo(() => {
