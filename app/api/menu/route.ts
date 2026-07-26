@@ -1,7 +1,8 @@
 // TesoritoOS - Menu Management API
-// Handles menu items CRUD with Supabase Storage integration
+// Handles menu items CRUD with Supabase Admin Storage integration
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -29,8 +30,41 @@ export async function GET() {
 }
 
 /**
+ * Helper to upload image using Admin Client (bypassing RLS on storage.objects)
+ */
+async function uploadImageToStorage(imageFile: File): Promise<string> {
+  const supabaseAdmin = createAdminClient();
+
+  // Attempt to create bucket if it doesn't exist yet
+  try {
+    await supabaseAdmin.storage.createBucket("menu-items", { public: true });
+  } catch {
+    // Bucket already exists or cannot be recreated
+  }
+
+  const fileExt = imageFile.name.split(".").pop() || "jpg";
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+  const filePath = `${fileName}`;
+
+  const { error: uploadError } = await supabaseAdmin.storage
+    .from("menu-items")
+    .upload(filePath, imageFile, { upsert: true });
+
+  if (uploadError) {
+    console.error("Storage upload error:", uploadError);
+    throw new Error(`Error al subir imagen a almacenamiento: ${uploadError.message}`);
+  }
+
+  const { data: { publicUrl } } = supabaseAdmin.storage
+    .from("menu-items")
+    .getPublicUrl(filePath);
+
+  return publicUrl;
+}
+
+/**
  * POST /api/menu
- * Create a new menu item with optional image upload
+ * Create a new menu item with image upload
  */
 export async function POST(request: NextRequest) {
   try {
@@ -41,45 +75,28 @@ export async function POST(request: NextRequest) {
     const category = formData.get("category") as string;
     const isAvailable = formData.get("isAvailable") === "true";
     const imageFile = formData.get("image") as File | null;
+    let imageUrl = (formData.get("imageUrl") as string) || null;
 
     if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ error: "El nombre es obligatorio" }, { status: 400 });
     }
 
     const parsedPrice = Number(price);
     if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
       return NextResponse.json(
-        { error: "Price must be a non-negative number" },
+        { error: "El precio debe ser un número mayor o igual a 0" },
         { status: 400 },
       );
     }
 
-    let imageUrl = null;
-    const supabase = await createClient();
-
-    // Handle image upload to Supabase Storage
     if (imageFile && imageFile.size > 0) {
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { data, error: uploadError } = await supabase.storage
-        .from('menu-items')
-        .upload(filePath, imageFile);
-
-      if (uploadError) {
-        console.error("Storage upload error:", uploadError);
-      } else {
-        const { data: { publicUrl } } = supabase.storage
-          .from('menu-items')
-          .getPublicUrl(filePath);
-        imageUrl = publicUrl;
-      }
+      imageUrl = await uploadImageToStorage(imageFile);
     }
 
+    const supabaseAdmin = createAdminClient();
     const id = crypto.randomUUID();
 
-    const { data: item, error: createError } = await supabase
+    const { data: item, error: createError } = await supabaseAdmin
       .from("menu_items")
       .insert({
         id,
@@ -87,7 +104,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         price: parsedPrice,
         category: category || null,
-        image_url: imageUrl,
+        image_url: imageUrl || null,
         is_available: isAvailable,
         updated_at: new Date().toISOString(),
       })
@@ -100,7 +117,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error creating menu item:", error);
     return NextResponse.json(
-      { error: "Failed to create menu item" },
+      { error: error instanceof Error ? error.message : "No se pudo crear el producto" },
       { status: 500 },
     );
   }
@@ -108,7 +125,7 @@ export async function POST(request: NextRequest) {
 
 /**
  * PUT /api/menu
- * Update a menu item with optional new image
+ * Update a menu item with optional new image upload
  */
 export async function PUT(request: NextRequest) {
   try {
@@ -120,11 +137,11 @@ export async function PUT(request: NextRequest) {
     const category = formData.get("category") as string;
     const isAvailable = formData.get("isAvailable") === "true";
     const imageFile = formData.get("image") as File | null;
-    let imageUrl = formData.get("imageUrl") as string | null;
+    let imageUrl = (formData.get("imageUrl") as string) || null;
 
     if (!id || !name) {
       return NextResponse.json(
-        { error: "ID and name are required" },
+        { error: "El ID y el nombre son obligatorios" },
         { status: 400 },
       );
     }
@@ -132,32 +149,18 @@ export async function PUT(request: NextRequest) {
     const parsedPrice = Number(price);
     if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
       return NextResponse.json(
-        { error: "Price must be a non-negative number" },
+        { error: "El precio debe ser un número mayor o igual a 0" },
         { status: 400 },
       );
     }
 
-    const supabase = await createClient();
-
-    // Handle new image upload if provided
     if (imageFile && imageFile.size > 0) {
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('menu-items')
-        .upload(filePath, imageFile);
-
-      if (!uploadError) {
-        const { data: { publicUrl } } = supabase.storage
-          .from('menu-items')
-          .getPublicUrl(filePath);
-        imageUrl = publicUrl;
-      }
+      imageUrl = await uploadImageToStorage(imageFile);
     }
 
-    const { data: item, error: updateError } = await supabase
+    const supabaseAdmin = createAdminClient();
+
+    const { data: item, error: updateError } = await supabaseAdmin
       .from("menu_items")
       .update({
         name,
@@ -178,7 +181,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error("Error updating menu item:", error);
     return NextResponse.json(
-      { error: "Failed to update menu item" },
+      { error: error instanceof Error ? error.message : "No se pudo actualizar el producto" },
       { status: 500 },
     );
   }
@@ -194,13 +197,13 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Menu item ID is required" },
+        { error: "El ID del producto es obligatorio" },
         { status: 400 },
       );
     }
 
-    const supabase = await createClient();
-    const { error } = await supabase.from("menu_items").delete().eq("id", id);
+    const supabaseAdmin = createAdminClient();
+    const { error } = await supabaseAdmin.from("menu_items").delete().eq("id", id);
 
     if (error) throw error;
 
@@ -208,7 +211,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error("Error deleting menu item:", error);
     return NextResponse.json(
-      { error: "Failed to delete menu item" },
+      { error: "No se pudo eliminar el producto" },
       { status: 500 },
     );
   }

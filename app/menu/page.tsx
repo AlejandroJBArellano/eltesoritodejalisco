@@ -229,10 +229,10 @@ export default function MenuPage() {
       formData.append("category", formState.category);
       formData.append("isAvailable", String(formState.isAvailable));
 
+      formData.append("imageUrl", formState.imageUrl || "");
+
       if (selectedFile) {
         formData.append("image", selectedFile);
-      } else if (formState.imageUrl) {
-        formData.append("imageUrl", formState.imageUrl);
       }
 
       const response = await fetch("/api/menu", {
@@ -626,42 +626,49 @@ export default function MenuPage() {
                   Imagen del Producto
                 </label>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-4">
-                    {imagePreview ? (
-                      <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#181818] relative">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="h-full w-full object-cover"
-                          onError={() => setImagePreview(null)}
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-16 w-16 flex-shrink-0 flex items-center justify-center rounded-xl border border-white/5 bg-[#181818] text-[#E0E0E0]/30">
-                        <ImageIcon className="h-6 w-6" />
-                      </div>
-                    )}
-                    <div className="flex-1 space-y-2">
+                  <div className="flex items-start gap-4">
+                    <div className="flex flex-col items-center gap-2">
+                      {imagePreview ? (
+                        <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#181818] relative">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-16 w-16 flex-shrink-0 flex items-center justify-center rounded-xl border border-white/5 bg-[#181818] text-[#E0E0E0]/30">
+                          <ImageIcon className="h-6 w-6" />
+                        </div>
+                      )}
+
+                      {(imagePreview || formState.imageUrl || selectedFile) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreview(null);
+                            setSelectedFile(null);
+                            handleFormChange("imageUrl", "");
+                            if (fileInputRef.current) fileInputRef.current.value = "";
+                          }}
+                          className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-wider"
+                        >
+                          Quitar
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex-1">
                       <input
                         type="file"
                         accept="image/*"
                         ref={fileInputRef}
                         onChange={handleFileChange}
-                        className="block w-full text-xs text-[#E0E0E0]/60 file:mr-3 file:rounded-xl file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-[#E0E0E0] hover:file:bg-white/20 file:transition-all cursor-pointer"
+                        className="block w-full text-xs text-[#E0E0E0]/60 file:mr-3 file:rounded-xl file:border-0 file:bg-white/10 file:px-4 file:py-2.5 file:text-xs file:font-bold file:text-[#E0E0E0] hover:file:bg-white/20 file:transition-all cursor-pointer"
                       />
-                      <input
-                        type="url"
-                        value={formState.imageUrl}
-                        onChange={(event) => {
-                          const url = event.target.value;
-                          handleFormChange("imageUrl", url);
-                          if (!selectedFile) {
-                            setImagePreview(url || null);
-                          }
-                        }}
-                        className="w-full rounded-xl border border-white/10 bg-[#181818] px-3.5 py-2 text-xs text-[#E0E0E0] placeholder-[#666666] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                        placeholder="O pega la URL de la imagen (ej. https://...)"
-                      />
+                      <p className="mt-1.5 text-[10px] text-[#E0E0E0]/40">
+                        Soporta JPG, PNG, WEBP (Se guardará automáticamente en Supabase Storage)
+                      </p>
                     </div>
                   </div>
                 </div>
