@@ -166,7 +166,7 @@ export function IngredientBatchControl({
         </h3>
         {activeBatch ? (
           <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" aria-hidden="true" />
             En Uso
           </span>
         ) : (
@@ -234,9 +234,11 @@ export function IngredientBatchControl({
             </div>
 
             <button
+              type="button"
               onClick={handleStartBatch}
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3.5 text-sm font-black text-black uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-400 active:scale-[0.99] disabled:opacity-50"
+              aria-label={`Abrir nuevo lote para ${ingredientName}`}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3.5 text-sm font-black text-black uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-400 active:scale-[0.98] disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -271,10 +273,12 @@ export function IngredientBatchControl({
             </div>
 
             <button
+              type="button"
               onClick={handleFinishBatch}
               disabled={loading}
-              className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl p-4 transition-all shadow-md active:scale-[0.99] ${isArmed
-                  ? "border-2 border-red-500 bg-red-600 text-white animate-pulse shadow-red-500/30"
+              aria-label={isArmed ? `Confirmar cierre de lote para ${ingredientName}` : `Marcar lote de ${ingredientName} como agotado`}
+              className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl p-4 transition-all shadow-md active:scale-[0.98] ${isArmed
+                  ? "border-2 border-red-500 bg-red-600/90 text-white shadow-lg shadow-red-500/30 scale-[1.01]"
                   : "border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/50"
                 }`}
             >
