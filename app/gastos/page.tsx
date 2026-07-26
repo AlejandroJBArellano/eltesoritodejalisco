@@ -60,6 +60,9 @@ export default function GastosPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Modal Expense Form
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+
   // Modal Category Form
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -71,7 +74,7 @@ export default function GastosPage() {
   // Monthly Sales
   const [totalSales, setTotalSales] = useState(0);
 
-  // Expense Form
+  // Expense Form State
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -183,6 +186,7 @@ export default function GastosPage() {
       }
       setAmount("");
       setDescription("");
+      setIsExpenseModalOpen(false);
       fetchData();
     } catch (error) {
       alert("Error de conexión");
@@ -283,7 +287,14 @@ export default function GastosPage() {
             </h1>
           </div>
 
-          <div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsExpenseModalOpen(true)}
+              className="rounded-full bg-primary px-4 py-1.5 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-primary/20"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Registrar Gasto
+            </button>
             <button
               onClick={() => {
                 setEditingCategory(null);
@@ -563,14 +574,169 @@ export default function GastosPage() {
           </div>
         </section>
 
-        {/* 4. Formulario de Gasto y Administración de Categorías */}
-        <div className="grid gap-6 lg:grid-cols-12 items-start">
-          {/* Formulario Inteligente */}
-          <section className="lg:col-span-7 rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-5">
-            <h2 className="text-base font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2 border-b border-white/5 pb-3">
-              <span className="h-2 w-2 rounded-full bg-primary"></span>
-              Registrar Gasto
+        {/* 4. Categorías de Gasto (Resumen & Administración) */}
+        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
+          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <h2 className="text-sm font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
+              <Tag className="h-4 w-4 text-purple-400" />
+              Categorías Registradas
             </h2>
+            <button
+              onClick={() => {
+                setEditingCategory(null);
+                setNewCatName("");
+                setNewCatColor("#FFB7CE");
+                setNewCatTipoGasto("variable");
+                setIsCategoryModalOpen(true);
+              }}
+              className="text-xs text-primary hover:underline font-black uppercase tracking-wider flex items-center gap-1"
+            >
+              <Plus className="h-3.5 w-3.5" /> Nueva Categoría
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {categories.map((cat) => (
+              <div
+                key={cat.id}
+                className="flex items-center justify-between p-3.5 rounded-xl bg-[#1A1A1A] border border-white/5 hover:border-white/10 transition-colors"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span
+                    className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
+                    style={{ backgroundColor: cat.color }}
+                  />
+                  <span className="text-xs text-[#E0E0E0] font-black uppercase truncate">
+                    {cat.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span
+                    className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider ${
+                      cat.tipo_gasto === "fijo"
+                        ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    }`}
+                  >
+                    {cat.tipo_gasto === "fijo" ? "Fijo" : "Var"}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setEditingCategory(cat);
+                      setNewCatName(cat.name);
+                      setNewCatColor(cat.color);
+                      setNewCatTipoGasto(cat.tipo_gasto || "variable");
+                      setIsCategoryModalOpen(true);
+                    }}
+                    className="text-xs text-[#E0E0E0]/40 hover:text-[#E0E0E0] p-1 transition-colors"
+                    title="Editar categoría"
+                  >
+                    <Edit3 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {categories.length === 0 && (
+              <p className="col-span-full text-[#E0E0E0]/40 text-xs italic text-center py-4">
+                No hay categorías registradas.
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* 5. Historial de Gastos (Tabla Full Width) */}
+        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 overflow-hidden space-y-4">
+          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-red-500"></span>
+              Historial de Gastos
+            </h2>
+            <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
+              {expenses.length} registro{expenses.length !== 1 ? "s" : ""} este mes
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            {isLoading ? (
+              <p className="py-8 text-center text-[#E0E0E0]/40 text-xs font-bold italic">
+                Cargando historial de gastos...
+              </p>
+            ) : (
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-white/5 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                    <th className="py-3 px-3">Fecha</th>
+                    <th className="py-3 px-3">Categoría</th>
+                    <th className="py-3 px-3">Descripción</th>
+                    <th className="py-3 px-3 text-center">Factura</th>
+                    <th className="py-3 px-3 text-right">Monto</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {expenses.map((exp) => (
+                    <tr key={exp.id} className="hover:bg-white/5 transition-colors">
+                      <td className="py-3.5 px-3 text-[#E0E0E0]/80 font-medium">
+                        {new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City" }).format(
+                          new Date(exp.date + "T12:00:00Z"),
+                        )}
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <span
+                          className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border"
+                          style={{
+                            backgroundColor: `${exp.expense_categories?.color || "#555"}20`,
+                            borderColor: `${exp.expense_categories?.color || "#555"}40`,
+                            color: exp.expense_categories?.color || "#E0E0E0",
+                          }}
+                        >
+                          {exp.expense_categories?.name || "Sin Categoría"}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-[#E0E0E0] font-bold">{exp.description}</td>
+                      <td className="py-3.5 px-3 text-center">
+                        {exp.has_invoice ? (
+                          <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-[9px] font-black text-blue-400 uppercase">
+                            FAC
+                          </span>
+                        ) : (
+                          <span className="text-[#E0E0E0]/30 font-bold">—</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-3 text-right font-mono font-black text-red-400">
+                        - ${exp.amount.toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                  {expenses.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-[#E0E0E0]/40 italic">
+                        No hay registros de gastos encontrados para este período.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </section>
+      </main>
+
+      {/* MODAL REGISTRAR GASTO */}
+      {isExpenseModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 no-print">
+          <div className="w-full max-w-md rounded-2xl bg-[#242424] p-6 shadow-2xl border border-white/10 space-y-5">
+            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+              <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+                <ReceiptText className="h-4 w-4 text-primary" />
+                Registrar Gasto
+              </h3>
+              <button
+                onClick={() => setIsExpenseModalOpen(false)}
+                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
             <form onSubmit={handleAddExpense} className="space-y-4">
               <div>
@@ -672,165 +838,28 @@ export default function GastosPage() {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmittingExp || categories.length === 0}
-                className="w-full mt-2 rounded-xl bg-primary py-3 text-black font-black text-xs hover:brightness-105 transition-all uppercase tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50"
-              >
-                {isSubmittingExp ? "Registrando..." : "Guardar Gasto"}
-              </button>
-            </form>
-          </section>
-
-          {/* Categorías de Gasto */}
-          <section className="lg:col-span-5 rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/5 pb-3">
-              <h2 className="text-sm font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
-                <Tag className="h-4 w-4 text-purple-400" />
-                Categorías de Gasto
-              </h2>
-              <button
-                onClick={() => {
-                  setEditingCategory(null);
-                  setNewCatName("");
-                  setNewCatColor("#FFB7CE");
-                  setNewCatTipoGasto("variable");
-                  setIsCategoryModalOpen(true);
-                }}
-                className="text-xs text-primary hover:underline font-black uppercase tracking-wider flex items-center gap-1"
-              >
-                <Plus className="h-3.5 w-3.5" /> Nueva
-              </button>
-            </div>
-
-            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-              {categories.map((cat) => (
-                <div
-                  key={cat.id}
-                  className="flex items-center justify-between p-3 rounded-xl bg-[#1A1A1A] border border-white/5 hover:border-white/10 transition-colors"
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsExpenseModalOpen(false)}
+                  className="w-full bg-white/5 text-[#E0E0E0]/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span
-                      className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
-                      style={{ backgroundColor: cat.color }}
-                    />
-                    <span className="text-xs text-[#E0E0E0] font-black uppercase truncate max-w-[130px]">
-                      {cat.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span
-                      className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider ${
-                        cat.tipo_gasto === "fijo"
-                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                          : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                      }`}
-                    >
-                      {cat.tipo_gasto === "fijo" ? "Fijo" : "Var"}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setEditingCategory(cat);
-                        setNewCatName(cat.name);
-                        setNewCatColor(cat.color);
-                        setNewCatTipoGasto(cat.tipo_gasto || "variable");
-                        setIsCategoryModalOpen(true);
-                      }}
-                      className="text-xs text-[#E0E0E0]/40 hover:text-[#E0E0E0] p-1 transition-colors"
-                      title="Editar categoría"
-                    >
-                      <Edit3 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {categories.length === 0 && (
-                <p className="text-[#E0E0E0]/40 text-xs italic text-center py-4">
-                  No hay categorías registradas.
-                </p>
-              )}
-            </div>
-          </section>
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingExp || categories.length === 0}
+                  className="w-full bg-primary text-black py-3 rounded-xl font-black hover:brightness-105 transition-all uppercase text-xs tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50"
+                >
+                  {isSubmittingExp ? "Registrando..." : "Guardar Gasto"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
+      )}
 
-        {/* 5. Historial de Gastos (Tabla Full Width) */}
-        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 overflow-hidden space-y-4">
-          <div className="flex items-center justify-between border-b border-white/5 pb-3">
-            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-red-500"></span>
-              Historial de Gastos
-            </h2>
-            <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
-              {expenses.length} registro{expenses.length !== 1 ? "s" : ""} este mes
-            </span>
-          </div>
-
-          <div className="overflow-x-auto">
-            {isLoading ? (
-              <p className="py-8 text-center text-[#E0E0E0]/40 text-xs font-bold italic">
-                Cargando historial de gastos...
-              </p>
-            ) : (
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-white/5 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-                    <th className="py-3 px-3">Fecha</th>
-                    <th className="py-3 px-3">Categoría</th>
-                    <th className="py-3 px-3">Descripción</th>
-                    <th className="py-3 px-3 text-center">Factura</th>
-                    <th className="py-3 px-3 text-right">Monto</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {expenses.map((exp) => (
-                    <tr key={exp.id} className="hover:bg-white/5 transition-colors">
-                      <td className="py-3.5 px-3 text-[#E0E0E0]/80 font-medium">
-                        {new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City" }).format(
-                          new Date(exp.date + "T12:00:00Z"),
-                        )}
-                      </td>
-                      <td className="py-3.5 px-3">
-                        <span
-                          className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border"
-                          style={{
-                            backgroundColor: `${exp.expense_categories?.color || "#555"}20`,
-                            borderColor: `${exp.expense_categories?.color || "#555"}40`,
-                            color: exp.expense_categories?.color || "#E0E0E0",
-                          }}
-                        >
-                          {exp.expense_categories?.name || "Sin Categoría"}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3 text-[#E0E0E0] font-bold">{exp.description}</td>
-                      <td className="py-3.5 px-3 text-center">
-                        {exp.has_invoice ? (
-                          <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-[9px] font-black text-blue-400 uppercase">
-                            FAC
-                          </span>
-                        ) : (
-                          <span className="text-[#E0E0E0]/30 font-bold">—</span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-mono font-black text-red-400">
-                        - ${exp.amount.toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                  {expenses.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-[#E0E0E0]/40 italic">
-                        No hay registros de gastos encontrados para este período.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </section>
-      </main>
-
-      {/* Modal Nueva / Editar Categoría */}
+      {/* MODAL NUEVA / EDITAR CATEGORÍA */}
       {isCategoryModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 no-print">
           <div className="w-full max-w-md rounded-2xl bg-[#242424] p-6 shadow-2xl border border-white/10 space-y-5">
