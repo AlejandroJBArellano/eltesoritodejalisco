@@ -32,6 +32,13 @@ import {
   PieChart as PieChartIcon,
   Check,
   Building,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Filter,
 } from "lucide-react";
 
 type Category = {
@@ -89,7 +96,7 @@ export default function GastosPage() {
   const [hasInvoice, setHasInvoice] = useState(false);
   const [isSubmittingExp, setIsSubmittingExp] = useState(false);
 
-  // Filter
+  // Filter Month
   const [currentMonth, setCurrentMonth] = useState(() => {
     const today = new Date();
     const mxDate = new Intl.DateTimeFormat("en-CA", {
@@ -99,6 +106,20 @@ export default function GastosPage() {
     }).format(today);
     return mxDate; // e.g. "2026-07"
   });
+
+  // Table Filters State
+  const [tableSearch, setTableSearch] = useState("");
+  const [tableCategoryFilter, setTableCategoryFilter] = useState("");
+  const [tableInvoiceFilter, setTableInvoiceFilter] = useState<"all" | "invoiced" | "no_invoice">("all");
+  const [tableTypeFilter, setTableTypeFilter] = useState<"all" | "fijo" | "variable">("all");
+
+  // Table Sorting State
+  const [sortField, setSortField] = useState<"date" | "amount" | "description" | "category">("date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+
+  // Table Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -266,6 +287,68 @@ export default function GastosPage() {
 
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
   }, [expenses]);
+
+  // --- FILTRADO, ORDENAMIENTO Y PAGINACIÓN DE TABLA ---
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter((exp) => {
+      if (tableSearch.trim()) {
+        const q = tableSearch.toLowerCase();
+        const matchDesc = exp.description.toLowerCase().includes(q);
+        const matchCat = (exp.expense_categories?.name || "").toLowerCase().includes(q);
+        if (!matchDesc && !matchCat) return false;
+      }
+
+      if (tableCategoryFilter && exp.category_id !== tableCategoryFilter) {
+        return false;
+      }
+
+      if (tableInvoiceFilter === "invoiced" && !exp.has_invoice) return false;
+      if (tableInvoiceFilter === "no_invoice" && exp.has_invoice) return false;
+
+      const tipo = exp.expense_categories?.tipo_gasto;
+      if (tableTypeFilter === "fijo" && tipo !== "fijo") return false;
+      if (tableTypeFilter === "variable" && tipo !== "variable") return false;
+
+      return true;
+    });
+  }, [expenses, tableSearch, tableCategoryFilter, tableInvoiceFilter, tableTypeFilter]);
+
+  const sortedExpenses = useMemo(() => {
+    return [...filteredExpenses].sort((a, b) => {
+      let comparison = 0;
+      if (sortField === "date") {
+        comparison = a.date.localeCompare(b.date);
+      } else if (sortField === "amount") {
+        comparison = a.amount - b.amount;
+      } else if (sortField === "description") {
+        comparison = a.description.localeCompare(b.description);
+      } else if (sortField === "category") {
+        const catA = a.expense_categories?.name || "";
+        const catB = b.expense_categories?.name || "";
+        comparison = catA.localeCompare(catB);
+      }
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [filteredExpenses, sortField, sortDirection]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tableSearch, tableCategoryFilter, tableInvoiceFilter, tableTypeFilter, sortField, sortDirection, pageSize]);
+
+  const totalPages = Math.ceil(sortedExpenses.length / pageSize) || 1;
+  const paginatedExpenses = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return sortedExpenses.slice(start, start + pageSize);
+  }, [sortedExpenses, currentPage, pageSize]);
+
+  const handleSort = (field: "date" | "amount" | "description" | "category") => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDirection("desc");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#121212] text-[#E0E0E0]">
@@ -507,7 +590,7 @@ export default function GastosPage() {
           </div>
         </section>
 
-        {/* 3. Sección Dedicada: Distribución de Gastos por Categoría (Gráfica de Barras) */}
+        {/* 3. Sección Dedicada: Distribución de Gastos por Categoría (Gráfica de Barras Horizontales) */}
         <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-6">
           <div className="flex items-center justify-between border-b border-white/5 pb-4">
             <h2 className="text-base font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
@@ -644,18 +727,98 @@ export default function GastosPage() {
           </div>
         </section>
 
-        {/* 5. Historial de Gastos (Tabla Full Width) */}
+        {/* 5. Historial de Gastos (Tabla Full Width con Filtros, Ordenamiento y Paginación) */}
         <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 overflow-hidden space-y-4">
-          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
             <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-red-500"></span>
               Historial de Gastos
             </h2>
             <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
-              {expenses.length} registro{expenses.length !== 1 ? "s" : ""} este mes
+              Mostrando {paginatedExpenses.length} de {filteredExpenses.length} egresos ({expenses.length} totales)
             </span>
           </div>
 
+          {/* BARRA DE FILTROS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-[#1A1A1A] p-4 rounded-xl border border-white/5">
+            {/* Buscador por texto */}
+            <div>
+              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+                Buscar
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#E0E0E0]/40" />
+                <input
+                  type="text"
+                  value={tableSearch}
+                  onChange={(e) => setTableSearch(e.target.value)}
+                  placeholder="Descripción o categoría..."
+                  className="w-full rounded-xl border border-white/5 bg-[#181818] pl-8 pr-3 py-1.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
+                />
+                {tableSearch && (
+                  <button
+                    onClick={() => setTableSearch("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#E0E0E0]/40 hover:text-white"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Filtro por Categoría */}
+            <div>
+              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+                Categoría
+              </label>
+              <select
+                value={tableCategoryFilter}
+                onChange={(e) => setTableCategoryFilter(e.target.value)}
+                className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-1.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+              >
+                <option value="">Todas las Categorías</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filtro por Factura */}
+            <div>
+              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+                Factura
+              </label>
+              <select
+                value={tableInvoiceFilter}
+                onChange={(e) => setTableInvoiceFilter(e.target.value as any)}
+                className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-1.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+              >
+                <option value="all">Todas</option>
+                <option value="invoiced">Solo Facturados (FAC)</option>
+                <option value="no_invoice">Sin Factura</option>
+              </select>
+            </div>
+
+            {/* Filtro por Tipo de Gasto */}
+            <div>
+              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+                Tipo de Gasto
+              </label>
+              <select
+                value={tableTypeFilter}
+                onChange={(e) => setTableTypeFilter(e.target.value as any)}
+                className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-1.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+              >
+                <option value="all">Todos los Tipos</option>
+                <option value="fijo">Solo Fijos</option>
+                <option value="variable">Solo Variables</option>
+              </select>
+            </div>
+          </div>
+
+          {/* TABLA CON ENCABEZADOS DE ORDENAMIENTO */}
           <div className="overflow-x-auto">
             {isLoading ? (
               <p className="py-8 text-center text-[#E0E0E0]/40 text-xs font-bold italic">
@@ -665,15 +828,79 @@ export default function GastosPage() {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-white/5 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-                    <th className="py-3 px-3">Fecha</th>
-                    <th className="py-3 px-3">Categoría</th>
-                    <th className="py-3 px-3">Descripción</th>
+                    <th
+                      className="py-3 px-3 cursor-pointer select-none hover:text-white transition-colors"
+                      onClick={() => handleSort("date")}
+                    >
+                      <div className="flex items-center gap-1">
+                        Fecha
+                        {sortField === "date" ? (
+                          sortDirection === "asc" ? (
+                            <ArrowUp className="h-3 w-3 text-primary" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3 text-primary" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="h-3 w-3 opacity-30" />
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="py-3 px-3 cursor-pointer select-none hover:text-white transition-colors"
+                      onClick={() => handleSort("category")}
+                    >
+                      <div className="flex items-center gap-1">
+                        Categoría
+                        {sortField === "category" ? (
+                          sortDirection === "asc" ? (
+                            <ArrowUp className="h-3 w-3 text-primary" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3 text-primary" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="h-3 w-3 opacity-30" />
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="py-3 px-3 cursor-pointer select-none hover:text-white transition-colors"
+                      onClick={() => handleSort("description")}
+                    >
+                      <div className="flex items-center gap-1">
+                        Descripción
+                        {sortField === "description" ? (
+                          sortDirection === "asc" ? (
+                            <ArrowUp className="h-3 w-3 text-primary" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3 text-primary" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="h-3 w-3 opacity-30" />
+                        )}
+                      </div>
+                    </th>
                     <th className="py-3 px-3 text-center">Factura</th>
-                    <th className="py-3 px-3 text-right">Monto</th>
+                    <th
+                      className="py-3 px-3 text-right cursor-pointer select-none hover:text-white transition-colors"
+                      onClick={() => handleSort("amount")}
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        Monto
+                        {sortField === "amount" ? (
+                          sortDirection === "asc" ? (
+                            <ArrowUp className="h-3 w-3 text-primary" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3 text-primary" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="h-3 w-3 opacity-30" />
+                        )}
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {expenses.map((exp) => (
+                  {paginatedExpenses.map((exp) => (
                     <tr key={exp.id} className="hover:bg-white/5 transition-colors">
                       <td className="py-3.5 px-3 text-[#E0E0E0]/80 font-medium">
                         {new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City" }).format(
@@ -707,10 +934,10 @@ export default function GastosPage() {
                       </td>
                     </tr>
                   ))}
-                  {expenses.length === 0 && (
+                  {filteredExpenses.length === 0 && (
                     <tr>
                       <td colSpan={5} className="py-8 text-center text-[#E0E0E0]/40 italic">
-                        No hay registros de gastos encontrados para este período.
+                        No hay registros de gastos encontrados para los filtros seleccionados.
                       </td>
                     </tr>
                   )}
@@ -718,6 +945,51 @@ export default function GastosPage() {
               </table>
             )}
           </div>
+
+          {/* CONTROLES DE PAGINACIÓN */}
+          {filteredExpenses.length > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-white/5 text-xs text-[#E0E0E0]/60 font-medium">
+              <div className="flex items-center gap-2">
+                <span>Filas por página:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="bg-[#181818] border border-white/5 rounded-lg px-2 py-1 text-xs text-[#E0E0E0] outline-none"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <span>
+                  Página <strong className="text-[#E0E0E0]">{currentPage}</strong> de{" "}
+                  <strong className="text-[#E0E0E0]">{totalPages}</strong>
+                </span>
+
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 transition-all"
+                    title="Página anterior"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 transition-all"
+                    title="Página siguiente"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       </main>
 
