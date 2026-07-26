@@ -1,10 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { format } from "date-fns-tz";
-import { differenceInHours, differenceInMinutes } from "date-fns";
 import { Attendance, User } from "@/types";
+import { differenceInMinutes } from "date-fns";
+import { format } from "date-fns-tz";
+import {
+  ArrowLeft,
+  FileText,
+  LogIn,
+  LogOut,
+  ShieldAlert,
+  UserCheck,
+  UserX
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const TZ = "America/Mexico_City";
 
@@ -41,13 +50,10 @@ export default function AsistenciaPage() {
   const handleAction = async (action: "CHECK_IN" | "CHECK_OUT", targetUserId?: string) => {
     try {
       setIsLoading(true);
-      
+
       let timestamp = undefined;
-      // If admin is modifying someone else or themselves, use custom time
       if (isAdmin) {
-        // Construct ISO string from customTime
         const today = format(new Date(), "yyyy-MM-dd", { timeZone: TZ });
-        // basic construction of local timestamp assuming today's date
         timestamp = new Date(`${today}T${customTime}:00-06:00`).toISOString();
       }
 
@@ -79,24 +85,46 @@ export default function AsistenciaPage() {
 
   const renderAdminView = () => {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4 bg-[#242424] p-4 rounded-lg border border-[#333]">
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-white mb-1">Modo Administrador</h3>
-            <p className="text-sm text-gray-400">Puedes registrar la entrada o salida de tu equipo usando una hora personalizada.</p>
-          </div>
+      <div className="space-y-8">
+        {/* Admin Bar */}
+        <div className="rounded-2xl bg-[#242424] p-6 border border-white/5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">Hora a registrar</label>
-            <input 
-              type="time" 
+            <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-primary" /> Modo Administrador
+            </h3>
+            <p className="text-xs text-[#E0E0E0]/60 mt-1 font-medium">
+              Puedes registrar entradas o salidas manuales usando una hora personalizada.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="text-xs font-bold text-[#E0E0E0]/60 uppercase tracking-wider">
+              Hora a registrar:
+            </label>
+            <input
+              type="time"
               value={customTime}
               onChange={(e) => setCustomTime(e.target.value)}
-              className="bg-[#121212] border border-[#333] text-white px-3 py-2 rounded-md focus:outline-none focus:border-blue-500"
+              className="bg-[#181818] border border-white/10 text-[#E0E0E0] px-3.5 py-2 rounded-xl text-xs outline-none focus:border-primary font-mono"
             />
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Section Header */}
+        <div className="flex items-center justify-between border-b border-white/5 pb-3">
+          <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-secondary"></span>
+            Personal & Estado de Turnos Hoy
+          </h2>
+          <Link
+            href="/asistencia/history"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-white uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md active:scale-95"
+          >
+            <FileText className="h-4 w-4" /> Historial Completo
+          </Link>
+        </div>
+
+        {/* User Cards Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {users.map(user => {
             const active = getActiveAttendance(user.id);
             const finished = getFinishedAttendances(user.id);
@@ -108,53 +136,61 @@ export default function AsistenciaPage() {
             }, 0);
 
             return (
-              <div key={user.id} className="bg-[#181818] p-5 rounded-xl border border-[#333] flex flex-col justify-between">
+              <div
+                key={user.id}
+                className={`rounded-2xl p-6 border transition-all duration-300 flex flex-col justify-between ${active
+                    ? "bg-[#242424] border-emerald-500/30 shadow-md shadow-emerald-500/5"
+                    : "bg-[#242424] border-white/5 hover:border-white/10"
+                  }`}
+              >
                 <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold text-lg text-white">{user.name}</h4>
-                    <span className="text-xs bg-[#242424] text-gray-400 px-2 py-1 rounded-full">{user.role}</span>
+                  <div className="flex justify-between items-start mb-3">
+                    <h4 className="font-black text-lg text-[#E0E0E0] uppercase tracking-tight">{user.name}</h4>
+                    <span className="rounded-full bg-white/5 border border-white/10 px-2.5 py-0.5 text-[10px] font-black text-[#E0E0E0]/60 uppercase tracking-widest">
+                      {user.role}
+                    </span>
                   </div>
-                  
+
                   {active ? (
                     <div className="mb-4">
-                      <span className="inline-flex items-center gap-1.5 py-1 px-2 rounded-md text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                      <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         En Turno
                       </span>
-                      <p className="text-sm text-gray-400 mt-2">
-                        Entrada: {format(new Date(active.check_in), "HH:mm", { timeZone: TZ })}
+                      <p className="text-xs text-[#E0E0E0]/60 font-mono mt-2.5">
+                        Entrada: <strong className="text-emerald-400">{format(new Date(active.check_in), "HH:mm", { timeZone: TZ })}</strong>
                       </p>
                     </div>
                   ) : (
                     <div className="mb-4">
-                      <span className="inline-flex items-center gap-1.5 py-1 px-2 rounded-md text-xs font-medium bg-gray-500/10 text-gray-400 border border-gray-500/20">
+                      <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-black bg-white/5 text-[#E0E0E0]/50 border border-white/10 uppercase tracking-widest">
                         Fuera de Turno
                       </span>
                     </div>
                   )}
 
                   {finished.length > 0 && (
-                    <div className="mb-4 text-xs text-gray-500 border-t border-[#333] pt-2">
-                      <p>Turnos completados hoy: {finished.length}</p>
-                      <p>Horas totales: {totalHoursFinished.toFixed(2)} hrs</p>
+                    <div className="mb-4 text-xs text-[#E0E0E0]/50 border-t border-white/5 pt-3 space-y-1 font-medium">
+                      <p>Turnos completados hoy: <strong className="text-[#E0E0E0] font-bold">{finished.length}</strong></p>
+                      <p>Horas totales acumuladas: <strong className="text-emerald-400 font-bold">{totalHoursFinished.toFixed(2)} hrs</strong></p>
                     </div>
                   )}
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-[#333] flex gap-2">
+                <div className="mt-4 pt-4 border-t border-white/5 flex gap-3">
                   {!active ? (
-                    <button 
+                    <button
                       onClick={() => handleAction("CHECK_IN", user.id)}
-                      className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
+                      className="flex-1 inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider py-2.5 px-4 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                     >
-                      Entrada
+                      <LogIn className="h-4 w-4" /> Registrar Entrada
                     </button>
                   ) : (
-                    <button 
+                    <button
                       onClick={() => handleAction("CHECK_OUT", user.id)}
-                      className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
+                      className="flex-1 inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider py-2.5 px-4 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                     >
-                      Salida
+                      <LogOut className="h-4 w-4" /> Registrar Salida
                     </button>
                   )}
                 </div>
@@ -167,43 +203,44 @@ export default function AsistenciaPage() {
   };
 
   const renderEmployeeView = () => {
-    // Current logged in user is the only one in attendances (if any)
     const active = attendances.find(a => a.status === "ACTIVE");
-    
+
     return (
-      <div className="max-w-md mx-auto bg-[#181818] p-8 rounded-2xl border border-[#333] shadow-xl text-center">
-        <h2 className="text-2xl font-bold text-white mb-2">Control de Asistencia</h2>
-        <p className="text-gray-400 mb-8">Registra tu hora de entrada y salida del turno actual.</p>
-        
+      <div className="max-w-md mx-auto bg-[#242424] p-8 rounded-2xl border border-white/5 shadow-sm text-center">
+        <h2 className="text-xl font-black text-[#E0E0E0] uppercase tracking-tight mb-2">Control de Asistencia</h2>
+        <p className="text-xs text-[#E0E0E0]/60 mb-8 font-medium">Registra tu hora de entrada y salida del turno actual.</p>
+
         {active ? (
           <div>
-            <div className="w-32 h-32 mx-auto rounded-full bg-green-500/10 border-4 border-green-500 flex items-center justify-center mb-6">
-              <span className="text-green-400 font-bold text-xl">Activo</span>
+            <div className="w-36 h-36 mx-auto rounded-full bg-emerald-500/10 border-4 border-emerald-500 flex flex-col items-center justify-center mb-6 shadow-lg shadow-emerald-500/10">
+              <UserCheck className="h-8 w-8 text-emerald-400 mb-1" />
+              <span className="text-emerald-400 font-black text-sm uppercase tracking-wider">Turno Activo</span>
             </div>
-            <p className="text-lg text-white mb-1">Hora de entrada</p>
-            <p className="text-3xl font-mono text-green-400 mb-8">
+            <p className="text-xs text-[#E0E0E0]/60 font-bold uppercase tracking-wider mb-1">Hora de entrada</p>
+            <p className="text-3xl font-mono font-black text-emerald-400 mb-8">
               {format(new Date(active.check_in), "HH:mm", { timeZone: TZ })}
             </p>
-            <button 
+            <button
               onClick={() => handleAction("CHECK_OUT")}
               disabled={isLoading}
-              className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-lg shadow-lg shadow-red-500/20 transition-all"
+              className="w-full inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-black py-4 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-red-500/20 transition-all active:scale-95 cursor-pointer"
             >
-              {isLoading ? "Registrando..." : "Registrar Salida"}
+              <LogOut className="h-4 w-4" /> {isLoading ? "Registrando..." : "Registrar Salida"}
             </button>
           </div>
         ) : (
           <div>
-            <div className="w-32 h-32 mx-auto rounded-full bg-gray-500/10 border-4 border-gray-500 flex items-center justify-center mb-6">
-              <span className="text-gray-400 font-bold text-lg">Inactivo</span>
+            <div className="w-36 h-36 mx-auto rounded-full bg-white/5 border-4 border-white/10 flex flex-col items-center justify-center mb-6">
+              <UserX className="h-8 w-8 text-[#E0E0E0]/40 mb-1" />
+              <span className="text-[#E0E0E0]/50 font-black text-sm uppercase tracking-wider">Fuera de Turno</span>
             </div>
-            <p className="text-gray-500 mb-8">No tienes un turno activo en este momento.</p>
-            <button 
+            <p className="text-xs text-[#E0E0E0]/50 font-medium mb-8">No tienes un turno activo en este momento.</p>
+            <button
               onClick={() => handleAction("CHECK_IN")}
               disabled={isLoading}
-              className="w-full bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-lg shadow-lg shadow-green-500/20 transition-all"
+              className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-black py-4 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer"
             >
-              {isLoading ? "Registrando..." : "Registrar Entrada"}
+              <LogIn className="h-4 w-4" /> {isLoading ? "Registrando..." : "Registrar Entrada"}
             </button>
           </div>
         )}
@@ -212,31 +249,50 @@ export default function AsistenciaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] pb-12">
-      {/* Header */}
-      <header className="bg-[#242424] shadow-sm border-b border-[#333]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#121212] pb-16">
+      {/* Top Header */}
+      <header className="bg-[#242424] border-b border-white/5 shadow-sm mb-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <Link
               href="/"
-              className="text-sm text-blue-500 hover:text-blue-400 mb-1 inline-block"
+              className="inline-flex items-center gap-2 text-xs font-black text-[#E0E0E0]/60 hover:text-white uppercase tracking-widest transition-colors mb-2"
             >
-              ← Volver al Dashboard
+              <ArrowLeft className="h-3.5 w-3.5" /> Volver al Dashboard
             </Link>
-            <h1 className="text-2xl font-bold text-[#E0E0E0]">
-              Asistencia
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-3">
+                <span className="h-3 w-3 rounded-full bg-primary animate-pulse"></span>
+                Control de Asistencia
+              </h1>
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20">
+                Turnos
+              </span>
+            </div>
           </div>
+
+          {isAdmin && (
+            <div className="flex items-center gap-3">
+              <Link
+                href="/asistencia/history"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-black text-white uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md active:scale-95"
+              >
+                <FileText className="h-4 w-4" /> Ver Historial Completo (Admin)
+              </Link>
+            </div>
+          )}
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {isLoading && !users.length && !attendances.length ? (
           <div className="flex justify-center py-20">
-            <span className="text-gray-400">Cargando datos...</span>
+            <span className="text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest">
+              Cargando datos de asistencia...
+            </span>
           </div>
         ) : error ? (
-          <div className="bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-lg">
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold p-4 rounded-xl text-center">
             {error}
           </div>
         ) : isAdmin ? (

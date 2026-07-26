@@ -337,6 +337,31 @@ export default async function Home() {
                 </Link>
               )}
 
+              {/* Historial de Asistencia - Admin */}
+              {isAdmin && (
+                <Link href="/asistencia/history" className="group cursor-pointer focus:outline-none">
+                  <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                    <div>
+                      <div className="mb-6 flex items-center justify-between">
+                        <div className="rounded-xl bg-purple-500/10 p-3 text-purple-500">
+                          <ReceiptText className="h-7 w-7" />
+                        </div>
+                        <span className="rounded-full bg-purple-500/10 px-4 py-1 text-xs font-black text-purple-500 uppercase tracking-widest">
+                          Historial
+                        </span>
+                      </div>
+                      <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-purple-500 transition-colors flex items-center justify-between">
+                        <span>Historial de Asistencia</span>
+                        <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </h3>
+                      <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                        Filtros de horas trabajadas y registros de turno por empleado.
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              )}
+
               {/* Control de Tareas - Admin */}
               {isAdmin && (
                 <Link href="/admin/tareas" className="group cursor-pointer focus:outline-none">
