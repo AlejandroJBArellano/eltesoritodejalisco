@@ -3,6 +3,23 @@ import { createClient } from "@/lib/supabase/server";
 import { MEX_TIMEZONE } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import {
+  ClipboardList,
+  DollarSign,
+  Users,
+  HandCoins,
+  ChefHat,
+  Receipt,
+  BookOpen,
+  UtensilsCrossed,
+  CheckSquare,
+  ClipboardCheck,
+  Clock,
+  UserCog,
+  BarChart3,
+  ReceiptText,
+  ArrowUpRight,
+} from "lucide-react";
 
 export default async function Home() {
   const profile = await getProfile();
@@ -82,292 +99,374 @@ export default async function Home() {
 
         {/* Quick Stats - Only for Admins */}
         {isAdmin && (
-          <div className="mb-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5">
-              <div className="flex items-center">
-                <div className="rounded-xl bg-primary/10 p-3 text-primary text-2xl">
-                  📋
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+          <div className="mb-12">
+            <h2 className="mb-4 text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+              Resumen del Día
+            </h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Órdenes Activas */}
+              <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                     Órdenes Activas
-                  </p>
-                  <p className="text-3xl font-black text-[#E0E0E0] tracking-tight">
-                    {activeOrdersCount}
-                  </p>
+                  </span>
+                  <div className="rounded-xl bg-primary/10 p-3 text-primary">
+                    <ClipboardList className="h-5 w-5" />
+                  </div>
                 </div>
+                <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
+                  {activeOrdersCount}
+                </p>
               </div>
-            </div>
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5">
-              <div className="flex items-center">
-                <div className="rounded-xl bg-secondary/10 p-3 text-secondary text-2xl">
-                  💰
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+
+              {/* Venta Bruta */}
+              <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                     Venta Bruta
-                  </p>
-                  <p className="text-3xl font-black text-[#E0E0E0] tracking-tight">
-                    {new Intl.NumberFormat("es-MX", {
-                      style: "currency",
-                      currency: "MXN",
-                    }).format(salesToday)}
-                  </p>
+                  </span>
+                  <div className="rounded-xl bg-secondary/10 p-3 text-secondary">
+                    <DollarSign className="h-5 w-5" />
+                  </div>
                 </div>
+                <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
+                  {new Intl.NumberFormat("es-MX", {
+                    style: "currency",
+                    currency: "MXN",
+                  }).format(salesToday)}
+                </p>
               </div>
-            </div>
 
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5">
-              <div className="flex items-center">
-                <div className="rounded-xl bg-success/10 p-3 text-success text-2xl">
-                  👥
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              {/* Clientes */}
+              <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                     Clientes
-                  </p>
-                  <p className="text-3xl font-black text-[#E0E0E0] tracking-tight">
-                    {customersCount}
-                  </p>
+                  </span>
+                  <div className="rounded-xl bg-success/10 p-3 text-success">
+                    <Users className="h-5 w-5" />
+                  </div>
                 </div>
+                <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
+                  {customersCount}
+                </p>
               </div>
-            </div>
 
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5">
-              <div className="flex items-center">
-                <div className="rounded-xl bg-blue-500/10 p-3 text-blue-500 text-2xl">
-                  💵
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              {/* Propinas Hoy */}
+              <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
                     Propinas Hoy
-                  </p>
-                  <p className="text-3xl font-black text-[#E0E0E0] tracking-tight">
-                    {new Intl.NumberFormat("es-MX", {
-                      style: "currency",
-                      currency: "MXN",
-                    }).format(tipsToday)}
-                  </p>
+                  </span>
+                  <div className="rounded-xl bg-blue-500/10 p-3 text-blue-500">
+                    <HandCoins className="h-5 w-5" />
+                  </div>
                 </div>
+                <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
+                  {new Intl.NumberFormat("es-MX", {
+                    style: "currency",
+                    currency: "MXN",
+                  }).format(tipsToday)}
+                </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Main Modules */}
-        <div className="mb-8">
-          <h2 className="mb-8 text-2xl font-black text-[#E0E0E0] tracking-tight uppercase">
-            Módulos Disponibles
-          </h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Kitchen System - Everyone can see but Chef is redirected */}
-            <Link href="/kitchen">
-              <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="text-5xl">👨‍🍳</span>
-                  <span className="rounded-full bg-primary/10 px-4 py-1 text-xs font-black text-primary uppercase tracking-widest">
-                    Real-time
-                  </span>
-                </div>
-                <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
-                  Sistema de Cocina
-                </h3>
-                <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                  KDS con temporizador y smart batching.
-                </p>
-              </div>
-            </Link>
-
-            {/* POS - Admin and Waiter */}
-            {(isAdmin || isWaiter) && (
-              <Link href="/pos">
-                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className="mb-6 flex items-center justify-between">
-                    <span className="text-5xl">🧾</span>
-                    <span className="rounded-full bg-secondary/10 px-4 py-1 text-xs font-black text-secondary uppercase tracking-widest">
-                      Activo
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
-                    Punto de Venta
-                  </h3>
-                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                    Crear órdenes y procesar pagos.
-                  </p>
-                </div>
-              </Link>
-            )}
-
-            {/* History - Admin Only */}
-            {isAdmin && (
-              <Link href="/history">
-                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className="mb-6 flex items-center justify-between">
-                    <span className="text-5xl">📖</span>
-                    <span className="rounded-full bg-blue-500/10 px-4 py-1 text-xs font-black text-blue-500 uppercase tracking-widest">
-                      Registro
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
-                    Historial
-                  </h3>
-                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                    Historial de órdenes y cobros.
-                  </p>
-                </div>
-              </Link>
-            )}
-
-            {/* Menu - Admin */}
-            {isAdmin && (
-              <Link href="/menu">
-                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className="mb-6">
-                    <span className="text-5xl">🍽️</span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
-                    Gestión de Menú
-                  </h3>
-                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                    Productos y recetas técnicas.
-                  </p>
-                </div>
-              </Link>
-            )}
-
-            {/* Customers - Admin and Waiter */}
-            {(isAdmin || isWaiter) && (
-              <Link href="/customers">
-                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className="mb-6 flex items-center justify-between">
-                    <span className="text-5xl">👥</span>
-                    <span className="rounded-full bg-success/10 px-4 py-1 text-xs font-black text-success uppercase tracking-widest">
-                      CRM
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
-                    Clientes
-                  </h3>
-                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                    Lealtad y fuentes de visita.
-                  </p>
-                </div>
-              </Link>
-            )}
-
-            {/* Tareas - Admin and Waiter */}
-            {(isAdmin || isWaiter) && (
-              <Link href="/tareas">
-                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className="mb-6 flex items-center justify-between">
-                    <span className="text-5xl">✅</span>
-                    <span className="rounded-full bg-primary/10 px-4 py-1 text-xs font-black text-primary uppercase tracking-widest">
-                      Checklist
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
-                    Tareas Diarias
-                  </h3>
-                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                    Checklist de tareas primordiales y operación diaria.
-                  </p>
-                </div>
-              </Link>
-            )}
-
-            {/* Admin Tareas - Admin Only */}
-            {isAdmin && (
-              <Link href="/admin/tareas">
-                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className="mb-6 flex items-center justify-between">
-                    <span className="text-5xl">📊</span>
-                    <span className="rounded-full bg-blue-500/10 px-4 py-1 text-xs font-black text-blue-500 uppercase tracking-widest">
-                      Control
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
-                    Control de Tareas
-                  </h3>
-                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                    Aprobación de tareas críticas y monitoreo de tiempos netos.
-                  </p>
-                </div>
-              </Link>
-            )}
-
-            {/* Asistencia - Todos */}
-            <Link href="/asistencia">
-              <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="text-5xl">⏰</span>
-                  <span className="rounded-full bg-purple-500/10 px-4 py-1 text-xs font-black text-purple-500 uppercase tracking-widest">
-                    Turnos
-                  </span>
-                </div>
-                <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
-                  Asistencia
-                </h3>
-                <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                  Registro de entradas y salidas.
-                </p>
-              </div>
-            </Link>
-
-            {/* Users - Admin Only */}
-            {isAdmin && (
-              <Link href="/admin/users">
-                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className="mb-6">
-                    <span className="text-5xl">🔐</span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
-                    Usuarios
-                  </h3>
-                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                    Gestión de personal y roles.
-                  </p>
-                </div>
-              </Link>
-            )}
-
-            {/* Reports - Admin */}
-            {isAdmin && (
-              <Link href="/reports">
-                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className="mb-6">
-                    <span className="text-5xl">📊</span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
-                    Reportes
-                  </h3>
-                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                    Ventas y métricas de negocio.
-                  </p>
-                </div>
-              </Link>
-            )}
-
-            {/* Gastos - Admin */}
-            {isAdmin && (
-              <Link href="/gastos">
-                <div className="group cursor-pointer rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className="mb-6 flex items-center justify-between">
-                    <span className="text-5xl">💸</span>
-                    <span className="rounded-full bg-red-500/10 px-4 py-1 text-xs font-black text-red-500 uppercase tracking-widest">
-                      NUEVO
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase">
-                    Gastos
-                  </h3>
-                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                    Registro y control de gastos (insumos, sueldos, etc.)
-                  </p>
-                </div>
-              </Link>
-            )}
+        {/* SECCIÓN 1: OPERACIÓN DIARIA */}
+        <section className="mb-10">
+          <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-3">
+            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-primary"></span>
+              Operación Diaria
+            </h2>
           </div>
-        </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {/* POS */}
+            {(isAdmin || isWaiter) && (
+              <Link href="/pos" className="group cursor-pointer focus:outline-none">
+                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                  <div>
+                    <div className="mb-6 flex items-center justify-between">
+                      <div className="rounded-xl bg-secondary/10 p-3 text-secondary">
+                        <Receipt className="h-7 w-7" />
+                      </div>
+                      <span className="rounded-full bg-secondary/10 px-4 py-1 text-xs font-black text-secondary uppercase tracking-widest">
+                        Activo
+                      </span>
+                    </div>
+                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-secondary transition-colors flex items-center justify-between">
+                      <span>Punto de Venta</span>
+                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </h3>
+                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                      Crear órdenes y procesar pagos.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {/* Cocina */}
+            <Link href="/kitchen" className="group cursor-pointer focus:outline-none">
+              <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                <div>
+                  <div className="mb-6 flex items-center justify-between">
+                    <div className="rounded-xl bg-primary/10 p-3 text-primary">
+                      <ChefHat className="h-7 w-7" />
+                    </div>
+                    <span className="rounded-full bg-primary/10 px-4 py-1 text-xs font-black text-primary uppercase tracking-widest">
+                      Real-time
+                    </span>
+                  </div>
+                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Sistema de Cocina</span>
+                    <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </h3>
+                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                    KDS con temporizador y smart batching.
+                  </p>
+                </div>
+              </div>
+            </Link>
+
+            {/* Tareas Diarias */}
+            {(isAdmin || isWaiter) && (
+              <Link href="/tareas" className="group cursor-pointer focus:outline-none">
+                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                  <div>
+                    <div className="mb-6 flex items-center justify-between">
+                      <div className="rounded-xl bg-primary/10 p-3 text-primary">
+                        <CheckSquare className="h-7 w-7" />
+                      </div>
+                      <span className="rounded-full bg-primary/10 px-4 py-1 text-xs font-black text-primary uppercase tracking-widest">
+                        Checklist
+                      </span>
+                    </div>
+                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-primary transition-colors flex items-center justify-between">
+                      <span>Tareas Diarias</span>
+                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </h3>
+                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                      Checklist de tareas primordiales y operación diaria.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {/* Asistencia */}
+            <Link href="/asistencia" className="group cursor-pointer focus:outline-none">
+              <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                <div>
+                  <div className="mb-6 flex items-center justify-between">
+                    <div className="rounded-xl bg-purple-500/10 p-3 text-purple-500">
+                      <Clock className="h-7 w-7" />
+                    </div>
+                    <span className="rounded-full bg-purple-500/10 px-4 py-1 text-xs font-black text-purple-500 uppercase tracking-widest">
+                      Turnos
+                    </span>
+                  </div>
+                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-purple-500 transition-colors flex items-center justify-between">
+                    <span>Asistencia</span>
+                    <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </h3>
+                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                    Registro de entradas y salidas.
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </section>
+
+        {/* SECCIÓN 2: ADMINISTRACIÓN Y CLIENTES */}
+        {(isAdmin || isWaiter) && (
+          <section className="mb-10">
+            <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-3">
+              <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-success"></span>
+                Gestión y Clientes
+              </h2>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Clientes */}
+              <Link href="/customers" className="group cursor-pointer focus:outline-none">
+                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                  <div>
+                    <div className="mb-6 flex items-center justify-between">
+                      <div className="rounded-xl bg-success/10 p-3 text-success">
+                        <Users className="h-7 w-7" />
+                      </div>
+                      <span className="rounded-full bg-success/10 px-4 py-1 text-xs font-black text-success uppercase tracking-widest">
+                        CRM
+                      </span>
+                    </div>
+                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-success transition-colors flex items-center justify-between">
+                      <span>Clientes</span>
+                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </h3>
+                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                      Lealtad y fuentes de visita.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Menú - Admin */}
+              {isAdmin && (
+                <Link href="/menu" className="group cursor-pointer focus:outline-none">
+                  <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                    <div>
+                      <div className="mb-6 flex items-center justify-between">
+                        <div className="rounded-xl bg-primary/10 p-3 text-primary">
+                          <UtensilsCrossed className="h-7 w-7" />
+                        </div>
+                      </div>
+                      <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-primary transition-colors flex items-center justify-between">
+                        <span>Gestión de Menú</span>
+                        <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </h3>
+                      <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                        Productos y recetas técnicas.
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              )}
+
+              {/* Control de Tareas - Admin */}
+              {isAdmin && (
+                <Link href="/admin/tareas" className="group cursor-pointer focus:outline-none">
+                  <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                    <div>
+                      <div className="mb-6 flex items-center justify-between">
+                        <div className="rounded-xl bg-blue-500/10 p-3 text-blue-500">
+                          <ClipboardCheck className="h-7 w-7" />
+                        </div>
+                        <span className="rounded-full bg-blue-500/10 px-4 py-1 text-xs font-black text-blue-500 uppercase tracking-widest">
+                          Control
+                        </span>
+                      </div>
+                      <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-blue-500 transition-colors flex items-center justify-between">
+                        <span>Control de Tareas</span>
+                        <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </h3>
+                      <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                        Aprobación de tareas críticas y monitoreo de tiempos netos.
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              )}
+
+              {/* Usuarios - Admin */}
+              {isAdmin && (
+                <Link href="/admin/users" className="group cursor-pointer focus:outline-none">
+                  <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                    <div>
+                      <div className="mb-6 flex items-center justify-between">
+                        <div className="rounded-xl bg-primary/10 p-3 text-primary">
+                          <UserCog className="h-7 w-7" />
+                        </div>
+                      </div>
+                      <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-primary transition-colors flex items-center justify-between">
+                        <span>Usuarios</span>
+                        <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </h3>
+                      <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                        Gestión de personal y roles.
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* SECCIÓN 3: FINANZAS Y REPORTES - Admin Only */}
+        {isAdmin && (
+          <section className="mb-8">
+            <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-3">
+              <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+                Finanzas y Reportes
+              </h2>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Historial */}
+              <Link href="/history" className="group cursor-pointer focus:outline-none">
+                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                  <div>
+                    <div className="mb-6 flex items-center justify-between">
+                      <div className="rounded-xl bg-blue-500/10 p-3 text-blue-500">
+                        <BookOpen className="h-7 w-7" />
+                      </div>
+                      <span className="rounded-full bg-blue-500/10 px-4 py-1 text-xs font-black text-blue-500 uppercase tracking-widest">
+                        Registro
+                      </span>
+                    </div>
+                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-blue-500 transition-colors flex items-center justify-between">
+                      <span>Historial</span>
+                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </h3>
+                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                      Historial de órdenes y cobros.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Gastos */}
+              <Link href="/gastos" className="group cursor-pointer focus:outline-none">
+                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                  <div>
+                    <div className="mb-6 flex items-center justify-between">
+                      <div className="rounded-xl bg-red-500/10 p-3 text-red-500">
+                        <ReceiptText className="h-7 w-7" />
+                      </div>
+                      <span className="rounded-full bg-red-500/10 px-4 py-1 text-xs font-black text-red-500 uppercase tracking-widest">
+                        NUEVO
+                      </span>
+                    </div>
+                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-red-500 transition-colors flex items-center justify-between">
+                      <span>Gastos</span>
+                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </h3>
+                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                      Registro y control de gastos (insumos, sueldos, etc.)
+                    </p>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Reportes */}
+              <Link href="/reports" className="group cursor-pointer focus:outline-none">
+                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+                  <div>
+                    <div className="mb-6 flex items-center justify-between">
+                      <div className="rounded-xl bg-[#242424] p-3 text-[#E0E0E0]">
+                        <BarChart3 className="h-7 w-7" />
+                      </div>
+                    </div>
+                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-primary transition-colors flex items-center justify-between">
+                      <span>Reportes</span>
+                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </h3>
+                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+                      Ventas y métricas de negocio.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </section>
+        )}
+
       </main>
     </div>
   );
