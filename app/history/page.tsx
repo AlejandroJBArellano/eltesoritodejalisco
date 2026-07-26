@@ -1,1390 +1,1713 @@
 "use client";
 
 import { OrderWithDetails, PaymentMethod } from "@/types";
-import { format, isSameMonth, parseISO, subMonths } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { format, isSameMonth, parseISO, subMonths } from "date-fns";
+import { es } from "date-fns/locale";
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Cell,
-    Legend,
-    Line,
-    LineChart,
-    Pie,
-    PieChart,
-    Tooltip as RechartsTooltip,
-    ResponsiveContainer,
-    XAxis, YAxis
-} from 'recharts';
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import { FacturacionModal } from "@/components/pos/FacturacionModal";
 import {
-    getOrderPaymentLabel,
-    getOrderPaymentMethods,
-    getOrderTipAmount,
+  getOrderPaymentLabel,
+  getOrderPaymentMethods,
+  getOrderTipAmount,
 } from "@/components/pos/paymentUtils";
 import { usePendingCut } from "@/hooks/usePendingCut";
 import { createClient } from "@/lib/supabase/client";
+import {
+  ArrowLeft,
+  Search,
+  Calendar,
+  UtensilsCrossed,
+  CreditCard,
+  BarChart3,
+  CheckCircle2,
+  Folder,
+  FileText,
+  ChevronDown,
+  ChevronRight,
+  ShieldAlert,
+  Clock,
+  DollarSign,
+  Wallet,
+  Receipt,
+  HandCoins,
+  Users,
+  TrendingUp,
+  Plus,
+  X,
+  AlertTriangle,
+  Printer,
+  PieChart as PieChartIcon,
+  ShoppingBag,
+  Home,
+  CheckSquare,
+} from "lucide-react";
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
+const COLORS = ["#FFB7CE", "#34D399", "#60A5FA", "#FBBF24", "#C084FC", "#F472B6", "#38BDF8"];
 
 type Order = OrderWithDetails;
 
 type ExpenseDetailItem = {
-    description: string;
-    amount: number;
-    category?: string;
-    has_invoice?: boolean;
-};
-
-type ExpenseRow = {
-    description: string;
-    amount: number;
-    has_invoice: boolean;
-    expense_categories?: { name?: string } | null;
+  description: string;
+  amount: number;
+  category?: string;
+  has_invoice?: boolean;
 };
 
 type DailyCut = {
-    id: string;
-    cut_date: string;
-    venta_neta: number;
-    iva_acumulado: number;
-    propinas_efectivo: number;
-    propinas_tarjeta: number;
-    caja_efectivo: number;
-    caja_tarjeta: number;
-    utilidad_real: number;
-    total_gastos: number;
-    utilidad_final: number;
-    total_orders: number;
-    notes: string | null;
-    expenses_detail: ExpenseDetailItem[] | null;
-    created_at: string;
+  id: string;
+  cut_date: string;
+  venta_neta: number;
+  iva_acumulado: number;
+  propinas_efectivo: number;
+  propinas_tarjeta: number;
+  caja_efectivo: number;
+  caja_tarjeta: number;
+  utilidad_real: number;
+  total_gastos: number;
+  utilidad_final: number;
+  total_orders: number;
+  notes: string | null;
+  expenses_detail: ExpenseDetailItem[] | null;
+  created_at: string;
 };
 
 export default function HistoryPage() {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isCheckingRole, setIsCheckingRole] = useState(true);
-    const [userRole, setUserRole] = useState<string | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCheckingRole, setIsCheckingRole] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    // Filters
-    const [searchQuery, setSearchQuery] = useState("");
-    const [dateFilter, setDateFilter] = useState(""); // YYYY-MM-DD
-    const [tableFilter, setTableFilter] = useState("");
-    const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
+  // Filters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateFilter, setDateFilter] = useState(""); // YYYY-MM-DD
+  const [tableFilter, setTableFilter] = useState("");
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
 
-    const [expandedRow, setExpandedRow] = useState<string | null>(null);
-    const [billingOrder, setBillingOrder] = useState<Order | null>(null);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [billingOrder, setBillingOrder] = useState<Order | null>(null);
 
-    // Corte Diario state
-    const [todayExpenses, setTodayExpenses] = useState(0);
-    const [isFinalizing, setIsFinalizing] = useState(false);
-    const [showFinalizeModal, setShowFinalizeModal] = useState(false);
-    const [finalizeSuccess, setFinalizeSuccess] = useState(false);
-    const [showCutsArchive, setShowCutsArchive] = useState(false);
-    const [dailyCuts, setDailyCuts] = useState<DailyCut[]>([]);
-    const [isLoadingCuts, setIsLoadingCuts] = useState(false);
-    const [manualCash, setManualCash] = useState<string>("");
-    const [manualCard, setManualCard] = useState<string>("");
-    const [manualTipsEfectivo, setManualTipsEfectivo] = useState<string>("");
-    const [manualTipsTarjeta, setManualTipsTarjeta] = useState<string>("");
-    const [selectedCutDetail, setSelectedCutDetail] = useState<DailyCut | null>(null);
-    const [isGeneratingPendingCut, setIsGeneratingPendingCut] = useState(false);
-    
-    // Propinas Distribution state
-    const [tipBreakdown, setTipBreakdown] = useState<any[]>([]);
-    const [tipTotalHours, setTipTotalHours] = useState<number>(0);
-    const [isCalculatingTips, setIsCalculatingTips] = useState(false);
+  // Corte Diario state
+  const [todayExpenses, setTodayExpenses] = useState(0);
+  const [isFinalizing, setIsFinalizing] = useState(false);
+  const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+  const [finalizeSuccess, setFinalizeSuccess] = useState(false);
+  const [showCutsArchive, setShowCutsArchive] = useState(false);
+  const [dailyCuts, setDailyCuts] = useState<DailyCut[]>([]);
+  const [isLoadingCuts, setIsLoadingCuts] = useState(false);
+  const [manualCash, setManualCash] = useState<string>("");
+  const [manualCard, setManualCard] = useState<string>("");
+  const [manualTipsEfectivo, setManualTipsEfectivo] = useState<string>("");
+  const [manualTipsTarjeta, setManualTipsTarjeta] = useState<string>("");
+  const [selectedCutDetail, setSelectedCutDetail] = useState<DailyCut | null>(null);
+  const [isGeneratingPendingCut, setIsGeneratingPendingCut] = useState(false);
 
-    const {
-        loading: pendingCutLoading,
-        hasPendingCut,
-        pendingDate,
-        pendingOrders,
-        refresh: refreshPendingCut,
-    } = usePendingCut();
+  // Propinas Distribution state
+  const [tipBreakdown, setTipBreakdown] = useState<any[]>([]);
+  const [tipTotalHours, setTipTotalHours] = useState<number>(0);
+  const [isCalculatingTips, setIsCalculatingTips] = useState(false);
 
-    const checkRole = async () => {
-        try {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single();
-                setUserRole(profile?.role || null);
-            }
-        } catch (error) {
-            console.error("Error checking role:", error);
-        } finally {
-            setIsCheckingRole(false);
-        }
-    };
+  const {
+    loading: pendingCutLoading,
+    hasPendingCut,
+    pendingDate,
+    pendingOrders,
+    refresh: refreshPendingCut,
+  } = usePendingCut();
 
-    const fetchOrders = async () => {
-        try {
-            setIsLoading(true);
-            const response = await fetch("/api/orders");
-            const data = await response.json();
-            if (!response.ok) throw new Error(data?.error || "Error al cargar órdenes");
+  const checkRole = async () => {
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        setUserRole(profile?.role || null);
+      }
+    } catch (error) {
+      console.error("Error checking role:", error);
+    } finally {
+      setIsCheckingRole(false);
+    }
+  };
 
-            const mappedOrders = (data.orders || []).map((dbOrder: any) => ({
-                ...dbOrder,
-                orderNumber: dbOrder.order_number,
-                customerId: dbOrder.customer_id,
-                createdAt: dbOrder.created_at ? (dbOrder.created_at.includes('Z') || dbOrder.created_at.includes('+') ? dbOrder.created_at : `${dbOrder.created_at.replace(' ', 'T')}Z`) : null,
-                updatedAt: dbOrder.updated_at ? (dbOrder.updated_at.includes('Z') || dbOrder.updated_at.includes('+') ? dbOrder.updated_at : `${dbOrder.updated_at.replace(' ', 'T')}Z`) : null,
-                orderItems: Array.isArray(dbOrder.order_items)
-                    ? dbOrder.order_items.map((item: any) => ({
-                        ...item,
-                        orderId: item.order_id,
-                        menuItemId: item.menu_item_id,
-                        unitPrice: item.unit_price,
-                        menuItem: item.menu_items
-                            ? {
-                                ...item.menu_items,
-                                imageUrl: item.menu_items?.image_url,
-                                isAvailable: item.menu_items?.is_available,
-                            }
-                            : { name: "Producto", price: item.unit_price || 0 },
-                    }))
-                    : [],
-                payments: Array.isArray(dbOrder.payments)
-                    ? dbOrder.payments.map((p: any) => ({
-                        ...p,
-                        orderId: p.order_id,
-                        tipAmount: p.tip_amount,
-                    }))
-                    : [],
-                customer: dbOrder.customers || dbOrder.customer || undefined,
-            })) as Order[];
+  const fetchOrders = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/orders");
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Error al cargar órdenes");
 
-            setOrders(mappedOrders);
-        } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : "Error inesperado");
-        } finally {
-            setIsLoading(false);
-        }
-    };
+      const mappedOrders = (data.orders || []).map((dbOrder: any) => ({
+        ...dbOrder,
+        orderNumber: dbOrder.order_number,
+        customerId: dbOrder.customer_id,
+        createdAt: dbOrder.created_at
+          ? dbOrder.created_at.includes("Z") || dbOrder.created_at.includes("+")
+            ? dbOrder.created_at
+            : `${dbOrder.created_at.replace(" ", "T")}Z`
+          : null,
+        updatedAt: dbOrder.updated_at
+          ? dbOrder.updated_at.includes("Z") || dbOrder.updated_at.includes("+")
+            ? dbOrder.updated_at
+            : `${dbOrder.updated_at.replace(" ", "T")}Z`
+          : null,
+        orderItems: Array.isArray(dbOrder.order_items)
+          ? dbOrder.order_items.map((item: any) => ({
+              ...item,
+              orderId: item.order_id,
+              menuItemId: item.menu_item_id,
+              unitPrice: item.unit_price,
+              menuItem: item.menu_items
+                ? {
+                    ...item.menu_items,
+                    imageUrl: item.menu_items?.image_url,
+                    isAvailable: item.menu_items?.is_available,
+                  }
+                : { name: "Producto", price: item.unit_price || 0 },
+            }))
+          : [],
+        payments: Array.isArray(dbOrder.payments)
+          ? dbOrder.payments.map((p: any) => ({
+              ...p,
+              orderId: p.order_id,
+              tipAmount: p.tip_amount,
+            }))
+          : [],
+        customer: dbOrder.customers || dbOrder.customer || undefined,
+      })) as Order[];
 
-    useEffect(() => {
-        checkRole();
-        fetchOrders();
-        fetchTodayExpenses();
-    }, []);
+      setOrders(mappedOrders);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Error inesperado");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const fetchTodayExpenses = async () => {
-        try {
-            const supabase = createClient();
-            const mxDateStr = new Intl.DateTimeFormat("en-CA", {
-                timeZone: "America/Mexico_City",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-            }).format(new Date());
-            const { data } = await supabase
-                .from("expenses")
-                .select("amount, expense_categories(tipo_gasto)")
-                .eq("date", mxDateStr);
-            const total = (data || []).reduce((sum, e: any) => {
-                const tipo = e.expense_categories?.tipo_gasto;
-                if (!tipo || tipo === "variable") {
-                    return sum + Number(e.amount);
-                }
-                return sum;
-            }, 0);
-            setTodayExpenses(total);
-        } catch (err) {
-            console.error("Error fetching today expenses:", err);
-        }
-    };
+  useEffect(() => {
+    checkRole();
+    fetchOrders();
+    fetchTodayExpenses();
+  }, []);
 
-    const fetchDailyCuts = async () => {
-        try {
-            setIsLoadingCuts(true);
-            const response = await fetch("/api/daily-cuts");
-            const data = await response.json();
-            setDailyCuts(data.cuts || []);
-        } catch (err) {
-            console.error("Error fetching daily cuts:", err);
-        } finally {
-            setIsLoadingCuts(false);
-        }
-    };
-
-    useEffect(() => {
-        if (!showFinalizeModal) return;
-        
-        const calculateTips = async () => {
-            setIsCalculatingTips(true);
-            try {
-                const res = await fetch("/api/tips/calculate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        total_cash_tips: manualTipsEfectivo,
-                        total_card_tips: manualTipsTarjeta
-                    })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setTipBreakdown(data.breakdown || []);
-                    setTipTotalHours(data.total_hours || 0);
-                }
-            } catch (err) {
-                console.error("Error calculating tips:", err);
-            } finally {
-                setIsCalculatingTips(false);
-            }
-        };
-
-        const timer = setTimeout(calculateTips, 500);
-        return () => clearTimeout(timer);
-    }, [showFinalizeModal, manualTipsEfectivo, manualTipsTarjeta]);
-
-    const handleFinalizarDia = async () => {
-        if (openOrders.length > 0) {
-            alert(`No se puede cerrar: Hay ${openOrders.length} órdenes pendientes de pago. Favor de cobrarlas o cancelarlas antes de continuar.`);
-            setShowFinalizeModal(false);
-            return;
-        }
-
-        try {
-            setIsFinalizing(true);
-            const supabase = createClient();
-            const mxDateStr = new Intl.DateTimeFormat("en-CA", {
-                timeZone: "America/Mexico_City",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-            }).format(new Date());
-
-            // Fetch today's itemized expenses to store as a snapshot (only variable ones)
-            const { data: expensesData } = await supabase
-                .from("expenses")
-                .select("description, amount, has_invoice, expense_categories(name, tipo_gasto)")
-                .eq("date", mxDateStr);
-
-            const expensesDetail: ExpenseDetailItem[] = ((expensesData || []) as any[])
-                .filter((e) => {
-                    const tipo = e.expense_categories?.tipo_gasto;
-                    return !tipo || tipo === "variable";
-                })
-                .map((e) => ({
-                    description: e.description,
-                    amount: Number(e.amount),
-                    category: e.expense_categories?.name ?? undefined,
-                    has_invoice: e.has_invoice ?? false,
-                }));
-
-            const cashFinal = manualCash !== "" ? Number(manualCash) : todayTotals.cajaEfectivo;
-            const cardFinal = manualCard !== "" ? Number(manualCard) : todayTotals.cajaTarjeta;
-            const tipsEfectivoFinal = manualTipsEfectivo !== "" ? Number(manualTipsEfectivo) : todayTotals.propinasEfectivo;
-            const tipsTarjetaFinal = manualTipsTarjeta !== "" ? Number(manualTipsTarjeta) : todayTotals.propinasTarjeta;
-
-            const response = await fetch("/api/daily-cuts", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    cut_date: mxDateStr,
-                    venta_neta: todayTotals.ventaNeta,
-                    iva_acumulado: todayTotals.ivaAcumulado,
-                    propinas_efectivo: tipsEfectivoFinal,
-                    propinas_tarjeta: tipsTarjetaFinal,
-                    caja_efectivo: cashFinal,
-                    caja_tarjeta: cardFinal,
-                    utilidad_real: todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal,
-                    total_gastos: todayExpenses,
-                    utilidad_final: (todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal) - todayExpenses,
-                    total_orders: todayOrders.length,
-                    expenses_detail: expensesDetail,
-                }),
-            });
-
-            if (!response.ok) throw new Error("Error al guardar el corte");
-
-            // Also save to daily_tips
-            const { error: tipsError } = await supabase.from('daily_tips').insert({
-                cut_date: mxDateStr,
-                total_card_tips: tipsTarjetaFinal,
-                total_cash_tips: tipsEfectivoFinal,
-                total_tips: tipsTarjetaFinal + tipsEfectivoFinal,
-                total_hours: tipTotalHours,
-                breakdown: tipBreakdown
-            });
-
-            if (tipsError) {
-                console.error("Error saving daily tips:", tipsError);
-                // We don't abort the whole process, just log it. 
-                // Or maybe alert the user that tips weren't saved correctly but cut was successful.
-            }
-
-            setFinalizeSuccess(true);
-            setShowFinalizeModal(false);
-            alert("¡Corte de día finalizado con éxito! Los folios de órdenes se han reiniciado.");
-        } catch (err) {
-            console.error("Error finalizing day:", err);
-            alert("Error al finalizar el día. Por favor intente de nuevo.");
-        } finally {
-            setIsFinalizing(false);
-        }
-    };
-
-    const handleGeneratePendingCut = async () => {
-        if (!pendingDate) return;
-
-        const confirmed = window.confirm(
-            `Se generará el corte pendiente del día ${pendingDate} con ${pendingOrders} orden(es). ¿Deseas continuar?`
-        );
-        if (!confirmed) return;
-
-        try {
-            setIsGeneratingPendingCut(true);
-            const response = await fetch("/api/cortes/extemporaneo", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ cutDate: pendingDate }),
-            });
-            const data = await response.json();
-
-            if (!response.ok) {
-                if (response.status === 409) {
-                    alert("Ese corte ya existe. Se actualizará la vista.");
-                    await refreshPendingCut();
-                    return;
-                }
-                throw new Error(data?.error || "Error al generar el corte pendiente");
-            }
-
-            alert(`Corte extemporáneo generado correctamente para ${pendingDate}.`);
-            await Promise.all([fetchOrders(), fetchDailyCuts(), refreshPendingCut()]);
-        } catch (err) {
-            console.error("Error generating pending cut:", err);
-            alert("No fue posible generar el corte pendiente.");
-        } finally {
-            setIsGeneratingPendingCut(false);
-        }
-    };
-
-
-
-    const filteredOrders = useMemo(() => {
-        // ... (rest of the filteredOrders logic remains the same)
-        return orders.filter((order) => {
-            if (searchQuery && !order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-            if (dateFilter) {
-                const orderDate = new Intl.DateTimeFormat("en-CA", {
-                    timeZone: "America/Mexico_City",
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                }).format(new Date(order.createdAt));
-                if (orderDate !== dateFilter) return false;
-            }
-            if (tableFilter && order.table !== tableFilter) return false;
-            if (paymentMethodFilter) {
-                const paymentMethods = getOrderPaymentMethods(order);
-                if (!paymentMethods.includes(paymentMethodFilter as PaymentMethod)) return false;
-            }
-            return true;
-        });
-    }, [orders, searchQuery, dateFilter, tableFilter, paymentMethodFilter]);
-
-    const toggleRow = (orderId: string) => {
-        setExpandedRow((prev) => (prev === orderId ? null : orderId));
-    };
-
-    // Unique Tables for filter dropdown
-    const availableTables = useMemo(() => {
-        const tables = new Set(orders.map((o) => o.table).filter(Boolean) as string[]);
-        return Array.from(tables).sort();
-    }, [orders]);
-
-    // Today's orders and totals for the Corte Diario (always filtered to today in MX timezone)
-    const todayDateStr = useMemo(() => new Intl.DateTimeFormat("en-CA", {
+  const fetchTodayExpenses = async () => {
+    try {
+      const supabase = createClient();
+      const mxDateStr = new Intl.DateTimeFormat("en-CA", {
         timeZone: "America/Mexico_City",
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
-    }).format(new Date()), []);
+      }).format(new Date());
+      const { data } = await supabase
+        .from("expenses")
+        .select("amount, expense_categories(tipo_gasto)")
+        .eq("date", mxDateStr);
+      const total = (data || []).reduce((sum, e: any) => {
+        const tipo = e.expense_categories?.tipo_gasto;
+        if (!tipo || tipo === "variable") {
+          return sum + Number(e.amount);
+        }
+        return sum;
+      }, 0);
+      setTodayExpenses(total);
+    } catch (err) {
+      console.error("Error fetching today expenses:", err);
+    }
+  };
 
-    const todayOrders = useMemo(() => {
-        return orders.filter((order) => {
-            const orderDate = new Intl.DateTimeFormat("en-CA", {
-                timeZone: "America/Mexico_City",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-            }).format(new Date(order.createdAt));
-            return orderDate === todayDateStr &&
-                (order.status === "PAID" || order.status === "DELIVERED" || order.status === "UNCOLLECTED");
+  const fetchDailyCuts = async () => {
+    try {
+      setIsLoadingCuts(true);
+      const response = await fetch("/api/daily-cuts");
+      const data = await response.json();
+      setDailyCuts(data.cuts || []);
+    } catch (err) {
+      console.error("Error fetching daily cuts:", err);
+    } finally {
+      setIsLoadingCuts(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!showFinalizeModal) return;
+
+    const calculateTips = async () => {
+      setIsCalculatingTips(true);
+      try {
+        const res = await fetch("/api/tips/calculate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            total_cash_tips: manualTipsEfectivo,
+            total_card_tips: manualTipsTarjeta,
+          }),
         });
-    }, [orders, todayDateStr]);
+        if (res.ok) {
+          const data = await res.json();
+          setTipBreakdown(data.breakdown || []);
+          setTipTotalHours(data.total_hours || 0);
+        }
+      } catch (err) {
+        console.error("Error calculating tips:", err);
+      } finally {
+        setIsCalculatingTips(false);
+      }
+    };
 
-    const openOrders = useMemo(() => {
-        return orders.filter((order) => {
-            const orderDate = new Intl.DateTimeFormat("en-CA", {
-                timeZone: "America/Mexico_City",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-            }).format(new Date(order.createdAt));
-            return orderDate === todayDateStr &&
-                !(order.status === "PAID" || order.status === "CANCELLED" || order.status === "UNCOLLECTED");
-        });
-    }, [orders, todayDateStr]);
+    const timer = setTimeout(calculateTips, 500);
+    return () => clearTimeout(timer);
+  }, [showFinalizeModal, manualTipsEfectivo, manualTipsTarjeta]);
 
-    const todayTotals = useMemo(() => {
-        let ventaNeta = 0;
-        let ivaAcumulado = 0;
-        let propinasEfectivo = 0;
-        let propinasTarjeta = 0;
-        let cajaEfectivo = 0;
-        let cajaTarjeta = 0;
-
-        todayOrders.forEach((order) => {
-            const subtotalFiscal = order.total / 1.16;
-            const ivaFiscal = order.total - subtotalFiscal;
-
-            // Venta neta y el IVA se suman una vez por orden
-            ventaNeta += subtotalFiscal;
-            ivaAcumulado += ivaFiscal;
-
-            if (order.payments && order.payments.length > 0) {
-                order.payments.forEach((payment) => {
-                    const tipAmount = payment.tipAmount || 0;
-                    const paymentMethod = payment.method;
-                    const totalPago = Number(payment.amount || 0) + Number(tipAmount);
-
-                    if (paymentMethod === PaymentMethod.CASH) {
-                        propinasEfectivo += tipAmount;
-                        cajaEfectivo += totalPago;
-                    } else if (paymentMethod === PaymentMethod.CARD || paymentMethod === PaymentMethod.TRANSFER) {
-                        propinasTarjeta += tipAmount;
-                        cajaTarjeta += totalPago;
-                    } else {
-                        cajaEfectivo += totalPago;
-                    }
-                });
-            }
-        });
-
-        const utilidadReal = ventaNeta + propinasEfectivo + propinasTarjeta;
-        const utilidadFinal = utilidadReal - todayExpenses;
-
-        // NEW: Operational Summary Calculations
-        const ordersAtTable = todayOrders.filter(o => o.table && o.table !== "Domicilio").length;
-        const ordersDelivery = todayOrders.filter(o => o.table === "Domicilio").length;
-        const averageTicket = todayOrders.length > 0 ? (ventaNeta + ivaAcumulado) / todayOrders.length : 0;
-
-        return {
-            ventaNeta,
-            ivaAcumulado,
-            propinasEfectivo,
-            propinasTarjeta,
-            cajaEfectivo,
-            cajaTarjeta,
-            utilidadReal,
-            utilidadFinal,
-            ordersAtTable,
-            ordersDelivery,
-            averageTicket
-        };
-    }, [todayOrders, todayExpenses]);
-
-    const chartsData = useMemo(() => {
-        const now = new Date();
-        const dailyMap = new Map<string, number>();
-        const categoryMap = new Map<string, number>();
-        let currentMonthTotal = 0;
-        let previousMonthTotal = 0;
-
-        orders.forEach(order => {
-            if (order.status !== "PAID" && order.status !== "DELIVERED") return;
-
-            const date = new Date(order.createdAt);
-            const subtotalFiscal = order.total / 1.16;
-
-            if (isSameMonth(date, now)) {
-                currentMonthTotal += subtotalFiscal;
-                const dayKey = format(date, 'yyyy-MM-dd');
-                dailyMap.set(dayKey, (dailyMap.get(dayKey) || 0) + subtotalFiscal);
-
-                order.orderItems?.forEach(item => {
-                    const cat = item.menuItem?.category || 'Otros';
-                    const itemImporteFiscal = (item.quantity * item.unitPrice) / 1.16;
-                    categoryMap.set(cat, (categoryMap.get(cat) || 0) + itemImporteFiscal);
-                });
-            } else if (isSameMonth(date, subMonths(now, 1))) {
-                previousMonthTotal += subtotalFiscal;
-            }
-        });
-
-        const dailySales = Array.from(dailyMap.entries())
-            .sort((a, b) => a[0].localeCompare(b[0]))
-            .map(([date, total]) => ({
-                date: format(parseISO(date), 'dd MMM', { locale: es }),
-                total
-            }));
-
-        const salesMix = Array.from(categoryMap.entries())
-            .map(([name, value]) => ({ name, value }))
-            .sort((a, b) => b.value - a.value);
-
-        const growth = [
-            { name: format(subMonths(now, 1), 'MMMM', { locale: es }).toUpperCase(), total: previousMonthTotal },
-            { name: format(now, 'MMMM', { locale: es }).toUpperCase(), total: currentMonthTotal }
-        ];
-
-        return { dailySales, salesMix, growth };
-    }, [orders]);
-
-    if (isCheckingRole) {
-        return (
-            <div className="min-h-screen bg-dark flex justify-center items-center">
-                <p className="text-white">Verificando permisos...</p>
-            </div>
-        );
+  const handleFinalizarDia = async () => {
+    if (openOrders.length > 0) {
+      alert(
+        `No se puede cerrar: Hay ${openOrders.length} órdenes pendientes de pago. Favor de cobrarlas o cancelarlas antes de continuar.`,
+      );
+      setShowFinalizeModal(false);
+      return;
     }
 
-    if (userRole === "WAITER") {
-        return (
-            <div className="min-h-screen bg-dark flex flex-col justify-center items-center p-4">
-                <div className="bg-[#242424] p-8 rounded-2xl shadow-xl border border-red-900/30 max-w-md w-full text-center">
-                    <div className="text-6xl mb-4">🚫</div>
-                    <h1 className="text-2xl font-bold text-white mb-2">Acceso Denegado</h1>
-                    <p className="text-gray-400 mb-8">
-                        Lo sentimos, el rol de <strong>MESERO</strong> no tiene permisos para acceder al historial y estadísticas financieras.
-                    </p>
-                    <Link
-                        href="/"
-                        className="inline-block w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                        Volver al Dashboard
-                    </Link>
-                </div>
-            </div>
-        );
+    try {
+      setIsFinalizing(true);
+      const supabase = createClient();
+      const mxDateStr = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date());
+
+      const { data: expensesData } = await supabase
+        .from("expenses")
+        .select("description, amount, has_invoice, expense_categories(name, tipo_gasto)")
+        .eq("date", mxDateStr);
+
+      const expensesDetail: ExpenseDetailItem[] = ((expensesData || []) as any[])
+        .filter((e) => {
+          const tipo = e.expense_categories?.tipo_gasto;
+          return !tipo || tipo === "variable";
+        })
+        .map((e) => ({
+          description: e.description,
+          amount: Number(e.amount),
+          category: e.expense_categories?.name ?? undefined,
+          has_invoice: e.has_invoice ?? false,
+        }));
+
+      const cashFinal = manualCash !== "" ? Number(manualCash) : todayTotals.cajaEfectivo;
+      const cardFinal = manualCard !== "" ? Number(manualCard) : todayTotals.cajaTarjeta;
+      const tipsEfectivoFinal =
+        manualTipsEfectivo !== "" ? Number(manualTipsEfectivo) : todayTotals.propinasEfectivo;
+      const tipsTarjetaFinal =
+        manualTipsTarjeta !== "" ? Number(manualTipsTarjeta) : todayTotals.propinasTarjeta;
+
+      const response = await fetch("/api/daily-cuts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cut_date: mxDateStr,
+          venta_neta: todayTotals.ventaNeta,
+          iva_acumulado: todayTotals.ivaAcumulado,
+          propinas_efectivo: tipsEfectivoFinal,
+          propinas_tarjeta: tipsTarjetaFinal,
+          caja_efectivo: cashFinal,
+          caja_tarjeta: cardFinal,
+          utilidad_real: todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal,
+          total_gastos: todayExpenses,
+          utilidad_final:
+            todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal - todayExpenses,
+          total_orders: todayOrders.length,
+          expenses_detail: expensesDetail,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Error al guardar el corte");
+
+      const { error: tipsError } = await supabase.from("daily_tips").insert({
+        cut_date: mxDateStr,
+        total_card_tips: tipsTarjetaFinal,
+        total_cash_tips: tipsEfectivoFinal,
+        total_tips: tipsTarjetaFinal + tipsEfectivoFinal,
+        total_hours: tipTotalHours,
+        breakdown: tipBreakdown,
+      });
+
+      if (tipsError) {
+        console.error("Error saving daily tips:", tipsError);
+      }
+
+      setFinalizeSuccess(true);
+      setShowFinalizeModal(false);
+      alert("¡Corte de día finalizado con éxito! Los folios de órdenes se han reiniciado.");
+    } catch (err) {
+      console.error("Error finalizing day:", err);
+      alert("Error al finalizar el día. Por favor intente de nuevo.");
+    } finally {
+      setIsFinalizing(false);
     }
+  };
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-dark flex justify-center items-center">
-                <p className="text-white">Cargando historial...</p>
-            </div>
-        );
-    }
+  const handleGeneratePendingCut = async () => {
+    if (!pendingDate) return;
 
-    return (
-        <div className="min-h-screen bg-dark">
-            <header className="bg-[#242424] shadow-sm no-print">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                    <div>
-                        <Link href="/" className="text-sm text-blue-600 hover:text-blue-800">
-                            ← Dashboard
-                        </Link>
-                        <h1 className="text-2xl font-bold text-text-light">Historial y Estadísticas</h1>
-                    </div>
-                </div>
-            </header>
-
-            <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-                {errorMessage && (
-                    <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                        {errorMessage}
-                    </div>
-                )}
-
-                <div className="bg-[#242424] p-6 rounded-lg shadow-md space-y-6 flex flex-col">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Buscar Folio</label>
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Ej. 001"
-                                className="w-full rounded-lg border border-gray-600 bg-[#181818] text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Fecha</label>
-                            <input
-                                type="date"
-                                value={dateFilter}
-                                onChange={(e) => setDateFilter(e.target.value)}
-                                className="w-full rounded-lg border border-gray-600 bg-[#181818] text-white px-3 py-[7px] text-sm focus:border-blue-500 focus:outline-none scheme-dark"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Mesa</label>
-                            <select
-                                value={tableFilter}
-                                onChange={(e) => setTableFilter(e.target.value)}
-                                className="w-full rounded-lg border border-gray-600 bg-[#181818] text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none leading-normal"
-                            >
-                                <option value="">Todas</option>
-                                {availableTables.map((t) => (
-                                    <option key={t} value={t}>
-                                        {t}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Método de Pago</label>
-                            <select
-                                value={paymentMethodFilter}
-                                onChange={(e) => setPaymentMethodFilter(e.target.value)}
-                                className="w-full rounded-lg border border-gray-600 bg-[#181818] text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none leading-normal"
-                            >
-                                <option value="">Todos</option>
-                                <option value={PaymentMethod.CASH}>Efectivo</option>
-                                <option value={PaymentMethod.CARD}>Tarjeta</option>
-                                <option value={PaymentMethod.TRANSFER}>Transferencia</option>
-                                <option value={PaymentMethod.OTHER}>Otro</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                {/* CORTE DIARIO */}
-                <div className={`bg-[#242424] p-6 rounded-lg shadow-md space-y-4 flex flex-col mb-2 border-l-4 ${finalizeSuccess ? 'border-l-green-500' : 'border-l-blue-500'}`}>
-                    <div className="flex items-center justify-between pb-2 border-b border-gray-700">
-                        <div>
-                            <h2 className="text-lg font-bold text-white">Corte Diario</h2>
-                            <p className="text-xs text-gray-400 mt-0.5">
-                                {finalizeSuccess
-                                    ? '✅ Corte guardado — contadores reiniciados para mañana'
-                                    : `Hoy · ${todayOrders.length} orden${todayOrders.length !== 1 ? 'es' : ''} completada${todayOrders.length !== 1 ? 's' : ''}`}
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => {
-                                    setShowCutsArchive((v) => !v);
-                                    if (!showCutsArchive) fetchDailyCuts();
-                                }}
-                                className="rounded-lg border border-gray-600 bg-[#181818] px-3 py-2 text-xs font-semibold text-gray-300 hover:border-blue-500 hover:text-white transition-all"
-                            >
-                                📁 Archivo de Cortes
-                            </button>
-                            {!pendingCutLoading && hasPendingCut && (
-                                <button
-                                    onClick={handleGeneratePendingCut}
-                                    disabled={isGeneratingPendingCut}
-                                    className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700 transition-all disabled:opacity-70"
-                                >
-                                    {isGeneratingPendingCut
-                                        ? "Generando..."
-                                        : `⏳ Generar corte pendiente (${pendingDate} · ${pendingOrders})`}
-                                </button>
-                            )}
-                            {!finalizeSuccess && (
-                                <button
-                                    onClick={() => {
-                                        if (openOrders.length > 0) {
-                                            alert(`No se puede cerrar: Hay ${openOrders.length} órdenes pendientes de pago.`);
-                                            return;
-                                        }
-                                        setManualCash(todayTotals.cajaEfectivo.toString());
-                                        setManualCard(todayTotals.cajaTarjeta.toString());
-                                        setManualTipsEfectivo(todayTotals.propinasEfectivo.toString());
-                                        setManualTipsTarjeta(todayTotals.propinasTarjeta.toString());
-                                        setShowFinalizeModal(true);
-                                    }}
-                                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700 transition-all"
-                                >
-                                    ✅ Finalizar Día
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    {finalizeSuccess ? (
-                        // After finalizing: show reset state ($0.00)
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="flex flex-col space-y-3">
-                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Venta Neta Total (Sin IVA)</span>
-                                    <span className="text-gray-500 text-xl font-mono font-medium">$0.00</span>
-                                </div>
-                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">IVA Acumulado</span>
-                                    <span className="text-gray-500 text-xl font-mono">$0.00</span>
-                                </div>
-                            </div>
-                            <div className="flex flex-col space-y-3">
-                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Efectivo)</span>
-                                    <span className="text-gray-500 text-xl font-mono">$0.00</span>
-                                </div>
-                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Tarjeta)</span>
-                                    <span className="text-gray-500 text-xl font-mono">$0.00</span>
-                                </div>
-                            </div>
-                            <div className="flex flex-col space-y-3">
-                                <div className="bg-[#181818] p-3 rounded-lg border border-green-900/50">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Efectivo)</span>
-                                    <span className="text-gray-500 text-xl font-mono font-bold">$0.00</span>
-                                </div>
-                                <div className="bg-[#181818] p-3 rounded-lg border border-blue-900/50">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Tarjeta)</span>
-                                    <span className="text-gray-500 text-xl font-mono font-bold">$0.00</span>
-                                </div>
-                            </div>
-                            <div className="bg-linear-to-br from-[#1a3a1a] to-[#0f1f0f] p-4 rounded-lg flex flex-col justify-center items-center shadow-lg border border-green-500/30 lg:col-span-1 md:col-span-2">
-                                <span className="text-green-300 text-xs font-bold uppercase tracking-wider mb-2">Día Finalizado ✓</span>
-                                <span className="text-white text-3xl font-black font-mono">$0.00</span>
-                                <span className="text-green-400/60 text-[10px] mt-2 text-center uppercase">Nuevo día — caja en cero</span>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                            {/* Venta y IVA */}
-                            <div className="flex flex-col space-y-3">
-                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Venta Neta Total (Sin IVA)</span>
-                                    <span className="text-white text-xl font-mono font-medium">${todayTotals.ventaNeta.toFixed(2)}</span>
-                                </div>
-                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">IVA Acumulado</span>
-                                    <span className="text-gray-300 text-xl font-mono">${todayTotals.ivaAcumulado.toFixed(2)}</span>
-                                </div>
-                            </div>
-
-                            {/* Propinas */}
-                            <div className="flex flex-col space-y-3">
-                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Efectivo)</span>
-                                    <span className="text-green-400 text-xl font-mono">${todayTotals.propinasEfectivo.toFixed(2)}</span>
-                                </div>
-                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Tarjeta)</span>
-                                    <span className="text-blue-400 text-xl font-mono">${todayTotals.propinasTarjeta.toFixed(2)}</span>
-                                </div>
-                            </div>
-
-                            {/* Caja Final */}
-                            <div className="flex flex-col space-y-3">
-                                <div className="bg-[#181818] p-3 rounded-lg border border-green-900/50">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Efectivo)</span>
-                                    <span className="text-green-400 text-xl font-mono font-bold">${todayTotals.cajaEfectivo.toFixed(2)}</span>
-                                </div>
-                                <div className="bg-[#181818] p-3 rounded-lg border border-blue-900/50">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Tarjeta)</span>
-                                    <span className="text-blue-400 text-xl font-mono font-bold">${todayTotals.cajaTarjeta.toFixed(2)}</span>
-                                </div>
-                            </div>
-
-                            {/* Gastos del día */}
-                            <div className="bg-[#181818] p-3 rounded-lg border border-red-900/50 flex flex-col justify-center">
-                                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Gastos del Día</span>
-                                <span className="text-red-400 text-2xl font-mono font-bold">-${todayExpenses.toFixed(2)}</span>
-                                <span className="text-gray-500 text-[10px] mt-1 uppercase">Insumos, sueldos, etc.</span>
-                            </div>
-
-                            {/* Utilidad Final */}
-                            <div className="bg-linear-to-br from-[#1c2e4a] to-[#0f172a] p-4 rounded-lg flex flex-col justify-center items-center shadow-lg border border-blue-500/30">
-                                <span className="text-blue-200 text-xs font-bold uppercase tracking-wider mb-1">Utilidad Real</span>
-                                <span className="text-white text-2xl font-black font-mono">
-                                    ${todayTotals.utilidadReal.toFixed(2)}
-                                </span>
-                                <div className="mt-2 pt-2 border-t border-blue-500/20 w-full text-center">
-                                    <span className="text-blue-200 text-xs font-bold uppercase tracking-wider block mb-1">Utilidad Final</span>
-                                    <span className={`text-xl font-black font-mono ${todayTotals.utilidadFinal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        ${todayTotals.utilidadFinal.toFixed(2)}
-                                    </span>
-                                    <span className="text-blue-300/60 text-[10px] mt-1 block uppercase">Utilidad - Gastos</span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* NEW: Resumen Operativo Card */}
-                    {!finalizeSuccess && todayOrders.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-gray-700">
-                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                📊 Resumen Operativo del Día
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="bg-[#181818] p-4 rounded-xl border border-white/5 flex items-center gap-4">
-                                    <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center text-xl">📜</div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 font-bold uppercase">Folios Generados</p>
-                                        <p className="text-xl font-black text-white">{todayOrders.length} <span className="text-xs text-blue-500 font-normal">órdenes hoy</span></p>
-                                    </div>
-                                </div>
-
-                                <div className="bg-[#181818] p-4 rounded-xl border border-white/5 flex items-center gap-4">
-                                    <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center text-xl">🏠</div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 font-bold uppercase">Servicio Mesa vs Domicilio</p>
-                                        <p className="text-lg font-black text-white">
-                                            {todayTotals.ordersAtTable} <span className="text-[10px] text-gray-500 font-normal">Mesa</span>
-                                            <span className="mx-2 text-gray-700">|</span>
-                                            {todayTotals.ordersDelivery} <span className="text-[10px] text-gray-500 font-normal">Domicilio</span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="bg-[#181818] p-4 rounded-xl border border-white/5 flex items-center gap-4">
-                                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center text-xl">📈</div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 font-bold uppercase">Consumo Promedio</p>
-                                        <p className="text-xl font-black text-green-400">${todayTotals.averageTicket.toFixed(2)} <span className="text-[10px] text-gray-500 font-normal">por orden</span></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* ARCHIVO DE CORTES */}
-                {showCutsArchive && (
-                    <div className="bg-[#242424] p-6 rounded-lg shadow-md border border-gray-700">
-                        <h2 className="text-lg font-bold text-white mb-4 pb-2 border-b border-gray-700 flex items-center gap-2">
-                            📁 Archivo de Cortes Diarios
-                        </h2>
-                        {isLoadingCuts ? (
-                            <p className="text-gray-400 text-sm">Cargando archivo...</p>
-                        ) : dailyCuts.length === 0 ? (
-                            <p className="text-gray-400 text-sm">No hay cortes registrados aún.</p>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left text-sm">
-                                    <thead className="text-gray-400 uppercase text-xs font-bold border-b border-gray-700">
-                                        <tr>
-                                            <th className="py-3 pr-4">Fecha</th>
-                                            <th className="py-3 pr-4 text-right">Órdenes</th>
-                                            <th className="py-3 pr-4 text-right">Venta Bruta</th>
-                                            <th className="py-3 pr-4 text-right">Venta Neta</th>
-                                            <th className="py-3 pr-4 text-right">IVA</th>
-                                            <th className="py-3 pr-4 text-right">Gastos</th>
-                                            <th className="py-3 pr-4 text-right">Utilidad Final</th>
-                                            <th className="py-3 text-center">Detalle</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-700/50">
-                                        {dailyCuts.map((cut) => {
-                                            const ventaBruta = Number(cut.venta_neta) + Number(cut.iva_acumulado);
-                                            return (
-                                                <tr key={cut.id} className="hover:bg-[#2a2a2a] transition-colors">
-                                                    <td className="py-3 pr-4 font-medium text-white">
-                                                        {new Date(`${cut.cut_date}T12:00:00`).toLocaleDateString('es-MX', {
-                                                            weekday: 'short',
-                                                            year: 'numeric',
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                        })}
-                                                    </td>
-                                                    <td className="py-3 pr-4 text-right text-gray-300">{cut.total_orders}</td>
-                                                    <td className="py-3 pr-4 text-right text-green-400 font-mono">
-                                                        ${ventaBruta.toFixed(2)}
-                                                    </td>
-                                                    <td className="py-3 pr-4 text-right text-gray-300 font-mono">
-                                                        ${Number(cut.venta_neta).toFixed(2)}
-                                                    </td>
-                                                    <td className="py-3 pr-4 text-right text-yellow-400 font-mono">
-                                                        ${Number(cut.iva_acumulado).toFixed(2)}
-                                                    </td>
-                                                    <td className="py-3 pr-4 text-right text-red-400 font-mono">
-                                                        -${Number(cut.total_gastos).toFixed(2)}
-                                                    </td>
-                                                    <td className={`py-3 pr-4 text-right font-mono font-bold ${Number(cut.utilidad_final) >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
-                                                        ${Number(cut.utilidad_final).toFixed(2)}
-                                                    </td>
-                                                    <td className="py-3 text-center">
-                                                        <button
-                                                            onClick={() => setSelectedCutDetail(cut)}
-                                                            className="rounded-lg bg-[#181818] border border-gray-600 px-3 py-1 text-xs font-semibold text-gray-300 hover:border-blue-500 hover:text-white transition-all"
-                                                        >
-                                                            Ver Detalle
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* MODAL DETALLE DE CORTE */}
-                {selectedCutDetail && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-                        <div className="w-full max-w-lg rounded-2xl bg-[#242424] p-6 shadow-2xl border border-blue-500/30 max-h-[90vh] overflow-y-auto">
-                            <div className="flex items-center justify-between mb-4">
-                                <div>
-                                    <h3 className="text-xl font-black text-white">📋 Detalle del Corte</h3>
-                                    <p className="text-sm text-gray-400 mt-0.5">
-                                        {new Date(`${selectedCutDetail.cut_date}T12:00:00`).toLocaleDateString('es-MX', {
-                                            weekday: 'long',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric',
-                                        })}
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={() => setSelectedCutDetail(null)}
-                                    className="rounded-lg border border-gray-600 px-3 py-1.5 text-sm text-gray-400 hover:text-white hover:border-gray-400 transition-all"
-                                >
-                                    ✕ Cerrar
-                                </button>
-                            </div>
-
-                            {/* Financial Grid */}
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Venta Neta Total (Sin IVA)</span>
-                                    <span className="text-white text-lg font-mono font-medium">${Number(selectedCutDetail.venta_neta).toFixed(2)}</span>
-                                </div>
-                                <div className="bg-[#181818] p-3 rounded-lg border border-yellow-900/50">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">IVA Acumulado</span>
-                                    <span className="text-yellow-400 text-lg font-mono">${Number(selectedCutDetail.iva_acumulado).toFixed(2)}</span>
-                                </div>
-                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Efectivo)</span>
-                                    <span className="text-green-400 text-lg font-mono">${Number(selectedCutDetail.propinas_efectivo).toFixed(2)}</span>
-                                </div>
-                                <div className="bg-[#181818] p-3 rounded-lg border border-gray-700">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Propinas (Tarjeta)</span>
-                                    <span className="text-blue-400 text-lg font-mono">${Number(selectedCutDetail.propinas_tarjeta).toFixed(2)}</span>
-                                    <span className="text-gray-500 text-[10px] block mt-0.5">No suma a utilidad</span>
-                                </div>
-                                <div className="bg-[#181818] p-3 rounded-lg border border-green-900/50">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Efectivo)</span>
-                                    <span className="text-green-400 text-lg font-mono font-bold">${Number(selectedCutDetail.caja_efectivo).toFixed(2)}</span>
-                                </div>
-                                <div className="bg-[#181818] p-3 rounded-lg border border-blue-900/50">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-1">Caja Final (Tarjeta/Banco)</span>
-                                    <span className="text-blue-400 text-lg font-mono font-bold">${Number(selectedCutDetail.caja_tarjeta).toFixed(2)}</span>
-                                </div>
-                            </div>
-
-                            {/* Expenses Detail */}
-                            <div className="bg-[#181818] rounded-lg border border-red-900/50 p-4 mb-4">
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Gastos del Día</span>
-                                    <span className="text-red-400 font-mono font-bold">-${Number(selectedCutDetail.total_gastos).toFixed(2)}</span>
-                                </div>
-                                {selectedCutDetail.expenses_detail && selectedCutDetail.expenses_detail.length > 0 ? (
-                                    <div className="space-y-1.5">
-                                        {selectedCutDetail.expenses_detail.map((expense, i) => (
-                                            <div key={i} className="flex items-center justify-between text-sm">
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    {expense.has_invoice && (
-                                                        <span className="text-[10px] bg-green-900/40 text-green-400 px-1.5 py-0.5 rounded font-semibold shrink-0">FAC</span>
-                                                    )}
-                                                    {expense.category && (
-                                                        <span className="text-[10px] text-gray-500 shrink-0">[{expense.category}]</span>
-                                                    )}
-                                                    <span className="text-gray-300 truncate">{expense.description}</span>
-                                                </div>
-                                                <span className="text-red-400 font-mono shrink-0 ml-3">-${Number(expense.amount).toFixed(2)}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-gray-500 text-xs italic">Sin desglose de gastos disponible para este corte.</p>
-                                )}
-                            </div>
-
-                            {/* Utilidad Summary */}
-                            <div className="bg-linear-to-br from-[#1c2e4a] to-[#0f172a] p-4 rounded-lg border border-blue-500/30">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-blue-200 text-xs font-bold uppercase tracking-wider">Utilidad Real</span>
-                                    <span className="text-white font-black font-mono">${Number(selectedCutDetail.utilidad_real).toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between items-center pt-2 border-t border-blue-500/20">
-                                    <span className="text-blue-200 text-xs font-bold uppercase tracking-wider">Utilidad Final (- Gastos)</span>
-                                    <span className={`text-xl font-black font-mono ${Number(selectedCutDetail.utilidad_final) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        ${Number(selectedCutDetail.utilidad_final).toFixed(2)}
-                                    </span>
-                                </div>
-                                <p className="text-blue-300/40 text-[10px] mt-2 uppercase">
-                                    {selectedCutDetail.total_orders} orden{selectedCutDetail.total_orders !== 1 ? 'es' : ''} completada{selectedCutDetail.total_orders !== 1 ? 's' : ''}
-                                </p>
-                            </div>
-
-                            {selectedCutDetail.notes && (
-                                <div className="mt-3 bg-[#181818] rounded-lg border border-gray-700 p-3">
-                                    <span className="text-gray-400 text-xs font-semibold uppercase block mb-1">Notas</span>
-                                    <p className="text-gray-300 text-sm">{selectedCutDetail.notes}</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* MODAL FINALIZAR DÍA */}
-                {showFinalizeModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-                        <div className="w-full max-w-md rounded-2xl bg-[#242424] p-6 shadow-2xl border border-green-500/30">
-                            <h3 className="text-xl font-black text-white mb-1">✅ Finalizar Día</h3>
-                            <p className="text-gray-400 text-sm mb-6">
-                                Se guardará el siguiente resumen en el archivo de cortes:
-                            </p>
-
-                            <div className="space-y-3 bg-[#181818] rounded-lg p-4 mb-6 text-sm">
-                                <div className="flex justify-between items-center bg-[#242424] p-2 rounded-md">
-                                    <span className="text-gray-400">Venta Neta (sin IVA)</span>
-                                    <span className="text-white font-mono font-bold">${todayTotals.ventaNeta.toFixed(2)}</span>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3 mt-4">
-                                    <div>
-                                        <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Efectivo Caja</label>
-                                        <input
-                                            type="number"
-                                            value={manualCash}
-                                            onChange={(e) => setManualCash(e.target.value)}
-                                            className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-green-400 font-mono focus:border-green-500 outline-none"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Tarjeta Caja</label>
-                                        <input
-                                            type="number"
-                                            value={manualCard}
-                                            onChange={(e) => setManualCard(e.target.value)}
-                                            className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-blue-400 font-mono focus:border-blue-500 outline-none"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Propinas Efec.</label>
-                                        <input
-                                            type="number"
-                                            value={manualTipsEfectivo}
-                                            onChange={(e) => setManualTipsEfectivo(e.target.value)}
-                                            className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-green-500/70 font-mono focus:border-green-500 outline-none"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Propinas Tarj.</label>
-                                        <input
-                                            type="number"
-                                            value={manualTipsTarjeta}
-                                            onChange={(e) => setManualTipsTarjeta(e.target.value)}
-                                            className="w-full bg-dark border border-gray-700 rounded-lg px-2 py-1.5 text-blue-500/70 font-mono focus:border-blue-500 outline-none"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-between border-t border-gray-700 pt-3">
-                                    <span className="text-gray-400">Órdenes completadas</span>
-                                    <span className="text-white font-bold">{todayOrders.length}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Gastos del Día</span>
-                                    <span className="text-red-400 font-mono">-${todayExpenses.toFixed(2)}</span>
-                                </div>
-                                <div className="border-t border-gray-600 pt-2 mt-2 flex justify-between font-bold">
-                                    <span className="text-blue-200 uppercase text-xs">Utilidad Final Estimada</span>
-                                    <span className={`font-mono ${(todayTotals.ventaNeta + Number(manualTipsEfectivo || 0) + Number(manualTipsTarjeta || 0) - todayExpenses) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        ${(todayTotals.ventaNeta + Number(manualTipsEfectivo || 0) + Number(manualTipsTarjeta || 0) - todayExpenses).toFixed(2)}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Tip Distribution Block */}
-                            <div className="bg-[#181818] p-4 rounded-xl border border-gray-700 mb-6">
-                                <h4 className="text-sm font-bold text-white mb-2 uppercase flex items-center justify-between">
-                                    <span>Distribución de Propinas</span>
-                                    {isCalculatingTips && <span className="text-xs text-blue-400">Calculando...</span>}
-                                </h4>
-                                {!isCalculatingTips && tipBreakdown.length > 0 ? (
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-xs text-gray-500 font-bold border-b border-gray-700 pb-1">
-                                            <span>Empleado</span>
-                                            <span>Horas</span>
-                                            <span>Monto</span>
-                                        </div>
-                                        {tipBreakdown.map((item, idx) => (
-                                            <div key={idx} className="flex justify-between text-sm">
-                                                <span className="text-gray-300">{item.employee_name}</span>
-                                                <span className="text-gray-400 font-mono">{item.hours_worked.toFixed(2)}h</span>
-                                                <span className="text-green-400 font-mono font-bold">${item.tip_amount.toFixed(2)}</span>
-                                            </div>
-                                        ))}
-                                        <div className="flex justify-between text-xs text-gray-400 font-bold border-t border-gray-700 pt-1 mt-2">
-                                            <span>Total Horas: {tipTotalHours.toFixed(2)}h</span>
-                                            <span>Total: ${(Number(manualTipsEfectivo || 0) + Number(manualTipsTarjeta || 0)).toFixed(2)}</span>
-                                        </div>
-                                    </div>
-                                ) : !isCalculatingTips ? (
-                                    <p className="text-xs text-gray-500 italic">No hay empleados con asistencia finalizada hoy.</p>
-                                ) : null}
-                            </div>
-
-                            <p className="text-xs text-gray-500 mb-6">
-                                Los datos y la distribución de propinas serán guardados en el historial. Los contadores del Corte Diario se reiniciarán a $0.00.
-                            </p>
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setShowFinalizeModal(false)}
-                                    disabled={isFinalizing}
-                                    className="flex-1 rounded-xl border border-gray-600 py-3 text-sm font-bold text-gray-300 hover:bg-[#181818] transition-all disabled:opacity-50"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    onClick={handleFinalizarDia}
-                                    disabled={isFinalizing}
-                                    className="flex-1 rounded-xl bg-green-600 py-3 text-sm font-bold text-white hover:bg-green-700 transition-all disabled:opacity-70"
-                                >
-                                    {isFinalizing ? 'Guardando...' : 'Confirmar y Finalizar'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* GRÁFICAS */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    {/* Venta Diaria */}
-                    <div className="bg-[#242424] p-6 rounded-lg shadow-md lg:col-span-2 border border-gray-700">
-                        <h2 className="text-lg font-bold text-white mb-4 uppercase">Venta Diaria ({format(new Date(), 'MMMM', { locale: es })})</h2>
-                        <div className="h-64 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={chartsData.dailySales} margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                    <XAxis dataKey="date" stroke="#9CA3AF" fontSize={12} />
-                                    <YAxis stroke="#9CA3AF" fontSize={12} tickFormatter={(val) => `$${val}`} />
-                                    <RechartsTooltip
-                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#FFF' }}
-                                        formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Venta Neta']}
-                                    />
-                                    <Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    {/* Mix de Ventas */}
-                    <div className="bg-[#242424] p-6 rounded-lg shadow-md border border-gray-700">
-                        <h2 className="text-lg font-bold text-white mb-4 uppercase">Mix de Ventas</h2>
-                        <div className="h-64 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={chartsData.salesMix}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={80}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                    >
-                                        {chartsData.salesMix.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <RechartsTooltip
-                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#FFF' }}
-                                        formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Importe']}
-                                    />
-                                    <Legend wrapperStyle={{ fontSize: '12px', color: '#9CA3AF' }} />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    {/* Trend de Crecimiento */}
-                    <div className="bg-[#242424] p-6 rounded-lg shadow-md lg:col-span-3 border border-gray-700">
-                        <h2 className="text-lg font-bold text-white mb-4 uppercase">Crecimiento Mensual</h2>
-                        <div className="h-64 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={chartsData.growth} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
-                                    <XAxis type="number" stroke="#9CA3AF" fontSize={12} tickFormatter={(val) => `$${val}`} />
-                                    <YAxis dataKey="name" type="category" stroke="#9CA3AF" fontSize={12} width={100} />
-                                    <RechartsTooltip
-                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#FFF' }}
-                                        formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Total Venta Neta']}
-                                        cursor={{ fill: '#2a2a2a' }}
-                                    />
-                                    <Bar dataKey="total" fill="#10b981" barSize={40} radius={[0, 4, 4, 0]}>
-                                        {chartsData.growth.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={index === 0 ? '#4B5563' : '#10b981'} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-[#242424] rounded-lg shadow-md overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
-                            <thead className="bg-[#181818] text-gray-400 uppercase text-xs font-bold">
-                                <tr>
-                                    <th className="px-4 py-4">Folio</th>
-                                    <th className="px-4 py-4">Fecha</th>
-                                    <th className="px-4 py-4">Mesa</th>
-                                    <th className="px-4 py-4">Método</th>
-                                    <th className="px-4 py-4 text-right">Subtotal</th>
-                                    <th className="px-4 py-4 text-right">IVA (16%)</th>
-                                    <th className="px-4 py-4 text-right">Propina</th>
-                                    <th className="px-4 py-4 text-right text-blue-400">TOTAL PAGO</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-700">
-                                {filteredOrders.map((order) => {
-                                    const tipAmount = getOrderTipAmount(order);
-                                    const paymentMethods = getOrderPaymentMethods(order);
-                                    const primaryPaymentMethod = paymentMethods[0] || "N/A";
-
-                                    // Desglose
-                                    const subtotalFiscal = order.total / 1.16;
-                                    const ivaFiscal = order.total - subtotalFiscal;
-                                    const totalPago = order.total + tipAmount;
-
-                                    let methodLabel = getOrderPaymentLabel(order);
-                                    let methodColorClass = primaryPaymentMethod === 'CASH' ? 'bg-green-900/50 text-green-300' :
-                                        primaryPaymentMethod === 'CARD' ? 'bg-blue-900/50 text-blue-300' :
-                                            'bg-gray-800 text-gray-300';
-
-                                    if (order.status === 'UNCOLLECTED') {
-                                        methodLabel = "NO COBRADA";
-                                        methodColorClass = "bg-red-900/50 text-red-300";
-                                    } else if (paymentMethods.length > 1) {
-                                        methodColorClass = "bg-purple-900/50 text-purple-300";
-                                    }
-
-                                    const isExpanded = expandedRow === order.id;
-
-                                    return (
-                                        <React.Fragment key={order.id}>
-                                            <tr
-                                                className="hover:bg-[#2a2a2a] cursor-pointer transition-colors"
-                                                onClick={() => toggleRow(order.id)}
-                                            >
-                                                <td className="px-4 py-4 font-bold text-text-light">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-gray-500 text-xs w-4">
-                                                            {isExpanded ? "▼" : "▶"}
-                                                        </span>
-                                                        #{order.orderNumber}
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-4 text-gray-300">
-                                                    {new Date(order.createdAt).toLocaleDateString('es-MX', {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit',
-                                                        timeZone: 'America/Mexico_City'
-                                                    })}
-                                                </td>
-                                                <td className="px-4 py-4 text-gray-300">{order.table || "Llevar"}</td>
-                                                <td className="px-4 py-4 text-gray-300">
-                                                    <span className={`px-2 py-1 rounded text-xs font-semibold ${methodColorClass}`}>
-                                                        {methodLabel}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-4 text-right text-gray-300 font-mono">
-                                                    ${subtotalFiscal.toFixed(2)}
-                                                </td>
-                                                <td className="px-4 py-4 text-right text-gray-300 font-mono">
-                                                    ${ivaFiscal.toFixed(2)}
-                                                </td>
-                                                <td className="px-4 py-4 text-right text-gray-300 font-mono">
-                                                    ${tipAmount.toFixed(2)}
-                                                </td>
-                                                <td className="px-4 py-4 text-right font-black text-blue-400 font-mono text-base">
-                                                    ${totalPago.toFixed(2)}
-                                                </td>
-                                            </tr>
-                                            {/* FILA EXPANDIDA PARA DETALLES DE PRODUCTOS */}
-                                            {isExpanded && (
-                                                <tr className="bg-[#1e1e1e]">
-                                                    <td colSpan={8} className="px-10 py-4">
-                                                        <div className="bg-[#181818] rounded border border-gray-700 p-4">
-                                                            <h4 className="text-sm font-bold text-gray-400 uppercase mb-3">Detalle de la Orden</h4>
-                                                            <table className="w-full text-sm">
-                                                                <thead>
-                                                                    <tr className="text-gray-500 border-b border-gray-700">
-                                                                        <th className="text-left pb-2 font-semibold font-mono">Cant</th>
-                                                                        <th className="text-left pb-2 font-semibold">Producto</th>
-                                                                        <th className="text-right pb-2 font-semibold">Precio Unit.</th>
-                                                                        <th className="text-right pb-2 font-semibold">Importe</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {order.orderItems?.map((item) => {
-                                                                        const importe = item.quantity * item.unitPrice;
-                                                                        return (
-                                                                            <tr key={item.id} className="border-b border-gray-800/50 last:border-0 hover:bg-black/20">
-                                                                                <td className="py-2 text-gray-300 font-mono">{item.quantity}</td>
-                                                                                <td className="py-2 text-gray-300 font-medium">
-                                                                                    {item.menuItem?.name || "Producto desconocido"}
-                                                                                </td>
-                                                                                <td className="py-2 text-right text-gray-400 opacity-80 font-mono">
-                                                                                    ${item.unitPrice.toFixed(2)}
-                                                                                </td>
-                                                                                <td className="py-2 text-right text-gray-300 font-mono">
-                                                                                    ${importe.toFixed(2)}
-                                                                                </td>
-                                                                            </tr>
-                                                                        );
-                                                                    })}
-                                                                </tbody>
-                                                            </table>
-                                                            <div className="mt-4 flex justify-end">
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        setBillingOrder(order);
-                                                                    }}
-                                                                    className="rounded bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 transition-colors"
-                                                                >
-                                                                    📄 Facturar
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </React.Fragment>
-                                    );
-                                })}
-                                {filteredOrders.length === 0 && (
-                                    <tr>
-                                        <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
-                                            No se encontraron órdenes que coincidan con los filtros.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </main>
-
-            {billingOrder && (
-                <FacturacionModal
-                    order={billingOrder}
-                    onClose={() => setBillingOrder(null)}
-                />
-            )}
-        </div>
+    const confirmed = window.confirm(
+      `Se generará el corte pendiente del día ${pendingDate} con ${pendingOrders} orden(es). ¿Deseas continuar?`,
     );
+    if (!confirmed) return;
+
+    try {
+      setIsGeneratingPendingCut(true);
+      const response = await fetch("/api/cortes/extemporaneo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cutDate: pendingDate }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 409) {
+          alert("Ese corte ya existe. Se actualizará la vista.");
+          await refreshPendingCut();
+          return;
+        }
+        throw new Error(data?.error || "Error al generar el corte pendiente");
+      }
+
+      alert(`Corte extemporáneo generado correctamente para ${pendingDate}.`);
+      await Promise.all([fetchOrders(), fetchDailyCuts(), refreshPendingCut()]);
+    } catch (err) {
+      console.error("Error generating pending cut:", err);
+      alert("No fue posible generar el corte pendiente.");
+    } finally {
+      setIsGeneratingPendingCut(false);
+    }
+  };
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      if (searchQuery && !order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()))
+        return false;
+      if (dateFilter) {
+        const orderDate = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "America/Mexico_City",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(new Date(order.createdAt));
+        if (orderDate !== dateFilter) return false;
+      }
+      if (tableFilter && order.table !== tableFilter) return false;
+      if (paymentMethodFilter) {
+        const paymentMethods = getOrderPaymentMethods(order);
+        if (!paymentMethods.includes(paymentMethodFilter as PaymentMethod)) return false;
+      }
+      return true;
+    });
+  }, [orders, searchQuery, dateFilter, tableFilter, paymentMethodFilter]);
+
+  const toggleRow = (orderId: string) => {
+    setExpandedRow((prev) => (prev === orderId ? null : orderId));
+  };
+
+  const availableTables = useMemo(() => {
+    const tables = new Set(orders.map((o) => o.table).filter(Boolean) as string[]);
+    return Array.from(tables).sort();
+  }, [orders]);
+
+  const todayDateStr = useMemo(
+    () =>
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date()),
+    [],
+  );
+
+  const todayOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const orderDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date(order.createdAt));
+      return (
+        orderDate === todayDateStr &&
+        (order.status === "PAID" || order.status === "DELIVERED" || order.status === "UNCOLLECTED")
+      );
+    });
+  }, [orders, todayDateStr]);
+
+  const openOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const orderDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date(order.createdAt));
+      return (
+        orderDate === todayDateStr &&
+        !(order.status === "PAID" || order.status === "CANCELLED" || order.status === "UNCOLLECTED")
+      );
+    });
+  }, [orders, todayDateStr]);
+
+  const todayTotals = useMemo(() => {
+    let ventaNeta = 0;
+    let ivaAcumulado = 0;
+    let propinasEfectivo = 0;
+    let propinasTarjeta = 0;
+    let cajaEfectivo = 0;
+    let cajaTarjeta = 0;
+
+    todayOrders.forEach((order) => {
+      const subtotalFiscal = order.total / 1.16;
+      const ivaFiscal = order.total - subtotalFiscal;
+
+      ventaNeta += subtotalFiscal;
+      ivaAcumulado += ivaFiscal;
+
+      if (order.payments && order.payments.length > 0) {
+        order.payments.forEach((payment) => {
+          const tipAmount = payment.tipAmount || 0;
+          const paymentMethod = payment.method;
+          const totalPago = Number(payment.amount || 0) + Number(tipAmount);
+
+          if (paymentMethod === PaymentMethod.CASH) {
+            propinasEfectivo += tipAmount;
+            cajaEfectivo += totalPago;
+          } else if (paymentMethod === PaymentMethod.CARD || paymentMethod === PaymentMethod.TRANSFER) {
+            propinasTarjeta += tipAmount;
+            cajaTarjeta += totalPago;
+          } else {
+            cajaEfectivo += totalPago;
+          }
+        });
+      }
+    });
+
+    const utilidadReal = ventaNeta + propinasEfectivo + propinasTarjeta;
+    const utilidadFinal = utilidadReal - todayExpenses;
+
+    const ordersAtTable = todayOrders.filter((o) => o.table && o.table !== "Domicilio").length;
+    const ordersDelivery = todayOrders.filter((o) => o.table === "Domicilio").length;
+    const averageTicket =
+      todayOrders.length > 0 ? (ventaNeta + ivaAcumulado) / todayOrders.length : 0;
+
+    return {
+      ventaNeta,
+      ivaAcumulado,
+      propinasEfectivo,
+      propinasTarjeta,
+      cajaEfectivo,
+      cajaTarjeta,
+      utilidadReal,
+      utilidadFinal,
+      ordersAtTable,
+      ordersDelivery,
+      averageTicket,
+    };
+  }, [todayOrders, todayExpenses]);
+
+  const chartsData = useMemo(() => {
+    const now = new Date();
+    const dailyMap = new Map<string, number>();
+    const categoryMap = new Map<string, number>();
+    let currentMonthTotal = 0;
+    let previousMonthTotal = 0;
+
+    orders.forEach((order) => {
+      if (order.status !== "PAID" && order.status !== "DELIVERED") return;
+
+      const date = new Date(order.createdAt);
+      const subtotalFiscal = order.total / 1.16;
+
+      if (isSameMonth(date, now)) {
+        currentMonthTotal += subtotalFiscal;
+        const dayKey = format(date, "yyyy-MM-dd");
+        dailyMap.set(dayKey, (dailyMap.get(dayKey) || 0) + subtotalFiscal);
+
+        order.orderItems?.forEach((item) => {
+          const cat = item.menuItem?.category || "Otros";
+          const itemImporteFiscal = (item.quantity * item.unitPrice) / 1.16;
+          categoryMap.set(cat, (categoryMap.get(cat) || 0) + itemImporteFiscal);
+        });
+      } else if (isSameMonth(date, subMonths(now, 1))) {
+        previousMonthTotal += subtotalFiscal;
+      }
+    });
+
+    const dailySales = Array.from(dailyMap.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, total]) => ({
+        date: format(parseISO(date), "dd MMM", { locale: es }),
+        total,
+      }));
+
+    const salesMix = Array.from(categoryMap.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+
+    const growth = [
+      {
+        name: format(subMonths(now, 1), "MMMM", { locale: es }).toUpperCase(),
+        total: previousMonthTotal,
+      },
+      { name: format(now, "MMMM", { locale: es }).toUpperCase(), total: currentMonthTotal },
+    ];
+
+    return { dailySales, salesMix, growth };
+  }, [orders]);
+
+  if (isCheckingRole) {
+    return (
+      <div className="min-h-screen bg-[#121212] flex justify-center items-center">
+        <p className="text-[#E0E0E0]/60 font-bold text-sm">Verificando permisos...</p>
+      </div>
+    );
+  }
+
+  if (userRole === "WAITER") {
+    return (
+      <div className="min-h-screen bg-[#121212] flex flex-col justify-center items-center p-4">
+        <div className="bg-[#242424] p-8 rounded-2xl shadow-xl border border-red-500/20 max-w-md w-full text-center space-y-4">
+          <div className="rounded-2xl bg-red-500/10 p-4 text-red-400 w-16 h-16 mx-auto flex items-center justify-center">
+            <ShieldAlert className="h-8 w-8" />
+          </div>
+          <h1 className="text-2xl font-black text-[#E0E0E0] tracking-tight uppercase">
+            Acceso Denegado
+          </h1>
+          <p className="text-sm text-[#E0E0E0]/60 leading-relaxed font-medium">
+            El rol de <strong className="text-[#E0E0E0]">MESERO</strong> no cuenta con permisos para acceder al historial ni estadísticas financieras.
+          </p>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center gap-2 w-full py-3 bg-[#E0E0E0] text-black rounded-xl font-black text-sm uppercase tracking-wider hover:bg-white transition-all shadow-md"
+          >
+            <ArrowLeft className="h-4 w-4" /> Volver al Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#121212] flex justify-center items-center">
+        <p className="text-[#E0E0E0]/60 font-bold text-sm">Cargando historial y datos...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#121212] text-[#E0E0E0]">
+      {/* Header */}
+      <header className="bg-[#121212]/90 backdrop-blur-md sticky top-0 z-30 border-b border-white/5 no-print">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="group flex items-center gap-1.5 text-xs font-bold text-[#E0E0E0]/60 hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+              Dashboard
+            </Link>
+            <span className="text-white/20">|</span>
+            <h1 className="text-xl font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+              Historial y Estadísticas
+            </h1>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 no-print space-y-8">
+        {errorMessage && (
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-bold text-red-400 flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {/* FILTROS DE BÚSQUEDA */}
+        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
+          <h2 className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-primary"></span>
+            Filtros de Búsqueda
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                Buscar Folio
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Ej. 001"
+                  className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                Fecha
+              </label>
+              <div className="relative">
+                <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+                <input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors scheme-dark"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                Mesa
+              </label>
+              <select
+                value={tableFilter}
+                onChange={(e) => setTableFilter(e.target.value)}
+                className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+              >
+                <option value="">Todas las Mesas</option>
+                {availableTables.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                Método de Pago
+              </label>
+              <select
+                value={paymentMethodFilter}
+                onChange={(e) => setPaymentMethodFilter(e.target.value)}
+                className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+              >
+                <option value="">Todos los Métodos</option>
+                <option value={PaymentMethod.CASH}>Efectivo</option>
+                <option value={PaymentMethod.CARD}>Tarjeta</option>
+                <option value={PaymentMethod.TRANSFER}>Transferencia</option>
+                <option value={PaymentMethod.OTHER}>Otro</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        {/* CORTE DIARIO */}
+        <section
+          className={`rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 border-l-4 space-y-6 ${
+            finalizeSuccess ? "border-l-success" : "border-l-blue-500"
+          }`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+            <div>
+              <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    finalizeSuccess ? "bg-success" : "bg-blue-500"
+                  }`}
+                ></span>
+                Corte Diario
+              </h2>
+              <p className="text-xs font-medium text-[#E0E0E0]/50 mt-0.5">
+                {finalizeSuccess
+                  ? "✅ Corte guardado — contadores reiniciados para el siguiente ciclo"
+                  : `Hoy · ${todayOrders.length} orden${
+                      todayOrders.length !== 1 ? "es" : ""
+                    } completada${todayOrders.length !== 1 ? "s" : ""}`}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCutsArchive((v) => !v);
+                  if (!showCutsArchive) fetchDailyCuts();
+                }}
+                className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-black text-[#E0E0E0] hover:bg-white/10 transition-all uppercase tracking-wider flex items-center gap-1.5"
+              >
+                <Folder className="h-3.5 w-3.5 text-blue-400" />
+                Archivo de Cortes
+              </button>
+
+              {!pendingCutLoading && hasPendingCut && (
+                <button
+                  type="button"
+                  onClick={handleGeneratePendingCut}
+                  disabled={isGeneratingPendingCut}
+                  className="rounded-xl bg-amber-500/20 border border-amber-500/30 px-3.5 py-2 text-xs font-black text-amber-400 hover:bg-amber-500/30 transition-all uppercase tracking-wider flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <Clock className="h-3.5 w-3.5" />
+                  {isGeneratingPendingCut
+                    ? "Generando..."
+                    : `Generar corte pendiente (${pendingDate} · ${pendingOrders})`}
+                </button>
+              )}
+
+              {!finalizeSuccess && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (openOrders.length > 0) {
+                      alert(
+                        `No se puede cerrar: Hay ${openOrders.length} órdenes pendientes de pago.`,
+                      );
+                      return;
+                    }
+                    setManualCash(todayTotals.cajaEfectivo.toString());
+                    setManualCard(todayTotals.cajaTarjeta.toString());
+                    setManualTipsEfectivo(todayTotals.propinasEfectivo.toString());
+                    setManualTipsTarjeta(todayTotals.propinasTarjeta.toString());
+                    setShowFinalizeModal(true);
+                  }}
+                  className="rounded-xl bg-success px-4 py-2 text-xs font-black text-white hover:brightness-110 transition-all uppercase tracking-wider shadow-lg shadow-success/20 flex items-center gap-1.5"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Finalizar Día
+                </button>
+              )}
+            </div>
+          </div>
+
+          {finalizeSuccess ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-3">
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-white/5">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    Venta Neta Total (Sin IVA)
+                  </span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                </div>
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-white/5">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    IVA Acumulado
+                  </span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-white/5">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    Propinas (Efectivo)
+                  </span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                </div>
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-white/5">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    Propinas (Tarjeta)
+                  </span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-emerald-500/20">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    Caja Final (Efectivo)
+                  </span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                </div>
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-blue-500/20">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    Caja Final (Tarjeta)
+                  </span>
+                  <span className="text-[#E0E0E0]/40 text-xl font-mono">$0.00</span>
+                </div>
+              </div>
+              <div className="bg-emerald-500/10 p-5 rounded-2xl flex flex-col justify-center items-center border border-emerald-500/20 lg:col-span-1 md:col-span-2">
+                <span className="text-emerald-400 text-xs font-black uppercase tracking-widest mb-1 flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4" /> Día Finalizado
+                </span>
+                <span className="text-[#E0E0E0] text-3xl font-black font-mono">$0.00</span>
+                <span className="text-emerald-400/60 text-[10px] font-bold mt-1 text-center uppercase tracking-widest">
+                  Nuevo ciclo — caja en cero
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* Venta y IVA */}
+              <div className="space-y-3">
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-white/5">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    Venta Neta (Sin IVA)
+                  </span>
+                  <span className="text-[#E0E0E0] text-xl font-mono font-bold">
+                    ${todayTotals.ventaNeta.toFixed(2)}
+                  </span>
+                </div>
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-white/5">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    IVA Acumulado
+                  </span>
+                  <span className="text-amber-400 text-xl font-mono">
+                    ${todayTotals.ivaAcumulado.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Propinas */}
+              <div className="space-y-3">
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-white/5">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    Propinas (Efectivo)
+                  </span>
+                  <span className="text-emerald-400 text-xl font-mono font-bold">
+                    ${todayTotals.propinasEfectivo.toFixed(2)}
+                  </span>
+                </div>
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-white/5">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    Propinas (Tarjeta)
+                  </span>
+                  <span className="text-blue-400 text-xl font-mono font-bold">
+                    ${todayTotals.propinasTarjeta.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Caja Final */}
+              <div className="space-y-3">
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-emerald-500/20">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    Caja Final (Efectivo)
+                  </span>
+                  <span className="text-emerald-400 text-xl font-mono font-black">
+                    ${todayTotals.cajaEfectivo.toFixed(2)}
+                  </span>
+                </div>
+                <div className="bg-[#1A1A1A] p-3.5 rounded-xl border border-blue-500/20">
+                  <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                    Caja Final (Tarjeta)
+                  </span>
+                  <span className="text-blue-400 text-xl font-mono font-black">
+                    ${todayTotals.cajaTarjeta.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Gastos del día */}
+              <div className="bg-[#1A1A1A] p-4 rounded-xl border border-red-500/20 flex flex-col justify-center">
+                <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                  Gastos del Día
+                </span>
+                <span className="text-red-400 text-2xl font-mono font-black">
+                  -${todayExpenses.toFixed(2)}
+                </span>
+                <span className="text-[#E0E0E0]/40 text-[10px] mt-1 uppercase font-bold">
+                  Insumos, sueldos, etc.
+                </span>
+              </div>
+
+              {/* Utilidad Final */}
+              <div className="bg-blue-950/30 p-4 rounded-2xl flex flex-col justify-center items-center shadow-lg border border-blue-500/30">
+                <span className="text-blue-300 text-[10px] font-black uppercase tracking-widest mb-1">
+                  Utilidad Real
+                </span>
+                <span className="text-[#E0E0E0] text-2xl font-black font-mono">
+                  ${todayTotals.utilidadReal.toFixed(2)}
+                </span>
+                <div className="mt-2 pt-2 border-t border-blue-500/20 w-full text-center">
+                  <span className="text-blue-300 text-[10px] font-black uppercase tracking-widest block mb-0.5">
+                    Utilidad Final
+                  </span>
+                  <span
+                    className={`text-xl font-black font-mono ${
+                      todayTotals.utilidadFinal >= 0 ? "text-emerald-400" : "text-red-400"
+                    }`}
+                  >
+                    ${todayTotals.utilidadFinal.toFixed(2)}
+                  </span>
+                  <span className="text-[#E0E0E0]/40 text-[9px] mt-0.5 block uppercase tracking-wider">
+                    (Utilidad Real - Gastos)
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Resumen Operativo */}
+          {!finalizeSuccess && todayOrders.length > 0 && (
+            <div className="pt-4 border-t border-white/5 space-y-3">
+              <h3 className="text-xs font-black text-[#E0E0E0]/50 uppercase tracking-widest flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                Resumen Operativo del Día
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-[#1A1A1A] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
+                    <Receipt className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                      Folios Generados
+                    </p>
+                    <p className="text-lg font-black text-[#E0E0E0]">
+                      {todayOrders.length}{" "}
+                      <span className="text-xs font-normal text-blue-400">órdenes hoy</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-[#1A1A1A] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+                    <Home className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                      Mesa vs Domicilio
+                    </p>
+                    <p className="text-base font-black text-[#E0E0E0]">
+                      {todayTotals.ordersAtTable}{" "}
+                      <span className="text-[10px] text-[#E0E0E0]/50 font-normal">Mesa</span>
+                      <span className="mx-2 text-[#E0E0E0]/20">|</span>
+                      {todayTotals.ordersDelivery}{" "}
+                      <span className="text-[10px] text-[#E0E0E0]/50 font-normal">Domicilio</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-[#1A1A1A] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                    <TrendingUp className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                      Consumo Promedio
+                    </p>
+                    <p className="text-lg font-black text-emerald-400">
+                      ${todayTotals.averageTicket.toFixed(2)}{" "}
+                      <span className="text-[10px] text-[#E0E0E0]/50 font-normal">por orden</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* ARCHIVO DE CORTES */}
+        {showCutsArchive && (
+          <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
+            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2 border-b border-white/5 pb-3">
+              <Folder className="h-5 w-5 text-blue-400" />
+              Archivo de Cortes Diarios
+            </h2>
+
+            {isLoadingCuts ? (
+              <p className="text-xs text-[#E0E0E0]/50 font-bold italic py-4">
+                Cargando archivo de cortes...
+              </p>
+            ) : dailyCuts.length === 0 ? (
+              <p className="text-xs text-[#E0E0E0]/50 font-bold italic py-4">
+                No hay cortes registrados aún.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-white/5 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                      <th className="py-3 px-3">Fecha</th>
+                      <th className="py-3 px-3 text-right">Órdenes</th>
+                      <th className="py-3 px-3 text-right">Venta Bruta</th>
+                      <th className="py-3 px-3 text-right">Venta Neta</th>
+                      <th className="py-3 px-3 text-right">IVA</th>
+                      <th className="py-3 px-3 text-right">Gastos</th>
+                      <th className="py-3 px-3 text-right">Utilidad Final</th>
+                      <th className="py-3 px-3 text-center">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {dailyCuts.map((cut) => {
+                      const ventaBruta = Number(cut.venta_neta) + Number(cut.iva_acumulado);
+                      return (
+                        <tr key={cut.id} className="hover:bg-white/5 transition-colors">
+                          <td className="py-3.5 px-3 font-bold text-[#E0E0E0]">
+                            {new Date(`${cut.cut_date}T12:00:00`).toLocaleDateString("es-MX", {
+                              weekday: "short",
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </td>
+                          <td className="py-3.5 px-3 text-right font-black text-[#E0E0E0]/80">
+                            {cut.total_orders}
+                          </td>
+                          <td className="py-3.5 px-3 text-right font-mono font-bold text-emerald-400">
+                            ${ventaBruta.toFixed(2)}
+                          </td>
+                          <td className="py-3.5 px-3 text-right font-mono text-[#E0E0E0]/70">
+                            ${Number(cut.venta_neta).toFixed(2)}
+                          </td>
+                          <td className="py-3.5 px-3 text-right font-mono text-amber-400">
+                            ${Number(cut.iva_acumulado).toFixed(2)}
+                          </td>
+                          <td className="py-3.5 px-3 text-right font-mono text-red-400">
+                            -${Number(cut.total_gastos).toFixed(2)}
+                          </td>
+                          <td
+                            className={`py-3.5 px-3 text-right font-mono font-black ${
+                              Number(cut.utilidad_final) >= 0 ? "text-blue-400" : "text-red-400"
+                            }`}
+                          >
+                            ${Number(cut.utilidad_final).toFixed(2)}
+                          </td>
+                          <td className="py-3.5 px-3 text-center">
+                            <button
+                              onClick={() => setSelectedCutDetail(cut)}
+                              className="rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-black text-[#E0E0E0] hover:bg-white/10 transition-all uppercase tracking-wider"
+                            >
+                              Ver Detalle
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* GRÁFICAS FINANCIERAS */}
+        <section className="space-y-4">
+          <h2 className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+            Análisis y Tendencias
+          </h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Venta Diaria */}
+            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 lg:col-span-2 space-y-4">
+              <h3 className="text-sm font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-blue-400" />
+                Venta Diaria ({format(new Date(), "MMMM", { locale: es })})
+              </h3>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={chartsData.dailySales}
+                    margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
+                    <XAxis dataKey="date" stroke="#888888" fontSize={11} />
+                    <YAxis stroke="#888888" fontSize={11} tickFormatter={(val) => `$${val}`} />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "#1D1D1D",
+                        borderColor: "#333333",
+                        borderRadius: "12px",
+                        color: "#E0E0E0",
+                      }}
+                      formatter={(value: any) => [`$${Number(value).toFixed(2)}`, "Venta Neta"]}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="total"
+                      stroke="#FFB7CE"
+                      strokeWidth={3}
+                      dot={{ r: 4, fill: "#FFB7CE" }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Mix de Ventas */}
+            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
+              <h3 className="text-sm font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
+                <PieChartIcon className="h-4 w-4 text-emerald-400" />
+                Mix de Ventas
+              </h3>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartsData.salesMix}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={75}
+                      paddingAngle={4}
+                      dataKey="value"
+                    >
+                      {chartsData.salesMix.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "#1D1D1D",
+                        borderColor: "#333333",
+                        borderRadius: "12px",
+                        color: "#E0E0E0",
+                      }}
+                      formatter={(value: any) => [`$${Number(value).toFixed(2)}`, "Importe"]}
+                    />
+                    <Legend wrapperStyle={{ fontSize: "11px", color: "#888888" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Crecimiento Mensual */}
+            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 lg:col-span-3 space-y-4">
+              <h3 className="text-sm font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-success" />
+                Crecimiento Mensual
+              </h3>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={chartsData.growth}
+                    layout="vertical"
+                    margin={{ top: 5, right: 20, left: 30, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" horizontal={false} />
+                    <XAxis type="number" stroke="#888888" fontSize={11} tickFormatter={(val) => `$${val}`} />
+                    <YAxis dataKey="name" type="category" stroke="#888888" fontSize={11} width={90} />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "#1D1D1D",
+                        borderColor: "#333333",
+                        borderRadius: "12px",
+                        color: "#E0E0E0",
+                      }}
+                      formatter={(value: any) => [`$${Number(value).toFixed(2)}`, "Total Venta Neta"]}
+                      cursor={{ fill: "#242424" }}
+                    />
+                    <Bar dataKey="total" fill="#03A63C" barSize={36} radius={[0, 8, 8, 0]}>
+                      {chartsData.growth.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index === 0 ? "#4B5563" : "#03A63C"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* TABLA PRINCIPAL DE ÓRDENES */}
+        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 overflow-hidden space-y-4">
+          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-success"></span>
+              Registros de Órdenes
+            </h2>
+            <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
+              Mostrando {filteredOrders.length} orden{filteredOrders.length !== 1 ? "es" : ""}
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-white/5 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                  <th className="py-3 px-3">Folio</th>
+                  <th className="py-3 px-3">Fecha</th>
+                  <th className="py-3 px-3">Mesa</th>
+                  <th className="py-3 px-3">Método</th>
+                  <th className="py-3 px-3 text-right">Subtotal</th>
+                  <th className="py-3 px-3 text-right">IVA (16%)</th>
+                  <th className="py-3 px-3 text-right">Propina</th>
+                  <th className="py-3 px-3 text-right text-primary">TOTAL PAGO</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {filteredOrders.map((order) => {
+                  const tipAmount = getOrderTipAmount(order);
+                  const paymentMethods = getOrderPaymentMethods(order);
+                  const primaryPaymentMethod = paymentMethods[0] || "N/A";
+
+                  const subtotalFiscal = order.total / 1.16;
+                  const ivaFiscal = order.total - subtotalFiscal;
+                  const totalPago = order.total + tipAmount;
+
+                  let methodLabel = getOrderPaymentLabel(order);
+                  let methodBadgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+
+                  if (order.status === "UNCOLLECTED") {
+                    methodLabel = "NO COBRADA";
+                    methodBadgeClass = "bg-red-500/10 text-red-400 border-red-500/20";
+                  } else if (primaryPaymentMethod === "CARD" || primaryPaymentMethod === "TRANSFER") {
+                    methodBadgeClass = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+                  } else if (paymentMethods.length > 1) {
+                    methodBadgeClass = "bg-purple-500/10 text-purple-300 border-purple-500/20";
+                  }
+
+                  const isExpanded = expandedRow === order.id;
+
+                  return (
+                    <React.Fragment key={order.id}>
+                      <tr
+                        className="hover:bg-white/5 cursor-pointer transition-colors"
+                        onClick={() => toggleRow(order.id)}
+                      >
+                        <td className="py-3.5 px-3 font-mono font-black text-sm text-[#E0E0E0]">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[#E0E0E0]/40">
+                              {isExpanded ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-primary" />
+                              ) : (
+                                <ChevronRight className="h-3.5 w-3.5" />
+                              )}
+                            </span>
+                            #{order.orderNumber}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-3 text-[#E0E0E0]/80 font-medium">
+                          {new Date(order.createdAt).toLocaleDateString("es-MX", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            timeZone: "America/Mexico_City",
+                          })}
+                        </td>
+                        <td className="py-3.5 px-3">
+                          <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black text-[#E0E0E0]/70 uppercase tracking-wider">
+                            {order.table || "Para Llevar"}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-3">
+                          <span
+                            className={`px-2.5 py-1 rounded-full border text-[10px] font-black uppercase tracking-wider ${methodBadgeClass}`}
+                          >
+                            {methodLabel}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-3 text-right font-mono text-[#E0E0E0]/70">
+                          ${subtotalFiscal.toFixed(2)}
+                        </td>
+                        <td className="py-3.5 px-3 text-right font-mono text-amber-400/80">
+                          ${ivaFiscal.toFixed(2)}
+                        </td>
+                        <td className="py-3.5 px-3 text-right font-mono text-blue-400">
+                          ${tipAmount.toFixed(2)}
+                        </td>
+                        <td className="py-3.5 px-3 text-right font-mono font-black text-[#E0E0E0] text-sm">
+                          ${totalPago.toFixed(2)}
+                        </td>
+                      </tr>
+
+                      {/* FILA EXPANDIDA PARA DETALLES DE PRODUCTOS */}
+                      {isExpanded && (
+                        <tr className="bg-[#181818]">
+                          <td colSpan={8} className="px-6 py-4">
+                            <div className="bg-[#1D1D1D] rounded-xl border border-white/5 p-4 space-y-3">
+                              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                                <h4 className="text-xs font-black text-[#E0E0E0]/50 uppercase tracking-widest flex items-center gap-1.5">
+                                  <ShoppingBag className="h-3.5 w-3.5 text-primary" />
+                                  Detalle de la Orden #{order.orderNumber}
+                                </h4>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setBillingOrder(order);
+                                  }}
+                                  className="rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                                >
+                                  <FileText className="h-3.5 w-3.5" /> Facturar
+                                </button>
+                              </div>
+
+                              <table className="w-full text-xs">
+                                <thead>
+                                  <tr className="text-[10px] font-extrabold text-[#E0E0E0]/40 uppercase tracking-widest border-b border-white/5">
+                                    <th className="text-left pb-2 font-mono">Cant</th>
+                                    <th className="text-left pb-2">Producto</th>
+                                    <th className="text-right pb-2">Precio Unit.</th>
+                                    <th className="text-right pb-2">Importe</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                  {order.orderItems?.map((item) => {
+                                    const importe = item.quantity * item.unitPrice;
+                                    return (
+                                      <tr key={item.id} className="hover:bg-white/5">
+                                        <td className="py-2 text-[#E0E0E0] font-mono font-bold">
+                                          {item.quantity}
+                                        </td>
+                                        <td className="py-2 text-[#E0E0E0] font-bold uppercase">
+                                          {item.menuItem?.name || "Producto desconocido"}
+                                          {item.notes && (
+                                            <span className="block text-[10px] text-amber-400 font-normal">
+                                              {item.notes}
+                                            </span>
+                                          )}
+                                        </td>
+                                        <td className="py-2 text-right text-[#E0E0E0]/60 font-mono">
+                                          ${item.unitPrice.toFixed(2)}
+                                        </td>
+                                        <td className="py-2 text-right text-[#E0E0E0] font-mono font-bold">
+                                          ${importe.toFixed(2)}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+
+                {filteredOrders.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-8 text-center text-[#E0E0E0]/40 italic">
+                      No se encontraron órdenes que coincidan con los filtros seleccionados.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+
+      {/* MODAL DETALLE DE CORTE */}
+      {selectedCutDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 no-print">
+          <div className="w-full max-w-lg rounded-2xl bg-[#242424] p-6 shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto custom-scrollbar space-y-5">
+            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <div>
+                <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+                  <Receipt className="h-4 w-4 text-blue-400" />
+                  Detalle del Corte
+                </h3>
+                <p className="text-xs font-bold text-[#E0E0E0]/50 mt-0.5">
+                  {new Date(`${selectedCutDetail.cut_date}T12:00:00`).toLocaleDateString("es-MX", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedCutDetail(null)}
+                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-[#1A1A1A] p-3 rounded-xl border border-white/5">
+                <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                  Venta Neta (Sin IVA)
+                </span>
+                <span className="text-[#E0E0E0] text-lg font-mono font-bold">
+                  ${Number(selectedCutDetail.venta_neta).toFixed(2)}
+                </span>
+              </div>
+              <div className="bg-[#1A1A1A] p-3 rounded-xl border border-white/5">
+                <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                  IVA Acumulado
+                </span>
+                <span className="text-amber-400 text-lg font-mono font-bold">
+                  ${Number(selectedCutDetail.iva_acumulado).toFixed(2)}
+                </span>
+              </div>
+              <div className="bg-[#1A1A1A] p-3 rounded-xl border border-white/5">
+                <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                  Propinas (Efectivo)
+                </span>
+                <span className="text-emerald-400 text-lg font-mono font-bold">
+                  ${Number(selectedCutDetail.propinas_efectivo).toFixed(2)}
+                </span>
+              </div>
+              <div className="bg-[#1A1A1A] p-3 rounded-xl border border-white/5">
+                <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                  Propinas (Tarjeta)
+                </span>
+                <span className="text-blue-400 text-lg font-mono font-bold">
+                  ${Number(selectedCutDetail.propinas_tarjeta).toFixed(2)}
+                </span>
+              </div>
+              <div className="bg-[#1A1A1A] p-3 rounded-xl border border-emerald-500/20">
+                <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                  Caja Final (Efectivo)
+                </span>
+                <span className="text-emerald-400 text-lg font-mono font-black">
+                  ${Number(selectedCutDetail.caja_efectivo).toFixed(2)}
+                </span>
+              </div>
+              <div className="bg-[#1A1A1A] p-3 rounded-xl border border-blue-500/20">
+                <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                  Caja Final (Tarjeta)
+                </span>
+                <span className="text-blue-400 text-lg font-mono font-black">
+                  ${Number(selectedCutDetail.caja_tarjeta).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Desglose de Gastos */}
+            <div className="bg-[#1A1A1A] rounded-xl border border-red-500/20 p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest">
+                  Gastos Registrados
+                </span>
+                <span className="text-red-400 font-mono font-black">
+                  -${Number(selectedCutDetail.total_gastos).toFixed(2)}
+                </span>
+              </div>
+              {selectedCutDetail.expenses_detail && selectedCutDetail.expenses_detail.length > 0 ? (
+                <div className="space-y-1 pt-2 border-t border-white/5">
+                  {selectedCutDetail.expenses_detail.map((expense, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {expense.has_invoice && (
+                          <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-black uppercase">
+                            FAC
+                          </span>
+                        )}
+                        <span className="text-[#E0E0E0]/70 truncate">{expense.description}</span>
+                      </div>
+                      <span className="text-red-400 font-mono font-bold shrink-0 ml-2">
+                        -${Number(expense.amount).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[#E0E0E0]/40 text-xs italic pt-1">
+                  Sin registro individual de gastos en este corte.
+                </p>
+              )}
+            </div>
+
+            <div className="bg-blue-950/30 p-4 rounded-xl border border-blue-500/30 space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-blue-300 font-black uppercase tracking-wider">
+                  Utilidad Real
+                </span>
+                <span className="text-[#E0E0E0] font-black font-mono">
+                  ${Number(selectedCutDetail.utilidad_real).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t border-blue-500/20">
+                <span className="text-blue-300 font-black uppercase tracking-wider text-xs">
+                  Utilidad Final (- Gastos)
+                </span>
+                <span
+                  className={`text-lg font-black font-mono ${
+                    Number(selectedCutDetail.utilidad_final) >= 0
+                      ? "text-emerald-400"
+                      : "text-red-400"
+                  }`}
+                >
+                  ${Number(selectedCutDetail.utilidad_final).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setSelectedCutDetail(null)}
+              className="w-full bg-white/5 text-[#E0E0E0]/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL FINALIZAR DÍA */}
+      {showFinalizeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 no-print">
+          <div className="w-full max-w-md rounded-2xl bg-[#242424] p-6 shadow-2xl border border-emerald-500/30 space-y-5">
+            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+              <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                Finalizar Día
+              </h3>
+              <button
+                onClick={() => setShowFinalizeModal(false)}
+                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-xs font-medium text-[#E0E0E0]/60">
+              Se guardará el resumen financiero en el archivo de cortes y se iniciará un nuevo ciclo.
+            </p>
+
+            <div className="space-y-3 bg-[#1A1A1A] rounded-xl p-4 border border-white/5 text-xs">
+              <div className="flex justify-between items-center bg-[#242424] p-2.5 rounded-lg border border-white/5">
+                <span className="text-[#E0E0E0]/60 font-bold">Venta Neta (sin IVA)</span>
+                <span className="text-[#E0E0E0] font-mono font-black">
+                  ${todayTotals.ventaNeta.toFixed(2)}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <div>
+                  <label className="text-[10px] text-[#E0E0E0]/50 uppercase font-black mb-1 block">
+                    Efectivo Caja
+                  </label>
+                  <input
+                    type="number"
+                    value={manualCash}
+                    onChange={(e) => setManualCash(e.target.value)}
+                    className="w-full bg-[#181818] border border-white/5 rounded-lg px-2.5 py-1.5 text-emerald-400 font-mono font-bold focus:border-emerald-400 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-[#E0E0E0]/50 uppercase font-black mb-1 block">
+                    Tarjeta Caja
+                  </label>
+                  <input
+                    type="number"
+                    value={manualCard}
+                    onChange={(e) => setManualCard(e.target.value)}
+                    className="w-full bg-[#181818] border border-white/5 rounded-lg px-2.5 py-1.5 text-blue-400 font-mono font-bold focus:border-blue-400 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-[#E0E0E0]/50 uppercase font-black mb-1 block">
+                    Propinas Efec.
+                  </label>
+                  <input
+                    type="number"
+                    value={manualTipsEfectivo}
+                    onChange={(e) => setManualTipsEfectivo(e.target.value)}
+                    className="w-full bg-[#181818] border border-white/5 rounded-lg px-2.5 py-1.5 text-emerald-400/80 font-mono font-bold focus:border-emerald-400 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-[#E0E0E0]/50 uppercase font-black mb-1 block">
+                    Propinas Tarj.
+                  </label>
+                  <input
+                    type="number"
+                    value={manualTipsTarjeta}
+                    onChange={(e) => setManualTipsTarjeta(e.target.value)}
+                    className="w-full bg-[#181818] border border-white/5 rounded-lg px-2.5 py-1.5 text-blue-400/80 font-mono font-bold focus:border-blue-400 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between border-t border-white/5 pt-2 text-[#E0E0E0]/60">
+                <span>Órdenes completadas</span>
+                <span className="text-[#E0E0E0] font-bold">{todayOrders.length}</span>
+              </div>
+              <div className="flex justify-between text-[#E0E0E0]/60">
+                <span>Gastos del Día</span>
+                <span className="text-red-400 font-mono font-bold">
+                  -${todayExpenses.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Distribución de Propinas */}
+            <div className="bg-[#1A1A1A] p-4 rounded-xl border border-white/5 space-y-2">
+              <h4 className="text-xs font-black text-[#E0E0E0] uppercase tracking-wider flex items-center justify-between">
+                <span>Distribución de Propinas</span>
+                {isCalculatingTips && (
+                  <span className="text-[10px] text-blue-400">Calculando...</span>
+                )}
+              </h4>
+              {!isCalculatingTips && tipBreakdown.length > 0 ? (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex justify-between text-[10px] text-[#E0E0E0]/40 font-extrabold uppercase tracking-widest border-b border-white/5 pb-1">
+                    <span>Empleado</span>
+                    <span>Horas</span>
+                    <span>Monto</span>
+                  </div>
+                  {tipBreakdown.map((item, idx) => (
+                    <div key={idx} className="flex justify-between text-xs">
+                      <span className="text-[#E0E0E0]/80 font-bold">{item.employee_name}</span>
+                      <span className="text-[#E0E0E0]/50 font-mono">
+                        {item.hours_worked.toFixed(2)}h
+                      </span>
+                      <span className="text-emerald-400 font-mono font-bold">
+                        ${item.tip_amount.toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : !isCalculatingTips ? (
+                <p className="text-[11px] text-[#E0E0E0]/40 italic">
+                  No hay registros de asistencia finalizados hoy.
+                </p>
+              ) : null}
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowFinalizeModal(false)}
+                disabled={isFinalizing}
+                className="w-full bg-white/5 text-[#E0E0E0]/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleFinalizarDia}
+                disabled={isFinalizing}
+                className="w-full bg-success text-white py-3 rounded-xl font-black hover:brightness-110 transition-all uppercase text-xs tracking-wider shadow-lg shadow-success/20 disabled:opacity-50"
+              >
+                {isFinalizing ? "Guardando..." : "Confirmar y Finalizar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE FACTURACIÓN */}
+      {billingOrder && (
+        <FacturacionModal order={billingOrder} onClose={() => setBillingOrder(null)} />
+      )}
+    </div>
+  );
 }
