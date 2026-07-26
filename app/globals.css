@@ -33,6 +33,14 @@
   textarea {
     @apply bg-[#181818] text-[#E0E0E0] border-[#333333] placeholder-[#888888] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors;
   }
+
+  /* Dark color-scheme for native date/time inputs */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"] {
+    color-scheme: dark;
+  }
 }
 
 body {
@@ -41,7 +49,27 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Print utility */
+/* ── Custom Scrollbar ─────────────────────────────────── */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Print utility ────────────────────────────────────── */
 @media print {
   .no-print {
     display: none !important;

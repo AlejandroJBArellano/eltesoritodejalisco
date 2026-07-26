@@ -45,6 +45,8 @@ export function AdminTareasClient({
   const [metrics, setMetrics] = useState<any[]>([])
   const [loading, setLoading] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [armedCatId, setArmedCatId] = useState<string | null>(null)
+  const [armedTaskId, setArmedTaskId] = useState<string | null>(null)
 
   // State for Categories & Tasks
   const [categories, setCategories] = useState<TaskCategory[]>(initialCategories)
@@ -133,7 +135,7 @@ export function AdminTareasClient({
       await approveTask(executionId)
       setExecutions(prev => prev.map(e => e.id === executionId ? { ...e, status: 'APPROVED' } : e))
     } catch (err: any) {
-      alert(err.message || "Error al aprobar tarea")
+      setErrorMsg(err.message || "Error al aprobar tarea")
     } finally {
       setLoading(null)
     }
@@ -150,7 +152,7 @@ export function AdminTareasClient({
       setNewCategoryName('')
       setIsCategoryModalOpen(false)
     } catch (err: any) {
-      alert(err.message || "Error al crear categoría")
+      setErrorMsg(err.message || "Error al crear categoría")
     } finally {
       setLoading(null)
     }
@@ -164,20 +166,25 @@ export function AdminTareasClient({
       setCategories(prev => prev.map(c => c.id === id ? updated : c))
       setEditingCategoryId(null)
     } catch (err: any) {
-      alert(err.message || "Error al actualizar categoría")
+      setErrorMsg(err.message || "Error al actualizar categoría")
     } finally {
       setLoading(null)
     }
   }
 
   const handleDeleteCategory = async (id: string, name: string) => {
-    if (!window.confirm(`¿Seguro que deseas eliminar la categoría "${name}"?`)) return
+    if (armedCatId !== id) {
+      setArmedCatId(id)
+      setTimeout(() => setArmedCatId(null), 3000)
+      return
+    }
+    setArmedCatId(null)
     try {
       setLoading('cat')
       await deleteTaskCategory(id)
       setCategories(prev => prev.filter(c => c.id !== id))
     } catch (err: any) {
-      alert(err.message || "Error al eliminar categoría")
+      setErrorMsg(err.message || "Error al eliminar categoría")
     } finally {
       setLoading(null)
     }
@@ -221,7 +228,7 @@ export function AdminTareasClient({
       setNewTaskName('')
       setIsTaskModalOpen(false)
     } catch (err: any) {
-      alert(err.message || "Error al crear tarea")
+      setErrorMsg(err.message || "Error al crear tarea")
     } finally {
       setLoading(null)
     }
@@ -245,20 +252,25 @@ export function AdminTareasClient({
       setEditingTaskId(null)
       setIsTaskModalOpen(false)
     } catch (err: any) {
-      alert(err.message || "Error al actualizar tarea")
+      setErrorMsg(err.message || "Error al actualizar tarea")
     } finally {
       setLoading(null)
     }
   }
 
   const handleDeleteTask = async (id: string, name: string) => {
-    if (!window.confirm(`¿Seguro que deseas desactivar la tarea "${name}"?`)) return
+    if (armedTaskId !== id) {
+      setArmedTaskId(id)
+      setTimeout(() => setArmedTaskId(null), 3000)
+      return
+    }
+    setArmedTaskId(null)
     try {
       setLoading('task')
       await deletePrimordialTask(id)
       setTasks(prev => prev.filter(t => t.id !== id))
     } catch (err: any) {
-      alert(err.message || "Error al desactivar la tarea")
+      setErrorMsg(err.message || "Error al desactivar la tarea")
     } finally {
       setLoading(null)
     }

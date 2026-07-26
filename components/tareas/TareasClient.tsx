@@ -27,10 +27,14 @@ export function TareasClient({
 }) {
   const [executions, setExecutions] = useState<TaskExecution[]>(initialExecutions)
   const [loadingTaskId, setLoadingTaskId] = useState<string | null>(null)
-  
+
   // Guardar las fotos seleccionadas por ejecución
   const [selectedPhotos, setSelectedPhotos] = useState<{ [execId: string]: File }>({})
-  
+
+  // Error states (replacing alert)
+  const [photoErrors, setPhotoErrors] = useState<{ [execId: string]: string }>({})
+  const [taskError, setTaskError] = useState<string | null>(null)
+
   // Controlar alertas de Timeout
   const [timeoutAlert, setTimeoutAlert] = useState<{ exec: TaskExecution, task: PrimordialTask } | null>(null)
   
@@ -112,11 +116,13 @@ export function TareasClient({
 
   const handleComplete = async (exec: TaskExecution, task: PrimordialTask) => {
     const file = selectedPhotos[exec.id]
-    
+
     if (task.requires_photo && !file) {
-      alert(`⚠️ La tarea "${task.name}" requiere una foto de evidencia para poder completarse.`)
+      setPhotoErrors(prev => ({ ...prev, [exec.id]: `Esta tarea requiere una foto de evidencia para completarse.` }))
       return
     }
+    setPhotoErrors(prev => { const c = { ...prev }; delete c[exec.id]; return c })
+    setTaskError(null)
 
     setLoadingTaskId(exec.id)
     try {
@@ -152,7 +158,7 @@ export function TareasClient({
 
       setExecutions(prev => prev.map(e => e.id === exec.id ? { ...updatedExec, task: e.task } : e))
     } catch (e: any) {
-      alert(e.message || "Error al completar la tarea")
+      setTaskError(e.message || "Error al completar la tarea")
       console.error(e)
     } finally {
       setLoadingTaskId(null)
@@ -304,6 +310,11 @@ export function TareasClient({
                               onChange={(e) => handleFileChange(activeExecution.id, e.target.files?.[0] || null)}
                               className="block w-full text-xs text-[#E0E0E0]/60 file:mr-3 file:rounded-xl file:border-0 file:bg-white/10 file:px-4 file:py-2.5 file:text-xs file:font-black file:text-[#E0E0E0] hover:file:bg-white/20 file:transition-all cursor-pointer"
                             />
+                            {photoErrors[activeExecution.id] && (
+                              <p className="text-xs font-bold text-red-400 mt-1">
+                                ⚠️ {photoErrors[activeExecution.id]}
+                              </p>
+                            )}
                           </div>
                         )}
 

@@ -78,6 +78,7 @@ export default function GastosPage() {
   const [newCatColor, setNewCatColor] = useState("#FFB7CE");
   const [newCatTipoGasto, setNewCatTipoGasto] = useState<"fijo" | "variable">("variable");
   const [isSubmittingCat, setIsSubmittingCat] = useState(false);
+  const [catError, setCatError] = useState<string | null>(null);
 
   // Monthly Sales
   const [totalSales, setTotalSales] = useState(0);
@@ -96,6 +97,7 @@ export default function GastosPage() {
   });
   const [hasInvoice, setHasInvoice] = useState(false);
   const [isSubmittingExp, setIsSubmittingExp] = useState(false);
+  const [expError, setExpError] = useState<string | null>(null);
 
   // Filter Month
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -169,15 +171,16 @@ export default function GastosPage() {
       });
       if (!res.ok) {
         const d = await res.json();
-        alert(d.error || `Error al ${isEditing ? "editar" : "crear"} categoría`);
+        setCatError(d.error || `Error al ${isEditing ? "editar" : "crear"} categoría`);
         return;
       }
       setIsCategoryModalOpen(false);
+      setCatError(null);
       setNewCatName("");
       setEditingCategory(null);
       fetchData();
     } catch (error) {
-      alert("Error de conexión");
+      setCatError("Error de conexión");
     } finally {
       setIsSubmittingCat(false);
     }
@@ -186,10 +189,11 @@ export default function GastosPage() {
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!categoryId || !amount || parseFloat(amount) <= 0 || !description) {
-      alert("Comienza llenando todos los campos requeridos");
+      setExpError("Completa todos los campos requeridos");
       return;
     }
     setIsSubmittingExp(true);
+    setExpError(null);
     try {
       const res = await fetch("/api/gastos", {
         method: "POST",
@@ -203,7 +207,7 @@ export default function GastosPage() {
         }),
       });
       if (!res.ok) {
-        alert("Error al registrar gasto");
+        setExpError("Error al registrar gasto");
         return;
       }
       setAmount("");
@@ -211,7 +215,7 @@ export default function GastosPage() {
       setIsExpenseModalOpen(false);
       fetchData();
     } catch (error) {
-      alert("Error de conexión");
+      setExpError("Error de conexión");
     } finally {
       setIsSubmittingExp(false);
     }
@@ -992,14 +996,25 @@ export default function GastosPage() {
                 Registrar Gasto
               </h3>
               <button
-                onClick={() => setIsExpenseModalOpen(false)}
-                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors"
+                onClick={() => {
+                  setIsExpenseModalOpen(false);
+                  setExpError(null);
+                }}
+                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors p-1 rounded-lg hover:bg-white/10"
+                type="button"
+                aria-label="Cerrar"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleAddExpense} className="space-y-4">
+              {expError && (
+                <div className="rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 p-3 text-xs font-bold flex items-center gap-2">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                  {expError}
+                </div>
+              )}
               <div>
                 <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
                   Categoría *
@@ -1133,14 +1148,23 @@ export default function GastosPage() {
                 onClick={() => {
                   setIsCategoryModalOpen(false);
                   setEditingCategory(null);
+                  setCatError(null);
                 }}
-                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors"
+                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors p-1 rounded-lg hover:bg-white/10"
+                type="button"
+                aria-label="Cerrar"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleAddCategory} className="space-y-4">
+              {catError && (
+                <div className="rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 p-3 text-xs font-bold flex items-center gap-2">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                  {catError}
+                </div>
+              )}
               <div>
                 <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
                   Nombre de la Categoría *

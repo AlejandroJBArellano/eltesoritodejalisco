@@ -124,6 +124,7 @@ export default function AdminUsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [deleteArmedId, setDeleteArmedId] = useState<string | null>(null);
 
   // Modal & Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -181,9 +182,12 @@ export default function AdminUsersPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`¿Estás seguro de que deseas eliminar al usuario ${name}? Esta acción no se puede deshacer.`)) {
+    if (deleteArmedId !== id) {
+      setDeleteArmedId(id);
+      setTimeout(() => setDeleteArmedId(null), 3000);
       return;
     }
+    setDeleteArmedId(null);
     setErrorMsg("");
     setSuccessMsg("");
 
@@ -191,7 +195,7 @@ export default function AdminUsersPage() {
     if (res?.error) {
       setErrorMsg(res.error);
     } else if (res?.success) {
-      setSuccessMsg("Usuario eliminado.");
+      setSuccessMsg(`Usuario ${name} eliminado.`);
       fetchProfiles();
     }
   };
@@ -471,10 +475,14 @@ export default function AdminUsersPage() {
                       <td className="py-3 px-4 text-right">
                         <button
                           onClick={() => handleDelete(p.id, p.full_name || p.email)}
-                          className="rounded-lg bg-red-500/10 border border-red-500/20 p-2 text-red-400 hover:bg-red-500/20 transition-colors"
-                          title="Eliminar Usuario"
+                          className={`rounded-lg border p-2 transition-all text-xs font-black ${
+                            deleteArmedId === p.id
+                              ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
+                              : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                          }`}
+                          title={deleteArmedId === p.id ? "Confirmar eliminación" : "Eliminar Usuario"}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {deleteArmedId === p.id ? "¿Seguro?" : <Trash2 className="h-4 w-4" />}
                         </button>
                       </td>
                     </tr>

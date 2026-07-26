@@ -58,6 +58,7 @@ export default function CustomersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [deleteArmedId, setDeleteArmedId] = useState<string | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -208,10 +209,12 @@ export default function CustomersPage() {
   };
 
   const handleDelete = async (customerId: string) => {
-    const confirmed = window.confirm(
-      "¿Eliminar este cliente? Esta acción no se puede deshacer."
-    );
-    if (!confirmed) return;
+    if (deleteArmedId !== customerId) {
+      setDeleteArmedId(customerId);
+      setTimeout(() => setDeleteArmedId(null), 3000);
+      return;
+    }
+    setDeleteArmedId(null);
 
     try {
       setIsSubmitting(true);
@@ -484,10 +487,14 @@ export default function CustomersPage() {
                         </button>
                         <button
                           onClick={() => handleDelete(c.id)}
-                          className="rounded-lg bg-red-500/10 border border-red-500/20 p-2 text-red-400 hover:bg-red-500/20 transition-colors"
-                          title="Eliminar Cliente"
+                          className={`rounded-lg border p-2 transition-all text-xs font-black ${
+                            deleteArmedId === c.id
+                              ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
+                              : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                          }`}
+                          title={deleteArmedId === c.id ? "Confirmar eliminación" : "Eliminar Cliente"}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {deleteArmedId === c.id ? "¿Seguro?" : <Trash2 className="h-4 w-4" />}
                         </button>
                       </div>
                     </td>

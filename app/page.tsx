@@ -42,7 +42,7 @@ function StatCard({ title, icon: Icon, value, themeClass }: StatCardProps) {
           <Icon className="h-5 w-5" />
         </div>
       </div>
-      <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
+      <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight tabular-nums">
         {value}
       </p>
     </div>
@@ -55,7 +55,7 @@ interface ModuleCardProps {
   href: string;
   icon: React.ElementType;
   themeClass: string;
-  hoverTextClass: string;
+  hoverColor: string;
   badge?: string;
 }
 
@@ -65,12 +65,12 @@ function ModuleCard({
   href,
   icon: Icon,
   themeClass,
-  hoverTextClass,
+  hoverColor,
   badge,
 }: ModuleCardProps) {
   return (
     <Link href={href} className="group cursor-pointer focus:outline-none">
-      <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+      <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 hover:border-white/10 flex flex-col justify-between">
         <div>
           <div className="mb-6 flex items-center justify-between">
             <div className={`rounded-xl p-3 ${themeClass}`}>
@@ -82,8 +82,11 @@ function ModuleCard({
               </span>
             )}
           </div>
-          <h3 className={`mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase transition-colors flex items-center justify-between group-hover:${hoverTextClass}`}>
-            <span>{title}</span>
+          <h3
+            className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase transition-colors flex items-center justify-between"
+            style={{ "--hover-color": hoverColor } as React.CSSProperties}
+          >
+            <span className="group-hover:text-[var(--hover-color)] transition-colors">{title}</span>
             <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </h3>
           <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
@@ -226,7 +229,7 @@ export default async function Home() {
                 icon={Receipt}
                 badge="Activo"
                 themeClass="bg-secondary/10 text-secondary"
-                hoverTextClass="text-secondary"
+                hoverColor="var(--color-secondary)"
               />
             )}
             <ModuleCard
@@ -236,7 +239,7 @@ export default async function Home() {
               icon={ChefHat}
               badge="Real-time"
               themeClass="bg-primary/10 text-primary"
-              hoverTextClass="text-primary"
+              hoverColor="var(--color-primary)"
             />
             {(isAdmin || isWaiter) && (
               <ModuleCard
@@ -246,7 +249,7 @@ export default async function Home() {
                 icon={CheckSquare}
                 badge="Checklist"
                 themeClass="bg-primary/10 text-primary"
-                hoverTextClass="text-primary"
+                hoverColor="var(--color-primary)"
               />
             )}
             <ModuleCard
@@ -256,7 +259,7 @@ export default async function Home() {
               icon={Clock}
               badge="Turnos"
               themeClass="bg-purple-500/10 text-purple-500"
-              hoverTextClass="text-purple-500"
+              hoverColor="#a855f7"
             />
           </div>
         </section>
@@ -279,7 +282,7 @@ export default async function Home() {
                 icon={Users}
                 badge="CRM"
                 themeClass="bg-success/10 text-success"
-                hoverTextClass="text-success"
+                hoverColor="var(--color-success)"
               />
               {isAdmin && (
                 <ModuleCard
@@ -288,7 +291,7 @@ export default async function Home() {
                   href="/menu"
                   icon={UtensilsCrossed}
                   themeClass="bg-primary/10 text-primary"
-                  hoverTextClass="text-primary"
+                  hoverColor="var(--color-primary)"
                 />
               )}
               {isAdmin && (
@@ -299,7 +302,7 @@ export default async function Home() {
                   icon={ReceiptText}
                   badge="Historial"
                   themeClass="bg-purple-500/10 text-purple-500"
-                  hoverTextClass="text-purple-500"
+                  hoverColor="#a855f7"
                 />
               )}
               {isAdmin && (
@@ -310,7 +313,7 @@ export default async function Home() {
                   icon={ClipboardCheck}
                   badge="Control"
                   themeClass="bg-blue-500/10 text-blue-500"
-                  hoverTextClass="text-blue-500"
+                  hoverColor="#3b82f6"
                 />
               )}
               {isAdmin && (
@@ -320,7 +323,7 @@ export default async function Home() {
                   href="/admin/users"
                   icon={UserCog}
                   themeClass="bg-primary/10 text-primary"
-                  hoverTextClass="text-primary"
+                  hoverColor="var(--color-primary)"
                 />
               )}
             </div>
@@ -345,7 +348,7 @@ export default async function Home() {
                 icon={BookOpen}
                 badge="Registro"
                 themeClass="bg-blue-500/10 text-blue-500"
-                hoverTextClass="text-blue-500"
+                hoverColor="#3b82f6"
               />
               <ModuleCard
                 title="Gastos"
@@ -354,7 +357,7 @@ export default async function Home() {
                 icon={ReceiptText}
                 badge="NUEVO"
                 themeClass="bg-red-500/10 text-red-500"
-                hoverTextClass="text-red-500"
+                hoverColor="#ef4444"
               />
               <ModuleCard
                 title="Reportes"
@@ -362,7 +365,7 @@ export default async function Home() {
                 href="/reports"
                 icon={BarChart3}
                 themeClass="bg-zinc-800 text-[#E0E0E0]"
-                hoverTextClass="text-primary"
+                hoverColor="var(--color-primary)"
               />
             </div>
           </section>

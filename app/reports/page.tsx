@@ -244,7 +244,7 @@ export default function ReportsPage() {
                 onClick={() => handlePeriodChange(p)}
                 className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all ${
                   period === p
-                    ? "bg-primary text-white shadow-md shadow-primary/20 scale-[1.02]"
+                    ? "bg-primary text-black shadow-md shadow-primary/20 scale-[1.02]"
                     : "bg-[#181818] text-[#E0E0E0]/60 hover:bg-white/10 hover:text-white border border-white/5"
                 }`}
               >

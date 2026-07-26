@@ -74,6 +74,9 @@ export default function MenuPage() {
   const [selectedRecipeMenuItemId, setSelectedRecipeMenuItemId] = useState("");
   const [recipeForm, setRecipeForm] = useState<RecipeFormState>(emptyRecipeForm);
   const [recipeErrors, setRecipeErrors] = useState<Record<string, string>>({});
+
+  const [deleteArmedItemId, setDeleteArmedItemId] = useState<string | null>(null);
+  const [deleteArmedRecipeId, setDeleteArmedRecipeId] = useState<string | null>(null);
   const [recipeQuantities, setRecipeQuantities] = useState<Record<string, string>>({});
   
   const [isLoading, setIsLoading] = useState(true);
@@ -270,10 +273,12 @@ export default function MenuPage() {
   };
 
   const handleDelete = async (itemId: string) => {
-    const confirmed = window.confirm(
-      "¿Eliminar este producto del menú? Esta acción no se puede deshacer."
-    );
-    if (!confirmed) return;
+    if (deleteArmedItemId !== itemId) {
+      setDeleteArmedItemId(itemId);
+      setTimeout(() => setDeleteArmedItemId(null), 3000);
+      return;
+    }
+    setDeleteArmedItemId(null);
 
     try {
       setIsSubmitting(true);
@@ -349,7 +354,12 @@ export default function MenuPage() {
   };
 
   const deleteRecipe = async (recipeId: string) => {
-    if (!window.confirm("¿Eliminar ingrediente de la receta?")) return;
+    if (deleteArmedRecipeId !== recipeId) {
+      setDeleteArmedRecipeId(recipeId);
+      setTimeout(() => setDeleteArmedRecipeId(null), 3000);
+      return;
+    }
+    setDeleteArmedRecipeId(null);
     try {
       setIsSubmitting(true);
       const response = await fetch("/api/recipes", {
@@ -672,10 +682,14 @@ export default function MenuPage() {
                         </button>
                         <button
                           onClick={() => handleDelete(item.id)}
-                          className="rounded-lg bg-red-500/10 border border-red-500/20 p-2 text-red-400 hover:bg-red-500/20 transition-colors"
-                          title="Eliminar Producto"
+                          className={`rounded-lg border p-2 transition-all text-xs font-black ${
+                            deleteArmedItemId === item.id
+                              ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
+                              : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                          }`}
+                          title={deleteArmedItemId === item.id ? "Confirmar eliminación" : "Eliminar Producto"}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {deleteArmedItemId === item.id ? "¿Seguro?" : <Trash2 className="h-4 w-4" />}
                         </button>
                       </div>
                     </td>
@@ -967,9 +981,14 @@ export default function MenuPage() {
                         <button
                           type="button"
                           onClick={() => deleteRecipe(rec.id)}
-                          className="text-red-400 hover:text-red-300 p-1"
+                          className={`text-xs font-black transition-all p-1 rounded ${
+                            deleteArmedRecipeId === rec.id
+                              ? "text-red-300 bg-red-500/30 px-2"
+                              : "text-red-400 hover:text-red-300"
+                          }`}
+                          title={deleteArmedRecipeId === rec.id ? "Confirmar" : "Quitar de receta"}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          {deleteArmedRecipeId === rec.id ? "¿Quitar?" : <Trash2 className="h-3.5 w-3.5" />}
                         </button>
                       </div>
                     </div>

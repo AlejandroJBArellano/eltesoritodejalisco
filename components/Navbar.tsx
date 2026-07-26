@@ -1,42 +1,83 @@
-import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { logout } from '@/app/login/actions'
+"use client";
 
-export default async function Navbar() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { logout } from "@/app/login/actions";
+import { useEffect, useState } from "react";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setEmail(user?.email ?? null);
+    });
+  }, []);
+
+  if (email === null) return null;
 
   const systemName = process.env.NEXT_PUBLIC_SYSTEM_NAME || "TesoritoOS";
   const endsWithOS = systemName.toLowerCase().endsWith("os");
   const prefix = endsWithOS ? systemName.slice(0, -2) : systemName;
   const suffix = endsWithOS ? systemName.slice(-2) : "";
 
+  const navLinks = [
+    { href: "/pos", label: "POS" },
+    { href: "/kitchen", label: "Cocina" },
+    { href: "/history", label: "Historial" },
+  ];
+
   return (
-    <nav className="bg-dark border-b border-dark/20 text-white">
+    <nav className="bg-dark border-b border-white/5 text-white sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <div className="flex items-center">
-            <Link href="/" className="text-xl font-black tracking-tighter">
-              <span className="text-primary">{prefix.toUpperCase()}</span>
-              {suffix && <span className="text-warning">{suffix.toUpperCase()}</span>}
-            </Link>
+        <div className="flex justify-between h-16 items-center gap-4">
+          {/* Logo */}
+          <Link href="/" className="text-xl font-black tracking-tighter shrink-0">
+            <span className="text-primary">{prefix.toUpperCase()}</span>
+            {suffix && <span className="text-warning">{suffix.toUpperCase()}</span>}
+          </Link>
+
+          {/* Quick nav links */}
+          <div className="hidden sm:flex items-center gap-1">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    isActive
+                      ? "bg-primary/15 text-primary"
+                      : "text-[#E0E0E0]/50 hover:text-[#E0E0E0] hover:bg-white/5"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-300 hidden sm:block font-medium">
-              {user.email}
-            </span>
+
+          {/* Right: email + logout */}
+          <div className="flex items-center gap-3 shrink-0">
+            {email && (
+              <span className="hidden sm:block text-xs font-medium text-[#E0E0E0]/40 max-w-[180px] truncate" title={email}>
+                {email}
+              </span>
+            )}
             <form action={logout}>
               <button
                 type="submit"
-                className="text-sm font-bold text-primary hover:text-primary/80 transition-colors bg-white/10 px-3 py-1.5 rounded-lg"
+                className="text-xs font-black uppercase tracking-wider text-[#E0E0E0]/50 hover:text-red-400 bg-white/5 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 px-3 py-1.5 rounded-lg transition-all"
               >
-                Cerrar sesión
+                Salir
               </button>
             </form>
           </div>
         </div>
       </div>
     </nav>
-  )
+  );
 }

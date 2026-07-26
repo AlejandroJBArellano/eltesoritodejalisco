@@ -41,7 +41,7 @@ export function PageHeader({
                   <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
                   {backLabel}
                 </Link>
-                <span className="text-white/20">|</span>
+                <span className="w-px h-4 bg-white/10 shrink-0" aria-hidden="true" />
               </>
             )}
             <div>

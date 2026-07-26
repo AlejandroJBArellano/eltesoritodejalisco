@@ -71,7 +71,7 @@ export default function AsistenciaPage() {
 
       await fetchAttendance();
     } catch (err: any) {
-      alert(err.message);
+      setError(err.message);
       setIsLoading(false);
     }
   };

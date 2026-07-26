@@ -17,6 +17,7 @@ export function IngredientBatchControl({
   const [error, setError] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [summaryData, setSummaryData] = useState<any>(null);
+  const [isArmed, setIsArmed] = useState(false);
 
   // Helper for duration display
   const getDuration = (start: string | Date) => {
@@ -104,9 +105,12 @@ export function IngredientBatchControl({
   const handleFinishBatch = async () => {
     if (!activeBatch) return;
 
-    if (!confirm(`¿Confirmas que se ACABÓ el ${ingredientName}?`)) {
+    if (!isArmed) {
+      setIsArmed(true);
+      setTimeout(() => setIsArmed(false), 4000);
       return;
     }
+    setIsArmed(false);
 
     setLoading(true);
     try {
@@ -224,13 +228,17 @@ export function IngredientBatchControl({
             <button
               onClick={handleFinishBatch}
               disabled={loading}
-              className="w-full py-6 bg-white border-2 border-red-500 text-red-600 hover:bg-red-50 active:bg-red-100 rounded-xl text-xl font-bold transition-all shadow-sm hover:shadow-md flex flex-col items-center justify-center gap-1 group"
+              className={`w-full py-6 rounded-xl text-xl font-bold transition-all shadow-sm flex flex-col items-center justify-center gap-1 group ${
+                isArmed
+                  ? "bg-red-600 text-white border-2 border-red-400 animate-[pulse_0.6s_ease-in-out_infinite]"
+                  : "bg-white border-2 border-red-500 text-red-600 hover:bg-red-50 active:bg-red-100"
+              }`}
             >
               <span className="group-hover:scale-105 transition-transform">
-                🗑️ YA SE ACABÓ
+                {isArmed ? "⚠️ ¿CONFIRMAR QUE SE ACABÓ?" : "🗑️ YA SE ACABÓ"}
               </span>
-              <span className="text-xs font-normal opacity-70 text-red-400">
-                Solo presiona cuando rasques el fondo
+              <span className={`text-xs font-normal ${isArmed ? "text-white/90 font-bold" : "opacity-70 text-red-400"}`}>
+                {isArmed ? "Presiona de nuevo para cerrar este lote" : "Solo presiona cuando rasques el fondo"}
               </span>
             </button>
           </div>

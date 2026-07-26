@@ -139,6 +139,11 @@ export default function HistoryPage() {
   const [selectedCutDetail, setSelectedCutDetail] = useState<DailyCut | null>(null);
   const [isGeneratingPendingCut, setIsGeneratingPendingCut] = useState(false);
 
+  // Inline feedback states (replacing alert/confirm)
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historySuccess, setHistorySuccess] = useState<string | null>(null);
+  const [pendingCutArmed, setPendingCutArmed] = useState(false);
+
   // Propinas Distribution state
   const [tipBreakdown, setTipBreakdown] = useState<any[]>([]);
   const [tipTotalHours, setTipTotalHours] = useState<number>(0);
@@ -304,8 +309,12 @@ export default function HistoryPage() {
 
   const handleFinalizarDia = async () => {
     if (openOrders.length > 0) {
-      alert(
-        `No se puede cerrar: Hay ${openOrders.length} órdenes pendientes de pago. Favor de cobrarlas o cancelarlas antes de continuar.`,
+      setHistoryError(
+        `No se puede cerrar: Hay ${openOrders.length} orden${
+          openOrders.length !== 1 ? "es" : ""
+        } pendiente${
+          openOrders.length !== 1 ? "s" : ""
+        } de pago. Cóbralas o cancélalas antes de continuar.`,
       );
       setShowFinalizeModal(false);
       return;
@@ -382,10 +391,11 @@ export default function HistoryPage() {
 
       setFinalizeSuccess(true);
       setShowFinalizeModal(false);
-      alert("¡Corte de día finalizado con éxito! Los folios de órdenes se han reiniciado.");
+      setHistorySuccess("¡Corte de día finalizado con éxito! Los folios de órdenes se han reiniciado.");
+      setTimeout(() => setHistorySuccess(null), 6000);
     } catch (err) {
       console.error("Error finalizing day:", err);
-      alert("Error al finalizar el día. Por favor intente de nuevo.");
+      setHistoryError("Error al finalizar el día. Por favor intente de nuevo.");
     } finally {
       setIsFinalizing(false);
     }
@@ -393,11 +403,12 @@ export default function HistoryPage() {
 
   const handleGeneratePendingCut = async () => {
     if (!pendingDate) return;
-
-    const confirmed = window.confirm(
-      `Se generará el corte pendiente del día ${pendingDate} con ${pendingOrders} orden(es). ¿Deseas continuar?`,
-    );
-    if (!confirmed) return;
+    if (!pendingCutArmed) {
+      setPendingCutArmed(true);
+      setTimeout(() => setPendingCutArmed(false), 4000);
+      return;
+    }
+    setPendingCutArmed(false);
 
     try {
       setIsGeneratingPendingCut(true);
@@ -410,18 +421,19 @@ export default function HistoryPage() {
 
       if (!response.ok) {
         if (response.status === 409) {
-          alert("Ese corte ya existe. Se actualizará la vista.");
+          setHistoryError("Ese corte ya existe. Se actualizará la vista.");
           await refreshPendingCut();
           return;
         }
         throw new Error(data?.error || "Error al generar el corte pendiente");
       }
 
-      alert(`Corte extemporáneo generado correctamente para ${pendingDate}.`);
+      setHistorySuccess(`Corte extemporáneo generado correctamente para ${pendingDate}.`);
+      setTimeout(() => setHistorySuccess(null), 5000);
       await Promise.all([fetchOrders(), fetchDailyCuts(), refreshPendingCut()]);
     } catch (err) {
       console.error("Error generating pending cut:", err);
-      alert("No fue posible generar el corte pendiente.");
+      setHistoryError("No fue posible generar el corte pendiente.");
     } finally {
       setIsGeneratingPendingCut(false);
     }
@@ -705,6 +717,30 @@ export default function HistoryPage() {
           </div>
         )}
 
+        {historyError && (
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-bold text-red-400 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 shrink-0" />
+              <span>{historyError}</span>
+            </div>
+            <button type="button" onClick={() => setHistoryError(null)} className="text-red-400/60 hover:text-red-400 shrink-0">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {historySuccess && (
+          <div className="rounded-2xl border border-success/20 bg-success/10 p-4 text-sm font-bold text-success flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 shrink-0" />
+              <span>{historySuccess}</span>
+            </div>
+            <button type="button" onClick={() => setHistorySuccess(null)} className="text-success/60 hover:text-success shrink-0">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
         {/* FILTROS DE BÚSQUEDA */}
         <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
           <h2 className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest flex items-center gap-2">
@@ -824,12 +860,18 @@ export default function HistoryPage() {
                   type="button"
                   onClick={handleGeneratePendingCut}
                   disabled={isGeneratingPendingCut}
-                  className="rounded-xl bg-amber-500/20 border border-amber-500/30 px-3.5 py-2 text-xs font-black text-amber-400 hover:bg-amber-500/30 transition-all uppercase tracking-wider flex items-center gap-1.5 disabled:opacity-50"
+                  className={`rounded-xl border px-3.5 py-2 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 disabled:opacity-50 transition-all ${
+                    pendingCutArmed
+                      ? "bg-amber-500/30 border-amber-500/50 text-amber-300 animate-[pulse_0.6s_ease-in-out_infinite]"
+                      : "bg-amber-500/20 border-amber-500/30 text-amber-400 hover:bg-amber-500/30"
+                  }`}
                 >
                   <Clock className="h-3.5 w-3.5" />
                   {isGeneratingPendingCut
                     ? "Generando..."
-                    : `Generar corte pendiente (${pendingDate} · ${pendingOrders})`}
+                    : pendingCutArmed
+                    ? "¿Confirmar corte?"
+                    : `Corte pendiente (${pendingDate} · ${pendingOrders})`}
                 </button>
               )}
 
@@ -838,8 +880,8 @@ export default function HistoryPage() {
                   type="button"
                   onClick={() => {
                     if (openOrders.length > 0) {
-                      alert(
-                        `No se puede cerrar: Hay ${openOrders.length} órdenes pendientes de pago.`,
+                      setHistoryError(
+                        `${openOrders.length} orden${openOrders.length !== 1 ? "es" : ""} pendiente${openOrders.length !== 1 ? "s" : ""} de pago — cóbralas antes de cerrar.`,
                       );
                       return;
                     }
