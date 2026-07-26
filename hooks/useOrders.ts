@@ -5,29 +5,98 @@ import { createClient } from "@/lib/supabase/client";
 import type { OrderWithDetails } from "@/types";
 import { useEffect, useState } from "react";
 
-export const mapOrderData = (dbOrder: any): OrderWithDetails => {
+/**
+ * Safely parses any date string, timestamp, or Date object into a valid JS Date object.
+ * Handles ISO strings with or without timezone offsets (e.g. +00:00, -06:00, Z).
+ */
+export function safeParseDate(input: string | Date | number | null | undefined): Date {
+  if (!input) return new Date();
+  if (input instanceof Date) return isNaN(input.getTime()) ? new Date() : input;
+  if (typeof input === 'number') return new Date(input);
+
+  if (typeof input === 'string') {
+    let parsed = new Date(input);
+    if (!isNaN(parsed.getTime())) return parsed;
+
+    const formattedStr = input.trim().replace(' ', 'T');
+    parsed = new Date(formattedStr);
+    if (!isNaN(parsed.getTime())) return parsed;
+
+    if (!formattedStr.endsWith('Z') && !/[+-]\d{2}:\d{2}$/.test(formattedStr)) {
+      parsed = new Date(`${formattedStr}Z`);
+      if (!isNaN(parsed.getTime())) return parsed;
+    }
+  }
+
+  return new Date();
+}
+
+export interface DbOrderPayload {
+  id: string;
+  order_number: string;
+  customer_id?: string;
+  source: string;
+  status: any;
+  table?: string;
+  notes?: string;
+  subtotal?: number;
+  tax?: number;
+  total?: number;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  order_items?: Array<{
+    id: string;
+    order_id: string;
+    menu_item_id: string;
+    quantity: number;
+    unit_price: number;
+    notes?: string;
+    status?: any;
+    tiempo_preparacion_segundos?: number | null;
+    created_at?: string;
+    menu_items?: {
+      id?: string;
+      name: string;
+      price: number;
+      image_url?: string;
+      is_available?: boolean;
+    };
+  }>;
+  customers?: any;
+  customer?: any;
+}
+
+export const mapOrderData = (dbOrder: DbOrderPayload): OrderWithDetails => {
+  const createdAt = safeParseDate(dbOrder.created_at);
+  const updatedAt = safeParseDate(dbOrder.updated_at);
+
   return {
     ...dbOrder,
     orderNumber: dbOrder.order_number,
     customerId: dbOrder.customer_id,
-    createdAt: dbOrder.created_at,
-    updatedAt: dbOrder.updated_at,
+    createdAt,
+    updatedAt,
     orderItems: Array.isArray(dbOrder.order_items)
-      ? dbOrder.order_items.map((item: any) => ({
+      ? dbOrder.order_items.map((item) => ({
           ...item,
           orderId: item.order_id,
           menuItemId: item.menu_item_id,
           unitPrice: item.unit_price,
           status: item.status,
           preparationTimeSeconds: item.tiempo_preparacion_segundos ?? null,
-          createdAt: item.created_at ? (item.created_at.includes('Z') || item.created_at.includes('+') ? item.created_at : `${item.created_at.replace(' ', 'T')}Z`) : null,
-        menuItem: item.menu_items
-          ? {
-              ...item.menu_items,
+          createdAt: safeParseDate(item.created_at),
+          menuItem: item.menu_items
+            ? {
+                id: item.menu_items.id || item.menu_item_id,
+                name: item.menu_items.name,
+                price: item.menu_items.price,
                 imageUrl: item.menu_items?.image_url,
-                isAvailable: item.menu_items?.is_available,
+                isAvailable: item.menu_items?.is_available ?? true,
+                createdAt: new Date(),
+                updatedAt: new Date(),
               }
-            : { name: "Producto", price: item.unit_price || 0 },
+            : { id: item.menu_item_id, name: "Producto", price: item.unit_price || 0, isAvailable: true, createdAt: new Date(), updatedAt: new Date() },
         }))
       : [],
     customer: dbOrder.customers || dbOrder.customer || undefined,
@@ -37,7 +106,7 @@ export const mapOrderData = (dbOrder: any): OrderWithDetails => {
 /**
  * Hook to fetch and subscribe to real-time orders using Supabase
  */
-export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
+export function useRealtimeOrders(initialData: OrderWithDetails[] = [], soundEnabled: boolean = false) {
   const [orders, setOrders] = useState<OrderWithDetails[]>(initialData);
   const [loading, setLoading] = useState(initialData.length === 0);
   const [error, setError] = useState<string | null>(null);
@@ -68,8 +137,9 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
     let lastAudioTime = 0;
 
     const playBell = () => {
+      if (!soundEnabled) return;
       const now = Date.now();
-      if (now - lastAudioTime > 2000) { // debounce de 2 segundos
+      if (now - lastAudioTime > 2000) { // 2 seconds debounce
         lastAudioTime = now;
         try {
           const audio = new Audio('/new_order.mp3');
@@ -96,7 +166,7 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "order_items" },
-        (payload) => {
+        () => {
           playBell();
           fetchOrders();
         },
@@ -110,7 +180,7 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [soundEnabled]);
 
   return { orders, loading, error, refetch: fetchOrders, setOrders };
 }
@@ -118,18 +188,13 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = []) {
 /**
  * Hook to calculate elapsed time for orders
  */
-export function useOrderTimer(createdAt: Date) {
+export function useOrderTimer(createdAt: Date | string) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
     const calculateElapsed = () => {
       const now = new Date();
-      const rawDate = createdAt as unknown as string;
-      const createdAtStr = typeof rawDate === 'string' && !rawDate.endsWith('Z') 
-        ? `${rawDate}Z` 
-        : rawDate;
-      
-      const created = new Date(createdAtStr);
+      const created = safeParseDate(createdAt);
       const diffMs = Math.max(0, now.getTime() - created.getTime());
       setElapsedSeconds(Math.floor(diffMs / 1000));
     };
@@ -142,3 +207,4 @@ export function useOrderTimer(createdAt: Date) {
 
   return elapsedSeconds;
 }
+
