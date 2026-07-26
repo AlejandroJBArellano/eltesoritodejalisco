@@ -25,7 +25,8 @@ export const formatMixedNotes = (counts: Record<MixedFlavor, number>) =>
 export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => Promise<Order[]>) {
   const [formState, setFormState] = useState<OrderFormState>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  
+  const [cartError, setCartError] = useState<string | null>(null);
+
   // Mixed Order State
   const [mixedOrderMenuItem, setMixedOrderMenuItem] = useState<MenuItem | null>(null);
   const [mixedFlavorCounts, setMixedFlavorCounts] = useState<Record<MixedFlavor, number>>(emptyFlavorCounts());
@@ -40,6 +41,9 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
   const [modifyingOrder, setModifyingOrder] = useState<Order | null>(null);
   const [modifyItems, setModifyItems] = useState<ModifyItem[]>([]);
   const [isSubmittingCart, setIsSubmittingCart] = useState(false);
+
+  // Two-step clear cart: null = idle, true = armed (waiting for confirm click)
+  const [clearCartArmed, setClearCartArmed] = useState(false);
 
   // Initializing default empty cart
   useEffect(() => {
@@ -136,10 +140,20 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
     });
   };
 
+  /**
+   * Two-step clear cart.
+   * First call: arms the confirmation (sets clearCartArmed = true).
+   * Second call: actually clears.
+   * Armed state auto-resets after 3 seconds if not confirmed.
+   */
   const handleClearCart = () => {
-    if (window.confirm("¿Seguro que deseas vaciar el carrito?")) {
-      setFormState((prev) => ({ ...prev, items: [] }));
+    if (!clearCartArmed) {
+      setClearCartArmed(true);
+      setTimeout(() => setClearCartArmed(false), 3000);
+      return;
     }
+    setFormState((prev) => ({ ...prev, items: [] }));
+    setClearCartArmed(false);
   };
 
   const validateForm = () => {
@@ -153,6 +167,7 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
   const clearForm = () => {
     setFormState(emptyForm);
     setFormErrors({});
+    setCartError(null);
   };
 
   const handleCheckoutSubmit = async (
@@ -165,6 +180,7 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
 
     try {
       setIsSubmittingCart(true);
+      setCartError(null);
       const payload = {
         customerId: formState.customerId || undefined,
         source: formState.source,
@@ -190,7 +206,7 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
       setCheckoutOrder(newOrder);
       clearForm();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Error al procesar");
+      setCartError(error instanceof Error ? error.message : "Error al procesar");
     } finally {
       setIsSubmittingCart(false);
     }
@@ -205,12 +221,13 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
     );
 
     if (validItems.length === 0) {
-      alert("Agrega al menos un producto válido");
+      setCartError("Agrega al menos un producto válido");
       return;
     }
 
     try {
       setIsSubmittingCart(true);
+      setCartError(null);
       const response = await fetch(`/api/orders/${editingOrder.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -231,7 +248,7 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
       setEditingOrder(null);
       setAdditionalItems([{ menuItemId: availableMenuItems[0]?.id || "", quantity: "1", notes: "" }]);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Error al actualizar orden");
+      setCartError(error instanceof Error ? error.message : "Error al actualizar orden");
     } finally {
       setIsSubmittingCart(false);
     }
@@ -292,11 +309,12 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
   const handleSaveModifiedOrder = async () => {
     if (!modifyingOrder) return;
     if (modifyItems.length === 0) {
-      alert("La orden debe tener al menos un producto.");
+      setCartError("La orden debe tener al menos un producto.");
       return;
     }
     try {
       setIsSubmittingCart(true);
+      setCartError(null);
       const response = await fetch(`/api/orders/${modifyingOrder.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -313,21 +331,18 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
       setModifyingOrder(null);
       setModifyItems([]);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Error al modificar orden");
+      setCartError(error instanceof Error ? error.message : "Error al modificar orden");
     } finally {
       setIsSubmittingCart(false);
     }
   };
 
   const handleCancelOrder = async (orderId: string, orderNumber: string) => {
-    if (
-      !window.confirm(
-        `¿Seguro que deseas cancelar la orden #${orderNumber}? Esta acción no se puede deshacer.`,
-      )
-    )
-      return;
+    // cancelOrderArmed state is managed in the UI (page.tsx) via a separate per-row mechanism
+    // This function is called only after the UI has done its two-step confirm
     try {
       setIsSubmittingCart(true);
+      setCartError(null);
       const response = await fetch(`/api/orders/${orderId}`, {
         method: "DELETE",
       });
@@ -337,7 +352,7 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
       }
       await refreshOrders();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Error al cancelar orden");
+      setCartError(error instanceof Error ? error.message : "Error al cancelar orden");
     } finally {
       setIsSubmittingCart(false);
     }
@@ -346,11 +361,15 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
   return {
     formState,
     formErrors,
+    cartError,
+    setCartError,
     handleFormChange,
     handleGridItemClick,
     handleQuantityChange,
+    handleItemNoteChange,
     handleClearCart,
-    
+    clearCartArmed,
+
     // Mixed Order
     mixedOrderMenuItem,
     setMixedOrderMenuItem,

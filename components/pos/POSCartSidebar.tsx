@@ -1,5 +1,5 @@
-import React from "react";
-import { ShoppingBag, Minus, Plus, Printer, Bike, AlertTriangle } from "lucide-react";
+import React, { useState } from "react";
+import { ShoppingBag, Minus, Plus, Printer, Bike, AlertTriangle, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { OrderFormState, MenuItem, Customer } from "@/types/pos";
 import { isMixedOrderItem } from "@/hooks/pos/usePOSCart";
 
@@ -9,8 +9,11 @@ interface POSCartSidebarProps {
   customers: Customer[];
   sourceOptions: string[];
   formErrors: Record<string, string>;
+  cartError: string | null;
   handleClearCart: () => void;
+  clearCartArmed: boolean;
   handleQuantityChange: (index: number, delta: number) => void;
+  handleItemNoteChange: (index: number, notes: string) => void;
   availableMenuItems: MenuItem[];
   isSubmitting: boolean;
 }
@@ -21,11 +24,29 @@ export function POSCartSidebar({
   customers,
   sourceOptions,
   formErrors,
+  cartError,
   handleClearCart,
+  clearCartArmed,
   handleQuantityChange,
+  handleItemNoteChange,
   availableMenuItems,
   isSubmitting,
 }: POSCartSidebarProps) {
+  // Track which cart items have the note input expanded
+  const [expandedNotes, setExpandedNotes] = useState<Set<number>>(new Set());
+
+  const toggleNote = (index: number) => {
+    setExpandedNotes((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  };
+
   return (
     <div className="space-y-6 lg:sticky lg:top-24">
       {/* Detalles Adicionales de la Orden */}
@@ -112,25 +133,30 @@ export function POSCartSidebar({
       {/* Tu Pedido (Carrito) */}
       <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-5">
         <div className="flex items-center justify-between border-b border-white/5 pb-3">
-          <h3 className="text-sm font-black uppercase text-[#E0E0E0] tracking-wider flex items-center gap-2">
+          <h2 className="text-sm font-black uppercase text-[#E0E0E0] tracking-wider flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-success"></span>
             Tu Pedido
-          </h3>
+          </h2>
           {formState.items.length > 0 && (
             <button
               type="button"
               onClick={handleClearCart}
-              className="text-[10px] font-bold text-red-400 hover:text-red-300 uppercase tracking-wider transition-colors"
+              className={`text-[10px] font-black uppercase tracking-wider transition-all px-2.5 py-1 rounded-lg border ${
+                clearCartArmed
+                  ? "bg-red-500/20 border-red-500/50 text-red-400 animate-[pulse_0.5s_ease-in-out_infinite]"
+                  : "border-transparent text-red-400/60 hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/10"
+              }`}
             >
-              Vaciar Carrito
+              {clearCartArmed ? "¿Confirmar?" : "Vaciar"}
             </button>
           )}
         </div>
 
-        {formErrors.items && (
+        {/* Inline errors */}
+        {(formErrors.items || cartError) && (
           <div className="rounded-xl bg-red-500/10 p-3 border border-red-500/20 text-xs font-bold text-red-400 flex items-center gap-2">
             <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-            {formErrors.items}
+            {formErrors.items || cartError}
           </div>
         )}
 
@@ -138,7 +164,7 @@ export function POSCartSidebar({
         <div className="space-y-2.5 max-h-[42vh] overflow-y-auto pr-1 custom-scrollbar">
           {formState.items.length === 0 ? (
             <div className="text-center py-12 text-[#E0E0E0]/40 space-y-2">
-              <ShoppingBag className="h-10 w-10 mx-auto opacity-30 text-primary" />
+              <ShoppingBag className="h-10 w-10 mx-auto opacity-20 text-primary" />
               <p className="text-xs font-extrabold uppercase tracking-widest">
                 El carrito está vacío
               </p>
@@ -150,51 +176,82 @@ export function POSCartSidebar({
             formState.items.map((item, index) => {
               const product = availableMenuItems.find((m) => m.id === item.menuItemId);
               const isMixed = product && isMixedOrderItem(product.name);
+              const noteExpanded = expandedNotes.has(index);
               return (
                 <div
                   key={index}
-                  className="flex items-center justify-between bg-[#1A1A1A] p-3 rounded-xl border border-white/5 gap-3"
+                  className="bg-[#1A1A1A] rounded-xl border border-white/5 overflow-hidden"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-black text-xs text-[#E0E0E0] uppercase tracking-tight truncate">
-                      {product?.name || "Producto"}
-                    </p>
-                    {isMixed && item.notes ? (
-                      <p className="text-[10px] font-extrabold text-amber-400 mt-0.5">
-                        {item.notes}
+                  <div className="flex items-center justify-between p-3 gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black text-xs text-[#E0E0E0] uppercase tracking-tight truncate">
+                        {product?.name || "Producto"}
                       </p>
-                    ) : (
-                      <p className="text-[10px] font-bold text-[#E0E0E0]/50 mt-0.5">
-                        ${product?.price.toFixed(2)} c/u
+                      {isMixed && item.notes ? (
+                        <p className="text-[10px] font-extrabold text-amber-400 mt-0.5">
+                          {item.notes}
+                        </p>
+                      ) : (
+                        <p className="text-[10px] font-bold text-[#E0E0E0]/50 mt-0.5">
+                          ${product?.price.toFixed(2)} c/u
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1 border border-white/5">
+                      <button
+                        type="button"
+                        onClick={() => handleQuantityChange(index, -1)}
+                        className="h-6 w-6 rounded-lg bg-white/5 hover:bg-red-500/20 text-[#E0E0E0] hover:text-red-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
+                      >
+                        <Minus className="h-3 w-3" />
+                      </button>
+                      <span className="w-5 text-center font-black text-xs text-[#E0E0E0]">
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleQuantityChange(index, 1)}
+                        className="h-6 w-6 rounded-lg bg-white/5 hover:bg-emerald-500/20 text-[#E0E0E0] hover:text-emerald-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
+                      >
+                        <Plus className="h-3 w-3" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2 min-w-[55px] justify-end">
+                      <p className="font-black text-xs text-[#E0E0E0] tabular-nums">
+                        ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
                       </p>
-                    )}
+                      {!isMixed && (
+                        <button
+                          type="button"
+                          onClick={() => toggleNote(index)}
+                          className="text-[#E0E0E0]/30 hover:text-[#E0E0E0]/70 transition-colors"
+                          title="Agregar nota"
+                        >
+                          {noteExpanded ? (
+                            <ChevronUp className="h-3.5 w-3.5" />
+                          ) : (
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1 border border-white/5">
-                    <button
-                      type="button"
-                      onClick={() => handleQuantityChange(index, -1)}
-                      className="h-6 w-6 rounded-lg bg-white/5 hover:bg-red-500/20 text-[#E0E0E0] hover:text-red-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
-                    >
-                      <Minus className="h-3 w-3" />
-                    </button>
-                    <span className="w-5 text-center font-black text-xs text-[#E0E0E0]">
-                      {item.quantity}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleQuantityChange(index, 1)}
-                      className="h-6 w-6 rounded-lg bg-white/5 hover:bg-emerald-500/20 text-[#E0E0E0] hover:text-emerald-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
-                    >
-                      <Plus className="h-3 w-3" />
-                    </button>
-                  </div>
-
-                  <div className="text-right min-w-[55px]">
-                    <p className="font-black text-xs text-[#E0E0E0] tabular-nums">
-                      ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
-                    </p>
-                  </div>
+                  {/* Expandable note input */}
+                  {noteExpanded && !isMixed && (
+                    <div className="px-3 pb-3">
+                      <input
+                        type="text"
+                        value={item.notes}
+                        onChange={(e) => handleItemNoteChange(index, e.target.value)}
+                        placeholder="Nota especial (sin cebolla, extra salsa...)"
+                        className="w-full rounded-lg border border-white/5 bg-[#141414] px-3 py-1.5 text-[11px] text-[#E0E0E0] outline-none focus:border-primary/40 transition-colors placeholder:text-[#E0E0E0]/25"
+                        autoFocus
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })
@@ -223,8 +280,17 @@ export function POSCartSidebar({
               disabled={isSubmitting}
               className="w-full rounded-xl bg-primary py-3.5 text-black font-black text-sm hover:brightness-105 active:scale-[0.98] transition-all uppercase tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              <Printer className="h-4 w-4" />
-              {isSubmitting ? "GUARDANDO..." : "GUARDAR E IMPRIMIR"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  GUARDANDO...
+                </>
+              ) : (
+                <>
+                  <Printer className="h-4 w-4" />
+                  GUARDAR E IMPRIMIR
+                </>
+              )}
             </button>
           </div>
         )}

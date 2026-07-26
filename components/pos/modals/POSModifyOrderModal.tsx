@@ -1,12 +1,11 @@
 import React from "react";
 import { X, Minus, Plus, Trash2 } from "lucide-react";
-import { Order } from "@/types/pos";
+import { Order, ModifyItem } from "@/types/pos";
 
 interface POSModifyOrderModalProps {
   modifyingOrder: Order | null;
   setModifyingOrder: (order: Order | null) => void;
-  modifyItems: any[];
-  setModifyItems: (items: any[]) => void;
+  modifyItems: ModifyItem[];
   handleModifyQuantityChange: (index: number, delta: number) => void;
   handleModifyRemoveItem: (index: number) => void;
   handleSaveModifiedOrder: () => void;
@@ -17,7 +16,6 @@ export function POSModifyOrderModal({
   modifyingOrder,
   setModifyingOrder,
   modifyItems,
-  setModifyItems,
   handleModifyQuantityChange,
   handleModifyRemoveItem,
   handleSaveModifiedOrder,
@@ -29,17 +27,15 @@ export function POSModifyOrderModal({
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
       <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-white/10 space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
         <div className="flex justify-between items-center border-b border-white/5 pb-3">
-          <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+          <h2 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-orange-400"></span>
             Modificar Orden #{modifyingOrder.orderNumber}
-          </h3>
+          </h2>
           <button
             type="button"
-            onClick={() => {
-              setModifyingOrder(null);
-              setModifyItems([]);
-            }}
-            className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors"
+            onClick={() => setModifyingOrder(null)}
+            className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors p-1 rounded-lg hover:bg-white/10"
+            aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
           </button>
@@ -118,10 +114,7 @@ export function POSModifyOrderModal({
         <div className="flex gap-3 pt-2">
           <button
             type="button"
-            onClick={() => {
-              setModifyingOrder(null);
-              setModifyItems([]);
-            }}
+            onClick={() => setModifyingOrder(null)}
             className="w-full bg-white/5 text-[#E0E0E0]/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider"
           >
             Cancelar

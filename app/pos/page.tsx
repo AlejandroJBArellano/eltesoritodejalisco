@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
@@ -36,7 +37,8 @@ import {
   Plus,
   Edit3,
   X,
-  Send
+  Send,
+  History,
 } from "lucide-react";
 import { Order } from "@/types/pos";
 
@@ -61,10 +63,12 @@ export default function POSPage() {
   const {
     formState,
     formErrors,
+    cartError,
+    setCartError,
     editingOrder, setEditingOrder,
     additionalItems,
     modifyingOrder, setModifyingOrder,
-    modifyItems, setModifyItems,
+    modifyItems,
     mixedOrderMenuItem, setMixedOrderMenuItem,
     mixedFlavorCounts,
     handleFormChange,
@@ -72,7 +76,9 @@ export default function POSPage() {
     handleMixedFlavorChange,
     handleMixedOrderConfirm,
     handleQuantityChange,
+    handleItemNoteChange,
     handleClearCart,
+    clearCartArmed,
     openModifyModal,
     handleModifyQuantityChange,
     handleModifyRemoveItem,
@@ -88,6 +94,7 @@ export default function POSPage() {
 
   const {
     isSubmittingCheckout,
+    checkoutError,
     checkoutOrder, setCheckoutOrder,
     paymentMethod, setPaymentMethod,
     receivedAmount, setReceivedAmount,
@@ -97,6 +104,7 @@ export default function POSPage() {
     tipInput, setTipInput,
     tipAmountCalculated,
     change,
+    unusualTipInfo, setUnusualTipInfo,
     showWhatsAppModal, setShowWhatsAppModal,
     whatsappNumber, setWhatsappNumber,
     generateWhatsAppMessage,
@@ -113,7 +121,19 @@ export default function POSPage() {
     handleFailedPayment,
   } = usePOSCheckout(refreshOrders);
 
-  // Derive sourceOptions here
+  // Two-step cancel order: stores the orderId being armed for cancel
+  const [cancelArmedId, setCancelArmedId] = useState<string | null>(null);
+
+  const handleCancelArm = (orderId: string) => {
+    setCancelArmedId(orderId);
+    setTimeout(() => setCancelArmedId(null), 3000);
+  };
+
+  const handleCancelConfirm = async (orderId: string) => {
+    setCancelArmedId(null);
+    await handleCancelOrder(orderId, "");
+  };
+
   const sourceOptions = [
     "TikTok",
     "Instagram",
@@ -210,16 +230,23 @@ export default function POSPage() {
           </div>
         </div>
 
+        {/* 4th card — same anatomy as peers, CTA styled */}
         <Link
           href="/history"
-          className="rounded-2xl bg-gradient-to-br from-[#2A2A2A] to-[#242424] p-5 shadow-sm border border-white/5 flex flex-col justify-center items-center text-center group hover:border-primary/30 transition-colors"
+          className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 flex items-center gap-4 relative overflow-hidden group hover:border-primary/20 transition-colors"
         >
-          <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center mb-2 group-hover:bg-primary/10 transition-colors">
-            <ChevronRight className="h-4 w-4 text-[#E0E0E0]/50 group-hover:text-primary transition-colors" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/10 transition-colors">
+            <History className="h-6 w-6 text-[#E0E0E0]/40 group-hover:text-primary transition-colors" />
           </div>
-          <p className="text-xs font-black text-[#E0E0E0]/70 uppercase tracking-wider group-hover:text-[#E0E0E0] transition-colors">
-            Ver Historial Completo
-          </p>
+          <div>
+            <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+              Historial
+            </p>
+            <p className="text-sm font-black text-[#E0E0E0]/70 group-hover:text-[#E0E0E0] transition-colors flex items-center gap-1">
+              Ver Completo <ChevronRight className="h-3.5 w-3.5" />
+            </p>
+          </div>
         </Link>
       </div>
 
@@ -245,8 +272,11 @@ export default function POSPage() {
             customers={customers}
             sourceOptions={sourceOptions}
             formErrors={formErrors}
+            cartError={cartError}
             handleClearCart={handleClearCart}
+            clearCartArmed={clearCartArmed}
             handleQuantityChange={handleQuantityChange}
+            handleItemNoteChange={handleItemNoteChange}
             availableMenuItems={availableMenuItems}
             isSubmitting={isSubmittingCart || isSubmittingCheckout}
           />
@@ -292,6 +322,12 @@ export default function POSPage() {
               ) : (
                 orders.slice(0, 10).map((order) => {
                   const tipAmt = getOrderTipAmount(order);
+                  const isUndoable = (() => {
+                    const lastUpdate = new Date(order.updatedAt || order.createdAt).getTime();
+                    const now = new Date().getTime();
+                    return now - lastUpdate < 3 * 60 * 1000;
+                  })();
+
                   return (
                     <tr key={order.id} className="hover:bg-white/5 transition-colors">
                       <td className="py-3.5 px-3">
@@ -395,26 +431,17 @@ export default function POSPage() {
                               Propina
                             </button>
                           )}
-                          {order.status === "PAID" &&
-                            (() => {
-                              const lastUpdate = new Date(order.updatedAt || order.createdAt).getTime();
-                              const now = new Date().getTime();
-                              const isWithin3Min = now - lastUpdate < 3 * 60 * 1000;
-
-                              if (isWithin3Min) {
-                                return (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleUndoPayment(order.id, order.orderNumber)}
-                                    className="rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-all active:scale-95 animate-pulse"
-                                  >
-                                    <Undo2 className="h-3 w-3" />
-                                    Deshacer
-                                  </button>
-                                );
-                              }
-                              return null;
-                            })()}
+                          {order.status === "PAID" && isUndoable && (
+                            <button
+                              type="button"
+                              onClick={() => handleUndoPayment(order.id)}
+                              className="rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95"
+                              title="Revertir pago (ventana de 3 min)"
+                            >
+                              <Undo2 className="h-3 w-3" />
+                              Deshacer <span className="opacity-60 normal-case font-bold">(3 min)</span>
+                            </button>
+                          )}
                           {order.status === "PAID" && (
                             <button
                               type="button"
@@ -440,12 +467,20 @@ export default function POSPage() {
                           {order.status !== "PAID" && order.status !== "UNCOLLECTED" && (
                             <button
                               type="button"
-                              onClick={() => handleCancelOrder(order.id, order.orderNumber)}
+                              onClick={() =>
+                                cancelArmedId === order.id
+                                  ? handleCancelConfirm(order.id)
+                                  : handleCancelArm(order.id)
+                              }
                               disabled={isSubmittingCart || isSubmittingCheckout}
-                              className="rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-1 text-[10px] font-black uppercase transition-colors disabled:opacity-50"
-                              title="Cancelar orden"
+                              className={`rounded-xl p-1 text-[10px] font-black uppercase transition-all disabled:opacity-50 ${
+                                cancelArmedId === order.id
+                                  ? "bg-red-500/30 border border-red-500/50 text-red-300 px-2"
+                                  : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
+                              }`}
+                              title={cancelArmedId === order.id ? "Confirmar cancelación" : "Cancelar orden"}
                             >
-                              <Ban className="h-3.5 w-3.5" />
+                              {cancelArmedId === order.id ? "¿Seguro?" : <Ban className="h-3.5 w-3.5" />}
                             </button>
                           )}
                         </div>
@@ -476,7 +511,6 @@ export default function POSPage() {
         modifyingOrder={modifyingOrder}
         setModifyingOrder={setModifyingOrder}
         modifyItems={modifyItems}
-        setModifyItems={setModifyItems}
         handleModifyQuantityChange={handleModifyQuantityChange}
         handleModifyRemoveItem={handleModifyRemoveItem}
         handleSaveModifiedOrder={handleSaveModifiedOrder}
@@ -552,16 +586,19 @@ export default function POSPage() {
         setShowSplitBill={setShowSplitBill}
         openModifyModal={openModifyModal}
         handleFailedPayment={handleFailedPayment}
+        checkoutError={checkoutError}
+        unusualTipInfo={unusualTipInfo}
+        setUnusualTipInfo={setUnusualTipInfo}
       />
 
       {showWhatsAppModal && checkoutOrder && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
           <div className="bg-[#242424] rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-white/10 space-y-5">
             <div className="flex justify-between items-center border-b border-white/5 pb-3">
-              <h3 className="text-base font-black flex items-center gap-2 text-[#E0E0E0] uppercase tracking-tight">
+              <h2 className="text-base font-black flex items-center gap-2 text-[#E0E0E0] uppercase tracking-tight">
                 <MessageCircle className="h-5 w-5 text-emerald-400" />
-                Enviar Ticket por WhatsApp
-              </h3>
+                Ticket por WhatsApp
+              </h2>
               <button
                 type="button"
                 onClick={() => setShowWhatsAppModal(false)}
@@ -572,7 +609,7 @@ export default function POSPage() {
               </button>
             </div>
 
-            <p className="text-xs font-bold text-[#E0E0E0]/50 text-center uppercase tracking-wider">
+            <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
               Ingresa los 10 dígitos del número celular
             </p>
 

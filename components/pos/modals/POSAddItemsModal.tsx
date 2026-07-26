@@ -38,7 +38,8 @@ export function POSAddItemsModal({
           <button
             type="button"
             onClick={() => setEditingOrder(null)}
-            className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors"
+            className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors p-1 rounded-lg hover:bg-white/10"
+            aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
           </button>

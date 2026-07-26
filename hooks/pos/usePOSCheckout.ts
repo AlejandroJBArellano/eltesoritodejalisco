@@ -5,6 +5,7 @@ import type { SplitPayment } from "@/components/pos/SplitBillModal";
 
 export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   // Checkout & Print State
   const [checkoutOrder, setCheckoutOrder] = useState<Order | null>(null);
@@ -14,6 +15,9 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
   const [showKitchenTicket, setShowKitchenTicket] = useState(false);
   const [tipType, setTipType] = useState<"NONE" | "PERCENTAGE" | "FIXED">("NONE");
   const [tipInput, setTipInput] = useState<string>("");
+
+  // Unusual tip confirmation: if non-null, UI must show inline confirm before calling handleProcessPayment
+  const [unusualTipInfo, setUnusualTipInfo] = useState<{ amount: number; percentage: number } | null>(null);
 
   // WhatsApp Modal
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
@@ -58,19 +62,22 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
     return diff > 0 ? diff : 0;
   }, [checkoutOrder, receivedAmount, tipAmountCalculated]);
 
-  const handleProcessPayment = async () => {
+  const handleProcessPayment = async (forceConfirmed = false) => {
     if (!checkoutOrder) return;
 
     const percentage = (tipAmountCalculated / checkoutOrder.total) * 100;
     const isUnusual = tipAmountCalculated > 0 && (percentage > 30 || tipAmountCalculated > 500);
-    if (isUnusual) {
-      if (!window.confirm(`La propina es de $${tipAmountCalculated.toFixed(2)} (${percentage.toFixed(1)}%). ¿Confirmar cantidad?`)) {
-        return;
-      }
+
+    if (isUnusual && !forceConfirmed) {
+      setUnusualTipInfo({ amount: tipAmountCalculated, percentage });
+      return;
     }
+
+    setUnusualTipInfo(null);
 
     try {
       setIsSubmitting(true);
+      setCheckoutError(null);
       const response = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -92,7 +99,7 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
       setCheckoutOrder(updatedOrder);
       setShowTicket(true);
     } catch (error) {
-      alert("Error al procesar el pago");
+      setCheckoutError(error instanceof Error ? error.message : "Error al procesar el pago");
     } finally {
       setIsSubmitting(false);
     }
@@ -104,14 +111,17 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
     const totalTip = splits.reduce((sum, s) => sum + s.tipAmount, 0);
     const percentage = totalTip > 0 ? (totalTip / checkoutOrder.total) * 100 : 0;
     const isUnusual = totalTip > 0 && (percentage > 30 || totalTip > 500);
-    if (isUnusual) {
-      if (!window.confirm(`La propina total es de $${totalTip.toFixed(2)} (${percentage.toFixed(1)}%). ¿Confirmar?`)) {
-        return;
-      }
+
+    if (isUnusual && !unusualTipInfo) {
+      setUnusualTipInfo({ amount: totalTip, percentage });
+      return;
     }
+
+    setUnusualTipInfo(null);
 
     try {
       setIsSubmitting(true);
+      setCheckoutError(null);
       const response = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -124,7 +134,7 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
       setShowSplitBill(false);
       setShowTicket(true);
     } catch (error) {
-      alert("Error al procesar el pago");
+      setCheckoutError(error instanceof Error ? error.message : "Error al procesar el pago");
     } finally {
       setIsSubmitting(false);
     }
@@ -135,14 +145,16 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
 
     const percentage = (editTipAmountCalculated / editingTipOrder.total) * 100;
     const isUnusual = editTipAmountCalculated > 0 && (percentage > 30 || editTipAmountCalculated > 500);
-    if (isUnusual) {
-      if (!window.confirm(`La nueva propina es de $${editTipAmountCalculated.toFixed(2)} (${percentage.toFixed(1)}%). ¿Confirmar cantidad?`)) {
-        return;
-      }
+    if (isUnusual && !unusualTipInfo) {
+      setUnusualTipInfo({ amount: editTipAmountCalculated, percentage });
+      return;
     }
+
+    setUnusualTipInfo(null);
 
     try {
       setIsSubmitting(true);
+      setCheckoutError(null);
       const response = await fetch("/api/payments", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -155,17 +167,17 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
       await refreshOrders();
       setEditingTipOrder(null);
     } catch (error) {
-      alert("Error al actualizar propina");
+      setCheckoutError(error instanceof Error ? error.message : "Error al actualizar propina");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleUndoPayment = async (orderId: string, orderNumber: string) => {
-    if (!window.confirm(`¿Seguro que deseas deshacer el pago de la orden #${orderNumber}? La orden volverá a estar pendiente para edición.`)) return;
-
+  const handleUndoPayment = async (orderId: string) => {
+    // Caller is responsible for confirming via inline UI before calling this
     try {
       setIsSubmitting(true);
+      setCheckoutError(null);
       const response = await fetch(`/api/orders/${orderId}/undo-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -175,9 +187,8 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
       if (!response.ok) throw new Error("Error al deshacer el pago");
 
       await refreshOrders();
-      alert("Pago revertido exitosamente. La orden ahora puede ser editada.");
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Error al deshacer pago");
+      setCheckoutError(error instanceof Error ? error.message : "Error al deshacer pago");
     } finally {
       setIsSubmitting(false);
     }
@@ -187,10 +198,10 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
     const order = orderToProcess || checkoutOrder;
     if (!order) return;
 
-    if (!window.confirm(`¿Seguro que deseas marcar la orden #${order.orderNumber} como PAGO FALLIDO? Esto la quitará de ventas exitosas.`)) return;
-
+    // Caller is responsible for confirming via inline UI before calling this
     try {
       setIsSubmitting(true);
+      setCheckoutError(null);
       const response = await fetch(`/api/orders/${order.id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -203,9 +214,8 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
 
       await refreshOrders();
       if (!orderToProcess) setCheckoutOrder(null);
-      alert("Orden marcada como 'No Cobrada' exitosamente.");
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Error al procesar");
+      setCheckoutError(error instanceof Error ? error.message : "Error al procesar");
     } finally {
       setIsSubmitting(false);
     }
@@ -237,6 +247,8 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
 
   return {
     isSubmittingCheckout: isSubmitting,
+    checkoutError,
+    setCheckoutError,
     checkoutOrder, setCheckoutOrder,
     paymentMethod, setPaymentMethod,
     receivedAmount, setReceivedAmount,
@@ -246,7 +258,9 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
     tipInput, setTipInput,
     tipAmountCalculated,
     change,
-    
+
+    unusualTipInfo, setUnusualTipInfo,
+
     showWhatsAppModal, setShowWhatsAppModal,
     whatsappNumber, setWhatsappNumber,
     generateWhatsAppMessage,
@@ -263,6 +277,6 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
     handleSplitPayment,
     handleUpdateTip,
     handleUndoPayment,
-    handleFailedPayment
+    handleFailedPayment,
   };
 }

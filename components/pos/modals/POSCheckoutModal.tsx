@@ -1,5 +1,5 @@
 import React from "react";
-import { X, DollarSign, CreditCard, Landmark, Scissors } from "lucide-react";
+import { X, DollarSign, CreditCard, Landmark, Scissors, AlertTriangle, AlertCircle } from "lucide-react";
 import { Order } from "@/types/pos";
 
 const PAYMENT_METHODS = [
@@ -21,11 +21,14 @@ interface POSCheckoutModalProps {
   receivedAmount: string;
   setReceivedAmount: (val: string) => void;
   change: number;
-  handleProcessPayment: () => void;
+  handleProcessPayment: (forceConfirmed?: boolean) => void;
   isSubmitting: boolean;
   setShowSplitBill: (show: boolean) => void;
   openModifyModal: (order: Order) => void;
   handleFailedPayment: () => void;
+  checkoutError: string | null;
+  unusualTipInfo: { amount: number; percentage: number } | null;
+  setUnusualTipInfo: (info: { amount: number; percentage: number } | null) => void;
 }
 
 export function POSCheckoutModal({
@@ -46,6 +49,9 @@ export function POSCheckoutModal({
   setShowSplitBill,
   openModifyModal,
   handleFailedPayment,
+  checkoutError,
+  unusualTipInfo,
+  setUnusualTipInfo,
 }: POSCheckoutModalProps) {
   if (!checkoutOrder) return null;
 
@@ -53,10 +59,10 @@ export function POSCheckoutModal({
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
       <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto custom-scrollbar space-y-6">
         <div className="flex justify-between items-center border-b border-white/5 pb-3">
-          <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+          <h2 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-success"></span>
             Cobrar Orden #{checkoutOrder.orderNumber}
-          </h3>
+          </h2>
           <button
             type="button"
             onClick={() => setCheckoutOrder(null)}
@@ -66,6 +72,46 @@ export function POSCheckoutModal({
             <X className="h-5 w-5" />
           </button>
         </div>
+
+        {/* Inline error */}
+        {checkoutError && (
+          <div className="rounded-xl bg-red-500/10 p-3 border border-red-500/20 text-xs font-bold text-red-400 flex items-center gap-2">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            {checkoutError}
+          </div>
+        )}
+
+        {/* Unusual tip confirmation banner */}
+        {unusualTipInfo && (
+          <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 space-y-3">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-black text-amber-400 uppercase tracking-wide">Propina inusual</p>
+                <p className="text-[11px] font-bold text-amber-400/80 mt-0.5">
+                  ${unusualTipInfo.amount.toFixed(2)} ({unusualTipInfo.percentage.toFixed(1)}%) — ¿es correcto?
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setUnusualTipInfo(null)}
+                className="flex-1 py-2 text-[10px] rounded-xl font-black uppercase border border-white/10 bg-white/5 text-[#E0E0E0]/60 hover:bg-white/10 transition-colors"
+              >
+                Corregir
+              </button>
+              <button
+                type="button"
+                onClick={() => handleProcessPayment(true)}
+                disabled={isSubmitting}
+                className="flex-1 py-2 text-[10px] rounded-xl font-black uppercase border border-amber-500/40 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors disabled:opacity-50"
+              >
+                Sí, confirmar
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-5">
           <div className="text-center bg-[#1A1A1A] py-6 rounded-2xl border border-white/5 space-y-1">
@@ -126,6 +172,9 @@ export function POSCheckoutModal({
               </button>
             </div>
 
+            <p className="text-[10px] font-extrabold text-[#E0E0E0]/30 uppercase tracking-widest mb-1.5">
+              Acceso Rápido
+            </p>
             <div className="grid grid-cols-3 gap-2 mb-2">
               {["10", "15", "20"].map((pct) => (
                 <button
@@ -210,9 +259,10 @@ export function POSCheckoutModal({
           <div className="flex flex-col gap-2.5 pt-2">
             <button
               type="button"
-              onClick={handleProcessPayment}
+              onClick={() => handleProcessPayment(false)}
               disabled={
                 isSubmitting ||
+                !!unusualTipInfo ||
                 (paymentMethod === "CASH" &&
                   (!receivedAmount ||
                     Number(receivedAmount) < checkoutOrder.total + tipAmountCalculated))
@@ -248,7 +298,7 @@ export function POSCheckoutModal({
               disabled={isSubmitting}
               className="w-full bg-red-500/10 text-red-400 border border-red-500/10 py-2.5 rounded-xl font-black text-xs hover:bg-red-500/20 transition-all uppercase tracking-wider"
             >
-              Marca como Pago Fallido
+              Marcar como Pago Fallido
             </button>
           </div>
         </div>
