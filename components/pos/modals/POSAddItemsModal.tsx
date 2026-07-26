@@ -110,7 +110,7 @@ export function POSAddItemsModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-purple-500 text-white py-3 rounded-xl font-black hover:brightness-110 transition-all uppercase text-xs tracking-wider shadow-lg shadow-purple-500/20"
+              className="w-full bg-purple-500 text-white py-3 rounded-xl font-black hover:brightness-110 active:scale-[0.98] transition-all uppercase text-xs tracking-wider shadow-lg shadow-purple-500/20 disabled:opacity-50"
             >
               {isSubmitting ? "Guardando..." : "Agregar Productos"}
             </button>

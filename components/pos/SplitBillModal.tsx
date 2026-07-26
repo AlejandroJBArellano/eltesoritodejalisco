@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { X, Scissors, AlertTriangle } from "lucide-react";
 import { OrderWithDetails } from "@/types";
 
 type SplitMode = "EQUAL" | "ITEMS";
@@ -204,14 +205,16 @@ export function SplitBillModal({
       <div className="bg-[#1E1E1E] rounded-[2.5rem] max-w-lg w-full p-8 shadow-2xl border border-white/10 max-h-[92vh] overflow-y-auto custom-scrollbar">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-black text-white uppercase tracking-tighter">
-            ✂️ Dividir Cuenta
+          <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+            <Scissors className="h-5 w-5" /> Dividir Cuenta
           </h3>
           <button
+            type="button"
             onClick={onClose}
-            className="text-zinc-600 hover:text-white transition-colors"
+            className="text-zinc-600 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+            aria-label="Cerrar"
           >
-            ✕
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -228,6 +231,7 @@ export function SplitBillModal({
         {/* Mode selector */}
         <div className="flex gap-2 p-1 bg-white/5 rounded-2xl mb-6">
           <button
+            type="button"
             onClick={() => setMode("EQUAL")}
             className={`flex-1 py-2 rounded-xl text-xs font-black uppercase transition-all ${
               mode === "EQUAL"
@@ -238,6 +242,7 @@ export function SplitBillModal({
             Partes Iguales
           </button>
           <button
+            type="button"
             onClick={() => setMode("ITEMS")}
             className={`flex-1 py-2 rounded-xl text-xs font-black uppercase transition-all ${
               mode === "ITEMS"
@@ -256,6 +261,7 @@ export function SplitBillModal({
           </label>
           <div className="flex items-center gap-3 justify-center">
             <button
+              type="button"
               onClick={() => handlePartCountChange(partCount - 1)}
               disabled={partCount <= 2}
               className="w-10 h-10 rounded-xl bg-white/5 text-white font-black text-lg hover:bg-white/10 disabled:opacity-30 transition-all"
@@ -266,6 +272,7 @@ export function SplitBillModal({
               {partCount}
             </span>
             <button
+              type="button"
               onClick={() => handlePartCountChange(partCount + 1)}
               disabled={partCount >= 8}
               className="w-10 h-10 rounded-xl bg-white/5 text-white font-black text-lg hover:bg-white/10 disabled:opacity-30 transition-all"
@@ -282,8 +289,8 @@ export function SplitBillModal({
               Asignar Artículos
             </p>
             {!allItemsAssigned && (
-              <p className="text-[10px] text-yellow-400 font-black bg-yellow-500/10 p-2 rounded-xl border border-yellow-500/20 text-center mb-2">
-                ⚠️ Todos los artículos deben asignarse
+              <p className="text-[10px] text-yellow-400 font-black bg-yellow-500/10 p-2 rounded-xl border border-yellow-500/20 text-center mb-2 flex items-center justify-center gap-1.5">
+                <AlertTriangle className="h-3 w-3 shrink-0" /> Todos los artículos deben asignarse
               </p>
             )}
             {order.orderItems.map((item) => {
@@ -353,6 +360,7 @@ export function SplitBillModal({
                       {Array.from({ length: partCount }, (_, i) => i + 1).map((n) => (
                         <button
                           key={n}
+                          type="button"
                           onClick={() =>
                             setSingleAssignments((prev: Record<string, number>) => ({
                               ...prev,
@@ -409,6 +417,7 @@ export function SplitBillModal({
                   {PAYMENT_METHODS.map((m) => (
                     <button
                       key={m.value}
+                      type="button"
                       onClick={() =>
                         updatePart(i, "paymentMethod", m.value)
                       }
@@ -427,6 +436,7 @@ export function SplitBillModal({
                 <div>
                   <div className="flex gap-1.5 mb-1.5">
                     <button
+                      type="button"
                       onClick={() => {
                         updatePart(i, "tipType", "NONE");
                         updatePart(i, "tipInput", "");
@@ -440,6 +450,7 @@ export function SplitBillModal({
                       Sin propina
                     </button>
                     <button
+                      type="button"
                       onClick={() => updatePart(i, "tipType", "PERCENTAGE")}
                       className={`flex-1 py-1.5 text-[9px] rounded-lg font-black uppercase border-2 transition-all ${
                         part.tipType === "PERCENTAGE"
@@ -450,6 +461,7 @@ export function SplitBillModal({
                       %
                     </button>
                     <button
+                      type="button"
                       onClick={() => updatePart(i, "tipType", "FIXED")}
                       className={`flex-1 py-1.5 text-[9px] rounded-lg font-black uppercase border-2 transition-all ${
                         part.tipType === "FIXED"
@@ -466,6 +478,7 @@ export function SplitBillModal({
                       {["10", "15", "20"].map((pct) => (
                         <button
                           key={pct}
+                          type="button"
                           onClick={() => updatePart(i, "tipInput", pct)}
                           className={`flex-1 py-1.5 text-[9px] rounded-lg font-black uppercase border-2 transition-all ${
                             part.tipInput === pct
@@ -546,6 +559,7 @@ export function SplitBillModal({
         {/* Actions */}
         <div className="mt-6 space-y-3">
           <button
+            type="button"
             onClick={handleConfirm}
             disabled={isSubmitting || !canConfirm}
             className="w-full bg-[#B2FBA5] text-[#000000] py-4 rounded-full font-black text-lg hover:brightness-105 active:scale-[0.98] transition-all shadow-[0_0_20px_#B2FBA544] disabled:opacity-30 uppercase"
@@ -553,6 +567,7 @@ export function SplitBillModal({
             {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGOS"}
           </button>
           <button
+            type="button"
             onClick={onClose}
             className="w-full bg-white/5 text-zinc-500 py-3 rounded-2xl font-black text-[10px] hover:bg-white/10 transition-all uppercase tracking-widest"
           >

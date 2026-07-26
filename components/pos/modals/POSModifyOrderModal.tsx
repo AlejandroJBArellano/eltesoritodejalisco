@@ -47,8 +47,8 @@ export function POSModifyOrderModal({
 
         <div className="space-y-3">
           {modifyItems.length === 0 && (
-            <p className="text-center text-[#E0E0E0]/40 py-6 text-xs italic">
-              No quedan productos en la orden.
+            <p className="text-center text-[#E0E0E0]/30 py-8 text-xs font-extrabold uppercase tracking-widest">
+              No quedan productos en la orden
             </p>
           )}
           {modifyItems.map((item, index) => (
@@ -69,7 +69,7 @@ export function POSModifyOrderModal({
                 <button
                   type="button"
                   onClick={() => handleModifyQuantityChange(index, -1)}
-                  className="h-6 w-6 rounded-lg bg-white/5 hover:bg-red-500/20 text-[#E0E0E0] hover:text-red-400 flex items-center justify-center font-bold text-xs transition-colors"
+                  className="h-6 w-6 rounded-lg bg-white/5 hover:bg-red-500/20 text-[#E0E0E0] hover:text-red-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
                 >
                   <Minus className="h-3 w-3" />
                 </button>
@@ -79,7 +79,7 @@ export function POSModifyOrderModal({
                 <button
                   type="button"
                   onClick={() => handleModifyQuantityChange(index, 1)}
-                  className="h-6 w-6 rounded-lg bg-white/5 hover:bg-emerald-500/20 text-[#E0E0E0] hover:text-emerald-400 flex items-center justify-center font-bold text-xs transition-colors"
+                  className="h-6 w-6 rounded-lg bg-white/5 hover:bg-emerald-500/20 text-[#E0E0E0] hover:text-emerald-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
                 >
                   <Plus className="h-3 w-3" />
                 </button>

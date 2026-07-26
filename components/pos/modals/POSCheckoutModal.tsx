@@ -1,5 +1,5 @@
 import React from "react";
-import { X, DollarSign, CreditCard, Landmark } from "lucide-react";
+import { X, DollarSign, CreditCard, Landmark, Scissors } from "lucide-react";
 import { Order } from "@/types/pos";
 
 const PAYMENT_METHODS = [
@@ -58,8 +58,10 @@ export function POSCheckoutModal({
             Cobrar Orden #{checkoutOrder.orderNumber}
           </h3>
           <button
+            type="button"
             onClick={() => setCheckoutOrder(null)}
-            className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors"
+            className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors p-1 rounded-lg hover:bg-white/10"
+            aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
           </button>
@@ -215,7 +217,7 @@ export function POSCheckoutModal({
                   (!receivedAmount ||
                     Number(receivedAmount) < checkoutOrder.total + tipAmountCalculated))
               }
-              className="w-full bg-success text-white py-4 rounded-xl font-black text-base hover:brightness-110 shadow-lg shadow-success/20 disabled:opacity-30 transition-all uppercase tracking-wider"
+              className="w-full bg-success text-white py-4 rounded-xl font-black text-base hover:brightness-110 active:scale-[0.98] shadow-lg shadow-success/20 disabled:opacity-30 transition-all uppercase tracking-wider"
             >
               {isSubmitting ? "Procesando..." : "Registrar Pago"}
             </button>
@@ -224,9 +226,9 @@ export function POSCheckoutModal({
               type="button"
               onClick={() => setShowSplitBill(true)}
               disabled={isSubmitting}
-              className="w-full bg-blue-500/10 text-blue-400 border border-blue-500/20 py-2.5 rounded-xl font-black text-xs hover:bg-blue-500/20 transition-all uppercase tracking-wider"
+              className="w-full bg-blue-500/10 text-blue-400 border border-blue-500/20 py-2.5 rounded-xl font-black text-xs hover:bg-blue-500/20 transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
             >
-              ✂️ Dividir Cuenta
+              <Scissors className="h-3.5 w-3.5" /> Dividir Cuenta
             </button>
 
             <button
@@ -244,7 +246,7 @@ export function POSCheckoutModal({
               type="button"
               onClick={() => handleFailedPayment()}
               disabled={isSubmitting}
-              className="w-full bg-red-500/10 text-red-400 py-2.5 rounded-xl font-black text-xs hover:bg-red-500/20 transition-all uppercase tracking-wider"
+              className="w-full bg-red-500/10 text-red-400 border border-red-500/10 py-2.5 rounded-xl font-black text-xs hover:bg-red-500/20 transition-all uppercase tracking-wider"
             >
               Marca como Pago Fallido
             </button>

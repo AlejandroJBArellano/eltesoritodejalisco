@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Order, OrderFormState, MenuItem, OrderItemDraft, MixedFlavor, MIXED_ORDER_TOTAL, MIXED_ORDER_FLAVORS } from "@/types/pos";
+import { Order, OrderFormState, MenuItem, OrderItemDraft, ModifyItem, MixedFlavor, MIXED_ORDER_TOTAL, MIXED_ORDER_FLAVORS } from "@/types/pos";
 
 const emptyForm: OrderFormState = {
   customerId: "",
@@ -38,7 +38,7 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
 
   // Modify Order State (edit/remove existing items)
   const [modifyingOrder, setModifyingOrder] = useState<Order | null>(null);
-  const [modifyItems, setModifyItems] = useState<any[]>([]);
+  const [modifyItems, setModifyItems] = useState<ModifyItem[]>([]);
   const [isSubmittingCart, setIsSubmittingCart] = useState(false);
 
   // Initializing default empty cart
@@ -342,16 +342,14 @@ export function usePOSCart(availableMenuItems: MenuItem[], refreshOrders: () => 
       setIsSubmittingCart(false);
     }
   };
+
   return {
     formState,
     formErrors,
     handleFormChange,
     handleGridItemClick,
     handleQuantityChange,
-    handleItemNoteChange,
     handleClearCart,
-    validateForm,
-    clearForm,
     
     // Mixed Order
     mixedOrderMenuItem,

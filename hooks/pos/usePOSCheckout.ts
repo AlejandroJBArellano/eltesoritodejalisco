@@ -14,7 +14,7 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
   const [showKitchenTicket, setShowKitchenTicket] = useState(false);
   const [tipType, setTipType] = useState<"NONE" | "PERCENTAGE" | "FIXED">("NONE");
   const [tipInput, setTipInput] = useState<string>("");
-  
+
   // WhatsApp Modal
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState("");
@@ -219,7 +219,7 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
       msg += `📍 Mesa: ${checkoutOrder.table}\n`;
     }
     msg += `\n*Resumen de tu orden:*\n`;
-    checkoutOrder.orderItems?.forEach((item: any) => {
+    checkoutOrder.orderItems?.forEach((item: { quantity: number; menuItem?: { name?: string }; unitPrice?: number }) => {
       const quantity = item.quantity || 1;
       const itemName = item.menuItem?.name || "Producto";
       const itemPrice = item.unitPrice || 0;

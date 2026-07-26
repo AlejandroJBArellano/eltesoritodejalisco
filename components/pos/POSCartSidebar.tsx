@@ -1,5 +1,5 @@
 import React from "react";
-import { ShoppingBag, Minus, Plus, Printer, Bike } from "lucide-react";
+import { ShoppingBag, Minus, Plus, Printer, Bike, AlertTriangle } from "lucide-react";
 import { OrderFormState, MenuItem, Customer } from "@/types/pos";
 import { isMixedOrderItem } from "@/hooks/pos/usePOSCart";
 
@@ -27,7 +27,7 @@ export function POSCartSidebar({
   isSubmitting,
 }: POSCartSidebarProps) {
   return (
-    <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-24">
+    <div className="space-y-6 lg:sticky lg:top-24">
       {/* Detalles Adicionales de la Orden */}
       <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
         <div className="flex items-center justify-between border-b border-white/5 pb-3">
@@ -80,7 +80,11 @@ export function POSCartSidebar({
             <select
               value={formState.source}
               onChange={(e) => handleFormChange("source", e.target.value)}
-              className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+              className={`w-full rounded-xl border bg-[#181818] px-3 py-2 text-xs text-[#E0E0E0] outline-none transition-colors ${
+                formErrors.source
+                  ? "border-red-500/50 focus:border-red-400"
+                  : "border-white/5 focus:border-primary"
+              }`}
             >
               {sourceOptions.map((s) => (
                 <option key={s} value={s}>
@@ -92,14 +96,14 @@ export function POSCartSidebar({
 
           <div>
             <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
-              Mesa / Notas
+              Notas
             </label>
             <input
               type="text"
               value={formState.notes}
               onChange={(e) => handleFormChange("notes", e.target.value)}
               className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
-              placeholder="Ej. Mesa 4..."
+              placeholder="Mesa 4, sin chile..."
             />
           </div>
         </div>
@@ -124,8 +128,9 @@ export function POSCartSidebar({
         </div>
 
         {formErrors.items && (
-          <div className="rounded-xl bg-red-500/10 p-3 border border-red-500/20 text-xs font-bold text-red-400 text-center">
-            ⚠️ {formErrors.items}
+          <div className="rounded-xl bg-red-500/10 p-3 border border-red-500/20 text-xs font-bold text-red-400 flex items-center gap-2">
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+            {formErrors.items}
           </div>
         )}
 
@@ -169,7 +174,7 @@ export function POSCartSidebar({
                     <button
                       type="button"
                       onClick={() => handleQuantityChange(index, -1)}
-                      className="h-6 w-6 rounded-lg bg-white/5 hover:bg-red-500/20 text-[#E0E0E0] hover:text-red-400 flex items-center justify-center font-bold text-xs transition-colors"
+                      className="h-6 w-6 rounded-lg bg-white/5 hover:bg-red-500/20 text-[#E0E0E0] hover:text-red-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
                     >
                       <Minus className="h-3 w-3" />
                     </button>
@@ -179,7 +184,7 @@ export function POSCartSidebar({
                     <button
                       type="button"
                       onClick={() => handleQuantityChange(index, 1)}
-                      className="h-6 w-6 rounded-lg bg-white/5 hover:bg-emerald-500/20 text-[#E0E0E0] hover:text-emerald-400 flex items-center justify-center font-bold text-xs transition-colors"
+                      className="h-6 w-6 rounded-lg bg-white/5 hover:bg-emerald-500/20 text-[#E0E0E0] hover:text-emerald-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
                     >
                       <Plus className="h-3 w-3" />
                     </button>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, X, Plus } from "lucide-react";
+import { Search, X, Plus, PackageSearch } from "lucide-react";
 import { MenuItem } from "@/types/pos";
 import { isMixedOrderItem } from "@/hooks/pos/usePOSCart";
 
@@ -54,7 +54,8 @@ export function POSMenuGrid({
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#E0E0E0]/40 hover:text-[#E0E0E0]"
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center rounded-lg text-[#E0E0E0]/40 hover:text-[#E0E0E0] hover:bg-white/10 transition-colors"
+              aria-label="Limpiar búsqueda"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -64,6 +65,17 @@ export function POSMenuGrid({
 
       {/* Categorías en Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+        <button
+          type="button"
+          onClick={() => setActiveCategory("")} 
+          className={`px-4 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${
+            activeCategory === ""
+              ? "bg-white/10 border-white/20 text-[#E0E0E0] shadow-sm scale-105"
+              : "bg-white/5 text-[#E0E0E0]/50 border-transparent hover:border-white/10 hover:text-[#E0E0E0]"
+          }`}
+        >
+          Todos
+        </button>
         {categories.map((cat) => {
           const config = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG.OTROS;
           const isActive = activeCategory === cat;
@@ -87,8 +99,14 @@ export function POSMenuGrid({
       {/* Grid de Productos */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5 pt-1">
         {filteredMenuItems.length === 0 ? (
-          <div className="col-span-full py-12 text-center text-[#E0E0E0]/40 italic text-xs">
-            No se encontraron productos en esta sección.
+          <div className="col-span-full py-16 text-center space-y-2">
+            <PackageSearch className="h-10 w-10 mx-auto opacity-30 text-primary" />
+            <p className="text-xs font-extrabold uppercase tracking-widest text-[#E0E0E0]/40">
+              Sin resultados
+            </p>
+            <p className="text-[11px] font-medium text-[#E0E0E0]/30">
+              Intenta con otra categoría o búsqueda
+            </p>
           </div>
         ) : (
           filteredMenuItems.map((m) => {

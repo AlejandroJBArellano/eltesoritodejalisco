@@ -38,11 +38,10 @@ import {
   X,
   Send
 } from "lucide-react";
-import { Order, MIXED_ORDER_TOTAL, MIXED_ORDER_FLAVORS } from "@/types/pos";
+import { Order } from "@/types/pos";
 
 export default function POSPage() {
   const {
-    menuItems,
     availableMenuItems,
     customers,
     orders,
@@ -84,6 +83,7 @@ export default function POSPage() {
     handleAddItems,
     handleCheckoutSubmit,
     handleCancelOrder,
+    isSubmittingCart,
   } = usePOSCart(availableMenuItems, refreshOrders);
 
   const {
@@ -205,7 +205,7 @@ export default function POSPage() {
               Ticket Promedio
             </p>
             <p className="text-2xl font-black text-[#E0E0E0] tabular-nums tracking-tight">
-              ${todayStats.avgTicket.toFixed(2)}
+              ${isNaN(todayStats.avgTicket) ? "0.00" : todayStats.avgTicket.toFixed(2)}
             </p>
           </div>
         </div>
@@ -248,7 +248,7 @@ export default function POSPage() {
             handleClearCart={handleClearCart}
             handleQuantityChange={handleQuantityChange}
             availableMenuItems={availableMenuItems}
-            isSubmitting={isSubmittingCheckout} // Assuming this is mainly for submitting
+            isSubmitting={isSubmittingCart || isSubmittingCheckout}
           />
         </form>
       </main>
@@ -281,160 +281,179 @@ export default function POSPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {orders.slice(0, 10).map((order) => {
-                const tipAmt = getOrderTipAmount(order);
-                return (
-                  <tr key={order.id} className="hover:bg-white/5 transition-colors">
-                    <td className="py-3.5 px-3">
-                      <span className="font-mono font-black text-sm text-[#E0E0E0]">#{order.orderNumber}</span>
-                    </td>
-                    <td className="py-3.5 px-3">
-                      <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black text-[#E0E0E0]/70 uppercase tracking-wider">
-                        {order.table || "Para Llevar"}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-3">
-                      {order.status === "PAID" ? (
-                        <span className="rounded-full bg-success/10 px-2.5 py-1 text-[10px] font-black text-success uppercase tracking-widest">
-                          Pagado
+              {orders.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-16 text-center">
+                    <p className="text-xs font-extrabold uppercase tracking-widest text-[#E0E0E0]/30">
+                      No hay órdenes todavía
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                orders.slice(0, 10).map((order) => {
+                  const tipAmt = getOrderTipAmount(order);
+                  return (
+                    <tr key={order.id} className="hover:bg-white/5 transition-colors">
+                      <td className="py-3.5 px-3">
+                        <span className="font-mono font-black text-sm text-[#E0E0E0]">#{order.orderNumber}</span>
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black text-[#E0E0E0]/70 uppercase tracking-wider">
+                          {order.table || "Para Llevar"}
                         </span>
-                      ) : order.status === "UNCOLLECTED" ? (
-                        <span className="rounded-full bg-red-500/10 px-2.5 py-1 text-[10px] font-black text-red-400 uppercase tracking-widest">
-                          No Cobrada
-                        </span>
-                      ) : (
-                        <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-black text-amber-400 uppercase tracking-widest">
-                          Pendiente
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-3">
-                      <div className="flex flex-col">
-                        <span className="font-black text-sm text-[#E0E0E0] tabular-nums">
-                          ${order.total.toFixed(2)}
-                        </span>
-                        {tipAmt > 0 && (
-                          <span className="text-[10px] font-bold text-blue-400/80">
-                            +${tipAmt.toFixed(2)} propina
+                      </td>
+                      <td className="py-3.5 px-3">
+                        {order.status === "PAID" ? (
+                          <span className="rounded-full bg-success/10 px-2.5 py-1 text-[10px] font-black text-success uppercase tracking-widest">
+                            Pagado
+                          </span>
+                        ) : order.status === "UNCOLLECTED" ? (
+                          <span className="rounded-full bg-red-500/10 px-2.5 py-1 text-[10px] font-black text-red-400 uppercase tracking-widest">
+                            No Cobrada
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-black text-amber-400 uppercase tracking-widest">
+                            Pendiente
                           </span>
                         )}
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-3">
-                      <div className="flex justify-end items-center gap-1.5 flex-wrap">
-                        {order.status !== "PAID" && (
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <div className="flex flex-col">
+                          <span className="font-black text-sm text-[#E0E0E0] tabular-nums">
+                            ${order.total.toFixed(2)}
+                          </span>
+                          {tipAmt > 0 && (
+                            <span className="text-[10px] font-bold text-blue-400/80">
+                              +${tipAmt.toFixed(2)} propina
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <div className="flex justify-end items-center gap-1.5 flex-wrap">
+                          {order.status !== "PAID" && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCheckoutOrder(order);
+                                setShowTicket(false);
+                                setShowKitchenTicket(false);
+                                setTipType("NONE");
+                                setTipInput("");
+                                setPaymentMethod("CASH");
+                                setReceivedAmount("");
+                              }}
+                              className="rounded-xl bg-success/10 hover:bg-success/20 text-success border border-success/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            >
+                              <DollarSign className="h-3 w-3" />
+                              Cobrar
+                            </button>
+                          )}
                           <button
+                            type="button"
                             onClick={() => {
                               setCheckoutOrder(order);
+                              setShowKitchenTicket(true);
                               setShowTicket(false);
-                              setShowKitchenTicket(false);
-                              setTipType("NONE");
-                              setTipInput("");
-                              setPaymentMethod("CASH");
-                              setReceivedAmount("");
                             }}
-                            className="rounded-xl bg-success/10 hover:bg-success/20 text-success border border-success/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            className="rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
                           >
-                            <DollarSign className="h-3 w-3" />
-                            Cobrar
+                            <ChefHat className="h-3 w-3" />
+                            Comanda
                           </button>
-                        )}
-                        <button
-                          onClick={() => {
-                            setCheckoutOrder(order);
-                            setShowKitchenTicket(true);
-                            setShowTicket(false);
-                          }}
-                          className="rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
-                        >
-                          <ChefHat className="h-3 w-3" />
-                          Comanda
-                        </button>
-                        {order.status !== "PAID" && (
-                          <button
-                            onClick={() => setEditingOrder(order)}
-                            className="rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
-                          >
-                            <Plus className="h-3 w-3" />
-                            Agregar
-                          </button>
-                        )}
-                        {order.status !== "PAID" && (
-                          <button
-                            onClick={() => openModifyModal(order)}
-                            className="rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
-                          >
-                            <Edit3 className="h-3 w-3" />
-                            Editar
-                          </button>
-                        )}
-                        {order.status === "PAID" && (
-                          <button
-                            onClick={() => {
-                              setEditingTipOrder(order);
-                              setEditTipType("FIXED");
-                              setEditTipInput(order.payments?.[0]?.tipAmount?.toString() || "0");
-                            }}
-                            className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
-                          >
-                            <HandCoins className="h-3 w-3" />
-                            Propina
-                          </button>
-                        )}
-                        {order.status === "PAID" &&
-                          (() => {
-                            const lastUpdate = new Date(order.updatedAt || order.createdAt).getTime();
-                            const now = new Date().getTime();
-                            const isWithin3Min = now - lastUpdate < 3 * 60 * 1000;
+                          {order.status !== "PAID" && (
+                            <button
+                              type="button"
+                              onClick={() => setEditingOrder(order)}
+                              className="rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            >
+                              <Plus className="h-3 w-3" />
+                              Agregar
+                            </button>
+                          )}
+                          {order.status !== "PAID" && (
+                            <button
+                              type="button"
+                              onClick={() => openModifyModal(order)}
+                              className="rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            >
+                              <Edit3 className="h-3 w-3" />
+                              Editar
+                            </button>
+                          )}
+                          {order.status === "PAID" && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingTipOrder(order);
+                                setEditTipType("FIXED");
+                                setEditTipInput(order.payments?.[0]?.tipAmount?.toString() || "0");
+                              }}
+                              className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            >
+                              <HandCoins className="h-3 w-3" />
+                              Propina
+                            </button>
+                          )}
+                          {order.status === "PAID" &&
+                            (() => {
+                              const lastUpdate = new Date(order.updatedAt || order.createdAt).getTime();
+                              const now = new Date().getTime();
+                              const isWithin3Min = now - lastUpdate < 3 * 60 * 1000;
 
-                            if (isWithin3Min) {
-                              return (
-                                <button
-                                  onClick={() => handleUndoPayment(order.id, order.orderNumber)}
-                                  className="rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors animate-pulse"
-                                >
-                                  <Undo2 className="h-3 w-3" />
-                                  Deshacer
-                                </button>
-                              );
-                            }
-                            return null;
-                          })()}
-                        {order.status === "PAID" && (
+                              if (isWithin3Min) {
+                                return (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUndoPayment(order.id, order.orderNumber)}
+                                    className="rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-all active:scale-95 animate-pulse"
+                                  >
+                                    <Undo2 className="h-3 w-3" />
+                                    Deshacer
+                                  </button>
+                                );
+                              }
+                              return null;
+                            })()}
+                          {order.status === "PAID" && (
+                            <button
+                              type="button"
+                              onClick={() => setBillingOrder(order)}
+                              className="rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            >
+                              <FileText className="h-3 w-3" />
+                              Factura
+                            </button>
+                          )}
                           <button
-                            onClick={() => setBillingOrder(order)}
-                            className="rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            type="button"
+                            onClick={() => {
+                              setCheckoutOrder(order);
+                              setShowTicket(true);
+                              setShowKitchenTicket(false);
+                            }}
+                            className="rounded-xl bg-white/5 hover:bg-white/10 text-[#E0E0E0]/70 border border-white/5 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
                           >
-                            <FileText className="h-3 w-3" />
-                            Factura
+                            <Printer className="h-3 w-3" />
+                            Ticket
                           </button>
-                        )}
-                        <button
-                          onClick={() => {
-                            setCheckoutOrder(order);
-                            setShowTicket(true);
-                            setShowKitchenTicket(false);
-                          }}
-                          className="rounded-xl bg-white/5 hover:bg-white/10 text-[#E0E0E0]/70 border border-white/5 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
-                        >
-                          <Printer className="h-3 w-3" />
-                          Ticket
-                        </button>
-                        {order.status !== "PAID" && order.status !== "UNCOLLECTED" && (
-                          <button
-                            onClick={() => handleCancelOrder(order.id, order.orderNumber)}
-                            disabled={isSubmittingCheckout}
-                            className="rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-1 text-[10px] font-black uppercase transition-colors"
-                            title="Cancelar orden"
-                          >
-                            <Ban className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                          {order.status !== "PAID" && order.status !== "UNCOLLECTED" && (
+                            <button
+                              type="button"
+                              onClick={() => handleCancelOrder(order.id, order.orderNumber)}
+                              disabled={isSubmittingCart || isSubmittingCheckout}
+                              className="rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-1 text-[10px] font-black uppercase transition-colors disabled:opacity-50"
+                              title="Cancelar orden"
+                            >
+                              <Ban className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -450,7 +469,7 @@ export default function POSPage() {
         handleAdditionalItemChange={handleAdditionalItemChange}
         removeAdditionalItemRow={removeAdditionalItemRow}
         availableMenuItems={availableMenuItems}
-        isSubmitting={isSubmittingCheckout}
+        isSubmitting={isSubmittingCart}
       />
 
       <POSModifyOrderModal
@@ -461,7 +480,7 @@ export default function POSPage() {
         handleModifyQuantityChange={handleModifyQuantityChange}
         handleModifyRemoveItem={handleModifyRemoveItem}
         handleSaveModifiedOrder={handleSaveModifiedOrder}
-        isSubmitting={isSubmittingCheckout}
+        isSubmitting={isSubmittingCart}
       />
 
       <POSMixedOrderModal
@@ -477,6 +496,7 @@ export default function POSPage() {
           <div className="max-w-md w-full py-10 space-y-6">
             <div className="flex justify-center gap-3 no-print">
               <button
+                type="button"
                 onClick={() => window.print()}
                 className="bg-success text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
               >
@@ -484,6 +504,7 @@ export default function POSPage() {
               </button>
               {showTicket && (
                 <button
+                  type="button"
                   onClick={() => setShowWhatsAppModal(true)}
                   className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg hover:bg-emerald-500 active:scale-95 transition-all flex items-center gap-1.5"
                 >
@@ -491,6 +512,7 @@ export default function POSPage() {
                 </button>
               )}
               <button
+                type="button"
                 onClick={() => {
                   setCheckoutOrder(null);
                   setShowTicket(false);
@@ -541,8 +563,10 @@ export default function POSPage() {
                 Enviar Ticket por WhatsApp
               </h3>
               <button
+                type="button"
                 onClick={() => setShowWhatsAppModal(false)}
-                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors"
+                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors p-1 rounded-lg hover:bg-white/10"
+                aria-label="Cerrar"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -563,6 +587,7 @@ export default function POSPage() {
             />
 
             <button
+              type="button"
               disabled={whatsappNumber.length !== 10}
               onClick={() => {
                 const url = `https://wa.me/52${whatsappNumber}?text=${generateWhatsAppMessage()}`;
@@ -573,7 +598,7 @@ export default function POSPage() {
                 setShowKitchenTicket(false);
                 setWhatsappNumber("");
               }}
-              className="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-black text-sm hover:brightness-110 disabled:opacity-30 transition-all shadow-lg shadow-emerald-500/20 uppercase tracking-wider flex items-center justify-center gap-2"
+              className="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-black text-sm hover:brightness-110 disabled:opacity-30 active:scale-[0.98] transition-all shadow-lg shadow-emerald-500/20 uppercase tracking-wider flex items-center justify-center gap-2"
             >
               <Send className="h-4 w-4" /> Enviar Ticket
             </button>
