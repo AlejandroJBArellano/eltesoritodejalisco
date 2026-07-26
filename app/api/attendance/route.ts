@@ -21,9 +21,10 @@ export async function GET(request: Request) {
       .from("users")
       .select("role")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
-    const isAdmin = dbUser?.role === "ADMIN" || dbUser?.role === "MANAGER";
+    const role = dbUser?.role || (user.user_metadata?.role as string);
+    const isAdmin = role === "ADMIN" || role === "MANAGER";
 
     if (isAdmin) {
       // If admin, fetch all attendance records for today, and also all users
@@ -96,11 +97,80 @@ export async function POST(request: Request) {
     const actionTime = timestamp ? new Date(timestamp).toISOString() : new Date().toISOString();
 
     if (action === "CHECK_IN") {
+      // Resolve target user ID in `users` table
+      let dbUserId = actualUserId;
+      const { data: targetDbUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("id", actualUserId)
+        .maybeSingle();
+
+      if (!targetDbUser) {
+        console.log("[Attendance API] targetDbUser not found by id:", actualUserId);
+        // Find by email from auth user if user.id does not match users.id
+        const { data: userByEmail, error: emailSearchError } = await supabase
+          .from("users")
+          .select("id")
+          .eq("email", user.email)
+          .maybeSingle();
+
+        if (emailSearchError) {
+          console.error("[Attendance API] Error searching user by email:", emailSearchError);
+        }
+
+        if (userByEmail) {
+          console.log("[Attendance API] Found user by email:", userByEmail);
+          dbUserId = userByEmail.id;
+        } else if (user.email) {
+          console.log("[Attendance API] Attempting to auto-create user:", {
+            email: user.email,
+            name: user.user_metadata?.name,
+            role: user.user_metadata?.role,
+          });
+
+          const nowIso = new Date().toISOString();
+          // Auto-register user in `users` table if missing
+          const { data: newUser, error: autoCreateError } = await supabase
+            .from("users")
+            .insert({
+              id: user.id,
+              email: user.email,
+              name: user.user_metadata?.name || user.email.split("@")[0],
+              role: user.user_metadata?.role || "ADMIN",
+              password: "MANAGED_BY_SUPABASE",
+              created_at: nowIso,
+              updated_at: nowIso,
+            })
+            .select("id")
+            .single();
+
+          if (autoCreateError) {
+            console.error("[Attendance API] autoCreateError detail:", autoCreateError);
+          }
+
+          if (!autoCreateError && newUser) {
+            console.log("[Attendance API] Successfully created user:", newUser);
+            dbUserId = newUser.id;
+          } else {
+            return NextResponse.json(
+              { error: `No se pudo registrar automáticamente al usuario: ${autoCreateError?.message || 'Error desconocido'}` },
+              { status: 500 }
+            );
+          }
+        } else {
+          console.error("[Attendance API] User has no email in auth context:", user);
+          return NextResponse.json(
+            { error: "No se encontró el registro de usuario en la base de datos." },
+            { status: 400 }
+          );
+        }
+      }
+
       // Create a new record
       const { data, error } = await supabase
         .from("attendance")
         .insert({
-          user_id: actualUserId,
+          user_id: dbUserId,
           date: todayDate,
           check_in: actionTime,
           status: "ACTIVE",
@@ -111,11 +181,31 @@ export async function POST(request: Request) {
       if (error) throw error;
       return NextResponse.json(data);
     } else if (action === "CHECK_OUT") {
+      // Resolve target user ID in `users` table
+      let dbUserId = actualUserId;
+      const { data: targetDbUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("id", actualUserId)
+        .maybeSingle();
+
+      if (!targetDbUser) {
+        const { data: userByEmail } = await supabase
+          .from("users")
+          .select("id")
+          .eq("email", user.email)
+          .maybeSingle();
+
+        if (userByEmail) {
+          dbUserId = userByEmail.id;
+        }
+      }
+
       // Find active record
       const { data: activeRecords, error: fetchError } = await supabase
         .from("attendance")
         .select("id")
-        .eq("user_id", actualUserId)
+        .eq("user_id", dbUserId)
         .eq("date", todayDate)
         .eq("status", "ACTIVE")
         .order("created_at", { ascending: false })

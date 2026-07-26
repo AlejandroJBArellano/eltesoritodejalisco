@@ -28,11 +28,15 @@ export async function GET() {
           .maybeSingle();
 
         if (!dbUser && authUser.email) {
+          const nowIso = new Date().toISOString();
           await supabase.from("users").insert({
+            id: authUser.id,
             email: authUser.email,
             name: authUser.user_metadata?.name || authUser.email.split("@")[0],
             role: (authUser.user_metadata?.role as any) || "ADMIN",
             password: "MANAGED_BY_SUPABASE",
+            created_at: nowIso,
+            updated_at: nowIso,
           });
         }
       }
