@@ -8,64 +8,69 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     console.log("[ATTENDANCE_HISTORY] GET request received.");
-    console.log("[ATTENDANCE_HISTORY] Auth User:", user ? { id: user.id, email: user.email, metadata: user.user_metadata } : null);
+    console.log("[ATTENDANCE_HISTORY] Auth User:", user ? { id: user.id, email: user.email } : null);
 
     if (authError || !user) {
-      console.warn("[ATTENDANCE_HISTORY] Unauthorized access attempt:", authError?.message);
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
     const adminSupabase = createAdminClient();
 
-    // 1. Check role in users table by ID
-    const { data: dbUserById, error: userByIdError } = await adminSupabase
-      .from("users")
-      .select("id, name, email, role")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    console.log("[ATTENDANCE_HISTORY] dbUserById:", dbUserById, "Error:", userByIdError?.message);
-
-    // 2. Check role in users table by Email
-    let dbUserByEmail = null;
-    if (!dbUserById && user.email) {
-      const { data: byEmail, error: emailErr } = await adminSupabase
-        .from("users")
-        .select("id, name, email, role")
-        .eq("email", user.email)
-        .maybeSingle();
-      dbUserByEmail = byEmail;
-      console.log("[ATTENDANCE_HISTORY] dbUserByEmail:", dbUserByEmail, "Error:", emailErr?.message);
-    }
-
-    // 3. Check profiles table by ID
-    const { data: profileData, error: profileErr } = await adminSupabase
+    // 1. Primary check: profiles table (used by getProfile() in dashboard)
+    const { data: profileData } = await adminSupabase
       .from("profiles")
       .select("id, role")
       .eq("id", user.id)
       .maybeSingle();
 
-    console.log("[ATTENDANCE_HISTORY] profileData:", profileData, "Error:", profileErr?.message);
+    console.log("[ATTENDANCE_HISTORY] profileData:", profileData);
 
-    // Determine resolved role
-    const resolvedRole =
+    // 2. Secondary check: users table
+    const { data: dbUserById } = await adminSupabase
+      .from("users")
+      .select("id, name, email, role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    console.log("[ATTENDANCE_HISTORY] dbUserById:", dbUserById);
+
+    let dbUserByEmail = null;
+    if (!dbUserById && user.email) {
+      const { data: byEmail } = await adminSupabase
+        .from("users")
+        .select("id, name, email, role")
+        .eq("email", user.email)
+        .maybeSingle();
+      dbUserByEmail = byEmail;
+      console.log("[ATTENDANCE_HISTORY] dbUserByEmail:", dbUserByEmail);
+    }
+
+    // Prioritize profileData.role (from profiles table)
+    let role =
+      profileData?.role ||
       dbUserById?.role ||
       dbUserByEmail?.role ||
-      profileData?.role ||
-      (user.user_metadata?.role as string) ||
-      "ADMIN"; // Default to ADMIN if logged in user is managing
+      (user.user_metadata?.role as string);
 
-    console.log("[ATTENDANCE_HISTORY] Resolved Role:", resolvedRole);
+    console.log("[ATTENDANCE_HISTORY] Resolved Role:", role);
 
-    const isEmployee = resolvedRole === "WAITER" || resolvedRole === "CHEF";
-    const isAdmin = !isEmployee;
+    const isAdmin = role === "ADMIN" || role === "MANAGER" || !role;
 
     console.log("[ATTENDANCE_HISTORY] Is Admin Permission Allowed:", isAdmin);
 
+    // Sync users table role if profileData has ADMIN but users table has obsolete role
+    if (profileData?.role === "ADMIN" && dbUserById && dbUserById.role !== "ADMIN") {
+      console.log("[ATTENDANCE_HISTORY] Syncing users table role to ADMIN for user:", user.id);
+      await adminSupabase
+        .from("users")
+        .update({ role: "ADMIN" })
+        .eq("id", user.id);
+    }
+
     if (!isAdmin) {
-      console.warn("[ATTENDANCE_HISTORY] Permission DENIED for role:", resolvedRole);
+      console.warn("[ATTENDANCE_HISTORY] Permission DENIED for role:", role);
       return NextResponse.json(
-        { error: `No tienes permisos para ver el historial completo de asistencias (Rol actual: ${resolvedRole}).` },
+        { error: `No tienes permisos para ver el historial completo de asistencias (Rol actual: ${role}).` },
         { status: 403 }
       );
     }
@@ -75,8 +80,6 @@ export async function GET(request: NextRequest) {
     const filterUserId = searchParams.get("userId");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
-
-    console.log("[ATTENDANCE_HISTORY] Applied filters:", { filterUserId, startDate, endDate });
 
     // Fetch attendances using Admin Client
     let attendanceQuery = adminSupabase
@@ -117,7 +120,7 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    console.log("[ATTENDANCE_HISTORY] Successfully fetched records count:", enrichedAttendances.length);
+    console.log("[ATTENDANCE_HISTORY] Successfully returned records count:", enrichedAttendances.length);
 
     return NextResponse.json({ attendances: enrichedAttendances });
   } catch (error: any) {

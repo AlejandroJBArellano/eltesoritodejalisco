@@ -16,14 +16,20 @@ export async function GET(request: Request) {
 
     const todayDate = format(new Date(), "yyyy-MM-dd", { timeZone: TZ });
 
-    // Try to get user role from metadata or db
+    // Check profiles table first (used by getProfile() in dashboard)
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
     const { data: dbUser } = await supabase
       .from("users")
       .select("role")
       .eq("id", user.id)
       .maybeSingle();
 
-    const role = dbUser?.role || (user.user_metadata?.role as string);
+    const role = profileData?.role || dbUser?.role || (user.user_metadata?.role as string);
     const isAdmin = role === "ADMIN" || role === "MANAGER";
 
     if (isAdmin) {
