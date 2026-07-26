@@ -21,6 +21,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import React from "react";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 // --- Extracted UI Components for Dashboard ---
 
@@ -33,18 +34,20 @@ interface StatCardProps {
 
 function StatCard({ title, icon: Icon, value, themeClass }: StatCardProps) {
   return (
-    <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-          {title}
-        </span>
-        <div className={`rounded-xl p-3 ${themeClass}`}>
-          <Icon className="h-5 w-5" />
+    <div className="rounded-2xl bg-[#242424] p-3 sm:p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+      <div className="flex items-center justify-between sm:items-start gap-1">
+        <div className="min-w-0">
+          <span className="text-[9px] sm:text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider block truncate">
+            {title}
+          </span>
+          <p className="mt-0.5 sm:mt-3 text-base sm:text-3xl font-black text-[#E0E0E0] tracking-tight tabular-nums truncate">
+            {value}
+          </p>
+        </div>
+        <div className={`rounded-lg p-1.5 sm:p-3 ${themeClass} shrink-0 sm:-mt-1`}>
+          <Icon className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
         </div>
       </div>
-      <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight tabular-nums">
-        {value}
-      </p>
     </div>
   );
 }
@@ -70,30 +73,35 @@ function ModuleCard({
 }: ModuleCardProps) {
   return (
     <Link href={href} className="group cursor-pointer focus:outline-none">
-      <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 hover:border-white/10 flex flex-col justify-between">
+      <div className="h-full rounded-2xl bg-[#242424] p-3 sm:p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 hover:border-white/10 flex flex-col justify-between min-h-[90px] sm:min-h-0">
         <div>
-          <div className="mb-6 flex items-center justify-between">
-            <div className={`rounded-xl p-3 ${themeClass}`}>
-              <Icon className="h-7 w-7" />
+          {/* Top section: Icon + Badge */}
+          <div className="mb-2 sm:mb-6 flex items-center justify-between">
+            <div className={`rounded-lg p-1.5 sm:p-3 ${themeClass}`}>
+              <Icon className="h-4 w-4 sm:h-7 sm:w-7" />
             </div>
             {badge && (
               <span
-                className={`rounded-full px-4 py-1 text-xs font-black uppercase tracking-widest ${themeClass}`}
+                className={`rounded-full px-1.5 py-0.5 sm:px-4 sm:py-1 text-[8px] sm:text-xs font-black uppercase tracking-widest ${themeClass}`}
               >
                 {badge}
               </span>
             )}
           </div>
+
+          {/* Content: Title */}
           <h3
-            className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase transition-colors flex items-center justify-between"
+            className="text-xs sm:text-xl font-black text-[#E0E0E0] tracking-tight uppercase transition-colors flex items-center justify-between"
             style={{ "--hover-color": hoverColor } as React.CSSProperties}
           >
-            <span className="group-hover:text-[var(--hover-color)] transition-colors">
+            <span className="group-hover:text-[var(--hover-color)] transition-colors truncate">
               {title}
             </span>
-            <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <ArrowUpRight className="hidden sm:block h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </h3>
-          <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+
+          {/* Description (desktop-only) */}
+          <p className="hidden sm:block mt-2 text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
             {description}
           </p>
         </div>
@@ -180,14 +188,11 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen">
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:py-12 sm:px-6 lg:px-8">
         {/* Quick Stats - Only for Admins */}
         {isAdmin && (
-          <div className="mb-12">
-            <h2 className="mb-4 text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-              Resumen del Día
-            </h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <CollapsibleSection title="Resumen del Día" defaultOpen={false}>
+            <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-4">
               <StatCard
                 title="Órdenes Activas"
                 icon={ClipboardList}
@@ -219,19 +224,12 @@ export default async function Home() {
                 themeClass="bg-blue-500/10 text-blue-500"
               />
             </div>
-          </div>
+          </CollapsibleSection>
         )}
 
         {/* SECCIÓN 1: OPERACIÓN DIARIA */}
-        <section className="mb-10">
-          <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-3">
-            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-primary"></span>
-              Operación Diaria
-            </h2>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <CollapsibleSection title="Operación Diaria" dotColorClass="bg-primary">
+          <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-3">
             {(isAdmin || isWaiter) && (
               <ModuleCard
                 title="Punto de Venta"
@@ -273,19 +271,12 @@ export default async function Home() {
               hoverColor="#a855f7"
             />
           </div>
-        </section>
+        </CollapsibleSection>
 
         {/* SECCIÓN 2: ADMINISTRACIÓN Y CLIENTES */}
         {(isAdmin || isWaiter) && (
-          <section className="mb-10">
-            <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-3">
-              <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-success"></span>
-                Gestión y Clientes
-              </h2>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <CollapsibleSection title="Gestión y Clientes" dotColorClass="bg-success">
+            <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-3">
               <ModuleCard
                 title="Clientes"
                 description="Lealtad y fuentes de visita."
@@ -338,20 +329,13 @@ export default async function Home() {
                 />
               )}
             </div>
-          </section>
+          </CollapsibleSection>
         )}
 
         {/* SECCIÓN 3: FINANZAS Y REPORTES - Admin Only */}
         {isAdmin && (
-          <section className="mb-8">
-            <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-3">
-              <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-blue-500"></span>
-                Finanzas y Reportes
-              </h2>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <CollapsibleSection title="Finanzas y Reportes" dotColorClass="bg-blue-500">
+            <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-3">
               <ModuleCard
                 title="Historial"
                 description="Historial de órdenes y cobros."
@@ -379,7 +363,7 @@ export default async function Home() {
                 hoverColor="var(--color-primary)"
               />
             </div>
-          </section>
+          </CollapsibleSection>
         )}
       </main>
     </div>
