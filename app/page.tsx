@@ -20,6 +20,82 @@ import {
   ReceiptText,
   ArrowUpRight,
 } from "lucide-react";
+import React from "react";
+
+// --- Extracted UI Components for Dashboard ---
+
+interface StatCardProps {
+  title: string;
+  icon: React.ElementType;
+  value: React.ReactNode;
+  themeClass: string;
+}
+
+function StatCard({ title, icon: Icon, value, themeClass }: StatCardProps) {
+  return (
+    <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+          {title}
+        </span>
+        <div className={`rounded-xl p-3 ${themeClass}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+      <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+interface ModuleCardProps {
+  title: string;
+  description: string;
+  href: string;
+  icon: React.ElementType;
+  themeClass: string;
+  hoverTextClass: string;
+  badge?: string;
+}
+
+function ModuleCard({
+  title,
+  description,
+  href,
+  icon: Icon,
+  themeClass,
+  hoverTextClass,
+  badge,
+}: ModuleCardProps) {
+  return (
+    <Link href={href} className="group cursor-pointer focus:outline-none">
+      <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
+        <div>
+          <div className="mb-6 flex items-center justify-between">
+            <div className={`rounded-xl p-3 ${themeClass}`}>
+              <Icon className="h-7 w-7" />
+            </div>
+            {badge && (
+              <span className={`rounded-full px-4 py-1 text-xs font-black uppercase tracking-widest ${themeClass}`}>
+                {badge}
+              </span>
+            )}
+          </div>
+          <h3 className={`mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase transition-colors flex items-center justify-between group-hover:${hoverTextClass}`}>
+            <span>{title}</span>
+            <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </h3>
+          <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+            {description}
+          </p>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// --- Main Page Component ---
 
 export default async function Home() {
   const profile = await getProfile();
@@ -104,71 +180,30 @@ export default async function Home() {
               Resumen del Día
             </h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {/* Órdenes Activas */}
-              <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                    Órdenes Activas
-                  </span>
-                  <div className="rounded-xl bg-primary/10 p-3 text-primary">
-                    <ClipboardList className="h-5 w-5" />
-                  </div>
-                </div>
-                <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
-                  {activeOrdersCount}
-                </p>
-              </div>
-
-              {/* Venta Bruta */}
-              <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                    Venta Bruta
-                  </span>
-                  <div className="rounded-xl bg-secondary/10 p-3 text-secondary">
-                    <DollarSign className="h-5 w-5" />
-                  </div>
-                </div>
-                <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
-                  {new Intl.NumberFormat("es-MX", {
-                    style: "currency",
-                    currency: "MXN",
-                  }).format(salesToday)}
-                </p>
-              </div>
-
-              {/* Clientes */}
-              <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                    Clientes
-                  </span>
-                  <div className="rounded-xl bg-success/10 p-3 text-success">
-                    <Users className="h-5 w-5" />
-                  </div>
-                </div>
-                <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
-                  {customersCount}
-                </p>
-              </div>
-
-              {/* Propinas Hoy */}
-              <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                    Propinas Hoy
-                  </span>
-                  <div className="rounded-xl bg-blue-500/10 p-3 text-blue-500">
-                    <HandCoins className="h-5 w-5" />
-                  </div>
-                </div>
-                <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
-                  {new Intl.NumberFormat("es-MX", {
-                    style: "currency",
-                    currency: "MXN",
-                  }).format(tipsToday)}
-                </p>
-              </div>
+              <StatCard
+                title="Órdenes Activas"
+                icon={ClipboardList}
+                value={activeOrdersCount}
+                themeClass="bg-primary/10 text-primary"
+              />
+              <StatCard
+                title="Venta Bruta"
+                icon={DollarSign}
+                value={new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(salesToday)}
+                themeClass="bg-secondary/10 text-secondary"
+              />
+              <StatCard
+                title="Clientes"
+                icon={Users}
+                value={customersCount}
+                themeClass="bg-success/10 text-success"
+              />
+              <StatCard
+                title="Propinas Hoy"
+                icon={HandCoins}
+                value={new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(tipsToday)}
+                themeClass="bg-blue-500/10 text-blue-500"
+              />
             </div>
           </div>
         )}
@@ -183,101 +218,46 @@ export default async function Home() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {/* POS */}
             {(isAdmin || isWaiter) && (
-              <Link href="/pos" className="group cursor-pointer focus:outline-none">
-                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                  <div>
-                    <div className="mb-6 flex items-center justify-between">
-                      <div className="rounded-xl bg-secondary/10 p-3 text-secondary">
-                        <Receipt className="h-7 w-7" />
-                      </div>
-                      <span className="rounded-full bg-secondary/10 px-4 py-1 text-xs font-black text-secondary uppercase tracking-widest">
-                        Activo
-                      </span>
-                    </div>
-                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-secondary transition-colors flex items-center justify-between">
-                      <span>Punto de Venta</span>
-                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </h3>
-                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                      Crear órdenes y procesar pagos.
-                    </p>
-                  </div>
-                </div>
-              </Link>
+              <ModuleCard
+                title="Punto de Venta"
+                description="Crear órdenes y procesar pagos."
+                href="/pos"
+                icon={Receipt}
+                badge="Activo"
+                themeClass="bg-secondary/10 text-secondary"
+                hoverTextClass="text-secondary"
+              />
             )}
-
-            {/* Cocina */}
-            <Link href="/kitchen" className="group cursor-pointer focus:outline-none">
-              <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                <div>
-                  <div className="mb-6 flex items-center justify-between">
-                    <div className="rounded-xl bg-primary/10 p-3 text-primary">
-                      <ChefHat className="h-7 w-7" />
-                    </div>
-                    <span className="rounded-full bg-primary/10 px-4 py-1 text-xs font-black text-primary uppercase tracking-widest">
-                      Real-time
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Sistema de Cocina</span>
-                    <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                  </h3>
-                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                    KDS con temporizador y smart batching.
-                  </p>
-                </div>
-              </div>
-            </Link>
-
-            {/* Tareas Diarias */}
+            <ModuleCard
+              title="Sistema de Cocina"
+              description="KDS con temporizador y smart batching."
+              href="/kitchen"
+              icon={ChefHat}
+              badge="Real-time"
+              themeClass="bg-primary/10 text-primary"
+              hoverTextClass="text-primary"
+            />
             {(isAdmin || isWaiter) && (
-              <Link href="/tareas" className="group cursor-pointer focus:outline-none">
-                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                  <div>
-                    <div className="mb-6 flex items-center justify-between">
-                      <div className="rounded-xl bg-primary/10 p-3 text-primary">
-                        <CheckSquare className="h-7 w-7" />
-                      </div>
-                      <span className="rounded-full bg-primary/10 px-4 py-1 text-xs font-black text-primary uppercase tracking-widest">
-                        Checklist
-                      </span>
-                    </div>
-                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-primary transition-colors flex items-center justify-between">
-                      <span>Tareas Diarias</span>
-                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </h3>
-                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                      Checklist de tareas primordiales y operación diaria.
-                    </p>
-                  </div>
-                </div>
-              </Link>
+              <ModuleCard
+                title="Tareas Diarias"
+                description="Checklist de tareas primordiales y operación diaria."
+                href="/tareas"
+                icon={CheckSquare}
+                badge="Checklist"
+                themeClass="bg-primary/10 text-primary"
+                hoverTextClass="text-primary"
+              />
             )}
-
-            {/* Asistencia */}
-            <Link href="/asistencia" className="group cursor-pointer focus:outline-none">
-              <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                <div>
-                  <div className="mb-6 flex items-center justify-between">
-                    <div className="rounded-xl bg-purple-500/10 p-3 text-purple-500">
-                      <Clock className="h-7 w-7" />
-                    </div>
-                    <span className="rounded-full bg-purple-500/10 px-4 py-1 text-xs font-black text-purple-500 uppercase tracking-widest">
-                      Turnos
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-purple-500 transition-colors flex items-center justify-between">
-                    <span>Asistencia</span>
-                    <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                  </h3>
-                  <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                    Registro de entradas y salidas.
-                  </p>
-                </div>
-              </div>
-            </Link>
+            <ModuleCard
+              title="Asistencia"
+              description="Registro de entradas y salidas."
+              href="/asistencia"
+              icon={Clock}
+              badge="Turnos"
+              themeClass="bg-purple-500/10 text-purple-500"
+              hoverTextClass="text-purple-500"
+            />
           </div>
         </section>
 
@@ -292,121 +272,56 @@ export default async function Home() {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Clientes */}
-              <Link href="/customers" className="group cursor-pointer focus:outline-none">
-                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                  <div>
-                    <div className="mb-6 flex items-center justify-between">
-                      <div className="rounded-xl bg-success/10 p-3 text-success">
-                        <Users className="h-7 w-7" />
-                      </div>
-                      <span className="rounded-full bg-success/10 px-4 py-1 text-xs font-black text-success uppercase tracking-widest">
-                        CRM
-                      </span>
-                    </div>
-                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-success transition-colors flex items-center justify-between">
-                      <span>Clientes</span>
-                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </h3>
-                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                      Lealtad y fuentes de visita.
-                    </p>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Menú - Admin */}
+              <ModuleCard
+                title="Clientes"
+                description="Lealtad y fuentes de visita."
+                href="/customers"
+                icon={Users}
+                badge="CRM"
+                themeClass="bg-success/10 text-success"
+                hoverTextClass="text-success"
+              />
               {isAdmin && (
-                <Link href="/menu" className="group cursor-pointer focus:outline-none">
-                  <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                    <div>
-                      <div className="mb-6 flex items-center justify-between">
-                        <div className="rounded-xl bg-primary/10 p-3 text-primary">
-                          <UtensilsCrossed className="h-7 w-7" />
-                        </div>
-                      </div>
-                      <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-primary transition-colors flex items-center justify-between">
-                        <span>Gestión de Menú</span>
-                        <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </h3>
-                      <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                        Productos y recetas técnicas.
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+                <ModuleCard
+                  title="Gestión de Menú"
+                  description="Productos y recetas técnicas."
+                  href="/menu"
+                  icon={UtensilsCrossed}
+                  themeClass="bg-primary/10 text-primary"
+                  hoverTextClass="text-primary"
+                />
               )}
-
-              {/* Historial de Asistencia - Admin */}
               {isAdmin && (
-                <Link href="/asistencia/history" className="group cursor-pointer focus:outline-none">
-                  <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                    <div>
-                      <div className="mb-6 flex items-center justify-between">
-                        <div className="rounded-xl bg-purple-500/10 p-3 text-purple-500">
-                          <ReceiptText className="h-7 w-7" />
-                        </div>
-                        <span className="rounded-full bg-purple-500/10 px-4 py-1 text-xs font-black text-purple-500 uppercase tracking-widest">
-                          Historial
-                        </span>
-                      </div>
-                      <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-purple-500 transition-colors flex items-center justify-between">
-                        <span>Historial de Asistencia</span>
-                        <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </h3>
-                      <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                        Filtros de horas trabajadas y registros de turno por empleado.
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+                <ModuleCard
+                  title="Historial de Asistencia"
+                  description="Filtros de horas trabajadas y registros de turno por empleado."
+                  href="/asistencia/history"
+                  icon={ReceiptText}
+                  badge="Historial"
+                  themeClass="bg-purple-500/10 text-purple-500"
+                  hoverTextClass="text-purple-500"
+                />
               )}
-
-              {/* Control de Tareas - Admin */}
               {isAdmin && (
-                <Link href="/admin/tareas" className="group cursor-pointer focus:outline-none">
-                  <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                    <div>
-                      <div className="mb-6 flex items-center justify-between">
-                        <div className="rounded-xl bg-blue-500/10 p-3 text-blue-500">
-                          <ClipboardCheck className="h-7 w-7" />
-                        </div>
-                        <span className="rounded-full bg-blue-500/10 px-4 py-1 text-xs font-black text-blue-500 uppercase tracking-widest">
-                          Control
-                        </span>
-                      </div>
-                      <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-blue-500 transition-colors flex items-center justify-between">
-                        <span>Control de Tareas</span>
-                        <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </h3>
-                      <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                        Aprobación de tareas críticas y monitoreo de tiempos netos.
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+                <ModuleCard
+                  title="Control de Tareas"
+                  description="Aprobación de tareas críticas y monitoreo de tiempos netos."
+                  href="/admin/tareas"
+                  icon={ClipboardCheck}
+                  badge="Control"
+                  themeClass="bg-blue-500/10 text-blue-500"
+                  hoverTextClass="text-blue-500"
+                />
               )}
-
-              {/* Usuarios - Admin */}
               {isAdmin && (
-                <Link href="/admin/users" className="group cursor-pointer focus:outline-none">
-                  <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                    <div>
-                      <div className="mb-6 flex items-center justify-between">
-                        <div className="rounded-xl bg-primary/10 p-3 text-primary">
-                          <UserCog className="h-7 w-7" />
-                        </div>
-                      </div>
-                      <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-primary transition-colors flex items-center justify-between">
-                        <span>Usuarios</span>
-                        <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </h3>
-                      <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                        Gestión de personal y roles.
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+                <ModuleCard
+                  title="Usuarios"
+                  description="Gestión de personal y roles."
+                  href="/admin/users"
+                  icon={UserCog}
+                  themeClass="bg-primary/10 text-primary"
+                  hoverTextClass="text-primary"
+                />
               )}
             </div>
           </section>
@@ -423,71 +338,32 @@ export default async function Home() {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Historial */}
-              <Link href="/history" className="group cursor-pointer focus:outline-none">
-                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                  <div>
-                    <div className="mb-6 flex items-center justify-between">
-                      <div className="rounded-xl bg-blue-500/10 p-3 text-blue-500">
-                        <BookOpen className="h-7 w-7" />
-                      </div>
-                      <span className="rounded-full bg-blue-500/10 px-4 py-1 text-xs font-black text-blue-500 uppercase tracking-widest">
-                        Registro
-                      </span>
-                    </div>
-                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-blue-500 transition-colors flex items-center justify-between">
-                      <span>Historial</span>
-                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </h3>
-                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                      Historial de órdenes y cobros.
-                    </p>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Gastos */}
-              <Link href="/gastos" className="group cursor-pointer focus:outline-none">
-                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                  <div>
-                    <div className="mb-6 flex items-center justify-between">
-                      <div className="rounded-xl bg-red-500/10 p-3 text-red-500">
-                        <ReceiptText className="h-7 w-7" />
-                      </div>
-                      <span className="rounded-full bg-red-500/10 px-4 py-1 text-xs font-black text-red-500 uppercase tracking-widest">
-                        NUEVO
-                      </span>
-                    </div>
-                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-red-500 transition-colors flex items-center justify-between">
-                      <span>Gastos</span>
-                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </h3>
-                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                      Registro y control de gastos (insumos, sueldos, etc.)
-                    </p>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Reportes */}
-              <Link href="/reports" className="group cursor-pointer focus:outline-none">
-                <div className="h-full rounded-2xl bg-[#242424] p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
-                  <div>
-                    <div className="mb-6 flex items-center justify-between">
-                      <div className="rounded-xl bg-[#242424] p-3 text-[#E0E0E0]">
-                        <BarChart3 className="h-7 w-7" />
-                      </div>
-                    </div>
-                    <h3 className="mb-2 text-xl font-black text-[#E0E0E0] tracking-tight uppercase group-hover:text-primary transition-colors flex items-center justify-between">
-                      <span>Reportes</span>
-                      <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </h3>
-                    <p className="text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
-                      Ventas y métricas de negocio.
-                    </p>
-                  </div>
-                </div>
-              </Link>
+              <ModuleCard
+                title="Historial"
+                description="Historial de órdenes y cobros."
+                href="/history"
+                icon={BookOpen}
+                badge="Registro"
+                themeClass="bg-blue-500/10 text-blue-500"
+                hoverTextClass="text-blue-500"
+              />
+              <ModuleCard
+                title="Gastos"
+                description="Registro y control de gastos (insumos, sueldos, etc.)"
+                href="/gastos"
+                icon={ReceiptText}
+                badge="NUEVO"
+                themeClass="bg-red-500/10 text-red-500"
+                hoverTextClass="text-red-500"
+              />
+              <ModuleCard
+                title="Reportes"
+                description="Ventas y métricas de negocio."
+                href="/reports"
+                icon={BarChart3}
+                themeClass="bg-zinc-800 text-[#E0E0E0]"
+                hoverTextClass="text-primary"
+              />
             </div>
           </section>
         )}

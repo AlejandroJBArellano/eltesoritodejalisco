@@ -12,6 +12,94 @@ interface KitchenDisplaySystemProps {
   initialOrders: OrderWithDetails[];
 }
 
+interface KanbanColumnProps {
+  title: string;
+  count: number;
+  colorClass: "amber" | "blue" | "emerald";
+  orders: OrderWithDetails[];
+  emptyIcon: React.ElementType;
+  emptyTitle: string;
+  emptyDescription: string;
+  onStatusChange: (orderId: string, newStatus: OrderStatus) => void;
+  onItemReady: (orderId: string, itemId: string) => void;
+  updatingItemIds: Set<string>;
+}
+
+function KanbanColumn({
+  title,
+  count,
+  colorClass,
+  orders,
+  emptyIcon: EmptyIcon,
+  emptyTitle,
+  emptyDescription,
+  onStatusChange,
+  onItemReady,
+  updatingItemIds,
+}: KanbanColumnProps) {
+  const colorMap = {
+    amber: {
+      bg: "bg-amber-500",
+      shadow: "shadow-amber-500/50",
+      badgeBg: "bg-amber-500/10",
+      text: "text-amber-400",
+      border: "border-amber-500/30",
+    },
+    blue: {
+      bg: "bg-blue-500",
+      shadow: "shadow-blue-500/50",
+      badgeBg: "bg-blue-500/10",
+      text: "text-blue-400",
+      border: "border-blue-500/30",
+    },
+    emerald: {
+      bg: "bg-emerald-500",
+      shadow: "shadow-emerald-500/50",
+      badgeBg: "bg-emerald-500/10",
+      text: "text-emerald-400",
+      border: "border-emerald-500/30",
+    },
+  };
+
+  const theme = colorMap[colorClass];
+
+  return (
+    <div className="rounded-2xl bg-zinc-900/80 p-5 shadow-lg border border-zinc-800/80 backdrop-blur-sm">
+      <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4 mb-5">
+        <h2 className="text-base font-black text-zinc-100 uppercase tracking-tight flex items-center gap-2.5">
+          <span className={`h-3 w-3 rounded-full ${theme.bg} shadow-sm ${theme.shadow}`}></span>
+          {title}
+        </h2>
+        <span className={`rounded-full ${theme.badgeBg} px-3 py-1 text-xs font-black ${theme.text} uppercase tracking-widest border ${theme.border}`}>
+          {count}
+        </span>
+      </div>
+      <div className="space-y-4">
+        {orders.map((order) => (
+          <OrderCard
+            key={order.id}
+            order={order}
+            onStatusChange={onStatusChange}
+            onItemReady={onItemReady}
+            updatingItemIds={updatingItemIds}
+          />
+        ))}
+        {orders.length === 0 && (
+          <div className="py-14 text-center rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 p-6">
+            <EmptyIcon className="mx-auto h-8 w-8 text-zinc-600 mb-2" />
+            <p className="text-xs font-black text-zinc-500 uppercase tracking-widest">
+              {emptyTitle}
+            </p>
+            <p className="text-[11px] text-zinc-600 mt-1">
+              {emptyDescription}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /**
  * Main Kitchen Display System (KDS) Component
  * Manages the full kitchen view with order cards and smart batching
@@ -195,110 +283,44 @@ export function KitchenDisplaySystem({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
         {view === "kanban" ? (
           <div className="grid gap-6 md:grid-cols-3 items-start">
-            {/* Pending Column */}
-            <div className="rounded-2xl bg-zinc-900/80 p-5 shadow-lg border border-zinc-800/80 backdrop-blur-sm">
-              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4 mb-5">
-                <h2 className="text-base font-black text-zinc-100 uppercase tracking-tight flex items-center gap-2.5">
-                  <span className="h-3 w-3 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span>
-                  Pendientes
-                </h2>
-                <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-black text-amber-400 uppercase tracking-widest border border-amber-500/30">
-                  {ordersByStatus.pending.length}
-                </span>
-              </div>
-              <div className="space-y-4">
-                {ordersByStatus.pending.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onStatusChange={handleStatusChange}
-                    onItemReady={handleItemReady}
-                    updatingItemIds={updatingItemIds}
-                  />
-                ))}
-                {ordersByStatus.pending.length === 0 && (
-                  <div className="py-14 text-center rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 p-6">
-                    <Clock className="mx-auto h-8 w-8 text-zinc-600 mb-2" />
-                    <p className="text-xs font-black text-zinc-500 uppercase tracking-widest">
-                      Sin órdenes pendientes
-                    </p>
-                    <p className="text-[11px] text-zinc-600 mt-1">
-                      Las comandas recibidas aparecerán aquí
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <KanbanColumn
+              title="Pendientes"
+              count={ordersByStatus.pending.length}
+              colorClass="amber"
+              orders={ordersByStatus.pending}
+              emptyIcon={Clock}
+              emptyTitle="Sin órdenes pendientes"
+              emptyDescription="Las comandas recibidas aparecerán aquí"
+              onStatusChange={handleStatusChange}
+              onItemReady={handleItemReady}
+              updatingItemIds={updatingItemIds}
+            />
 
-            {/* Preparing Column */}
-            <div className="rounded-2xl bg-zinc-900/80 p-5 shadow-lg border border-zinc-800/80 backdrop-blur-sm">
-              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4 mb-5">
-                <h2 className="text-base font-black text-zinc-100 uppercase tracking-tight flex items-center gap-2.5">
-                  <span className="h-3 w-3 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></span>
-                  En Preparación
-                </h2>
-                <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-black text-blue-400 uppercase tracking-widest border border-blue-500/30">
-                  {ordersByStatus.preparing.length}
-                </span>
-              </div>
-              <div className="space-y-4">
-                {ordersByStatus.preparing.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onStatusChange={handleStatusChange}
-                    onItemReady={handleItemReady}
-                    updatingItemIds={updatingItemIds}
-                  />
-                ))}
-                {ordersByStatus.preparing.length === 0 && (
-                  <div className="py-14 text-center rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 p-6">
-                    <ChefHat className="mx-auto h-8 w-8 text-zinc-600 mb-2" />
-                    <p className="text-xs font-black text-zinc-500 uppercase tracking-widest">
-                      Cocina despejada
-                    </p>
-                    <p className="text-[11px] text-zinc-600 mt-1">
-                      Inicia preparación en la columna pendiente
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <KanbanColumn
+              title="En Preparación"
+              count={ordersByStatus.preparing.length}
+              colorClass="blue"
+              orders={ordersByStatus.preparing}
+              emptyIcon={ChefHat}
+              emptyTitle="Cocina despejada"
+              emptyDescription="Inicia preparación en la columna pendiente"
+              onStatusChange={handleStatusChange}
+              onItemReady={handleItemReady}
+              updatingItemIds={updatingItemIds}
+            />
 
-            {/* Ready Column */}
-            <div className="rounded-2xl bg-zinc-900/80 p-5 shadow-lg border border-zinc-800/80 backdrop-blur-sm">
-              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4 mb-5">
-                <h2 className="text-base font-black text-zinc-100 uppercase tracking-tight flex items-center gap-2.5">
-                  <span className="h-3 w-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
-                  Listos para Entregar
-                </h2>
-                <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-400 uppercase tracking-widest border border-emerald-500/30">
-                  {ordersByStatus.ready.length}
-                </span>
-              </div>
-              <div className="space-y-4">
-                {ordersByStatus.ready.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onStatusChange={handleStatusChange}
-                    onItemReady={handleItemReady}
-                    updatingItemIds={updatingItemIds}
-                  />
-                ))}
-                {ordersByStatus.ready.length === 0 && (
-                  <div className="py-14 text-center rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 p-6">
-                    <CheckCircle2 className="mx-auto h-8 w-8 text-zinc-600 mb-2" />
-                    <p className="text-xs font-black text-zinc-500 uppercase tracking-widest">
-                      Sin platillos por entregar
-                    </p>
-                    <p className="text-[11px] text-zinc-600 mt-1">
-                      Las órdenes terminadas se listarán aquí
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <KanbanColumn
+              title="Listos para Entregar"
+              count={ordersByStatus.ready.length}
+              colorClass="emerald"
+              orders={ordersByStatus.ready}
+              emptyIcon={CheckCircle2}
+              emptyTitle="Sin platillos por entregar"
+              emptyDescription="Las órdenes terminadas se listarán aquí"
+              onStatusChange={handleStatusChange}
+              onItemReady={handleItemReady}
+              updatingItemIds={updatingItemIds}
+            />
           </div>
         ) : (
           <SmartBatchingView orders={orders} />

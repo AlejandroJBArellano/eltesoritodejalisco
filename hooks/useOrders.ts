@@ -208,3 +208,23 @@ export function useOrderTimer(createdAt: Date | string) {
   return elapsedSeconds;
 }
 
+/**
+ * Utility to format seconds into MM:SS format
+ */
+export function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+}
+
+/**
+ * Utility to get elapsed seconds since a given date
+ */
+export function getElapsedSeconds(dateInput: Date | string | null | undefined): number {
+  if (!dateInput) return 0;
+  const now = new Date();
+  const created = safeParseDate(dateInput);
+  const diffMs = Math.max(0, now.getTime() - created.getTime());
+  return Math.floor(diffMs / 1000);
+}
+

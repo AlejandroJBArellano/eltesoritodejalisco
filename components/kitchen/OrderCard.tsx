@@ -3,7 +3,7 @@
 import { OrderStatus, type OrderWithDetails } from "@/types";
 import { useEffect, useState } from "react";
 import { Clock, Check, Utensils, AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
-import { safeParseDate } from "@/hooks/useOrders";
+import { useOrderTimer, formatTime, getElapsedSeconds } from "@/hooks/useOrders";
 
 interface OrderCardProps {
   order: OrderWithDetails;
@@ -17,43 +17,9 @@ interface OrderCardProps {
  * Displays order details with real-time timer and status management
  */
 export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds }: OrderCardProps) {
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [isOverdue, setIsOverdue] = useState(false);
-
   const ALERT_THRESHOLD_MINUTES = 15;
-
-  useEffect(() => {
-    const calculateElapsed = () => {
-      const now = new Date();
-      const created = safeParseDate(order.createdAt);
-      const diffMs = Math.max(0, now.getTime() - created.getTime());
-
-      const diffMinutes = Math.floor(diffMs / 1000 / 60);
-      const diffSeconds = Math.floor((diffMs / 1000) % 60);
-
-      setElapsedTime(diffMinutes * 60 + diffSeconds);
-      setIsOverdue(diffMinutes >= ALERT_THRESHOLD_MINUTES);
-    };
-
-    calculateElapsed();
-    const interval = setInterval(calculateElapsed, 1000);
-
-    return () => clearInterval(interval);
-  }, [order.createdAt]);
-
-  const getElapsedSeconds = (dateInput: any) => {
-    if (!dateInput) return 0;
-    const now = new Date();
-    const created = safeParseDate(dateInput);
-    const diffMs = Math.max(0, now.getTime() - created.getTime());
-    return Math.floor(diffMs / 1000);
-  };
-
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
+  const elapsedSeconds = useOrderTimer(order.createdAt);
+  const isOverdue = elapsedSeconds / 60 >= ALERT_THRESHOLD_MINUTES;
 
   const getStatusBadge = (status: OrderStatus) => {
     switch (status) {
@@ -121,7 +87,7 @@ export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds 
           }`}
         >
           <Clock className={`h-4 w-4 ${isOverdue ? "animate-spin" : ""}`} style={{ animationDuration: "3s" }} />
-          {formatTime(elapsedTime)}
+          {formatTime(elapsedSeconds)}
         </div>
       </div>
 
