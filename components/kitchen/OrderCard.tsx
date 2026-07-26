@@ -120,7 +120,7 @@ export function OrderCard({ order, onStatusChange, onItemReady, updatingItemIds 
                   <button
                     onClick={() => onItemReady?.(order.id, item.id)}
                     disabled={updatingItemIds?.has(item.id)}
-                    className="min-h-[44px] min-w-[76px] rounded-xl bg-emerald-500/15 border border-emerald-500/30 px-4 py-2 text-xs font-black text-emerald-400 uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50 active:scale-95 cursor-pointer flex items-center justify-center shadow-sm"
+                    className="min-h-[44px] min-w-[76px] rounded-xl bg-emerald-500/15 border border-emerald-500/30 px-4 py-2 text-xs font-black text-emerald-400 uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50 active:scale-95 cursor-pointer flex items-center justify-center shadow-sm focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
                   >
                     {updatingItemIds?.has(item.id) ? (
                       <span className="animate-pulse">...</span>

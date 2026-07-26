@@ -213,7 +213,7 @@ export default function ReportsPage() {
         actions={
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition-all shadow-lg shadow-primary/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
           >
             <Printer className="h-4 w-4" /> Imprimir / PDF
           </button>
@@ -236,7 +236,7 @@ export default function ReportsPage() {
               <button
                 key={p}
                 onClick={() => handlePeriodChange(p)}
-                className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 ${period === p
+                className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${period === p
                     ? "bg-primary text-black shadow-md shadow-primary/20 scale-[1.02]"
                     : "bg-[#181818] text-[#E0E0E0]/60 hover:bg-white/10 hover:text-white border border-white/5"
                   }`}
@@ -274,7 +274,7 @@ export default function ReportsPage() {
               <button
                 onClick={handleApplyCustomDates}
                 disabled={!customStartDate}
-                className="rounded-xl bg-success px-5 py-2 text-xs font-black text-white uppercase tracking-wider hover:bg-success/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
+                className="rounded-xl bg-success px-5 py-2 text-xs font-black text-white uppercase tracking-wider hover:bg-success/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
               >
                 Aplicar Rango
               </button>
@@ -449,7 +449,7 @@ export default function ReportsPage() {
             {selectedDay && (
               <button
                 onClick={() => setSelectedDay(null)}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-wider active:scale-95"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-wider active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none rounded"
               >
                 <X className="h-3.5 w-3.5" /> Cerrar filtro diario
               </button>
@@ -586,7 +586,7 @@ export default function ReportsPage() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="bg-transparent text-[#E0E0E0] text-xs font-bold uppercase tracking-wider outline-none cursor-pointer"
+                  className="bg-transparent text-[#E0E0E0] text-xs font-bold uppercase tracking-wider outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none rounded px-1"
                 >
                   {categoriesList.map((cat) => (
                     <option key={cat} value={cat} className="bg-[#242424] text-[#E0E0E0]">
@@ -600,7 +600,7 @@ export default function ReportsPage() {
               <div className="flex items-center bg-[#181818] p-1 rounded-xl border border-white/10">
                 <button
                   onClick={() => setProductMetric("revenue")}
-                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${productMetric === "revenue"
+                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-success focus-visible:outline-none ${productMetric === "revenue"
                       ? "bg-success text-white shadow-md"
                       : "text-[#E0E0E0]/60 hover:text-white"
                     }`}
@@ -609,7 +609,7 @@ export default function ReportsPage() {
                 </button>
                 <button
                   onClick={() => setProductMetric("quantity")}
-                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${productMetric === "quantity"
+                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:outline-none ${productMetric === "quantity"
                       ? "bg-purple-600 text-white shadow-md"
                       : "text-[#E0E0E0]/60 hover:text-white"
                     }`}
