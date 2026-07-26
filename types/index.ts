@@ -271,7 +271,7 @@ export interface SmartBatch {
   name: string;
   startedAt: Date;
   endedAt?: Date;
-  finalYield?: any; // Json
+  finalYield?: Record<string, unknown> | null; // Json
   isActive: boolean;
   ingredient?: Ingredient;
 }
