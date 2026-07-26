@@ -5,42 +5,66 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const period = searchParams.get("period") || "7days"; // today | 7days | month
+    const period = searchParams.get("period") || "7days"; // today | yesterday | 7days | 30days | month | last_month | custom
+    const customStartParam = searchParams.get("startDate");
+    const customEndParam = searchParams.get("endDate");
 
     const today = new Date();
     let startDate: Date;
+    let endDate: Date | null = null;
+
+    const getMexicoDateStr = (d: Date) => {
+      return new Intl.DateTimeFormat("en-CA", {
+        timeZone: MEX_TIMEZONE,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(d);
+    };
+
+    const mxTodayStr = getMexicoDateStr(today);
 
     if (period === "today") {
-      // Start of today in Mexico City time
-      const mxDateStr = new Intl.DateTimeFormat("en-CA", {
-        timeZone: MEX_TIMEZONE,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(today);
-      startDate = new Date(`${mxDateStr}T00:00:00-06:00`);
+      startDate = new Date(`${mxTodayStr}T00:00:00-06:00`);
+    } else if (period === "yesterday") {
+      const yesterdayDate = new Date(today);
+      yesterdayDate.setDate(today.getDate() - 1);
+      const mxYesterdayStr = getMexicoDateStr(yesterdayDate);
+      startDate = new Date(`${mxYesterdayStr}T00:00:00-06:00`);
+      endDate = new Date(`${mxYesterdayStr}T23:59:59-06:00`);
+    } else if (period === "30days") {
+      startDate = new Date(today);
+      startDate.setDate(today.getDate() - 30);
     } else if (period === "month") {
-      // Start of current month in Mexico City time
-      const mxDateStr = new Intl.DateTimeFormat("en-CA", {
-        timeZone: MEX_TIMEZONE,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(today);
-      const [year, month] = mxDateStr.split("-");
+      const [year, month] = mxTodayStr.split("-");
       startDate = new Date(`${year}-${month}-01T00:00:00-06:00`);
+    } else if (period === "last_month") {
+      const [yearStr, monthStr] = mxTodayStr.split("-");
+      let year = parseInt(yearStr, 10);
+      let month = parseInt(monthStr, 10) - 1;
+      if (month === 0) {
+        month = 12;
+        year -= 1;
+      }
+      const prevMonthStr = String(month).padStart(2, "0");
+      startDate = new Date(`${year}-${prevMonthStr}-01T00:00:00-06:00`);
+      const lastDayOfPrevMonth = new Date(year, month, 0).getDate();
+      endDate = new Date(`${year}-${prevMonthStr}-${String(lastDayOfPrevMonth).padStart(2, "0")}T23:59:59-06:00`);
+    } else if (period === "custom" && customStartParam) {
+      startDate = new Date(`${customStartParam}T00:00:00-06:00`);
+      if (customEndParam) {
+        endDate = new Date(`${customEndParam}T23:59:59-06:00`);
+      }
     } else {
       // Default: last 7 days
       startDate = new Date(today);
       startDate.setDate(today.getDate() - 7);
     }
 
-    
-
     const supabase = await createClient();
 
     // 1. Sales Summary (Completed Orders)
-    const { data: completedOrders, error: ordersError } = await supabase
+    let ordersQuery = supabase
       .from("orders")
       .select(`
         *,
@@ -52,6 +76,12 @@ export async function GET(request: NextRequest) {
       .in("status", ["DELIVERED", "PAID"])
       .gte("created_at", startDate.toISOString())
       .order("created_at", { ascending: true });
+
+    if (endDate) {
+      ordersQuery = ordersQuery.lte("created_at", endDate.toISOString());
+    }
+
+    const { data: completedOrders, error: ordersError } = await ordersQuery;
 
     if (ordersError) throw ordersError;
 
@@ -77,10 +107,14 @@ export async function GET(request: NextRequest) {
     const averageTicket = totalOrders > 0 ? totalSales / totalOrders : 0;
     const averageCompletionTimeMinutes = completedOrdersCount > 0 ? (totalCompletionTimeMs / completedOrdersCount) / (1000 * 60) : 0;
 
-    const { data: payments } = await supabase
+    let paymentsQuery = supabase
       .from("payments")
       .select("tip_amount")
       .gte("created_at", startDate.toISOString());
+    if (endDate) {
+      paymentsQuery = paymentsQuery.lte("created_at", endDate.toISOString());
+    }
+    const { data: payments } = await paymentsQuery;
 
     const totalTips = (payments || []).reduce(
       (sum, p) => sum + (p.tip_amount || 0),
@@ -167,8 +201,6 @@ export async function GET(request: NextRequest) {
 
     const categories = Array.from(categorySet);
 
-
-
     // 4. Customer Insights
     const { data: customers, error: custError } = await supabase
       .from("customers")
@@ -178,18 +210,26 @@ export async function GET(request: NextRequest) {
 
     if (custError) throw custError;
 
-    const { count: newCustomersCount, error: countError } = await supabase
+    let newCustQuery = supabase
       .from("customers")
       .select("*", { count: 'exact', head: true })
       .gte("created_at", startDate.toISOString());
+    if (endDate) {
+      newCustQuery = newCustQuery.lte("created_at", endDate.toISOString());
+    }
+    const { count: newCustomersCount, error: countError } = await newCustQuery;
 
     if (countError) throw countError;
 
     // 5. Gastos Operativos
-    const { data: expensesData, error: expError } = await supabase
+    let expensesQuery = supabase
       .from("expenses")
       .select("amount")
       .gte("date", startDate.toISOString().split("T")[0]);
+    if (endDate) {
+      expensesQuery = expensesQuery.lte("date", endDate.toISOString().split("T")[0]);
+    }
+    const { data: expensesData, error: expError } = await expensesQuery;
 
     if (expError) throw expError;
 
@@ -199,11 +239,15 @@ export async function GET(request: NextRequest) {
     );
 
     // 6. Pérdidas por Cobro (Uncollected Orders)
-    const { data: uncollectedOrders } = await supabase
+    let uncollectedQuery = supabase
       .from("orders")
       .select("total")
       .eq("status", "UNCOLLECTED")
       .gte("created_at", startDate.toISOString());
+    if (endDate) {
+      uncollectedQuery = uncollectedQuery.lte("created_at", endDate.toISOString());
+    }
+    const { data: uncollectedOrders } = await uncollectedQuery;
 
     const totalUncollected = (uncollectedOrders || []).reduce(
       (sum, order) => sum + (order.total || 0),
