@@ -1,33 +1,7 @@
 import { KitchenDisplaySystem } from "@/components/kitchen/KitchenDisplaySystem";
 import { createClient } from "@/lib/supabase/server";
-
-export const mapOrderData = (dbOrder: any) => {
-  return {
-    ...dbOrder,
-    orderNumber: dbOrder.order_number,
-    customerId: dbOrder.customer_id,
-    createdAt: dbOrder.created_at ? (dbOrder.created_at.includes('Z') || dbOrder.created_at.includes('+') ? dbOrder.created_at : `${dbOrder.created_at.replace(' ', 'T')}Z`) : null,
-    updatedAt: dbOrder.updated_at ? (dbOrder.updated_at.includes('Z') || dbOrder.updated_at.includes('+') ? dbOrder.updated_at : `${dbOrder.updated_at.replace(' ', 'T')}Z`) : null,
-    orderItems: Array.isArray(dbOrder.order_items)
-      ? dbOrder.order_items.map((item: any) => ({
-        ...item,
-        orderId: item.order_id,
-        menuItemId: item.menu_item_id,
-        unitPrice: item.unit_price,
-        preparationTimeSeconds: item.tiempo_preparacion_segundos ?? null,
-        createdAt: item.created_at ? (item.created_at.includes('Z') || item.created_at.includes('+') ? item.created_at : `${item.created_at.replace(' ', 'T')}Z`) : null,
-        menuItem: item.menu_items
-          ? {
-            ...item.menu_items,
-            imageUrl: item.menu_items?.image_url,
-            isAvailable: item.menu_items?.is_available,
-          }
-          : { name: "Producto", price: item.unit_price || 0 },
-      }))
-      : [],
-    customer: dbOrder.customers || dbOrder.customer || undefined,
-  };
-};
+import { mapOrderData } from "@/lib/mappers/orders";
+import type { DbOrderPayload } from "@/lib/mappers/orders";
 
 // Fetch active kitchen orders
 async function getActiveOrders() {
@@ -44,7 +18,7 @@ async function getActiveOrders() {
     .in("status", ["PENDING", "PREPARING", "READY"])
     .order("created_at", { ascending: true });
 
-  return (orders || []).map(mapOrderData);
+  return (orders || []).map((o) => mapOrderData(o as unknown as DbOrderPayload));
 }
 
 export default async function KitchenPage() {
