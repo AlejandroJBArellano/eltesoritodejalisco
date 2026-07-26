@@ -1,21 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
-  Utensils,
-  CheckCircle2,
-  XCircle,
-  Layers,
-  Plus,
-  Pencil,
-  Trash2,
-  RefreshCw,
-  ChefHat,
   Image as ImageIcon,
-  BookOpen,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Trash2
 } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 type MenuItem = {
   id: string;
@@ -474,65 +468,6 @@ export default function MenuPage() {
           </div>
         )}
 
-        {/* Quick Stats Cards */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                Total Productos
-              </span>
-              <div className="rounded-xl bg-primary/10 p-3 text-primary">
-                <Utensils className="h-5 w-5" />
-              </div>
-            </div>
-            <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
-              {items.length}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                Disponibles
-              </span>
-              <div className="rounded-xl bg-success/10 p-3 text-success">
-                <CheckCircle2 className="h-5 w-5" />
-              </div>
-            </div>
-            <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
-              {activeCount}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                No Disponibles
-              </span>
-              <div className="rounded-xl bg-white/5 p-3 text-gray-400">
-                <XCircle className="h-5 w-5" />
-              </div>
-            </div>
-            <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
-              {items.length - activeCount}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                Categorías
-              </span>
-              <div className="rounded-xl bg-secondary/10 p-3 text-secondary">
-                <Layers className="h-5 w-5" />
-              </div>
-            </div>
-            <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
-              {categoriesCount}
-            </p>
-          </div>
-        </div>
-
         {/* Form & Recipes Grid */}
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           {/* Card Form: Producto */}
@@ -697,8 +632,8 @@ export default function MenuPage() {
                 {isSubmitting
                   ? "Guardando..."
                   : isEditing
-                  ? "Actualizar Producto"
-                  : "Crear Producto"}
+                    ? "Actualizar Producto"
+                    : "Crear Producto"}
               </button>
             </form>
           </div>
@@ -944,11 +879,10 @@ export default function MenuPage() {
                       </td>
                       <td className="py-3.5 px-2">
                         <span
-                          className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${
-                            item.isAvailable
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${item.isAvailable
                               ? "bg-success/10 text-success"
                               : "bg-white/5 text-[#E0E0E0]/40"
-                          }`}
+                            }`}
                         >
                           {item.isAvailable ? "Disponible" : "No disponible"}
                         </span>

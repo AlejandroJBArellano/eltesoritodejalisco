@@ -13,6 +13,14 @@ import {
   YAxis,
 } from "recharts";
 
+type ProductSaleItem = {
+  id: string;
+  name: string;
+  category: string;
+  quantity: number;
+  revenue: number;
+};
+
 type ReportData = {
   period: string;
   summary: {
@@ -28,6 +36,8 @@ type ReportData = {
   itemsByDay: Record<string, { name: string; quantity: number; revenue: number }[]>;
   salesBySource: Record<string, { count: number; total: number }>;
   topSellingItems: { name: string; quantity: number; revenue: number }[];
+  productSales?: ProductSaleItem[];
+  categories?: string[];
   customers: {
     topCustomers: { name: string; totalSpend: number; loyaltyPoints: number }[];
     newCustomersCount: number;
@@ -48,6 +58,10 @@ export default function ReportsPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>("7days");
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+
+  // States for Product Sales Distribution Chart
+  const [selectedCategory, setSelectedCategory] = useState<string>("TODAS");
+  const [productMetric, setProductMetric] = useState<"revenue" | "quantity">("revenue");
 
   const fetchData = async (p: Period) => {
     try {
@@ -87,6 +101,31 @@ export default function ReportsPage() {
     if (!selectedDay || !data?.itemsByDay) return [];
     return data.itemsByDay[selectedDay] || [];
   }, [selectedDay, data]);
+
+  const categoriesList = useMemo(() => {
+    if (!data?.productSales) return ["TODAS"];
+    const cats = Array.from(new Set(data.productSales.map((p) => p.category).filter(Boolean)));
+    return ["TODAS", ...cats];
+  }, [data]);
+
+  const productChartData = useMemo(() => {
+    if (!data?.productSales) return [];
+    let list = data.productSales;
+    if (selectedCategory !== "TODAS") {
+      list = list.filter((p) => p.category === selectedCategory);
+    }
+    return [...list]
+      .sort((a, b) => (productMetric === "revenue" ? b.revenue - a.revenue : b.quantity - a.quantity))
+      .slice(0, 10);
+  }, [data, selectedCategory, productMetric]);
+
+  const totalCategoryRevenue = useMemo(() => {
+    return productChartData.reduce((sum, item) => sum + item.revenue, 0);
+  }, [productChartData]);
+
+  const totalCategoryQuantity = useMemo(() => {
+    return productChartData.reduce((sum, item) => sum + item.quantity, 0);
+  }, [productChartData]);
 
   if (isLoading) {
     return (
@@ -331,6 +370,150 @@ export default function ReportsPage() {
                 <p className="text-sm text-gray-400">No hay detalle de productos para este día.</p>
               )}
             </div>
+          )}
+        </section>
+
+        {/* Product Sales Distribution Chart */}
+        <section className="rounded-lg bg-[#242424] p-6 shadow-md border border-gray-800">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📊</span>
+                <h2 className="text-lg font-bold text-[#E0E0E0]">
+                  Distribución de Ventas por Producto
+                </h2>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                Analiza el rendimiento individual y la concentración de ingresos/volumen de tu menú
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Category Filter */}
+              <div className="flex items-center gap-1.5 bg-[#1A1A1A] p-1.5 rounded-lg border border-gray-700 text-xs">
+                <span className="text-gray-400 pl-2">Categoría:</span>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="bg-[#242424] text-[#E0E0E0] text-xs rounded px-2.5 py-1 border border-gray-700 outline-none focus:border-blue-500 cursor-pointer"
+                >
+                  {categoriesList.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Metric Toggle ($ vs Units) */}
+              <div className="flex items-center bg-[#1A1A1A] p-1 rounded-lg border border-gray-700">
+                <button
+                  onClick={() => setProductMetric("revenue")}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
+                    productMetric === "revenue"
+                      ? "bg-emerald-600 text-white shadow"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  $ Ingresos
+                </button>
+                <button
+                  onClick={() => setProductMetric("quantity")}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
+                    productMetric === "quantity"
+                      ? "bg-purple-600 text-white shadow"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  # Unidades
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Summary Badges */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+            <div className="bg-[#1A1A1A] p-3 rounded-lg border border-gray-800">
+              <span className="text-xs text-gray-400 block">Total ({selectedCategory})</span>
+              <span className="text-base font-bold text-emerald-400">
+                ${totalCategoryRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div className="bg-[#1A1A1A] p-3 rounded-lg border border-gray-800">
+              <span className="text-xs text-gray-400 block">Unidades Vendidas</span>
+              <span className="text-base font-bold text-purple-400">
+                {totalCategoryQuantity.toLocaleString()} u.
+              </span>
+            </div>
+            <div className="col-span-2 sm:col-span-1 bg-[#1A1A1A] p-3 rounded-lg border border-gray-800">
+              <span className="text-xs text-gray-400 block">Producto Líder</span>
+              <span className="text-sm font-bold text-[#E0E0E0] truncate block">
+                {productChartData[0]?.name || "N/A"}
+              </span>
+            </div>
+          </div>
+
+          {/* Horizontal Bar Chart Container */}
+          {productChartData.length > 0 ? (
+            <div className="w-full overflow-hidden">
+              <div style={{ height: Math.max(260, productChartData.length * 45) }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    layout="vertical"
+                    data={productChartData}
+                    margin={{ top: 10, right: 30, left: 10, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
+                    <XAxis
+                      type="number"
+                      stroke="#9CA3AF"
+                      fontSize={12}
+                      tick={{ fill: "#9CA3AF" }}
+                      tickFormatter={(val) =>
+                        productMetric === "revenue"
+                          ? `$${val.toLocaleString()}`
+                          : `${val}`
+                      }
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      stroke="#9CA3AF"
+                      fontSize={12}
+                      width={140}
+                      tick={{ fill: "#E0E0E0" }}
+                    />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "#1F2937",
+                        borderColor: "#374151",
+                        color: "#FFF",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.5)",
+                      }}
+                      formatter={(value: number | undefined) => [
+                        productMetric === "revenue"
+                          ? `$${(value ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+                          : `${value} unidades vendidas`,
+                        productMetric === "revenue" ? "Ingresos Generados" : "Volumen Vendido",
+                      ]}
+                      labelFormatter={(label) => `Producto: ${label}`}
+                      cursor={{ fill: "rgba(255,255,255,0.05)" }}
+                    />
+                    <Bar
+                      dataKey={productMetric === "revenue" ? "revenue" : "quantity"}
+                      fill={productMetric === "revenue" ? "#10B981" : "#8B5CF6"}
+                      radius={[0, 4, 4, 0]}
+                      barSize={20}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          ) : (
+            <p className="py-12 text-center text-gray-400">
+              No hay productos registrados en el periodo seleccionado o categoría.
+            </p>
           )}
         </section>
 

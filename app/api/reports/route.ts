@@ -136,14 +136,20 @@ export async function GET(request: NextRequest) {
       salesBySource[source].total += (order.total || 0);
     });
 
-    // 2. Top Selling Items (aggregate across the period)
-    const itemSales: Record<string, { name: string; quantity: number; revenue: number }> =
-      {};
+    // 2. Product Sales Aggregation (for top items & distribution chart)
+    const itemSales: Record<string, { id: string; name: string; category: string; quantity: number; revenue: number }> = {};
+    const categorySet = new Set<string>();
+
     (completedOrders || []).forEach((order) => {
       (order as any).order_items.forEach((item: any) => {
+        const cat = item.menu_items?.category || "General";
+        categorySet.add(cat);
+
         if (!itemSales[item.menu_item_id]) {
           itemSales[item.menu_item_id] = {
-            name: item.menu_items?.name || "Unknown",
+            id: item.menu_item_id,
+            name: item.menu_items?.name || "Sin nombre",
+            category: cat,
             quantity: 0,
             revenue: 0,
           };
@@ -153,9 +159,13 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    const topSellingItems = Object.values(itemSales)
+    const productSales = Object.values(itemSales).sort((a, b) => b.revenue - a.revenue);
+
+    const topSellingItems = [...productSales]
       .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 5);
+
+    const categories = Array.from(categorySet);
 
 
 
@@ -215,6 +225,8 @@ export async function GET(request: NextRequest) {
       itemsByDay: itemsByDaySorted,
       salesBySource,
       topSellingItems,
+      productSales,
+      categories,
       customers: {
         topCustomers: customers,
         newCustomersCount: newCustomersCount || 0
