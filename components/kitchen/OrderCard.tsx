@@ -3,7 +3,8 @@
 import { OrderStatus, type OrderWithDetails } from "@/types";
 import { useEffect, useState } from "react";
 import { Clock, Check, Utensils, AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
-import { useOrderTimer, formatTime, getElapsedSeconds } from "@/hooks/useOrders";
+import { useOrderTimer, getElapsedSeconds } from "@/hooks/useOrders";
+import { formatTime } from "@/lib/utils";
 
 interface OrderCardProps {
   order: OrderWithDetails;
