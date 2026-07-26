@@ -7,8 +7,6 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    console.log("[ATTENDANCE_HISTORY] GET request received.");
-    console.log("[ATTENDANCE_HISTORY] Auth User:", user ? { id: user.id, email: user.email } : null);
 
     if (authError || !user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -23,7 +21,6 @@ export async function GET(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
 
-    console.log("[ATTENDANCE_HISTORY] profileData:", profileData);
 
     // 2. Secondary check: users table
     const { data: dbUserById } = await adminSupabase
@@ -32,7 +29,6 @@ export async function GET(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
 
-    console.log("[ATTENDANCE_HISTORY] dbUserById:", dbUserById);
 
     let dbUserByEmail = null;
     if (!dbUserById && user.email) {
@@ -42,7 +38,6 @@ export async function GET(request: NextRequest) {
         .eq("email", user.email)
         .maybeSingle();
       dbUserByEmail = byEmail;
-      console.log("[ATTENDANCE_HISTORY] dbUserByEmail:", dbUserByEmail);
     }
 
     // Prioritize profileData.role (from profiles table)
@@ -52,15 +47,12 @@ export async function GET(request: NextRequest) {
       dbUserByEmail?.role ||
       (user.user_metadata?.role as string);
 
-    console.log("[ATTENDANCE_HISTORY] Resolved Role:", role);
 
     const isAdmin = role === "ADMIN" || role === "MANAGER" || !role;
 
-    console.log("[ATTENDANCE_HISTORY] Is Admin Permission Allowed:", isAdmin);
 
     // Sync users table role if profileData has ADMIN but users table has obsolete role
     if (profileData?.role === "ADMIN" && dbUserById && dbUserById.role !== "ADMIN") {
-      console.log("[ATTENDANCE_HISTORY] Syncing users table role to ADMIN for user:", user.id);
       await adminSupabase
         .from("users")
         .update({ role: "ADMIN" })
@@ -120,7 +112,6 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    console.log("[ATTENDANCE_HISTORY] Successfully returned records count:", enrichedAttendances.length);
 
     return NextResponse.json({ attendances: enrichedAttendances });
   } catch (error: any) {
