@@ -1,11 +1,26 @@
 "use client";
 
 import { SmartBatch } from "@/types";
+import {
+  AlertTriangle,
+  Clock,
+  Package,
+  Play,
+  RefreshCw,
+  Sparkles,
+  Trash2,
+  UtensilsCrossed
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface IngredientBatchControlProps {
   ingredientName: string;
   ingredientId: string;
+}
+
+interface BatchSummaryResponse {
+  totalItems: number;
+  summary?: Record<string, number>;
 }
 
 export function IngredientBatchControl({
@@ -16,7 +31,7 @@ export function IngredientBatchControl({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
-  const [summaryData, setSummaryData] = useState<any>(null);
+  const [summaryData, setSummaryData] = useState<BatchSummaryResponse | null>(null);
   const [isArmed, setIsArmed] = useState(false);
 
   // Helper for duration display
@@ -39,31 +54,26 @@ export function IngredientBatchControl({
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/inventory/smart-batch?ingredientId=${ingredientId}`,
+        `/api/inventory/smart-batch?ingredientId=${ingredientId}`
       );
       if (res.ok) {
         const data = await res.json();
         setActiveBatch(data.activeBatch);
       } else {
-        // If 404 or empty, just null
         setActiveBatch(null);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Error de conexión");
     } finally {
       setLoading(false);
     }
   };
 
-  // 1. Fetch active batch on mount
   useEffect(() => {
     fetchActiveBatch();
 
-    // Auto refresh every minute to update the timer text
     const interval = setInterval(() => {
       if (activeBatch) {
-        // Force re-render for timer
         setActiveBatch({ ...activeBatch });
       }
     }, 60000);
@@ -71,7 +81,6 @@ export function IngredientBatchControl({
     return () => clearInterval(interval);
   }, [ingredientId]);
 
-  // 2. Start a new batch
   const handleStartBatch = async () => {
     setLoading(true);
     setError(null);
@@ -92,16 +101,15 @@ export function IngredientBatchControl({
         setSummaryData(null);
       } else {
         const err = await res.json();
-        setError(err.error || "Error al abrir");
+        setError(err.error || "Error al abrir el lote");
       }
-    } catch (err) {
+    } catch {
       setError("Error de red");
     } finally {
       setLoading(false);
     }
   };
 
-  // 3. Finish the current batch
   const handleFinishBatch = async () => {
     if (!activeBatch) return;
 
@@ -118,104 +126,143 @@ export function IngredientBatchControl({
         `/api/inventory/smart-batch/${activeBatch.id}/finish`,
         {
           method: "POST",
-        },
+        }
       );
 
       if (res.ok) {
         const data = await res.json();
-        setSummaryData(data); // Save the result to show
-        setActiveBatch(null); // No active batch anymore
+        setSummaryData(data);
+        setActiveBatch(null);
         setShowSummary(true);
       } else {
         const err = await res.json();
-        setError(err.error || "Error al finalizar");
+        setError(err.error || "Error al finalizar el lote");
       }
-    } catch (err) {
+    } catch {
       setError("Error de red");
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading && !activeBatch && !summaryData)
+  if (loading && !activeBatch && !summaryData) {
     return (
-      <div className="p-4 text-center animate-pulse">Scanning inventory...</div>
+      <div className="flex h-full min-h-[220px] flex-col items-center justify-center rounded-2xl border border-white/5 bg-[#242424] p-6 text-[#E0E0E0]/60">
+        <RefreshCw className="h-6 w-6 animate-spin text-emerald-400 mb-2" />
+        <span className="text-xs font-bold uppercase tracking-wider">
+          Cargando inventario...
+        </span>
+      </div>
     );
+  }
 
   return (
-    <div className="bg-white border-2 border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
-      <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
-        <h3 className="font-bold text-slate-800 flex items-center gap-2">
-          🪣 {ingredientName}
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#242424] shadow-lg transition-all hover:border-white/20">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-white/5 bg-[#1A1A1A] p-4">
+        <h3 className="flex items-center gap-2 font-black text-[#E0E0E0]">
+          <Package className="h-5 w-5 text-emerald-400" />
+          <span>{ingredientName}</span>
         </h3>
-        {activeBatch && (
-          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-bold animate-pulse">
-            EN USO
+        {activeBatch ? (
+          <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-400">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+            En Uso
+          </span>
+        ) : (
+          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#E0E0E0]/50">
+            Cerrado
           </span>
         )}
       </div>
 
-      <div className="p-4 flex-1 flex flex-col justify-center">
+      {/* Body */}
+      <div className="flex flex-1 flex-col justify-between p-5">
         {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
-            {error}
+          <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs font-bold text-red-400">
+            <AlertTriangle className="h-4 w-4 flex-shrink-0 text-red-400" />
+            <span>{error}</span>
           </div>
         )}
 
         {!activeBatch ? (
-          <div className="space-y-4">
+          <div className="flex flex-1 flex-col justify-between space-y-4">
             {showSummary && summaryData && (
-              <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-sm">
-                <h4 className="font-bold text-yellow-800 mb-2 border-b border-yellow-200 pb-1">
-                  Rendimiento del último bote:
-                </h4>
-                <div className="space-y-1 text-yellow-900 max-h-32 overflow-y-auto">
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-xs">
+                <div className="mb-2 flex items-center gap-1.5 border-b border-amber-500/20 pb-2 font-bold text-amber-300">
+                  <Sparkles className="h-4 w-4 text-amber-400" />
+                  <span>Rendimiento del Lote Anterior:</span>
+                </div>
+                <div className="max-h-32 space-y-1.5 overflow-y-auto pr-1 text-amber-200/90 custom-scrollbar">
                   {summaryData.summary &&
                     Object.entries(summaryData.summary).map(
-                      ([item, count]: any) => (
-                        <div key={item} className="flex justify-between">
-                          <span className="truncate pr-2">{item}</span>
-                          <span className="font-mono font-bold">{count}</span>
+                      ([item, count]) => (
+                        <div
+                          key={item}
+                          className="flex justify-between items-center text-xs"
+                        >
+                          <span className="truncate pr-2 text-[#E0E0E0]/80">
+                            {item}
+                          </span>
+                          <span className="font-mono font-bold text-amber-300">
+                            {count}
+                          </span>
                         </div>
-                      ),
+                      )
                     )}
                   {(!summaryData.summary ||
                     Object.keys(summaryData.summary).length === 0) && (
-                    <p className="italic opacity-70">
-                      No se vendió nada con este ingrediente.
-                    </p>
-                  )}
+                      <p className="italic text-amber-200/60">
+                        No se registraron ventas en este lote.
+                      </p>
+                    )}
                 </div>
-                <div className="pt-2 mt-2 border-t border-yellow-200 font-bold flex justify-between text-yellow-800">
+                <div className="mt-3 flex justify-between border-t border-amber-500/20 pt-2 font-black text-amber-300">
                   <span>Total Producido:</span>
-                  <span>{summaryData.totalItems} platos</span>
+                  <span>{summaryData.totalItems} platillos</span>
                 </div>
               </div>
             )}
 
-            <div className="text-center py-2 text-gray-500 text-sm">
-              <p>El bote está vacío o cerrado.</p>
+            <div className="my-auto py-4 text-center">
+              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-[#E0E0E0]/40">
+                <UtensilsCrossed className="h-6 w-6" />
+              </div>
+              <p className="text-xs font-medium text-[#E0E0E0]/60">
+                El lote actual está sin iniciar o agotado.
+              </p>
             </div>
 
             <button
               onClick={handleStartBatch}
               disabled={loading}
-              className="w-full py-4 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white rounded-lg text-lg font-bold shadow transition-all flex items-center justify-center gap-2"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3.5 text-sm font-black text-black uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-400 active:scale-[0.99] disabled:opacity-50"
             >
-              {loading ? "Abriendo..." : "🟢 ABRIR NUEVO BOTE"}
+              {loading ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span>Abriendo Lote...</span>
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 fill-black" />
+                  <span>Abrir Nuevo Lote</span>
+                </>
+              )}
             </button>
           </div>
         ) : (
-          <div className="space-y-4 flex flex-col flex-1">
-            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-center">
-              <span className="text-xs text-blue-500 uppercase font-bold tracking-wider">
-                Tiempo Activo
+          <div className="flex flex-1 flex-col justify-between space-y-4">
+            <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-5 text-center shadow-inner">
+              <span className="flex items-center justify-center gap-1 text-[10px] font-black uppercase tracking-widest text-blue-400">
+                <Clock className="h-3.5 w-3.5" />
+                Tiempo Transcurrido
               </span>
-              <div className="text-4xl font-mono font-black text-blue-900 my-1">
+              <div className="my-2 font-mono text-3xl font-black text-blue-300">
                 {getDuration(activeBatch.startedAt)}
               </div>
-              <span className="text-xs text-blue-400">
-                Desde{" "}
+              <span className="text-[11px] font-medium text-blue-300/60">
+                Iniciado a las{" "}
                 {new Date(activeBatch.startedAt).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -223,22 +270,34 @@ export function IngredientBatchControl({
               </span>
             </div>
 
-            <div className="flex-1"></div>
-
             <button
               onClick={handleFinishBatch}
               disabled={loading}
-              className={`w-full py-6 rounded-xl text-xl font-bold transition-all shadow-sm flex flex-col items-center justify-center gap-1 group ${
-                isArmed
-                  ? "bg-red-600 text-white border-2 border-red-400 animate-[pulse_0.6s_ease-in-out_infinite]"
-                  : "bg-white border-2 border-red-500 text-red-600 hover:bg-red-50 active:bg-red-100"
-              }`}
+              className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl p-4 transition-all shadow-md active:scale-[0.99] ${isArmed
+                  ? "border-2 border-red-500 bg-red-600 text-white animate-pulse shadow-red-500/30"
+                  : "border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/50"
+                }`}
             >
-              <span className="group-hover:scale-105 transition-transform">
-                {isArmed ? "⚠️ ¿CONFIRMAR QUE SE ACABÓ?" : "🗑️ YA SE ACABÓ"}
-              </span>
-              <span className={`text-xs font-normal ${isArmed ? "text-white/90 font-bold" : "opacity-70 text-red-400"}`}>
-                {isArmed ? "Presiona de nuevo para cerrar este lote" : "Solo presiona cuando rasques el fondo"}
+              <div className="flex items-center gap-2 text-sm font-black uppercase tracking-wider">
+                {isArmed ? (
+                  <>
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>¿Confirmar Cierre de Lote?</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    <span>Marcar Lote como Agotado</span>
+                  </>
+                )}
+              </div>
+              <span
+                className={`text-[10px] font-medium ${isArmed ? "text-white/90 font-bold" : "text-red-400/70"
+                  }`}
+              >
+                {isArmed
+                  ? "Presiona nuevamente para finalizar"
+                  : "Presiona al vaciar completamente el contenedor"}
               </span>
             </button>
           </div>
@@ -247,3 +306,4 @@ export function IngredientBatchControl({
     </div>
   );
 }
+

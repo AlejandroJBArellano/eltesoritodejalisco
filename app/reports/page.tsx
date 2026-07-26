@@ -1,41 +1,34 @@
 "use client";
 
-import Link from "next/link";
+import { PageHeader } from "@/components/PageHeader";
+import {
+  AlertTriangle,
+  Award,
+  BarChart3,
+  Calendar,
+  Clock,
+  DollarSign,
+  Layers,
+  Printer,
+  ReceiptText,
+  Sparkles,
+  Store,
+  TrendingDown,
+  UserPlus,
+  Users,
+  Wallet
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
-  ResponsiveContainer,
   Tooltip as RechartsTooltip,
+  ResponsiveContainer,
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  ArrowLeft,
-  Printer,
-  DollarSign,
-  TrendingDown,
-  AlertTriangle,
-  Wallet,
-  ReceiptText,
-  Clock,
-  UserPlus,
-  BarChart3,
-  Award,
-  Store,
-  Users,
-  Calendar,
-  Layers,
-  Sparkles,
-} from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import {
-  TableSearchInput,
-  TableHeaderSortCell,
-  TablePagination,
-} from "@/components/ui/DataTableControls";
 
 type ProductSaleItem = {
   id: string;
@@ -77,7 +70,7 @@ const PERIOD_LABELS: Record<Period, string> = {
   "30days": "Últimos 30 días",
   month: "Mes Actual",
   last_month: "Mes Anterior",
-  custom: "Personalizado 📅",
+  custom: "Personalizado",
 };
 
 export default function ReportsPage() {
@@ -242,11 +235,10 @@ export default function ReportsPage() {
               <button
                 key={p}
                 onClick={() => handlePeriodChange(p)}
-                className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all ${
-                  period === p
+                className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all ${period === p
                     ? "bg-primary text-black shadow-md shadow-primary/20 scale-[1.02]"
                     : "bg-[#181818] text-[#E0E0E0]/60 hover:bg-white/10 hover:text-white border border-white/5"
-                }`}
+                  }`}
               >
                 {PERIOD_LABELS[p]}
               </button>
@@ -607,21 +599,19 @@ export default function ReportsPage() {
               <div className="flex items-center bg-[#181818] p-1 rounded-xl border border-white/10">
                 <button
                   onClick={() => setProductMetric("revenue")}
-                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
-                    productMetric === "revenue"
+                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${productMetric === "revenue"
                       ? "bg-success text-white shadow-md"
                       : "text-[#E0E0E0]/60 hover:text-white"
-                  }`}
+                    }`}
                 >
                   $ Ingresos
                 </button>
                 <button
                   onClick={() => setProductMetric("quantity")}
-                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
-                    productMetric === "quantity"
+                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${productMetric === "quantity"
                       ? "bg-purple-600 text-white shadow-md"
                       : "text-[#E0E0E0]/60 hover:text-white"
-                  }`}
+                    }`}
                 >
                   # Unidades
                 </button>
@@ -738,10 +728,10 @@ export default function ReportsPage() {
                   index === 0
                     ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
                     : index === 1
-                    ? "bg-slate-400/20 text-slate-300 border-slate-400/30"
-                    : index === 2
-                    ? "bg-amber-700/20 text-amber-500 border-amber-700/30"
-                    : "bg-white/5 text-[#E0E0E0]/60 border-white/5";
+                      ? "bg-slate-400/20 text-slate-300 border-slate-400/30"
+                      : index === 2
+                        ? "bg-amber-700/20 text-amber-500 border-amber-700/30"
+                        : "bg-white/5 text-[#E0E0E0]/60 border-white/5";
 
                 return (
                   <div

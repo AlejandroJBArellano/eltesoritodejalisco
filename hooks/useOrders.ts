@@ -143,9 +143,9 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = [], soundEna
         lastAudioTime = now;
         try {
           const audio = new Audio('/new_order.mp3');
-          audio.play().catch((e) => console.log('Audio playback prevented:', e));
-        } catch (error) {
-          console.error('Error playing sound', error);
+          audio.play().catch(() => {});
+        } catch {
+          // Audio playback fail fallback
         }
       }
     };
@@ -171,11 +171,7 @@ export function useRealtimeOrders(initialData: OrderWithDetails[] = [], soundEna
           fetchOrders();
         },
       )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          console.log("Subscribed to orders channel");
-        }
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
