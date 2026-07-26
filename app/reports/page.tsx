@@ -16,7 +16,8 @@ import {
   TrendingDown,
   UserPlus,
   Users,
-  Wallet
+  Wallet,
+  X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -212,7 +213,7 @@ export default function ReportsPage() {
         actions={
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 transition-all shadow-lg shadow-primary/20"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
           >
             <Printer className="h-4 w-4" /> Imprimir / PDF
           </button>
@@ -235,7 +236,7 @@ export default function ReportsPage() {
               <button
                 key={p}
                 onClick={() => handlePeriodChange(p)}
-                className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all ${period === p
+                className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 ${period === p
                     ? "bg-primary text-black shadow-md shadow-primary/20 scale-[1.02]"
                     : "bg-[#181818] text-[#E0E0E0]/60 hover:bg-white/10 hover:text-white border border-white/5"
                   }`}
@@ -448,9 +449,9 @@ export default function ReportsPage() {
             {selectedDay && (
               <button
                 onClick={() => setSelectedDay(null)}
-                className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-wider"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-wider active:scale-95"
               >
-                ✕ Cerrar filtro diario
+                <X className="h-3.5 w-3.5" /> Cerrar filtro diario
               </button>
             )}
           </div>
@@ -599,7 +600,7 @@ export default function ReportsPage() {
               <div className="flex items-center bg-[#181818] p-1 rounded-xl border border-white/10">
                 <button
                   onClick={() => setProductMetric("revenue")}
-                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${productMetric === "revenue"
+                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${productMetric === "revenue"
                       ? "bg-success text-white shadow-md"
                       : "text-[#E0E0E0]/60 hover:text-white"
                     }`}
@@ -608,7 +609,7 @@ export default function ReportsPage() {
                 </button>
                 <button
                   onClick={() => setProductMetric("quantity")}
-                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${productMetric === "quantity"
+                  className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${productMetric === "quantity"
                       ? "bg-purple-600 text-white shadow-md"
                       : "text-[#E0E0E0]/60 hover:text-white"
                     }`}
@@ -824,9 +825,9 @@ export default function ReportsPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-white/10 text-xs font-black text-[#E0E0E0]/40 uppercase tracking-wider">
-                  <th className="py-3 px-3">Cliente</th>
-                  <th className="py-3 px-3 text-right">Gasto Total</th>
-                  <th className="py-3 px-3 text-right">Puntos Lealtad</th>
+                  <th scope="col" className="py-3 px-3">Cliente</th>
+                  <th scope="col" className="py-3 px-3 text-right">Gasto Total</th>
+                  <th scope="col" className="py-3 px-3 text-right">Puntos Lealtad</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
