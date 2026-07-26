@@ -61,9 +61,13 @@ export async function POST(request: Request) {
         const hours = diffMinutes / 60;
 
         const userId = record.user_id;
-        const userName = Array.isArray(record.users)
-          ? record.users[0]?.name
-          : (record.users as any)?.name || "Desconocido";
+        const usersField = record.users as unknown as
+          | { name: string }
+          | { name: string }[]
+          | null;
+        const userName = Array.isArray(usersField)
+          ? usersField[0]?.name
+          : usersField?.name || "Desconocido";
 
         if (!hoursByUser[userId]) {
           hoursByUser[userId] = { name: userName, hours: 0 };

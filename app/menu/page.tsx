@@ -32,6 +32,16 @@ type MenuItem = {
   isAvailable: boolean;
 };
 
+interface DatabaseMenuItem {
+  id: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  category?: string | null;
+  is_available: boolean;
+  image_url?: string | null;
+}
+
 type RecipeItem = {
   id: string;
   menuItemId: string;
@@ -136,7 +146,7 @@ export default function MenuPage() {
         throw new Error(data?.error || "Error al cargar el menú");
       }
       setItems(
-        (data.items || []).map((item: any) => ({
+        (data.items || []).map((item: DatabaseMenuItem) => ({
           ...item,
           isAvailable: item.is_available,
           imageUrl: item.image_url,
@@ -584,7 +594,11 @@ export default function MenuPage() {
               </label>
               <select
                 value={availabilityFilter}
-                onChange={(e) => setAvailabilityFilter(e.target.value as any)}
+                onChange={(e) =>
+                  setAvailabilityFilter(
+                    e.target.value as "all" | "available" | "unavailable",
+                  )
+                }
                 className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-[#E0E0E0] outline-none focus:border-primary"
               >
                 <option value="all">Todos los Estados</option>

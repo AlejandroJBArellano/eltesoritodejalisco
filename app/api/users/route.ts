@@ -33,7 +33,7 @@ export async function GET() {
             id: authUser.id,
             email: authUser.email,
             name: authUser.user_metadata?.name || authUser.email.split("@")[0],
-            role: (authUser.user_metadata?.role as any) || "ADMIN",
+            role: (authUser.user_metadata?.role as string) || "ADMIN",
             password: "MANAGED_BY_SUPABASE",
             created_at: nowIso,
             updated_at: nowIso,

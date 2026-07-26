@@ -2,6 +2,24 @@ import { createClient } from "@/lib/supabase/server";
 import { MEX_TIMEZONE } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
+interface ReportOrder {
+  id: string;
+  total: number | null;
+  created_at: string;
+  completed_at: string | null;
+  source: string | null;
+  status: string;
+  order_items: Array<{
+    menu_item_id: string;
+    quantity: number;
+    unit_price: number;
+    menu_items: {
+      name: string;
+      category?: string | null;
+    } | null;
+  }>;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -89,11 +107,13 @@ export async function GET(request: NextRequest) {
 
     if (ordersError) throw ordersError;
 
+    const typedOrders = (completedOrders as unknown as ReportOrder[]) || [];
+
     // Calculate totals
     let totalCompletionTimeMs = 0;
     let completedOrdersCount = 0;
 
-    const totalSales = (completedOrders || []).reduce((sum, order) => {
+    const totalSales = typedOrders.reduce((sum, order) => {
       if (order.created_at && order.completed_at) {
         const created = new Date(order.created_at).getTime();
         const completed = new Date(order.completed_at).getTime();
@@ -104,7 +124,7 @@ export async function GET(request: NextRequest) {
       }
       return sum + (order.total || 0);
     }, 0);
-    const totalOrders = (completedOrders || []).length;
+    const totalOrders = typedOrders.length;
     const averageTicket = totalOrders > 0 ? totalSales / totalOrders : 0;
     const averageCompletionTimeMinutes =
       completedOrdersCount > 0
@@ -133,7 +153,7 @@ export async function GET(request: NextRequest) {
       Record<string, { name: string; quantity: number; revenue: number }>
     > = {};
 
-    (completedOrders || []).forEach((order) => {
+    typedOrders.forEach((order) => {
       const date = new Intl.DateTimeFormat("en-CA", {
         timeZone: MEX_TIMEZONE,
         year: "numeric",
@@ -144,7 +164,7 @@ export async function GET(request: NextRequest) {
 
       // Track items per day
       if (!itemsByDay[date]) itemsByDay[date] = {};
-      (order as any).order_items.forEach((item: any) => {
+      order.order_items.forEach((item) => {
         const key = item.menu_item_id;
         if (!itemsByDay[date][key]) {
           itemsByDay[date][key] = {
@@ -171,7 +191,7 @@ export async function GET(request: NextRequest) {
 
     // Sales by Source
     const salesBySource: Record<string, { count: number; total: number }> = {};
-    (completedOrders || []).forEach((order) => {
+    typedOrders.forEach((order) => {
       const source = order.source || "Desconocido";
       if (!salesBySource[source]) {
         salesBySource[source] = { count: 0, total: 0 };
@@ -193,8 +213,8 @@ export async function GET(request: NextRequest) {
     > = {};
     const categorySet = new Set<string>();
 
-    (completedOrders || []).forEach((order) => {
-      (order as any).order_items.forEach((item: any) => {
+    typedOrders.forEach((order) => {
+      order.order_items.forEach((item) => {
         const cat = item.menu_items?.category || "General";
         categorySet.add(cat);
 

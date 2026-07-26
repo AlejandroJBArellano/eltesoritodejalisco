@@ -4,6 +4,24 @@
 import type { InventoryDeductionResult } from "@/types";
 import { createClient } from "@/lib/supabase/server";
 
+interface InventoryIngredient {
+  id: string;
+  name: string;
+  current_stock: number;
+}
+
+interface InventoryOrder {
+  order_items: Array<{
+    quantity: number;
+    menu_items: {
+      recipe_items: Array<{
+        quantity_required: number;
+        ingredients: InventoryIngredient | null;
+      }> | null;
+    } | null;
+  }>;
+}
+
 /**
  * Deducts ingredients from inventory based on order items and their recipes
  * This function should be called when an order status changes to DELIVERED or PAID
@@ -53,10 +71,10 @@ export async function deductInventoryForOrder(
     // Calculate total ingredient requirements
     const ingredientRequirements = new Map<
       string,
-      { ingredient: any; totalRequired: number }
+      { ingredient: InventoryIngredient; totalRequired: number }
     >();
 
-    for (const orderItem of (order as any).order_items) {
+    for (const orderItem of (order as unknown as InventoryOrder).order_items) {
       const { menu_items: menuItem, quantity } = orderItem;
 
       if (!menuItem || !menuItem.recipe_items) continue;
@@ -182,10 +200,10 @@ export async function reverseInventoryForOrder(
     // Calculate total ingredient requirements to reverse
     const ingredientRequirements = new Map<
       string,
-      { ingredient: any; totalRequired: number }
+      { ingredient: InventoryIngredient; totalRequired: number }
     >();
 
-    for (const orderItem of (order as any).order_items) {
+    for (const orderItem of (order as unknown as InventoryOrder).order_items) {
       const { menu_items: menuItem, quantity } = orderItem;
 
       if (!menuItem || !menuItem.recipe_items) continue;
@@ -344,7 +362,8 @@ export async function checkLowStockIngredients() {
   if (error) throw error;
 
   return (ingredients || []).filter(
-    (ing: any) => ing.current_stock <= ing.minimum_stock,
+    (ing: { current_stock: number; minimum_stock: number }) =>
+      ing.current_stock <= ing.minimum_stock,
   );
 }
 

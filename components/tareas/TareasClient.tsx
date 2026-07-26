@@ -190,8 +190,10 @@ export function TareasClient({
           e.id === exec.id ? { ...updatedExec, task: e.task } : e,
         ),
       );
-    } catch (e: any) {
-      setTaskError(e.message || "Error al completar la tarea");
+    } catch (e) {
+      setTaskError(
+        e instanceof Error ? e.message : "Error al completar la tarea",
+      );
       console.error(e);
     } finally {
       setLoadingTaskId(null);

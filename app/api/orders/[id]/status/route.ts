@@ -15,7 +15,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const { status } = await request.json();
 
-    const updateData: any = { status };
+    const updateData: {
+      status: string;
+      completed_at?: string;
+    } = { status };
 
     // If order is completed or uncollected, set completion timestamp
     if (

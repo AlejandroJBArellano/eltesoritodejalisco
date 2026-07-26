@@ -62,7 +62,7 @@ export async function createUser(formData: FormData) {
 
     revalidatePath("/admin/users");
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     console.error(err);
     return { error: "Ocurrió un error inesperado." };
   }

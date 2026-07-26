@@ -122,11 +122,14 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ attendances: enrichedAttendances });
-  } catch (error: any) {
+  } catch (error) {
     console.error("[ATTENDANCE_HISTORY] GET internal error:", error);
     return NextResponse.json(
       {
-        error: error?.message || "Error al obtener el historial de asistencias",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Error al obtener el historial de asistencias",
       },
       { status: 500 },
     );

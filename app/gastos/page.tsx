@@ -601,7 +601,10 @@ export default function GastosPage() {
                       borderRadius: "12px",
                       color: "#E0E0E0",
                     }}
-                    formatter={(value: any, name: any) => [
+                    formatter={(
+                      value: number | string,
+                      name: string | number,
+                    ) => [
                       `$${Number(value).toFixed(2)}`,
                       name === "fijos"
                         ? "Gasto Fijo"
@@ -690,7 +693,11 @@ export default function GastosPage() {
                       borderRadius: "12px",
                       color: "#E0E0E0",
                     }}
-                    formatter={(value: any, name: any, item: any) => [
+                    formatter={(
+                      value: number | string,
+                      name: string | number,
+                      item: { payload: { tipo: string } },
+                    ) => [
                       `$${Number(value).toFixed(2)} (${
                         totalExpenses > 0
                           ? ((Number(value) / totalExpenses) * 100).toFixed(1)
@@ -851,7 +858,11 @@ export default function GastosPage() {
               </label>
               <select
                 value={tableInvoiceFilter}
-                onChange={(e) => setTableInvoiceFilter(e.target.value as any)}
+                onChange={(e) =>
+                  setTableInvoiceFilter(
+                    e.target.value as "all" | "invoiced" | "no_invoice",
+                  )
+                }
                 className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-1.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
               >
                 <option value="all">Todas</option>
@@ -867,7 +878,11 @@ export default function GastosPage() {
               </label>
               <select
                 value={tableTypeFilter}
-                onChange={(e) => setTableTypeFilter(e.target.value as any)}
+                onChange={(e) =>
+                  setTableTypeFilter(
+                    e.target.value as "all" | "fijo" | "variable",
+                  )
+                }
                 className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-1.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
               >
                 <option value="all">Todos los Tipos</option>

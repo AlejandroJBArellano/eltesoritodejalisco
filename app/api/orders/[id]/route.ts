@@ -207,7 +207,13 @@ export async function PATCH(
     const additionalTax = additionalSubtotal * 0;
     const additionalTotal = additionalSubtotal + additionalTax;
 
-    const orderUpdate: any = {
+    const orderUpdate: {
+      subtotal: number;
+      tax: number;
+      total: number;
+      updated_at: string;
+      status?: string;
+    } = {
       subtotal: (order.subtotal || 0) + additionalSubtotal,
       tax: (order.tax || 0) + additionalTax,
       total: (order.total || 0) + additionalTotal,

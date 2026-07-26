@@ -425,7 +425,16 @@ export async function getStaffPerformanceMetrics(dateStr: string) {
     };
   } = {};
 
-  data?.forEach((exec: any) => {
+  type TaskExecutionRow = {
+    id: string;
+    net_duration_minutes: number | null;
+    user: {
+      id: string;
+      full_name: string | null;
+    } | null;
+  };
+
+  (data as unknown as TaskExecutionRow[])?.forEach((exec) => {
     const u = exec.user;
     if (!u) return;
 

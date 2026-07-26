@@ -5,6 +5,55 @@ import { format, isSameMonth, parseISO, subMonths } from "date-fns";
 import { es } from "date-fns/locale";
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
+
+interface TipBreakdownItem {
+  employee_name: string;
+  hours_worked: number;
+  tip_amount: number;
+}
+
+interface DBOrderItem {
+  order_id: string;
+  menu_item_id: string;
+  unit_price: number;
+  quantity: number;
+  menu_items?: {
+    image_url?: string | null;
+    is_available?: boolean | null;
+    name?: string;
+    price?: number;
+    [key: string]: unknown;
+  } | null;
+  [key: string]: unknown;
+}
+
+interface DBPayment {
+  order_id: string;
+  tip_amount?: number | null;
+  [key: string]: unknown;
+}
+
+interface DBOrder {
+  order_number: number;
+  customer_id?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  order_items?: DBOrderItem[] | null;
+  payments?: DBPayment[] | null;
+  customers?: unknown;
+  customer?: unknown;
+  [key: string]: unknown;
+}
+
+interface ExpenseDataRow {
+  description: string;
+  amount: number;
+  has_invoice: boolean;
+  expense_categories: {
+    name: string;
+    tipo_gasto: string;
+  } | null;
+}
 import {
   Bar,
   BarChart,
@@ -146,7 +195,7 @@ export default function HistoryPage() {
   const [pendingCutArmed, setPendingCutArmed] = useState(false);
 
   // Propinas Distribution state
-  const [tipBreakdown, setTipBreakdown] = useState<any[]>([]);
+  const [tipBreakdown, setTipBreakdown] = useState<TipBreakdownItem[]>([]);
   const [tipTotalHours, setTipTotalHours] = useState<number>(0);
   const [isCalculatingTips, setIsCalculatingTips] = useState(false);
 
@@ -187,7 +236,7 @@ export default function HistoryPage() {
       if (!response.ok)
         throw new Error(data?.error || "Error al cargar órdenes");
 
-      const mappedOrders = (data.orders || []).map((dbOrder: any) => ({
+      const mappedOrders = (data.orders || []).map((dbOrder: DBOrder) => ({
         ...dbOrder,
         orderNumber: dbOrder.order_number,
         customerId: dbOrder.customer_id,
@@ -202,7 +251,7 @@ export default function HistoryPage() {
             : `${dbOrder.updated_at.replace(" ", "T")}Z`
           : null,
         orderItems: Array.isArray(dbOrder.order_items)
-          ? dbOrder.order_items.map((item: any) => ({
+          ? dbOrder.order_items.map((item: DBOrderItem) => ({
             ...item,
             orderId: item.order_id,
             menuItemId: item.menu_item_id,
@@ -217,7 +266,7 @@ export default function HistoryPage() {
           }))
           : [],
         payments: Array.isArray(dbOrder.payments)
-          ? dbOrder.payments.map((p: any) => ({
+          ? dbOrder.payments.map((p: DBPayment) => ({
             ...p,
             orderId: p.order_id,
             tipAmount: p.tip_amount,
@@ -255,13 +304,22 @@ export default function HistoryPage() {
         .from("expenses")
         .select("amount, expense_categories(tipo_gasto)")
         .eq("date", mxDateStr);
-      const total = (data || []).reduce((sum, e: any) => {
-        const tipo = e.expense_categories?.tipo_gasto;
-        if (!tipo || tipo === "variable") {
-          return sum + Number(e.amount);
-        }
-        return sum;
-      }, 0);
+      const total = (data || []).reduce(
+        (
+          sum,
+          e: {
+            amount: number;
+            expense_categories: { tipo_gasto: string } | null;
+          },
+        ) => {
+          const tipo = e.expense_categories?.tipo_gasto;
+          if (!tipo || tipo === "variable") {
+            return sum + Number(e.amount);
+          }
+          return sum;
+        },
+        0,
+      );
       setTodayExpenses(total);
     } catch (err) {
       console.error("Error fetching today expenses:", err);
@@ -340,7 +398,7 @@ export default function HistoryPage() {
         .eq("date", mxDateStr);
 
       const expensesDetail: ExpenseDetailItem[] = (
-        (expensesData || []) as any[]
+        (expensesData as unknown as ExpenseDataRow[]) || []
       )
         .filter((e) => {
           const tipo = e.expense_categories?.tipo_gasto;
@@ -1385,7 +1443,7 @@ export default function HistoryPage() {
                         borderRadius: "12px",
                         color: "#E0E0E0",
                       }}
-                      formatter={(value: any) => [
+                      formatter={(value: number | string) => [
                         `$${Number(value).toFixed(2)}`,
                         "Venta Neta",
                       ]}
@@ -1435,7 +1493,7 @@ export default function HistoryPage() {
                         borderRadius: "12px",
                         color: "#E0E0E0",
                       }}
-                      formatter={(value: any) => [
+                      formatter={(value: number | string) => [
                         `$${Number(value).toFixed(2)}`,
                         "Importe",
                       ]}
@@ -1486,7 +1544,7 @@ export default function HistoryPage() {
                         borderRadius: "12px",
                         color: "#E0E0E0",
                       }}
-                      formatter={(value: any) => [
+                      formatter={(value: number | string) => [
                         `$${Number(value).toFixed(2)}`,
                         "Total Venta Neta",
                       ]}
