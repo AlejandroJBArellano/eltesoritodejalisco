@@ -11,7 +11,7 @@ import {
   Trash2,
   UtensilsCrossed,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 interface IngredientBatchControlProps {
   ingredientName: string;
@@ -52,7 +52,7 @@ export function IngredientBatchControl({
     return `${diffMins}m`;
   };
 
-  const fetchActiveBatch = async () => {
+  const fetchActiveBatch = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(
@@ -69,19 +69,17 @@ export function IngredientBatchControl({
     } finally {
       setLoading(false);
     }
-  };
+  }, [ingredientId]);
 
   useEffect(() => {
     fetchActiveBatch();
 
     const interval = setInterval(() => {
-      if (activeBatch) {
-        setActiveBatch({ ...activeBatch });
-      }
+      setActiveBatch((prev) => (prev ? { ...prev } : null));
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [ingredientId]);
+  }, [ingredientId, fetchActiveBatch]);
 
   const handleStartBatch = async () => {
     setLoading(true);

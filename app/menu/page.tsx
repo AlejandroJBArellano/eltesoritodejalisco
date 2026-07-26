@@ -653,6 +653,7 @@ export default function MenuPage() {
                   >
                     <td className="py-3 px-4">
                       {item.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={item.imageUrl}
                           alt={item.name}
@@ -855,6 +856,7 @@ export default function MenuPage() {
             </label>
             <div className="flex items-center gap-4">
               {imagePreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={imagePreview}
                   alt="Preview"

@@ -91,7 +91,7 @@ export function useRealtimeOrders(
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [soundEnabled, supabase]);
+  }, [soundEnabled, supabase, initialData.length]);
 
   return { orders, loading, error, refetch: fetchOrders, setOrders };
 }
