@@ -2,7 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Cell, Legend, Pie, PieChart, Tooltip as RechartsTooltip, ResponsiveContainer } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import {
   ReceiptText,
   FileText,
@@ -200,16 +212,54 @@ export default function GastosPage() {
   const netUtility = totalSales - (fixedExpensesTotal + variableExpensesTotal);
   const profitMargin = totalSales > 0 ? (netUtility / totalSales) * 100 : 0;
 
-  const chartData = useMemo(() => {
-    const map = new Map<string, { name: string; value: number; color: string }>();
+  // Gráfica Lineal de Gastos por Día del Mes (Fijos vs Variables)
+  const dailyExpensesData = useMemo(() => {
+    const map = new Map<string, { fijos: number; variables: number; total: number }>();
+
+    expenses.forEach((exp) => {
+      const dateKey = exp.date;
+      const tipo = exp.expense_categories?.tipo_gasto;
+      if (!map.has(dateKey)) {
+        map.set(dateKey, { fijos: 0, variables: 0, total: 0 });
+      }
+      const item = map.get(dateKey)!;
+      if (tipo === "fijo") {
+        item.fijos += exp.amount;
+      } else {
+        item.variables += exp.amount;
+      }
+      item.total += exp.amount;
+    });
+
+    return Array.from(map.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([dateStr, values]) => {
+        const parts = dateStr.split("-");
+        const dayLabel = parts.length === 3 ? `${parts[2]}/${parts[1]}` : dateStr;
+        return {
+          date: dayLabel,
+          rawDate: dateStr,
+          fijos: values.fijos,
+          variables: values.variables,
+          total: values.total,
+        };
+      });
+  }, [expenses]);
+
+  // Gráfica por Categorías de Gastos
+  const categoryExpensesData = useMemo(() => {
+    const map = new Map<string, { name: string; value: number; color: string; tipo: string }>();
+
     expenses.forEach((exp) => {
       const catName = exp.expense_categories?.name || "Sin Categoría";
-      const catColor = exp.expense_categories?.color || "#888888";
+      const catColor = exp.expense_categories?.color || "#FFB7CE";
+      const catTipo = exp.expense_categories?.tipo_gasto || "variable";
       if (!map.has(catName)) {
-        map.set(catName, { name: catName, value: 0, color: catColor });
+        map.set(catName, { name: catName, value: 0, color: catColor, tipo: catTipo });
       }
       map.get(catName)!.value += exp.amount;
     });
+
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
   }, [expenses]);
 
@@ -251,6 +301,7 @@ export default function GastosPage() {
         </div>
       </header>
 
+      {/* Main Single Column Layout */}
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 no-print space-y-8">
         {/* Selector de Mes */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
@@ -273,7 +324,7 @@ export default function GastosPage() {
           </div>
         </div>
 
-        {/* Resumen de Egresos (Top Metrics Grid Estilo app/page.tsx) */}
+        {/* 1. Resumen de Egresos (4 Top Metric Cards) */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Total Gastos */}
           <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 transition-all hover:border-white/10">
@@ -354,329 +405,348 @@ export default function GastosPage() {
           </div>
         </div>
 
-        {/* Formulario + Categorías vs Gráficas */}
-        <div className="grid gap-8 lg:grid-cols-12 items-start">
-          {/* Columna Izquierda: Formulario y Categorías */}
-          <div className="lg:col-span-5 xl:col-span-4 space-y-6">
-            {/* Formulario Inteligente */}
-            <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-5">
-              <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2 border-b border-white/5 pb-3">
-                <span className="h-2 w-2 rounded-full bg-primary"></span>
-                Registrar Gasto
-              </h2>
+        {/* 2. Gráfica Lineal: Gastos Fijos vs Gastos Variables */}
+        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+            <h2 className="text-base font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-amber-400" />
+              Tendencia de Egresos: Gastos Fijos vs Variables ({currentMonth})
+            </h2>
 
-              <form onSubmit={handleAddExpense} className="space-y-4">
+            {/* Leyendas con totales */}
+            <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
+              <div className="flex items-center gap-2 bg-[#1A1A1A] px-3 py-1.5 rounded-xl border border-white/5">
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
                 <div>
-                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
-                    Categoría *
-                  </label>
-                  {categories.length === 0 ? (
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-bold mb-2">
-                      Crea una categoría primero ☝️
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
-                      <select
-                        value={categoryId}
-                        onChange={(e) => setCategoryId(e.target.value)}
-                        required
-                        className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-3 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
-                      >
-                        <option value="" disabled className="bg-[#242424]">
-                          Selecciona un rubro...
-                        </option>
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={cat.id} className="bg-[#242424]">
-                            {cat.name} ({cat.tipo_gasto === "fijo" ? "Fijo" : "Variable"})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
+                  <span className="text-[#E0E0E0]/40 font-bold uppercase text-[9px] block">
+                    Gastos Fijos
+                  </span>
+                  <span className="text-amber-400 font-black">
+                    ${fixedExpensesTotal.toFixed(2)}
+                  </span>
                 </div>
-
-                <div>
-                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
-                    Monto ($) *
-                  </label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      placeholder="Ej. 1500.00"
-                      required
-                      className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-4 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30 font-mono"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
-                    Descripción / Motivo *
-                  </label>
-                  <div className="relative">
-                    <FileText className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
-                    <input
-                      type="text"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Ej. Compra de insumos a proveedor"
-                      required
-                      className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-4 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
-                      Fecha
-                    </label>
-                    <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      required
-                      className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors scheme-dark"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
-                      ¿Facturado?
-                    </label>
-                    <div className="flex h-[42px] items-center">
-                      <label className="relative inline-flex cursor-pointer items-center">
-                        <input
-                          type="checkbox"
-                          className="peer sr-only"
-                          checked={hasInvoice}
-                          onChange={(e) => setHasInvoice(e.target.checked)}
-                        />
-                        <div className="peer h-6 w-11 rounded-full bg-white/10 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-white/20 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-500 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
-                        <span className="ml-2.5 text-xs font-black uppercase text-[#E0E0E0]/70">
-                          {hasInvoice ? "Sí" : "No"}
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmittingExp || categories.length === 0}
-                  className="w-full mt-2 rounded-xl bg-primary py-3 text-black font-black text-xs hover:brightness-105 transition-all uppercase tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50"
-                >
-                  {isSubmittingExp ? "Registrando..." : "Guardar Gasto"}
-                </button>
-              </form>
-            </section>
-
-            {/* Categorías */}
-            <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
-              <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                <h2 className="text-sm font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
-                  <Tag className="h-4 w-4 text-purple-400" />
-                  Categorías
-                </h2>
-                <button
-                  onClick={() => {
-                    setEditingCategory(null);
-                    setNewCatName("");
-                    setNewCatColor("#FFB7CE");
-                    setNewCatTipoGasto("variable");
-                    setIsCategoryModalOpen(true);
-                  }}
-                  className="text-xs text-primary hover:underline font-black uppercase tracking-wider flex items-center gap-1"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Nueva
-                </button>
               </div>
 
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                {categories.map((cat) => (
-                  <div
-                    key={cat.id}
-                    className="flex items-center justify-between p-3 rounded-xl bg-[#1A1A1A] border border-white/5 hover:border-white/10 transition-colors"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span
-                        className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
-                        style={{ backgroundColor: cat.color }}
-                      />
-                      <span className="text-xs text-[#E0E0E0] font-black uppercase truncate max-w-[130px]">
-                        {cat.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span
-                        className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider ${
-                          cat.tipo_gasto === "fijo"
-                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                            : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                        }`}
-                      >
-                        {cat.tipo_gasto === "fijo" ? "Fijo" : "Var"}
-                      </span>
-                      <button
-                        onClick={() => {
-                          setEditingCategory(cat);
-                          setNewCatName(cat.name);
-                          setNewCatColor(cat.color);
-                          setNewCatTipoGasto(cat.tipo_gasto || "variable");
-                          setIsCategoryModalOpen(true);
-                        }}
-                        className="text-xs text-[#E0E0E0]/40 hover:text-[#E0E0E0] p-1 transition-colors"
-                        title="Editar categoría"
-                      >
-                        <Edit3 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+              <div className="flex items-center gap-2 bg-[#1A1A1A] px-3 py-1.5 rounded-xl border border-white/5">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+                <div>
+                  <span className="text-[#E0E0E0]/40 font-bold uppercase text-[9px] block">
+                    Gastos Variables
+                  </span>
+                  <span className="text-emerald-400 font-black">
+                    ${variableExpensesTotal.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Dual Line Chart */}
+          <div className="h-[280px] w-full">
+            {dailyExpensesData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={dailyExpensesData}
+                  margin={{ top: 10, right: 20, left: 10, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
+                  <XAxis dataKey="date" stroke="#888888" fontSize={11} />
+                  <YAxis stroke="#888888" fontSize={11} tickFormatter={(val) => `$${val}`} />
+                  <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: "#1D1D1D",
+                      borderColor: "#333333",
+                      borderRadius: "12px",
+                      color: "#E0E0E0",
+                    }}
+                    formatter={(value: any, name: any) => [
+                      `$${Number(value).toFixed(2)}`,
+                      name === "fijos" ? "Gasto Fijo" : name === "variables" ? "Gasto Variable" : "Total",
+                    ]}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }}
+                    formatter={(value) => (value === "fijos" ? "Gastos Fijos" : "Gastos Variables")}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="fijos"
+                    name="fijos"
+                    stroke="#F59E0B"
+                    strokeWidth={3}
+                    dot={{ r: 4, fill: "#F59E0B" }}
+                    activeDot={{ r: 6 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="variables"
+                    name="variables"
+                    stroke="#10B981"
+                    strokeWidth={3}
+                    dot={{ r: 4, fill: "#10B981" }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-[#E0E0E0]/30 text-xs italic">
+                Aún no hay gastos registrados este mes.
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* 3. Sección Dedicada: Distribución de Gastos por Categoría (Gráfica de Barras) */}
+        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-6">
+          <div className="flex items-center justify-between border-b border-white/5 pb-4">
+            <h2 className="text-base font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-purple-400" />
+              Gastos por Categoría ({currentMonth})
+            </h2>
+            <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
+              {categoryExpensesData.length} categorías registradas
+            </span>
+          </div>
+
+          <div className="h-[300px] w-full">
+            {categoryExpensesData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={categoryExpensesData}
+                  margin={{ top: 10, right: 20, left: 10, bottom: 25 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
+                  <XAxis
+                    dataKey="name"
+                    stroke="#888888"
+                    fontSize={10}
+                    interval={0}
+                    angle={-20}
+                    textAnchor="end"
+                  />
+                  <YAxis stroke="#888888" fontSize={11} tickFormatter={(val) => `$${val}`} />
+                  <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: "#1D1D1D",
+                      borderColor: "#333333",
+                      borderRadius: "12px",
+                      color: "#E0E0E0",
+                    }}
+                    formatter={(value: any, name: any, item: any) => [
+                      `$${Number(value).toFixed(2)} (${
+                        totalExpenses > 0
+                          ? ((Number(value) / totalExpenses) * 100).toFixed(1)
+                          : 0
+                      }%)`,
+                      `Gasto ${item.payload.tipo === "fijo" ? "Fijo" : "Variable"}`,
+                    ]}
+                  />
+                  <Bar dataKey="value" barSize={32} radius={[6, 6, 0, 0]}>
+                    {categoryExpensesData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-[#E0E0E0]/30 text-xs italic">
+                Aún no hay gastos registrados este mes.
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* 4. Formulario de Gasto y Administración de Categorías */}
+        <div className="grid gap-6 lg:grid-cols-12 items-start">
+          {/* Formulario Inteligente */}
+          <section className="lg:col-span-7 rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-5">
+            <h2 className="text-base font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2 border-b border-white/5 pb-3">
+              <span className="h-2 w-2 rounded-full bg-primary"></span>
+              Registrar Gasto
+            </h2>
+
+            <form onSubmit={handleAddExpense} className="space-y-4">
+              <div>
+                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                  Categoría *
+                </label>
+                {categories.length === 0 ? (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-bold mb-2">
+                    Crea una categoría primero ☝️
                   </div>
-                ))}
-                {categories.length === 0 && (
-                  <p className="text-[#E0E0E0]/40 text-xs italic text-center py-4">
-                    No hay categorías registradas.
-                  </p>
+                ) : (
+                  <div className="relative">
+                    <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+                    <select
+                      value={categoryId}
+                      onChange={(e) => setCategoryId(e.target.value)}
+                      required
+                      className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-3 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+                    >
+                      <option value="" disabled className="bg-[#242424]">
+                        Selecciona un rubro...
+                      </option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id} className="bg-[#242424]">
+                          {cat.name} ({cat.tipo_gasto === "fijo" ? "Fijo" : "Variable"})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 )}
               </div>
-            </section>
-          </div>
 
-          {/* Columna Derecha: Gráficas y Balance */}
-          <div className="lg:col-span-7 xl:col-span-8 space-y-6">
-            <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-5">
-              <h2 className="text-sm font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2 border-b border-white/5 pb-3">
-                <PieChartIcon className="h-4 w-4 text-emerald-400" />
-                Distribución y Métricas Mensuales
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                {/* Gráfica Donut */}
-                <div className="h-[280px]">
-                  {chartData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={chartData}
-                          dataKey="value"
-                          nameKey="name"
-                          cx="50%"
-                          cy="45%"
-                          outerRadius={80}
-                          innerRadius={50}
-                          paddingAngle={4}
-                          label={({ name, percent }) =>
-                            `${name} ${((percent || 0) * 100).toFixed(0)}%`
-                          }
-                          labelLine={false}
-                        >
-                          {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <RechartsTooltip
-                          contentStyle={{
-                            backgroundColor: "#1D1D1D",
-                            borderColor: "#333333",
-                            borderRadius: "12px",
-                            color: "#E0E0E0",
-                          }}
-                          formatter={(value: any) => `$${Number(value).toFixed(2)}`}
-                        />
-                        <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-[#E0E0E0]/30 text-xs italic">
-                      Aún no hay gastos registrados este mes.
-                    </div>
-                  )}
+              <div>
+                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                  Monto ($) *
+                </label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="Ej. 1500.00"
+                    required
+                    className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-4 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30 font-mono"
+                  />
                 </div>
+              </div>
 
-                {/* Balance Operativo */}
-                <div className="space-y-4 bg-[#1A1A1A] p-5 rounded-2xl border border-white/5 shadow-inner">
-                  <h3 className="text-xs font-black text-[#E0E0E0]/50 uppercase tracking-widest border-b border-white/5 pb-2 flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-blue-400" />
-                    Balance Operativo Mensual
-                  </h3>
+              <div>
+                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                  Descripción / Motivo *
+                </label>
+                <div className="relative">
+                  <FileText className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+                  <input
+                    type="text"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Ej. Compra de insumos a proveedor"
+                    required
+                    className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-4 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
+                  />
+                </div>
+              </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-                        Costos Fijos
-                      </p>
-                      <p className="text-base font-black text-amber-400 font-mono">
-                        ${fixedExpensesTotal.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-                        Costos Variables
-                      </p>
-                      <p className="text-base font-black text-emerald-400 font-mono">
-                        ${variableExpensesTotal.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-white/5 pt-3">
-                    <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-                      Ventas Totales
-                    </p>
-                    <p className="text-xl font-black text-[#E0E0E0] font-mono">
-                      ${totalSales.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </p>
-                  </div>
-
-                  <div className="border-t border-white/5 pt-3 grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-                        Utilidad Neta
-                      </p>
-                      <p
-                        className={`text-xl font-black font-mono ${
-                          netUtility >= 0 ? "text-emerald-400" : "text-red-400"
-                        }`}
-                      >
-                        ${netUtility.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-                        Margen %
-                      </p>
-                      <p
-                        className={`text-xl font-black font-mono ${
-                          profitMargin >= 0 ? "text-emerald-400" : "text-red-400"
-                        }`}
-                      >
-                        {profitMargin.toFixed(1)}%
-                      </p>
-                    </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                    Fecha
+                  </label>
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                    className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors scheme-dark"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                    ¿Facturado?
+                  </label>
+                  <div className="flex h-[42px] items-center">
+                    <label className="relative inline-flex cursor-pointer items-center">
+                      <input
+                        type="checkbox"
+                        className="peer sr-only"
+                        checked={hasInvoice}
+                        onChange={(e) => setHasInvoice(e.target.checked)}
+                      />
+                      <div className="peer h-6 w-11 rounded-full bg-white/10 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-white/20 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-500 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
+                      <span className="ml-2.5 text-xs font-black uppercase text-[#E0E0E0]/70">
+                        {hasInvoice ? "Sí" : "No"}
+                      </span>
+                    </label>
                   </div>
                 </div>
               </div>
-            </section>
-          </div>
+
+              <button
+                type="submit"
+                disabled={isSubmittingExp || categories.length === 0}
+                className="w-full mt-2 rounded-xl bg-primary py-3 text-black font-black text-xs hover:brightness-105 transition-all uppercase tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50"
+              >
+                {isSubmittingExp ? "Registrando..." : "Guardar Gasto"}
+              </button>
+            </form>
+          </section>
+
+          {/* Categorías de Gasto */}
+          <section className="lg:col-span-5 rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <h2 className="text-sm font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
+                <Tag className="h-4 w-4 text-purple-400" />
+                Categorías de Gasto
+              </h2>
+              <button
+                onClick={() => {
+                  setEditingCategory(null);
+                  setNewCatName("");
+                  setNewCatColor("#FFB7CE");
+                  setNewCatTipoGasto("variable");
+                  setIsCategoryModalOpen(true);
+                }}
+                className="text-xs text-primary hover:underline font-black uppercase tracking-wider flex items-center gap-1"
+              >
+                <Plus className="h-3.5 w-3.5" /> Nueva
+              </button>
+            </div>
+
+            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+              {categories.map((cat) => (
+                <div
+                  key={cat.id}
+                  className="flex items-center justify-between p-3 rounded-xl bg-[#1A1A1A] border border-white/5 hover:border-white/10 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span
+                      className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
+                      style={{ backgroundColor: cat.color }}
+                    />
+                    <span className="text-xs text-[#E0E0E0] font-black uppercase truncate max-w-[130px]">
+                      {cat.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span
+                      className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider ${
+                        cat.tipo_gasto === "fijo"
+                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                          : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      }`}
+                    >
+                      {cat.tipo_gasto === "fijo" ? "Fijo" : "Var"}
+                    </span>
+                    <button
+                      onClick={() => {
+                        setEditingCategory(cat);
+                        setNewCatName(cat.name);
+                        setNewCatColor(cat.color);
+                        setNewCatTipoGasto(cat.tipo_gasto || "variable");
+                        setIsCategoryModalOpen(true);
+                      }}
+                      className="text-xs text-[#E0E0E0]/40 hover:text-[#E0E0E0] p-1 transition-colors"
+                      title="Editar categoría"
+                    >
+                      <Edit3 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {categories.length === 0 && (
+                <p className="text-[#E0E0E0]/40 text-xs italic text-center py-4">
+                  No hay categorías registradas.
+                </p>
+              )}
+            </div>
+          </section>
         </div>
 
-        {/* Historial de Gastos (Tabla) */}
+        {/* 5. Historial de Gastos (Tabla Full Width) */}
         <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 overflow-hidden space-y-4">
           <div className="flex items-center justify-between border-b border-white/5 pb-3">
             <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
