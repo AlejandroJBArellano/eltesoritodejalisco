@@ -1,15 +1,26 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
 import {
-  ArrowLeft,
   Image as ImageIcon,
   Pencil,
   Plus,
   RefreshCw,
-  Trash2
+  Trash2,
+  BookOpen,
+  Utensils,
+  CheckCircle2,
+  XCircle,
+  Filter,
 } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { PageHeader } from "@/components/PageHeader";
+import { Modal } from "@/components/ui/Modal";
+import {
+  TableSearchInput,
+  TableHeaderSortCell,
+  TablePagination,
+} from "@/components/ui/DataTableControls";
 
 type MenuItem = {
   id: string;
@@ -19,12 +30,6 @@ type MenuItem = {
   category?: string | null;
   imageUrl?: string | null;
   isAvailable: boolean;
-};
-
-type Ingredient = {
-  id: string;
-  name: string;
-  unit: string;
 };
 
 type RecipeItem = {
@@ -70,24 +75,46 @@ export default function MenuPage() {
   const [recipeForm, setRecipeForm] = useState<RecipeFormState>(emptyRecipeForm);
   const [recipeErrors, setRecipeErrors] = useState<Record<string, string>>({});
   const [recipeQuantities, setRecipeQuantities] = useState<Record<string, string>>({});
+  
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Modals state
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
+
+  // Form state
   const [formState, setFormState] = useState<MenuFormState>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Table Filters, Sort & Pagination State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [availabilityFilter, setAvailabilityFilter] = useState<"all" | "available" | "unavailable">("all");
+
+  type SortField = "name" | "price" | "category" | "isAvailable";
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   const isEditing = Boolean(formState.id);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    items.forEach((i) => {
+      if (i.category) set.add(i.category);
+    });
+    return Array.from(set).sort();
+  }, [items]);
 
   const activeCount = useMemo(
     () => items.filter((item) => item.isAvailable).length,
-    [items]
-  );
-
-  const categoriesCount = useMemo(
-    () => new Set(items.map((i) => i.category).filter(Boolean)).size,
     [items]
   );
 
@@ -138,30 +165,16 @@ export default function MenuPage() {
   };
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        await Promise.all([fetchMenu()]);
-      } catch (error) {
-        setErrorMessage(
-          error instanceof Error ? error.message : "Error inesperado al cargar"
-        );
-      }
-    };
-    load();
+    fetchMenu();
   }, []);
 
   const validateForm = (state: MenuFormState) => {
     const errors: Record<string, string> = {};
-
-    if (!state.name.trim()) {
-      errors.name = "El nombre es obligatorio";
-    }
-
+    if (!state.name.trim()) errors.name = "El nombre es obligatorio";
     const price = Number(state.price);
     if (!Number.isFinite(price) || price < 0) {
       errors.price = "El precio debe ser un número mayor o igual a 0";
     }
-
     return errors;
   };
 
@@ -184,13 +197,6 @@ export default function MenuPage() {
     }
   };
 
-  const handleRecipeFormChange = (
-    field: keyof RecipeFormState,
-    value: string
-  ) => {
-    setRecipeForm((prev) => ({ ...prev, [field]: value }));
-  };
-
   const resetForm = () => {
     setFormState(emptyForm);
     setFormErrors({});
@@ -199,22 +205,35 @@ export default function MenuPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const resetRecipeForm = () => {
-    setRecipeForm(emptyRecipeForm);
-    setRecipeErrors({});
+  const openNewProductModal = () => {
+    resetForm();
+    setIsProductModalOpen(true);
+  };
+
+  const openEditProductModal = (item: MenuItem) => {
+    setFormState({
+      id: item.id,
+      name: item.name,
+      description: item.description || "",
+      price: String(item.price),
+      category: item.category || "",
+      imageUrl: item.imageUrl || "",
+      isAvailable: item.isAvailable,
+    });
+    setImagePreview(item.imageUrl || null);
+    setFormErrors({});
+    setSelectedFile(null);
+    setIsProductModalOpen(true);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const errors = validateForm(formState);
     setFormErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
+    if (Object.keys(errors).length > 0) return;
 
     try {
       setIsSubmitting(true);
-
       const formData = new FormData();
       if (formState.id) formData.append("id", formState.id);
       formData.append("name", formState.name.trim());
@@ -222,7 +241,6 @@ export default function MenuPage() {
       formData.append("price", formState.price);
       formData.append("category", formState.category);
       formData.append("isAvailable", String(formState.isAvailable));
-
       formData.append("imageUrl", formState.imageUrl || "");
 
       if (selectedFile) {
@@ -240,6 +258,7 @@ export default function MenuPage() {
       }
       await fetchMenu();
       resetForm();
+      setIsProductModalOpen(false);
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
@@ -250,28 +269,11 @@ export default function MenuPage() {
     }
   };
 
-  const handleEdit = (item: MenuItem) => {
-    setFormState({
-      id: item.id,
-      name: item.name,
-      description: item.description || "",
-      price: String(item.price),
-      category: item.category || "",
-      imageUrl: item.imageUrl || "",
-      isAvailable: item.isAvailable,
-    });
-    setImagePreview(item.imageUrl || null);
-    setFormErrors({});
-    setSelectedFile(null);
-  };
-
   const handleDelete = async (itemId: string) => {
     const confirmed = window.confirm(
       "¿Eliminar este producto del menú? Esta acción no se puede deshacer."
     );
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     try {
       setIsSubmitting(true);
@@ -295,99 +297,59 @@ export default function MenuPage() {
     }
   };
 
-  const validateRecipeForm = (state: RecipeFormState) => {
-    const errors: Record<string, string> = {};
-    if (!selectedRecipeMenuItemId) {
-      errors.menuItemId = "Selecciona un producto del menú";
+  // Recipe Modal & Methods
+  const openRecipeModal = (menuItemId?: string) => {
+    const targetId = menuItemId || (items[0]?.id ?? "");
+    setSelectedRecipeMenuItemId(targetId);
+    setRecipeForm(emptyRecipeForm);
+    setRecipeErrors({});
+    if (targetId) {
+      fetchRecipes(targetId);
     }
-    if (!state.ingredientName) {
-      errors.ingredientName = "Ingresa el nombre del ingrediente";
-    }
-    const qty = Number(state.quantityRequired);
-    if (!Number.isFinite(qty) || qty <= 0) {
-      errors.quantityRequired = "La cantidad debe ser mayor a 0";
-    }
-    return errors;
+    setIsRecipeModalOpen(true);
   };
 
   const handleRecipeSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const errors = validateRecipeForm(recipeForm);
-    setRecipeErrors(errors);
-    if (Object.keys(errors).length > 0) {
+    if (!selectedRecipeMenuItemId) {
+      setRecipeErrors({ menuItemId: "Selecciona un producto" });
+      return;
+    }
+    if (!recipeForm.ingredientName.trim()) {
+      setRecipeErrors({ ingredientName: "Ingresa el nombre del ingrediente" });
+      return;
+    }
+    const qty = Number(recipeForm.quantityRequired);
+    if (!Number.isFinite(qty) || qty <= 0) {
+      setRecipeErrors({ quantityRequired: "La cantidad debe ser mayor a 0" });
       return;
     }
 
     try {
       setIsSubmitting(true);
-      const payload = {
-        menuItemId: selectedRecipeMenuItemId,
-        ingredientName: recipeForm.ingredientName,
-        quantityRequired: Number(recipeForm.quantityRequired),
-      };
       const response = await fetch("/api/recipes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          menuItemId: selectedRecipeMenuItemId,
+          ingredientName: recipeForm.ingredientName.trim(),
+          quantityRequired: qty,
+        }),
       });
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.error || "No se pudo guardar la receta");
-      }
+      if (!response.ok) throw new Error(data?.error || "Error al guardar receta");
       await fetchRecipes(selectedRecipeMenuItemId);
-      resetRecipeForm();
-      setErrorMessage(null);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al guardar"
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleRecipeQuantityChange = (recipeId: string, value: string) => {
-    setRecipeQuantities((prev) => ({ ...prev, [recipeId]: value }));
-  };
-
-  const updateRecipe = async (recipeId: string) => {
-    const qty = Number(recipeQuantities[recipeId]);
-    if (!Number.isFinite(qty) || qty <= 0) {
-      setRecipeErrors({ update: "La cantidad debe ser mayor a 0" });
-      return;
-    }
-    try {
-      setIsSubmitting(true);
-      const response = await fetch("/api/recipes", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: recipeId, quantityRequired: qty }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.error || "No se pudo actualizar la receta");
-      }
-      await fetchRecipes(selectedRecipeMenuItemId);
-      setErrorMessage(null);
+      setRecipeForm(emptyRecipeForm);
       setRecipeErrors({});
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Error inesperado al actualizar"
-      );
+      setErrorMessage(error instanceof Error ? error.message : "Error al guardar");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const deleteRecipe = async (recipeId: string) => {
-    const confirmed = window.confirm(
-      "¿Eliminar este ingrediente de la receta?"
-    );
-    if (!confirmed) {
-      return;
-    }
+    if (!window.confirm("¿Eliminar ingrediente de la receta?")) return;
     try {
       setIsSubmitting(true);
       const response = await fetch("/api/recipes", {
@@ -395,526 +357,638 @@ export default function MenuPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: recipeId }),
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.error || "No se pudo eliminar la receta");
-      }
+      if (!response.ok) throw new Error("Error al eliminar");
       await fetchRecipes(selectedRecipeMenuItemId);
-      setErrorMessage(null);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al eliminar"
-      );
+    } catch (e) {
+      console.error(e);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleRecipeMenuSelection = async (menuItemId: string) => {
-    setSelectedRecipeMenuItemId(menuItemId);
-    try {
-      await fetchRecipes(menuItemId);
-      setRecipeErrors({});
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Error inesperado al cargar recetas"
-      );
+  // Filtered & Sorted Items
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchName = item.name.toLowerCase().includes(q);
+        const matchDesc = (item.description || "").toLowerCase().includes(q);
+        const matchCat = (item.category || "").toLowerCase().includes(q);
+        if (!matchName && !matchDesc && !matchCat) return false;
+      }
+
+      if (categoryFilter !== "all" && item.category !== categoryFilter) {
+        return false;
+      }
+
+      if (availabilityFilter === "available" && !item.isAvailable) return false;
+      if (availabilityFilter === "unavailable" && item.isAvailable) return false;
+
+      return true;
+    });
+  }, [items, searchQuery, categoryFilter, availabilityFilter]);
+
+  const sortedItems = useMemo(() => {
+    return [...filteredItems].sort((a, b) => {
+      let comp = 0;
+      if (sortField === "name") {
+        comp = a.name.localeCompare(b.name);
+      } else if (sortField === "price") {
+        comp = a.price - b.price;
+      } else if (sortField === "category") {
+        comp = (a.category || "").localeCompare(b.category || "");
+      } else if (sortField === "isAvailable") {
+        comp = (a.isAvailable ? 1 : 0) - (b.isAvailable ? 1 : 0);
+      }
+      return sortDirection === "asc" ? comp : -comp;
+    });
+  }, [filteredItems, sortField, sortDirection]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, categoryFilter, availabilityFilter, sortField, sortDirection, pageSize]);
+
+  const totalPages = Math.ceil(sortedItems.length / pageSize) || 1;
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return sortedItems.slice(start, start + pageSize);
+  }, [sortedItems, currentPage, pageSize]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
     }
   };
 
   return (
     <div className="min-h-screen bg-[#121212]">
-      {/* Header */}
-      <header className="border-b border-white/5 bg-[#181818]/60 backdrop-blur-md sticky top-0 z-10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2 rounded-xl bg-[#242424] border border-white/5 px-3 py-2 text-xs font-bold text-[#E0E0E0]/80 hover:text-white hover:border-white/10 transition-all"
+      {/* Header reutilizable */}
+      <PageHeader
+        title="Gestión de Menú"
+        subtitle="Administra productos, catálogo y recetas del restaurante"
+        badgeColor="bg-primary"
+        actions={
+          <>
+            <button
+              onClick={() => openRecipeModal()}
+              className="rounded-xl border border-white/10 bg-[#242424] px-4 py-2 text-xs font-bold text-[#E0E0E0] hover:bg-white/10 transition-all uppercase tracking-wider flex items-center gap-2"
             >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="uppercase tracking-wider">Dashboard</span>
-            </Link>
-            <div>
-              <h1 className="text-xl font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-primary"></span>
-                Gestión de Menú
-              </h1>
-              <p className="text-xs text-[#E0E0E0]/50 font-medium">
-                Administra productos, catálogo y recetas del restaurante
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            {isEditing && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="rounded-xl border border-white/10 bg-[#242424] px-4 py-2 text-xs font-extrabold text-[#E0E0E0]/70 hover:bg-[#2c2c2c] hover:text-white uppercase tracking-wider transition-all"
-              >
-                Cancelar Edición
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+              <BookOpen className="h-4 w-4 text-purple-400" />
+              Recetas e Ingredientes
+            </button>
+            <button
+              onClick={openNewProductModal}
+              className="rounded-xl bg-primary px-4 py-2 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-primary/20"
+            >
+              <Plus className="h-4 w-4" />
+              Nuevo Producto
+            </button>
+          </>
+        }
+      />
 
-      <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         {errorMessage && (
           <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-xs font-bold text-red-400">
             {errorMessage}
           </div>
         )}
 
-        {/* Form & Recipes Grid */}
-        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          {/* Card Form: Producto */}
-          <div className="rounded-2xl bg-[#242424] p-6 sm:p-8 shadow-sm border border-white/5">
-            <h2 className="mb-6 text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-primary"></span>
-              {isEditing ? "Editar Producto" : "Nuevo Producto"}
-            </h2>
-            <form onSubmit={handleSubmit} className="grid gap-5">
-              <div>
-                <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-2">
-                  Nombre del Platillo
-                </label>
-                <input
-                  type="text"
-                  value={formState.name}
-                  onChange={(event) =>
-                    handleFormChange("name", event.target.value)
-                  }
-                  className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#666666] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                  placeholder="Ej. Torta Ahogada Sencilla"
-                />
-                {formErrors.name && (
-                  <p className="mt-1 text-xs font-bold text-red-400">
-                    {formErrors.name}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-2">
-                  Descripción
-                </label>
-                <textarea
-                  value={formState.description}
-                  onChange={(event) =>
-                    handleFormChange("description", event.target.value)
-                  }
-                  className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#666666] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
-                  rows={3}
-                  placeholder="Descripción corta del platillo, ingredientes principales o notas."
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-2">
-                    Precio (MXN)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formState.price}
-                    onChange={(event) =>
-                      handleFormChange("price", event.target.value)
-                    }
-                    className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#666666] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                    placeholder="Ej. 95.00"
-                  />
-                  {formErrors.price && (
-                    <p className="mt-1 text-xs font-bold text-red-400">
-                      {formErrors.price}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-2">
-                    Categoría
-                  </label>
-                  <select
-                    value={formState.category}
-                    onChange={(event) =>
-                      handleFormChange("category", event.target.value)
-                    }
-                    className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                  >
-                    <option value="">Selecciona una categoría</option>
-                    <option value="Bebidas">Bebidas</option>
-                    <option value="Platillos Fuertes">Platillos Fuertes</option>
-                    <option value="Antojitos">Antojitos</option>
-                    <option value="Tacos">Tacos</option>
-                    <option value="Extras">Extras</option>
-                    <option value="Postres">Postres</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-2">
-                  Imagen del Producto
-                </label>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-4">
-                    <div className="flex flex-col items-center gap-2">
-                      {imagePreview ? (
-                        <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#181818] relative">
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="h-16 w-16 flex-shrink-0 flex items-center justify-center rounded-xl border border-white/5 bg-[#181818] text-[#E0E0E0]/30">
-                          <ImageIcon className="h-6 w-6" />
-                        </div>
-                      )}
-
-                      {(imagePreview || formState.imageUrl || selectedFile) && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setImagePreview(null);
-                            setSelectedFile(null);
-                            handleFormChange("imageUrl", "");
-                            if (fileInputRef.current) fileInputRef.current.value = "";
-                          }}
-                          className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-wider"
-                        >
-                          Quitar
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="flex-1">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        className="block w-full text-xs text-[#E0E0E0]/60 file:mr-3 file:rounded-xl file:border-0 file:bg-white/10 file:px-4 file:py-2.5 file:text-xs file:font-bold file:text-[#E0E0E0] hover:file:bg-white/20 file:transition-all cursor-pointer"
-                      />
-                      <p className="mt-1.5 text-[10px] text-[#E0E0E0]/40">
-                        Soporta JPG, PNG, WEBP (Se guardará automáticamente en Supabase Storage)
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <label className="flex items-center gap-3 text-xs font-bold text-[#E0E0E0]/80 uppercase tracking-wider cursor-pointer pt-1">
-                <input
-                  type="checkbox"
-                  checked={formState.isAvailable}
-                  onChange={(event) =>
-                    handleFormChange("isAvailable", event.target.checked)
-                  }
-                  className="h-4 w-4 rounded border-white/10 bg-[#181818] text-primary focus:ring-primary accent-primary"
-                />
-                <span>
-                  {formState.isAvailable ? "Disponible en Menú" : "No Disponible"}
-                </span>
-              </label>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="mt-2 w-full rounded-xl bg-primary px-5 py-3 text-xs font-black text-black uppercase tracking-widest hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Plus className="h-4 w-4" />
-                {isSubmitting
-                  ? "Guardando..."
-                  : isEditing
-                    ? "Actualizar Producto"
-                    : "Crear Producto"}
-              </button>
-            </form>
+        {/* Tarjetas Informativas */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                Total Platillos
+              </p>
+              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">{items.length}</p>
+            </div>
+            <div className="rounded-xl bg-primary/10 p-3 text-primary">
+              <Utensils className="h-5 w-5" />
+            </div>
           </div>
 
-          {/* Card Form: Recetas */}
-          <div className="rounded-2xl bg-[#242424] p-6 sm:p-8 shadow-sm border border-white/5 flex flex-col justify-between">
+          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2 mb-1">
-                <span className="h-2 w-2 rounded-full bg-secondary"></span>
-                Recetas por Producto
-              </h2>
-              <p className="text-xs text-[#E0E0E0]/50 font-medium mb-6">
-                Asigna insumos requeridos por platillo para control de inventario.
+              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                Platillos Activos
               </p>
+              <p className="mt-1 text-2xl font-black text-emerald-400">{activeCount}</p>
+            </div>
+            <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+          </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-2">
-                    Seleccionar Producto
-                  </label>
-                  <select
-                    value={selectedRecipeMenuItemId}
-                    onChange={(event) =>
-                      handleRecipeMenuSelection(event.target.value)
-                    }
-                    className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
+          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                Categorías Registradas
+              </p>
+              <p className="mt-1 text-2xl font-black text-purple-400">{categories.length}</p>
+            </div>
+            <div className="rounded-xl bg-purple-500/10 p-3 text-purple-400">
+              <Filter className="h-5 w-5" />
+            </div>
+          </div>
+        </div>
+
+        {/* TABLA DE PRODUCTOS CON BUSQUEDA, FILTROS, ORDENAMIENTO Y PAGINACION */}
+        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+            <h2 className="text-base font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-primary" />
+              Catálogo de Menú ({filteredItems.length})
+            </h2>
+            <button
+              onClick={fetchMenu}
+              className="text-xs text-[#E0E0E0]/60 hover:text-white flex items-center gap-1.5 font-bold"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+              Actualizar Lista
+            </button>
+          </div>
+
+          {/* Barra de Filtros */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#1A1A1A] p-4 rounded-xl border border-white/5">
+            <div>
+              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+                Buscar Producto
+              </label>
+              <TableSearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Buscar por nombre o descripción..."
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+                Categoría
+              </label>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-[#E0E0E0] outline-none focus:border-primary"
+              >
+                <option value="all">Todas las Categorías</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+                Estado
+              </label>
+              <select
+                value={availabilityFilter}
+                onChange={(e) =>
+                  setAvailabilityFilter(e.target.value as any)
+                }
+                className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-[#E0E0E0] outline-none focus:border-primary"
+              >
+                <option value="all">Todos los Estados</option>
+                <option value="available">Disponibles</option>
+                <option value="unavailable">No Disponibles</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Tabla */}
+          <div className="overflow-x-auto rounded-xl border border-white/5">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-[#181818] text-xs uppercase tracking-wider text-[#E0E0E0]/60 border-b border-white/5">
+                <tr>
+                  <th className="py-3 px-4 font-bold">Imagen</th>
+                  <TableHeaderSortCell
+                    field="name"
+                    label="Nombre"
+                    currentSortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHeaderSortCell
+                    field="category"
+                    label="Categoría"
+                    currentSortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHeaderSortCell
+                    field="price"
+                    label="Precio"
+                    currentSortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHeaderSortCell
+                    field="isAvailable"
+                    label="Estado"
+                    currentSortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <th className="py-3 px-4 font-bold text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {paginatedItems.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="hover:bg-white/[0.02] transition-colors"
                   >
-                    <option value="">Selecciona un producto</option>
-                    {items.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                  {recipeErrors.menuItemId && (
-                    <p className="mt-1 text-xs font-bold text-red-400">
-                      {recipeErrors.menuItemId}
+                    <td className="py-3 px-4">
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.name}
+                          className="h-10 w-10 rounded-xl object-cover border border-white/10"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-xl bg-[#181818] border border-white/10 flex items-center justify-center text-[#E0E0E0]/30">
+                          <ImageIcon className="h-5 w-5" />
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      <p className="font-bold text-[#E0E0E0]">{item.name}</p>
+                      {item.description && (
+                        <p className="text-xs text-[#E0E0E0]/50 line-clamp-1">
+                          {item.description}
+                        </p>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1 text-xs font-bold text-[#E0E0E0]/80">
+                        {item.category || "Sin categoría"}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 font-black text-primary">
+                      ${Number(item.price).toFixed(2)}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                          item.isAvailable
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : "bg-red-500/10 text-red-400 border border-red-500/20"
+                        }`}
+                      >
+                        {item.isAvailable ? (
+                          <>
+                            <CheckCircle2 className="h-3 w-3" />
+                            Disponible
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="h-3 w-3" />
+                            Agotado
+                          </>
+                        )}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openRecipeModal(item.id)}
+                          className="rounded-lg bg-purple-500/10 border border-purple-500/20 p-2 text-purple-400 hover:bg-purple-500/20 transition-colors"
+                          title="Gestionar Receta"
+                        >
+                          <BookOpen className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => openEditProductModal(item)}
+                          className="rounded-lg bg-white/5 border border-white/10 p-2 text-[#E0E0E0]/80 hover:text-white hover:bg-white/10 transition-colors"
+                          title="Editar Producto"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="rounded-lg bg-red-500/10 border border-red-500/20 p-2 text-red-400 hover:bg-red-500/20 transition-colors"
+                          title="Eliminar Producto"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {paginatedItems.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="py-8 text-center text-xs text-[#E0E0E0]/40 italic"
+                    >
+                      {isLoading
+                        ? "Cargando menú..."
+                        : "No se encontraron productos en el menú."}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Controls de Paginación */}
+          <TablePagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={sortedItems.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+        </section>
+      </main>
+
+      {/* MODAL DE PRODUCTO (NUEVO / EDITAR) */}
+      <Modal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        title={isEditing ? "Editar Producto" : "Nuevo Producto"}
+        subtitle="Llena los datos del platillo o bebida para el catálogo"
+        icon={<Utensils className="h-5 w-5 text-primary" />}
+        maxWidth="lg"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+              Nombre del Platillo *
+            </label>
+            <input
+              type="text"
+              value={formState.name}
+              onChange={(e) => handleFormChange("name", e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#666666] outline-none focus:border-primary"
+              placeholder="Ej. Torta Ahogada Sencilla"
+            />
+            {formErrors.name && (
+              <p className="mt-1 text-xs font-bold text-red-400">
+                {formErrors.name}
+              </p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+                Precio ($) *
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={formState.price}
+                onChange={(e) => handleFormChange("price", e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary"
+                placeholder="0.00"
+              />
+              {formErrors.price && (
+                <p className="mt-1 text-xs font-bold text-red-400">
+                  {formErrors.price}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+                Categoría
+              </label>
+              <input
+                type="text"
+                list="category-suggestions"
+                value={formState.category}
+                onChange={(e) => handleFormChange("category", e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary"
+                placeholder="Ej. Platos Fuertes"
+              />
+              <datalist id="category-suggestions">
+                {categories.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+              Descripción
+            </label>
+            <textarea
+              rows={2}
+              value={formState.description}
+              onChange={(e) => handleFormChange("description", e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary"
+              placeholder="Ingredientes principales, preparación, etc."
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+              Imagen del Producto
+            </label>
+            <div className="flex items-center gap-4">
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="h-16 w-16 rounded-xl object-cover border border-white/10"
+                />
+              ) : (
+                <div className="h-16 w-16 rounded-xl bg-[#181818] border border-white/10 flex items-center justify-center text-[#E0E0E0]/30">
+                  <ImageIcon className="h-6 w-6" />
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="text-xs text-[#E0E0E0]/60 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-white/10 file:text-white hover:file:bg-white/20"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-2">
+            <input
+              type="checkbox"
+              id="isAvailable"
+              checked={formState.isAvailable}
+              onChange={(e) => handleFormChange("isAvailable", e.target.checked)}
+              className="h-4 w-4 rounded border-white/10 bg-[#181818] text-primary focus:ring-primary"
+            />
+            <label
+              htmlFor="isAvailable"
+              className="text-xs font-bold text-[#E0E0E0]"
+            >
+              Disponible para venta activa
+            </label>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+            <button
+              type="button"
+              onClick={() => setIsProductModalOpen(false)}
+              className="rounded-xl border border-white/10 px-4 py-2.5 text-xs font-bold text-[#E0E0E0]/70 hover:bg-white/5"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-xl bg-primary px-5 py-2.5 text-xs font-black text-black hover:brightness-105 disabled:opacity-50"
+            >
+              {isSubmitting
+                ? "Guardando..."
+                : isEditing
+                ? "Actualizar Producto"
+                : "Guardar Producto"}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* MODAL DE RECETAS */}
+      <Modal
+        isOpen={isRecipeModalOpen}
+        onClose={() => setIsRecipeModalOpen(false)}
+        title="Gestión de Recetas e Ingredientes"
+        subtitle="Asigna ingredientes a cada platillo para control de inventario"
+        icon={<BookOpen className="h-5 w-5 text-purple-400" />}
+        maxWidth="xl"
+      >
+        <div className="space-y-6">
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+              Selecciona Producto del Menú
+            </label>
+            <select
+              value={selectedRecipeMenuItemId}
+              onChange={(e) => {
+                setSelectedRecipeMenuItemId(e.target.value);
+                if (e.target.value) fetchRecipes(e.target.value);
+              }}
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary font-bold"
+            >
+              <option value="">-- Seleccionar Producto --</option>
+              {items.map((i) => (
+                <option key={i.id} value={i.id}>
+                  {i.name} (${Number(i.price).toFixed(2)})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {selectedRecipeMenuItemId ? (
+            <>
+              <form onSubmit={handleRecipeSubmit} className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#181818] p-4 rounded-xl border border-white/5">
+                <div className="sm:col-span-2">
+                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+                    Nombre del Ingrediente
+                  </label>
+                  <input
+                    type="text"
+                    value={recipeForm.ingredientName}
+                    onChange={(e) =>
+                      setRecipeForm((prev) => ({
+                        ...prev,
+                        ingredientName: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary"
+                    placeholder="Ej. Carne de Cerdo (g), Bolillo, etc."
+                  />
+                  {recipeErrors.ingredientName && (
+                    <p className="text-[10px] font-bold text-red-400 mt-0.5">
+                      {recipeErrors.ingredientName}
                     </p>
                   )}
                 </div>
 
-                <form onSubmit={handleRecipeSubmit} className="grid gap-4">
-                  <div>
-                    <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-2">
-                      Ingrediente / Insumo
-                    </label>
-                    <input
-                      type="text"
-                      value={recipeForm.ingredientName}
-                      onChange={(event) =>
-                        handleRecipeFormChange(
-                          "ingredientName",
-                          event.target.value
-                        )
-                      }
-                      className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2 text-sm text-[#E0E0E0] placeholder-[#666666] focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
-                      placeholder="Ej. Tomate (kg), Carne de Cerdo (kg)"
-                    />
-                    {recipeErrors.ingredientName && (
-                      <p className="mt-1 text-xs font-bold text-red-400">
-                        {recipeErrors.ingredientName}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-2">
-                      Cantidad Requerida por Unidad
-                    </label>
+                <div>
+                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+                    Cantidad Requerida
+                  </label>
+                  <div className="flex gap-2">
                     <input
                       type="number"
-                      min="0"
                       step="0.01"
                       value={recipeForm.quantityRequired}
-                      onChange={(event) =>
-                        handleRecipeFormChange(
-                          "quantityRequired",
-                          event.target.value
-                        )
+                      onChange={(e) =>
+                        setRecipeForm((prev) => ({
+                          ...prev,
+                          quantityRequired: e.target.value,
+                        }))
                       }
-                      className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2 text-sm text-[#E0E0E0] placeholder-[#666666] focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
-                      placeholder="Ej. 0.20"
+                      className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary"
+                      placeholder="1"
                     />
-                    {recipeErrors.quantityRequired && (
-                      <p className="mt-1 text-xs font-bold text-red-400">
-                        {recipeErrors.quantityRequired}
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full rounded-xl bg-secondary px-5 py-2.5 text-xs font-black text-black uppercase tracking-widest hover:bg-secondary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Plus className="h-4 w-4" />
-                    {isSubmitting ? "Guardando..." : "Agregar Ingrediente"}
-                  </button>
-                </form>
-
-                {recipeErrors.update && (
-                  <p className="text-xs font-bold text-red-400">
-                    {recipeErrors.update}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* List of Recipe Ingredients */}
-            <div className="mt-6 space-y-3 pt-4 border-t border-white/5">
-              <h3 className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider">
-                Ingredientes en Receta
-              </h3>
-              {!selectedRecipeMenuItemId ? (
-                <p className="text-xs text-[#E0E0E0]/40 italic">
-                  Selecciona un producto arriba para gestionar su receta.
-                </p>
-              ) : recipeItems.length === 0 ? (
-                <p className="text-xs text-[#E0E0E0]/40 italic">
-                  Sin ingredientes registrados para este platillo.
-                </p>
-              ) : (
-                <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
-                  {recipeItems.map((recipe) => (
-                    <div
-                      key={recipe.id}
-                      className="rounded-xl border border-white/5 bg-[#181818] p-3 flex flex-wrap items-center justify-between gap-3"
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="rounded-xl bg-purple-500 px-3 py-2 text-xs font-bold text-white hover:bg-purple-600 shrink-0"
                     >
-                      <p className="text-xs font-bold text-[#E0E0E0]">
-                        {recipe.ingredientName}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={recipeQuantities[recipe.id] || ""}
-                          onChange={(event) =>
-                            handleRecipeQuantityChange(
-                              recipe.id,
-                              event.target.value
-                            )
-                          }
-                          className="w-20 rounded-lg border border-white/10 bg-[#242424] px-2 py-1 text-xs font-bold text-[#E0E0E0] focus:border-secondary outline-none"
-                        />
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {recipeErrors.quantityRequired && (
+                    <p className="text-[10px] font-bold text-red-400 mt-0.5">
+                      {recipeErrors.quantityRequired}
+                    </p>
+                  )}
+                </div>
+              </form>
+
+              {/* Lista de Ingredientes en la Receta */}
+              <div>
+                <h4 className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider mb-2">
+                  Ingredientes Configurados ({recipeItems.length})
+                </h4>
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {recipeItems.map((rec) => (
+                    <div
+                      key={rec.id}
+                      className="flex items-center justify-between bg-[#181818] p-3 rounded-xl border border-white/5 text-xs"
+                    >
+                      <span className="font-bold text-[#E0E0E0]">
+                        {rec.ingredientName}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[#E0E0E0]/60 font-mono font-bold">
+                          {rec.quantityRequired} unidad(es)
+                        </span>
                         <button
                           type="button"
-                          onClick={() => updateRecipe(recipe.id)}
-                          className="rounded-lg bg-white/5 px-2.5 py-1 text-xs font-bold text-secondary hover:bg-secondary/10 transition-colors"
-                        >
-                          Guardar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteRecipe(recipe.id)}
-                          className="rounded-lg bg-white/5 p-1 text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                          title="Eliminar ingrediente"
+                          onClick={() => deleteRecipe(rec.id)}
+                          className="text-red-400 hover:text-red-300 p-1"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
                   ))}
+                  {recipeItems.length === 0 && (
+                    <p className="text-xs text-[#E0E0E0]/40 italic text-center py-4">
+                      No hay ingredientes registrados para este platillo.
+                    </p>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Section 3: Productos del Menú */}
-        <section className="rounded-2xl bg-[#242424] p-6 sm:p-8 shadow-sm border border-white/5">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-primary"></span>
-              Catálogo de Productos
-            </h2>
-            <button
-              type="button"
-              onClick={fetchMenu}
-              className="flex items-center gap-2 rounded-xl border border-white/5 bg-[#181818] px-3.5 py-2 text-xs font-bold text-[#E0E0E0]/70 hover:text-white hover:border-white/10 transition-all cursor-pointer"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              <span className="uppercase tracking-wider">Recargar</span>
-            </button>
-          </div>
-
-          {isLoading ? (
-            <div className="py-8 text-center text-xs font-medium text-[#E0E0E0]/50">
-              Cargando catálogo de productos...
-            </div>
-          ) : items.length === 0 ? (
-            <div className="py-8 text-center text-xs font-medium text-[#E0E0E0]/50">
-              No hay productos registrados en el menú.
-            </div>
+              </div>
+            </>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-white/5 text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider">
-                    <th className="py-3 px-2">Producto</th>
-                    <th className="py-3 px-2">Categoría</th>
-                    <th className="py-3 px-2">Precio</th>
-                    <th className="py-3 px-2">Estado</th>
-                    <th className="py-3 px-2 text-right">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {items.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-white/[0.02] transition-colors"
-                    >
-                      <td className="py-3.5 px-2">
-                        <div className="flex items-center gap-3">
-                          {item.imageUrl ? (
-                            <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#181818]">
-                              <img
-                                src={item.imageUrl}
-                                alt={item.name}
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-xl border border-white/5 bg-[#181818] text-[#E0E0E0]/30">
-                              <ImageIcon className="h-5 w-5" />
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-bold text-[#E0E0E0]">{item.name}</p>
-                            {item.description && (
-                              <p className="text-xs text-[#E0E0E0]/50 line-clamp-1">
-                                {item.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-2 text-xs font-bold text-[#E0E0E0]/60">
-                        {item.category || "—"}
-                      </td>
-                      <td className="py-3.5 px-2 text-sm font-black text-[#E0E0E0]">
-                        ${item.price.toFixed(2)}
-                      </td>
-                      <td className="py-3.5 px-2">
-                        <span
-                          className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${item.isAvailable
-                              ? "bg-success/10 text-success"
-                              : "bg-white/5 text-[#E0E0E0]/40"
-                            }`}
-                        >
-                          {item.isAvailable ? "Disponible" : "No disponible"}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-2 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleEdit(item)}
-                            className="flex items-center gap-1.5 rounded-xl border border-white/5 bg-white/5 px-3 py-1.5 text-xs font-bold text-[#E0E0E0] hover:bg-primary/20 hover:text-primary hover:border-primary/20 transition-all cursor-pointer"
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                            <span>Editar</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(item.id)}
-                            className="flex items-center gap-1.5 rounded-xl border border-white/5 bg-white/5 px-3 py-1.5 text-xs font-bold text-gray-400 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/20 transition-all cursor-pointer"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                            <span>Eliminar</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <p className="text-xs text-[#E0E0E0]/40 italic text-center py-8">
+              Selecciona un producto arriba para ver o agregar sus ingredientes.
+            </p>
           )}
-        </section>
-      </main>
+        </div>
+      </Modal>
     </div>
   );
 }

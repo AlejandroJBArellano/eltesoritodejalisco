@@ -6,6 +6,7 @@ import { OrderTicket } from "@/components/pos/OrderTicket";
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { SplitBillModal, type SplitPayment } from "@/components/pos/SplitBillModal";
 import { OrderWithDetails } from "@/types";
+import { PageHeader } from "@/components/PageHeader";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
@@ -851,36 +852,22 @@ export default function POSPage() {
 
   return (
     <div className="min-h-screen bg-[#121212] text-[#E0E0E0]">
-      {/* Top Navbar */}
-      <header className="bg-[#121212]/90 backdrop-blur-md sticky top-0 z-30 border-b border-white/5 no-print">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="group flex items-center gap-1.5 text-xs font-bold text-[#E0E0E0]/60 hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-              Dashboard
-            </Link>
-            <span className="text-white/20">|</span>
-            <h1 className="text-xl font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-secondary"></span>
-              Punto de Venta
-            </h1>
+      {/* Header reutilizable */}
+      <PageHeader
+        title="Punto de Venta"
+        subtitle="Registro de órdenes, comandas y cobranza en caja"
+        badgeColor="bg-[#34D399]"
+        actions={
+          <div className="flex items-center gap-2.5 rounded-xl bg-[#242424] px-4 py-1.5 border border-white/5 shadow-sm">
+            <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
+              Próximo Folio
+            </span>
+            <span className="font-mono font-black text-emerald-400 text-sm">
+              #{nextFolioDisplay}
+            </span>
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2.5 rounded-full bg-[#242424] px-4 py-1.5 border border-white/5 shadow-sm">
-              <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
-                Próximo Folio
-              </span>
-              <span className="font-mono font-black text-secondary text-sm">
-                #{nextFolioDisplay}
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
+        }
+      />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 no-print space-y-8">
         {errorMessage && (

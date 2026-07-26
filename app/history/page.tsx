@@ -27,6 +27,12 @@ import {
   getOrderPaymentMethods,
   getOrderTipAmount,
 } from "@/components/pos/paymentUtils";
+import { PageHeader } from "@/components/PageHeader";
+import {
+  TableSearchInput,
+  TableHeaderSortCell,
+  TablePagination,
+} from "@/components/ui/DataTableControls";
 import { usePendingCut } from "@/hooks/usePendingCut";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -100,6 +106,20 @@ export default function HistoryPage() {
   const [dateFilter, setDateFilter] = useState(""); // YYYY-MM-DD
   const [tableFilter, setTableFilter] = useState("");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
+
+  // Table Controls State - Orders Table
+  type OrderSortField = "orderNumber" | "createdAt" | "table" | "total";
+  const [ordersSortField, setOrdersSortField] = useState<OrderSortField>("createdAt");
+  const [ordersSortDir, setOrdersSortDir] = useState<"asc" | "desc">("desc");
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [ordersPageSize, setOrdersPageSize] = useState(10);
+
+  // Table Controls State - Cuts Table
+  type CutSortField = "cut_date" | "total_orders" | "venta_neta" | "utilidad_final";
+  const [cutsSortField, setCutsSortField] = useState<CutSortField>("cut_date");
+  const [cutsSortDir, setCutsSortDir] = useState<"asc" | "desc">("desc");
+  const [cutsPage, setCutsPage] = useState(1);
+  const [cutsPageSize, setCutsPageSize] = useState(10);
 
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [billingOrder, setBillingOrder] = useState<Order | null>(null);
@@ -429,6 +449,48 @@ export default function HistoryPage() {
     });
   }, [orders, searchQuery, dateFilter, tableFilter, paymentMethodFilter]);
 
+  const sortedOrders = useMemo(() => {
+    return [...filteredOrders].sort((a, b) => {
+      let comp = 0;
+      if (ordersSortField === "orderNumber") comp = a.orderNumber.localeCompare(b.orderNumber);
+      else if (ordersSortField === "createdAt") comp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      else if (ordersSortField === "table") comp = (a.table || "").localeCompare(b.table || "");
+      else if (ordersSortField === "total") comp = a.total - b.total;
+      return ordersSortDir === "asc" ? comp : -comp;
+    });
+  }, [filteredOrders, ordersSortField, ordersSortDir]);
+
+  useEffect(() => {
+    setOrdersPage(1);
+  }, [searchQuery, dateFilter, tableFilter, paymentMethodFilter, ordersSortField, ordersSortDir, ordersPageSize]);
+
+  const ordersTotalPages = Math.ceil(sortedOrders.length / ordersPageSize) || 1;
+  const paginatedOrders = useMemo(() => {
+    const start = (ordersPage - 1) * ordersPageSize;
+    return sortedOrders.slice(start, start + ordersPageSize);
+  }, [sortedOrders, ordersPage, ordersPageSize]);
+
+  const sortedDailyCuts = useMemo(() => {
+    return [...dailyCuts].sort((a, b) => {
+      let comp = 0;
+      if (cutsSortField === "cut_date") comp = a.cut_date.localeCompare(b.cut_date);
+      else if (cutsSortField === "total_orders") comp = a.total_orders - b.total_orders;
+      else if (cutsSortField === "venta_neta") comp = a.venta_neta - b.venta_neta;
+      else if (cutsSortField === "utilidad_final") comp = a.utilidad_final - b.utilidad_final;
+      return cutsSortDir === "asc" ? comp : -comp;
+    });
+  }, [dailyCuts, cutsSortField, cutsSortDir]);
+
+  useEffect(() => {
+    setCutsPage(1);
+  }, [cutsSortField, cutsSortDir, cutsPageSize]);
+
+  const cutsTotalPages = Math.ceil(sortedDailyCuts.length / cutsPageSize) || 1;
+  const paginatedDailyCuts = useMemo(() => {
+    const start = (cutsPage - 1) * cutsPageSize;
+    return sortedDailyCuts.slice(start, start + cutsPageSize);
+  }, [sortedDailyCuts, cutsPage, cutsPageSize]);
+
   const toggleRow = (orderId: string) => {
     setExpandedRow((prev) => (prev === orderId ? null : orderId));
   };
@@ -628,25 +690,12 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen bg-[#121212] text-[#E0E0E0]">
-      {/* Header */}
-      <header className="bg-[#121212]/90 backdrop-blur-md sticky top-0 z-30 border-b border-white/5 no-print">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="group flex items-center gap-1.5 text-xs font-bold text-[#E0E0E0]/60 hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-              Dashboard
-            </Link>
-            <span className="text-white/20">|</span>
-            <h1 className="text-xl font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-blue-500"></span>
-              Historial y Estadísticas
-            </h1>
-          </div>
-        </div>
-      </header>
+      {/* Header reutilizable */}
+      <PageHeader
+        title="Historial y Estadísticas"
+        subtitle="Control de ventas, cortes de caja y balance financiero"
+        badgeColor="bg-blue-500"
+      />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 no-print space-y-8">
         {errorMessage && (
@@ -1042,22 +1091,49 @@ export default function HistoryPage() {
                 No hay cortes registrados aún.
               </p>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto space-y-4">
                 <table className="w-full text-left text-xs">
                   <thead>
                     <tr className="border-b border-white/5 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-                      <th className="py-3 px-3">Fecha</th>
-                      <th className="py-3 px-3 text-right">Órdenes</th>
+                      <TableHeaderSortCell
+                        field="cut_date"
+                        label="Fecha"
+                        currentSortField={cutsSortField}
+                        sortDirection={cutsSortDir}
+                        onSort={(f) => { setCutsSortField(f); setCutsSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                      />
+                      <TableHeaderSortCell
+                        field="total_orders"
+                        label="Órdenes"
+                        currentSortField={cutsSortField}
+                        sortDirection={cutsSortDir}
+                        onSort={(f) => { setCutsSortField(f); setCutsSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                        className="text-right"
+                      />
                       <th className="py-3 px-3 text-right">Venta Bruta</th>
-                      <th className="py-3 px-3 text-right">Venta Neta</th>
+                      <TableHeaderSortCell
+                        field="venta_neta"
+                        label="Venta Neta"
+                        currentSortField={cutsSortField}
+                        sortDirection={cutsSortDir}
+                        onSort={(f) => { setCutsSortField(f); setCutsSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                        className="text-right"
+                      />
                       <th className="py-3 px-3 text-right">IVA</th>
                       <th className="py-3 px-3 text-right">Gastos</th>
-                      <th className="py-3 px-3 text-right">Utilidad Final</th>
+                      <TableHeaderSortCell
+                        field="utilidad_final"
+                        label="Utilidad Final"
+                        currentSortField={cutsSortField}
+                        sortDirection={cutsSortDir}
+                        onSort={(f) => { setCutsSortField(f); setCutsSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                        className="text-right"
+                      />
                       <th className="py-3 px-3 text-center">Acción</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {dailyCuts.map((cut) => {
+                    {paginatedDailyCuts.map((cut) => {
                       const ventaBruta = Number(cut.venta_neta) + Number(cut.iva_acumulado);
                       return (
                         <tr key={cut.id} className="hover:bg-white/5 transition-colors">
@@ -1104,6 +1180,14 @@ export default function HistoryPage() {
                     })}
                   </tbody>
                 </table>
+                <TablePagination
+                  currentPage={cutsPage}
+                  totalPages={cutsTotalPages}
+                  totalItems={sortedDailyCuts.length}
+                  pageSize={cutsPageSize}
+                  onPageChange={setCutsPage}
+                  onPageSizeChange={setCutsPageSize}
+                />
               </div>
             )}
           </section>
@@ -1241,22 +1325,47 @@ export default function HistoryPage() {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto space-y-4">
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-white/5 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-                  <th className="py-3 px-3">Folio</th>
-                  <th className="py-3 px-3">Fecha</th>
-                  <th className="py-3 px-3">Mesa</th>
+                  <TableHeaderSortCell
+                    field="orderNumber"
+                    label="Folio"
+                    currentSortField={ordersSortField}
+                    sortDirection={ordersSortDir}
+                    onSort={(f) => { setOrdersSortField(f); setOrdersSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                  />
+                  <TableHeaderSortCell
+                    field="createdAt"
+                    label="Fecha"
+                    currentSortField={ordersSortField}
+                    sortDirection={ordersSortDir}
+                    onSort={(f) => { setOrdersSortField(f); setOrdersSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                  />
+                  <TableHeaderSortCell
+                    field="table"
+                    label="Mesa"
+                    currentSortField={ordersSortField}
+                    sortDirection={ordersSortDir}
+                    onSort={(f) => { setOrdersSortField(f); setOrdersSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                  />
                   <th className="py-3 px-3">Método</th>
                   <th className="py-3 px-3 text-right">Subtotal</th>
                   <th className="py-3 px-3 text-right">IVA (16%)</th>
                   <th className="py-3 px-3 text-right">Propina</th>
-                  <th className="py-3 px-3 text-right text-primary">TOTAL PAGO</th>
+                  <TableHeaderSortCell
+                    field="total"
+                    label="TOTAL PAGO"
+                    currentSortField={ordersSortField}
+                    sortDirection={ordersSortDir}
+                    onSort={(f) => { setOrdersSortField(f); setOrdersSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
+                    className="text-right text-primary"
+                  />
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {filteredOrders.map((order) => {
+                {paginatedOrders.map((order) => {
                   const tipAmount = getOrderTipAmount(order);
                   const paymentMethods = getOrderPaymentMethods(order);
                   const primaryPaymentMethod = paymentMethods[0] || "N/A";
@@ -1349,42 +1458,41 @@ export default function HistoryPage() {
                                     e.stopPropagation();
                                     setBillingOrder(order);
                                   }}
-                                  className="rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                                  className="flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 text-[10px] font-black text-blue-400 hover:bg-blue-500/20 transition-all uppercase tracking-wider"
                                 >
-                                  <FileText className="h-3.5 w-3.5" /> Facturar
+                                  <Receipt className="h-3.5 w-3.5" /> Facturar Orden
                                 </button>
                               </div>
 
                               <table className="w-full text-xs">
                                 <thead>
-                                  <tr className="text-[10px] font-extrabold text-[#E0E0E0]/40 uppercase tracking-widest border-b border-white/5">
-                                    <th className="text-left pb-2 font-mono">Cant</th>
-                                    <th className="text-left pb-2">Producto</th>
-                                    <th className="text-right pb-2">Precio Unit.</th>
-                                    <th className="text-right pb-2">Importe</th>
+                                  <tr className="text-[10px] font-bold text-[#E0E0E0]/40 border-b border-white/5">
+                                    <th className="pb-1 text-left">Producto</th>
+                                    <th className="pb-1 text-center">Cant.</th>
+                                    <th className="pb-1 text-right">P. Unit</th>
+                                    <th className="pb-1 text-right">Subtotal</th>
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                   {order.orderItems?.map((item) => {
-                                    const importe = item.quantity * item.unitPrice;
+                                    const unitPrice = Number(item.unitPrice || 0);
+                                    const subtotal = item.quantity * unitPrice;
                                     return (
-                                      <tr key={item.id} className="hover:bg-white/5">
-                                        <td className="py-2 text-[#E0E0E0] font-mono font-bold">
-                                          {item.quantity}
-                                        </td>
-                                        <td className="py-2 text-[#E0E0E0] font-bold uppercase">
-                                          {item.menuItem?.name || "Producto desconocido"}
+                                      <tr key={item.id}>
+                                        <td className="py-1.5 font-bold text-[#E0E0E0]">
+                                          {item.menuItem?.name || "Producto"}
                                           {item.notes && (
-                                            <span className="block text-[10px] text-amber-400 font-normal">
-                                              {item.notes}
+                                            <span className="text-[10px] text-amber-400/80 block font-normal">
+                                              Notas: {item.notes}
                                             </span>
                                           )}
                                         </td>
-                                        <td className="py-2 text-right text-[#E0E0E0]/60 font-mono">
-                                          ${item.unitPrice.toFixed(2)}
+                                        <td className="py-1.5 text-center font-mono">{item.quantity}</td>
+                                        <td className="py-1.5 text-right font-mono text-[#E0E0E0]/60">
+                                          ${unitPrice.toFixed(2)}
                                         </td>
-                                        <td className="py-2 text-right text-[#E0E0E0] font-mono font-bold">
-                                          ${importe.toFixed(2)}
+                                        <td className="py-1.5 text-right font-mono font-bold text-[#E0E0E0]">
+                                          ${subtotal.toFixed(2)}
                                         </td>
                                       </tr>
                                     );
@@ -1399,7 +1507,7 @@ export default function HistoryPage() {
                   );
                 })}
 
-                {filteredOrders.length === 0 && (
+                {paginatedOrders.length === 0 && (
                   <tr>
                     <td colSpan={8} className="px-4 py-8 text-center text-[#E0E0E0]/40 italic">
                       No se encontraron órdenes que coincidan con los filtros seleccionados.
@@ -1408,6 +1516,14 @@ export default function HistoryPage() {
                 )}
               </tbody>
             </table>
+            <TablePagination
+              currentPage={ordersPage}
+              totalPages={ordersTotalPages}
+              totalItems={sortedOrders.length}
+              pageSize={ordersPageSize}
+              onPageChange={setOrdersPage}
+              onPageSizeChange={setOrdersPageSize}
+            />
           </div>
         </section>
       </main>

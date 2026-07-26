@@ -2,6 +2,8 @@ import { getTodayExecutions, getTaskCategories, getPrimordialTasks } from '@/lib
 import { AdminTareasClient } from '@/components/tareas/AdminTareasClient'
 import { getUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
+import { CheckSquare } from 'lucide-react'
 
 export default async function AdminTareasPage() {
   const user = await getUser()
@@ -14,11 +16,15 @@ export default async function AdminTareasPage() {
   const tasks = await getPrimordialTasks()
 
   return (
-    <main className="min-h-screen bg-dark p-8">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-2xl font-bold text-white mb-2">Administración de Tareas</h1>
-        <p className="text-gray-400 mb-8">Control, monitoreo y configuración de tareas de operación diaria.</p>
-        
+    <main className="min-h-screen bg-[#121212] text-[#E0E0E0]">
+      <PageHeader
+        title="Administración de Tareas"
+        subtitle="Control, monitoreo y configuración del checklist operativo diario"
+        badgeColor="bg-primary"
+        icon={<CheckSquare className="h-5 w-5 text-primary" />}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <AdminTareasClient 
           initialExecutions={executions} 
           initialCategories={categories}

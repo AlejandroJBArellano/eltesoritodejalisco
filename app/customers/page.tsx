@@ -1,26 +1,28 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   Users,
   Award,
   DollarSign,
-  BarChart3,
   User,
   Phone,
   Mail,
   Cake,
-  Search,
   Plus,
   Edit3,
   Trash2,
   RefreshCw,
-  ArrowLeft,
-  X,
-  AlertTriangle,
   Gift,
+  Search,
 } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
+import { Modal } from "@/components/ui/Modal";
+import {
+  TableSearchInput,
+  TableHeaderSortCell,
+  TablePagination,
+} from "@/components/ui/DataTableControls";
 
 type Customer = {
   id: string;
@@ -56,9 +58,21 @@ export default function CustomersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [formState, setFormState] = useState<CustomerFormState>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Table Filters, Sort & Pagination State
   const [searchQuery, setSearchQuery] = useState("");
+  
+  type SortField = "name" | "loyalty_points" | "total_spend" | "birthday";
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const isEditing = Boolean(formState.id);
 
@@ -66,36 +80,25 @@ export default function CustomersPage() {
     () =>
       customers.reduce(
         (acc, customer) => acc + (customer.loyalty_points || 0),
-        0,
+        0
       ),
-    [customers],
+    [customers]
   );
 
   const totalSpendSum = useMemo(
     () =>
       customers.reduce(
         (acc, customer) => acc + Number(customer.total_spend || 0),
-        0,
+        0
       ),
-    [customers],
+    [customers]
   );
 
   const avgPointsPerCustomer = useMemo(
     () =>
       customers.length > 0 ? (totalLoyaltyPoints / customers.length).toFixed(1) : "0",
-    [customers, totalLoyaltyPoints],
+    [customers, totalLoyaltyPoints]
   );
-
-  const filteredCustomers = useMemo(() => {
-    if (!searchQuery.trim()) return customers;
-    const q = searchQuery.toLowerCase();
-    return customers.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        (c.phone && c.phone.toLowerCase().includes(q)) ||
-        (c.email && c.email.toLowerCase().includes(q)),
-    );
-  }, [customers, searchQuery]);
 
   const fetchCustomers = async () => {
     try {
@@ -109,7 +112,7 @@ export default function CustomersPage() {
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al cargar",
+        error instanceof Error ? error.message : "Error inesperado al cargar"
       );
     } finally {
       setIsLoading(false);
@@ -147,13 +150,30 @@ export default function CustomersPage() {
     setFormErrors({});
   };
 
+  const openNewCustomerModal = () => {
+    resetForm();
+    setIsModalOpen(true);
+  };
+
+  const openEditCustomerModal = (customer: Customer) => {
+    setFormState({
+      id: customer.id,
+      name: customer.name,
+      phone: customer.phone || "",
+      email: customer.email || "",
+      birthday: customer.birthday
+        ? new Date(customer.birthday).toISOString().slice(0, 10)
+        : "",
+    });
+    setFormErrors({});
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const errors = validateForm(formState);
     setFormErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
+    if (Object.keys(errors).length > 0) return;
 
     try {
       setIsSubmitting(true);
@@ -176,37 +196,22 @@ export default function CustomersPage() {
       }
       await fetchCustomers();
       resetForm();
+      setIsModalOpen(false);
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al guardar",
+        error instanceof Error ? error.message : "Error inesperado al guardar"
       );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleEdit = (customer: Customer) => {
-    setFormState({
-      id: customer.id,
-      name: customer.name,
-      phone: customer.phone || "",
-      email: customer.email || "",
-      birthday: customer.birthday
-        ? new Date(customer.birthday).toISOString().slice(0, 10)
-        : "",
-    });
-    setFormErrors({});
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   const handleDelete = async (customerId: string) => {
     const confirmed = window.confirm(
-      "¿Eliminar este cliente? Esta acción no se puede deshacer.",
+      "¿Eliminar este cliente? Esta acción no se puede deshacer."
     );
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     try {
       setIsSubmitting(true);
@@ -223,372 +228,396 @@ export default function CustomersPage() {
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al eliminar",
+        error instanceof Error ? error.message : "Error inesperado al eliminar"
       );
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Filtered & Sorted Customers
+  const filteredCustomers = useMemo(() => {
+    return customers.filter((c) => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchName = c.name.toLowerCase().includes(q);
+        const matchPhone = (c.phone || "").toLowerCase().includes(q);
+        const matchEmail = (c.email || "").toLowerCase().includes(q);
+        if (!matchName && !matchPhone && !matchEmail) return false;
+      }
+      return true;
+    });
+  }, [customers, searchQuery]);
+
+  const sortedCustomers = useMemo(() => {
+    return [...filteredCustomers].sort((a, b) => {
+      let comp = 0;
+      if (sortField === "name") {
+        comp = a.name.localeCompare(b.name);
+      } else if (sortField === "loyalty_points") {
+        comp = a.loyalty_points - b.loyalty_points;
+      } else if (sortField === "total_spend") {
+        comp = a.total_spend - b.total_spend;
+      } else if (sortField === "birthday") {
+        comp = (a.birthday || "").localeCompare(b.birthday || "");
+      }
+      return sortDirection === "asc" ? comp : -comp;
+    });
+  }, [filteredCustomers, sortField, sortDirection]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortField, sortDirection, pageSize]);
+
+  const totalPages = Math.ceil(sortedCustomers.length / pageSize) || 1;
+  const paginatedCustomers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return sortedCustomers.slice(start, start + pageSize);
+  }, [sortedCustomers, currentPage, pageSize]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#121212] text-[#E0E0E0]">
-      {/* Top Navbar */}
-      <header className="bg-[#121212]/90 backdrop-blur-md sticky top-0 z-30 border-b border-white/5 no-print">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="group flex items-center gap-1.5 text-xs font-bold text-[#E0E0E0]/60 hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-              Dashboard
-            </Link>
-            <span className="text-white/20">|</span>
-            <h1 className="text-xl font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-success"></span>
-              Clientes & CRM
-            </h1>
-          </div>
+      {/* Header reutilizable */}
+      <PageHeader
+        title="Clientes & CRM"
+        subtitle="Gestión de fidelización, puntos y directorio de clientes"
+        badgeColor="bg-emerald-500"
+        actions={
+          <button
+            onClick={openNewCustomerModal}
+            className="rounded-xl bg-emerald-500 px-4 py-2 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+          >
+            <Plus className="h-4 w-4" />
+            Nuevo Cliente
+          </button>
+        }
+      />
 
-          <div className="flex items-center gap-3">
-            {isEditing && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs font-black text-[#E0E0E0]/70 hover:bg-white/10 transition-all uppercase tracking-wider"
-              >
-                Cancelar Edición
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 no-print space-y-8">
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         {errorMessage && (
-          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-bold text-red-400 flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 shrink-0" />
-            <span>{errorMessage}</span>
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-xs font-bold text-red-400">
+            {errorMessage}
           </div>
         )}
 
-        {/* Resumen CRM (Metric Cards in app/page.tsx Style) */}
-        <div>
-          <h2 className="mb-4 text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-            Resumen del CRM
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Total Clientes */}
-            <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 transition-all hover:border-white/10">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                  Total Clientes
-                </span>
-                <div className="rounded-xl bg-success/10 p-2.5 text-success">
-                  <Users className="h-5 w-5" />
-                </div>
-              </div>
-              <p className="mt-2 text-2xl font-black text-[#E0E0E0] tracking-tight">
-                {customers.length}
+        {/* Tarjetas de Métricas de CRM */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                Total Registrados
+              </p>
+              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">{customers.length}</p>
+            </div>
+            <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
+              <Users className="h-5 w-5" />
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                Puntos de Lealtad
+              </p>
+              <p className="mt-1 text-2xl font-black text-amber-400">{totalLoyaltyPoints}</p>
+            </div>
+            <div className="rounded-xl bg-amber-500/10 p-3 text-amber-400">
+              <Award className="h-5 w-5" />
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                Consumo Acumulado
+              </p>
+              <p className="mt-1 text-2xl font-black text-emerald-400">
+                ${totalSpendSum.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </p>
             </div>
-
-            {/* Puntos de Lealtad */}
-            <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 transition-all hover:border-white/10">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                  Puntos Totales
-                </span>
-                <div className="rounded-xl bg-purple-500/10 p-2.5 text-purple-400">
-                  <Award className="h-5 w-5" />
-                </div>
-              </div>
-              <p className="mt-2 text-2xl font-black text-[#E0E0E0] tracking-tight">
-                {totalLoyaltyPoints}
-              </p>
+            <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
+              <DollarSign className="h-5 w-5" />
             </div>
+          </div>
 
-            {/* Consumo Acumulado */}
-            <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 transition-all hover:border-white/10">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                  Ventas a Clientes
-                </span>
-                <div className="rounded-xl bg-secondary/10 p-2.5 text-secondary">
-                  <DollarSign className="h-5 w-5" />
-                </div>
-              </div>
-              <p className="mt-2 text-2xl font-black text-[#E0E0E0] tracking-tight">
-                {new Intl.NumberFormat("es-MX", {
-                  style: "currency",
-                  currency: "MXN",
-                }).format(totalSpendSum)}
+          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                Prom. Puntos/Cliente
               </p>
+              <p className="mt-1 text-2xl font-black text-purple-400">{avgPointsPerCustomer}</p>
             </div>
-
-            {/* Promedio Puntos/Cliente */}
-            <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 transition-all hover:border-white/10">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
-                  Prom. Puntos / Cliente
-                </span>
-                <div className="rounded-xl bg-blue-500/10 p-2.5 text-blue-400">
-                  <BarChart3 className="h-5 w-5" />
-                </div>
-              </div>
-              <p className="mt-2 text-2xl font-black text-[#E0E0E0] tracking-tight">
-                {avgPointsPerCustomer}
-              </p>
+            <div className="rounded-xl bg-purple-500/10 p-3 text-purple-400">
+              <Gift className="h-5 w-5" />
             </div>
           </div>
         </div>
 
-        {/* Sección Formulario + Reglas de Lealtad */}
-        <section className="grid gap-6 lg:grid-cols-12 items-start">
-          {/* Formulario de Cliente */}
-          <div className="lg:col-span-7 xl:col-span-8 rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-5">
-            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2 border-b border-white/5 pb-3">
-              <span className="h-2 w-2 rounded-full bg-primary"></span>
-              {isEditing ? "Editar Cliente" : "Registrar Nuevo Cliente"}
-            </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
-                  Nombre Completo *
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
-                  <input
-                    type="text"
-                    value={formState.name}
-                    onChange={(e) => handleFormChange("name", e.target.value)}
-                    className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-4 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
-                    placeholder="Ej. Juan Pérez"
-                  />
-                </div>
-                {formErrors.name && (
-                  <p className="mt-1 text-xs text-red-400 font-bold">{formErrors.name}</p>
-                )}
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
-                    Teléfono / WhatsApp
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
-                    <input
-                      type="tel"
-                      value={formState.phone}
-                      onChange={(e) => handleFormChange("phone", e.target.value)}
-                      className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-4 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
-                      placeholder="3312345678"
-                    />
-                  </div>
-                  {formErrors.phone && (
-                    <p className="mt-1 text-xs text-red-400 font-bold">{formErrors.phone}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
-                    Correo Electrónico
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
-                    <input
-                      type="email"
-                      value={formState.email}
-                      onChange={(e) => handleFormChange("email", e.target.value)}
-                      className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-4 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
-                      placeholder="cliente@ejemplo.com"
-                    />
-                  </div>
-                  {formErrors.email && (
-                    <p className="mt-1 text-xs text-red-400 font-bold">{formErrors.email}</p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
-                  Cumpleaños
-                </label>
-                <div className="relative">
-                  <Cake className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
-                  <input
-                    type="date"
-                    value={formState.birthday}
-                    onChange={(e) => handleFormChange("birthday", e.target.value)}
-                    className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-4 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors scheme-dark"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full rounded-xl bg-primary py-3 text-black font-black text-xs hover:brightness-105 transition-all uppercase tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50"
-                >
-                  {isSubmitting
-                    ? "Guardando..."
-                    : isEditing
-                      ? "Actualizar Cliente"
-                      : "Crear Cliente"}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Tarjeta Programa de Lealtad */}
-          <div className="lg:col-span-5 xl:col-span-4 rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
-            <h2 className="text-sm font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2 border-b border-white/5 pb-3">
-              <Gift className="h-4 w-4 text-purple-400" />
-              Programa de Lealtad
-            </h2>
-            <p className="text-xs text-[#E0E0E0]/60 font-medium leading-relaxed">
-              Los clientes acumulan automáticamente puntos de lealtad al realizar sus consumos en el Punto de Venta.
-            </p>
-            <div className="rounded-xl bg-purple-500/10 p-4 border border-purple-500/20 text-xs text-purple-300 space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-widest block text-purple-400">
-                Puntos Acumulados
-              </span>
-              <p className="text-2xl font-black text-[#E0E0E0] font-mono">
-                {totalLoyaltyPoints} pts
-              </p>
-              <p className="text-[10px] font-medium text-purple-300/70 pt-1">
-                Equivalente a recompensas de lealtad activas.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Listado de Clientes */}
-        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-5 overflow-hidden">
+        {/* TABLA DE CLIENTES CON BUSQUEDA, ORDENAMIENTO Y PAGINACION */}
+        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
-            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-success"></span>
-              Clientes Registrados
+            <h2 className="text-base font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              Directorio de Clientes ({filteredCustomers.length})
             </h2>
-
             <div className="flex items-center gap-3">
-              {/* Buscador Rápido */}
-              <div className="relative min-w-[220px]">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar cliente..."
-                  className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-4 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#E0E0E0]/40 hover:text-[#E0E0E0]"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-
+              <TableSearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Buscar cliente, teléfono o email..."
+              />
               <button
-                type="button"
                 onClick={fetchCustomers}
-                className="rounded-xl border border-white/10 bg-white/5 p-2 text-[#E0E0E0]/60 hover:text-[#E0E0E0] hover:bg-white/10 transition-all"
-                title="Recargar clientes"
+                className="text-xs text-[#E0E0E0]/60 hover:text-white flex items-center gap-1.5 font-bold"
               >
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
               </button>
             </div>
           </div>
 
-          {isLoading ? (
-            <p className="text-xs text-[#E0E0E0]/50 font-bold italic py-8 text-center">
-              Cargando catálogo de clientes...
-            </p>
-          ) : filteredCustomers.length === 0 ? (
-            <p className="text-xs text-[#E0E0E0]/50 font-bold italic py-8 text-center">
-              No se encontraron clientes registrados.
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-white/5 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-                    <th className="py-3 px-3">Cliente</th>
-                    <th className="py-3 px-3">Contacto</th>
-                    <th className="py-3 px-3">Cumpleaños</th>
-                    <th className="py-3 px-3">Puntos</th>
-                    <th className="py-3 px-3 text-right">Total Gastado</th>
-                    <th className="py-3 px-3 text-right">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {filteredCustomers.map((customer) => (
-                    <tr key={customer.id} className="hover:bg-white/5 transition-colors">
-                      <td className="py-3.5 px-3">
-                        <p className="font-black text-[#E0E0E0] uppercase text-sm">
-                          {customer.name}
-                        </p>
-                      </td>
-                      <td className="py-3.5 px-3">
-                        <p className="font-bold text-[#E0E0E0]/80">{customer.phone || "—"}</p>
-                        {customer.email && (
-                          <p className="text-[10px] font-medium text-[#E0E0E0]/40">
-                            {customer.email}
+          <div className="overflow-x-auto rounded-xl border border-white/5">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#181818] uppercase tracking-wider text-[#E0E0E0]/60 border-b border-white/5">
+                <tr>
+                  <TableHeaderSortCell
+                    field="name"
+                    label="Cliente"
+                    currentSortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <th className="py-3 px-4 font-bold">Contacto</th>
+                  <TableHeaderSortCell
+                    field="birthday"
+                    label="Cumpleaños"
+                    currentSortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHeaderSortCell
+                    field="loyalty_points"
+                    label="Puntos"
+                    currentSortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHeaderSortCell
+                    field="total_spend"
+                    label="Gasto Total"
+                    currentSortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <th className="py-3 px-4 font-bold text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {paginatedCustomers.map((c) => (
+                  <tr
+                    key={c.id}
+                    className="hover:bg-white/[0.02] transition-colors"
+                  >
+                    <td className="py-3 px-4 font-bold text-[#E0E0E0] flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black">
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      {c.name}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="space-y-0.5">
+                        {c.phone && (
+                          <p className="text-[#E0E0E0]/80 flex items-center gap-1.5 font-mono">
+                            <Phone className="h-3 w-3 text-[#E0E0E0]/40" />
+                            {c.phone}
                           </p>
                         )}
-                      </td>
-                      <td className="py-3.5 px-3 text-[#E0E0E0]/70 font-medium">
-                        {customer.birthday
-                          ? new Date(customer.birthday).toLocaleDateString("es-MX", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                              timeZone: "UTC",
-                            })
-                          : "—"}
-                      </td>
-                      <td className="py-3.5 px-3">
-                        <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 text-[10px] font-black text-purple-300 uppercase tracking-wider font-mono">
-                          {customer.loyalty_points || 0} pts
+                        {c.email && (
+                          <p className="text-[#E0E0E0]/50 flex items-center gap-1.5">
+                            <Mail className="h-3 w-3 text-[#E0E0E0]/40" />
+                            {c.email}
+                          </p>
+                        )}
+                        {!c.phone && !c.email && (
+                          <span className="text-[#E0E0E0]/30 italic">Sin datos</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-[#E0E0E0]/70">
+                      {c.birthday ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Cake className="h-3.5 w-3.5 text-pink-400" />
+                          {new Date(c.birthday).toLocaleDateString("es-MX", {
+                            day: "numeric",
+                            month: "short",
+                          })}
                         </span>
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-mono font-black text-emerald-400">
-                        ${Number(customer.total_spend || 0).toFixed(2)}
-                      </td>
-                      <td className="py-3.5 px-3 text-right">
-                        <div className="flex justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleEdit(customer)}
-                            className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
-                          >
-                            <Edit3 className="h-3 w-3" /> Editar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(customer.id)}
-                            className="rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-1 text-[10px] font-black uppercase transition-colors"
-                            title="Eliminar cliente"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                      ) : (
+                        <span className="text-[#E0E0E0]/30 italic">-</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 font-black text-amber-400">
+                        <Award className="h-3 w-3" />
+                        {c.loyalty_points} pts
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 font-black text-emerald-400">
+                      ${Number(c.total_spend || 0).toFixed(2)}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openEditCustomerModal(c)}
+                          className="rounded-lg bg-white/5 border border-white/10 p-2 text-[#E0E0E0]/80 hover:text-white hover:bg-white/10 transition-colors"
+                          title="Editar Cliente"
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(c.id)}
+                          className="rounded-lg bg-red-500/10 border border-red-500/20 p-2 text-red-400 hover:bg-red-500/20 transition-colors"
+                          title="Eliminar Cliente"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {paginatedCustomers.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="py-8 text-center text-xs text-[#E0E0E0]/40 italic"
+                    >
+                      {isLoading
+                        ? "Cargando directorio..."
+                        : "No se encontraron clientes."}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <TablePagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={sortedCustomers.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
         </section>
       </main>
+
+      {/* MODAL DE CLIENTE (NUEVO / EDITAR) */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={isEditing ? "Editar Cliente" : "Nuevo Cliente"}
+        subtitle="Registra información de contacto y fecha de cumpleaños para CRM"
+        icon={<User className="h-5 w-5 text-emerald-400" />}
+        maxWidth="md"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+              Nombre Completo *
+            </label>
+            <input
+              type="text"
+              value={formState.name}
+              onChange={(e) => handleFormChange("name", e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-emerald-500"
+              placeholder="Ej. Juan Pérez"
+            />
+            {formErrors.name && (
+              <p className="mt-1 text-xs font-bold text-red-400">
+                {formErrors.name}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+              Teléfono
+            </label>
+            <input
+              type="tel"
+              value={formState.phone}
+              onChange={(e) => handleFormChange("phone", e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-emerald-500"
+              placeholder="Ej. 3312345678"
+            />
+            {formErrors.phone && (
+              <p className="mt-1 text-xs font-bold text-red-400">
+                {formErrors.phone}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+              Correo Electrónico
+            </label>
+            <input
+              type="email"
+              value={formState.email}
+              onChange={(e) => handleFormChange("email", e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-emerald-500"
+              placeholder="ejemplo@correo.com"
+            />
+            {formErrors.email && (
+              <p className="mt-1 text-xs font-bold text-red-400">
+                {formErrors.email}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+              Fecha de Cumpleaños
+            </label>
+            <input
+              type="date"
+              value={formState.birthday}
+              onChange={(e) => handleFormChange("birthday", e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-emerald-500 scheme-dark"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="rounded-xl border border-white/10 px-4 py-2.5 text-xs font-bold text-[#E0E0E0]/70 hover:bg-white/5"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-black text-black hover:brightness-105 disabled:opacity-50"
+            >
+              {isSubmitting
+                ? "Guardando..."
+                : isEditing
+                ? "Actualizar Cliente"
+                : "Guardar Cliente"}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

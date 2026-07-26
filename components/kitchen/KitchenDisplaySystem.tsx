@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowLeft, BellRing, Bell, LayoutGrid, Layers, ChefHat, CheckCircle2, Clock } from "lucide-react";
 import { OrderCard } from "./OrderCard";
 import { SmartBatchingView } from "./SmartBatchingView";
+import { PageHeader } from "@/components/PageHeader";
 
 interface KitchenDisplaySystemProps {
   initialOrders: OrderWithDetails[];
@@ -111,48 +112,32 @@ export function KitchenDisplaySystem({
 
   return (
     <div className="min-h-screen bg-[#121212]">
-      {/* Top Header */}
-      <header className="bg-[#242424] border-b border-white/5 shadow-sm mb-8">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-xs font-black text-[#E0E0E0]/60 hover:text-white uppercase tracking-widest transition-colors mb-2"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" /> Volver al Dashboard
-            </Link>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-3">
-                <span className="h-3 w-3 rounded-full bg-primary animate-pulse"></span>
-                KDS — Sistema de Cocina
-              </h1>
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20">
-                Real-time
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
+      {/* Header reutilizable */}
+      <PageHeader
+        title="KDS — Sistema de Cocina"
+        subtitle="Pantalla de comandería en tiempo real y preparación por lotes"
+        badgeColor="bg-purple-500"
+        actions={
+          <>
             {!soundEnabled ? (
               <button
                 onClick={() => setSoundEnabled(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-2.5 text-xs font-black uppercase tracking-wider shadow-sm animate-pulse hover:bg-red-500/30 transition-all active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider animate-pulse hover:bg-red-500/30 transition-all active:scale-95 cursor-pointer"
               >
                 <BellRing className="h-4 w-4" /> Activar Sonidos
               </button>
             ) : (
-              <span className="inline-flex items-center gap-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3.5 py-2 text-xs font-black uppercase tracking-wider">
+              <span className="inline-flex items-center gap-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider">
                 <Bell className="h-4 w-4" /> Sonidos Activos
               </span>
             )}
 
-            {/* View Toggle */}
-            <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-[#181818] p-1.5">
+            <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-[#181818] p-1">
               <button
                 onClick={() => setView("kanban")}
-                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                   view === "kanban"
-                    ? "bg-primary text-white shadow-md shadow-primary/20 scale-[1.02]"
+                    ? "bg-primary text-black shadow-md shadow-primary/20"
                     : "text-[#E0E0E0]/60 hover:text-white"
                 }`}
               >
@@ -160,18 +145,18 @@ export function KitchenDisplaySystem({
               </button>
               <button
                 onClick={() => setView("batching")}
-                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                   view === "batching"
-                    ? "bg-primary text-white shadow-md shadow-primary/20 scale-[1.02]"
+                    ? "bg-primary text-black shadow-md shadow-primary/20"
                     : "text-[#E0E0E0]/60 hover:text-white"
                 }`}
               >
                 <Layers className="h-3.5 w-3.5" /> Vista Lotes
               </button>
             </div>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       {/* Main Content Area */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

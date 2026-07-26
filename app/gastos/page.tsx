@@ -40,6 +40,7 @@ import {
   ArrowDown,
   Filter,
 } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
 
 type Category = {
   id: string;
@@ -352,30 +353,18 @@ export default function GastosPage() {
 
   return (
     <div className="min-h-screen bg-[#121212] text-[#E0E0E0]">
-      {/* Top Navbar */}
-      <header className="bg-[#121212]/90 backdrop-blur-md sticky top-0 z-30 border-b border-white/5 no-print">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="group flex items-center gap-1.5 text-xs font-bold text-[#E0E0E0]/60 hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-              Dashboard
-            </Link>
-            <span className="text-white/20">|</span>
-            <h1 className="text-xl font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-red-500"></span>
-              Gastos Operativos
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-3">
+      {/* Header reutilizable */}
+      <PageHeader
+        title="Gastos Operativos"
+        subtitle="Control de egresos, categorías y balance financiero mensual"
+        badgeColor="bg-red-500"
+        actions={
+          <>
             <button
               onClick={() => setIsExpenseModalOpen(true)}
-              className="rounded-full bg-primary px-4 py-1.5 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-primary/20"
+              className="rounded-xl bg-primary px-4 py-2 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-primary/20"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-4 w-4" />
               Registrar Gasto
             </button>
             <button
@@ -386,14 +375,14 @@ export default function GastosPage() {
                 setNewCatTipoGasto("variable");
                 setIsCategoryModalOpen(true);
               }}
-              className="rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs font-black text-[#E0E0E0] hover:bg-white/10 transition-all uppercase tracking-wider flex items-center gap-1.5"
+              className="rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-xs font-bold text-[#E0E0E0] hover:bg-white/10 transition-all uppercase tracking-wider flex items-center gap-1.5"
             >
-              <Plus className="h-3.5 w-3.5 text-primary" />
+              <Plus className="h-4 w-4 text-primary" />
               Nueva Categoría
             </button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       {/* Main Single Column Layout */}
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 no-print space-y-8">

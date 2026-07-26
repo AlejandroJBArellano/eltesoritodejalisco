@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { PageHeader } from "@/components/PageHeader";
 
 const TZ = "America/Mexico_City";
 
@@ -250,39 +251,22 @@ export default function AsistenciaPage() {
 
   return (
     <div className="min-h-screen bg-[#121212] pb-16">
-      {/* Top Header */}
-      <header className="bg-[#242424] border-b border-white/5 shadow-sm mb-8">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+      {/* Header reutilizable */}
+      <PageHeader
+        title="Control de Asistencia"
+        subtitle="Registro de entrada y salida de turnos de personal"
+        badgeColor="bg-primary"
+        actions={
+          isAdmin ? (
             <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-xs font-black text-[#E0E0E0]/60 hover:text-white uppercase tracking-widest transition-colors mb-2"
+              href="/asistencia/history"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 transition-all shadow-lg shadow-primary/20"
             >
-              <ArrowLeft className="h-3.5 w-3.5" /> Volver al Dashboard
+              <FileText className="h-4 w-4" /> Ver Historial Completo
             </Link>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-3">
-                <span className="h-3 w-3 rounded-full bg-primary animate-pulse"></span>
-                Control de Asistencia
-              </h1>
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20">
-                Turnos
-              </span>
-            </div>
-          </div>
-
-          {isAdmin && (
-            <div className="flex items-center gap-3">
-              <Link
-                href="/asistencia/history"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-black text-white uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md active:scale-95"
-              >
-                <FileText className="h-4 w-4" /> Ver Historial Completo (Admin)
-              </Link>
-            </div>
-          )}
-        </div>
-      </header>
+          ) : null
+        }
+      />
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {isLoading && !users.length && !attendances.length ? (
