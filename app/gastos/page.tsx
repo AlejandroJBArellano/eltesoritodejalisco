@@ -508,23 +508,29 @@ export default function GastosPage() {
             </span>
           </div>
 
-          <div className="h-[300px] w-full">
+          <div className="h-[420px] w-full">
             {categoryExpensesData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={categoryExpensesData}
-                  margin={{ top: 10, right: 20, left: 10, bottom: 25 }}
+                  layout="vertical"
+                  margin={{ top: 10, right: 30, left: 20, bottom: 10 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" horizontal={false} />
                   <XAxis
-                    dataKey="name"
+                    type="number"
                     stroke="#888888"
-                    fontSize={10}
-                    interval={0}
-                    angle={-20}
-                    textAnchor="end"
+                    fontSize={11}
+                    tickFormatter={(val) => `$${val}`}
                   />
-                  <YAxis stroke="#888888" fontSize={11} tickFormatter={(val) => `$${val}`} />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    stroke="#888888"
+                    fontSize={11}
+                    width={140}
+                    tickLine={false}
+                  />
                   <RechartsTooltip
                     contentStyle={{
                       backgroundColor: "#1D1D1D",
@@ -540,8 +546,9 @@ export default function GastosPage() {
                       }%)`,
                       `Gasto ${item.payload.tipo === "fijo" ? "Fijo" : "Variable"}`,
                     ]}
+                    cursor={{ fill: "#1F1F1F" }}
                   />
-                  <Bar dataKey="value" barSize={32} radius={[6, 6, 0, 0]}>
+                  <Bar dataKey="value" barSize={22} radius={[0, 6, 6, 0]}>
                     {categoryExpensesData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
