@@ -112,7 +112,6 @@ export async function POST(request: Request) {
         .maybeSingle();
 
       if (!targetDbUser) {
-        console.log("[Attendance API] targetDbUser not found by id:", actualUserId);
         // Find by email from auth user if user.id does not match users.id
         const { data: userByEmail, error: emailSearchError } = await supabase
           .from("users")
@@ -125,15 +124,8 @@ export async function POST(request: Request) {
         }
 
         if (userByEmail) {
-          console.log("[Attendance API] Found user by email:", userByEmail);
           dbUserId = userByEmail.id;
         } else if (user.email) {
-          console.log("[Attendance API] Attempting to auto-create user:", {
-            email: user.email,
-            name: user.user_metadata?.name,
-            role: user.user_metadata?.role,
-          });
-
           const nowIso = new Date().toISOString();
           // Auto-register user in `users` table if missing
           const { data: newUser, error: autoCreateError } = await supabase
@@ -155,7 +147,6 @@ export async function POST(request: Request) {
           }
 
           if (!autoCreateError && newUser) {
-            console.log("[Attendance API] Successfully created user:", newUser);
             dbUserId = newUser.id;
           } else {
             return NextResponse.json(
