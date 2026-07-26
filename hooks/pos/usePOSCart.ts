@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo, useEffect } from "react";
 import { Order, OrderFormState, MenuItem, OrderItemDraft, ModifyItem, MixedFlavor, MIXED_ORDER_TOTAL, MIXED_ORDER_FLAVORS } from "@/types/pos";
 
