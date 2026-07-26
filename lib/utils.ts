@@ -50,8 +50,17 @@ export function getCurrentCDMXDate(): string {
     return acc;
   }, {} as Record<string, string>);
 
-  const iso = `${partMap.year}-${partMap.month}-${partMap.day}T${partMap.hour}:${partMap.minute}:${partMap.second}-06:00`;
-  return iso;
+  // Dynamically calculate the CDMX UTC offset (handles DST correctly)
+  const cdmxStr = `${partMap.year}-${partMap.month}-${partMap.day}T${partMap.hour}:${partMap.minute}:${partMap.second}`;
+  const cdmxAsUtc = new Date(cdmxStr + "Z");
+  const offsetMs = cdmxAsUtc.getTime() - now.getTime();
+  const offsetMinutes = Math.round(offsetMs / 60000);
+  const sign = offsetMinutes >= 0 ? "+" : "-";
+  const absMinutes = Math.abs(offsetMinutes);
+  const offsetHours = String(Math.floor(absMinutes / 60)).padStart(2, "0");
+  const offsetMins = String(absMinutes % 60).padStart(2, "0");
+
+  return `${cdmxStr}${sign}${offsetHours}:${offsetMins}`;
 }
 
 /**
