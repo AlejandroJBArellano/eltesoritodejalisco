@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo } from "react";
 import { Order } from "@/types/pos";
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
@@ -229,7 +231,7 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
       msg += `📍 Mesa: ${checkoutOrder.table}\n`;
     }
     msg += `\n*Resumen de tu orden:*\n`;
-    checkoutOrder.orderItems?.forEach((item: { quantity: number; menuItem?: { name?: string }; unitPrice?: number }) => {
+    checkoutOrder.orderItems?.forEach((item) => {
       const quantity = item.quantity || 1;
       const itemName = item.menuItem?.name || "Producto";
       const itemPrice = item.unitPrice || 0;
