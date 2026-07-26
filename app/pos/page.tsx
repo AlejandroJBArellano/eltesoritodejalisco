@@ -1,45 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { usePOSData } from "@/hooks/pos/usePOSData";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
+import { usePOSData } from "@/hooks/pos/usePOSData";
+import { useState } from "react";
 
-import { POSMenuGrid } from "@/components/pos/POSMenuGrid";
 import { POSCartSidebar } from "@/components/pos/POSCartSidebar";
-import { POSCheckoutModal } from "@/components/pos/modals/POSCheckoutModal";
+import { POSMenuGrid } from "@/components/pos/POSMenuGrid";
 import { POSAddItemsModal } from "@/components/pos/modals/POSAddItemsModal";
-import { POSModifyOrderModal } from "@/components/pos/modals/POSModifyOrderModal";
+import { POSCheckoutModal } from "@/components/pos/modals/POSCheckoutModal";
 import { POSMixedOrderModal } from "@/components/pos/modals/POSMixedOrderModal";
+import { POSModifyOrderModal } from "@/components/pos/modals/POSModifyOrderModal";
 import { POSTipModal } from "@/components/pos/modals/POSTipModal";
 
+import { PageHeader } from "@/components/PageHeader";
 import { FacturacionModal } from "@/components/pos/FacturacionModal";
 import { KitchenTicket } from "@/components/pos/KitchenTicket";
 import { OrderTicket } from "@/components/pos/OrderTicket";
 import { SplitBillModal } from "@/components/pos/SplitBillModal";
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
-import { PageHeader } from "@/components/PageHeader";
 
-import Link from "next/link";
 import {
-  Receipt,
-  ClipboardList,
-  DollarSign,
-  BarChart3,
+  Ban,
   ChefHat,
   ChevronRight,
-  Printer,
-  MessageCircle,
-  Undo2,
-  HandCoins,
-  FileText,
-  Ban,
-  Plus,
+  DollarSign,
   Edit3,
-  X,
+  FileText,
+  HandCoins,
+  MessageCircle,
+  Plus,
+  Printer,
+  Receipt,
   Send,
-  History,
+  ShoppingBag,
+  Undo2,
+  X
 } from "lucide-react";
+import Link from "next/link";
 
 export default function POSPage() {
   const {
@@ -139,6 +137,7 @@ export default function POSPage() {
 
   // Two-step cancel order: stores the orderId being armed for cancel
   const [cancelArmedId, setCancelArmedId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"menu" | "cart">("menu");
 
   const handleCancelArm = (orderId: string) => {
     setCancelArmedId(orderId);
@@ -193,87 +192,53 @@ export default function POSPage() {
     );
   }
 
+  const totalCartItems = formState.items.reduce((sum, item) => sum + Number(item.quantity), 0);
+  const cartTotal = formState.items.reduce((total, item) => {
+    const product = availableMenuItems.find((m) => m.id === item.menuItemId);
+    return total + (product?.price || 0) * Number(item.quantity);
+  }, 0);
+
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-2 lg:space-y-6 pb-20">
       <PageHeader
         title="Punto de Venta"
         icon={<Receipt className="h-5 w-5 text-primary" />}
         subtitle={`Siguiente Folio: #${nextFolioDisplay}`}
       />
 
-      {/* MÉTRICAS RÁPIDAS DEL DÍA */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 flex items-center gap-4 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <ClipboardList className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-              Órdenes de Hoy
-            </p>
-            <p className="text-2xl font-black text-[#E0E0E0] tabular-nums tracking-tight">
-              {todayStats.count}
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 flex items-center gap-4 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-            <DollarSign className="h-6 w-6 text-emerald-400" />
-          </div>
-          <div>
-            <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-              Ventas de Hoy
-            </p>
-            <p className="text-2xl font-black text-[#E0E0E0] tabular-nums tracking-tight">
-              ${todayStats.sales.toFixed(2)}
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 flex items-center gap-4 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="h-12 w-12 rounded-2xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-            <BarChart3 className="h-6 w-6 text-blue-400" />
-          </div>
-          <div>
-            <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-              Ticket Promedio
-            </p>
-            <p className="text-2xl font-black text-[#E0E0E0] tabular-nums tracking-tight">
-              $
-              {isNaN(todayStats.avgTicket)
-                ? "0.00"
-                : todayStats.avgTicket.toFixed(2)}
-            </p>
-          </div>
-        </div>
-
-        {/* 4th card — same anatomy as peers, CTA styled */}
-        <Link
-          href="/history"
-          className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 flex items-center gap-4 relative overflow-hidden group hover:border-primary/20 transition-colors"
+      {/* Selector de pestañas para móvil/tablet */}
+      <div className="lg:hidden flex bg-[#1E1E1E] p-1.5 mx-2 rounded-2xl border border-white/5 gap-1.5 shadow-inner">
+        <button
+          type="button"
+          onClick={() => setActiveTab("menu")}
+          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border ${activeTab === "menu"
+            ? "bg-primary text-black border-primary shadow-lg shadow-primary/10"
+            : "bg-transparent text-[#E0E0E0]/60 border-transparent hover:text-[#E0E0E0]"
+            }`}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/10 transition-colors">
-            <History className="h-6 w-6 text-[#E0E0E0]/40 group-hover:text-primary transition-colors" />
-          </div>
-          <div>
-            <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
-              Historial
-            </p>
-            <p className="text-sm font-black text-[#E0E0E0]/70 group-hover:text-[#E0E0E0] transition-colors flex items-center gap-1">
-              Ver Completo <ChevronRight className="h-3.5 w-3.5" />
-            </p>
-          </div>
-        </Link>
+          Catálogo
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("cart")}
+          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border relative ${activeTab === "cart"
+            ? "bg-secondary text-black border-secondary shadow-lg shadow-secondary/10"
+            : "bg-transparent text-[#E0E0E0]/60 border-transparent hover:text-[#E0E0E0]"
+            }`}
+        >
+          Pedido
+          {totalCartItems > 0 && (
+            <span className={`rounded-full text-[10px] font-black h-5 min-w-[20px] px-1.5 flex items-center justify-center transition-colors ${activeTab === "cart" ? "bg-black text-white" : "bg-primary text-black"
+              }`}>
+              {totalCartItems}
+            </span>
+          )}
+        </button>
       </div>
 
-      <main className="grid gap-6 lg:grid-cols-12 items-start">
+      <main className="grid gap-6 lg:grid-cols-12 items-start mx-2 md:mx-4 lg:mx-6">
         {/* SECCIÓN DEL MENÚ */}
-        <div className="lg:col-span-7 xl:col-span-8">
+        <div className={`lg:col-span-7 xl:col-span-8 w-full min-w-0 ${activeTab === "menu" ? "block" : "hidden lg:block"}`}>
           <POSMenuGrid
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -288,7 +253,7 @@ export default function POSPage() {
         {/* SECCIÓN DEL CARRITO */}
         <form
           onSubmit={(e) => handleCheckoutSubmit(e, setCheckoutOrder)}
-          className="lg:col-span-5 xl:col-span-4 h-full"
+          className={`lg:col-span-5 xl:col-span-4 h-full w-full min-w-0 ${activeTab === "cart" ? "block" : "hidden lg:block"}`}
         >
           <POSCartSidebar
             formState={formState}
@@ -308,7 +273,7 @@ export default function POSPage() {
       </main>
 
       {/* SECCIÓN: Últimas Órdenes */}
-      <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 overflow-hidden">
+      <section className="rounded-2xl bg-[#242424] p-4 sm:p-6 shadow-sm border border-white/5 overflow-hidden mx-2 md:mx-4 lg:mx-6">
         <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
           <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-blue-500"></span>
@@ -323,7 +288,7 @@ export default function POSPage() {
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-white/5">
@@ -466,7 +431,7 @@ export default function POSPage() {
                                 setEditTipType("FIXED");
                                 setEditTipInput(
                                   order.payments?.[0]?.tipAmount?.toString() ||
-                                    "0",
+                                  "0",
                                 );
                               }}
                               className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
@@ -523,11 +488,10 @@ export default function POSPage() {
                                 disabled={
                                   isSubmittingCart || isSubmittingCheckout
                                 }
-                                className={`rounded-xl p-1 text-[10px] font-black uppercase transition-all disabled:opacity-50 ${
-                                  cancelArmedId === order.id
-                                    ? "bg-red-500/30 border border-red-500/50 text-red-300 px-2"
-                                    : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
-                                }`}
+                                className={`rounded-xl p-1 text-[10px] font-black uppercase transition-all disabled:opacity-50 ${cancelArmedId === order.id
+                                  ? "bg-red-500/30 border border-red-500/50 text-red-300 px-2"
+                                  : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
+                                  }`}
                                 title={
                                   cancelArmedId === order.id
                                     ? "Confirmar cancelación"
@@ -549,6 +513,212 @@ export default function POSPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* VISTA DE TARJETAS PARA MÓVIL (Últimas Órdenes) */}
+        <div className="md:hidden space-y-4 pt-4">
+          {orders.length === 0 ? (
+            <div className="py-16 text-center">
+              <p className="text-xs font-extrabold uppercase tracking-widest text-[#E0E0E0]/30">
+                No hay órdenes todavía
+              </p>
+            </div>
+          ) : (
+            orders.slice(0, 10).map((order) => {
+              const tipAmt = getOrderTipAmount(order);
+              const isUndoable = (() => {
+                const lastUpdate = new Date(
+                  order.updatedAt || order.createdAt,
+                ).getTime();
+                const now = new Date().getTime();
+                return now - lastUpdate < 3 * 60 * 1000;
+              })();
+
+              return (
+                <div
+                  key={order.id}
+                  className="bg-[#1A1A1A] rounded-2xl p-4 border border-white/5 space-y-4"
+                >
+                  {/* Header de la tarjeta */}
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-mono font-black text-sm text-[#E0E0E0]">
+                        #{order.orderNumber}
+                      </p>
+                      <p className="text-[10px] font-bold text-[#E0E0E0]/50 uppercase tracking-wider mt-0.5">
+                        {new Date(order.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                      <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black text-[#E0E0E0]/70 uppercase tracking-wider">
+                        {order.table || "Para Llevar"}
+                      </span>
+                      {order.status === "PAID" ? (
+                        <span className="rounded-full bg-success/10 px-2.5 py-1 text-[10px] font-black text-success uppercase tracking-widest">
+                          Pagado
+                        </span>
+                      ) : order.status === "UNCOLLECTED" ? (
+                        <span className="rounded-full bg-red-500/10 px-2.5 py-1 text-[10px] font-black text-red-400 uppercase tracking-widest">
+                          No Cobrada
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-black text-amber-400 uppercase tracking-widest">
+                          Pendiente
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Detalle de Total */}
+                  <div className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                    <span className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                      Total
+                    </span>
+                    <div className="text-right">
+                      <span className="font-black text-sm text-[#E0E0E0] tabular-nums">
+                        ${order.total.toFixed(2)}
+                      </span>
+                      {tipAmt > 0 && (
+                        <p className="text-[10px] font-bold text-blue-400/80 leading-none mt-0.5">
+                          +${tipAmt.toFixed(2)} propina
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Grid de Botones de Acción */}
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    {order.status !== "PAID" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCheckoutOrder(order);
+                          setShowTicket(false);
+                          setShowKitchenTicket(false);
+                          setTipType("NONE");
+                          setTipInput("");
+                          setPaymentMethod("CASH");
+                          setReceivedAmount("");
+                        }}
+                        className={`${order.status === "UNCOLLECTED" ? "col-span-2" : ""
+                          } rounded-xl bg-success/10 hover:bg-success/20 text-success border border-success/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors`}
+                      >
+                        <DollarSign className="h-3.5 w-3.5" />
+                        Cobrar
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCheckoutOrder(order);
+                        setShowKitchenTicket(true);
+                        setShowTicket(false);
+                      }}
+                      className="rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <ChefHat className="h-3.5 w-3.5" />
+                      Comanda
+                    </button>
+                    {order.status !== "PAID" && (
+                      <button
+                        type="button"
+                        onClick={() => setEditingOrder(order)}
+                        className="rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        Agregar
+                      </button>
+                    )}
+                    {order.status !== "PAID" && (
+                      <button
+                        type="button"
+                        onClick={() => openModifyModal(order)}
+                        className="rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                        Editar
+                      </button>
+                    )}
+                    {order.status === "PAID" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingTipOrder(order);
+                          setEditTipType("FIXED");
+                          setEditTipInput(
+                            order.payments?.[0]?.tipAmount?.toString() || "0",
+                          );
+                        }}
+                        className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        <HandCoins className="h-3.5 w-3.5" />
+                        Propina
+                      </button>
+                    )}
+                    {order.status === "PAID" && (
+                      <button
+                        type="button"
+                        onClick={() => setBillingOrder(order)}
+                        className="rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        Factura
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCheckoutOrder(order);
+                        setShowTicket(true);
+                        setShowKitchenTicket(false);
+                      }}
+                      className="rounded-xl bg-white/5 hover:bg-white/10 text-[#E0E0E0]/70 border border-white/5 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <Printer className="h-3.5 w-3.5" />
+                      Ticket
+                    </button>
+                    {order.status !== "PAID" &&
+                      order.status !== "UNCOLLECTED" && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            cancelArmedId === order.id
+                              ? handleCancelConfirm(order.id)
+                              : handleCancelArm(order.id)
+                          }
+                          disabled={isSubmittingCart || isSubmittingCheckout}
+                          className={`rounded-xl py-2.5 text-[10px] font-black uppercase transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 ${cancelArmedId === order.id
+                            ? "bg-red-500/30 border border-red-500/50 text-red-300"
+                            : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
+                            }`}
+                        >
+                          {cancelArmedId === order.id ? (
+                            "¿Seguro?"
+                          ) : (
+                            <>
+                              <Ban className="h-3.5 w-3.5" /> Cancelar
+                            </>
+                          )}
+                        </button>
+                      )}
+                    {order.status === "PAID" && isUndoable && (
+                      <button
+                        type="button"
+                        onClick={() => handleUndoPayment(order.id)}
+                        className="col-span-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                      >
+                        <Undo2 className="h-3.5 w-3.5" />
+                        Deshacer Pago
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </section>
 
@@ -730,6 +900,37 @@ export default function POSPage() {
         handleUpdateTip={handleUpdateTip}
         isSubmitting={isSubmittingCheckout}
       />
+
+      {/* Barra flotante para móviles cuando el carrito tiene ítems y estamos en la pestaña del catálogo */}
+      {totalCartItems > 0 && activeTab === "menu" && (
+        <div className="lg:hidden fixed bottom-6 left-4 right-4 z-40 animate-[slideUp_0.3s_ease-out]">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("cart");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="w-full bg-[#1e1e1e]/95 backdrop-blur-md hover:bg-[#262626]/95 border border-primary/20 text-white rounded-2xl p-4 flex items-center justify-between shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
+          >
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/20 border border-primary/30 h-10 w-10 rounded-xl flex items-center justify-center text-primary">
+                <ShoppingBag className="h-5 w-5" />
+              </div>
+              <div className="text-left">
+                <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest leading-none mb-1">
+                  Ver Pedido ({totalCartItems} items)
+                </p>
+                <p className="text-lg font-black text-[#E0E0E0]">
+                  ${cartTotal.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 font-black text-xs text-primary uppercase tracking-wider">
+              Continuar <ChevronRight className="h-4 w-4" />
+            </div>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

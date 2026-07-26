@@ -71,7 +71,7 @@ export function POSMenuGrid({
   handleGridItemClick,
 }: POSMenuGridProps) {
   return (
-    <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-5">
+    <section className="rounded-2xl bg-[#242424] p-4 sm:p-6 shadow-sm border border-white/5 space-y-5 w-full overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
         <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-primary"></span>
