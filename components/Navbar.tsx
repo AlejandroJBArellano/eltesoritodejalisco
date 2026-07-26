@@ -12,10 +12,28 @@ export default function Navbar() {
 
   useEffect(() => {
     const supabase = createClient();
+    
+    // Fetch initial user
     supabase.auth.getUser().then(({ data: { user } }) => {
       setEmail(user?.email ?? null);
     });
-  }, []);
+
+    // Listen to auth state changes to dynamically update the user email
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setEmail(session?.user?.email ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [pathname]);
+
+  // Hide Navbar on login or auth pages
+  if (pathname.startsWith("/login") || pathname.startsWith("/auth")) {
+    return null;
+  }
 
   if (email === null) return null;
 
