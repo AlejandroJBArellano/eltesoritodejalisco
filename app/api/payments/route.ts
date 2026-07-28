@@ -50,11 +50,41 @@ const getDistributedTipCents = ({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const orderId = body.orderId;
+
+    if (!orderId) {
+      return NextResponse.json(
+        { error: "Missing orderId" },
+        { status: 400 },
+      );
+    }
+
+    const supabase = await createClient();
+
+    // Check if the order is already archived/closed under a daily cut
+    const { data: orderToCheck, error: fetchOrderError } = await supabase
+      .from("orders")
+      .select("corte_id, estado_cierre")
+      .eq("id", orderId)
+      .maybeSingle();
+
+    if (fetchOrderError || !orderToCheck) {
+      return NextResponse.json(
+        { error: "Order not found" },
+        { status: 404 },
+      );
+    }
+
+    if (orderToCheck.corte_id || orderToCheck.estado_cierre === "ARCHIVADA") {
+      return NextResponse.json(
+        { error: "La orden pertenece a un corte de caja cerrado y no puede ser modificada o cobrada" },
+        { status: 400 },
+      );
+    }
 
     // Split-bill flow: array of individual payments for a single order
     if (body.splits && Array.isArray(body.splits)) {
-      const { orderId, splits } = body as {
-        orderId: string;
+      const { splits } = body as {
         splits: {
           amount: number;
           method: string;
@@ -64,14 +94,12 @@ export async function POST(request: NextRequest) {
         }[];
       };
 
-      if (!orderId || !splits.length) {
+      if (!splits.length) {
         return NextResponse.json(
           { error: "Missing required fields" },
           { status: 400 },
         );
       }
-
-      const supabase = await createClient();
 
       // 1. Insertar un registro de pago por cada parte
       const { error: splitError } = await supabase
@@ -115,16 +143,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Standard single-payment flow
-    const { orderId, method, amount, receivedAmount, change, tipAmount } = body;
+    const { method, amount, receivedAmount, change, tipAmount } = body;
 
-    if (!orderId || !method || !amount) {
+    if (!method || !amount) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
       );
     }
-
-    const supabase = await createClient();
 
     // 1. Crear el registro de pago
     const { data: payment, error: paymentError } = await supabase
