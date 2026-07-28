@@ -5,11 +5,6 @@ import { getCurrentCDMXDate, getCurrentCDMXDay } from "@/lib/utils";
 import { deductInventoryForOrder } from "@/lib/services/inventory";
 import { NextRequest, NextResponse } from "next/server";
 
-export const config = {
-  api: {
-    bodyParser: false, // Disables standard body parser for signature verification
-  },
-};
 
 export async function POST(request: NextRequest) {
   const bodyText = await request.text();
