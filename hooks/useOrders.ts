@@ -114,21 +114,37 @@ export function useRealtimeOrders(
  * Hook to calculate elapsed time for orders
  */
 export function useOrderTimer(createdAt: Date | string) {
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const timestamp = useMemo(() => {
+    if (!createdAt) return 0;
+    return safeParseDate(createdAt).getTime();
+  }, [createdAt]);
+
+  const [elapsedSeconds, setElapsedSeconds] = useState(() => {
+    if (!timestamp) return 0;
+    const now = new Date();
+    return Math.max(0, Math.floor((now.getTime() - timestamp) / 1000));
+  });
+
+  const [prevTimestamp, setPrevTimestamp] = useState(timestamp);
+  if (timestamp !== prevTimestamp) {
+    setPrevTimestamp(timestamp);
+    const now = new Date();
+    setElapsedSeconds(Math.max(0, Math.floor((now.getTime() - timestamp) / 1000)));
+  }
 
   useEffect(() => {
+    if (!timestamp) return;
+
     const calculateElapsed = () => {
       const now = new Date();
-      const created = safeParseDate(createdAt);
-      const diffMs = Math.max(0, now.getTime() - created.getTime());
+      const diffMs = Math.max(0, now.getTime() - timestamp);
       setElapsedSeconds(Math.floor(diffMs / 1000));
     };
 
-    calculateElapsed();
     const interval = setInterval(calculateElapsed, 1000);
 
     return () => clearInterval(interval);
-  }, [createdAt]);
+  }, [timestamp]);
 
   return elapsedSeconds;
 }
