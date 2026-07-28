@@ -1,4 +1,5 @@
 import { stripe } from "@/lib/stripe";
+import type Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentCDMXDate, getCurrentCDMXDay } from "@/lib/utils";
 import { deductInventoryForOrder } from "@/lib/services/inventory";
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
 
   // Handle checkout.session.completed event
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as any;
+    const session = event.data.object as Stripe.Checkout.Session;
     const metadata = session.metadata;
 
     if (!metadata || !metadata.orderItems) {
