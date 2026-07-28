@@ -5,6 +5,48 @@ import { NextRequest, NextResponse } from "next/server";
 const TAX_RATE = 0;
 
 /**
+ * GET /api/orders/:id
+ * Fetch details of a single order.
+ */
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+    const supabase = await createClient();
+
+    const { data: order, error } = await supabase
+      .from("orders")
+      .select(
+        `
+        *,
+        order_items (
+          *,
+          menu_items (*)
+        ),
+        payments (*),
+        customer:customers (*)
+      `,
+      )
+      .eq("id", id)
+      .single();
+
+    if (error || !order) {
+      return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
+    }
+
+    return NextResponse.json({ order });
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    return NextResponse.json(
+      { error: "Error al obtener la orden" },
+      { status: 500 },
+    );
+  }
+}
+
+/**
  * PUT /api/orders/:id
  * Replace the full item list of an existing order.
  * Accepts { items: [{ id: string, quantity: number }] }.

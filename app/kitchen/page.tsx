@@ -14,7 +14,8 @@ async function getActiveOrders() {
       order_items (
         *,
         menu_items (*)
-      )
+      ),
+      payments (*)
     `,
     )
     .in("status", ["PENDING", "PREPARING", "READY"])

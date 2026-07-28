@@ -87,12 +87,19 @@ export function OrderCard({
           <h3 className="text-2xl font-black text-zinc-100 tracking-tight uppercase">
             #{order.orderNumber}
           </h3>
-          {order.table && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-400 uppercase tracking-wider mt-0.5">
-              <Utensils className="h-3.5 w-3.5 text-amber-500" /> Mesa:{" "}
-              {order.table}
-            </span>
-          )}
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+            {order.table && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-400 uppercase tracking-wider">
+                <Utensils className="h-3.5 w-3.5 text-amber-500" /> Mesa:{" "}
+                {order.table}
+              </span>
+            )}
+            {order.payments && order.payments.length > 0 && (
+              <span className="inline-flex items-center gap-1 rounded bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-black text-emerald-400 uppercase tracking-wider">
+                Pagado Online
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Timer Badge */}

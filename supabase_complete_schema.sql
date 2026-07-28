@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS public.menu_items (
     category TEXT, -- 'ANTOJITOS', 'TACOS', 'BEBIDAS', etc.
     image_url TEXT,
     is_available BOOLEAN DEFAULT TRUE NOT NULL,
+    stripe_product_id TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

@@ -101,6 +101,22 @@ export async function POST(request: NextRequest) {
     const supabaseAdmin = createAdminClient();
     const id = crypto.randomUUID();
 
+    let stripeProductId: string | null = null;
+    try {
+      if (process.env.STRIPE_SECRET_KEY) {
+        const { stripe } = await import("@/lib/stripe");
+        const stripeProduct = await stripe.products.create({
+          name,
+          description: description || undefined,
+          active: isAvailable,
+        });
+        stripeProductId = stripeProduct.id;
+      }
+    } catch (stripeErr) {
+      console.error("Error creating product in Stripe:", stripeErr);
+      throw new Error(`Error en Stripe: ${(stripeErr as Error).message}`);
+    }
+
     const { data: item, error: createError } = await supabaseAdmin
       .from("menu_items")
       .insert({
@@ -111,6 +127,7 @@ export async function POST(request: NextRequest) {
         category: category || null,
         image_url: imageUrl || null,
         is_available: isAvailable,
+        stripe_product_id: stripeProductId,
         updated_at: new Date().toISOString(),
       })
       .select()
@@ -170,6 +187,37 @@ export async function PUT(request: NextRequest) {
 
     const supabaseAdmin = createAdminClient();
 
+    // Fetch existing product to check if it has a stripe_product_id
+    const { data: existingItem } = await supabaseAdmin
+      .from("menu_items")
+      .select("stripe_product_id")
+      .eq("id", id)
+      .single();
+
+    let stripeProductId = existingItem?.stripe_product_id || null;
+    try {
+      if (process.env.STRIPE_SECRET_KEY) {
+        const { stripe } = await import("@/lib/stripe");
+        if (stripeProductId) {
+          await stripe.products.update(stripeProductId, {
+            name,
+            description: description || undefined,
+            active: isAvailable,
+          });
+        } else {
+          const stripeProduct = await stripe.products.create({
+            name,
+            description: description || undefined,
+            active: isAvailable,
+          });
+          stripeProductId = stripeProduct.id;
+        }
+      }
+    } catch (stripeErr) {
+      console.error("Error updating product in Stripe:", stripeErr);
+      throw new Error(`Error en Stripe: ${(stripeErr as Error).message}`);
+    }
+
     const { data: item, error: updateError } = await supabaseAdmin
       .from("menu_items")
       .update({
@@ -179,6 +227,7 @@ export async function PUT(request: NextRequest) {
         category: category || null,
         image_url: imageUrl || null,
         is_available: isAvailable,
+        stripe_product_id: stripeProductId,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
