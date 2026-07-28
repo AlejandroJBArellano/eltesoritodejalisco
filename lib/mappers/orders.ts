@@ -47,6 +47,9 @@ export interface DbOrderPayload {
   created_at: string;
   updated_at: string;
   completed_at?: string;
+  corte_id?: string | null;
+  estado_cierre?: string | null;
+  operational_date?: string;
   order_items?: Array<{
     id: string;
     order_id: string;
@@ -104,6 +107,15 @@ export const mapOrderData = (dbOrder: DbOrderPayload): OrderWithDetails => {
     createdAt,
     updatedAt,
     completedAt,
+    corteId: dbOrder.corte_id,
+    closeStatus: dbOrder.estado_cierre === "ABIERTA"
+      ? "OPEN"
+      : dbOrder.estado_cierre === "CERRADA"
+      ? "CLOSED"
+      : dbOrder.estado_cierre === "ARCHIVADA"
+      ? "ARCHIVED"
+      : undefined,
+    operationalDate: dbOrder.operational_date,
     orderItems: Array.isArray(dbOrder.order_items)
       ? dbOrder.order_items.map((item) => ({
           id: item.id,

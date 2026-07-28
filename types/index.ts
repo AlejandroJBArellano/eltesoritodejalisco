@@ -76,6 +76,9 @@ export interface Order {
   completedAt?: Date;
   customer?: Customer;
   orderItems?: OrderItem[];
+  corteId?: string | null;
+  closeStatus?: "OPEN" | "CLOSED" | "ARCHIVED";
+  operationalDate?: string;
 }
 
 export interface OrderItem {
