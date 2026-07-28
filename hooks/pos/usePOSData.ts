@@ -60,15 +60,22 @@ export function usePOSData() {
 
   const filteredMenuItems = useMemo(() => {
     return availableMenuItems.filter((m) => {
-      if (searchQuery) {
-        return m.name.toLowerCase().includes(searchQuery.toLowerCase());
-      }
+      // 1. Category Filter (Case-insensitive matching)
       if (activeCategory && activeCategory !== "OTROS") {
-        return m.category === activeCategory;
+        if (!m.category || m.category.toUpperCase().trim() !== activeCategory.toUpperCase().trim()) {
+          return false;
+        }
+      } else if (activeCategory === "OTROS") {
+        if (m.category && CATEGORY_ORDER.includes(m.category.toUpperCase().trim())) {
+          return false;
+        }
       }
-      if (activeCategory === "OTROS") {
-        return !m.category || !CATEGORY_ORDER.includes(m.category);
+
+      // 2. Search Query Filter
+      if (searchQuery) {
+        return m.name.toLowerCase().includes(searchQuery.toLowerCase().trim());
       }
+
       return true;
     });
   }, [availableMenuItems, searchQuery, activeCategory]);
@@ -103,8 +110,17 @@ export function usePOSData() {
     const mappedOrders = (data.orders || []).map((dbOrder: DbOrderPayload) =>
       mapOrderData(dbOrder),
     ) as Order[];
-    setOrders(mappedOrders);
-    return mappedOrders;
+    
+    // Only display today's orders or active (not archived) orders from previous days
+    const todayDateStr = getTodayDateStr();
+    const activeAndTodayOrders = mappedOrders.filter(
+      (order) =>
+        (!order.corteId && order.closeStatus !== "ARCHIVED") ||
+        getOrderDateStr(order.createdAt) === todayDateStr,
+    );
+
+    setOrders(activeAndTodayOrders);
+    return activeAndTodayOrders;
   }, []);
 
   const refreshOrders = useCallback(() => {
