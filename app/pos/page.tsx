@@ -796,28 +796,30 @@ export default function POSPage() {
         </div>
       )}
 
-      <POSCheckoutModal
-        checkoutOrder={checkoutOrder}
-        setCheckoutOrder={setCheckoutOrder}
-        tipAmountCalculated={tipAmountCalculated}
-        tipType={tipType}
-        setTipType={setTipType}
-        tipInput={tipInput}
-        setTipInput={setTipInput}
-        paymentMethod={paymentMethod}
-        setPaymentMethod={setPaymentMethod}
-        receivedAmount={receivedAmount}
-        setReceivedAmount={setReceivedAmount}
-        change={change}
-        handleProcessPayment={handleProcessPayment}
-        isSubmitting={isSubmittingCheckout}
-        setShowSplitBill={setShowSplitBill}
-        openModifyModal={openModifyModal}
-        handleFailedPayment={handleFailedPayment}
-        checkoutError={checkoutError}
-        unusualTipInfo={unusualTipInfo}
-        setUnusualTipInfo={setUnusualTipInfo}
-      />
+      {!showTicket && !showKitchenTicket && (
+        <POSCheckoutModal
+          checkoutOrder={checkoutOrder}
+          setCheckoutOrder={setCheckoutOrder}
+          tipAmountCalculated={tipAmountCalculated}
+          tipType={tipType}
+          setTipType={setTipType}
+          tipInput={tipInput}
+          setTipInput={setTipInput}
+          paymentMethod={paymentMethod}
+          setPaymentMethod={setPaymentMethod}
+          receivedAmount={receivedAmount}
+          setReceivedAmount={setReceivedAmount}
+          change={change}
+          handleProcessPayment={handleProcessPayment}
+          isSubmitting={isSubmittingCheckout}
+          setShowSplitBill={setShowSplitBill}
+          openModifyModal={openModifyModal}
+          handleFailedPayment={handleFailedPayment}
+          checkoutError={checkoutError}
+          unusualTipInfo={unusualTipInfo}
+          setUnusualTipInfo={setUnusualTipInfo}
+        />
+      )}
 
       {showWhatsAppModal && checkoutOrder && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
