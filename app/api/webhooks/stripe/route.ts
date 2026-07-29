@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (menuItem) {
-          const itemPrice = menuItem.price;
+          const itemPrice = Math.round(menuItem.price * 1.035 * 100) / 100;
           const quantity = Number(item.quantity);
           subtotal += itemPrice * quantity;
 

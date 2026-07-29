@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       lineItems.push({
         price_data: {
           currency: "mxn",
-          unit_amount: Math.round(menuItem.price * 100),
+          unit_amount: Math.round(menuItem.price * 1.035 * 100),
           product: stripeProductId,
         },
         quantity: Number(item.quantity),
