@@ -13,6 +13,11 @@ import {
   CheckCircle2,
   XCircle,
   Filter,
+  Globe,
+  ChevronDown,
+  ArrowUp,
+  ArrowDown,
+  Tag,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Modal } from "@/components/ui/Modal";
@@ -22,6 +27,8 @@ import {
   TablePagination,
 } from "@/components/ui/DataTableControls";
 
+type Translations = Record<string, { name?: string; description?: string; category?: string }>;
+
 type MenuItem = {
   id: string;
   name: string;
@@ -30,6 +37,15 @@ type MenuItem = {
   category?: string | null;
   imageUrl?: string | null;
   isAvailable: boolean;
+  translations?: Translations;
+};
+
+type MenuCategory = {
+  id: string;
+  name: string;
+  translations?: Translations;
+  sort_order: number;
+  is_active: boolean;
 };
 
 type RecipeItem = {
@@ -47,11 +63,19 @@ type MenuFormState = {
   category: string;
   imageUrl: string;
   isAvailable: boolean;
+  nameEn: string;
+  descriptionEn: string;
 };
 
 type RecipeFormState = {
   ingredientName: string;
   quantityRequired: string;
+};
+
+type CategoryFormState = {
+  id?: string;
+  name: string;
+  nameEn: string;
 };
 
 const emptyForm: MenuFormState = {
@@ -61,6 +85,13 @@ const emptyForm: MenuFormState = {
   category: "",
   imageUrl: "",
   isAvailable: true,
+  nameEn: "",
+  descriptionEn: "",
+};
+
+const emptyCategoryForm: CategoryFormState = {
+  name: "",
+  nameEn: "",
 };
 
 const emptyRecipeForm: RecipeFormState = {
@@ -76,6 +107,7 @@ interface DatabaseMenuItem {
   category?: string | null;
   is_available: boolean;
   image_url?: string | null;
+  translations?: Translations;
 }
 
 interface MenuContentProps {
@@ -104,6 +136,8 @@ export function MenuContent({ initialItems }: MenuContentProps) {
   // Modals state
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [showTranslations, setShowTranslations] = useState(false);
 
   // Form state
   const [formState, setFormState] = useState<MenuFormState>(emptyForm);
@@ -111,6 +145,13 @@ export function MenuContent({ initialItems }: MenuContentProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Category management state
+  const [menuCategories, setMenuCategories] = useState<MenuCategory[]>([]);
+  const [categoryForm, setCategoryForm] = useState<CategoryFormState>(emptyCategoryForm);
+  const [categoryErrors, setCategoryErrors] = useState<Record<string, string>>({});
+  const [deleteArmedCategoryId, setDeleteArmedCategoryId] = useState<string | null>(null);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
 
   // Table Filters, Sort & Pagination State
   const [searchQuery, setSearchQuery] = useState("");
@@ -154,6 +195,7 @@ export function MenuContent({ initialItems }: MenuContentProps) {
           ...item,
           isAvailable: item.is_available,
           imageUrl: item.image_url,
+          translations: item.translations,
         })),
       );
       setErrorMessage(null);
@@ -163,6 +205,19 @@ export function MenuContent({ initialItems }: MenuContentProps) {
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("/api/menu-categories");
+      const data = await response.json();
+      if (response.ok) {
+        setMenuCategories(data.categories || []);
+        setCategoriesLoaded(true);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -219,6 +274,7 @@ export function MenuContent({ initialItems }: MenuContentProps) {
 
   const openNewProductModal = () => {
     resetForm();
+    setShowTranslations(false);
     setIsProductModalOpen(true);
   };
 
@@ -231,10 +287,13 @@ export function MenuContent({ initialItems }: MenuContentProps) {
       category: item.category || "",
       imageUrl: item.imageUrl || "",
       isAvailable: item.isAvailable,
+      nameEn: item.translations?.en?.name || "",
+      descriptionEn: item.translations?.en?.description || "",
     });
     setImagePreview(item.imageUrl || null);
     setFormErrors({});
     setSelectedFile(null);
+    setShowTranslations(!!(item.translations?.en?.name || item.translations?.en?.description));
     setIsProductModalOpen(true);
   };
 
@@ -254,6 +313,13 @@ export function MenuContent({ initialItems }: MenuContentProps) {
       formData.append("category", formState.category);
       formData.append("isAvailable", String(formState.isAvailable));
       formData.append("imageUrl", formState.imageUrl || "");
+
+      // Build translations JSONB — only include en if at least one field has value
+      const enTranslation: Record<string, string> = {};
+      if (formState.nameEn.trim()) enTranslation.name = formState.nameEn.trim();
+      if (formState.descriptionEn.trim()) enTranslation.description = formState.descriptionEn.trim();
+      const translations: Translations = Object.keys(enTranslation).length > 0 ? { en: enTranslation } : {};
+      formData.append("translations", JSON.stringify(translations));
 
       if (selectedFile) {
         formData.append("image", selectedFile);
@@ -310,6 +376,116 @@ export function MenuContent({ initialItems }: MenuContentProps) {
       );
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const openCategoryModal = (category?: MenuCategory) => {
+    if (!categoriesLoaded) fetchCategories();
+    if (category) {
+      setCategoryForm({
+        id: category.id,
+        name: category.name,
+        nameEn: category.translations?.en?.name || "",
+      });
+    } else {
+      setCategoryForm(emptyCategoryForm);
+    }
+    setCategoryErrors({});
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleCategorySubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const errors: Record<string, string> = {};
+    if (!categoryForm.name.trim()) errors.name = "El nombre es obligatorio";
+    setCategoryErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    const translations: Translations = categoryForm.nameEn.trim()
+      ? { en: { name: categoryForm.nameEn.trim() } }
+      : {};
+
+    try {
+      setIsSubmitting(true);
+      const isEditing = Boolean(categoryForm.id);
+      const response = await fetch("/api/menu-categories", {
+        method: isEditing ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...(isEditing ? { id: categoryForm.id } : {}),
+          name: categoryForm.name.trim(),
+          translations,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Error al guardar");
+      await fetchCategories();
+      await fetchMenu();
+      setIsCategoryModalOpen(false);
+      setCategoryForm(emptyCategoryForm);
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Error inesperado");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (deleteArmedCategoryId !== categoryId) {
+      setDeleteArmedCategoryId(categoryId);
+      setTimeout(() => setDeleteArmedCategoryId(null), 3000);
+      return;
+    }
+    setDeleteArmedCategoryId(null);
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/menu-categories", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: categoryId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "No se pudo eliminar");
+      await fetchCategories();
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Error al eliminar");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleMoveCategoryOrder = async (index: number, direction: "up" | "down") => {
+    const sorted = [...menuCategories].sort((a, b) => a.sort_order - b.sort_order);
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= sorted.length) return;
+
+    const updated = [...sorted];
+    const tempOrder = updated[index].sort_order;
+    updated[index] = { ...updated[index], sort_order: updated[targetIndex].sort_order };
+    updated[targetIndex] = { ...updated[targetIndex], sort_order: tempOrder };
+
+    // Optimistic UI update
+    setMenuCategories(updated);
+
+    try {
+      const response = await fetch("/api/menu-categories", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reorder: [
+            { id: updated[index].id, sort_order: updated[index].sort_order },
+            { id: updated[targetIndex].id, sort_order: updated[targetIndex].sort_order },
+          ],
+        }),
+      });
+      if (!response.ok) {
+        // Revert on error
+        await fetchCategories();
+      }
+    } catch {
+      await fetchCategories();
     }
   };
 
@@ -460,6 +636,13 @@ export function MenuContent({ initialItems }: MenuContentProps) {
               Recetas e Ingredientes
             </button>
             <button
+              onClick={() => openCategoryModal()}
+              className="rounded-xl border border-white/10 bg-[#242424] px-4 py-2 text-xs font-bold text-[#E0E0E0] hover:bg-white/10 transition-all uppercase tracking-wider flex items-center gap-2"
+            >
+              <Tag className="h-4 w-4 text-amber-400" />
+              Categorías
+            </button>
+            <button
               onClick={openNewProductModal}
               className="rounded-xl bg-primary px-4 py-2 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-primary/20"
             >
@@ -521,6 +704,96 @@ export function MenuContent({ initialItems }: MenuContentProps) {
             </div>
           </div>
         </div>
+
+        {/* PANEL DE CATEGORÍAS — se carga al hacer click en "Categorías" del header */}
+        {categoriesLoaded && (
+          <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+              <h2 className="text-base font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-amber-400" />
+                Categorías ({menuCategories.length})
+              </h2>
+              <button
+                onClick={() => openCategoryModal()}
+                className="text-xs font-black text-amber-400 hover:text-amber-300 flex items-center gap-1.5"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Nueva Categoría
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {menuCategories
+                .slice()
+                .sort((a, b) => a.sort_order - b.sort_order)
+                .map((cat, index, arr) => (
+                  <div
+                    key={cat.id}
+                    className="flex items-center justify-between bg-[#1A1A1A] border border-white/5 rounded-xl px-4 py-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-black text-[#E0E0E0]/30 tabular-nums w-5 text-right">
+                        {index + 1}
+                      </span>
+                      <div>
+                        <p className="text-sm font-black text-[#E0E0E0]">{cat.name}</p>
+                        {cat.translations?.en?.name && (
+                          <p className="text-[10px] text-[#E0E0E0]/40 font-bold flex items-center gap-1">
+                            <Globe className="h-2.5 w-2.5" />
+                            EN: {cat.translations.en.name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {/* Order buttons */}
+                      <button
+                        onClick={() => handleMoveCategoryOrder(index, "up")}
+                        disabled={index === 0 || isSubmitting}
+                        className="rounded-lg p-1.5 text-[#E0E0E0]/40 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                        title="Mover arriba"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleMoveCategoryOrder(index, "down")}
+                        disabled={index === arr.length - 1 || isSubmitting}
+                        className="rounded-lg p-1.5 text-[#E0E0E0]/40 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                        title="Mover abajo"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                      {/* Edit */}
+                      <button
+                        onClick={() => openCategoryModal(cat)}
+                        className="rounded-lg p-1.5 text-[#E0E0E0]/60 hover:text-white hover:bg-white/10 transition-colors"
+                        title="Editar"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      {/* Delete */}
+                      <button
+                        onClick={() => handleDeleteCategory(cat.id)}
+                        className={`rounded-lg border px-2 py-1 text-xs font-black transition-all ${
+                          deleteArmedCategoryId === cat.id
+                            ? "bg-red-500/30 border-red-500/50 text-red-300"
+                            : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                        }`}
+                        title={deleteArmedCategoryId === cat.id ? "Confirmar eliminación" : "Eliminar"}
+                      >
+                        {deleteArmedCategoryId === cat.id ? "¿Seguro?" : <Trash2 className="h-3.5 w-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              {menuCategories.length === 0 && (
+                <p className="text-xs text-[#E0E0E0]/30 italic text-center py-4">
+                  No hay categorías registradas. Crea una para empezar.
+                </p>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* TABLA DE PRODUCTOS */}
         <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
@@ -840,6 +1113,54 @@ export function MenuContent({ initialItems }: MenuContentProps) {
             />
           </div>
 
+          {/* SECCIÓN DE TRADUCCIONES — colapsable */}
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowTranslations((v) => !v)}
+              className="w-full flex items-center justify-between px-4 py-3 text-left"
+            >
+              <span className="text-xs font-extrabold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+                <Globe className="h-3.5 w-3.5" />
+                Traducción al Inglés (EN)
+                {(formState.nameEn || formState.descriptionEn) && (
+                  <span className="rounded-full bg-blue-500 h-1.5 w-1.5" />
+                )}
+              </span>
+              <ChevronDown
+                className={`h-3.5 w-3.5 text-blue-400 transition-transform ${showTranslations ? "rotate-180" : ""}`}
+              />
+            </button>
+            {showTranslations && (
+              <div className="px-4 pb-4 space-y-3 border-t border-blue-500/10">
+                <div className="pt-3">
+                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/40 uppercase tracking-wider block mb-1">
+                    Nombre en Inglés
+                  </label>
+                  <input
+                    type="text"
+                    value={formState.nameEn}
+                    onChange={(e) => handleFormChange("nameEn", e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#444] outline-none focus:border-blue-500"
+                    placeholder="e.g. Drowned Sandwich"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/40 uppercase tracking-wider block mb-1">
+                    Descripción en Inglés
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={formState.descriptionEn}
+                    onChange={(e) => handleFormChange("descriptionEn", e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#444] outline-none focus:border-blue-500"
+                    placeholder="e.g. Slow-cooked pork, chipotle sauce..."
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
           <div>
             <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
               Imagen del Producto
@@ -908,7 +1229,63 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         </form>
       </Modal>
 
-      {/* MODAL DE RECETAS */}
+      {/* MODAL DE CATEGORÍA (NUEVA / EDITAR) */}
+      <Modal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        title={categoryForm.id ? "Editar Categoría" : "Nueva Categoría"}
+        subtitle="Define el nombre y su traducción al inglés"
+        icon={<Tag className="h-5 w-5 text-amber-400" />}
+        maxWidth="sm"
+      >
+        <form onSubmit={handleCategorySubmit} className="space-y-4">
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+              Nombre de la Categoría (ES) *
+            </label>
+            <input
+              type="text"
+              value={categoryForm.name}
+              onChange={(e) => setCategoryForm((p) => ({ ...p, name: e.target.value }))}
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#666] outline-none focus:border-primary"
+              placeholder="Ej. ANTOJITOS"
+            />
+            {categoryErrors.name && (
+              <p className="mt-1 text-xs font-bold text-red-400">{categoryErrors.name}</p>
+            )}
+          </div>
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/40 uppercase tracking-wider block mb-1 flex items-center gap-1.5">
+              <Globe className="h-3 w-3 text-blue-400" />
+              Nombre en Inglés (EN)
+            </label>
+            <input
+              type="text"
+              value={categoryForm.nameEn}
+              onChange={(e) => setCategoryForm((p) => ({ ...p, nameEn: e.target.value }))}
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#444] outline-none focus:border-blue-500"
+              placeholder="e.g. Snacks"
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+            <button
+              type="button"
+              onClick={() => setIsCategoryModalOpen(false)}
+              className="rounded-xl border border-white/10 px-4 py-2.5 text-xs font-bold text-[#E0E0E0]/70 hover:bg-white/5"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-black text-black hover:brightness-105 disabled:opacity-50"
+            >
+              {isSubmitting ? "Guardando..." : categoryForm.id ? "Actualizar" : "Crear Categoría"}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
       <Modal
         isOpen={isRecipeModalOpen}
         onClose={() => setIsRecipeModalOpen(false)}

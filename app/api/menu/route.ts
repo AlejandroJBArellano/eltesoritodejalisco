@@ -7,14 +7,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 /**
  * GET /api/menu
- * Get all menu items
+ * Get all menu items (including translations for i18n)
  */
 export async function GET() {
   try {
     const supabase = await createClient();
     const { data: items, error } = await supabase
       .from("menu_items")
-      .select("*")
+      .select("*, translations")
       .order("name", { ascending: true });
 
     if (error) throw error;
@@ -78,6 +78,8 @@ export async function POST(request: NextRequest) {
     const isAvailable = formData.get("isAvailable") === "true";
     const imageFile = formData.get("image") as File | null;
     let imageUrl = (formData.get("imageUrl") as string) || null;
+    const translationsRaw = formData.get("translations") as string | null;
+    const translations = translationsRaw ? JSON.parse(translationsRaw) : {};
 
     if (!name) {
       return NextResponse.json(
@@ -128,6 +130,7 @@ export async function POST(request: NextRequest) {
         image_url: imageUrl || null,
         is_available: isAvailable,
         stripe_product_id: stripeProductId,
+        translations,
         updated_at: new Date().toISOString(),
       })
       .select()
@@ -165,6 +168,8 @@ export async function PUT(request: NextRequest) {
     const isAvailable = formData.get("isAvailable") === "true";
     const imageFile = formData.get("image") as File | null;
     let imageUrl = (formData.get("imageUrl") as string) || null;
+    const translationsRaw = formData.get("translations") as string | null;
+    const translations = translationsRaw ? JSON.parse(translationsRaw) : undefined;
 
     if (!id || !name) {
       return NextResponse.json(
@@ -228,6 +233,7 @@ export async function PUT(request: NextRequest) {
         image_url: imageUrl || null,
         is_available: isAvailable,
         stripe_product_id: stripeProductId,
+        ...(translations !== undefined ? { translations } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
