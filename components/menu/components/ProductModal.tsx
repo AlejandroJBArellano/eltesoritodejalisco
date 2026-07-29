@@ -1,0 +1,231 @@
+import { FormEvent, RefObject } from "react";
+import { Image as ImageIcon, Utensils, Globe, ChevronDown } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
+import { MenuFormState } from "../types";
+
+interface ProductModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  formState: MenuFormState;
+  formErrors: Record<string, string>;
+  isEditing: boolean;
+  isSubmitting: boolean;
+  categories: string[];
+  showTranslations: boolean;
+  onToggleTranslations: () => void;
+  onFormChange: (field: keyof MenuFormState, value: string | boolean) => void;
+  imagePreview: string | null;
+  fileInputRef: RefObject<HTMLInputElement | null>;
+  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export function ProductModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  formState,
+  formErrors,
+  isEditing,
+  isSubmitting,
+  categories,
+  showTranslations,
+  onToggleTranslations,
+  onFormChange,
+  imagePreview,
+  fileInputRef,
+  onFileChange,
+}: ProductModalProps) {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEditing ? "Editar Producto" : "Nuevo Producto"}
+      subtitle="Llena los datos del platillo o bebida para el catálogo"
+      icon={<Utensils className="h-5 w-5 text-primary" />}
+      maxWidth="lg"
+    >
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div>
+          <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            Nombre del Platillo *
+          </label>
+          <input
+            type="text"
+            value={formState.name}
+            onChange={(e) => onFormChange("name", e.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#666666] outline-none focus:border-primary"
+            placeholder="Ej. Torta Ahogada Sencilla"
+          />
+          {formErrors.name && (
+            <p className="mt-1 text-xs font-bold text-red-400">
+              {formErrors.name}
+            </p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+              Precio ($) *
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              value={formState.price}
+              onChange={(e) => onFormChange("price", e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary"
+              placeholder="0.00"
+            />
+            {formErrors.price && (
+              <p className="mt-1 text-xs font-bold text-red-400">
+                {formErrors.price}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+              Categoría
+            </label>
+            <input
+              type="text"
+              list="category-suggestions"
+              value={formState.category}
+              onChange={(e) => onFormChange("category", e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary"
+              placeholder="Ej. Platos Fuertes"
+            />
+            <datalist id="category-suggestions">
+              {categories.map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            Descripción
+          </label>
+          <textarea
+            rows={2}
+            value={formState.description}
+            onChange={(e) => onFormChange("description", e.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary"
+            placeholder="Ingredientes principales, preparación, etc."
+          />
+        </div>
+
+        {/* SECCIÓN DE TRADUCCIONES — colapsable */}
+        <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 overflow-hidden">
+          <button
+            type="button"
+            onClick={onToggleTranslations}
+            className="w-full flex items-center justify-between px-4 py-3 text-left"
+          >
+            <span className="text-xs font-extrabold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+              <Globe className="h-3.5 w-3.5" />
+              Traducción al Inglés (EN)
+              {(formState.nameEn || formState.descriptionEn) && (
+                <span className="rounded-full bg-blue-500 h-1.5 w-1.5" />
+              )}
+            </span>
+            <ChevronDown
+              className={`h-3.5 w-3.5 text-blue-400 transition-transform ${showTranslations ? "rotate-180" : ""}`}
+            />
+          </button>
+          {showTranslations && (
+            <div className="px-4 pb-4 space-y-3 border-t border-blue-500/10">
+              <div className="pt-3">
+                <label className="text-[10px] font-extrabold text-[#E0E0E0]/40 uppercase tracking-wider block mb-1">
+                  Nombre en Inglés
+                </label>
+                <input
+                  type="text"
+                  value={formState.nameEn}
+                  onChange={(e) => onFormChange("nameEn", e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#444] outline-none focus:border-blue-500"
+                  placeholder="e.g. Drowned Sandwich"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-extrabold text-[#E0E0E0]/40 uppercase tracking-wider block mb-1">
+                  Descripción en Inglés
+                </label>
+                <textarea
+                  rows={2}
+                  value={formState.descriptionEn}
+                  onChange={(e) => onFormChange("descriptionEn", e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#444] outline-none focus:border-blue-500"
+                  placeholder="e.g. Slow-cooked pork, chipotle sauce..."
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            Imagen del Producto
+          </label>
+          <div className="flex items-center gap-4">
+            {imagePreview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="h-16 w-16 rounded-xl object-cover border border-white/10"
+              />
+            ) : (
+              <div className="h-16 w-16 rounded-xl bg-[#181818] border border-white/10 flex items-center justify-center text-[#E0E0E0]/30">
+                <ImageIcon className="h-6 w-6" />
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={onFileChange}
+              className="text-xs text-[#E0E0E0]/60 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-white/10 file:text-white hover:file:bg-white/20"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 pt-2">
+          <input
+            type="checkbox"
+            id="isAvailable"
+            checked={formState.isAvailable}
+            onChange={(e) => onFormChange("isAvailable", e.target.checked)}
+            className="h-4 w-4 rounded border-white/10 bg-[#181818] text-primary focus:ring-primary"
+          />
+          <label htmlFor="isAvailable" className="text-xs font-bold text-[#E0E0E0]">
+            Disponible para venta activa
+          </label>
+        </div>
+
+        <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-white/10 px-4 py-2.5 text-xs font-bold text-[#E0E0E0]/70 hover:bg-white/5"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="rounded-xl bg-primary px-5 py-2.5 text-xs font-black text-black hover:brightness-105 disabled:opacity-50"
+          >
+            {isSubmitting
+              ? "Guardando..."
+              : isEditing
+                ? "Actualizar Producto"
+                : "Guardar Producto"}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
