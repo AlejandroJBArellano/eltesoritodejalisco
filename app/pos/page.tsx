@@ -252,7 +252,13 @@ export default function POSPage() {
 
         {/* SECCIÓN DEL CARRITO */}
         <form
-          onSubmit={(e) => handleCheckoutSubmit(e, setCheckoutOrder)}
+          onSubmit={(e) =>
+            handleCheckoutSubmit(e, (order) => {
+              setCheckoutOrder(order);
+              setShowKitchenTicket(true);
+              setShowTicket(false);
+            })
+          }
           className={`lg:col-span-5 xl:col-span-4 h-full w-full min-w-0 ${activeTab === "cart" ? "block" : "hidden lg:block"}`}
         >
           <POSCartSidebar
