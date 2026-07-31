@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { orderItems, type, customerName, notes } = body;
+    const { orderItems, type, customerName, notes, pickupTime } = body;
 
     if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
       return NextResponse.json(
@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
         type, // 'takeout' | 'dine-in'
         notes: notes || "",
         orderItems: JSON.stringify(validatedItems),
+        pickupTime: pickupTime || "",
       },
     });
 

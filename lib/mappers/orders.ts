@@ -50,6 +50,7 @@ export interface DbOrderPayload {
   corte_id?: string | null;
   estado_cierre?: string | null;
   operational_date?: string;
+  pickup_time?: string | null;
   order_items?: Array<{
     id: string;
     order_id: string;
@@ -116,6 +117,7 @@ export const mapOrderData = (dbOrder: DbOrderPayload): OrderWithDetails => {
       ? "ARCHIVED"
       : undefined,
     operationalDate: dbOrder.operational_date,
+    pickupTime: dbOrder.pickup_time ? safeParseDate(dbOrder.pickup_time) : null,
     orderItems: Array.isArray(dbOrder.order_items)
       ? dbOrder.order_items.map((item) => ({
           id: item.id,

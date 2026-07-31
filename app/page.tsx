@@ -328,6 +328,17 @@ export default async function Home() {
                   hoverColor="var(--color-primary)"
                 />
               )}
+              {isAdmin && (
+                <ModuleCard
+                  title="Horarios del Portal"
+                  description="Días y horas para programar pedidos."
+                  href="/admin/horarios"
+                  icon={Clock}
+                  badge="Config"
+                  themeClass="bg-amber-500/10 text-amber-500"
+                  hoverColor="#f59e0b"
+                />
+              )}
             </div>
           </CollapsibleSection>
         )}

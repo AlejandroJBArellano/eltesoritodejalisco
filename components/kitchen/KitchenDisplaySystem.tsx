@@ -2,7 +2,7 @@
 
 import { useRealtimeOrders } from "@/hooks/useOrders";
 import { OrderStatus, type OrderWithDetails } from "@/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BellRing,
   Bell,
@@ -127,6 +127,16 @@ export function KitchenDisplaySystem({
   );
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Time ticking for auto-releasing scheduled orders
+  const [now, setNow] = useState(() => new Date());
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 15000);
+    return () => clearInterval(timer);
+  }, []);
+
   const showToast = (message: string) => {
     setToastMessage(message);
     setTimeout(() => {
@@ -228,11 +238,21 @@ export function KitchenDisplaySystem({
     }
   };
 
+  const releasedOrders = orders.filter((o) => {
+    // Direct POS / ASAP orders have no scheduled pickupTime and show immediately
+    if (!o.pickupTime) return true;
+    
+    // Scheduled orders are released 30 minutes before delivery
+    const pickupMs = new Date(o.pickupTime).getTime();
+    const nowMs = now.getTime();
+    return pickupMs - nowMs <= 30 * 60 * 1000;
+  });
+
   // Group orders by status for Kanban view
   const ordersByStatus = {
-    pending: orders.filter((o) => o.status === OrderStatus.PENDING),
-    preparing: orders.filter((o) => o.status === OrderStatus.PREPARING),
-    ready: orders.filter((o) => o.status === OrderStatus.READY),
+    pending: releasedOrders.filter((o) => o.status === OrderStatus.PENDING),
+    preparing: releasedOrders.filter((o) => o.status === OrderStatus.PREPARING),
+    ready: releasedOrders.filter((o) => o.status === OrderStatus.READY),
   };
 
   return (
@@ -341,7 +361,7 @@ export function KitchenDisplaySystem({
             />
           </div>
         ) : (
-          <SmartBatchingView orders={orders} />
+          <SmartBatchingView orders={releasedOrders} />
         )}
       </div>
     </div>

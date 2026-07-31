@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
       const type = metadata.type || "takeout"; // 'takeout' | 'dine-in'
       const notes = metadata.notes || "";
       const orderItems = JSON.parse(metadata.orderItems);
+      const pickupTime = metadata.pickupTime || null;
 
       const supabaseAdmin = createAdminClient();
 
@@ -129,6 +130,7 @@ export async function POST(request: NextRequest) {
           operational_date: getCurrentCDMXDay(),
           estado_cierre: "ABIERTA",
           updated_at: getCurrentCDMXDate(),
+          pickup_time: pickupTime ? new Date(pickupTime).toISOString() : null,
         })
         .select()
         .single();

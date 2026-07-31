@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body: CreateOrderRequest = await request.json();
-    const { customerId, source, table, notes, orderItems } = body;
+    const body: CreateOrderRequest & { pickupTime?: string } = await request.json();
+    const { customerId, source, table, notes, orderItems, pickupTime } = body;
 
     if (!source) {
       return NextResponse.json(
@@ -161,6 +161,7 @@ export async function POST(request: NextRequest) {
         operational_date: getCurrentCDMXDay(),
         estado_cierre: "ABIERTA",
         updated_at: getCurrentCDMXDate(),
+        pickup_time: pickupTime ? new Date(pickupTime).toISOString() : null,
       })
       .select()
       .single();

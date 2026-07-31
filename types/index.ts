@@ -79,6 +79,7 @@ export interface Order {
   corteId?: string | null;
   closeStatus?: "OPEN" | "CLOSED" | "ARCHIVED";
   operationalDate?: string;
+  pickupTime?: Date | null;
 }
 
 export interface OrderItem {
