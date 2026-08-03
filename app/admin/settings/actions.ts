@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant";
 import { revalidatePath } from "next/cache";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export interface UpdateSettingsState {
   success?: boolean;
@@ -22,7 +23,39 @@ export async function updateTenantSettings(formData: FormData): Promise<UpdateSe
     const primaryColor = formData.get("primaryColor") as string;
     const secondaryColor = formData.get("secondaryColor") as string;
     const darkBgColor = formData.get("darkBgColor") as string;
-    const logoUrl = formData.get("logoUrl") as string;
+    
+    // File Upload handling
+    const logoFile = formData.get("logoFile") as File | null;
+    let logoUrl = formData.get("logoUrl") as string;
+
+    if (logoFile && logoFile.size > 0) {
+      const adminClient = createAdminClient();
+      
+      // Ensure the "logos" bucket exists and is public
+      try {
+        await adminClient.storage.createBucket("logos", { public: true });
+      } catch (e) {
+        // already exists
+      }
+
+      const fileExt = logoFile.name.split(".").pop() || "jpg";
+      const fileName = `${tenant.id}-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await adminClient.storage
+        .from("logos")
+        .upload(fileName, logoFile, { upsert: true });
+
+      if (uploadError) {
+        console.error("Storage upload error for logo:", uploadError);
+        return { error: `Error al subir el logo: ${uploadError.message}` };
+      }
+
+      const { data: { publicUrl } } = adminClient.storage
+        .from("logos")
+        .getPublicUrl(fileName);
+
+      logoUrl = publicUrl;
+    }
 
     if (!name || !name.trim()) {
       return { error: "El nombre del restaurante es obligatorio" };

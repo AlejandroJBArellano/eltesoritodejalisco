@@ -19,6 +19,15 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
   const [secondaryColor, setSecondaryColor] = useState(initialTenant.secondary_color || "#FFD1DC");
   const [darkBgColor, setDarkBgColor] = useState(initialTenant.dark_bg_color || "#121212");
 
+  const [logoPreview, setLogoPreview] = useState<string | null>(initialTenant.logo_url || null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSuccess(false);
@@ -94,15 +103,52 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-wider block mb-1">
-                URL del Logo del Restaurante (Opcional)
+              <label className="text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-wider block mb-2">
+                Logotipo del Restaurante
               </label>
+              
+              <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-xl border border-white/5 bg-[#1e1e1e]/50">
+                {/* Logo Preview box */}
+                <div className="h-20 w-20 shrink-0 rounded-2xl border border-white/10 bg-[#121212] overflow-hidden flex items-center justify-center relative group">
+                  {logoPreview ? (
+                    <img
+                      src={logoPreview}
+                      alt="Logo preview"
+                      className="h-full w-full object-contain p-2"
+                    />
+                  ) : (
+                    <span className="text-[10px] font-bold text-[#E0E0E0]/30 uppercase tracking-wider text-center px-1">
+                      Sin Logo
+                    </span>
+                  )}
+                </div>
+
+                {/* Upload action */}
+                <div className="flex-1 space-y-2 w-full">
+                  <input
+                    type="file"
+                    name="logoFile"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="block w-full text-xs text-slate-400
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-full file:border-0
+                      file:text-xs file:font-semibold
+                      file:bg-blue-600/15 file:text-blue-400
+                      hover:file:bg-blue-600/20
+                      file:transition-all file:cursor-pointer"
+                  />
+                  <p className="text-[10px] text-[#E0E0E0]/40 font-medium leading-relaxed">
+                    Soporta imágenes JPG, PNG o SVG. Recomendado formato cuadrado de al menos 200x200px.
+                  </p>
+                </div>
+              </div>
+
+              {/* Keep the current logoUrl if uploader is not used */}
               <input
-                type="text"
+                type="hidden"
                 name="logoUrl"
-                defaultValue={initialTenant.logo_url || ""}
-                placeholder="https://example.com/logo.png"
-                className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-blue-500 transition font-mono"
+                value={initialTenant.logo_url || ""}
               />
             </div>
           </div>
