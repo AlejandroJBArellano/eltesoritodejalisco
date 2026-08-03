@@ -1,5 +1,6 @@
 import { getProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getTenantContext } from "@/lib/tenant";
 import { MEX_TIMEZONE } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -134,12 +135,14 @@ export default async function Home() {
   let tipsToday = 0;
 
   if (isAdmin) {
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     // 1. Órdenes Activas
     const { count: activeCount } = await supabase
       .from("orders")
       .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenant.id)
       .in("status", ["PENDING", "PREPARING", "READY"]);
 
     activeOrdersCount = activeCount || 0;
@@ -160,6 +163,7 @@ export default async function Home() {
     const { data: todayOrders } = await supabase
       .from("orders")
       .select("total")
+      .eq("tenant_id", tenant.id)
       .in("status", ["PAID", "DELIVERED"])
       .gte("created_at", todayStartUTC);
 
@@ -172,6 +176,7 @@ export default async function Home() {
     const { data: todayPayments } = await supabase
       .from("payments")
       .select("tip_amount")
+      .eq("tenant_id", tenant.id)
       .gte("created_at", todayStartUTC);
 
     tipsToday = (todayPayments || []).reduce(
@@ -182,7 +187,8 @@ export default async function Home() {
     // 3. Clientes
     const { count: custCount } = await supabase
       .from("customers")
-      .select("*", { count: "exact", head: true });
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenant.id);
 
     customersCount = custCount || 0;
   }

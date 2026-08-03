@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { MenuContent } from "@/components/menu/MenuContent";
+import { getTenantContext } from "@/lib/tenant";
 
 type MenuItem = {
   id: string;
@@ -12,10 +13,12 @@ type MenuItem = {
 };
 
 async function getMenuItems(): Promise<MenuItem[]> {
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const { data: items, error } = await supabase
     .from("menu_items")
     .select("*")
+    .eq("tenant_id", tenant.id)
     .order("name", { ascending: true });
 
   if (error) {

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { MEX_TIMEZONE } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 interface ReportOrder {
   id: string;
@@ -81,6 +82,7 @@ export async function GET(request: NextRequest) {
       startDate.setDate(today.getDate() - 7);
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     // 1. Sales Summary (Completed Orders)
@@ -95,6 +97,7 @@ export async function GET(request: NextRequest) {
         )
       `,
       )
+      .eq("tenant_id", tenant.id)
       .in("status", ["DELIVERED", "PAID"])
       .gte("created_at", startDate.toISOString())
       .order("created_at", { ascending: true });
@@ -134,6 +137,7 @@ export async function GET(request: NextRequest) {
     let paymentsQuery = supabase
       .from("payments")
       .select("tip_amount")
+      .eq("tenant_id", tenant.id)
       .gte("created_at", startDate.toISOString());
     if (endDate) {
       paymentsQuery = paymentsQuery.lte("created_at", endDate.toISOString());
@@ -246,6 +250,7 @@ export async function GET(request: NextRequest) {
     const { data: customers, error: custError } = await supabase
       .from("customers")
       .select("*")
+      .eq("tenant_id", tenant.id)
       .order("total_spend", { ascending: false })
       .limit(5);
 
@@ -254,6 +259,7 @@ export async function GET(request: NextRequest) {
     let newCustQuery = supabase
       .from("customers")
       .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenant.id)
       .gte("created_at", startDate.toISOString());
     if (endDate) {
       newCustQuery = newCustQuery.lte("created_at", endDate.toISOString());
@@ -266,6 +272,7 @@ export async function GET(request: NextRequest) {
     let expensesQuery = supabase
       .from("expenses")
       .select("amount")
+      .eq("tenant_id", tenant.id)
       .gte("date", startDate.toISOString().split("T")[0]);
     if (endDate) {
       expensesQuery = expensesQuery.lte(
@@ -287,6 +294,7 @@ export async function GET(request: NextRequest) {
       .from("orders")
       .select("total")
       .eq("status", "UNCOLLECTED")
+      .eq("tenant_id", tenant.id)
       .gte("created_at", startDate.toISOString());
     if (endDate) {
       uncollectedQuery = uncollectedQuery.lte(

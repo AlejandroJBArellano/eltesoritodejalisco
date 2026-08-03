@@ -12,11 +12,15 @@ type Customer = {
   createdAt?: string;
 };
 
+import { getTenantContext } from "@/lib/tenant";
+
 async function getCustomers(): Promise<Customer[]> {
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const { data: customers, error } = await supabase
     .from("customers")
     .select("*")
+    .eq("tenant_id", tenant.id)
     .order("created_at", { ascending: false });
 
   if (error) {

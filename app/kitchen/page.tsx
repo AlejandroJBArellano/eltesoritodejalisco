@@ -3,8 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { mapOrderData } from "@/lib/mappers/orders";
 import type { DbOrderPayload } from "@/lib/mappers/orders";
 
+import { getTenantContext } from "@/lib/tenant";
+
 // Fetch active kitchen orders
 async function getActiveOrders() {
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const { data: orders } = await supabase
     .from("orders")
@@ -18,6 +21,7 @@ async function getActiveOrders() {
       payments (*)
     `,
     )
+    .eq("tenant_id", tenant.id)
     .in("status", ["PENDING", "PREPARING", "READY"])
     .order("created_at", { ascending: true });
 
