@@ -32,33 +32,40 @@ BEGIN
     END IF;
 END $$;
 
--- 1. Drop foreign keys referencing profiles(id)
+-- 1. Drop foreign keys referencing profiles(id) or users(id)
 ALTER TABLE public.attendance DROP CONSTRAINT IF EXISTS attendance_user_id_fkey;
+ALTER TABLE public.attendance DROP CONSTRAINT IF EXISTS fk_attendance_users;
 ALTER TABLE public.attendance DROP CONSTRAINT IF EXISTS fk_attendance_profile;
 ALTER TABLE public.task_executions DROP CONSTRAINT IF EXISTS fk_task_executions_profiles;
 ALTER TABLE public.task_executions DROP CONSTRAINT IF EXISTS fk_task_executions_profile;
 
 -- 2. Drop primary key constraints
 ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_pkey;
-IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='users') THEN
-    ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_pkey;
-END IF;
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='users') THEN
+        ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_pkey;
+    END IF;
+END $$;
 
 -- 3. Add composite primary keys
 ALTER TABLE public.profiles ADD PRIMARY KEY (id, tenant_id);
-IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='users') THEN
-    ALTER TABLE public.users ADD PRIMARY KEY (id, tenant_id);
-END IF;
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='users') THEN
+        ALTER TABLE public.users ADD PRIMARY KEY (id, tenant_id);
+    END IF;
+END $$;
 
--- 4. Re-create composite foreign keys referencing profiles(id, tenant_id)
+-- 4. Re-create composite foreign keys referencing profiles/users (id, tenant_id)
 ALTER TABLE public.attendance 
-  ADD CONSTRAINT fk_attendance_profile 
+  ADD CONSTRAINT fk_attendance_users 
   FOREIGN KEY (user_id, tenant_id) 
-  REFERENCES public.profiles(id, tenant_id) 
+  REFERENCES public.users(id, tenant_id) 
   ON DELETE CASCADE;
 
 ALTER TABLE public.task_executions 
-  ADD CONSTRAINT fk_task_executions_profile 
+  ADD CONSTRAINT fk_task_executions_profiles 
   FOREIGN KEY (user_id, tenant_id) 
   REFERENCES public.profiles(id, tenant_id) 
   ON DELETE SET NULL;
@@ -177,12 +184,15 @@ CREATE POLICY "Scoped access for profiles" ON public.profiles FOR ALL USING (
   tenant_id IN (SELECT public.get_user_tenants(auth.uid()))
 );
 
-IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='users') THEN
-    DROP POLICY IF EXISTS "Allow scoped operations for users" ON public.users;
-    CREATE POLICY "Scoped access for users" ON public.users FOR ALL USING (
-      id = auth.uid() OR
-      tenant_id IN (SELECT public.get_user_tenants(auth.uid()))
-    );
-END IF;
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='users') THEN
+        DROP POLICY IF EXISTS "Allow scoped operations for users" ON public.users;
+        EXECUTE 'CREATE POLICY "Scoped access for users" ON public.users FOR ALL USING (
+          id = auth.uid()::text OR
+          tenant_id IN (SELECT public.get_user_tenants(auth.uid()))
+        )';
+    END IF;
+END $$;
 
 COMMIT;
