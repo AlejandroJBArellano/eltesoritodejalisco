@@ -3,6 +3,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 /**
  * GET /api/business-hours
@@ -10,10 +11,12 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export async function GET() {
   try {
+    const tenant = await getTenantContext();
     const supabase = createAdminClient();
     const { data: hours, error } = await supabase
       .from("business_hours")
       .select("*")
+      .eq("tenant_id", tenant.id)
       .order("day_of_week", { ascending: true });
 
     if (error) throw error;

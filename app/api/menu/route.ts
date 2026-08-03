@@ -4,6 +4,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 /**
  * GET /api/menu
@@ -11,10 +12,12 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export async function GET() {
   try {
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     const { data: items, error } = await supabase
       .from("menu_items")
       .select("*, translations")
+      .eq("tenant_id", tenant.id)
       .order("name", { ascending: true });
 
     if (error) throw error;

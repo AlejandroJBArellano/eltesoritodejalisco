@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentCDMXDate, getCurrentCDMXDay } from "@/lib/utils";
 import type { CreateOrderRequest } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 /**
  * GET /api/orders
@@ -12,6 +13,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const statusParam = searchParams.get("status");
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     let query = supabase
       .from("orders")
@@ -26,6 +28,7 @@ export async function GET(request: NextRequest) {
         customer:customers (*)
       `,
       )
+      .eq("tenant_id", tenant.id)
       .order("created_at", { ascending: false });
 
     if (statusParam) {
@@ -70,6 +73,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     // Generate order number
@@ -78,6 +82,7 @@ export async function POST(request: NextRequest) {
     const { data: latestCut } = await supabase
       .from("daily_cuts")
       .select("created_at")
+      .eq("tenant_id", tenant.id)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -85,6 +90,7 @@ export async function POST(request: NextRequest) {
     let query = supabase
       .from("orders")
       .select("order_number")
+      .eq("tenant_id", tenant.id)
       .order("created_at", { ascending: false });
 
     const filterDate =
@@ -124,6 +130,7 @@ export async function POST(request: NextRequest) {
         .from("menu_items")
         .select("*")
         .eq("id", item.menuItemId)
+        .eq("tenant_id", tenant.id)
         .single();
 
       if (menuError || !menuItem)
@@ -150,6 +157,7 @@ export async function POST(request: NextRequest) {
       .from("orders")
       .insert({
         id: orderId,
+        tenant_id: tenant.id,
         order_number: nextNumber,
         customer_id: customerId,
         source,
@@ -173,6 +181,7 @@ export async function POST(request: NextRequest) {
       itemsWithPrices.map((item) => ({
         ...item,
         id: crypto.randomUUID(),
+        tenant_id: tenant.id,
         order_id: order.id,
       })),
     );
@@ -194,6 +203,7 @@ export async function POST(request: NextRequest) {
       `,
       )
       .eq("id", order.id)
+      .eq("tenant_id", tenant.id)
       .single();
 
     // If customer exists, update loyalty points
@@ -204,6 +214,7 @@ export async function POST(request: NextRequest) {
         .from("customers")
         .select("loyalty_points, total_spend")
         .eq("id", customerId)
+        .eq("tenant_id", tenant.id)
         .single();
 
       if (customer) {
@@ -213,7 +224,8 @@ export async function POST(request: NextRequest) {
             loyalty_points: (customer.loyalty_points || 0) + pointsEarned,
             total_spend: (customer.total_spend || 0) + total,
           })
-          .eq("id", customerId);
+          .eq("id", customerId)
+          .eq("tenant_id", tenant.id);
       }
     }
 

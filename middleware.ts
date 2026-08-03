@@ -34,6 +34,7 @@ function isPublicRoute(request: NextRequest): boolean {
   if (path === "/api/menu" && method === "GET") return true;
   if (path === "/api/menu-categories" && method === "GET") return true;
   if (path === "/api/business-hours" && method === "GET") return true;
+  if (path === "/api/tenant" && method === "GET") return true;
   if (path === "/api/payments/checkout-session" && method === "POST") return true;
   if (path === "/api/payments/session-order" && method === "GET") return true;
 

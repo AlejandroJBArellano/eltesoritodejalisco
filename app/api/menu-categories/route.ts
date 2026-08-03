@@ -3,6 +3,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 /**
  * GET /api/menu-categories
@@ -10,10 +11,12 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export async function GET() {
   try {
+    const tenant = await getTenantContext();
     const supabase = createAdminClient();
     const { data: categories, error } = await supabase
       .from("menu_categories")
       .select("*")
+      .eq("tenant_id", tenant.id)
       .order("sort_order", { ascending: true });
 
     if (error) throw error;
