@@ -214,12 +214,19 @@ export default function HistoryPage() {
         data: { user },
       } = await supabase.auth.getUser();
       if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
-        setUserRole(profile?.role || null);
+        const tenantRes = await fetch("/api/tenant");
+        if (tenantRes.ok) {
+          const { tenant } = await tenantRes.json();
+          if (tenant) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("role")
+              .eq("id", user.id)
+              .eq("tenant_id", tenant.id)
+              .single();
+            setUserRole(profile?.role || null);
+          }
+        }
       }
     } catch (error) {
       console.error("Error checking role:", error);
@@ -293,6 +300,11 @@ export default function HistoryPage() {
 
   const fetchTodayExpenses = async () => {
     try {
+      const tenantRes = await fetch("/api/tenant");
+      if (!tenantRes.ok) return;
+      const { tenant } = await tenantRes.json();
+      if (!tenant) return;
+
       const supabase = createClient();
       const mxDateStr = new Intl.DateTimeFormat("en-CA", {
         timeZone: "America/Mexico_City",
@@ -303,7 +315,8 @@ export default function HistoryPage() {
       const { data } = await supabase
         .from("expenses")
         .select("amount, expense_categories(tipo_gasto)")
-        .eq("date", mxDateStr);
+        .eq("date", mxDateStr)
+        .eq("tenant_id", tenant.id);
       const typedData =
         (data as unknown as {
           amount: number;
@@ -380,6 +393,11 @@ export default function HistoryPage() {
 
     try {
       setIsFinalizing(true);
+      const tenantRes = await fetch("/api/tenant");
+      if (!tenantRes.ok) throw new Error("No se pudo obtener el tenant");
+      const { tenant } = await tenantRes.json();
+      if (!tenant) throw new Error("No se pudo obtener el tenant");
+
       const supabase = createClient();
       const mxDateStr = new Intl.DateTimeFormat("en-CA", {
         timeZone: "America/Mexico_City",
@@ -393,7 +411,8 @@ export default function HistoryPage() {
         .select(
           "description, amount, has_invoice, expense_categories(name, tipo_gasto)",
         )
-        .eq("date", mxDateStr);
+        .eq("date", mxDateStr)
+        .eq("tenant_id", tenant.id);
 
       const expensesDetail: ExpenseDetailItem[] = (
         (expensesData as unknown as ExpenseDataRow[]) || []
@@ -449,6 +468,7 @@ export default function HistoryPage() {
       if (!response.ok) throw new Error("Error al guardar el corte");
 
       const { error: tipsError } = await supabase.from("daily_tips").insert({
+        tenant_id: tenant.id,
         cut_date: mxDateStr,
         total_card_tips: tipsTarjetaFinal,
         total_cash_tips: tipsEfectivoFinal,

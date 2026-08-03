@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 async function archiveOrdersForCut(
   supabase: Awaited<ReturnType<typeof createClient>>,
   cutDate: string,
   cutId: string,
+  tenantId: string,
 ) {
   await supabase
     .from("orders")
@@ -14,17 +16,20 @@ async function archiveOrdersForCut(
       closed_at: new Date().toISOString(),
     })
     .eq("operational_date", cutDate)
+    .eq("tenant_id", tenantId)
     .is("corte_id", null)
     .in("status", ["PAID", "DELIVERED", "UNCOLLECTED"]);
 }
 
 export async function GET() {
   try {
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("daily_cuts")
       .select("*")
+      .eq("tenant_id", tenant.id)
       .order("cut_date", { ascending: false })
       .limit(30);
 
@@ -67,6 +72,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     // Check if a cut for this date already exists
@@ -74,7 +80,8 @@ export async function POST(request: NextRequest) {
       .from("daily_cuts")
       .select("id")
       .eq("cut_date", cut_date)
-      .single();
+      .eq("tenant_id", tenant.id)
+      .maybeSingle();
 
     if (existing) {
       // Update existing cut for the same date
@@ -99,13 +106,14 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (error) throw error;
-      await archiveOrdersForCut(supabase, cut_date, data.id);
+      await archiveOrdersForCut(supabase, cut_date, data.id, tenant.id);
       return NextResponse.json({ cut: data, updated: true });
     }
 
     const { data, error } = await supabase
       .from("daily_cuts")
       .insert({
+        tenant_id: tenant.id,
         cut_date,
         venta_neta: venta_neta ?? 0,
         iva_acumulado: iva_acumulado ?? 0,
@@ -124,7 +132,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
-    await archiveOrdersForCut(supabase, cut_date, data.id);
+    await archiveOrdersForCut(supabase, cut_date, data.id, tenant.id);
 
     return NextResponse.json({ cut: data, updated: false }, { status: 201 });
   } catch (error) {

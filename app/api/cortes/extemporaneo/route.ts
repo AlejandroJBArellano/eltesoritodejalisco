@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -14,6 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     const { data: authData } = await supabase.auth.getUser();
     const userId = authData.user?.id ?? null;
@@ -21,6 +23,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase.rpc("generar_corte_extemporaneo", {
       p_cut_date: cutDate,
       p_user_id: userId,
+      p_tenant_id: tenant.id,
     });
 
     if (error) {

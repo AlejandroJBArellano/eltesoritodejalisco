@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { MEX_TIMEZONE } from "@/lib/utils";
 import { NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 function getCDMXDateString(offsetDays: number): string {
   const formatter = new Intl.DateTimeFormat("en-CA", {
@@ -19,6 +20,7 @@ function getCDMXDateString(offsetDays: number): string {
 
 export async function GET() {
   try {
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     const yesterday = getCDMXDateString(-1);
 
@@ -26,6 +28,7 @@ export async function GET() {
       .from("daily_cuts")
       .select("id")
       .eq("cut_date", yesterday)
+      .eq("tenant_id", tenant.id)
       .maybeSingle();
 
     if (cutError) throw cutError;
@@ -42,6 +45,7 @@ export async function GET() {
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("operational_date", yesterday)
+      .eq("tenant_id", tenant.id)
       .is("corte_id", null)
       .in("status", ["PAID", "DELIVERED", "UNCOLLECTED"]);
 
