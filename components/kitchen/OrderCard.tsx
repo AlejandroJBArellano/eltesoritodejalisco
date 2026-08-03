@@ -19,6 +19,75 @@ interface OrderCardProps {
   updatingItemIds?: Set<string>;
 }
 
+interface OrderItemRowProps {
+  item: OrderWithDetails["orderItems"][number];
+  orderId: string;
+  orderStatus: OrderStatus;
+  onItemReady?: (orderId: string, itemId: string) => void;
+  updatingItemIds?: Set<string>;
+}
+
+function OrderItemRow({
+  item,
+  orderId,
+  orderStatus,
+  onItemReady,
+  updatingItemIds,
+}: OrderItemRowProps) {
+  const isItemReady = item.status === OrderStatus.READY;
+  const elapsedSeconds = useOrderTimer(item.createdAt, isItemReady ? new Date() : null);
+
+  return (
+    <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3 transition-colors hover:border-border/80">
+      <div className="flex-1 pr-3">
+        <p className="font-bold text-text-light text-sm leading-snug">
+          <span className="text-amber-400 font-black mr-1 text-base">
+            {item.quantity}x
+          </span>{" "}
+          {item.menuItem.name}
+        </p>
+        {item.notes && (
+          <p className="mt-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20 flex items-center gap-1">
+            <AlertTriangle className="h-3 w-3 flex-shrink-0 text-amber-400" />{" "}
+            Nota: {item.notes}
+          </p>
+        )}
+      </div>
+
+      {orderStatus === OrderStatus.PREPARING && (
+        <div className="flex flex-col items-end justify-center min-w-[76px]">
+          {isItemReady ? (
+            <span className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 px-3 py-2 text-xs font-black text-emerald-400 uppercase tracking-wider min-h-[44px]">
+              <Check className="h-4 w-4" /> LISTO
+            </span>
+          ) : (
+            <button
+              onClick={() => onItemReady?.(orderId, item.id)}
+              disabled={updatingItemIds?.has(item.id)}
+              className="min-h-[44px] min-w-[76px] rounded-xl bg-emerald-500/15 border border-emerald-500/30 px-4 py-2 text-xs font-black text-emerald-400 uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50 active:scale-95 cursor-pointer flex items-center justify-center shadow-sm focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
+            >
+              {updatingItemIds?.has(item.id) ? (
+                <span className="animate-pulse">...</span>
+              ) : (
+                "Listo"
+              )}
+            </button>
+          )}
+          {item.preparationTimeSeconds != null ? (
+            <span className="mt-1 text-[10px] text-text-light/60 font-mono">
+              {formatTime(item.preparationTimeSeconds)}
+            </span>
+          ) : !isItemReady && item.createdAt ? (
+            <span className="mt-1 text-[10px] text-text-light/60 font-mono">
+              {formatTime(elapsedSeconds)}
+            </span>
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
  * KDS Order Card Component
  * Displays order details with real-time timer and status management
@@ -30,7 +99,9 @@ export function OrderCard({
   updatingItemIds,
 }: OrderCardProps) {
   const ALERT_THRESHOLD_MINUTES = 15;
-  const elapsedSeconds = useOrderTimer(order.createdAt);
+  const isCompleted = order.status === OrderStatus.READY || order.status === OrderStatus.DELIVERED;
+  const endTime = isCompleted ? (order.completedAt || order.updatedAt) : null;
+  const elapsedSeconds = useOrderTimer(order.createdAt, endTime);
   const isOverdue = elapsedSeconds / 60 >= ALERT_THRESHOLD_MINUTES;
 
   const getStatusBadge = (status: OrderStatus) => {
@@ -123,56 +194,14 @@ export function OrderCard({
       {/* Order Items List */}
       <div className="mb-4 space-y-2.5">
         {activeItems.map((item) => (
-          <div
+          <OrderItemRow
             key={item.id}
-            className="flex items-center justify-between rounded-xl border border-border bg-card p-3 transition-colors hover:border-border/80"
-          >
-            <div className="flex-1 pr-3">
-              <p className="font-bold text-text-light text-sm leading-snug">
-                <span className="text-amber-400 font-black mr-1 text-base">
-                  {item.quantity}x
-                </span>{" "}
-                {item.menuItem.name}
-              </p>
-              {item.notes && (
-                <p className="mt-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20 flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3 flex-shrink-0 text-amber-400" />{" "}
-                  Nota: {item.notes}
-                </p>
-              )}
-            </div>
-
-            {order.status === OrderStatus.PREPARING && (
-              <div className="flex flex-col items-end justify-center min-w-[76px]">
-                {item.status === OrderStatus.READY ? (
-                  <span className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 px-3 py-2 text-xs font-black text-emerald-400 uppercase tracking-wider min-h-[44px]">
-                    <Check className="h-4 w-4" /> LISTO
-                  </span>
-                ) : (
-                  <button
-                    onClick={() => onItemReady?.(order.id, item.id)}
-                    disabled={updatingItemIds?.has(item.id)}
-                    className="min-h-[44px] min-w-[76px] rounded-xl bg-emerald-500/15 border border-emerald-500/30 px-4 py-2 text-xs font-black text-emerald-400 uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50 active:scale-95 cursor-pointer flex items-center justify-center shadow-sm focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
-                  >
-                    {updatingItemIds?.has(item.id) ? (
-                      <span className="animate-pulse">...</span>
-                    ) : (
-                      "Listo"
-                    )}
-                  </button>
-                )}
-                {item.preparationTimeSeconds != null ? (
-                  <span className="mt-1 text-[10px] text-text-light/60 font-mono">
-                    {formatTime(item.preparationTimeSeconds)}
-                  </span>
-                ) : item.status !== OrderStatus.READY && item.createdAt ? (
-                  <span className="mt-1 text-[10px] text-text-light/60 font-mono">
-                    {formatTime(getElapsedSeconds(item.createdAt))}
-                  </span>
-                ) : null}
-              </div>
-            )}
-          </div>
+            item={item}
+            orderId={order.id}
+            orderStatus={order.status}
+            onItemReady={onItemReady}
+            updatingItemIds={updatingItemIds}
+          />
         ))}
       </div>
 

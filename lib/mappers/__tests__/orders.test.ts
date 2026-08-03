@@ -17,6 +17,16 @@ describe("lib/mappers/orders", () => {
       expect(isNaN(parsed.getTime())).toBe(false);
     });
 
+    it("should parse space-separated or standard ISO strings without timezone as UTC", () => {
+      const dateStr = "2026-07-26 14:00:00";
+      const parsed = safeParseDate(dateStr);
+      expect(parsed.toISOString()).toBe("2026-07-26T14:00:00.000Z");
+
+      const dateStrT = "2026-07-26T14:00:00";
+      const parsedT = safeParseDate(dateStrT);
+      expect(parsedT.toISOString()).toBe("2026-07-26T14:00:00.000Z");
+    });
+
     it("should return current Date for null, undefined, or invalid inputs", () => {
       const now = Date.now();
       expect(safeParseDate(null).getTime()).toBeGreaterThanOrEqual(now - 1000);

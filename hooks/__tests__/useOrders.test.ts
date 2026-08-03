@@ -55,6 +55,21 @@ describe("useOrders Hook utilities & timers", () => {
 
       expect(result.current).toBe(15);
     });
+
+    it("should return static elapsed seconds and not tick if endTime is provided", () => {
+      const startTime = new Date();
+      const endTime = new Date(startTime.getTime() + 10000); // 10 seconds later
+      const { result } = renderHook(() => useOrderTimer(startTime, endTime));
+
+      expect(result.current).toBe(10);
+
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+
+      // Should still be 10 seconds since it's static
+      expect(result.current).toBe(10);
+    });
   });
 
   describe("useRealtimeOrders", () => {

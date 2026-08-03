@@ -122,38 +122,46 @@ export function useRealtimeOrders(
 /**
  * Hook to calculate elapsed time for orders
  */
-export function useOrderTimer(createdAt: Date | string) {
-  const timestamp = useMemo(() => {
+export function useOrderTimer(createdAt: Date | string, endTime?: Date | string | null) {
+  const startTimestamp = useMemo(() => {
     if (!createdAt) return 0;
     return safeParseDate(createdAt).getTime();
   }, [createdAt]);
 
+  const endTimestamp = useMemo(() => {
+    if (!endTime) return null;
+    return safeParseDate(endTime).getTime();
+  }, [endTime]);
+
   const [elapsedSeconds, setElapsedSeconds] = useState(() => {
-    if (!timestamp) return 0;
-    const now = new Date();
-    return Math.max(0, Math.floor((now.getTime() - timestamp) / 1000));
+    if (!startTimestamp) return 0;
+    const end = endTimestamp || new Date().getTime();
+    return Math.max(0, Math.floor((end - startTimestamp) / 1000));
   });
 
-  const [prevTimestamp, setPrevTimestamp] = useState(timestamp);
-  if (timestamp !== prevTimestamp) {
-    setPrevTimestamp(timestamp);
-    const now = new Date();
-    setElapsedSeconds(Math.max(0, Math.floor((now.getTime() - timestamp) / 1000)));
+  const [prevStart, setPrevStart] = useState(startTimestamp);
+  const [prevEnd, setPrevEnd] = useState(endTimestamp);
+
+  if (startTimestamp !== prevStart || endTimestamp !== prevEnd) {
+    setPrevStart(startTimestamp);
+    setPrevEnd(endTimestamp);
+    const end = endTimestamp || new Date().getTime();
+    setElapsedSeconds(Math.max(0, Math.floor((end - startTimestamp) / 1000)));
   }
 
   useEffect(() => {
-    if (!timestamp) return;
+    if (!startTimestamp || endTimestamp) return;
 
     const calculateElapsed = () => {
       const now = new Date();
-      const diffMs = Math.max(0, now.getTime() - timestamp);
+      const diffMs = Math.max(0, now.getTime() - startTimestamp);
       setElapsedSeconds(Math.floor(diffMs / 1000));
     };
 
     const interval = setInterval(calculateElapsed, 1000);
 
     return () => clearInterval(interval);
-  }, [timestamp]);
+  }, [startTimestamp, endTimestamp]);
 
   return elapsedSeconds;
 }

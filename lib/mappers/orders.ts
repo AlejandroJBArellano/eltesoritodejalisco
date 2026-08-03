@@ -16,17 +16,23 @@ export function safeParseDate(
   if (typeof input === "number") return new Date(input);
 
   if (typeof input === "string") {
+    const trimmed = input.trim();
+    // Check if the string has a standard ISO date-time format but no timezone designator
+    const isIsoFormat = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}/.test(trimmed);
+    const hasTimezone = trimmed.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(trimmed) || /GMT|UTC/i.test(trimmed);
+
+    if (isIsoFormat && !hasTimezone) {
+      const formattedStr = trimmed.replace(" ", "T") + "Z";
+      const parsed = new Date(formattedStr);
+      if (!isNaN(parsed.getTime())) return parsed;
+    }
+
     let parsed = new Date(input);
     if (!isNaN(parsed.getTime())) return parsed;
 
-    const formattedStr = input.trim().replace(" ", "T");
+    const formattedStr = trimmed.replace(" ", "T");
     parsed = new Date(formattedStr);
     if (!isNaN(parsed.getTime())) return parsed;
-
-    if (!formattedStr.endsWith("Z") && !/[+-]\d{2}:\d{2}$/.test(formattedStr)) {
-      parsed = new Date(`${formattedStr}Z`);
-      if (!isNaN(parsed.getTime())) return parsed;
-    }
   }
 
   return new Date();
