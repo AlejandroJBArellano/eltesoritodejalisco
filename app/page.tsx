@@ -138,59 +138,19 @@ export default async function Home() {
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
-    // 1. Órdenes Activas
-    const { count: activeCount } = await supabase
-      .from("orders")
-      .select("*", { count: "exact", head: true })
-      .eq("tenant_id", tenant.id)
-      .in("status", ["PENDING", "PREPARING", "READY"]);
+    const { data: stats, error } = await supabase.rpc("get_dashboard_stats", {
+      p_tenant_id: tenant.id,
+    });
 
-    activeOrdersCount = activeCount || 0;
-
-    // 2. Ventas Hoy
-    const mxDateString = new Intl.DateTimeFormat("en-CA", {
-      timeZone: MEX_TIMEZONE,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date());
-
-    // Convert the start of the day in CDMX to UTC for the query
-    const todayStartUTC = new Date(
-      `${mxDateString}T00:00:00-06:00`,
-    ).toISOString();
-
-    const { data: todayOrders } = await supabase
-      .from("orders")
-      .select("total")
-      .eq("tenant_id", tenant.id)
-      .in("status", ["PAID", "DELIVERED"])
-      .gte("created_at", todayStartUTC);
-
-    salesToday = (todayOrders || []).reduce(
-      (sum, order) => sum + (order.total || 0),
-      0,
-    );
-
-    // 2.5 Propinas Hoy
-    const { data: todayPayments } = await supabase
-      .from("payments")
-      .select("tip_amount")
-      .eq("tenant_id", tenant.id)
-      .gte("created_at", todayStartUTC);
-
-    tipsToday = (todayPayments || []).reduce(
-      (sum, payment) => sum + (payment.tip_amount || 0),
-      0,
-    );
-
-    // 3. Clientes
-    const { count: custCount } = await supabase
-      .from("customers")
-      .select("*", { count: "exact", head: true })
-      .eq("tenant_id", tenant.id);
-
-    customersCount = custCount || 0;
+    if (error) {
+      console.error("Error fetching dashboard stats:", error);
+    } else if (stats && stats.length > 0) {
+      const s = stats[0];
+      activeOrdersCount = Number(s.active_orders || 0);
+      salesToday = Number(s.sales_today || 0);
+      tipsToday = Number(s.tips_today || 0);
+      customersCount = Number(s.customers_count || 0);
+    }
   }
 
   return (

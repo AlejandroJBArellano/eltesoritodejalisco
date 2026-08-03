@@ -18,6 +18,7 @@ export type { DbOrderPayload } from "@/lib/mappers/orders";
 export function useRealtimeOrders(
   initialData: OrderWithDetails[] = [],
   soundEnabled: boolean = false,
+  tenantId?: string,
 ) {
   const [orders, setOrders] = useState<OrderWithDetails[]>(initialData);
   const [loading, setLoading] = useState(initialData.length === 0);
@@ -77,11 +78,19 @@ export function useRealtimeOrders(
     };
 
     // Subscribe to changes in the tables
+    const ordersFilter = tenantId
+      ? { event: "*" as const, schema: "public" as const, table: "orders" as const, filter: `tenant_id=eq.${tenantId}` }
+      : { event: "*" as const, schema: "public" as const, table: "orders" as const };
+
+    const itemsFilter = tenantId
+      ? { event: "INSERT" as const, schema: "public" as const, table: "order_items" as const, filter: `tenant_id=eq.${tenantId}` }
+      : { event: "INSERT" as const, schema: "public" as const, table: "order_items" as const };
+
     const channel = supabase
-      .channel("orders_realtime")
+      .channel(`orders_realtime_${tenantId || "global"}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
+        ordersFilter,
         (payload) => {
           if (payload.eventType === "INSERT") {
             playBell();
@@ -91,7 +100,7 @@ export function useRealtimeOrders(
       )
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "order_items" },
+        itemsFilter,
         () => {
           playBell();
           debouncedFetchOrders();
@@ -105,7 +114,7 @@ export function useRealtimeOrders(
         clearTimeout(fetchTimeoutRef.current);
       }
     };
-  }, [soundEnabled, supabase, initialData.length, fetchOrders, debouncedFetchOrders]);
+  }, [soundEnabled, supabase, initialData.length, fetchOrders, debouncedFetchOrders, tenantId]);
 
   return { orders, loading, error, refetch: fetchOrders, setOrders };
 }

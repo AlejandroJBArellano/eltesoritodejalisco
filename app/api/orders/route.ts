@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/orders
- * Create a new order
+ * Create a new order via Supabase RPC (single round-trip for all writes)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -76,128 +76,30 @@ export async function POST(request: NextRequest) {
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
-    // Generate order number
-    // Reset at the start of the day or after the most recent daily cut
-    const todayStart = getCurrentCDMXDay() + "T00:00:00-06:00";
-    const { data: latestCut } = await supabase
-      .from("daily_cuts")
-      .select("created_at")
-      .eq("tenant_id", tenant.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    let query = supabase
-      .from("orders")
-      .select("order_number")
-      .eq("tenant_id", tenant.id)
-      .order("created_at", { ascending: false });
-
-    const filterDate =
-      latestCut && latestCut.created_at > todayStart
-        ? latestCut.created_at
-        : todayStart;
-
-    query = query.gt("created_at", filterDate);
-
-    const { data: lastOrder } = await query.limit(1).maybeSingle();
-
-    let nextSeq = 1;
-    if (lastOrder && lastOrder.order_number) {
-      const parts = lastOrder.order_number.split("-");
-      const lastSeqStr = parts[parts.length - 1];
-      nextSeq = parseInt(lastSeqStr, 10) + 1;
-    }
-
-    const todayStr = getCurrentCDMXDay().replace(/-/g, "").slice(2);
-    const nextNumber = `${todayStr}-${nextSeq.toString().padStart(3, "0")}`;
-
-    // Calculate order totals
-    let subtotal = 0;
-    const itemsWithPrices = [];
-
-    const menuItemIds = orderItems.map((item) => item.menuItemId).filter(Boolean);
-    const { data: menuItems, error: menuItemsError } = await supabase
-      .from("menu_items")
-      .select("*")
-      .in("id", menuItemIds)
-      .eq("tenant_id", tenant.id);
-
-    if (menuItemsError) {
-      throw new Error("Failed to fetch menu items");
-    }
-
-    const menuItemMap = new Map(menuItems?.map((item) => [item.id, item]) || []);
-
-    for (const item of orderItems) {
-      if (!item.menuItemId) {
-        throw new Error("Menu item is required");
-      }
-
-      const parsedQuantity = Number(item.quantity);
-      if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
-        throw new Error("Quantity must be greater than 0");
-      }
-
-      const menuItem = menuItemMap.get(item.menuItemId);
-      if (!menuItem) {
-        throw new Error(`Menu item ${item.menuItemId} not found`);
-      }
-
-      const itemTotal = menuItem.price * parsedQuantity;
-      subtotal += itemTotal;
-
-      itemsWithPrices.push({
-        menu_item_id: item.menuItemId,
-        quantity: Math.round(parsedQuantity),
-        unit_price: menuItem.price,
-        notes: item.notes || null,
-      });
-    }
-
-    const tax = subtotal * 0;
-    const total = subtotal + tax;
-
-    const orderId = crypto.randomUUID();
-
-    // Create order
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .insert({
-        id: orderId,
-        tenant_id: tenant.id,
-        order_number: nextNumber,
-        customer_id: customerId,
-        source,
-        table,
-        notes,
-        subtotal,
-        tax,
-        total,
-        operational_date: getCurrentCDMXDay(),
-        estado_cierre: "ABIERTA",
-        updated_at: getCurrentCDMXDate(),
-        pickup_time: pickupTime ? new Date(pickupTime).toISOString() : null,
-      })
-      .select()
-      .single();
-
-    if (orderError) throw orderError;
-
-    // Create order items
-    const { error: itemsError } = await supabase.from("order_items").insert(
-      itemsWithPrices.map((item) => ({
-        ...item,
-        id: crypto.randomUUID(),
-        tenant_id: tenant.id,
-        order_id: order.id,
-      })),
+    // 1. Create order + items in a single atomic RPC call
+    const { data: orderId, error: rpcError } = await supabase.rpc(
+      "create_order_with_items",
+      {
+        p_tenant_id: tenant.id,
+        p_customer_id: customerId || null,
+        p_source: source,
+        p_table: table || null,
+        p_notes: notes || null,
+        p_items: orderItems.map((i) => ({
+          menu_item_id: i.menuItemId,
+          quantity: Number(i.quantity),
+          notes: i.notes || null,
+        })),
+        p_pickup_time: pickupTime
+          ? new Date(pickupTime).toISOString()
+          : null,
+      },
     );
 
-    if (itemsError) throw itemsError;
+    if (rpcError) throw rpcError;
 
-    // Fetch full order for response
-    const { data: fullOrder } = await supabase
+    // 2. Fetch the full order with nested relations (single read)
+    const { data: fullOrder, error: fetchError } = await supabase
       .from("orders")
       .select(
         `
@@ -210,32 +112,11 @@ export async function POST(request: NextRequest) {
         customer:customers (*)
       `,
       )
-      .eq("id", order.id)
+      .eq("id", orderId)
       .eq("tenant_id", tenant.id)
       .single();
 
-    // If customer exists, update loyalty points
-    if (customerId) {
-      const pointsEarned = Math.floor(total / 10);
-
-      const { data: customer } = await supabase
-        .from("customers")
-        .select("loyalty_points, total_spend")
-        .eq("id", customerId)
-        .eq("tenant_id", tenant.id)
-        .single();
-
-      if (customer) {
-        await supabase
-          .from("customers")
-          .update({
-            loyalty_points: (customer.loyalty_points || 0) + pointsEarned,
-            total_spend: (customer.total_spend || 0) + total,
-          })
-          .eq("id", customerId)
-          .eq("tenant_id", tenant.id);
-      }
-    }
+    if (fetchError) throw fetchError;
 
     return NextResponse.json({ order: fullOrder }, { status: 201 });
   } catch (error) {

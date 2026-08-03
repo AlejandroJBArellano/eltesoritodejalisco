@@ -20,6 +20,7 @@ import { PageHeader } from "@/components/PageHeader";
 
 interface KitchenDisplaySystemProps {
   initialOrders: OrderWithDetails[];
+  tenantId?: string;
 }
 
 interface KanbanColumnProps {
@@ -118,9 +119,10 @@ function KanbanColumn({
  */
 export function KitchenDisplaySystem({
   initialOrders,
+  tenantId,
 }: KitchenDisplaySystemProps) {
   const [soundEnabled, setSoundEnabled] = useState(false);
-  const { orders, setOrders } = useRealtimeOrders(initialOrders, soundEnabled);
+  const { orders, setOrders } = useRealtimeOrders(initialOrders, soundEnabled, tenantId);
   const [view, setView] = useState<"kanban" | "batching">("kanban");
   const [updatingItemIds, setUpdatingItemIds] = useState<Set<string>>(
     () => new Set(),

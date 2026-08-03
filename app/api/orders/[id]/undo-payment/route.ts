@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { reverseInventoryForOrder } from "@/lib/services/inventory";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
 
@@ -59,13 +58,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     if (orderUpdateError) throw orderUpdateError;
 
-    // 4. Reverse inventory deductions
-    try {
-      await reverseInventoryForOrder(id);
-    } catch (reverseError) {
-      console.error("Error reversing inventory:", reverseError);
-      // Log but don't fail the whole undo process
-    }
+    // 4. Inventory reversal is handled automatically by the
+    //    trg_order_status_inventory trigger (PAID → PENDING)
 
     // 5. Log the adjustment
     const { error: logError } = await supabase
