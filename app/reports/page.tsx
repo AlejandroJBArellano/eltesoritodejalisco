@@ -937,7 +937,7 @@ export default function ReportsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {data.customers.topCustomers.map((customer, index) => (
                   <tr
                     key={index}

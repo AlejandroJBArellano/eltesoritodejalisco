@@ -1364,7 +1364,7 @@ export default function HistoryPage() {
                       <th className="py-3 px-3 text-center">Acción</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-border">
                     {paginatedDailyCuts.map((cut) => {
                       const ventaBruta =
                         Number(cut.venta_neta) + Number(cut.iva_acumulado);
@@ -1658,7 +1658,7 @@ export default function HistoryPage() {
                   />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {paginatedOrders.map((order) => {
                   const tipAmount = getOrderTipAmount(order);
                   const paymentMethods = getOrderPaymentMethods(order);
@@ -1780,7 +1780,7 @@ export default function HistoryPage() {
                                     </th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-white/5">
+                                <tbody className="divide-y divide-border">
                                   {order.orderItems?.map((item) => {
                                     const unitPrice = Number(
                                       item.unitPrice || 0,

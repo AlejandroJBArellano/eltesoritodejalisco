@@ -972,7 +972,7 @@ export default function GastosPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-border">
                   {paginatedExpenses.map((exp) => (
                     <tr
                       key={exp.id}

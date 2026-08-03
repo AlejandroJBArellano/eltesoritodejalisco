@@ -550,7 +550,7 @@ export function AdminTareasClient({
                   <th className="py-3 px-4 font-bold text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {paginatedExecutions.map((exec) => (
                   <tr
                     key={exec.id}
@@ -663,7 +663,7 @@ export function AdminTareasClient({
                   <th className="py-3 px-4">Duración Promedio</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {metrics.map((collab) => (
                   <tr key={collab.userId} className="hover:bg-white/[0.02]">
                     <td className="py-3 px-4 text-white font-bold">
@@ -793,7 +793,7 @@ export function AdminTareasClient({
                     <th className="py-3 px-4 font-bold text-right">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-border">
                   {paginatedTasks.map((t) => (
                     <tr key={t.id} className="hover:bg-white/[0.02]">
                       <td className="py-3 px-4 font-bold text-white">

@@ -385,7 +385,7 @@ export default function AttendanceHistoryPage() {
                     />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-border">
                   {paginatedAttendances.map((rec) => (
                     <tr
                       key={rec.id}

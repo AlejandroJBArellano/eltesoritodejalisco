@@ -449,7 +449,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                   <th className="py-3 px-4 font-bold text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {paginatedProfiles.map((p) => {
                   const roleConfig =
                     ROLE_PERMISSIONS[p.role] || ROLE_PERMISSIONS.WAITER;
