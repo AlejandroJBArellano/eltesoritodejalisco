@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { BookOpen, Plus, RefreshCw, Tag } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 
@@ -101,6 +102,24 @@ export function MenuContent({ initialItems }: MenuContentProps) {
     handleRecipeSubmit,
     deleteRecipe,
   } = useRecipes(items);
+
+  const [ingredients, setIngredients] = useState<any[]>([]);
+
+  const fetchIngredients = async () => {
+    try {
+      const response = await fetch("/api/inventory");
+      const data = await response.json();
+      if (response.ok) {
+        setIngredients(data.ingredients || []);
+      }
+    } catch (error) {
+      console.error("Error fetching ingredients:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIngredients();
+  }, []);
 
   // Sync category submit with menu item refresh (in case category rename cascades or needs update)
   const onCategorySubmitSuccess = async () => {
@@ -235,6 +254,7 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         isEditing={isEditing}
         isSubmitting={isSubmitting}
         categories={categories}
+        ingredients={ingredients}
         showTranslations={showTranslations}
         onToggleTranslations={() => setShowTranslations((v) => !v)}
         onFormChange={handleFormChange}
@@ -262,6 +282,7 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         onSubmit={handleRecipeSubmit}
         items={items}
         recipeItems={recipeItems}
+        ingredients={ingredients}
         selectedRecipeMenuItemId={selectedRecipeMenuItemId}
         onSelectedRecipeMenuItemIdChange={(id) => {
           setSelectedRecipeMenuItemId(id);

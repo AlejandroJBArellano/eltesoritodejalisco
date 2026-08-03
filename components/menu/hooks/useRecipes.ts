@@ -40,8 +40,8 @@ export function useRecipes(items: MenuItem[]) {
       setRecipeErrors({ menuItemId: "Selecciona un producto" });
       return;
     }
-    if (!recipeForm.ingredientName.trim()) {
-      setRecipeErrors({ ingredientName: "Ingresa el nombre del ingrediente" });
+    if (!recipeForm.ingredientId) {
+      setRecipeErrors({ ingredientId: "Selecciona un ingrediente" });
       return;
     }
     const qty = Number(recipeForm.quantityRequired);
@@ -57,7 +57,7 @@ export function useRecipes(items: MenuItem[]) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           menuItemId: selectedRecipeMenuItemId,
-          ingredientName: recipeForm.ingredientName.trim(),
+          ingredientId: recipeForm.ingredientId,
           quantityRequired: qty,
         }),
       });

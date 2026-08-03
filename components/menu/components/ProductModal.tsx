@@ -12,6 +12,7 @@ interface ProductModalProps {
   isEditing: boolean;
   isSubmitting: boolean;
   categories: string[];
+  ingredients: any[];
   showTranslations: boolean;
   onToggleTranslations: () => void;
   onFormChange: (field: keyof MenuFormState, value: string | boolean) => void;
@@ -29,6 +30,7 @@ export function ProductModal({
   isEditing,
   isSubmitting,
   categories,
+  ingredients,
   showTranslations,
   onToggleTranslations,
   onFormChange,
@@ -115,6 +117,24 @@ export function ProductModal({
             className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary"
             placeholder="Ingredientes principales, preparación, etc."
           />
+        </div>
+
+        <div>
+          <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            Enlace Directo a Inventario (Control de Stock Directo)
+          </label>
+          <select
+            value={formState.ingredientId || ""}
+            onChange={(e) => onFormChange("ingredientId", e.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary font-bold"
+          >
+            <option value="">-- No trackear directamente (usar recetas si existen) --</option>
+            {ingredients.map((ing) => (
+              <option key={ing.id} value={ing.id}>
+                {ing.name} ({ing.unit})
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* SECCIÓN DE TRADUCCIONES — colapsable */}

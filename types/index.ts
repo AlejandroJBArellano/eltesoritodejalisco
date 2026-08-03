@@ -12,6 +12,7 @@ export interface Ingredient {
   currentStock: number;
   minimumStock: number;
   costPerUnit?: number;
+  trackingType: "PIECE" | "MEASURABLE";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,6 +25,7 @@ export interface MenuItem {
   category?: string;
   imageUrl?: string;
   isAvailable: boolean;
+  ingredientId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,7 +41,8 @@ export interface RecipeItem {
 
 export interface StockAdjustment {
   id: string;
-  ingredientId: string;
+  ingredientId?: string | null;
+  menuItemId?: string | null;
   adjustment: number;
   reason?: string;
   userId?: string;

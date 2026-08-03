@@ -15,6 +15,7 @@ export type MenuItem = {
   imageUrl?: string | null;
   isAvailable: boolean;
   translations?: Translations;
+  ingredientId?: string | null;
 };
 
 export type MenuCategory = {
@@ -28,7 +29,8 @@ export type MenuCategory = {
 export type RecipeItem = {
   id: string;
   menuItemId: string;
-  ingredientName: string;
+  ingredientId: string;
+  ingredientName?: string;
   quantityRequired: number;
 };
 
@@ -44,10 +46,11 @@ export type MenuFormState = {
   isAvailable: boolean;
   nameEn: string;
   descriptionEn: string;
+  ingredientId: string;
 };
 
 export type RecipeFormState = {
-  ingredientName: string;
+  ingredientId: string;
   quantityRequired: string;
 };
 
@@ -67,6 +70,7 @@ export interface DatabaseMenuItem {
   is_available: boolean;
   image_url?: string | null;
   translations?: Translations;
+  ingredient_id?: string | null;
 }
 
 // Default empty states
@@ -79,6 +83,7 @@ export const EMPTY_PRODUCT_FORM: MenuFormState = {
   isAvailable: true,
   nameEn: "",
   descriptionEn: "",
+  ingredientId: "",
 };
 
 export const EMPTY_CATEGORY_FORM: CategoryFormState = {
@@ -87,6 +92,6 @@ export const EMPTY_CATEGORY_FORM: CategoryFormState = {
 };
 
 export const EMPTY_RECIPE_FORM: RecipeFormState = {
-  ingredientName: "",
+  ingredientId: "",
   quantityRequired: "",
 };

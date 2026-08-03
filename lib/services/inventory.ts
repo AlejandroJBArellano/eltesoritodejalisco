@@ -14,6 +14,8 @@ interface InventoryOrder {
   order_items: Array<{
     quantity: number;
     menu_items: {
+      ingredient_id: string | null;
+      ingredients: InventoryIngredient | null;
       recipe_items: Array<{
         quantity_required: number;
         ingredients: InventoryIngredient | null;
@@ -51,6 +53,7 @@ export async function deductInventoryForOrder(
           *,
           menu_items (
             *,
+            ingredients (*),
             recipe_items (
               *,
               ingredients (*)
@@ -77,13 +80,12 @@ export async function deductInventoryForOrder(
     for (const orderItem of (order as unknown as InventoryOrder).order_items) {
       const { menu_items: menuItem, quantity } = orderItem;
 
-      if (!menuItem || !menuItem.recipe_items) continue;
+      if (!menuItem) continue;
 
-      for (const recipeItem of menuItem.recipe_items) {
-        const { ingredients: ingredient, quantity_required } = recipeItem;
-        if (!ingredient) continue;
-
-        const totalNeeded = quantity_required * quantity;
+      // 1. Direct tracking of physical items (Option B)
+      if (menuItem.ingredients) {
+        const ingredient = menuItem.ingredients;
+        const totalNeeded = quantity; // 1-to-1 mapping
 
         if (ingredientRequirements.has(ingredient.id)) {
           const existing = ingredientRequirements.get(ingredient.id)!;
@@ -93,6 +95,25 @@ export async function deductInventoryForOrder(
             ingredient,
             totalRequired: totalNeeded,
           });
+        }
+      } 
+      // 2. Recipe-based tracking of prepared items (Option A)
+      else if (menuItem.recipe_items && menuItem.recipe_items.length > 0) {
+        for (const recipeItem of menuItem.recipe_items) {
+          const { ingredients: ingredient, quantity_required } = recipeItem;
+          if (!ingredient) continue;
+
+          const totalNeeded = Number((quantity_required * quantity).toFixed(4));
+
+          if (ingredientRequirements.has(ingredient.id)) {
+            const existing = ingredientRequirements.get(ingredient.id)!;
+            existing.totalRequired += totalNeeded;
+          } else {
+            ingredientRequirements.set(ingredient.id, {
+              ingredient,
+              totalRequired: totalNeeded,
+            });
+          }
         }
       }
     }
@@ -124,6 +145,7 @@ export async function deductInventoryForOrder(
           ingredient_id: ingredient.id,
           adjustment: -totalRequired,
           reason: `Order deduction`,
+          tenant_id: (order as { tenant_id: string }).tenant_id,
           created_at: new Date().toISOString(),
         });
 
@@ -180,6 +202,7 @@ export async function reverseInventoryForOrder(
           *,
           menu_items (
             *,
+            ingredients (*),
             recipe_items (
               *,
               ingredients (*)
@@ -206,13 +229,12 @@ export async function reverseInventoryForOrder(
     for (const orderItem of (order as unknown as InventoryOrder).order_items) {
       const { menu_items: menuItem, quantity } = orderItem;
 
-      if (!menuItem || !menuItem.recipe_items) continue;
+      if (!menuItem) continue;
 
-      for (const recipeItem of menuItem.recipe_items) {
-        const { ingredients: ingredient, quantity_required } = recipeItem;
-        if (!ingredient) continue;
-
-        const totalNeeded = quantity_required * quantity;
+      // 1. Direct tracking of physical items (Option B)
+      if (menuItem.ingredients) {
+        const ingredient = menuItem.ingredients;
+        const totalNeeded = quantity;
 
         if (ingredientRequirements.has(ingredient.id)) {
           const existing = ingredientRequirements.get(ingredient.id)!;
@@ -222,6 +244,25 @@ export async function reverseInventoryForOrder(
             ingredient,
             totalRequired: totalNeeded,
           });
+        }
+      }
+      // 2. Recipe-based tracking (Option A)
+      else if (menuItem.recipe_items && menuItem.recipe_items.length > 0) {
+        for (const recipeItem of menuItem.recipe_items) {
+          const { ingredients: ingredient, quantity_required } = recipeItem;
+          if (!ingredient) continue;
+
+          const totalNeeded = Number((quantity_required * quantity).toFixed(4));
+
+          if (ingredientRequirements.has(ingredient.id)) {
+            const existing = ingredientRequirements.get(ingredient.id)!;
+            existing.totalRequired += totalNeeded;
+          } else {
+            ingredientRequirements.set(ingredient.id, {
+              ingredient,
+              totalRequired: totalNeeded,
+            });
+          }
         }
       }
     }
@@ -253,6 +294,7 @@ export async function reverseInventoryForOrder(
           ingredient_id: ingredient.id,
           adjustment: totalRequired,
           reason: `Order reversal (undo)`,
+          tenant_id: (order as { tenant_id: string }).tenant_id,
           created_at: new Date().toISOString(),
         });
 
@@ -329,6 +371,7 @@ export async function adjustIngredientStock(
         adjustment,
         reason,
         user_id: userId,
+        tenant_id: ingredient.tenant_id,
       });
 
     if (insertError) throw insertError;

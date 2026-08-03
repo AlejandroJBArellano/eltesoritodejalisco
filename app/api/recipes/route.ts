@@ -2,6 +2,7 @@
 // Handles recipe items for menu products
 
 import { createClient } from "@/lib/supabase/server";
+import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -22,12 +23,20 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { data: recipeItems, error } = await supabase
       .from("recipe_items")
-      .select("*")
+      .select("*, ingredients(*)")
       .eq("menu_item_id", menuItemId);
 
     if (error) throw error;
 
-    return NextResponse.json({ recipeItems });
+    const formatted = (recipeItems || []).map((item: any) => ({
+      id: item.id,
+      menuItemId: item.menu_item_id,
+      ingredientId: item.ingredient_id,
+      ingredientName: item.ingredients?.name || "Sin nombre",
+      quantityRequired: item.quantity_required,
+    }));
+
+    return NextResponse.json({ recipeItems: formatted });
   } catch (error) {
     console.error("Error fetching recipes:", error);
     return NextResponse.json(
@@ -44,11 +53,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { menuItemId, ingredientName, quantityRequired } = body;
+    const { menuItemId, ingredientId, quantityRequired } = body;
 
-    if (!menuItemId || !ingredientName) {
+    if (!menuItemId || !ingredientId) {
       return NextResponse.json(
-        { error: "menuItemId and ingredientName are required" },
+        { error: "menuItemId and ingredientId are required" },
         { status: 400 },
       );
     }
@@ -61,20 +70,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     const { data: recipeItem, error } = await supabase
       .from("recipe_items")
       .insert({
         menu_item_id: menuItemId,
-        ingredient_name: ingredientName,
+        ingredient_id: ingredientId,
         quantity_required: parsedQuantity,
+        tenant_id: tenant.id,
       })
-      .select("*")
+      .select("*, ingredients(*)")
       .single();
 
     if (error) throw error;
 
-    return NextResponse.json({ recipeItem }, { status: 201 });
+    const formatted = {
+      id: recipeItem.id,
+      menuItemId: recipeItem.menu_item_id,
+      ingredientId: recipeItem.ingredient_id,
+      ingredientName: recipeItem.ingredients?.name || "Sin nombre",
+      quantityRequired: recipeItem.quantity_required,
+    };
+
+    return NextResponse.json({ recipeItem: formatted }, { status: 201 });
   } catch (error) {
     console.error("Error creating recipe:", error);
     return NextResponse.json(
@@ -113,12 +132,20 @@ export async function PUT(request: NextRequest) {
       .from("recipe_items")
       .update({ quantity_required: parsedQuantity })
       .eq("id", id)
-      .select("*")
+      .select("*, ingredients(*)")
       .single();
 
     if (error) throw error;
 
-    return NextResponse.json({ recipeItem });
+    const formatted = {
+      id: recipeItem.id,
+      menuItemId: recipeItem.menu_item_id,
+      ingredientId: recipeItem.ingredient_id,
+      ingredientName: recipeItem.ingredients?.name || "Sin nombre",
+      quantityRequired: recipeItem.quantity_required,
+    };
+
+    return NextResponse.json({ recipeItem: formatted });
   } catch (error) {
     console.error("Error updating recipe:", error);
     return NextResponse.json(

@@ -107,6 +107,7 @@ export function useMenuItems(initialItems: MenuItem[]) {
           isAvailable: item.is_available,
           imageUrl: item.image_url,
           translations: item.translations,
+          ingredientId: item.ingredient_id,
         })),
       );
       setErrorMessage(null);
@@ -170,6 +171,7 @@ export function useMenuItems(initialItems: MenuItem[]) {
       isAvailable: item.isAvailable,
       nameEn: item.translations?.en?.name || "",
       descriptionEn: item.translations?.en?.description || "",
+      ingredientId: item.ingredientId || "",
     });
     setImagePreview(item.imageUrl || null);
     setFormErrors({});
@@ -196,6 +198,7 @@ export function useMenuItems(initialItems: MenuItem[]) {
       formData.append("category", formState.category);
       formData.append("isAvailable", String(formState.isAvailable));
       formData.append("imageUrl", formState.imageUrl || "");
+      formData.append("ingredientId", formState.ingredientId || "");
 
       const enTranslation: Record<string, string> = {};
       if (formState.nameEn.trim()) enTranslation.name = formState.nameEn.trim();

@@ -9,6 +9,7 @@ interface RecipeModalProps {
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   items: MenuItem[];
   recipeItems: RecipeItem[];
+  ingredients: any[];
   selectedRecipeMenuItemId: string;
   onSelectedRecipeMenuItemIdChange: (id: string) => void;
   recipeForm: RecipeFormState;
@@ -25,6 +26,7 @@ export function RecipeModal({
   onSubmit,
   items,
   recipeItems,
+  ingredients,
   selectedRecipeMenuItemId,
   onSelectedRecipeMenuItemIdChange,
   recipeForm,
@@ -70,23 +72,28 @@ export function RecipeModal({
             >
               <div className="sm:col-span-2">
                 <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
-                  Nombre del Ingrediente
+                  Ingrediente del Catálogo
                 </label>
-                <input
-                  type="text"
-                  value={recipeForm.ingredientName}
+                <select
+                  value={recipeForm.ingredientId}
                   onChange={(e) =>
                     onRecipeFormChange({
                       ...recipeForm,
-                      ingredientName: e.target.value,
+                      ingredientId: e.target.value,
                     })
                   }
-                  className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary"
-                  placeholder="Ej. Carne de Cerdo (g), Bolillo, etc."
-                />
-                {recipeErrors.ingredientName && (
+                  className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary font-bold"
+                >
+                  <option value="">-- Seleccionar Ingrediente --</option>
+                  {ingredients.map((ing) => (
+                    <option key={ing.id} value={ing.id}>
+                      {ing.name} ({ing.unit})
+                    </option>
+                  ))}
+                </select>
+                {recipeErrors.ingredientId && (
                   <p className="text-[10px] font-bold text-red-400 mt-0.5">
-                    {recipeErrors.ingredientName}
+                    {recipeErrors.ingredientId}
                   </p>
                 )}
               </div>

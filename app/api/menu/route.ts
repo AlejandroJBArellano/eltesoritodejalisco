@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
     let imageUrl = (formData.get("imageUrl") as string) || null;
     const translationsRaw = formData.get("translations") as string | null;
     const translations = translationsRaw ? JSON.parse(translationsRaw) : {};
+    const ingredientId = (formData.get("ingredientId") as string) || null;
 
     if (!name) {
       return NextResponse.json(
@@ -134,6 +135,7 @@ export async function POST(request: NextRequest) {
         is_available: isAvailable,
         stripe_product_id: stripeProductId,
         translations,
+        ingredient_id: ingredientId,
         updated_at: new Date().toISOString(),
       })
       .select()
@@ -173,6 +175,7 @@ export async function PUT(request: NextRequest) {
     let imageUrl = (formData.get("imageUrl") as string) || null;
     const translationsRaw = formData.get("translations") as string | null;
     const translations = translationsRaw ? JSON.parse(translationsRaw) : undefined;
+    const ingredientId = (formData.get("ingredientId") as string) || null;
 
     if (!id || !name) {
       return NextResponse.json(
@@ -236,6 +239,7 @@ export async function PUT(request: NextRequest) {
         image_url: imageUrl || null,
         is_available: isAvailable,
         stripe_product_id: stripeProductId,
+        ingredient_id: ingredientId,
         ...(translations !== undefined ? { translations } : {}),
         updated_at: new Date().toISOString(),
       })
