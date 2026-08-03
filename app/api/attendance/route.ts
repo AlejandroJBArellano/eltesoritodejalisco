@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getTenantContext } from "@/lib/tenant";
 import { NextResponse } from "next/server";
 import { format } from "date-fns-tz";
 
@@ -7,6 +8,7 @@ const TZ = "America/Mexico_City";
 
 export async function GET() {
   try {
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     const {
       data: { user },
@@ -24,12 +26,14 @@ export async function GET() {
       .from("profiles")
       .select("role")
       .eq("id", user.id)
+      .eq("tenant_id", tenant.id)
       .maybeSingle();
 
     const { data: dbUser } = await supabase
       .from("users")
       .select("role")
       .eq("id", user.id)
+      .eq("tenant_id", tenant.id)
       .maybeSingle();
 
     const role =
@@ -43,8 +47,13 @@ export async function GET() {
         supabase
           .from("attendance")
           .select("id, user_id, check_in, check_out, status, date")
+          .eq("tenant_id", tenant.id)
           .eq("date", todayDate),
-        supabase.from("users").select("id, name, role").neq("role", "ADMIN"), // Maybe admins don't track attendance? Let's exclude or include depending. Let's include everyone just in case.
+        supabase
+          .from("users")
+          .select("id, name, role")
+          .eq("tenant_id", tenant.id)
+          .neq("role", "ADMIN"), // Maybe admins don't track attendance? Let's exclude or include depending. Let's include everyone just in case.
       ]);
 
       return NextResponse.json({
@@ -58,6 +67,7 @@ export async function GET() {
         .from("attendance")
         .select("id, user_id, check_in, check_out, status, date")
         .eq("user_id", user.id)
+        .eq("tenant_id", tenant.id)
         .eq("date", todayDate)
         .order("created_at", { ascending: false });
 
@@ -78,6 +88,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     const {
       data: { user },
@@ -99,6 +110,7 @@ export async function POST(request: Request) {
         .from("users")
         .select("role")
         .eq("id", user.id)
+        .eq("tenant_id", tenant.id)
         .single();
       if (dbUser?.role !== "ADMIN" && dbUser?.role !== "MANAGER") {
         return NextResponse.json(
@@ -121,6 +133,7 @@ export async function POST(request: Request) {
         .from("users")
         .select("id")
         .eq("id", actualUserId)
+        .eq("tenant_id", tenant.id)
         .maybeSingle();
 
       if (!targetDbUser) {
@@ -129,6 +142,7 @@ export async function POST(request: Request) {
           .from("users")
           .select("id")
           .eq("email", user.email)
+          .eq("tenant_id", tenant.id)
           .maybeSingle();
 
         if (emailSearchError) {
@@ -151,6 +165,7 @@ export async function POST(request: Request) {
               name: user.user_metadata?.name || user.email.split("@")[0],
               role: user.user_metadata?.role || "ADMIN",
               password: "MANAGED_BY_SUPABASE",
+              tenant_id: tenant.id,
               created_at: nowIso,
               updated_at: nowIso,
             })
@@ -194,6 +209,7 @@ export async function POST(request: Request) {
         .from("attendance")
         .insert({
           user_id: dbUserId,
+          tenant_id: tenant.id,
           date: todayDate,
           check_in: actionTime,
           status: "ACTIVE",
@@ -210,6 +226,7 @@ export async function POST(request: Request) {
         .from("users")
         .select("id")
         .eq("id", actualUserId)
+        .eq("tenant_id", tenant.id)
         .maybeSingle();
 
       if (!targetDbUser) {
@@ -217,6 +234,7 @@ export async function POST(request: Request) {
           .from("users")
           .select("id")
           .eq("email", user.email)
+          .eq("tenant_id", tenant.id)
           .maybeSingle();
 
         if (userByEmail) {
@@ -229,6 +247,7 @@ export async function POST(request: Request) {
         .from("attendance")
         .select("id")
         .eq("user_id", dbUserId)
+        .eq("tenant_id", tenant.id)
         .eq("date", todayDate)
         .eq("status", "ACTIVE")
         .order("created_at", { ascending: false })

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,6 +15,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
+    const tenant = await getTenantContext();
     const adminSupabase = createAdminClient();
 
     // 1. Primary check: profiles table (used by getProfile() in dashboard)
@@ -21,6 +23,7 @@ export async function GET(request: NextRequest) {
       .from("profiles")
       .select("id, role")
       .eq("id", user.id)
+      .eq("tenant_id", tenant.id)
       .maybeSingle();
 
     // 2. Secondary check: users table
@@ -28,6 +31,7 @@ export async function GET(request: NextRequest) {
       .from("users")
       .select("id, name, email, role")
       .eq("id", user.id)
+      .eq("tenant_id", tenant.id)
       .maybeSingle();
 
     let dbUserByEmail = null;
@@ -36,6 +40,7 @@ export async function GET(request: NextRequest) {
         .from("users")
         .select("id, name, email, role")
         .eq("email", user.email)
+        .eq("tenant_id", tenant.id)
         .maybeSingle();
       dbUserByEmail = byEmail;
     }
@@ -58,7 +63,8 @@ export async function GET(request: NextRequest) {
       await adminSupabase
         .from("users")
         .update({ role: "ADMIN" })
-        .eq("id", user.id);
+        .eq("id", user.id)
+        .eq("tenant_id", tenant.id);
     }
 
     if (!isAdmin) {
@@ -81,6 +87,7 @@ export async function GET(request: NextRequest) {
     let attendanceQuery = adminSupabase
       .from("attendance")
       .select("*")
+      .eq("tenant_id", tenant.id)
       .order("created_at", { ascending: false });
 
     if (filterUserId && filterUserId !== "ALL") {
@@ -106,7 +113,8 @@ export async function GET(request: NextRequest) {
     // Fetch all users to map user info reliably
     const { data: allUsers } = await adminSupabase
       .from("users")
-      .select("id, name, email, role");
+      .select("id, name, email, role")
+      .eq("tenant_id", tenant.id);
 
     const usersMap = new Map((allUsers || []).map((u) => [u.id, u]));
 

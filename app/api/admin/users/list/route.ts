@@ -1,5 +1,6 @@
 import { getProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getTenantContext } from "@/lib/tenant";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -10,6 +11,7 @@ export async function GET() {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 
+    const tenant = await getTenantContext();
     const adminClient = createAdminClient();
 
     // Obtenemos los usuarios y sus metadatos desde Supabase Auth (donde viven los correos y full_name verídicos)
@@ -24,27 +26,32 @@ export async function GET() {
       );
     }
 
-    // Y obtenemos los roles registrados en la tabla 'profiles'
+    // Y obtenemos los roles registrados en la tabla 'profiles' para este tenant
     const { data: profiles, error: profilesError } = await adminClient
       .from("profiles")
-      .select("*");
+      .select("*")
+      .eq("tenant_id", tenant.id);
 
     if (profilesError) {
       console.error(profilesError);
     }
 
-    // Combinamos la información de ambas tablas (por su ID)
-    const combinedUsers = authData.users.map((authUser) => {
-      const dbProfile = profiles?.find((p) => p.id === authUser.id);
-      return {
-        id: authUser.id,
-        email: authUser.email,
-        full_name:
-          authUser.user_metadata?.name || dbProfile?.full_name || "Sin nombre",
-        role: dbProfile?.role || authUser.user_metadata?.role || "WAITER",
-        created_at: authUser.created_at,
-      };
-    });
+    const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
+
+    // Combinamos la información de ambas tablas (filtrando solo los que pertenecen a este tenant)
+    const combinedUsers = authData.users
+      .filter((authUser) => profileMap.has(authUser.id))
+      .map((authUser) => {
+        const dbProfile = profileMap.get(authUser.id)!;
+        return {
+          id: authUser.id,
+          email: authUser.email,
+          full_name:
+            authUser.user_metadata?.name || dbProfile?.full_name || "Sin nombre",
+          role: dbProfile?.role || "WAITER",
+          created_at: authUser.created_at,
+        };
+      });
 
     // Los ordenamos de más reciente a más antiguo
     combinedUsers.sort(

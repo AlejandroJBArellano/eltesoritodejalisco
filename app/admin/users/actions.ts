@@ -2,6 +2,7 @@
 
 import { getProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getTenantContext } from "@/lib/tenant";
 import { revalidatePath } from "next/cache";
 
 export async function createUser(formData: FormData) {
@@ -20,6 +21,7 @@ export async function createUser(formData: FormData) {
       return { error: "Faltan datos requeridos" };
     }
 
+    const tenant = await getTenantContext();
     const adminClient = createAdminClient();
 
     // Crear el usuario en auth
@@ -31,6 +33,7 @@ export async function createUser(formData: FormData) {
         user_metadata: {
           full_name: fullName,
           role: role,
+          tenant_id: tenant.id, // pass tenant_id so handle_new_user trigger knows where to assign them
         },
       });
 
@@ -50,6 +53,7 @@ export async function createUser(formData: FormData) {
         email: email,
         full_name: fullName,
         role: role,
+        tenant_id: tenant.id,
       });
 
       if (upsertError) {
@@ -58,6 +62,16 @@ export async function createUser(formData: FormData) {
         await adminClient.auth.admin.deleteUser(newUser.user.id);
         return { error: "Error al crear el perfil en la base de datos" };
       }
+
+      // Also create/upsert in the users table to keep it in sync
+      await adminClient.from("users").upsert({
+        id: newUser.user.id,
+        email: email,
+        name: fullName,
+        role: role,
+        tenant_id: tenant.id,
+        password: "MANAGED_BY_SUPABASE",
+      });
     }
 
     revalidatePath("/admin/users");
@@ -75,17 +89,26 @@ export async function updateUserRole(id: string, newRole: string) {
       return { error: "No autorizado" };
     }
 
+    const tenant = await getTenantContext();
     const adminClient = createAdminClient();
 
     // Actualizamos perfil
     const { error: updateError } = await adminClient
       .from("profiles")
       .update({ role: newRole })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
 
     if (updateError) {
       return { error: "Error al actualizar el rol" };
     }
+
+    // Actualizamos tabla users si existe
+    await adminClient
+      .from("users")
+      .update({ role: newRole })
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
 
     // Opcional: actualizar user_metadata
     await adminClient.auth.admin.updateUserById(id, {
@@ -111,14 +134,26 @@ export async function deleteUser(id: string) {
       return { error: "No te puedes borrar a ti mismo" };
     }
 
+    const tenant = await getTenantContext();
     const adminClient = createAdminClient();
 
-    // Borrar de auth (el cascade en Supabase normalmente borra el profile)
-    const { error: deleteError } = await adminClient.auth.admin.deleteUser(id);
+    // En lugar de borrar la identidad global de Auth, simplemente removemos sus perfiles en este tenant
+    const { error: deleteProfileError } = await adminClient
+      .from("profiles")
+      .delete()
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
 
-    if (deleteError) {
-      return { error: "Error al eliminar usuario de Auth" };
+    if (deleteProfileError) {
+      return { error: "Error al eliminar el perfil del usuario" };
     }
+
+    // Eliminar también de la tabla public.users
+    await adminClient
+      .from("users")
+      .delete()
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
 
     revalidatePath("/admin/users");
     return { success: true };
