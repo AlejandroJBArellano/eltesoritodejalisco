@@ -34,9 +34,6 @@ export default async function KitchenPage() {
   const tenant = await getTenantContext();
   const orders = await getActiveOrders();
 
-  return (
-    <main className="min-h-screen bg-[#121212] pb-12">
-      <KitchenDisplaySystem initialOrders={orders} tenantId={tenant.id} />
-    </main>
-  );
+  return <KitchenDisplaySystem initialOrders={orders} tenantId={tenant.id} />;
 }
+

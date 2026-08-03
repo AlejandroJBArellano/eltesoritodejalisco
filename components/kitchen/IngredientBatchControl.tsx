@@ -11,7 +11,7 @@ import {
   Trash2,
   UtensilsCrossed,
 } from "lucide-react";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface IngredientBatchControlProps {
   ingredientName: string;
@@ -147,7 +147,7 @@ export function IngredientBatchControl({
 
   if (loading && !activeBatch && !summaryData) {
     return (
-      <div className="flex h-full min-h-[220px] flex-col items-center justify-center rounded-2xl border border-white/5 bg-[#242424] p-6 text-[#E0E0E0]/60">
+      <div className="flex h-full min-h-55 flex-col items-center justify-center rounded-2xl border border-border bg-card p-6 text-text-light/60">
         <RefreshCw className="h-6 w-6 animate-spin text-emerald-400 mb-2" />
         <span className="text-xs font-bold uppercase tracking-wider">
           Cargando inventario...
@@ -157,10 +157,10 @@ export function IngredientBatchControl({
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#242424] shadow-lg transition-all hover:border-white/20">
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all hover:border-border/80">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/5 bg-[#1A1A1A] p-4">
-        <h3 className="flex items-center gap-2 font-black text-[#E0E0E0]">
+      <div className="flex items-center justify-between border-b border-border bg-dark/40 p-4">
+        <h3 className="flex items-center gap-2 font-black text-text-light">
           <Package className="h-5 w-5 text-emerald-400" />
           <span>{ingredientName}</span>
         </h3>
@@ -173,7 +173,7 @@ export function IngredientBatchControl({
             En Uso
           </span>
         ) : (
-          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#E0E0E0]/50">
+          <span className="rounded-full border border-border bg-card-light px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-text-light/50">
             Cerrado
           </span>
         )}
@@ -183,7 +183,7 @@ export function IngredientBatchControl({
       <div className="flex flex-1 flex-col justify-between p-5">
         {error && (
           <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs font-bold text-red-400">
-            <AlertTriangle className="h-4 w-4 flex-shrink-0 text-red-400" />
+            <AlertTriangle className="h-4 w-4 shrink-0 text-red-400" />
             <span>{error}</span>
           </div>
         )}
@@ -191,7 +191,7 @@ export function IngredientBatchControl({
         {!activeBatch ? (
           <div className="flex flex-1 flex-col justify-between space-y-4">
             {showSummary && summaryData && (
-              <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-xs">
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-xs animate-in fade-in-0 zoom-in-95 duration-200">
                 <div className="mb-2 flex items-center gap-1.5 border-b border-amber-500/20 pb-2 font-bold text-amber-300">
                   <Sparkles className="h-4 w-4 text-amber-400" />
                   <span>Rendimiento del Lote Anterior:</span>
@@ -203,7 +203,7 @@ export function IngredientBatchControl({
                         key={item}
                         className="flex justify-between items-center text-xs"
                       >
-                        <span className="truncate pr-2 text-[#E0E0E0]/80">
+                        <span className="truncate pr-2 text-text-light/80">
                           {item}
                         </span>
                         <span className="font-mono font-bold text-amber-300">
@@ -213,10 +213,10 @@ export function IngredientBatchControl({
                     ))}
                   {(!summaryData.summary ||
                     Object.keys(summaryData.summary).length === 0) && (
-                    <p className="italic text-amber-200/60">
-                      No se registraron ventas en este lote.
-                    </p>
-                  )}
+                      <p className="italic text-amber-200/60">
+                        No se registraron ventas en este lote.
+                      </p>
+                    )}
                 </div>
                 <div className="mt-3 flex justify-between border-t border-amber-500/20 pt-2 font-black text-amber-300">
                   <span>Total Producido:</span>
@@ -226,10 +226,10 @@ export function IngredientBatchControl({
             )}
 
             <div className="my-auto py-4 text-center">
-              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-[#E0E0E0]/40">
+              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-card-light border border-border text-text-light/40">
                 <UtensilsCrossed className="h-6 w-6" />
               </div>
-              <p className="text-xs font-medium text-[#E0E0E0]/60">
+              <p className="text-xs font-medium text-text-light/60">
                 El lote actual está sin iniciar o agotado.
               </p>
             </div>
@@ -239,7 +239,7 @@ export function IngredientBatchControl({
               onClick={handleStartBatch}
               disabled={loading}
               aria-label={`Abrir nuevo lote para ${ingredientName}`}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3.5 text-sm font-black text-black uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-400 active:scale-[0.98] disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3.5 text-sm font-black text-black uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all duration-200 ease-out hover:bg-emerald-400 active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -282,11 +282,10 @@ export function IngredientBatchControl({
                   ? `Confirmar cierre de lote para ${ingredientName}`
                   : `Marcar lote de ${ingredientName} como agotado`
               }
-              className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl p-4 transition-all shadow-md active:scale-[0.98] ${
-                isArmed
-                  ? "border-2 border-red-500 bg-red-600/90 text-white shadow-lg shadow-red-500/30 scale-[1.01]"
-                  : "border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/50"
-              }`}
+              className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl p-4 transition-all duration-200 ease-out shadow-md active:scale-[0.98] cursor-pointer ${isArmed
+                ? "border-2 border-red-500 bg-red-600/90 text-white shadow-lg shadow-red-500/30 scale-[1.01]"
+                : "border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/50"
+                }`}
             >
               <div className="flex items-center gap-2 text-sm font-black uppercase tracking-wider">
                 {isArmed ? (
@@ -302,9 +301,8 @@ export function IngredientBatchControl({
                 )}
               </div>
               <span
-                className={`text-[10px] font-medium ${
-                  isArmed ? "text-white/90 font-bold" : "text-red-400/70"
-                }`}
+                className={`text-[10px] font-medium ${isArmed ? "text-white/90 font-bold" : "text-red-400/70"
+                  }`}
               >
                 {isArmed
                   ? "Presiona nuevamente para finalizar"
@@ -317,3 +315,4 @@ export function IngredientBatchControl({
     </div>
   );
 }
+

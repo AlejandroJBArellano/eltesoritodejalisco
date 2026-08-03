@@ -1,22 +1,22 @@
 "use client";
 
+import { PageHeader } from "@/components/PageHeader";
 import { useRealtimeOrders } from "@/hooks/useOrders";
 import { OrderStatus, type OrderWithDetails } from "@/types";
-import { useState, useEffect } from "react";
 import {
-  BellRing,
-  Bell,
-  LayoutGrid,
-  Layers,
-  ChefHat,
-  CheckCircle2,
-  Clock,
   AlertCircle,
+  Bell,
+  BellRing,
+  CheckCircle2,
+  ChefHat,
+  Clock,
+  Layers,
+  LayoutGrid,
   X,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { OrderCard } from "./OrderCard";
 import { SmartBatchingView } from "./SmartBatchingView";
-import { PageHeader } from "@/components/PageHeader";
 
 interface KitchenDisplaySystemProps {
   initialOrders: OrderWithDetails[];
@@ -75,8 +75,8 @@ function KanbanColumn({
   const theme = colorMap[colorClass];
 
   return (
-    <div className="rounded-2xl bg-card p-5 shadow-lg border border-border backdrop-blur-sm">
-      <div className="flex items-center justify-between border-b border-border pb-4 mb-5">
+    <div className="flex flex-col w-[85vw] sm:w-87.5 md:w-auto shrink-0 snap-start md:h-[calc(100vh-170px)] rounded-2xl bg-card p-5 shadow-lg border border-border backdrop-blur-sm">
+      <div className="flex items-center justify-between border-b border-border pb-4 mb-5 shrink-0">
         <h2 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2.5">
           <span
             className={`h-3 w-3 rounded-full ${theme.bg} shadow-sm ${theme.shadow}`}
@@ -89,7 +89,7 @@ function KanbanColumn({
           {count}
         </span>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-4 md:flex-1 md:overflow-y-auto pr-1.5 custom-scrollbar pb-2">
         {orders.map((order) => (
           <OrderCard
             key={order.id}
@@ -131,7 +131,7 @@ export function KitchenDisplaySystem({
 
   // Time ticking for auto-releasing scheduled orders
   const [now, setNow] = useState(() => new Date());
-  
+
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(new Date());
@@ -152,7 +152,7 @@ export function KitchenDisplaySystem({
     try {
       const testAudio = new Audio("/new_order.mp3");
       testAudio.volume = 0.1;
-      testAudio.play().catch(() => {});
+      testAudio.play().catch(() => { });
     } catch {
       // Ignore initial user gesture unlock error
     }
@@ -218,11 +218,11 @@ export function KitchenDisplaySystem({
             orderItems: order.orderItems.map((item) =>
               item.id === itemId
                 ? {
-                    ...item,
-                    status: data.item.status,
-                    preparationTimeSeconds:
-                      data.item.preparationTimeSeconds ?? null,
-                  }
+                  ...item,
+                  status: data.item.status,
+                  preparationTimeSeconds:
+                    data.item.preparationTimeSeconds ?? null,
+                }
                 : item,
             ),
           };
@@ -243,7 +243,7 @@ export function KitchenDisplaySystem({
   const releasedOrders = orders.filter((o) => {
     // Direct POS / ASAP orders have no scheduled pickupTime and show immediately
     if (!o.pickupTime) return true;
-    
+
     // Scheduled orders are released 30 minutes before delivery
     const pickupMs = new Date(o.pickupTime).getTime();
     const nowMs = now.getTime();
@@ -258,11 +258,11 @@ export function KitchenDisplaySystem({
   };
 
   return (
-    <div className="min-h-screen bg-background text-text-light pb-12">
+    <div className="min-h-screen bg-background text-text-light pb-8">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-red-950/90 border border-red-500/50 p-4 text-xs font-bold text-red-200 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4">
-          <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
+          <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
           <span>{toastMessage}</span>
           <button
             onClick={() => setToastMessage(null)}
@@ -283,7 +283,7 @@ export function KitchenDisplaySystem({
             {!soundEnabled ? (
               <button
                 onClick={handleEnableSound}
-                className="inline-flex items-center gap-2 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-2 text-xs font-black uppercase tracking-wider hover:bg-red-500/30 transition-all active:scale-95 cursor-pointer shadow-sm"
+                className="inline-flex items-center gap-2 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-2 text-xs font-black uppercase tracking-wider hover:bg-red-500/30 transition-all duration-200 ease-out active:scale-95 cursor-pointer shadow-sm"
               >
                 <BellRing className="h-4 w-4 animate-bounce" /> Activar Sonidos
               </button>
@@ -296,21 +296,19 @@ export function KitchenDisplaySystem({
             <div className="flex items-center gap-1 rounded-xl border border-border bg-card/90 p-1 shadow-inner">
               <button
                 onClick={() => setView("kanban")}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-                  view === "kanban"
-                    ? "bg-amber-500 text-zinc-950 shadow-md"
-                    : "text-text-light/60 hover:text-text-light"
-                }`}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${view === "kanban"
+                  ? "bg-amber-500 text-zinc-950 shadow-md"
+                  : "text-text-light/60 hover:text-text-light"
+                  }`}
               >
                 <LayoutGrid className="h-4 w-4" /> Vista Kanban
               </button>
               <button
                 onClick={() => setView("batching")}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-                  view === "batching"
-                    ? "bg-amber-500 text-zinc-950 shadow-md"
-                    : "text-text-light/60 hover:text-text-light"
-                }`}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${view === "batching"
+                  ? "bg-amber-500 text-zinc-950 shadow-md"
+                  : "text-text-light/60 hover:text-text-light"
+                  }`}
               >
                 <Layers className="h-4 w-4" /> Vista Lotes
               </button>
@@ -322,7 +320,7 @@ export function KitchenDisplaySystem({
       {/* Main Content Area */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
         {view === "kanban" ? (
-          <div className="grid gap-6 md:grid-cols-3 items-start">
+          <div className="flex md:grid gap-6 md:grid-cols-3 items-start overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 snap-x snap-mandatory no-scrollbar">
             <KanbanColumn
               title="Pendientes"
               count={ordersByStatus.pending.length}
