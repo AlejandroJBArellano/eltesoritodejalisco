@@ -531,24 +531,27 @@ export default function ReportsPage() {
                   data={chartData}
                   margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--color-border)"
+                  />
                   <XAxis
                     dataKey="label"
-                    stroke="#9CA3AF"
+                    stroke="var(--color-text-light)"
                     fontSize={12}
-                    tick={{ fill: "#9CA3AF" }}
+                    tick={{ fill: "var(--color-text-light)" }}
                   />
                   <YAxis
-                    stroke="#9CA3AF"
+                    stroke="var(--color-text-light)"
                     fontSize={12}
-                    tick={{ fill: "#9CA3AF" }}
+                    tick={{ fill: "var(--color-text-light)" }}
                     tickFormatter={(val) => `$${val}`}
                   />
                   <RechartsTooltip
                     contentStyle={{
-                      backgroundColor: "#181818",
-                      borderColor: "rgba(255,255,255,0.1)",
-                      color: "#FFF",
+                      backgroundColor: "var(--color-card)",
+                      borderColor: "var(--color-border)",
+                      color: "var(--color-text-light)",
                       borderRadius: "12px",
                       boxShadow: "0 10px 15px -3px rgba(0,0,0,0.5)",
                     }}
@@ -746,14 +749,14 @@ export default function ReportsPage() {
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="#374151"
+                      stroke="var(--color-border)"
                       horizontal={false}
                     />
                     <XAxis
                       type="number"
-                      stroke="#9CA3AF"
+                      stroke="var(--color-text-light)"
                       fontSize={12}
-                      tick={{ fill: "#9CA3AF" }}
+                      tick={{ fill: "var(--color-text-light)" }}
                       tickFormatter={(val) =>
                         productMetric === "revenue"
                           ? `$${val.toLocaleString()}`
@@ -763,16 +766,16 @@ export default function ReportsPage() {
                     <YAxis
                       type="category"
                       dataKey="name"
-                      stroke="#9CA3AF"
+                      stroke="var(--color-text-light)"
                       fontSize={12}
                       width={140}
-                      tick={{ fill: "#E0E0E0" }}
+                      tick={{ fill: "var(--color-text-light)" }}
                     />
                     <RechartsTooltip
                       contentStyle={{
-                        backgroundColor: "#181818",
-                        borderColor: "rgba(255,255,255,0.1)",
-                        color: "#FFF",
+                        backgroundColor: "var(--color-card)",
+                        borderColor: "var(--color-border)",
+                        color: "var(--color-text-light)",
                         borderRadius: "12px",
                         boxShadow: "0 10px 15px -3px rgba(0,0,0,0.5)",
                       }}
@@ -938,7 +941,7 @@ export default function ReportsPage() {
                 {data.customers.topCustomers.map((customer, index) => (
                   <tr
                     key={index}
-                    className="hover:bg-white/[0.02] transition-colors"
+                    className="hover:bg-white/2 transition-colors"
                   >
                     <td className="py-3.5 px-3">
                       <div className="flex items-center gap-3">

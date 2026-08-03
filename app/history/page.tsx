@@ -1545,34 +1545,34 @@ export default function HistoryPage() {
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="#2A2A2A"
+                      stroke="var(--color-border)"
                       horizontal={false}
                     />
                     <XAxis
                       type="number"
-                      stroke="#888888"
+                      stroke="var(--color-text-light)"
                       fontSize={11}
                       tickFormatter={(val) => `$${val}`}
                     />
                     <YAxis
                       dataKey="name"
                       type="category"
-                      stroke="#888888"
+                      stroke="var(--color-text-light)"
                       fontSize={11}
                       width={90}
                     />
                     <RechartsTooltip
                       contentStyle={{
-                        backgroundColor: "#1D1D1D",
-                        borderColor: "#333333",
+                        backgroundColor: "var(--color-card)",
+                        borderColor: "var(--color-border)",
                         borderRadius: "12px",
-                        color: "#E0E0E0",
+                        color: "var(--color-text-light)",
                       }}
                       formatter={(value: number | string | undefined) => [
                         `$${Number(value).toFixed(2)}`,
                         "Total Venta Neta",
                       ]}
-                      cursor={{ fill: "#242424" }}
+                      cursor={{ fill: "var(--color-card)" }}
                     />
                     <Bar
                       dataKey="total"
