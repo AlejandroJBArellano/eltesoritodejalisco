@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -12,6 +13,50 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      try {
+        const tenant = await getTenantContext();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Check if profile exists for this tenant
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .eq("tenant_id", tenant.id)
+            .maybeSingle();
+
+          if (!profile) {
+            const email = user.email || "";
+            const fullName = user.user_metadata?.full_name || user.user_metadata?.name || "Sin nombre";
+            const role = user.user_metadata?.role || "WAITER";
+
+            // Insert into public.profiles
+            await supabase.from("profiles").insert({
+              id: user.id,
+              email,
+              full_name: fullName,
+              role,
+              tenant_id: tenant.id,
+            });
+
+            // Insert into public.users if exists
+            try {
+              await supabase.from("users").insert({
+                id: user.id,
+                email,
+                full_name: fullName,
+                role,
+                tenant_id: tenant.id,
+              });
+            } catch (err) {
+              console.error("Error inserting into local users table:", err);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error during profile tenant mapping in callback:", err);
+      }
+
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
       if (isLocalEnv) {
