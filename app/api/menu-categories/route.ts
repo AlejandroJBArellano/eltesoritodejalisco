@@ -38,6 +38,7 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
   try {
+    const tenant = await getTenantContext();
     const body = await request.json();
     const { name, translations = {}, sort_order } = body;
 
@@ -56,9 +57,10 @@ export async function POST(request: NextRequest) {
       const { data: maxRow } = await supabase
         .from("menu_categories")
         .select("sort_order")
+        .eq("tenant_id", tenant.id)
         .order("sort_order", { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
       finalSortOrder = (maxRow?.sort_order ?? 0) + 10;
     }
 
@@ -69,6 +71,7 @@ export async function POST(request: NextRequest) {
         translations,
         sort_order: finalSortOrder,
         is_active: true,
+        tenant_id: tenant.id,
       })
       .select()
       .single();
@@ -99,6 +102,7 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
+    const tenant = await getTenantContext();
     const body = await request.json();
     const supabase = createAdminClient();
 
@@ -111,7 +115,8 @@ export async function PUT(request: NextRequest) {
         const { error } = await supabase
           .from("menu_categories")
           .update({ sort_order })
-          .eq("id", id);
+          .eq("id", id)
+          .eq("tenant_id", tenant.id);
         if (error) errors.push(error.message);
       }
 
@@ -140,6 +145,7 @@ export async function PUT(request: NextRequest) {
       .from("menu_categories")
       .select("name")
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .single();
 
     if (fetchError || !existing) {
@@ -159,18 +165,20 @@ export async function PUT(request: NextRequest) {
       .from("menu_categories")
       .update(updatePayload)
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .select()
       .single();
 
     if (updateError) throw updateError;
 
-    // Cascade rename: update all menu_items that reference the old category name
+    // Cascade rename: update all menu_items that reference the old category name in the same tenant
     const newName = updatePayload.name as string | undefined;
     if (newName && newName !== existing.name) {
       const { error: cascadeError } = await supabase
         .from("menu_items")
         .update({ category: newName })
-        .eq("category", existing.name);
+        .eq("category", existing.name)
+        .eq("tenant_id", tenant.id);
 
       if (cascadeError) {
         console.error("Cascade rename error:", cascadeError);
@@ -200,6 +208,7 @@ export async function PUT(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    const tenant = await getTenantContext();
     const { id } = await request.json();
 
     if (!id) {
@@ -211,18 +220,20 @@ export async function DELETE(request: NextRequest) {
 
     const supabase = createAdminClient();
 
-    // Check for associated products
+    // Check for associated products in the same tenant
     const { data: existing } = await supabase
       .from("menu_categories")
       .select("name")
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .single();
 
     if (existing) {
       const { count } = await supabase
         .from("menu_items")
         .select("id", { count: "exact", head: true })
-        .eq("category", existing.name);
+        .eq("category", existing.name)
+        .eq("tenant_id", tenant.id);
 
       if (count && count > 0) {
         return NextResponse.json(
@@ -237,7 +248,8 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabase
       .from("menu_categories")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
 
     if (error) throw error;
 

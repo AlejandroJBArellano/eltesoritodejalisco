@@ -2,13 +2,16 @@
 
 import { createClient } from "../supabase/server";
 import { getUser } from "../auth";
+import { getTenantContext } from "../tenant";
 import { revalidatePath } from "next/cache";
 
 export async function getPrimordialTasks() {
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("primordial_tasks")
     .select("*, category:task_categories(*)")
+    .eq("tenant_id", tenant.id)
     .eq("is_active", true)
     .order("created_at", { ascending: true });
 
@@ -17,6 +20,7 @@ export async function getPrimordialTasks() {
 }
 
 export async function getTodayExecutions() {
+  const tenant = await getTenantContext();
   const supabase = await createClient();
 
   // Get start of today
@@ -31,6 +35,7 @@ export async function getTodayExecutions() {
       task:primordial_tasks(*)
     `,
     )
+    .eq("tenant_id", tenant.id)
     .gte("created_at", today.toISOString())
     .order("created_at", { ascending: false });
 
@@ -45,6 +50,7 @@ export async function startTask(taskId: string) {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -53,6 +59,7 @@ export async function startTask(taskId: string) {
     .insert({
       task_id: taskId,
       user_id: user.id,
+      tenant_id: tenant.id,
       status: "IN_PROGRESS",
       start_time: now,
       last_resumed_at: now,
@@ -70,12 +77,14 @@ export async function pauseTask(executionId: string) {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
 
   const { data: current, error: fetchError } = await supabase
     .from("task_executions")
     .select("last_resumed_at, paused_seconds")
     .eq("id", executionId)
+    .eq("tenant_id", tenant.id)
     .single();
 
   if (fetchError || !current) throw new Error("Execution not found");
@@ -93,6 +102,7 @@ export async function pauseTask(executionId: string) {
       paused_seconds: current.paused_seconds + newlyPausedSeconds,
     })
     .eq("id", executionId)
+    .eq("tenant_id", tenant.id)
     .select()
     .single();
 
@@ -105,6 +115,7 @@ export async function resumeTask(executionId: string) {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -115,6 +126,7 @@ export async function resumeTask(executionId: string) {
       last_resumed_at: now,
     })
     .eq("id", executionId)
+    .eq("tenant_id", tenant.id)
     .select()
     .single();
 
@@ -127,12 +139,14 @@ export async function completeTask(executionId: string, photoUrl?: string) {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
 
   const { data: current, error: fetchError } = await supabase
     .from("task_executions")
     .select("start_time, last_resumed_at, paused_seconds, status")
     .eq("id", executionId)
+    .eq("tenant_id", tenant.id)
     .single();
 
   if (fetchError || !current) throw new Error("Execution not found");
@@ -157,6 +171,7 @@ export async function completeTask(executionId: string, photoUrl?: string) {
       photo_url: photoUrl || null,
     })
     .eq("id", executionId)
+    .eq("tenant_id", tenant.id)
     .select()
     .single();
 
@@ -170,6 +185,7 @@ export async function approveTask(executionId: string) {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -180,6 +196,7 @@ export async function approveTask(executionId: string) {
       approved_at: now,
     })
     .eq("id", executionId)
+    .eq("tenant_id", tenant.id)
     .select()
     .single();
 
@@ -193,10 +210,12 @@ export async function approveTask(executionId: string) {
 // =====================================================================
 
 export async function getTaskCategories() {
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("task_categories")
     .select("*")
+    .eq("tenant_id", tenant.id)
     .order("name", { ascending: true });
 
   if (error) throw new Error(error.message);
@@ -207,10 +226,11 @@ export async function createTaskCategory(name: string) {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("task_categories")
-    .insert({ name })
+    .insert({ name, tenant_id: tenant.id })
     .select()
     .single();
 
@@ -224,11 +244,13 @@ export async function updateTaskCategory(id: string, name: string) {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("task_categories")
     .update({ name, updated_at: new Date().toISOString() })
     .eq("id", id)
+    .eq("tenant_id", tenant.id)
     .select()
     .single();
 
@@ -242,11 +264,13 @@ export async function deleteTaskCategory(id: string) {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const { error } = await supabase
     .from("task_categories")
     .delete()
-    .eq("id", id);
+    .eq("id", id)
+    .eq("tenant_id", tenant.id);
 
   if (error) throw new Error(error.message);
   revalidatePath("/tareas");
@@ -268,6 +292,7 @@ export async function createPrimordialTask(
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("primordial_tasks")
@@ -278,6 +303,7 @@ export async function createPrimordialTask(
       timeout_minutes: timeoutMinutes,
       category_id: categoryId,
       is_active: true,
+      tenant_id: tenant.id,
     })
     .select()
     .single();
@@ -300,6 +326,7 @@ export async function updatePrimordialTask(
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("primordial_tasks")
@@ -313,6 +340,7 @@ export async function updatePrimordialTask(
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
+    .eq("tenant_id", tenant.id)
     .select()
     .single();
 
@@ -326,12 +354,14 @@ export async function deletePrimordialTask(id: string) {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
   // We soft delete (set is_active to false) to preserve references in existing task execution history
   const { data, error } = await supabase
     .from("primordial_tasks")
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq("id", id)
+    .eq("tenant_id", tenant.id)
     .select()
     .single();
 
@@ -349,6 +379,7 @@ export async function getExecutionsForDate(dateStr: string) {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
 
   // Enforce "mes en curso" (current month) constraint
@@ -373,6 +404,7 @@ export async function getExecutionsForDate(dateStr: string) {
       user:profiles(full_name)
     `,
     )
+    .eq("tenant_id", tenant.id)
     .gte("created_at", startOfDay)
     .lte("created_at", endOfDay)
     .order("created_at", { ascending: false });
@@ -385,6 +417,7 @@ export async function getStaffPerformanceMetrics(dateStr: string) {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const tenant = await getTenantContext();
   const supabase = await createClient();
 
   // Enforce current month limit
@@ -410,6 +443,7 @@ export async function getStaffPerformanceMetrics(dateStr: string) {
       user:profiles(id, full_name)
     `,
     )
+    .eq("tenant_id", tenant.id)
     .eq("status", "COMPLETED")
     .gte("created_at", startOfDay)
     .lte("created_at", endOfDay);

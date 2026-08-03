@@ -5,6 +5,33 @@
 
 BEGIN;
 
+-- 0. Backfill existing NULL tenant_ids to El Tesorito de Jalisco (tesorito)
+DO $$
+DECLARE
+    default_tenant_id UUID;
+BEGIN
+    SELECT id INTO default_tenant_id FROM public.tenants WHERE slug = 'tesorito' LIMIT 1;
+    
+    IF default_tenant_id IS NOT NULL THEN
+        -- Profiles and Users
+        UPDATE public.profiles SET tenant_id = default_tenant_id WHERE tenant_id IS NULL;
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='users') THEN
+            UPDATE public.users SET tenant_id = default_tenant_id WHERE tenant_id IS NULL;
+        END IF;
+        
+        -- Categories (menu, expenses, tasks)
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='menu_categories') THEN
+            UPDATE public.menu_categories SET tenant_id = default_tenant_id WHERE tenant_id IS NULL;
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='expense_categories') THEN
+            UPDATE public.expense_categories SET tenant_id = default_tenant_id WHERE tenant_id IS NULL;
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='task_categories') THEN
+            UPDATE public.task_categories SET tenant_id = default_tenant_id WHERE tenant_id IS NULL;
+        END IF;
+    END IF;
+END $$;
+
 -- 1. Drop foreign keys referencing profiles(id)
 ALTER TABLE public.attendance DROP CONSTRAINT IF EXISTS attendance_user_id_fkey;
 ALTER TABLE public.attendance DROP CONSTRAINT IF EXISTS fk_attendance_profile;

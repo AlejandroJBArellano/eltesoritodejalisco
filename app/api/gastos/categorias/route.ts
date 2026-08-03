@@ -1,12 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
+import { getTenantContext } from "@/lib/tenant";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("expense_categories")
       .select("*")
+      .eq("tenant_id", tenant.id)
       .eq("is_active", true)
       .order("name", { ascending: true });
 
@@ -23,6 +26,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const tenant = await getTenantContext();
     const body = await req.json();
     const { name, color, tipo_gasto } = body;
     if (!name)
@@ -37,7 +41,7 @@ export async function POST(req: Request) {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("expense_categories")
-      .insert([{ name, color: color || "#3B82F6", tipo_gasto }])
+      .insert([{ name, color: color || "#3B82F6", tipo_gasto, tenant_id: tenant.id }])
       .select()
       .single();
 
@@ -63,6 +67,7 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+    const tenant = await getTenantContext();
     const body = await req.json();
     const { id, name, color, tipo_gasto } = body;
     if (!id || !name) {
@@ -88,6 +93,7 @@ export async function PUT(req: Request) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .select()
       .single();
 
