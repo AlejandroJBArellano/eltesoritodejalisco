@@ -191,7 +191,7 @@ export default function AttendanceHistoryPage() {
       <PageHeader
         title="Historial de Asistencia"
         subtitle="Control de entradas, salidas y duraciones de turno del personal"
-        badgeColor="bg-[#FFB7CE]"
+        badgeColor="bg-primary"
         backHref="/asistencia"
         backLabel="Checador"
       />
@@ -201,12 +201,12 @@ export default function AttendanceHistoryPage() {
         <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h2 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2">
-              <Filter className="h-4 w-4 text-[#FFB7CE]" />
+              <Filter className="h-4 w-4 text-primary" />
               Filtros del Historial
             </h2>
             <button
               onClick={handleApplyFilters}
-              className="rounded-xl bg-[#FFB7CE] px-4 py-1.5 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-1.5"
+              className="rounded-xl bg-primary px-4 py-1.5 text-xs font-black text-black hover:brightness-105 active:scale-95 transition-all duration-200 cursor-pointer uppercase tracking-wider flex items-center gap-1.5"
             >
               <RefreshCw
                 className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`}
@@ -223,7 +223,7 @@ export default function AttendanceHistoryPage() {
               <select
                 value={selectedUserId}
                 onChange={(e) => setSelectedUserId(e.target.value)}
-                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-[#FFB7CE]"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
               >
                 <option value="ALL">Todos los Empleados</option>
                 {users.map((u) => (
@@ -242,7 +242,7 @@ export default function AttendanceHistoryPage() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-[#FFB7CE] scheme-dark"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary scheme-dark transition-colors"
               />
             </div>
 
@@ -254,7 +254,7 @@ export default function AttendanceHistoryPage() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-[#FFB7CE] scheme-dark"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary scheme-dark transition-colors"
               />
             </div>
 
@@ -320,7 +320,7 @@ export default function AttendanceHistoryPage() {
         <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[#FFB7CE]" />
+              <span className="h-2 w-2 rounded-full bg-primary" />
               Registros de Entrada y Salida ({filteredAttendances.length})
             </h2>
           </div>

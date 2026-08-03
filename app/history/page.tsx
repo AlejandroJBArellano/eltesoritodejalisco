@@ -1462,10 +1462,10 @@ export default function HistoryPage() {
                     />
                     <RechartsTooltip
                       contentStyle={{
-                        backgroundColor: "#1D1D1D",
-                        borderColor: "#333333",
+                        backgroundColor: "var(--color-card)",
+                        borderColor: "var(--color-border)",
                         borderRadius: "12px",
-                        color: "#E0E0E0",
+                        color: "var(--color-text-light)",
                       }}
                       formatter={(value: number | string | undefined) => [
                         `$${Number(value).toFixed(2)}`,
@@ -1475,9 +1475,9 @@ export default function HistoryPage() {
                     <Line
                       type="monotone"
                       dataKey="total"
-                      stroke="#FFB7CE"
+                      stroke="var(--color-primary)"
                       strokeWidth={3}
-                      dot={{ r: 4, fill: "#FFB7CE" }}
+                      dot={{ r: 4, fill: "var(--color-primary)" }}
                       activeDot={{ r: 6 }}
                     />
                   </LineChart>
