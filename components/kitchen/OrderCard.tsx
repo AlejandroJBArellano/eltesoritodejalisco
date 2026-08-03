@@ -35,7 +35,10 @@ function OrderItemRow({
   updatingItemIds,
 }: OrderItemRowProps) {
   const isItemReady = item.status === OrderStatus.READY;
-  const elapsedSeconds = useOrderTimer(item.createdAt, isItemReady ? new Date() : null);
+  const elapsedSeconds = useOrderTimer(
+    item.createdAt,
+    isItemReady ? new Date() : null,
+  );
 
   return (
     <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3 transition-colors hover:border-border/80">
@@ -99,8 +102,10 @@ export function OrderCard({
   updatingItemIds,
 }: OrderCardProps) {
   const ALERT_THRESHOLD_MINUTES = 15;
-  const isCompleted = order.status === OrderStatus.READY || order.status === OrderStatus.DELIVERED;
-  const endTime = isCompleted ? (order.completedAt || order.updatedAt) : null;
+  const isCompleted =
+    order.status === OrderStatus.READY ||
+    order.status === OrderStatus.DELIVERED;
+  const endTime = isCompleted ? order.completedAt || order.updatedAt : null;
   const elapsedSeconds = useOrderTimer(order.createdAt, endTime);
   const isOverdue = elapsedSeconds / 60 >= ALERT_THRESHOLD_MINUTES;
 
@@ -144,12 +149,13 @@ export function OrderCard({
 
   return (
     <div
-      className={`rounded-2xl border p-5 shadow-md transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-3 ease-out ${isOverdue &&
+      className={`rounded-2xl border p-5 shadow-md transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-3 ease-out ${
+        isOverdue &&
         order.status !== OrderStatus.DELIVERED &&
         order.status !== OrderStatus.READY
-        ? "border-red-500/70 bg-linear-to-b from-[#2A1212] to-[#1F0C0C] shadow-lg shadow-red-950/40 ring-1 ring-red-500/20"
-        : "border-border bg-card-light hover:border-border/80 hover:shadow-xl"
-        }`}
+          ? "border-red-500/70 bg-linear-to-b from-[#2A1212] to-[#1F0C0C] shadow-lg shadow-red-950/40 ring-1 ring-red-500/20"
+          : "border-border bg-card-light hover:border-border/80 hover:shadow-xl"
+      }`}
     >
       {/* Card Header */}
       <div className="mb-4 flex items-start justify-between border-b border-border/60 pb-3.5">
@@ -174,12 +180,13 @@ export function OrderCard({
 
         {/* Timer Badge */}
         <div
-          className={`rounded-xl px-3.5 py-1.5 font-mono text-base font-black shadow-inner flex items-center gap-1.5 transition-colors ${isOverdue &&
+          className={`rounded-xl px-3.5 py-1.5 font-mono text-base font-black shadow-inner flex items-center gap-1.5 transition-colors ${
+            isOverdue &&
             order.status !== OrderStatus.DELIVERED &&
             order.status !== OrderStatus.READY
-            ? "bg-red-600 text-white shadow-red-900/50 ring-2 ring-red-400/40"
-            : "bg-card text-text-light border border-border"
-            }`}
+              ? "bg-red-600 text-white shadow-red-900/50 ring-2 ring-red-400/40"
+              : "bg-card text-text-light border border-border"
+          }`}
         >
           <Clock
             className={`h-4 w-4 ${isOverdue ? "animate-spin" : ""}`}

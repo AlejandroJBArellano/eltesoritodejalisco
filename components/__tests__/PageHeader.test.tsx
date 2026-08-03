@@ -5,14 +5,25 @@ import { PageHeader } from "../PageHeader";
 
 describe("PageHeader Component", () => {
   it("should render title and subtitle correctly", () => {
-    render(<PageHeader title="Administración de Usuarios" subtitle="Gestiona roles y permisos" />);
+    render(
+      <PageHeader
+        title="Administración de Usuarios"
+        subtitle="Gestiona roles y permisos"
+      />,
+    );
 
     expect(screen.getByText("Administración de Usuarios")).toBeInTheDocument();
     expect(screen.getByText("Gestiona roles y permisos")).toBeInTheDocument();
   });
 
   it("should render back navigation link by default", () => {
-    render(<PageHeader title="Punto de Venta" backHref="/dashboard" backLabel="Volver al Dashboard" />);
+    render(
+      <PageHeader
+        title="Punto de Venta"
+        backHref="/dashboard"
+        backLabel="Volver al Dashboard"
+      />,
+    );
 
     const link = screen.getByRole("link", { name: /Volver al Dashboard/i });
     expect(link).toBeInTheDocument();
@@ -30,7 +41,7 @@ describe("PageHeader Component", () => {
       <PageHeader
         title="Clientes"
         actions={<button data-testid="new-client-btn">Nuevo Cliente</button>}
-      />
+      />,
     );
 
     expect(screen.getByTestId("new-client-btn")).toBeInTheDocument();

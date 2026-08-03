@@ -29,24 +29,24 @@ export function POSTipModal({
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
-      <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-white/10 space-y-6">
-        <div className="flex justify-between items-center border-b border-white/5 pb-3">
-          <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+      <div className="bg-card rounded-2xl max-w-md w-full p-6 shadow-2xl border border-border space-y-6">
+        <div className="flex justify-between items-center border-b border-border pb-3">
+          <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
             <HandCoins className="h-4 w-4 text-blue-400" />
             Editar Propina - Orden #{editingTipOrder.orderNumber}
           </h3>
           <button
             type="button"
             onClick={() => setEditingTipOrder(null)}
-            className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors"
+            className="text-text-light/40 hover:text-text-light transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="space-y-5">
-          <div className="text-center bg-[#1A1A1A] py-4 rounded-xl border border-white/5 space-y-1">
-            <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+          <div className="text-center bg-dark/40 py-4 rounded-xl border border-border space-y-1">
+            <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
               Total de la orden: ${editingTipOrder.total.toFixed(2)}
             </p>
             <p className="text-xl font-black text-blue-400">
@@ -55,7 +55,7 @@ export function POSTipModal({
           </div>
 
           <div>
-            <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-2">
+            <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-2">
               Ajustar Propina
             </label>
             <div className="flex gap-2 mb-2">
@@ -68,7 +68,7 @@ export function POSTipModal({
                 className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${
                   editTipType === "NONE"
                     ? "bg-primary/20 border-primary text-primary"
-                    : "border-white/5 text-[#E0E0E0]/60 bg-white/5 hover:border-white/10"
+                    : "border-border text-text-light/60 bg-white/5 hover:border-border"
                 }`}
               >
                 Sin Propina
@@ -79,7 +79,7 @@ export function POSTipModal({
                 className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${
                   editTipType === "PERCENTAGE"
                     ? "bg-primary/20 border-primary text-primary"
-                    : "border-white/5 text-[#E0E0E0]/60 bg-white/5 hover:border-white/10"
+                    : "border-border text-text-light/60 bg-white/5 hover:border-border"
                 }`}
               >
                 %
@@ -90,7 +90,7 @@ export function POSTipModal({
                 className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${
                   editTipType === "FIXED"
                     ? "bg-primary/20 border-primary text-primary"
-                    : "border-white/5 text-[#E0E0E0]/60 bg-white/5 hover:border-white/10"
+                    : "border-border text-text-light/60 bg-white/5 hover:border-border"
                 }`}
               >
                 $ Fijo
@@ -109,7 +109,7 @@ export function POSTipModal({
                   className={`py-2 text-xs rounded-xl font-black uppercase border transition-all ${
                     editTipType === "PERCENTAGE" && editTipInput === pct
                       ? "bg-primary text-black border-primary"
-                      : "border-white/5 text-[#E0E0E0]/60 bg-white/5 hover:border-white/10"
+                      : "border-border text-text-light/60 bg-white/5 hover:border-border"
                   }`}
                 >
                   {pct}%
@@ -125,7 +125,7 @@ export function POSTipModal({
                 placeholder={
                   editTipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"
                 }
-                className="w-full text-base font-black p-3 border border-white/5 bg-[#181818] rounded-xl focus:border-primary outline-none text-center text-[#E0E0E0] transition-colors placeholder:text-[#E0E0E0]/30"
+                className="w-full text-base font-black p-3 border border-border bg-dark/40 rounded-xl focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30"
               />
             )}
           </div>
@@ -142,7 +142,7 @@ export function POSTipModal({
             <button
               type="button"
               onClick={() => setEditingTipOrder(null)}
-              className="w-full bg-white/5 text-[#E0E0E0]/60 py-2.5 rounded-xl font-black text-xs hover:bg-white/10 transition-all uppercase tracking-wider border border-white/5"
+              className="w-full bg-white/5 text-text-light/60 py-2.5 rounded-xl font-black text-xs hover:bg-white/10 transition-all uppercase tracking-wider border border-border"
             >
               Cancelar
             </button>

@@ -74,10 +74,11 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${isActive
+                  className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    isActive
                       ? "bg-primary/15 text-primary"
                       : "text-text-light/50 hover:text-text-light hover:bg-white/5"
-                    }`}
+                  }`}
                 >
                   {link.label}
                 </Link>

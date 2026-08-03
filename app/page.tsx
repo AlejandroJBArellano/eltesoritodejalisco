@@ -42,11 +42,13 @@ function StatCard({ title, icon: Icon, value, themeClass }: StatCardProps) {
           <span className="text-[9px] sm:text-xs font-bold text-text-light/50 uppercase tracking-wider block truncate">
             {title}
           </span>
-          <p className="mt-0.5 sm:mt-3 text-base sm:text-3xl font-black text-[#E0E0E0] tracking-tight tabular-nums truncate">
+          <p className="mt-0.5 sm:mt-3 text-base sm:text-3xl font-black text-text-light tracking-tight tabular-nums truncate">
             {value}
           </p>
         </div>
-        <div className={`rounded-lg p-1.5 sm:p-3 ${themeClass} shrink-0 sm:-mt-1`}>
+        <div
+          className={`rounded-lg p-1.5 sm:p-3 ${themeClass} shrink-0 sm:-mt-1`}
+        >
           <Icon className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
         </div>
       </div>
@@ -93,7 +95,7 @@ function ModuleCard({
 
           {/* Content: Title */}
           <h3
-            className="text-xs sm:text-xl font-black text-[#E0E0E0] tracking-tight uppercase transition-colors flex items-center justify-between"
+            className="text-xs sm:text-xl font-black text-text-light tracking-tight uppercase transition-colors flex items-center justify-between"
             style={{ "--hover-color": hoverColor } as React.CSSProperties}
           >
             <span className="group-hover:text-[var(--hover-color)] transition-colors truncate">
@@ -103,7 +105,7 @@ function ModuleCard({
           </h3>
 
           {/* Description (desktop-only) */}
-          <p className="hidden sm:block mt-2 text-sm text-[#E0E0E0]/60 font-medium leading-relaxed">
+          <p className="hidden sm:block mt-2 text-sm text-text-light/60 font-medium leading-relaxed">
             {description}
           </p>
         </div>
@@ -242,7 +244,10 @@ export default async function Home() {
 
         {/* SECCIÓN 2: ADMINISTRACIÓN Y CLIENTES */}
         {(isAdmin || isWaiter) && (
-          <CollapsibleSection title="Gestión y Clientes" dotColorClass="bg-success">
+          <CollapsibleSection
+            title="Gestión y Clientes"
+            dotColorClass="bg-success"
+          >
             <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-3">
               <ModuleCard
                 title="Clientes"
@@ -323,7 +328,10 @@ export default async function Home() {
 
         {/* SECCIÓN 3: FINANZAS Y REPORTES - Admin Only */}
         {isAdmin && (
-          <CollapsibleSection title="Finanzas y Reportes" dotColorClass="bg-blue-500">
+          <CollapsibleSection
+            title="Finanzas y Reportes"
+            dotColorClass="bg-blue-500"
+          >
             <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-3">
               <ModuleCard
                 title="Historial"
@@ -348,7 +356,7 @@ export default async function Home() {
                 description="Ventas y métricas de negocio."
                 href="/reports"
                 icon={BarChart3}
-                themeClass="bg-zinc-800 text-[#E0E0E0]"
+                themeClass="bg-zinc-800 text-text-light"
                 hoverColor="var(--color-primary)"
               />
             </div>

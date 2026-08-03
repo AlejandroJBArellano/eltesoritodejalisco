@@ -16,16 +16,16 @@ export default async function LoginPage({
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-dark px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-6 bg-[#242424] p-8 rounded-2xl border border-white/10 shadow-2xl">
+      <div className="w-full max-w-md space-y-6 bg-card p-8 rounded-2xl border border-border shadow-2xl">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-black tracking-tighter uppercase">
             <span className="text-primary">{prefix}</span>
             {suffix && <span className="text-warning">{suffix}</span>}
           </h1>
-          <h2 className="text-lg font-black text-[#E0E0E0] uppercase tracking-tight">
+          <h2 className="text-lg font-black text-text-light uppercase tracking-tight">
             Iniciar sesión
           </h2>
-          <p className="text-xs font-medium text-[#E0E0E0]/50">
+          <p className="text-xs font-medium text-text-light/50">
             Ingresa tus credenciales para acceder al sistema
           </p>
         </div>
@@ -35,7 +35,7 @@ export default async function LoginPage({
             <div>
               <label
                 htmlFor="email-address"
-                className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1"
+                className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1"
               >
                 Correo electrónico
               </label>
@@ -45,14 +45,14 @@ export default async function LoginPage({
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full rounded-xl border border-white/10 bg-[#181818] px-3.5 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3.5 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
                 placeholder="usuario@ejemplo.com"
               />
             </div>
             <div>
               <label
                 htmlFor="password"
-                className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1"
+                className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1"
               >
                 Contraseña
               </label>
@@ -62,7 +62,7 @@ export default async function LoginPage({
                 type="password"
                 autoComplete="current-password"
                 required
-                className="w-full rounded-xl border border-white/10 bg-[#181818] px-3.5 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3.5 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
                 placeholder="••••••••"
               />
             </div>
@@ -84,7 +84,7 @@ export default async function LoginPage({
 
         <div className="flex items-center justify-center gap-3 my-2">
           <div className="h-px flex-1 bg-white/10" />
-          <span className="text-[10px] font-black text-[#E0E0E0]/30 uppercase tracking-widest">
+          <span className="text-[10px] font-black text-text-light/30 uppercase tracking-widest">
             O
           </span>
           <div className="h-px flex-1 bg-white/10" />
@@ -93,7 +93,7 @@ export default async function LoginPage({
         <form action={loginWithGoogle}>
           <button
             type="submit"
-            className="w-full flex justify-center items-center gap-2.5 rounded-xl border border-white/10 bg-[#181818] px-4 py-3 text-xs font-bold text-[#E0E0E0] hover:bg-white/5 transition-all cursor-pointer"
+            className="w-full flex justify-center items-center gap-2.5 rounded-xl border border-border bg-dark/40 px-4 py-3 text-xs font-bold text-text-light hover:bg-white/5 transition-all cursor-pointer"
           >
             <svg
               viewBox="0 0 24 24"

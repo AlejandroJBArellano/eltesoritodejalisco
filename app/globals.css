@@ -33,7 +33,7 @@
   input,
   select,
   textarea {
-    @apply bg-[#181818] text-[#E0E0E0] border-[#333333] placeholder-[#888888] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors;
+    @apply bg-dark/40 text-text-light border-[#333333] placeholder-[#888888] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors;
   }
 
   /* Dark color-scheme for native date/time inputs */
@@ -83,6 +83,6 @@ body {
   display: none;
 }
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

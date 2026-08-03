@@ -28,7 +28,9 @@ export function useMenuItems(initialItems: MenuItem[]) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Delete confirmation
-  const [deleteArmedItemId, setDeleteArmedItemId] = useState<string | null>(null);
+  const [deleteArmedItemId, setDeleteArmedItemId] = useState<string | null>(
+    null,
+  );
 
   // Table filters, sort & pagination
   const [searchQuery, setSearchQuery] = useState("");
@@ -66,9 +68,11 @@ export function useMenuItems(initialItems: MenuItem[]) {
         const matchCat = (item.category || "").toLowerCase().includes(q);
         if (!matchName && !matchDesc && !matchCat) return false;
       }
-      if (categoryFilter !== "all" && item.category !== categoryFilter) return false;
+      if (categoryFilter !== "all" && item.category !== categoryFilter)
+        return false;
       if (availabilityFilter === "available" && !item.isAvailable) return false;
-      if (availabilityFilter === "unavailable" && item.isAvailable) return false;
+      if (availabilityFilter === "unavailable" && item.isAvailable)
+        return false;
       return true;
     });
   }, [items, searchQuery, categoryFilter, availabilityFilter]);
@@ -100,7 +104,8 @@ export function useMenuItems(initialItems: MenuItem[]) {
       setIsLoading(true);
       const response = await fetch("/api/menu");
       const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "Error al cargar el menú");
+      if (!response.ok)
+        throw new Error(data?.error || "Error al cargar el menú");
       setItems(
         (data.items || []).map((item: DatabaseMenuItem) => ({
           ...item,

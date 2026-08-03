@@ -36,7 +36,7 @@ async function getUsers(): Promise<Profile[]> {
     .select("*")
     .eq("tenant_id", tenant.id);
 
-  const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+  const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
 
   const combinedUsers = authData.users
     .filter((authUser) => profileMap.has(authUser.id))

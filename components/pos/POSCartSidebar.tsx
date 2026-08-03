@@ -93,7 +93,7 @@ export function POSCartSidebar({
             <select
               value={formState.customerId}
               onChange={(e) => handleFormChange("customerId", e.target.value)}
-              className="w-full rounded-xl border border-border bg-[#181818] px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors"
+              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors"
             >
               <option value="">General</option>
               {customers.map((c) => (
@@ -111,7 +111,7 @@ export function POSCartSidebar({
             <select
               value={formState.source}
               onChange={(e) => handleFormChange("source", e.target.value)}
-              className={`w-full rounded-xl border bg-[#181818] px-3 py-2 text-xs text-text-light outline-none transition-colors ${
+              className={`w-full rounded-xl border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none transition-colors ${
                 formErrors.source
                   ? "border-red-500/50 focus:border-red-400"
                   : "border-border focus:border-primary"
@@ -133,7 +133,7 @@ export function POSCartSidebar({
               type="text"
               value={formState.notes}
               onChange={(e) => handleFormChange("notes", e.target.value)}
-              className="w-full rounded-xl border border-border bg-[#181818] px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
+              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
               placeholder="Mesa 4, sin chile..."
             />
           </div>

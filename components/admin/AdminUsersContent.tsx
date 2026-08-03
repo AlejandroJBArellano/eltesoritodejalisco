@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { createUser, deleteUser, updateUserRole } from "@/app/admin/users/actions";
+import {
+  createUser,
+  deleteUser,
+  updateUserRole,
+} from "@/app/admin/users/actions";
 import {
   UserPlus,
   Users,
@@ -264,7 +268,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] pb-16 text-[#E0E0E0]">
+    <div className="min-h-screen bg-background pb-16 text-text-light">
       <PageHeader
         title="Gestión de Personal & Usuarios"
         subtitle="Administra cuentas de acceso, asignación de roles y permisos"
@@ -297,12 +301,12 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
 
         {/* Tarjetas de Métricas Rápidas */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Total Usuarios
               </p>
-              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">
+              <p className="mt-1 text-2xl font-black text-text-light">
                 {profiles.length}
               </p>
             </div>
@@ -311,9 +315,9 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Administradores
               </p>
               <p className="mt-1 text-2xl font-black text-blue-400">
@@ -325,9 +329,9 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Meseros / POS
               </p>
               <p className="mt-1 text-2xl font-black text-amber-400">
@@ -339,9 +343,9 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Cocineros / KDS
               </p>
               <p className="mt-1 text-2xl font-black text-purple-400">
@@ -355,15 +359,15 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
         </div>
 
         {/* TABLA DE USUARIOS */}
-        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
-            <h2 className="text-base font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+            <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-blue-500" />
               Directorio de Usuarios ({filteredProfiles.length})
             </h2>
             <button
               onClick={fetchProfiles}
-              className="text-xs text-[#E0E0E0]/60 hover:text-white flex items-center gap-1.5 font-bold"
+              className="text-xs text-text-light/60 hover:text-white flex items-center gap-1.5 font-bold"
             >
               <RefreshCw
                 className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`}
@@ -373,9 +377,9 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           </div>
 
           {/* Barra de Filtros */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#1A1A1A] p-4 rounded-xl border border-white/5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
             <div>
-              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Buscar Usuario
               </label>
               <TableSearchInput
@@ -389,7 +393,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             </div>
 
             <div>
-              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Filtrar por Rol
               </label>
               <select
@@ -398,7 +402,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                   setRoleFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-[#E0E0E0] outline-none focus:border-blue-500"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-blue-500"
               >
                 <option value="ALL">Todos los Roles</option>
                 <option value="ADMIN">Administrador</option>
@@ -410,9 +414,9 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           </div>
 
           {/* Tabla de Usuarios */}
-          <div className="overflow-x-auto rounded-xl border border-white/5">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-left text-sm">
-              <thead className="bg-[#181818] text-xs uppercase tracking-wider text-[#E0E0E0]/60 border-b border-white/5">
+              <thead className="bg-dark/40 text-xs uppercase tracking-wider text-text-light/60 border-b border-border">
                 <tr>
                   <TableHeaderSortCell
                     field="full_name"
@@ -460,13 +464,13 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                             {(p.full_name || p.email).charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-bold text-[#E0E0E0]">
+                            <p className="font-bold text-text-light">
                               {p.full_name || "Sin Nombre"}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="py-3 px-4 font-mono text-xs text-[#E0E0E0]/70">
+                      <td className="py-3 px-4 font-mono text-xs text-text-light/70">
                         {p.email}
                       </td>
                       <td className="py-3 px-4">
@@ -503,7 +507,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                           </option>
                         </select>
                       </td>
-                      <td className="py-3 px-4 text-xs text-[#E0E0E0]/50">
+                      <td className="py-3 px-4 text-xs text-text-light/50">
                         {new Date(p.created_at).toLocaleDateString("es-MX", {
                           day: "numeric",
                           month: "short",
@@ -540,7 +544,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                   <tr>
                     <td
                       colSpan={5}
-                      className="py-8 text-center text-xs text-[#E0E0E0]/40 italic"
+                      className="py-8 text-center text-xs text-text-light/40 italic"
                     >
                       No se encontraron usuarios.
                     </td>
@@ -575,63 +579,63 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
       >
         <form onSubmit={handleCreateUser} className="space-y-4">
           <div>
-            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
               Nombre Completo *
             </label>
             <div className="relative">
-              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light/40" />
               <input
                 type="text"
                 name="full_name"
                 required
-                className="w-full rounded-xl border border-white/10 bg-[#181818] pl-10 pr-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-blue-500"
+                className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500"
                 placeholder="Ej. María García"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
               Correo Electrónico *
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light/40" />
               <input
                 type="email"
                 name="email"
                 required
-                className="w-full rounded-xl border border-white/10 bg-[#181818] pl-10 pr-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-blue-500"
+                className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500"
                 placeholder="maria@eltesoritodejalisco.com"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
               Contraseña de Acceso *
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light/40" />
               <input
                 type="password"
                 name="password"
                 required
                 minLength={6}
-                className="w-full rounded-xl border border-white/10 bg-[#181818] pl-10 pr-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-blue-500"
+                className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500"
                 placeholder="Mínimo 6 caracteres"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
               Rol Inicial Asignado
             </label>
             <select
               name="role"
               value={selectedFormRole}
               onChange={(e) => setSelectedFormRole(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm font-bold text-[#E0E0E0] outline-none focus:border-blue-500"
+              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-blue-500"
             >
               <option value="WAITER">Mesero (WAITER)</option>
               <option value="CHEF">Cocinero / Chef (CHEF)</option>
@@ -649,16 +653,16 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             >
               {currentRoleInfo.title}
             </p>
-            <p className="text-xs text-[#E0E0E0]/70 font-medium">
+            <p className="text-xs text-text-light/70 font-medium">
               {currentRoleInfo.subtitle}
             </p>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="rounded-xl border border-white/10 px-4 py-2.5 text-xs font-bold text-[#E0E0E0]/70 hover:bg-white/5"
+              className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-white/5"
             >
               Cancelar
             </button>

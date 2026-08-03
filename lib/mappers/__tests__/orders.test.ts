@@ -30,8 +30,12 @@ describe("lib/mappers/orders", () => {
     it("should return current Date for null, undefined, or invalid inputs", () => {
       const now = Date.now();
       expect(safeParseDate(null).getTime()).toBeGreaterThanOrEqual(now - 1000);
-      expect(safeParseDate(undefined).getTime()).toBeGreaterThanOrEqual(now - 1000);
-      expect(safeParseDate("invalid-date-string").getTime()).toBeGreaterThanOrEqual(now - 1000);
+      expect(safeParseDate(undefined).getTime()).toBeGreaterThanOrEqual(
+        now - 1000,
+      );
+      expect(
+        safeParseDate("invalid-date-string").getTime(),
+      ).toBeGreaterThanOrEqual(now - 1000);
     });
 
     it("should preserve existing Date objects if valid", () => {

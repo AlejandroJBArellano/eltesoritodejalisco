@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     if (!sessionId) {
       return NextResponse.json(
         { error: "session_id is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     if (!orderId) {
       return NextResponse.json(
         { error: "No order ID found in session metadata" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     console.error("Error retrieving Stripe session:", error);
     return NextResponse.json(
       { error: "Failed to retrieve session" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -12,16 +12,14 @@ describe("paymentUtils", () => {
     it("should return 0 if order or payments are null/empty", () => {
       expect(getOrderTipAmount(null)).toBe(0);
       expect(getOrderTipAmount(undefined)).toBe(0);
-      expect(getOrderTipAmount({ payments: [] } as unknown as OrderWithDetails)).toBe(0);
+      expect(
+        getOrderTipAmount({ payments: [] } as unknown as OrderWithDetails),
+      ).toBe(0);
     });
 
     it("should sum tip amounts from all payments", () => {
       const order = {
-        payments: [
-          { tipAmount: 15 },
-          { tipAmount: 10 },
-          { tipAmount: 0 },
-        ],
+        payments: [{ tipAmount: 15 }, { tipAmount: 10 }, { tipAmount: 0 }],
       } as unknown as OrderWithDetails;
 
       expect(getOrderTipAmount(order)).toBe(25);
@@ -38,7 +36,10 @@ describe("paymentUtils", () => {
         ],
       } as unknown as OrderWithDetails;
 
-      expect(getOrderPaymentMethods(order)).toEqual([PaymentMethod.CASH, PaymentMethod.CARD]);
+      expect(getOrderPaymentMethods(order)).toEqual([
+        PaymentMethod.CASH,
+        PaymentMethod.CARD,
+      ]);
     });
   });
 
@@ -46,7 +47,9 @@ describe("paymentUtils", () => {
     it("should translate payment method enums to Spanish labels", () => {
       expect(getPaymentMethodLabel(PaymentMethod.CASH)).toBe("Efectivo");
       expect(getPaymentMethodLabel(PaymentMethod.CARD)).toBe("Tarjeta");
-      expect(getPaymentMethodLabel(PaymentMethod.TRANSFER)).toBe("Transferencia");
+      expect(getPaymentMethodLabel(PaymentMethod.TRANSFER)).toBe(
+        "Transferencia",
+      );
       expect(getPaymentMethodLabel(PaymentMethod.OTHER)).toBe("Otro");
     });
   });

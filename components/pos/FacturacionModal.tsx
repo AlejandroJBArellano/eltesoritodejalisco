@@ -79,7 +79,7 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 no-print">
-      <div className="bg-[#1E1E1E] rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div className="bg-[#1E1E1E] rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl border border-border max-h-[90vh] overflow-y-auto custom-scrollbar">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-black text-white uppercase tracking-tighter">
             🧾 Facturación
@@ -106,7 +106,7 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center">
+            <div className="bg-white/5 p-4 rounded-2xl border border-border text-center">
               <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">
                 Total a facturar
               </p>
@@ -152,7 +152,7 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
                     required
                     value={formData.rfc}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#89CFF0] transition-all uppercase"
+                    className="w-full rounded-xl border border-border bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#89CFF0] transition-all uppercase"
                     placeholder="XAXX010101000"
                   />
                 </div>
@@ -166,7 +166,7 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
                     required
                     value={formData.nombre}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#89CFF0] transition-all uppercase"
+                    className="w-full rounded-xl border border-border bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#89CFF0] transition-all uppercase"
                     placeholder="PÚBLICO EN GENERAL"
                   />
                 </div>
@@ -181,7 +181,7 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
                       required
                       value={formData.codigoPostal}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#89CFF0] transition-all"
+                      className="w-full rounded-xl border border-border bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#89CFF0] transition-all"
                       placeholder="00000"
                       maxLength={5}
                     />
@@ -194,7 +194,7 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
                       name="usoCfdi"
                       value={formData.usoCfdi}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#89CFF0] transition-all"
+                      className="w-full rounded-xl border border-border bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#89CFF0] transition-all"
                     >
                       <option value="G03">G03 Gastos</option>
                       <option value="G01">G01 Adq. Merc.</option>
@@ -211,7 +211,7 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
                     name="regimenFiscal"
                     value={formData.regimenFiscal}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#89CFF0] transition-all"
+                    className="w-full rounded-xl border border-border bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#89CFF0] transition-all"
                   >
                     <option value="616">616 Sin obligaciones</option>
                     <option value="601">601 General de Ley</option>

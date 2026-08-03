@@ -36,4 +36,3 @@ export default async function KitchenPage() {
 
   return <KitchenDisplaySystem initialOrders={orders} tenantId={tenant.id} />;
 }
-

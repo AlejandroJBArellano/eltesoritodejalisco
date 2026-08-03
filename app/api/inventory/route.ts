@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     let result = ingredients || [];
     if (lowStock) {
       result = result.filter(
-        (ing: any) => ing.current_stock <= ing.minimum_stock
+        (ing: any) => ing.current_stock <= ing.minimum_stock,
       );
     }
 
@@ -63,7 +63,14 @@ export async function POST(request: NextRequest) {
   try {
     const tenant = await getTenantContext();
     const body = await request.json();
-    const { name, unit, currentStock, minimumStock, costPerUnit, trackingType } = body;
+    const {
+      name,
+      unit,
+      currentStock,
+      minimumStock,
+      costPerUnit,
+      trackingType,
+    } = body;
 
     if (!name || !unit) {
       return NextResponse.json(

@@ -1,14 +1,22 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useOrderTimer, getElapsedSeconds, useRealtimeOrders } from "../useOrders";
+import {
+  useOrderTimer,
+  getElapsedSeconds,
+  useRealtimeOrders,
+} from "../useOrders";
 import { OrderStatus, OrderWithDetails } from "@/types";
 
 // Mock Supabase client
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
     channel: () => ({
-      on: function () { return this; },
-      subscribe: function () { return this; },
+      on: function () {
+        return this;
+      },
+      subscribe: function () {
+        return this;
+      },
     }),
     removeChannel: vi.fn(),
   }),
@@ -90,7 +98,9 @@ describe("useOrders Hook utilities & timers", () => {
         },
       ];
 
-      const { result } = renderHook(() => useRealtimeOrders(initialOrders, false));
+      const { result } = renderHook(() =>
+        useRealtimeOrders(initialOrders, false),
+      );
 
       expect(result.current.orders.length).toBe(1);
       expect(result.current.loading).toBe(false);

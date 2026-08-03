@@ -1,16 +1,24 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { EMPTY_RECIPE_FORM, MenuItem, RecipeFormState, RecipeItem } from "../types";
+import {
+  EMPTY_RECIPE_FORM,
+  MenuItem,
+  RecipeFormState,
+  RecipeItem,
+} from "../types";
 
 export function useRecipes(items: MenuItem[]) {
   const [recipeItems, setRecipeItems] = useState<RecipeItem[]>([]);
   const [selectedRecipeMenuItemId, setSelectedRecipeMenuItemId] = useState("");
-  const [recipeForm, setRecipeForm] = useState<RecipeFormState>(EMPTY_RECIPE_FORM);
+  const [recipeForm, setRecipeForm] =
+    useState<RecipeFormState>(EMPTY_RECIPE_FORM);
   const [recipeErrors, setRecipeErrors] = useState<Record<string, string>>({});
   const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deleteArmedRecipeId, setDeleteArmedRecipeId] = useState<string | null>(null);
+  const [deleteArmedRecipeId, setDeleteArmedRecipeId] = useState<string | null>(
+    null,
+  );
 
   // ── Handlers ──────────────────────────────────────────────────
 
@@ -62,7 +70,8 @@ export function useRecipes(items: MenuItem[]) {
         }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "Error al guardar receta");
+      if (!response.ok)
+        throw new Error(data?.error || "Error al guardar receta");
       await fetchRecipes(selectedRecipeMenuItemId);
       setRecipeForm(EMPTY_RECIPE_FORM);
       setRecipeErrors({});

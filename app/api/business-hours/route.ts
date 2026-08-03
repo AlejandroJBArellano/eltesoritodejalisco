@@ -26,7 +26,7 @@ export async function GET() {
     console.error("Error fetching business hours:", error);
     return NextResponse.json(
       { error: "Error al obtener los horarios comerciales" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -49,7 +49,7 @@ export async function PUT(request: NextRequest) {
     if (!hours || !Array.isArray(hours)) {
       return NextResponse.json(
         { error: "Se requiere un arreglo de horarios para actualizar" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -58,7 +58,7 @@ export async function PUT(request: NextRequest) {
 
     for (const item of hours) {
       const { id, open_time, close_time, is_closed } = item;
-      
+
       if (!id) {
         errors.push("ID de registro faltante en uno de los elementos");
         continue;
@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest) {
         .update({
           open_time,
           close_time,
-          is_closed
+          is_closed,
         })
         .eq("id", id);
 
@@ -81,7 +81,7 @@ export async function PUT(request: NextRequest) {
     if (errors.length > 0) {
       return NextResponse.json(
         { error: `Errores al actualizar horarios: ${errors.join(", ")}` },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -90,7 +90,7 @@ export async function PUT(request: NextRequest) {
     console.error("Error updating business hours:", error);
     return NextResponse.json(
       { error: "Error interno al actualizar los horarios comerciales" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

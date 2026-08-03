@@ -79,33 +79,43 @@ export function useRealtimeOrders(
 
     // Subscribe to changes in the tables
     const ordersFilter = tenantId
-      ? { event: "*" as const, schema: "public" as const, table: "orders" as const, filter: `tenant_id=eq.${tenantId}` }
-      : { event: "*" as const, schema: "public" as const, table: "orders" as const };
+      ? {
+          event: "*" as const,
+          schema: "public" as const,
+          table: "orders" as const,
+          filter: `tenant_id=eq.${tenantId}`,
+        }
+      : {
+          event: "*" as const,
+          schema: "public" as const,
+          table: "orders" as const,
+        };
 
     const itemsFilter = tenantId
-      ? { event: "INSERT" as const, schema: "public" as const, table: "order_items" as const, filter: `tenant_id=eq.${tenantId}` }
-      : { event: "INSERT" as const, schema: "public" as const, table: "order_items" as const };
+      ? {
+          event: "INSERT" as const,
+          schema: "public" as const,
+          table: "order_items" as const,
+          filter: `tenant_id=eq.${tenantId}`,
+        }
+      : {
+          event: "INSERT" as const,
+          schema: "public" as const,
+          table: "order_items" as const,
+        };
 
     const channel = supabase
       .channel(`orders_realtime_${tenantId || "global"}`)
-      .on(
-        "postgres_changes",
-        ordersFilter,
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            playBell();
-          }
-          debouncedFetchOrders();
-        },
-      )
-      .on(
-        "postgres_changes",
-        itemsFilter,
-        () => {
+      .on("postgres_changes", ordersFilter, (payload) => {
+        if (payload.eventType === "INSERT") {
           playBell();
-          debouncedFetchOrders();
-        },
-      )
+        }
+        debouncedFetchOrders();
+      })
+      .on("postgres_changes", itemsFilter, () => {
+        playBell();
+        debouncedFetchOrders();
+      })
       .subscribe();
 
     return () => {
@@ -114,7 +124,14 @@ export function useRealtimeOrders(
         clearTimeout(fetchTimeoutRef.current);
       }
     };
-  }, [soundEnabled, supabase, initialData.length, fetchOrders, debouncedFetchOrders, tenantId]);
+  }, [
+    soundEnabled,
+    supabase,
+    initialData.length,
+    fetchOrders,
+    debouncedFetchOrders,
+    tenantId,
+  ]);
 
   return { orders, loading, error, refetch: fetchOrders, setOrders };
 }
@@ -122,7 +139,10 @@ export function useRealtimeOrders(
 /**
  * Hook to calculate elapsed time for orders
  */
-export function useOrderTimer(createdAt: Date | string, endTime?: Date | string | null) {
+export function useOrderTimer(
+  createdAt: Date | string,
+  endTime?: Date | string | null,
+) {
   const startTimestamp = useMemo(() => {
     if (!createdAt) return 0;
     return safeParseDate(createdAt).getTime();

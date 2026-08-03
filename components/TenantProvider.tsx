@@ -13,9 +13,7 @@ export function TenantProvider({
   children: React.ReactNode;
 }) {
   return (
-    <TenantContext.Provider value={tenant}>
-      {children}
-    </TenantContext.Provider>
+    <TenantContext.Provider value={tenant}>{children}</TenantContext.Provider>
   );
 }
 

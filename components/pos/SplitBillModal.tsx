@@ -215,7 +215,7 @@ export function SplitBillModal({
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[60] no-print">
-      <div className="bg-[#1E1E1E] rounded-[2.5rem] max-w-lg w-full p-8 shadow-2xl border border-white/10 max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <div className="bg-[#1E1E1E] rounded-[2.5rem] max-w-lg w-full p-8 shadow-2xl border border-border max-h-[92vh] overflow-y-auto custom-scrollbar">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
@@ -232,7 +232,7 @@ export function SplitBillModal({
         </div>
 
         {/* Total */}
-        <div className="text-center bg-white/5 py-4 rounded-2xl border border-white/5 mb-6">
+        <div className="text-center bg-white/5 py-4 rounded-2xl border border-border mb-6">
           <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
             Total a dividir
           </p>
@@ -374,7 +374,7 @@ export function SplitBillModal({
                               className={`w-10 h-8 text-center text-xs font-black rounded-lg border-2 bg-white/5 text-white outline-none transition-all ${
                                 isExact
                                   ? "border-[#B2FBA5]"
-                                  : "border-white/10 focus:border-white/30"
+                                  : "border-border focus:border-white/30"
                               }`}
                             />
                           </div>
@@ -443,7 +443,7 @@ export function SplitBillModal({
             return (
               <div
                 key={i}
-                className="bg-white/5 rounded-2xl p-4 border border-white/10 space-y-3"
+                className="bg-white/5 rounded-2xl p-4 border border-border space-y-3"
               >
                 {/* Part header */}
                 <div className="flex justify-between items-center">
@@ -465,7 +465,7 @@ export function SplitBillModal({
                       className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${
                         part.paymentMethod === m.value
                           ? "border-[#89CFF0] bg-[#89CFF0] text-black shadow-md"
-                          : "border-white/5 text-zinc-600 bg-white/5"
+                          : "border-border text-zinc-600 bg-white/5"
                       }`}
                     >
                       {m.label}
@@ -485,7 +485,7 @@ export function SplitBillModal({
                       className={`flex-1 py-1.5 text-[9px] rounded-lg font-black uppercase border-2 transition-all ${
                         part.tipType === "NONE"
                           ? "border-[#FFB7C5] bg-[#FFB7C5] text-black"
-                          : "border-white/5 text-zinc-600 bg-white/5"
+                          : "border-border text-zinc-600 bg-white/5"
                       }`}
                     >
                       Sin propina
@@ -496,7 +496,7 @@ export function SplitBillModal({
                       className={`flex-1 py-1.5 text-[9px] rounded-lg font-black uppercase border-2 transition-all ${
                         part.tipType === "PERCENTAGE"
                           ? "border-[#FFB7C5] bg-[#FFB7C5] text-black"
-                          : "border-white/5 text-zinc-600 bg-white/5"
+                          : "border-border text-zinc-600 bg-white/5"
                       }`}
                     >
                       %
@@ -507,7 +507,7 @@ export function SplitBillModal({
                       className={`flex-1 py-1.5 text-[9px] rounded-lg font-black uppercase border-2 transition-all ${
                         part.tipType === "FIXED"
                           ? "border-[#FFB7C5] bg-[#FFB7C5] text-black"
-                          : "border-white/5 text-zinc-600 bg-white/5"
+                          : "border-border text-zinc-600 bg-white/5"
                       }`}
                     >
                       $ Fijo
@@ -524,7 +524,7 @@ export function SplitBillModal({
                           className={`flex-1 py-1.5 text-[9px] rounded-lg font-black uppercase border-2 transition-all ${
                             part.tipInput === pct
                               ? "border-[#B2FBA5] bg-[#B2FBA5] text-black"
-                              : "border-white/5 text-zinc-600 bg-white/5"
+                              : "border-border text-zinc-600 bg-white/5"
                           }`}
                         >
                           {pct}%
@@ -544,7 +544,7 @@ export function SplitBillModal({
                         placeholder={
                           part.tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"
                         }
-                        className="flex-1 text-sm font-black p-2 border border-white/5 bg-white/5 rounded-xl focus:border-[#FFB7C5] outline-none text-center text-white transition-all placeholder:text-zinc-800"
+                        className="flex-1 text-sm font-black p-2 border border-border bg-white/5 rounded-xl focus:border-[#FFB7C5] outline-none text-center text-white transition-all placeholder:text-zinc-800"
                       />
                       {tip > 0 && (
                         <span className="text-[10px] font-black text-blue-400/60 whitespace-nowrap">
@@ -565,11 +565,11 @@ export function SplitBillModal({
                         updatePart(i, "receivedAmount", e.target.value)
                       }
                       placeholder="Efectivo recibido..."
-                      className="w-full text-lg font-black p-3 border border-white/5 bg-white/5 rounded-2xl focus:border-[#B2FBA5] outline-none text-center text-white transition-all placeholder:text-zinc-800"
+                      className="w-full text-lg font-black p-3 border border-border bg-white/5 rounded-2xl focus:border-[#B2FBA5] outline-none text-center text-white transition-all placeholder:text-zinc-800"
                     />
                     {part.receivedAmount &&
                       Number(part.receivedAmount) >= total && (
-                        <div className="flex justify-between items-center bg-white/5 p-2 rounded-xl border border-white/5">
+                        <div className="flex justify-between items-center bg-white/5 p-2 rounded-xl border border-border">
                           <span className="font-black text-zinc-600 text-[10px] uppercase">
                             Cambio
                           </span>
@@ -583,7 +583,7 @@ export function SplitBillModal({
 
                 {/* Total with tip */}
                 {tip > 0 && (
-                  <div className="flex justify-between items-center pt-2 border-t border-white/5">
+                  <div className="flex justify-between items-center pt-2 border-t border-border">
                     <span className="text-[10px] font-black text-zinc-600 uppercase">
                       Total con propina
                     </span>

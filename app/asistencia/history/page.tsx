@@ -186,7 +186,7 @@ export default function AttendanceHistoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] pb-16 text-[#E0E0E0]">
+    <div className="min-h-screen bg-background pb-16 text-text-light">
       {/* Header reutilizable */}
       <PageHeader
         title="Historial de Asistencia"
@@ -198,9 +198,9 @@ export default function AttendanceHistoryPage() {
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         {/* Barra de Filtros */}
-        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
-          <div className="flex items-center justify-between border-b border-white/5 pb-3">
-            <h2 className="text-xs font-black text-[#E0E0E0]/50 uppercase tracking-widest flex items-center gap-2">
+        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <h2 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2">
               <Filter className="h-4 w-4 text-[#FFB7CE]" />
               Filtros del Historial
             </h2>
@@ -217,13 +217,13 @@ export default function AttendanceHistoryPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Empleado
               </label>
               <select
                 value={selectedUserId}
                 onChange={(e) => setSelectedUserId(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-[#E0E0E0] outline-none focus:border-[#FFB7CE]"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-[#FFB7CE]"
               >
                 <option value="ALL">Todos los Empleados</option>
                 {users.map((u) => (
@@ -235,31 +235,31 @@ export default function AttendanceHistoryPage() {
             </div>
 
             <div>
-              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Fecha Inicio
               </label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-[#E0E0E0] outline-none focus:border-[#FFB7CE] scheme-dark"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-[#FFB7CE] scheme-dark"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Fecha Fin
               </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-[#E0E0E0] outline-none focus:border-[#FFB7CE] scheme-dark"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-[#FFB7CE] scheme-dark"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Búsqueda Rápida
               </label>
               <TableSearchInput
@@ -273,12 +273,12 @@ export default function AttendanceHistoryPage() {
 
         {/* Resumen Métricas */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Total Registros
               </p>
-              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">
+              <p className="mt-1 text-2xl font-black text-text-light">
                 {filteredAttendances.length}
               </p>
             </div>
@@ -287,9 +287,9 @@ export default function AttendanceHistoryPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Horas Totales Trabajadas
               </p>
               <p className="mt-1 text-2xl font-black text-emerald-400">
@@ -301,9 +301,9 @@ export default function AttendanceHistoryPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Turnos Activos Ahora
               </p>
               <p className="mt-1 text-2xl font-black text-amber-400">
@@ -317,16 +317,16 @@ export default function AttendanceHistoryPage() {
         </section>
 
         {/* TABLA CON PAGINACIÓN Y ORDENAMIENTO */}
-        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
-          <div className="flex items-center justify-between border-b border-white/5 pb-3">
-            <h2 className="text-base font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-[#FFB7CE]" />
               Registros de Entrada y Salida ({filteredAttendances.length})
             </h2>
           </div>
 
           {isLoading ? (
-            <div className="py-16 text-center text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest">
+            <div className="py-16 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest">
               Cargando historial de asistencias...
             </div>
           ) : error ? (
@@ -337,7 +337,7 @@ export default function AttendanceHistoryPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 text-xs font-black text-[#E0E0E0]/40 uppercase tracking-wider">
+                  <tr className="border-b border-border text-xs font-black text-text-light/40 uppercase tracking-wider">
                     <TableHeaderSortCell
                       field="name"
                       label="Empleado"
@@ -392,16 +392,16 @@ export default function AttendanceHistoryPage() {
                       className="hover:bg-white/[0.02] transition-colors"
                     >
                       <td className="py-3.5 px-3">
-                        <span className="font-bold text-[#E0E0E0] uppercase">
+                        <span className="font-bold text-text-light uppercase">
                           {rec.users?.name || "Desconocido"}
                         </span>
                       </td>
                       <td className="py-3.5 px-3">
-                        <span className="rounded-full bg-white/5 border border-white/10 px-2.5 py-0.5 text-[10px] font-black text-[#E0E0E0]/60 uppercase tracking-widest">
+                        <span className="rounded-full bg-white/5 border border-border px-2.5 py-0.5 text-[10px] font-black text-text-light/60 uppercase tracking-widest">
                           {rec.users?.role || "N/A"}
                         </span>
                       </td>
-                      <td className="py-3.5 px-3 text-[#E0E0E0]/80 font-mono text-xs">
+                      <td className="py-3.5 px-3 text-text-light/80 font-mono text-xs">
                         {rec.date}
                       </td>
                       <td className="py-3.5 px-3 text-emerald-400 font-mono text-xs font-bold">
@@ -416,7 +416,7 @@ export default function AttendanceHistoryPage() {
                             })
                           : "—"}
                       </td>
-                      <td className="py-3.5 px-3 text-right font-bold text-[#E0E0E0]">
+                      <td className="py-3.5 px-3 text-right font-bold text-text-light">
                         {calculateDuration(rec.check_in, rec.check_out)}
                       </td>
                       <td className="py-3.5 px-3 text-right">
@@ -426,7 +426,7 @@ export default function AttendanceHistoryPage() {
                             En Turno
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[10px] font-black text-[#E0E0E0]/50 uppercase tracking-widest">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-border px-3 py-1 text-[10px] font-black text-text-light/50 uppercase tracking-widest">
                             Finalizado
                           </span>
                         )}
@@ -437,7 +437,7 @@ export default function AttendanceHistoryPage() {
                     <tr>
                       <td
                         colSpan={7}
-                        className="py-12 text-center text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest"
+                        className="py-12 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest"
                       >
                         No se encontraron registros de asistencia con los
                         filtros seleccionados.

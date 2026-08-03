@@ -50,7 +50,9 @@ export function CategoriesPanel({
                   {index + 1}
                 </span>
                 <div>
-                  <p className="text-sm font-black text-text-light">{cat.name}</p>
+                  <p className="text-sm font-black text-text-light">
+                    {cat.name}
+                  </p>
                   {cat.translations?.en?.name && (
                     <p className="text-[10px] text-text-light/40 font-bold flex items-center gap-1">
                       <Globe className="h-2.5 w-2.5" />
@@ -93,9 +95,17 @@ export function CategoriesPanel({
                       ? "bg-red-500/30 border-red-500/50 text-red-300"
                       : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
                   }`}
-                  title={deleteArmedCategoryId === cat.id ? "Confirmar eliminación" : "Eliminar"}
+                  title={
+                    deleteArmedCategoryId === cat.id
+                      ? "Confirmar eliminación"
+                      : "Eliminar"
+                  }
                 >
-                  {deleteArmedCategoryId === cat.id ? "¿Seguro?" : <Trash2 className="h-3.5 w-3.5" />}
+                  {deleteArmedCategoryId === cat.id ? (
+                    "¿Seguro?"
+                  ) : (
+                    <Trash2 className="h-3.5 w-3.5" />
+                  )}
                 </button>
               </div>
             </div>

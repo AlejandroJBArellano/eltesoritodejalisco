@@ -35,7 +35,7 @@ import {
   Send,
   ShoppingBag,
   Undo2,
-  X
+  X,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -163,7 +163,7 @@ export default function POSPage() {
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
-          <p className="text-sm font-bold text-[#E0E0E0]/50 uppercase tracking-widest animate-pulse">
+          <p className="text-sm font-bold text-text-light/50 uppercase tracking-widest animate-pulse">
             Iniciando POS...
           </p>
         </div>
@@ -192,7 +192,10 @@ export default function POSPage() {
     );
   }
 
-  const totalCartItems = formState.items.reduce((sum, item) => sum + Number(item.quantity), 0);
+  const totalCartItems = formState.items.reduce(
+    (sum, item) => sum + Number(item.quantity),
+    0,
+  );
   const cartTotal = formState.items.reduce((total, item) => {
     const product = availableMenuItems.find((m) => m.id === item.menuItemId);
     return total + (product?.price || 0) * Number(item.quantity);
@@ -211,25 +214,32 @@ export default function POSPage() {
         <button
           type="button"
           onClick={() => setActiveTab("menu")}
-          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border ${activeTab === "menu"
-            ? "bg-primary text-black border-primary shadow-lg shadow-primary/10"
-            : "bg-transparent text-[#E0E0E0]/60 border-transparent hover:text-[#E0E0E0]"
-            }`}
+          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border ${
+            activeTab === "menu"
+              ? "bg-primary text-black border-primary shadow-lg shadow-primary/10"
+              : "bg-transparent text-text-light/60 border-transparent hover:text-text-light"
+          }`}
         >
           Catálogo
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("cart")}
-          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border relative ${activeTab === "cart"
-            ? "bg-secondary text-black border-secondary shadow-lg shadow-secondary/10"
-            : "bg-transparent text-[#E0E0E0]/60 border-transparent hover:text-[#E0E0E0]"
-            }`}
+          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border relative ${
+            activeTab === "cart"
+              ? "bg-secondary text-black border-secondary shadow-lg shadow-secondary/10"
+              : "bg-transparent text-text-light/60 border-transparent hover:text-text-light"
+          }`}
         >
           Pedido
           {totalCartItems > 0 && (
-            <span className={`rounded-full text-[10px] font-black h-5 min-w-[20px] px-1.5 flex items-center justify-center transition-colors ${activeTab === "cart" ? "bg-black text-white" : "bg-primary text-black"
-              }`}>
+            <span
+              className={`rounded-full text-[10px] font-black h-5 min-w-[20px] px-1.5 flex items-center justify-center transition-colors ${
+                activeTab === "cart"
+                  ? "bg-black text-white"
+                  : "bg-primary text-black"
+              }`}
+            >
               {totalCartItems}
             </span>
           )}
@@ -238,7 +248,9 @@ export default function POSPage() {
 
       <main className="grid gap-6 lg:grid-cols-12 items-start mx-2 md:mx-4 lg:mx-6">
         {/* SECCIÓN DEL MENÚ */}
-        <div className={`lg:col-span-7 xl:col-span-8 w-full min-w-0 ${activeTab === "menu" ? "block" : "hidden lg:block"}`}>
+        <div
+          className={`lg:col-span-7 xl:col-span-8 w-full min-w-0 ${activeTab === "menu" ? "block" : "hidden lg:block"}`}
+        >
           <POSMenuGrid
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -437,7 +449,7 @@ export default function POSPage() {
                                 setEditTipType("FIXED");
                                 setEditTipInput(
                                   order.payments?.[0]?.tipAmount?.toString() ||
-                                  "0",
+                                    "0",
                                 );
                               }}
                               className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
@@ -494,10 +506,11 @@ export default function POSPage() {
                                 disabled={
                                   isSubmittingCart || isSubmittingCheckout
                                 }
-                                className={`rounded-xl p-1 text-[10px] font-black uppercase transition-all disabled:opacity-50 ${cancelArmedId === order.id
-                                  ? "bg-red-500/30 border border-red-500/50 text-red-300 px-2"
-                                  : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
-                                  }`}
+                                className={`rounded-xl p-1 text-[10px] font-black uppercase transition-all disabled:opacity-50 ${
+                                  cancelArmedId === order.id
+                                    ? "bg-red-500/30 border border-red-500/50 text-red-300 px-2"
+                                    : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
+                                }`}
                                 title={
                                   cancelArmedId === order.id
                                     ? "Confirmar cancelación"
@@ -609,8 +622,9 @@ export default function POSPage() {
                           setPaymentMethod("CASH");
                           setReceivedAmount("");
                         }}
-                        className={`${order.status === "UNCOLLECTED" ? "col-span-2" : ""
-                          } rounded-xl bg-success/10 hover:bg-success/20 text-success border border-success/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors`}
+                        className={`${
+                          order.status === "UNCOLLECTED" ? "col-span-2" : ""
+                        } rounded-xl bg-success/10 hover:bg-success/20 text-success border border-success/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors`}
                       >
                         <DollarSign className="h-3.5 w-3.5" />
                         Cobrar
@@ -696,10 +710,11 @@ export default function POSPage() {
                               : handleCancelArm(order.id)
                           }
                           disabled={isSubmittingCart || isSubmittingCheckout}
-                          className={`rounded-xl py-2.5 text-[10px] font-black uppercase transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 ${cancelArmedId === order.id
-                            ? "bg-red-500/30 border border-red-500/50 text-red-300"
-                            : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
-                            }`}
+                          className={`rounded-xl py-2.5 text-[10px] font-black uppercase transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 ${
+                            cancelArmedId === order.id
+                              ? "bg-red-500/30 border border-red-500/50 text-red-300"
+                              : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
+                          }`}
                         >
                           {cancelArmedId === order.id ? (
                             "¿Seguro?"
@@ -788,7 +803,7 @@ export default function POSPage() {
                   setWhatsappNumber("");
                   setShowWhatsAppModal(false);
                 }}
-                className="bg-white/10 text-[#E0E0E0] px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-white/20 active:scale-95 transition-all"
+                className="bg-white/10 text-text-light px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-white/20 active:scale-95 transition-all"
               >
                 Cerrar
               </button>
@@ -829,23 +844,23 @@ export default function POSPage() {
 
       {showWhatsAppModal && checkoutOrder && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
-          <div className="bg-[#242424] rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-white/10 space-y-5">
-            <div className="flex justify-between items-center border-b border-white/5 pb-3">
-              <h2 className="text-base font-black flex items-center gap-2 text-[#E0E0E0] uppercase tracking-tight">
+          <div className="bg-card rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-border space-y-5">
+            <div className="flex justify-between items-center border-b border-border pb-3">
+              <h2 className="text-base font-black flex items-center gap-2 text-text-light uppercase tracking-tight">
                 <MessageCircle className="h-5 w-5 text-emerald-400" />
                 Ticket por WhatsApp
               </h2>
               <button
                 type="button"
                 onClick={() => setShowWhatsAppModal(false)}
-                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors p-1 rounded-lg hover:bg-white/10"
+                className="text-text-light/40 hover:text-text-light transition-colors p-1 rounded-lg hover:bg-white/10"
                 aria-label="Cerrar"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+            <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
               Ingresa los 10 dígitos del número celular
             </p>
 
@@ -858,7 +873,7 @@ export default function POSPage() {
               }
               placeholder="3312345678"
               autoFocus
-              className="w-full text-2xl font-black p-4 border border-white/5 bg-[#181818] rounded-xl focus:border-emerald-400 outline-none text-center text-[#E0E0E0] tracking-[0.2em] transition-colors placeholder:text-[#E0E0E0]/20"
+              className="w-full text-2xl font-black p-4 border border-border bg-dark/40 rounded-xl focus:border-emerald-400 outline-none text-center text-text-light tracking-[0.2em] transition-colors placeholder:text-text-light/20"
             />
 
             <button
@@ -925,10 +940,10 @@ export default function POSPage() {
                 <ShoppingBag className="h-5 w-5" />
               </div>
               <div className="text-left">
-                <p className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest leading-none mb-1">
+                <p className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest leading-none mb-1">
                   Ver Pedido ({totalCartItems} items)
                 </p>
-                <p className="text-lg font-black text-[#E0E0E0]">
+                <p className="text-lg font-black text-text-light">
                   ${cartTotal.toFixed(2)}
                 </p>
               </div>

@@ -176,7 +176,9 @@ export async function PUT(request: NextRequest) {
     const imageFile = formData.get("image") as File | null;
     let imageUrl = (formData.get("imageUrl") as string) || null;
     const translationsRaw = formData.get("translations") as string | null;
-    const translations = translationsRaw ? JSON.parse(translationsRaw) : undefined;
+    const translations = translationsRaw
+      ? JSON.parse(translationsRaw)
+      : undefined;
     const ingredientId = (formData.get("ingredientId") as string) || null;
 
     if (!id || !name) {

@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, Save, ArrowLeft, Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  Clock,
+  Save,
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import type { DbBusinessHours } from "@/app/admin/horarios/page";
@@ -17,10 +24,12 @@ const DAYS_OF_WEEK_NAMES = [
   "Miércoles",
   "Jueves",
   "Viernes",
-  "Sábado"
+  "Sábado",
 ];
 
-export function AdminHorariosContent({ initialHours }: AdminHorariosContentProps) {
+export function AdminHorariosContent({
+  initialHours,
+}: AdminHorariosContentProps) {
   const [hoursList, setHoursList] = useState<DbBusinessHours[]>(initialHours);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,15 +37,19 @@ export function AdminHorariosContent({ initialHours }: AdminHorariosContentProps
 
   const handleToggleClosed = (index: number) => {
     setHoursList((prev) =>
-      prev.map((h, i) => (i === index ? { ...h, is_closed: !h.is_closed } : h))
+      prev.map((h, i) => (i === index ? { ...h, is_closed: !h.is_closed } : h)),
     );
   };
 
-  const handleTimeChange = (index: number, field: "open_time" | "close_time", value: string) => {
+  const handleTimeChange = (
+    index: number,
+    field: "open_time" | "close_time",
+    value: string,
+  ) => {
     // Append seconds ":00" if not present to match PostgreSQL Time type format
     const formattedTime = value.length === 5 ? `${value}:00` : value;
     setHoursList((prev) =>
-      prev.map((h, i) => (i === index ? { ...h, [field]: formattedTime } : h))
+      prev.map((h, i) => (i === index ? { ...h, [field]: formattedTime } : h)),
     );
   };
 
@@ -52,7 +65,7 @@ export function AdminHorariosContent({ initialHours }: AdminHorariosContentProps
       if (!day.is_closed) {
         if (day.open_time >= day.close_time) {
           setError(
-            `El horario de apertura debe ser anterior al de cierre para el día ${DAYS_OF_WEEK_NAMES[day.day_of_week]}.`
+            `El horario de apertura debe ser anterior al de cierre para el día ${DAYS_OF_WEEK_NAMES[day.day_of_week]}.`,
           );
           setIsSaving(false);
           return;
@@ -68,13 +81,16 @@ export function AdminHorariosContent({ initialHours }: AdminHorariosContentProps
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "Error al guardar horarios");
+      if (!response.ok)
+        throw new Error(data?.error || "Error al guardar horarios");
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 4000);
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : "Ocurrió un error inesperado");
+      setError(
+        err instanceof Error ? err.message : "Ocurrió un error inesperado",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -86,9 +102,8 @@ export function AdminHorariosContent({ initialHours }: AdminHorariosContentProps
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] text-zinc-100 pb-12">
+    <div className="min-h-screen bg-background text-zinc-100 pb-12">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 pt-6">
-        
         {/* Back Link */}
         <div className="mb-4">
           <Link
@@ -143,7 +158,9 @@ export function AdminHorariosContent({ initialHours }: AdminHorariosContentProps
                       <label
                         htmlFor={`closed-${dayHours.id}`}
                         className={`text-sm font-black uppercase tracking-wider cursor-pointer transition-colors ${
-                          dayHours.is_closed ? "text-zinc-600 line-through" : "text-zinc-200"
+                          dayHours.is_closed
+                            ? "text-zinc-600 line-through"
+                            : "text-zinc-200"
                         }`}
                       >
                         {dayName}
@@ -165,7 +182,9 @@ export function AdminHorariosContent({ initialHours }: AdminHorariosContentProps
                           type="time"
                           disabled={dayHours.is_closed}
                           value={formatTimeForInput(dayHours.open_time)}
-                          onChange={(e) => handleTimeChange(idx, "open_time", e.target.value)}
+                          onChange={(e) =>
+                            handleTimeChange(idx, "open_time", e.target.value)
+                          }
                           className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed"
                         />
                       </div>
@@ -178,7 +197,9 @@ export function AdminHorariosContent({ initialHours }: AdminHorariosContentProps
                           type="time"
                           disabled={dayHours.is_closed}
                           value={formatTimeForInput(dayHours.close_time)}
-                          onChange={(e) => handleTimeChange(idx, "close_time", e.target.value)}
+                          onChange={(e) =>
+                            handleTimeChange(idx, "close_time", e.target.value)
+                          }
                           className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed"
                         />
                       </div>

@@ -15,7 +15,7 @@ export default async function TareasPage() {
   const executions = await getTodayExecutions();
 
   return (
-    <main className="min-h-screen bg-[#121212] text-[#E0E0E0]">
+    <main className="min-h-screen bg-background text-text-light">
       <PageHeader
         title="Checklist & Tareas Diarias"
         subtitle="Registro y cumplimiento de tareas operativas del turno"

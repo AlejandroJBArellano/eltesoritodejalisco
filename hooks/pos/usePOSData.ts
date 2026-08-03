@@ -62,11 +62,18 @@ export function usePOSData() {
     return availableMenuItems.filter((m) => {
       // 1. Category Filter (Case-insensitive matching)
       if (activeCategory && activeCategory !== "OTROS") {
-        if (!m.category || m.category.toUpperCase().trim() !== activeCategory.toUpperCase().trim()) {
+        if (
+          !m.category ||
+          m.category.toUpperCase().trim() !==
+            activeCategory.toUpperCase().trim()
+        ) {
           return false;
         }
       } else if (activeCategory === "OTROS") {
-        if (m.category && CATEGORY_ORDER.includes(m.category.toUpperCase().trim())) {
+        if (
+          m.category &&
+          CATEGORY_ORDER.includes(m.category.toUpperCase().trim())
+        ) {
           return false;
         }
       }
@@ -110,7 +117,7 @@ export function usePOSData() {
     const mappedOrders = (data.orders || []).map((dbOrder: DbOrderPayload) =>
       mapOrderData(dbOrder),
     ) as Order[];
-    
+
     // Only display today's orders or active (not archived) orders from previous days
     const todayDateStr = getTodayDateStr();
     const activeAndTodayOrders = mappedOrders.filter(

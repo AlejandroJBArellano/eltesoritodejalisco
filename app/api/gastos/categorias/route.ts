@@ -41,7 +41,9 @@ export async function POST(req: Request) {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("expense_categories")
-      .insert([{ name, color: color || "#3B82F6", tipo_gasto, tenant_id: tenant.id }])
+      .insert([
+        { name, color: color || "#3B82F6", tipo_gasto, tenant_id: tenant.id },
+      ])
       .select()
       .single();
 

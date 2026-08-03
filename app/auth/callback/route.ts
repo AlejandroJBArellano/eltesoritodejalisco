@@ -15,7 +15,9 @@ export async function GET(request: Request) {
     if (!error) {
       try {
         const tenant = await getTenantContext();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) {
           // Check if profile exists for this tenant
           const { data: profile } = await supabase
@@ -27,7 +29,10 @@ export async function GET(request: Request) {
 
           if (!profile) {
             const email = user.email || "";
-            const fullName = user.user_metadata?.full_name || user.user_metadata?.name || "Sin nombre";
+            const fullName =
+              user.user_metadata?.full_name ||
+              user.user_metadata?.name ||
+              "Sin nombre";
             const role = user.user_metadata?.role || "WAITER";
 
             // Insert into public.profiles

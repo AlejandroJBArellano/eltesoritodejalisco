@@ -12,15 +12,21 @@ function getCorsHeaders(request: NextRequest) {
   const headers = new Headers();
 
   if (
-    origin && 
-    (ALLOWED_ORIGINS.includes(origin) || 
-     origin.startsWith("http://localhost:") || 
-     origin.endsWith(".trykittn.com") ||
-     origin === "https://trykittn.com")
+    origin &&
+    (ALLOWED_ORIGINS.includes(origin) ||
+      origin.startsWith("http://localhost:") ||
+      origin.endsWith(".trykittn.com") ||
+      origin === "https://trykittn.com")
   ) {
     headers.set("Access-Control-Allow-Origin", origin);
-    headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
-    headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, stripe-signature, x-tenant-slug");
+    headers.set(
+      "Access-Control-Allow-Methods",
+      "GET, POST, OPTIONS, PUT, PATCH, DELETE",
+    );
+    headers.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, stripe-signature, x-tenant-slug",
+    );
     headers.set("Access-Control-Allow-Credentials", "true");
   }
   return headers;
@@ -36,7 +42,8 @@ function isPublicRoute(request: NextRequest): boolean {
   if (path === "/api/business-hours" && method === "GET") return true;
   if (path === "/api/tenant" && method === "GET") return true;
   if (path === "/api/register" && method === "POST") return true;
-  if (path === "/api/payments/checkout-session" && method === "POST") return true;
+  if (path === "/api/payments/checkout-session" && method === "POST")
+    return true;
   if (path === "/api/payments/session-order" && method === "GET") return true;
 
   // Match /api/orders/[id] (GET)
@@ -85,7 +92,7 @@ export async function middleware(request: NextRequest) {
   corsHeaders.forEach((value, key) => {
     response.headers.set(key, value);
   });
-  
+
   // Expose the tenant slug header to the client/frontend if needed
   response.headers.set("x-tenant-slug", tenantSlug);
 

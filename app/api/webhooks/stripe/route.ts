@@ -5,7 +5,6 @@ import { getCurrentCDMXDate, getCurrentCDMXDay } from "@/lib/utils";
 import { deductInventoryForOrder } from "@/lib/services/inventory";
 import { NextRequest, NextResponse } from "next/server";
 
-
 export async function POST(request: NextRequest) {
   const bodyText = await request.text();
   const sig = request.headers.get("stripe-signature");
@@ -25,7 +24,7 @@ export async function POST(request: NextRequest) {
     console.error("Webhook signature verification failed:", err);
     return NextResponse.json(
       { error: `Webhook Error: ${(err as Error).message}` },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -153,7 +152,7 @@ export async function POST(request: NextRequest) {
             ...item,
             tenant_id: tenantId,
             order_id: order.id,
-          }))
+          })),
         );
 
       if (itemsError) throw itemsError;
@@ -178,12 +177,17 @@ export async function POST(request: NextRequest) {
       // 6. Deduct inventory ingredients automatically
       await deductInventoryForOrder(order.id);
 
-      console.log(`[Stripe Webhook] Order ${orderNumber} created successfully via checkout session.`);
+      console.log(
+        `[Stripe Webhook] Order ${orderNumber} created successfully via checkout session.`,
+      );
     } catch (orderCreationError) {
-      console.error("[Stripe Webhook] Failed to record order:", orderCreationError);
+      console.error(
+        "[Stripe Webhook] Failed to record order:",
+        orderCreationError,
+      );
       return NextResponse.json(
         { error: "Error processing checkout database insert" },
-        { status: 500 }
+        { status: 500 },
       );
     }
   }

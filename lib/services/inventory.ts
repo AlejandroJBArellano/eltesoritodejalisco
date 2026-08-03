@@ -96,7 +96,7 @@ export async function deductInventoryForOrder(
             totalRequired: totalNeeded,
           });
         }
-      } 
+      }
       // 2. Recipe-based tracking of prepared items (Option A)
       else if (menuItem.recipe_items && menuItem.recipe_items.length > 0) {
         for (const recipeItem of menuItem.recipe_items) {
@@ -137,9 +137,11 @@ export async function deductInventoryForOrder(
           .then(({ error }) => {
             if (error) {
               result.success = false;
-              result.errors?.push(`Failed to update stock for ${ingredient.name}`);
+              result.errors?.push(
+                `Failed to update stock for ${ingredient.name}`,
+              );
             }
-          })
+          }),
       );
 
       adjustmentsToInsert.push({
@@ -295,9 +297,11 @@ export async function reverseInventoryForOrder(
           .then(({ error }) => {
             if (error) {
               result.success = false;
-              result.errors?.push(`Failed to update stock for ${ingredient.name}`);
+              result.errors?.push(
+                `Failed to update stock for ${ingredient.name}`,
+              );
             }
-          })
+          }),
       );
 
       adjustmentsToInsert.push({

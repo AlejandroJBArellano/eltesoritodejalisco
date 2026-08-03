@@ -67,16 +67,16 @@ export function POSCheckoutModal({
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
-      <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto custom-scrollbar space-y-6">
-        <div className="flex justify-between items-center border-b border-white/5 pb-3">
-          <h2 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+      <div className="bg-card rounded-2xl max-w-md w-full p-6 shadow-2xl border border-border max-h-[90vh] overflow-y-auto custom-scrollbar space-y-6">
+        <div className="flex justify-between items-center border-b border-border pb-3">
+          <h2 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-success"></span>
             Cobrar Orden #{checkoutOrder.orderNumber}
           </h2>
           <button
             type="button"
             onClick={() => setCheckoutOrder(null)}
-            className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors p-1 rounded-lg hover:bg-white/10"
+            className="text-text-light/40 hover:text-text-light transition-colors p-1 rounded-lg hover:bg-white/10"
             aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
@@ -110,7 +110,7 @@ export function POSCheckoutModal({
               <button
                 type="button"
                 onClick={() => setUnusualTipInfo(null)}
-                className="flex-1 py-2 text-[10px] rounded-xl font-black uppercase border border-white/10 bg-white/5 text-[#E0E0E0]/60 hover:bg-white/10 transition-colors"
+                className="flex-1 py-2 text-[10px] rounded-xl font-black uppercase border border-border bg-white/5 text-text-light/60 hover:bg-white/10 transition-colors"
               >
                 Corregir
               </button>
@@ -127,11 +127,11 @@ export function POSCheckoutModal({
         )}
 
         <div className="space-y-5">
-          <div className="text-center bg-[#1A1A1A] py-6 rounded-2xl border border-white/5 space-y-1">
-            <p className="text-[#E0E0E0]/50 text-[10px] font-extrabold uppercase tracking-widest">
+          <div className="text-center bg-dark/40 py-6 rounded-2xl border border-border space-y-1">
+            <p className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest">
               Total a Pagar
             </p>
-            <p className="text-4xl font-black text-[#E0E0E0] tabular-nums">
+            <p className="text-4xl font-black text-text-light tabular-nums">
               ${(checkoutOrder.total + tipAmountCalculated).toFixed(2)}
             </p>
             {tipAmountCalculated > 0 && (
@@ -143,7 +143,7 @@ export function POSCheckoutModal({
 
           {/* Selector de Propina */}
           <div>
-            <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-2">
+            <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-2">
               Propina
             </label>
             <div className="flex gap-2 mb-2">
@@ -156,7 +156,7 @@ export function POSCheckoutModal({
                 className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${
                   tipType === "NONE"
                     ? "bg-primary/20 border-primary text-primary"
-                    : "border-white/5 text-[#E0E0E0]/60 bg-white/5 hover:border-white/10"
+                    : "border-border text-text-light/60 bg-white/5 hover:border-border"
                 }`}
               >
                 Sin Propina
@@ -167,7 +167,7 @@ export function POSCheckoutModal({
                 className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${
                   tipType === "PERCENTAGE"
                     ? "bg-primary/20 border-primary text-primary"
-                    : "border-white/5 text-[#E0E0E0]/60 bg-white/5 hover:border-white/10"
+                    : "border-border text-text-light/60 bg-white/5 hover:border-border"
                 }`}
               >
                 Porcentaje (%)
@@ -178,14 +178,14 @@ export function POSCheckoutModal({
                 className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${
                   tipType === "FIXED"
                     ? "bg-primary/20 border-primary text-primary"
-                    : "border-white/5 text-[#E0E0E0]/60 bg-white/5 hover:border-white/10"
+                    : "border-border text-text-light/60 bg-white/5 hover:border-border"
                 }`}
               >
                 Fijo ($)
               </button>
             </div>
 
-            <p className="text-[10px] font-extrabold text-[#E0E0E0]/30 uppercase tracking-widest mb-1.5">
+            <p className="text-[10px] font-extrabold text-text-light/30 uppercase tracking-widest mb-1.5">
               Acceso Rápido
             </p>
             <div className="grid grid-cols-3 gap-2 mb-2">
@@ -200,7 +200,7 @@ export function POSCheckoutModal({
                   className={`py-2 text-xs rounded-xl font-black uppercase border transition-all ${
                     tipType === "PERCENTAGE" && tipInput === pct
                       ? "bg-primary text-black border-primary"
-                      : "border-white/5 text-[#E0E0E0]/60 bg-white/5 hover:border-white/10"
+                      : "border-border text-text-light/60 bg-white/5 hover:border-border"
                   }`}
                 >
                   {pct}%
@@ -216,14 +216,14 @@ export function POSCheckoutModal({
                 placeholder={
                   tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto propina"
                 }
-                className="w-full text-base font-black p-3 border border-white/5 bg-[#181818] rounded-xl focus:border-primary outline-none text-center text-[#E0E0E0] transition-colors placeholder:text-[#E0E0E0]/30"
+                className="w-full text-base font-black p-3 border border-border bg-dark/40 rounded-xl focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30"
               />
             )}
           </div>
 
           {/* Método de Pago */}
           <div>
-            <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-2">
+            <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-2">
               Método de Pago
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -237,7 +237,7 @@ export function POSCheckoutModal({
                     className={`py-3 text-xs rounded-xl font-black uppercase border flex flex-col items-center gap-1.5 transition-all ${
                       paymentMethod === m.value
                         ? "border-blue-400 bg-blue-500/10 text-blue-400"
-                        : "border-white/5 text-[#E0E0E0]/60 bg-white/5 hover:border-white/10"
+                        : "border-border text-text-light/60 bg-white/5 hover:border-border"
                     }`}
                   >
                     <IconComp className="h-4 w-4" />
@@ -255,12 +255,12 @@ export function POSCheckoutModal({
                 type="number"
                 value={receivedAmount}
                 onChange={(e) => setReceivedAmount(e.target.value)}
-                className="w-full text-3xl font-black p-4 border border-white/5 bg-[#181818] rounded-xl focus:border-success outline-none text-center text-[#E0E0E0] transition-colors placeholder:text-[#E0E0E0]/20"
+                className="w-full text-3xl font-black p-4 border border-border bg-dark/40 rounded-xl focus:border-success outline-none text-center text-text-light transition-colors placeholder:text-text-light/20"
                 placeholder="Monto recibido ($)..."
                 autoFocus
               />
-              <div className="flex justify-between items-center bg-[#1A1A1A] p-3.5 rounded-xl border border-white/5">
-                <span className="font-extrabold text-[#E0E0E0]/50 text-xs uppercase tracking-widest">
+              <div className="flex justify-between items-center bg-dark/40 p-3.5 rounded-xl border border-border">
+                <span className="font-extrabold text-text-light/50 text-xs uppercase tracking-widest">
                   Cambio a Entregar
                 </span>
                 <span className="text-2xl font-black text-success tabular-nums">
@@ -303,7 +303,7 @@ export function POSCheckoutModal({
                 openModifyModal(checkoutOrder);
                 setCheckoutOrder(null);
               }}
-              className="w-full bg-white/5 text-[#E0E0E0]/60 py-2.5 rounded-xl font-black text-xs hover:bg-white/10 transition-all uppercase tracking-wider border border-white/5"
+              className="w-full bg-white/5 text-text-light/60 py-2.5 rounded-xl font-black text-xs hover:bg-white/10 transition-all uppercase tracking-wider border border-border"
             >
               Regresar a Editar
             </button>

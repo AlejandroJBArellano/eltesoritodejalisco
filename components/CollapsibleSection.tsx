@@ -23,17 +23,17 @@ export default function CollapsibleSection({
       {/* Header Row: Clickable to toggle collapse state */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="mb-4 sm:mb-6 flex items-center justify-between border-b border-white/5 pb-2 cursor-pointer sm:cursor-default select-none group/header"
+        className="mb-4 sm:mb-6 flex items-center justify-between border-b border-border pb-2 cursor-pointer sm:cursor-default select-none group/header"
       >
-        <h2 className="text-base sm:text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+        <h2 className="text-base sm:text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
           {dotColorClass && (
             <span className={`h-2 w-2 rounded-full ${dotColorClass}`}></span>
           )}
           <span>{title}</span>
         </h2>
-        
+
         {/* Chevron icon visible only on mobile */}
-        <div className="sm:hidden text-[#E0E0E0]/40 group-hover/header:text-[#E0E0E0] transition-colors">
+        <div className="sm:hidden text-text-light/40 group-hover/header:text-text-light transition-colors">
           <ChevronDown
             className={`h-5 w-5 transition-transform duration-200 ${
               isOpen ? "rotate-180" : ""

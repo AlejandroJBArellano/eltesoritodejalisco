@@ -4,24 +4,46 @@ import { usePOSCart } from "../usePOSCart";
 import { MenuItem, Order } from "@/types/pos";
 
 const mockMenuItems: MenuItem[] = [
-  { id: "1", name: "Taco Pastor", price: 20, isAvailable: true, category: "Tacos" },
-  { id: "2", name: "Gringa", price: 35, isAvailable: true, category: "Gringas" },
-  { id: "3", name: "Orden Mixta", price: 60, isAvailable: true, category: "Tacos" },
+  {
+    id: "1",
+    name: "Taco Pastor",
+    price: 20,
+    isAvailable: true,
+    category: "Tacos",
+  },
+  {
+    id: "2",
+    name: "Gringa",
+    price: 35,
+    isAvailable: true,
+    category: "Gringas",
+  },
+  {
+    id: "3",
+    name: "Orden Mixta",
+    price: 60,
+    isAvailable: true,
+    category: "Tacos",
+  },
 ];
 
 const mockRefreshOrders = vi.fn().mockResolvedValue([] as Order[]);
 
 describe("usePOSCart Hook", () => {
   it("should initialize default empty form state", () => {
-    const { result } = renderHook(() => usePOSCart(mockMenuItems, mockRefreshOrders));
-    
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
     expect(result.current.formState.customerId).toBe("");
     expect(result.current.formState.source).toBe("Otro");
     expect(result.current.formState.items.length).toBe(0);
   });
 
   it("should add grid items to the cart correctly", () => {
-    const { result } = renderHook(() => usePOSCart(mockMenuItems, mockRefreshOrders));
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
 
     // Add Taco Pastor
     act(() => {
@@ -49,14 +71,16 @@ describe("usePOSCart Hook", () => {
   });
 
   it("should update quantity and remove item when quantity drops to 0", () => {
-    const { result } = renderHook(() => usePOSCart(mockMenuItems, mockRefreshOrders));
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
 
     // Add Taco Pastor
     act(() => {
       result.current.handleGridItemClick(mockMenuItems[0]);
     });
     expect(result.current.formState.items.length).toBe(1);
-    
+
     // Increment quantity
     act(() => {
       result.current.handleQuantityChange(0, 1);
@@ -78,7 +102,9 @@ describe("usePOSCart Hook", () => {
 
   it("should handle two-step clear cart flow", () => {
     vi.useFakeTimers();
-    const { result } = renderHook(() => usePOSCart(mockMenuItems, mockRefreshOrders));
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
 
     // Add Taco Pastor first so the cart is not empty
     act(() => {
@@ -107,7 +133,9 @@ describe("usePOSCart Hook", () => {
 
   it("should auto-reset armed state for clear cart after 3 seconds", () => {
     vi.useFakeTimers();
-    const { result } = renderHook(() => usePOSCart(mockMenuItems, mockRefreshOrders));
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
 
     act(() => {
       result.current.handleClearCart();
@@ -123,7 +151,9 @@ describe("usePOSCart Hook", () => {
   });
 
   it("should handle mixed order flavor changes correctly without exceeding total limit", () => {
-    const { result } = renderHook(() => usePOSCart(mockMenuItems, mockRefreshOrders));
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
 
     // Trigger mixed order flow by clicking "Orden Mixta"
     act(() => {

@@ -47,7 +47,9 @@ export async function GET() {
           id: authUser.id,
           email: authUser.email,
           full_name:
-            authUser.user_metadata?.name || dbProfile?.full_name || "Sin nombre",
+            authUser.user_metadata?.name ||
+            dbProfile?.full_name ||
+            "Sin nombre",
           role: dbProfile?.role || "WAITER",
           created_at: authUser.created_at,
         };

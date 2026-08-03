@@ -33,16 +33,16 @@ export function POSAddItemsModal({
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
-      <div className="bg-[#242424] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-white/10 space-y-6">
-        <div className="flex justify-between items-center border-b border-white/5 pb-3">
-          <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+      <div className="bg-card rounded-2xl max-w-md w-full p-6 shadow-2xl border border-border space-y-6">
+        <div className="flex justify-between items-center border-b border-border pb-3">
+          <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-purple-500"></span>
             Agregar Productos a Orden #{editingOrder.orderNumber}
           </h3>
           <button
             type="button"
             onClick={() => setEditingOrder(null)}
-            className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors p-1 rounded-lg hover:bg-white/10"
+            className="text-text-light/40 hover:text-text-light transition-colors p-1 rounded-lg hover:bg-white/10"
             aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
@@ -52,7 +52,7 @@ export function POSAddItemsModal({
         <form onSubmit={handleAddItems} className="space-y-5">
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Nuevos Productos
               </span>
               <button
@@ -75,14 +75,14 @@ export function POSAddItemsModal({
                       e.target.value,
                     )
                   }
-                  className="flex-1 rounded-xl border border-white/5 bg-[#181818] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+                  className="flex-1 rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors"
                   required
                 >
-                  <option value="" className="bg-[#242424]">
+                  <option value="" className="bg-card">
                     Seleccionar Producto
                   </option>
                   {availableMenuItems.map((m) => (
-                    <option key={m.id} value={m.id} className="bg-[#242424]">
+                    <option key={m.id} value={m.id} className="bg-card">
                       {m.name} (${m.price})
                     </option>
                   ))}
@@ -97,7 +97,7 @@ export function POSAddItemsModal({
                       e.target.value,
                     )
                   }
-                  className="w-16 rounded-xl border border-white/5 bg-[#181818] px-2 py-2 text-xs text-center font-black text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+                  className="w-16 rounded-xl border border-border bg-dark/40 px-2 py-2 text-xs text-center font-black text-text-light outline-none focus:border-primary transition-colors"
                   min="1"
                   required
                 />
@@ -116,7 +116,7 @@ export function POSAddItemsModal({
             <button
               type="button"
               onClick={() => setEditingOrder(null)}
-              className="w-full bg-white/5 text-[#E0E0E0]/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider"
+              className="w-full bg-white/5 text-text-light/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider"
             >
               Cancelar
             </button>

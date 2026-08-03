@@ -5,8 +5,20 @@ import { POSMenuGrid } from "../POSMenuGrid";
 import { MenuItem } from "@/types/pos";
 
 const mockItems: MenuItem[] = [
-  { id: "1", name: "Taco de Birria", price: 30, isAvailable: true, category: "TACOS" },
-  { id: "2", name: "Agua de Horchata", price: 25, isAvailable: true, category: "BEBIDAS" },
+  {
+    id: "1",
+    name: "Taco de Birria",
+    price: 30,
+    isAvailable: true,
+    category: "TACOS",
+  },
+  {
+    id: "2",
+    name: "Agua de Horchata",
+    price: 25,
+    isAvailable: true,
+    category: "BEBIDAS",
+  },
 ];
 
 const mockCategories = ["ALL", "TACOS", "BEBIDAS"];
@@ -23,7 +35,7 @@ describe("POSMenuGrid Component", () => {
         categories={mockCategories}
         filteredMenuItems={mockItems}
         handleGridItemClick={handleGridItemClick}
-      />
+      />,
     );
 
     expect(screen.getByText("Catálogo de Productos")).toBeInTheDocument();
@@ -43,12 +55,12 @@ describe("POSMenuGrid Component", () => {
         categories={mockCategories}
         filteredMenuItems={mockItems}
         handleGridItemClick={handleGridItemClick}
-      />
+      />,
     );
 
     const tacoCard = screen.getByText("Taco de Birria").closest("button");
     expect(tacoCard).toBeInTheDocument();
-    
+
     if (tacoCard) {
       fireEvent.click(tacoCard);
       expect(handleGridItemClick).toHaveBeenCalledWith(mockItems[0]);
@@ -66,7 +78,7 @@ describe("POSMenuGrid Component", () => {
         categories={mockCategories}
         filteredMenuItems={mockItems}
         handleGridItemClick={vi.fn()}
-      />
+      />,
     );
 
     const searchInput = screen.getByPlaceholderText(/Buscar producto/i);

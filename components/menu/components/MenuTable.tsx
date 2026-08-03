@@ -1,5 +1,15 @@
-import { Image as ImageIcon, BookOpen, Pencil, Trash2, CheckCircle2, XCircle } from "lucide-react";
-import { TableHeaderSortCell, TablePagination } from "@/components/ui/DataTableControls";
+import {
+  Image as ImageIcon,
+  BookOpen,
+  Pencil,
+  Trash2,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
+import {
+  TableHeaderSortCell,
+  TablePagination,
+} from "@/components/ui/DataTableControls";
 import { MenuItem, SortField } from "../types";
 
 interface MenuTableProps {
@@ -37,9 +47,9 @@ export function MenuTable({
 }: MenuTableProps) {
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-xl border border-white/5">
+      <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-left text-sm">
-          <thead className="bg-[#181818] text-xs uppercase tracking-wider text-[#E0E0E0]/60 border-b border-white/5">
+          <thead className="bg-dark/40 text-xs uppercase tracking-wider text-text-light/60 border-b border-border">
             <tr>
               <th className="py-3 px-4 font-bold">Imagen</th>
               <TableHeaderSortCell
@@ -85,24 +95,24 @@ export function MenuTable({
                     <img
                       src={item.imageUrl}
                       alt={item.name}
-                      className="h-10 w-10 rounded-xl object-cover border border-white/10"
+                      className="h-10 w-10 rounded-xl object-cover border border-border"
                     />
                   ) : (
-                    <div className="h-10 w-10 rounded-xl bg-[#181818] border border-white/10 flex items-center justify-center text-[#E0E0E0]/30">
+                    <div className="h-10 w-10 rounded-xl bg-dark/40 border border-border flex items-center justify-center text-text-light/30">
                       <ImageIcon className="h-5 w-5" />
                     </div>
                   )}
                 </td>
                 <td className="py-3 px-4">
-                  <p className="font-bold text-[#E0E0E0]">{item.name}</p>
+                  <p className="font-bold text-text-light">{item.name}</p>
                   {item.description && (
-                    <p className="text-xs text-[#E0E0E0]/50 line-clamp-1">
+                    <p className="text-xs text-text-light/50 line-clamp-1">
                       {item.description}
                     </p>
                   )}
                 </td>
                 <td className="py-3 px-4">
-                  <span className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1 text-xs font-bold text-[#E0E0E0]/80">
+                  <span className="rounded-lg bg-white/5 border border-border px-2.5 py-1 text-xs font-bold text-text-light/80">
                     {item.category || "Sin categoría"}
                   </span>
                 </td>
@@ -141,7 +151,7 @@ export function MenuTable({
                     </button>
                     <button
                       onClick={() => onEdit(item)}
-                      className="rounded-lg bg-white/5 border border-white/10 p-2 text-[#E0E0E0]/80 hover:text-white hover:bg-white/10 transition-colors"
+                      className="rounded-lg bg-white/5 border border-border p-2 text-text-light/80 hover:text-white hover:bg-white/10 transition-colors"
                       title="Editar Producto"
                     >
                       <Pencil className="h-4 w-4" />
@@ -173,7 +183,7 @@ export function MenuTable({
               <tr>
                 <td
                   colSpan={6}
-                  className="py-8 text-center text-xs text-[#E0E0E0]/40 italic"
+                  className="py-8 text-center text-xs text-text-light/40 italic"
                 >
                   No se encontraron productos en el menú.
                 </td>

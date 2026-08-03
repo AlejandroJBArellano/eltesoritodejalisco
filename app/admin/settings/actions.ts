@@ -10,7 +10,9 @@ export interface UpdateSettingsState {
   error?: string;
 }
 
-export async function updateTenantSettings(formData: FormData): Promise<UpdateSettingsState> {
+export async function updateTenantSettings(
+  formData: FormData,
+): Promise<UpdateSettingsState> {
   try {
     const tenant = await getTenantContext();
     const supabase = await createClient();
@@ -23,14 +25,14 @@ export async function updateTenantSettings(formData: FormData): Promise<UpdateSe
     const primaryColor = formData.get("primaryColor") as string;
     const secondaryColor = formData.get("secondaryColor") as string;
     const darkBgColor = formData.get("darkBgColor") as string;
-    
+
     // File Upload handling
     const logoFile = formData.get("logoFile") as File | null;
     let logoUrl = formData.get("logoUrl") as string;
 
     if (logoFile && logoFile.size > 0) {
       const adminClient = createAdminClient();
-      
+
       // Ensure the "logos" bucket exists and is public
       try {
         await adminClient.storage.createBucket("logos", { public: true });
@@ -40,7 +42,7 @@ export async function updateTenantSettings(formData: FormData): Promise<UpdateSe
 
       const fileExt = logoFile.name.split(".").pop() || "jpg";
       const fileName = `${tenant.id}-${Date.now()}.${fileExt}`;
-      
+
       const { error: uploadError } = await adminClient.storage
         .from("logos")
         .upload(fileName, logoFile, { upsert: true });
@@ -50,9 +52,9 @@ export async function updateTenantSettings(formData: FormData): Promise<UpdateSe
         return { error: `Error al subir el logo: ${uploadError.message}` };
       }
 
-      const { data: { publicUrl } } = adminClient.storage
-        .from("logos")
-        .getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = adminClient.storage.from("logos").getPublicUrl(fileName);
 
       logoUrl = publicUrl;
     }

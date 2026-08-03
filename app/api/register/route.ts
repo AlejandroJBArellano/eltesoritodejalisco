@@ -28,7 +28,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const cleanSlug = slug.toLowerCase().trim().replace(/[^a-z0-9-]/g, "");
+    const cleanSlug = slug
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9-]/g, "");
     if (!cleanSlug) {
       return NextResponse.json(
         { error: "El subdominio ingresado no es válido" },
@@ -75,18 +78,23 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Create Auth User
-    const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
-      email: email,
-      password: password,
-      email_confirm: true, // Auto-confirm email so they can log in immediately
-    });
+    const { data: newUser, error: createError } =
+      await adminClient.auth.admin.createUser({
+        email: email,
+        password: password,
+        email_confirm: true, // Auto-confirm email so they can log in immediately
+      });
 
     if (createError || !newUser.user) {
       console.error("Error creating auth user:", createError);
       // Clean up created tenant if auth fails
       await adminClient.from("tenants").delete().eq("id", tenant.id);
       return NextResponse.json(
-        { error: createError?.message || "Error al crear la cuenta del administrador" },
+        {
+          error:
+            createError?.message ||
+            "Error al crear la cuenta del administrador",
+        },
         { status: 500 },
       );
     }
@@ -125,7 +133,10 @@ export async function POST(request: NextRequest) {
       .insert(defaultHours);
 
     if (hoursError) {
-      console.error("Warning: failed to seed default business hours:", hoursError);
+      console.error(
+        "Warning: failed to seed default business hours:",
+        hoursError,
+      );
     }
 
     // 7. SEED DEFAULT MENU CATEGORIES
@@ -156,20 +167,44 @@ export async function POST(request: NextRequest) {
         .select();
 
       if (!taskCatsError && insertedTaskCats) {
-        const aperturaCat = insertedTaskCats.find((c: any) => c.name === "Apertura");
-        const cierreCat = insertedTaskCats.find((c: any) => c.name === "Cierre");
+        const aperturaCat = insertedTaskCats.find(
+          (c: any) => c.name === "Apertura",
+        );
+        const cierreCat = insertedTaskCats.find(
+          (c: any) => c.name === "Cierre",
+        );
 
         const defaultTasks = [];
         if (aperturaCat) {
           defaultTasks.push(
-            { title: "Limpiar mesas y barra", category_id: aperturaCat.id, shift: "APERTURA", tenant_id: tenant.id },
-            { title: "Verificar stock inicial", category_id: aperturaCat.id, shift: "APERTURA", tenant_id: tenant.id }
+            {
+              title: "Limpiar mesas y barra",
+              category_id: aperturaCat.id,
+              shift: "APERTURA",
+              tenant_id: tenant.id,
+            },
+            {
+              title: "Verificar stock inicial",
+              category_id: aperturaCat.id,
+              shift: "APERTURA",
+              tenant_id: tenant.id,
+            },
           );
         }
         if (cierreCat) {
           defaultTasks.push(
-            { title: "Hacer corte de caja", category_id: cierreCat.id, shift: "CIERRE", tenant_id: tenant.id },
-            { title: "Limpiar cocina y apagar parrillas", category_id: cierreCat.id, shift: "CIERRE", tenant_id: tenant.id }
+            {
+              title: "Hacer corte de caja",
+              category_id: cierreCat.id,
+              shift: "CIERRE",
+              tenant_id: tenant.id,
+            },
+            {
+              title: "Limpiar cocina y apagar parrillas",
+              category_id: cierreCat.id,
+              shift: "CIERRE",
+              tenant_id: tenant.id,
+            },
           );
         }
 
@@ -178,7 +213,10 @@ export async function POST(request: NextRequest) {
         }
       }
     } catch (taskSeedErr) {
-      console.error("Warning: failed to seed task configurations:", taskSeedErr);
+      console.error(
+        "Warning: failed to seed task configurations:",
+        taskSeedErr,
+      );
     }
 
     return NextResponse.json({

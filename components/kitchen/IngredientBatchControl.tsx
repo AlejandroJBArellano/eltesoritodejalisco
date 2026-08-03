@@ -213,10 +213,10 @@ export function IngredientBatchControl({
                     ))}
                   {(!summaryData.summary ||
                     Object.keys(summaryData.summary).length === 0) && (
-                      <p className="italic text-amber-200/60">
-                        No se registraron ventas en este lote.
-                      </p>
-                    )}
+                    <p className="italic text-amber-200/60">
+                      No se registraron ventas en este lote.
+                    </p>
+                  )}
                 </div>
                 <div className="mt-3 flex justify-between border-t border-amber-500/20 pt-2 font-black text-amber-300">
                   <span>Total Producido:</span>
@@ -282,10 +282,11 @@ export function IngredientBatchControl({
                   ? `Confirmar cierre de lote para ${ingredientName}`
                   : `Marcar lote de ${ingredientName} como agotado`
               }
-              className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl p-4 transition-all duration-200 ease-out shadow-md active:scale-[0.98] cursor-pointer ${isArmed
-                ? "border-2 border-red-500 bg-red-600/90 text-white shadow-lg shadow-red-500/30 scale-[1.01]"
-                : "border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/50"
-                }`}
+              className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl p-4 transition-all duration-200 ease-out shadow-md active:scale-[0.98] cursor-pointer ${
+                isArmed
+                  ? "border-2 border-red-500 bg-red-600/90 text-white shadow-lg shadow-red-500/30 scale-[1.01]"
+                  : "border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/50"
+              }`}
             >
               <div className="flex items-center gap-2 text-sm font-black uppercase tracking-wider">
                 {isArmed ? (
@@ -301,8 +302,9 @@ export function IngredientBatchControl({
                 )}
               </div>
               <span
-                className={`text-[10px] font-medium ${isArmed ? "text-white/90 font-bold" : "text-red-400/70"
-                  }`}
+                className={`text-[10px] font-medium ${
+                  isArmed ? "text-white/90 font-bold" : "text-red-400/70"
+                }`}
               >
                 {isArmed
                   ? "Presiona nuevamente para finalizar"
@@ -315,4 +317,3 @@ export function IngredientBatchControl({
     </div>
   );
 }
-

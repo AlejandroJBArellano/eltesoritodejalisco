@@ -1,12 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { deductInventoryForOrder, reverseInventoryForOrder } from "../inventory";
+import {
+  deductInventoryForOrder,
+  reverseInventoryForOrder,
+} from "../inventory";
 
 // Mock the supabase server client
 vi.mock("@/lib/supabase/server", () => {
   const mockSingle = vi.fn();
   const mockEq = vi.fn().mockReturnValue({ single: mockSingle });
   const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-  const mockUpdate = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
+  const mockUpdate = vi
+    .fn()
+    .mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
   const mockInsert = vi.fn().mockResolvedValue({ error: null });
 
   const mockFrom = vi.fn().mockImplementation((table: string) => {
@@ -88,12 +93,16 @@ describe("lib/services/inventory", () => {
     expect(result.deductions).toHaveLength(2);
 
     // Direct deduction: 2 Coca Colas (1-to-1)
-    const directDeduction = result.deductions.find(d => d.ingredientId === "ing-direct");
+    const directDeduction = result.deductions.find(
+      (d) => d.ingredientId === "ing-direct",
+    );
     expect(directDeduction).toBeDefined();
     expect(directDeduction?.quantityDeducted).toBe(2);
 
     // Recipe deduction: 3 * 0.1 = 0.3 Carne Pastor
-    const recipeDeduction = result.deductions.find(d => d.ingredientId === "ing-recipe-1");
+    const recipeDeduction = result.deductions.find(
+      (d) => d.ingredientId === "ing-recipe-1",
+    );
     expect(recipeDeduction).toBeDefined();
     expect(recipeDeduction?.quantityDeducted).toBe(0.3);
   });
@@ -128,7 +137,9 @@ describe("lib/services/inventory", () => {
     expect(result.success).toBe(true);
     expect(result.deductions).toHaveLength(1);
 
-    const directReversal = result.deductions.find(d => d.ingredientId === "ing-direct");
+    const directReversal = result.deductions.find(
+      (d) => d.ingredientId === "ing-direct",
+    );
     expect(directReversal).toBeDefined();
     expect(directReversal?.quantityDeducted).toBe(-2); // -2 means we added 2 back
   });

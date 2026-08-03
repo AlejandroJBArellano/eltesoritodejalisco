@@ -19,7 +19,10 @@ export function safeParseDate(
     const trimmed = input.trim();
     // Check if the string has a standard ISO date-time format but no timezone designator
     const isIsoFormat = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}/.test(trimmed);
-    const hasTimezone = trimmed.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(trimmed) || /GMT|UTC/i.test(trimmed);
+    const hasTimezone =
+      trimmed.endsWith("Z") ||
+      /[+-]\d{2}:\d{2}$/.test(trimmed) ||
+      /GMT|UTC/i.test(trimmed);
 
     if (isIsoFormat && !hasTimezone) {
       const formattedStr = trimmed.replace(" ", "T") + "Z";
@@ -115,13 +118,14 @@ export const mapOrderData = (dbOrder: DbOrderPayload): OrderWithDetails => {
     updatedAt,
     completedAt,
     corteId: dbOrder.corte_id,
-    closeStatus: dbOrder.estado_cierre === "ABIERTA"
-      ? "OPEN"
-      : dbOrder.estado_cierre === "CERRADA"
-      ? "CLOSED"
-      : dbOrder.estado_cierre === "ARCHIVADA"
-      ? "ARCHIVED"
-      : undefined,
+    closeStatus:
+      dbOrder.estado_cierre === "ABIERTA"
+        ? "OPEN"
+        : dbOrder.estado_cierre === "CERRADA"
+          ? "CLOSED"
+          : dbOrder.estado_cierre === "ARCHIVADA"
+            ? "ARCHIVED"
+            : undefined,
     operationalDate: dbOrder.operational_date,
     pickupTime: dbOrder.pickup_time ? safeParseDate(dbOrder.pickup_time) : null,
     orderItems: Array.isArray(dbOrder.order_items)

@@ -105,7 +105,9 @@ function KanbanColumn({
             <p className="text-xs font-black text-text-light/50 uppercase tracking-widest">
               {emptyTitle}
             </p>
-            <p className="text-[11px] text-text-light/40 mt-1">{emptyDescription}</p>
+            <p className="text-[11px] text-text-light/40 mt-1">
+              {emptyDescription}
+            </p>
           </div>
         )}
       </div>
@@ -122,7 +124,11 @@ export function KitchenDisplaySystem({
   tenantId,
 }: KitchenDisplaySystemProps) {
   const [soundEnabled, setSoundEnabled] = useState(false);
-  const { orders, setOrders } = useRealtimeOrders(initialOrders, soundEnabled, tenantId);
+  const { orders, setOrders } = useRealtimeOrders(
+    initialOrders,
+    soundEnabled,
+    tenantId,
+  );
   const [view, setView] = useState<"kanban" | "batching">("kanban");
   const [updatingItemIds, setUpdatingItemIds] = useState<Set<string>>(
     () => new Set(),
@@ -152,7 +158,7 @@ export function KitchenDisplaySystem({
     try {
       const testAudio = new Audio("/new_order.mp3");
       testAudio.volume = 0.1;
-      testAudio.play().catch(() => { });
+      testAudio.play().catch(() => {});
     } catch {
       // Ignore initial user gesture unlock error
     }
@@ -218,11 +224,11 @@ export function KitchenDisplaySystem({
             orderItems: order.orderItems.map((item) =>
               item.id === itemId
                 ? {
-                  ...item,
-                  status: data.item.status,
-                  preparationTimeSeconds:
-                    data.item.preparationTimeSeconds ?? null,
-                }
+                    ...item,
+                    status: data.item.status,
+                    preparationTimeSeconds:
+                      data.item.preparationTimeSeconds ?? null,
+                  }
                 : item,
             ),
           };
@@ -296,19 +302,21 @@ export function KitchenDisplaySystem({
             <div className="flex items-center gap-1 rounded-xl border border-border bg-card/90 p-1 shadow-inner">
               <button
                 onClick={() => setView("kanban")}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${view === "kanban"
-                  ? "bg-amber-500 text-zinc-950 shadow-md"
-                  : "text-text-light/60 hover:text-text-light"
-                  }`}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${
+                  view === "kanban"
+                    ? "bg-amber-500 text-zinc-950 shadow-md"
+                    : "text-text-light/60 hover:text-text-light"
+                }`}
               >
                 <LayoutGrid className="h-4 w-4" /> Vista Kanban
               </button>
               <button
                 onClick={() => setView("batching")}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${view === "batching"
-                  ? "bg-amber-500 text-zinc-950 shadow-md"
-                  : "text-text-light/60 hover:text-text-light"
-                  }`}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${
+                  view === "batching"
+                    ? "bg-amber-500 text-zinc-950 shadow-md"
+                    : "text-text-light/60 hover:text-text-light"
+                }`}
               >
                 <Layers className="h-4 w-4" /> Vista Lotes
               </button>

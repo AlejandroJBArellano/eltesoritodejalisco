@@ -382,8 +382,8 @@ export function AdminTareasClient({
   return (
     <div className="space-y-6">
       {/* Tabs & Acciones */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4">
-        <div className="flex gap-2 bg-[#242424] p-1 rounded-xl border border-white/5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
+        <div className="flex gap-2 bg-card p-1 rounded-xl border border-border">
           <button
             onClick={() => setActiveTab("history")}
             className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
@@ -421,7 +421,7 @@ export function AdminTareasClient({
             <>
               <button
                 onClick={() => setIsCategoryModalOpen(true)}
-                className="rounded-xl border border-white/10 bg-[#242424] px-3.5 py-2 text-xs font-bold text-white hover:bg-white/10 flex items-center gap-1.5 uppercase tracking-wider"
+                className="rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-bold text-white hover:bg-white/10 flex items-center gap-1.5 uppercase tracking-wider"
               >
                 <FolderPlus className="h-4 w-4 text-purple-400" />
                 Nueva Categoría
@@ -445,7 +445,7 @@ export function AdminTareasClient({
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-[#242424] border border-white/10 text-white rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-primary font-bold scheme-dark"
+                className="bg-card border border-border text-white rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-primary font-bold scheme-dark"
               />
             </div>
           )}
@@ -460,8 +460,8 @@ export function AdminTareasClient({
 
       {/* TAB 1: HISTORIAL */}
       {activeTab === "history" && (
-        <div className="space-y-4 rounded-2xl bg-[#242424] p-6 border border-white/5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+        <div className="space-y-4 rounded-2xl bg-card p-6 border border-border">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
             <h2 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-primary" />
               Ejecución de Tareas - {selectedDate}
@@ -473,7 +473,7 @@ export function AdminTareasClient({
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#1A1A1A] p-4 rounded-xl border border-white/5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
             <div>
               <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
                 Buscar Ejecución
@@ -491,7 +491,7 @@ export function AdminTareasClient({
               <select
                 value={execStatusFilter}
                 onChange={(e) => setExecStatusFilter(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
               >
                 <option value="ALL">Todos los Estados</option>
                 <option value="COMPLETED">Listo para Aprobar</option>
@@ -501,9 +501,9 @@ export function AdminTareasClient({
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-white/5">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-left text-sm text-gray-300">
-              <thead className="bg-[#181818] text-xs font-black text-white uppercase tracking-wider border-b border-white/5">
+              <thead className="bg-dark/40 text-xs font-black text-white uppercase tracking-wider border-b border-border">
                 <tr>
                   <TableHeaderSortCell
                     field="task"
@@ -650,13 +650,13 @@ export function AdminTareasClient({
 
       {/* TAB 2: RENDIMIENTO */}
       {activeTab === "performance" && (
-        <div className="space-y-4 rounded-2xl bg-[#242424] p-6 border border-white/5">
+        <div className="space-y-4 rounded-2xl bg-card p-6 border border-border">
           <h2 className="text-base font-black text-white uppercase tracking-wider">
             Resumen de Rendimiento de Personal - {selectedDate}
           </h2>
-          <div className="overflow-x-auto rounded-xl border border-white/5">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-left text-sm text-gray-300">
-              <thead className="bg-[#181818] text-xs font-black text-white uppercase tracking-wider border-b border-white/5">
+              <thead className="bg-dark/40 text-xs font-black text-white uppercase tracking-wider border-b border-border">
                 <tr>
                   <th className="py-3 px-4">Colaborador</th>
                   <th className="py-3 px-4">Tareas Completadas</th>
@@ -697,15 +697,15 @@ export function AdminTareasClient({
       {activeTab === "config" && (
         <div className="space-y-6">
           {/* TABLA DE CATALOGO DE TAREAS */}
-          <div className="rounded-2xl bg-[#242424] p-6 border border-white/5 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+          <div className="rounded-2xl bg-card p-6 border border-border space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
               <h2 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-primary" />
                 Catálogo de Tareas Primordiales ({filteredTasks.length})
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#1A1A1A] p-4 rounded-xl border border-white/5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
               <div>
                 <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
                   Buscar Tarea
@@ -724,7 +724,7 @@ export function AdminTareasClient({
                 <select
                   value={taskCatFilter}
                   onChange={(e) => setTaskCatFilter(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
+                  className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
                 >
                   <option value="ALL">Todas las Categorías</option>
                   {categories.map((c) => (
@@ -742,7 +742,7 @@ export function AdminTareasClient({
                 <select
                   value={taskFreqFilter}
                   onChange={(e) => setTaskFreqFilter(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
+                  className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
                 >
                   <option value="ALL">Todas las Frecuencias</option>
                   <option value="DAILY">Diario</option>
@@ -755,9 +755,9 @@ export function AdminTareasClient({
               </div>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-white/5">
+            <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-left text-sm text-gray-300">
-                <thead className="bg-[#181818] text-xs font-black text-white uppercase tracking-wider border-b border-white/5">
+                <thead className="bg-dark/40 text-xs font-black text-white uppercase tracking-wider border-b border-border">
                   <tr>
                     <TableHeaderSortCell
                       field="name"
@@ -800,7 +800,7 @@ export function AdminTareasClient({
                         {t.name}
                       </td>
                       <td className="py-3 px-4">
-                        <span className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1 text-xs font-bold text-gray-300">
+                        <span className="rounded-lg bg-white/5 border border-border px-2.5 py-1 text-xs font-bold text-gray-300">
                           {t.category?.name || "Sin categoría"}
                         </span>
                       </td>
@@ -883,7 +883,7 @@ export function AdminTareasClient({
                   : setNewTaskName(e.target.value)
               }
               placeholder="Ej. Limpieza de Freidoras"
-              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-white outline-none focus:border-primary font-bold"
+              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-white outline-none focus:border-primary font-bold"
             />
           </div>
 
@@ -901,7 +901,7 @@ export function AdminTareasClient({
                     ? setEditingTaskCategoryId(e.target.value)
                     : setNewTaskCategoryId(e.target.value)
                 }
-                className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2.5 text-xs font-bold text-white outline-none focus:border-primary"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2.5 text-xs font-bold text-white outline-none focus:border-primary"
               >
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -922,7 +922,7 @@ export function AdminTareasClient({
                     ? setEditingTaskFrequency(e.target.value as TaskFrequency)
                     : setNewTaskFrequency(e.target.value as TaskFrequency)
                 }
-                className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2.5 text-xs font-bold text-white outline-none focus:border-primary"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2.5 text-xs font-bold text-white outline-none focus:border-primary"
               >
                 <option value="DAILY">Diario</option>
                 <option value="CONTINUOUS">Continuo</option>
@@ -934,7 +934,7 @@ export function AdminTareasClient({
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-xl bg-[#181818] border border-white/10">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-dark/40 border border-border">
             <label className="text-xs font-bold text-white flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -948,7 +948,7 @@ export function AdminTareasClient({
                     ? setEditingTaskRequiresPhoto(e.target.checked)
                     : setNewTaskRequiresPhoto(e.target.checked)
                 }
-                className="h-4 w-4 rounded border-white/10 bg-[#242424] text-primary focus:ring-primary"
+                className="h-4 w-4 rounded border-border bg-card text-primary focus:ring-primary"
               />
               Requiere foto de evidencia
             </label>
@@ -963,17 +963,17 @@ export function AdminTareasClient({
                     ? setEditingTaskTimeout(Number(e.target.value))
                     : setNewTaskTimeout(Number(e.target.value))
                 }
-                className="w-16 rounded-lg border border-white/10 bg-[#242424] px-2 py-1 text-xs font-bold text-white text-center"
+                className="w-16 rounded-lg border border-border bg-card px-2 py-1 text-xs font-bold text-white text-center"
               />
               <span className="text-xs text-gray-500">min</span>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"
               onClick={() => setIsTaskModalOpen(false)}
-              className="rounded-xl border border-white/10 px-4 py-2.5 text-xs font-bold text-gray-300 hover:bg-white/5"
+              className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-gray-300 hover:bg-white/5"
             >
               Cancelar
             </button>
@@ -1011,15 +1011,15 @@ export function AdminTareasClient({
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
               placeholder="Ej. Cocina, Barra, Limpieza"
-              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-white outline-none focus:border-purple-400 font-bold"
+              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-white outline-none focus:border-purple-400 font-bold"
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"
               onClick={() => setIsCategoryModalOpen(false)}
-              className="rounded-xl border border-white/10 px-4 py-2.5 text-xs font-bold text-gray-300 hover:bg-white/5"
+              className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-gray-300 hover:bg-white/5"
             >
               Cancelar
             </button>

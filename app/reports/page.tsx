@@ -193,7 +193,7 @@ export default function ReportsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#121212] text-[#E0E0E0]/60 text-sm font-bold uppercase tracking-wider">
+      <div className="flex min-h-screen items-center justify-center bg-background text-text-light/60 text-sm font-bold uppercase tracking-wider">
         <div className="flex items-center gap-3">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
           Cargando reportes & métricas...
@@ -204,13 +204,13 @@ export default function ReportsPage() {
 
   if (errorMessage) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-[#121212] p-4 text-center">
-        <div className="rounded-2xl bg-[#242424] p-8 shadow-sm border border-red-500/20 max-w-md">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
+        <div className="rounded-2xl bg-card p-8 shadow-sm border border-red-500/20 max-w-md">
           <AlertTriangle className="mx-auto h-12 w-12 text-red-400 mb-4" />
-          <h2 className="text-lg font-black text-[#E0E0E0] uppercase tracking-tight mb-2">
+          <h2 className="text-lg font-black text-text-light uppercase tracking-tight mb-2">
             Error al Cargar Datos
           </h2>
-          <p className="text-xs text-[#E0E0E0]/60 mb-6">{errorMessage}</p>
+          <p className="text-xs text-text-light/60 mb-6">{errorMessage}</p>
           <button
             onClick={() => fetchData(period)}
             className="rounded-xl bg-primary px-6 py-2.5 text-xs font-black text-white uppercase tracking-wider hover:bg-primary/90 transition-all"
@@ -228,7 +228,7 @@ export default function ReportsPage() {
     data.summary.totalSales - (data.summary.totalExpenses || 0);
 
   return (
-    <div className="min-h-screen bg-[#121212] pb-16">
+    <div className="min-h-screen bg-background pb-16">
       {/* Header reutilizable */}
       <PageHeader
         title="Reportes & Analytics"
@@ -247,9 +247,9 @@ export default function ReportsPage() {
       {/* Main Content Area */}
       <main className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6 lg:px-8">
         {/* Period Selector Card */}
-        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5">
+        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest flex items-center gap-2">
+            <h2 className="text-xs font-extrabold text-text-light/50 uppercase tracking-widest flex items-center gap-2">
               <Calendar className="h-4 w-4 text-primary" /> Filtro de Período y
               Fechas
             </h2>
@@ -273,7 +273,7 @@ export default function ReportsPage() {
                 className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
                   period === p
                     ? "bg-primary text-black shadow-md shadow-primary/20 scale-[1.02]"
-                    : "bg-[#181818] text-[#E0E0E0]/60 hover:bg-white/10 hover:text-white border border-white/5"
+                    : "bg-dark/40 text-text-light/60 hover:bg-white/10 hover:text-white border border-border"
                 }`}
               >
                 {PERIOD_LABELS[p]}
@@ -283,27 +283,27 @@ export default function ReportsPage() {
 
           {/* Custom Date Range Controls */}
           {period === "custom" && (
-            <div className="mt-4 flex flex-wrap items-center gap-4 pt-4 border-t border-white/5">
+            <div className="mt-4 flex flex-wrap items-center gap-4 pt-4 border-t border-border">
               <div className="flex items-center gap-2">
-                <label className="text-xs font-bold text-[#E0E0E0]/60 uppercase tracking-wider">
+                <label className="text-xs font-bold text-text-light/60 uppercase tracking-wider">
                   Desde:
                 </label>
                 <input
                   type="date"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="rounded-xl border border-white/10 bg-[#181818] px-3.5 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="rounded-xl border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <label className="text-xs font-bold text-[#E0E0E0]/60 uppercase tracking-wider">
+                <label className="text-xs font-bold text-text-light/60 uppercase tracking-wider">
                   Hasta:
                 </label>
                 <input
                   type="date"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="rounded-xl border border-white/10 bg-[#181818] px-3.5 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="rounded-xl border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
               <button
@@ -319,8 +319,8 @@ export default function ReportsPage() {
 
         {/* KPI Cards Grid */}
         <section>
-          <div className="mb-4 flex items-center justify-between border-b border-white/5 pb-3">
-            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+          <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
+            <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-success"></span>
               Resumen Financiero y Operativo
             </h2>
@@ -328,31 +328,31 @@ export default function ReportsPage() {
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {/* Venta Bruta */}
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+            <div className="rounded-2xl bg-card p-6 shadow-sm border border-border transition-all hover:border-border">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                   Venta Bruta
                 </span>
                 <div className="rounded-xl bg-success/10 p-3 text-success">
                   <DollarSign className="h-5 w-5" />
                 </div>
               </div>
-              <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
+              <p className="mt-3 text-3xl font-black text-text-light tracking-tight">
                 $
                 {data.summary.totalSales.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </p>
-              <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
+              <p className="mt-1 text-xs text-text-light/40 font-medium">
                 Total ingresado a caja ({data.summary.totalOrders} órdenes)
               </p>
             </div>
 
             {/* Gastos Generales */}
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+            <div className="rounded-2xl bg-card p-6 shadow-sm border border-border transition-all hover:border-border">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                   Gastos Operativos
                 </span>
                 <div className="rounded-xl bg-red-500/10 p-3 text-red-400">
@@ -366,15 +366,15 @@ export default function ReportsPage() {
                   maximumFractionDigits: 2,
                 })}
               </p>
-              <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
+              <p className="mt-1 text-xs text-text-light/40 font-medium">
                 Insumos, sueldos y servicios
               </p>
             </div>
 
             {/* Utilidad Neta */}
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+            <div className="rounded-2xl bg-card p-6 shadow-sm border border-border transition-all hover:border-border">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                   Utilidad Neta
                 </span>
                 <div className="rounded-xl bg-primary/10 p-3 text-primary">
@@ -390,76 +390,76 @@ export default function ReportsPage() {
                   maximumFractionDigits: 2,
                 })}
               </p>
-              <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
+              <p className="mt-1 text-xs text-text-light/40 font-medium">
                 Ventas brutas menos gastos
               </p>
             </div>
 
             {/* Ticket Promedio */}
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+            <div className="rounded-2xl bg-card p-6 shadow-sm border border-border transition-all hover:border-border">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                   Ticket Promedio
                 </span>
                 <div className="rounded-xl bg-secondary/10 p-3 text-secondary">
                   <ReceiptText className="h-5 w-5" />
                 </div>
               </div>
-              <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
+              <p className="mt-3 text-3xl font-black text-text-light tracking-tight">
                 $
                 {data.summary.averageTicket.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </p>
-              <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
+              <p className="mt-1 text-xs text-text-light/40 font-medium">
                 Promedio ingresado por orden
               </p>
             </div>
 
             {/* Tiempo Preparación */}
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+            <div className="rounded-2xl bg-card p-6 shadow-sm border border-border transition-all hover:border-border">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                   Tiempo Promedio KDS
                 </span>
                 <div className="rounded-xl bg-purple-500/10 p-3 text-purple-400">
                   <Clock className="h-5 w-5" />
                 </div>
               </div>
-              <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
+              <p className="mt-3 text-3xl font-black text-text-light tracking-tight">
                 {Math.round(data.summary.averageCompletionTimeMinutes)}{" "}
-                <span className="text-sm font-bold text-[#E0E0E0]/50 uppercase">
+                <span className="text-sm font-bold text-text-light/50 uppercase">
                   min
                 </span>
               </p>
-              <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
+              <p className="mt-1 text-xs text-text-light/40 font-medium">
                 Tiempo de preparación en cocina
               </p>
             </div>
 
             {/* Nuevos Clientes */}
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+            <div className="rounded-2xl bg-card p-6 shadow-sm border border-border transition-all hover:border-border">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                   Nuevos Clientes
                 </span>
                 <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
                   <UserPlus className="h-5 w-5" />
                 </div>
               </div>
-              <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
+              <p className="mt-3 text-3xl font-black text-text-light tracking-tight">
                 {data.customers.newCustomersCount}
               </p>
-              <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
+              <p className="mt-1 text-xs text-text-light/40 font-medium">
                 Registrados en el período
               </p>
             </div>
 
             {/* Pérdidas por Cobro */}
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+            <div className="rounded-2xl bg-card p-6 shadow-sm border border-border transition-all hover:border-border">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                   Pérdidas de Cobro
                 </span>
                 <div className="rounded-xl bg-amber-500/10 p-3 text-amber-400">
@@ -473,29 +473,29 @@ export default function ReportsPage() {
                   { minimumFractionDigits: 2, maximumFractionDigits: 2 },
                 )}
               </p>
-              <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
+              <p className="mt-1 text-xs text-text-light/40 font-medium">
                 Órdenes no cobradas / canceladas
               </p>
             </div>
 
             {/* Total Propinas */}
-            <div className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+            <div className="rounded-2xl bg-card p-6 shadow-sm border border-border transition-all hover:border-border">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+                <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                   Propinas Totales
                 </span>
                 <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
                   <Sparkles className="h-5 w-5" />
                 </div>
               </div>
-              <p className="mt-3 text-3xl font-black text-[#E0E0E0] tracking-tight">
+              <p className="mt-3 text-3xl font-black text-text-light tracking-tight">
                 $
                 {(data.summary.totalTips || 0).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </p>
-              <p className="mt-1 text-xs text-[#E0E0E0]/40 font-medium">
+              <p className="mt-1 text-xs text-text-light/40 font-medium">
                 Propinas acumuladas para staff
               </p>
             </div>
@@ -503,9 +503,9 @@ export default function ReportsPage() {
         </section>
 
         {/* Section: Interactive Sales Chart (Ventas por Día) */}
-        <section className="rounded-2xl bg-[#242424] p-6 sm:p-8 shadow-sm border border-white/5">
-          <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-3">
-            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+        <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
+          <div className="mb-6 flex items-center justify-between border-b border-border pb-3">
+            <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-secondary"></span>
               Tendencia de Ventas por Día
             </h2>
@@ -519,7 +519,7 @@ export default function ReportsPage() {
             )}
           </div>
 
-          <p className="text-xs text-[#E0E0E0]/60 mb-6 font-medium">
+          <p className="text-xs text-text-light/60 mb-6 font-medium">
             Haz clic en cualquiera de las barras para desplegar el desglose de
             productos vendidos ese día.
           </p>
@@ -581,14 +581,14 @@ export default function ReportsPage() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <p className="py-16 text-center text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest">
+            <p className="py-16 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest">
               No hay registros de ventas en el período seleccionado.
             </p>
           )}
 
           {/* Day Drill-Down Panel */}
           {selectedDay && (
-            <div className="mt-6 rounded-2xl bg-[#181818] border border-amber-500/30 p-6">
+            <div className="mt-6 rounded-2xl bg-dark/40 border border-amber-500/30 p-6">
               <h3 className="text-sm font-black text-amber-400 mb-4 uppercase tracking-wider flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" /> Top Productos —{" "}
                 {new Date(`${selectedDay}T12:00:00-06:00`).toLocaleDateString(
@@ -607,18 +607,18 @@ export default function ReportsPage() {
                   {selectedDayItems.map((item, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
+                      className="flex items-center justify-between py-2 border-b border-border last:border-0"
                     >
                       <div className="flex items-center gap-3">
                         <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/20 text-xs font-black text-amber-400">
                           #{i + 1}
                         </span>
-                        <span className="text-sm font-bold text-[#E0E0E0]">
+                        <span className="text-sm font-bold text-text-light">
                           {item.name}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm font-black text-[#E0E0E0]">
+                        <span className="text-sm font-black text-text-light">
                           {item.quantity} vendidos
                         </span>
                         <span className="ml-3 text-xs font-semibold text-emerald-400">
@@ -629,7 +629,7 @@ export default function ReportsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-[#E0E0E0]/50 font-medium">
+                <p className="text-xs text-text-light/50 font-medium">
                   No hay detalle de productos registrado para esta fecha.
                 </p>
               )}
@@ -638,14 +638,14 @@ export default function ReportsPage() {
         </section>
 
         {/* Product Sales Distribution Chart Section */}
-        <section className="rounded-2xl bg-[#242424] p-6 sm:p-8 shadow-sm border border-white/5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-white/5 pb-4">
+        <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
             <div>
-              <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+              <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-purple-500"></span>
                 Distribución de Ventas por Producto
               </h2>
-              <p className="text-xs text-[#E0E0E0]/60 mt-1 font-medium">
+              <p className="text-xs text-text-light/60 mt-1 font-medium">
                 Analiza el volumen y concentración de ventas individuales por
                 producto y categoría.
               </p>
@@ -653,21 +653,21 @@ export default function ReportsPage() {
 
             <div className="flex flex-wrap items-center gap-3">
               {/* Category Filter Dropdown */}
-              <div className="flex items-center gap-2 bg-[#181818] px-3 py-1.5 rounded-xl border border-white/10 text-xs">
+              <div className="flex items-center gap-2 bg-dark/40 px-3 py-1.5 rounded-xl border border-border text-xs">
                 <Layers className="h-3.5 w-3.5 text-purple-400" />
-                <span className="text-[#E0E0E0]/60 font-bold uppercase tracking-wider">
+                <span className="text-text-light/60 font-bold uppercase tracking-wider">
                   Cat:
                 </span>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="bg-transparent text-[#E0E0E0] text-xs font-bold uppercase tracking-wider outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none rounded px-1"
+                  className="bg-transparent text-text-light text-xs font-bold uppercase tracking-wider outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none rounded px-1"
                 >
                   {categoriesList.map((cat) => (
                     <option
                       key={cat}
                       value={cat}
-                      className="bg-[#242424] text-[#E0E0E0]"
+                      className="bg-card text-text-light"
                     >
                       {cat}
                     </option>
@@ -676,13 +676,13 @@ export default function ReportsPage() {
               </div>
 
               {/* Metric Toggle ($ vs Units) */}
-              <div className="flex items-center bg-[#181818] p-1 rounded-xl border border-white/10">
+              <div className="flex items-center bg-dark/40 p-1 rounded-xl border border-border">
                 <button
                   onClick={() => setProductMetric("revenue")}
                   className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-success focus-visible:outline-none ${
                     productMetric === "revenue"
                       ? "bg-success text-white shadow-md"
-                      : "text-[#E0E0E0]/60 hover:text-white"
+                      : "text-text-light/60 hover:text-white"
                   }`}
                 >
                   $ Ingresos
@@ -692,7 +692,7 @@ export default function ReportsPage() {
                   className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:outline-none ${
                     productMetric === "quantity"
                       ? "bg-purple-600 text-white shadow-md"
-                      : "text-[#E0E0E0]/60 hover:text-white"
+                      : "text-text-light/60 hover:text-white"
                   }`}
                 >
                   # Unidades
@@ -703,8 +703,8 @@ export default function ReportsPage() {
 
           {/* Quick Summary Badges */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-[#181818] p-4 rounded-xl border border-white/5">
-              <span className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block">
+            <div className="bg-dark/40 p-4 rounded-xl border border-border">
+              <span className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-wider block">
                 Total Recaudado ({selectedCategory})
               </span>
               <span className="text-lg font-black text-emerald-400 mt-1 block">
@@ -714,19 +714,19 @@ export default function ReportsPage() {
                 })}
               </span>
             </div>
-            <div className="bg-[#181818] p-4 rounded-xl border border-white/5">
-              <span className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block">
+            <div className="bg-dark/40 p-4 rounded-xl border border-border">
+              <span className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-wider block">
                 Unidades Vendidas
               </span>
               <span className="text-lg font-black text-purple-400 mt-1 block">
                 {totalCategoryQuantity.toLocaleString()} u.
               </span>
             </div>
-            <div className="col-span-2 sm:col-span-1 bg-[#181818] p-4 rounded-xl border border-white/5">
-              <span className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block">
+            <div className="col-span-2 sm:col-span-1 bg-dark/40 p-4 rounded-xl border border-border">
+              <span className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-wider block">
                 Producto Estrella
               </span>
-              <span className="text-sm font-black text-[#E0E0E0] truncate mt-1 block uppercase">
+              <span className="text-sm font-black text-text-light truncate mt-1 block uppercase">
                 {productChartData[0]?.name || "N/A"}
               </span>
             </div>
@@ -800,7 +800,7 @@ export default function ReportsPage() {
               </div>
             </div>
           ) : (
-            <p className="py-12 text-center text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest">
+            <p className="py-12 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest">
               No hay productos registrados en la categoría o período
               seleccionado.
             </p>
@@ -810,9 +810,9 @@ export default function ReportsPage() {
         {/* Detailed Rankings Grid */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Top Selling Items */}
-          <section className="rounded-2xl bg-[#242424] p-6 sm:p-8 shadow-sm border border-white/5">
-            <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-3">
-              <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+          <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
+            <div className="mb-6 flex items-center justify-between border-b border-border pb-3">
+              <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
                 <Award className="h-5 w-5 text-amber-400" />
                 Top Productos Más Vendidos
               </h2>
@@ -827,12 +827,12 @@ export default function ReportsPage() {
                       ? "bg-slate-400/20 text-slate-300 border-slate-400/30"
                       : index === 2
                         ? "bg-amber-700/20 text-amber-500 border-amber-700/30"
-                        : "bg-white/5 text-[#E0E0E0]/60 border-white/5";
+                        : "bg-white/5 text-text-light/60 border-border";
 
                 return (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 rounded-xl bg-[#181818] border border-white/5"
+                    className="flex items-center justify-between p-3 rounded-xl bg-dark/40 border border-border"
                   >
                     <div className="flex items-center gap-3">
                       <span
@@ -840,12 +840,12 @@ export default function ReportsPage() {
                       >
                         #{index + 1}
                       </span>
-                      <span className="font-bold text-[#E0E0E0] uppercase text-sm">
+                      <span className="font-bold text-text-light uppercase text-sm">
                         {item.name}
                       </span>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-black text-[#E0E0E0]">
+                      <p className="text-sm font-black text-text-light">
                         {item.quantity} vendidos
                       </p>
                       <p className="text-xs font-bold text-emerald-400">
@@ -856,7 +856,7 @@ export default function ReportsPage() {
                 );
               })}
               {data.topSellingItems.length === 0 && (
-                <p className="py-8 text-center text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest">
+                <p className="py-8 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest">
                   No hay ventas registradas aún.
                 </p>
               )}
@@ -864,9 +864,9 @@ export default function ReportsPage() {
           </section>
 
           {/* Sales by Source */}
-          <section className="rounded-2xl bg-[#242424] p-6 sm:p-8 shadow-sm border border-white/5">
-            <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-3">
-              <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+          <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
+            <div className="mb-6 flex items-center justify-between border-b border-border pb-3">
+              <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
                 <Store className="h-5 w-5 text-secondary" />
                 Ventas por Canal / Fuente
               </h2>
@@ -876,23 +876,23 @@ export default function ReportsPage() {
               {Object.entries(data.salesBySource).map(([source, stats]) => (
                 <div
                   key={source}
-                  className="p-4 rounded-xl bg-[#181818] border border-white/5 flex items-center justify-between"
+                  className="p-4 rounded-xl bg-dark/40 border border-border flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <div className="rounded-lg bg-secondary/10 p-2.5 text-secondary">
                       <Store className="h-4 w-4" />
                     </div>
                     <div>
-                      <span className="font-bold text-[#E0E0E0] uppercase text-sm block">
+                      <span className="font-bold text-text-light uppercase text-sm block">
                         {source}
                       </span>
-                      <span className="text-xs text-[#E0E0E0]/40 font-medium">
+                      <span className="text-xs text-text-light/40 font-medium">
                         {stats.count} órdenes procesadas
                       </span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-base font-black text-[#E0E0E0]">
+                    <p className="text-base font-black text-text-light">
                       $
                       {stats.total.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
@@ -902,7 +902,7 @@ export default function ReportsPage() {
                 </div>
               ))}
               {Object.keys(data.salesBySource).length === 0 && (
-                <p className="py-8 text-center text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest">
+                <p className="py-8 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest">
                   No hay fuentes registradas.
                 </p>
               )}
@@ -911,9 +911,9 @@ export default function ReportsPage() {
         </div>
 
         {/* Top Customers Section */}
-        <section className="rounded-2xl bg-[#242424] p-6 sm:p-8 shadow-sm border border-white/5">
-          <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-3">
-            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+        <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
+          <div className="mb-6 flex items-center justify-between border-b border-border pb-3">
+            <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
               Mejores Clientes
             </h2>
@@ -922,7 +922,7 @@ export default function ReportsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-xs font-black text-[#E0E0E0]/40 uppercase tracking-wider">
+                <tr className="border-b border-border text-xs font-black text-text-light/40 uppercase tracking-wider">
                   <th scope="col" className="py-3 px-3">
                     Cliente
                   </th>
@@ -945,7 +945,7 @@ export default function ReportsPage() {
                         <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-xs font-black text-primary">
                           {customer.name.substring(0, 2).toUpperCase()}
                         </span>
-                        <span className="font-bold text-[#E0E0E0] uppercase">
+                        <span className="font-bold text-text-light uppercase">
                           {customer.name}
                         </span>
                       </div>
@@ -964,7 +964,7 @@ export default function ReportsPage() {
                   <tr>
                     <td
                       colSpan={3}
-                      className="py-8 text-center text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest"
+                      className="py-8 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest"
                     >
                       No hay clientes registrados en este período.
                     </td>

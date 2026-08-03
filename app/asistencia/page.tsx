@@ -100,33 +100,33 @@ export default function AsistenciaPage() {
     return (
       <div className="space-y-8">
         {/* Admin Bar */}
-        <div className="rounded-2xl bg-[#242424] p-6 border border-white/5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="rounded-2xl bg-card p-6 border border-border flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+            <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 text-primary" /> Modo
               Administrador
             </h3>
-            <p className="text-xs text-[#E0E0E0]/60 mt-1 font-medium">
+            <p className="text-xs text-text-light/60 mt-1 font-medium">
               Puedes registrar entradas o salidas manuales usando una hora
               personalizada.
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <label className="text-xs font-bold text-[#E0E0E0]/60 uppercase tracking-wider">
+            <label className="text-xs font-bold text-text-light/60 uppercase tracking-wider">
               Hora a registrar:
             </label>
             <input
               type="time"
               value={customTime}
               onChange={(e) => setCustomTime(e.target.value)}
-              className="bg-[#181818] border border-white/10 text-[#E0E0E0] px-3.5 py-2 rounded-xl text-xs outline-none focus:border-primary font-mono"
+              className="bg-dark/40 border border-border text-text-light px-3.5 py-2 rounded-xl text-xs outline-none focus:border-primary font-mono"
             />
           </div>
         </div>
 
         {/* Section Header */}
-        <div className="flex items-center justify-between border-b border-white/5 pb-3">
-          <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-secondary"></span>
             Personal & Estado de Turnos Hoy
           </h2>
@@ -162,16 +162,16 @@ export default function AsistenciaPage() {
                 key={user.id}
                 className={`rounded-2xl p-6 border transition-all duration-300 flex flex-col justify-between ${
                   active
-                    ? "bg-[#242424] border-emerald-500/30 shadow-md shadow-emerald-500/5"
-                    : "bg-[#242424] border-white/5 hover:border-white/10"
+                    ? "bg-card border-emerald-500/30 shadow-md shadow-emerald-500/5"
+                    : "bg-card border-border hover:border-border"
                 }`}
               >
                 <div>
                   <div className="flex justify-between items-start mb-3">
-                    <h4 className="font-black text-lg text-[#E0E0E0] uppercase tracking-tight">
+                    <h4 className="font-black text-lg text-text-light uppercase tracking-tight">
                       {user.name}
                     </h4>
-                    <span className="rounded-full bg-white/5 border border-white/10 px-2.5 py-0.5 text-[10px] font-black text-[#E0E0E0]/60 uppercase tracking-widest">
+                    <span className="rounded-full bg-white/5 border border-border px-2.5 py-0.5 text-[10px] font-black text-text-light/60 uppercase tracking-widest">
                       {user.role}
                     </span>
                   </div>
@@ -182,7 +182,7 @@ export default function AsistenciaPage() {
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         En Turno
                       </span>
-                      <p className="text-xs text-[#E0E0E0]/60 font-mono mt-2.5">
+                      <p className="text-xs text-text-light/60 font-mono mt-2.5">
                         Entrada:{" "}
                         <strong className="text-emerald-400">
                           {format(new Date(active.check_in), "HH:mm", {
@@ -193,17 +193,17 @@ export default function AsistenciaPage() {
                     </div>
                   ) : (
                     <div className="mb-4">
-                      <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-black bg-white/5 text-[#E0E0E0]/50 border border-white/10 uppercase tracking-widest">
+                      <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-black bg-white/5 text-text-light/50 border border-border uppercase tracking-widest">
                         Fuera de Turno
                       </span>
                     </div>
                   )}
 
                   {finished.length > 0 && (
-                    <div className="mb-4 text-xs text-[#E0E0E0]/50 border-t border-white/5 pt-3 space-y-1 font-medium">
+                    <div className="mb-4 text-xs text-text-light/50 border-t border-border pt-3 space-y-1 font-medium">
                       <p>
                         Turnos completados hoy:{" "}
-                        <strong className="text-[#E0E0E0] font-bold">
+                        <strong className="text-text-light font-bold">
                           {finished.length}
                         </strong>
                       </p>
@@ -217,7 +217,7 @@ export default function AsistenciaPage() {
                   )}
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-white/5 flex gap-3">
+                <div className="mt-4 pt-4 border-t border-border flex gap-3">
                   {!active ? (
                     <button
                       onClick={() => handleAction("CHECK_IN", user.id)}
@@ -246,11 +246,11 @@ export default function AsistenciaPage() {
     const active = attendances.find((a) => a.status === "ACTIVE");
 
     return (
-      <div className="max-w-md mx-auto bg-[#242424] p-8 rounded-2xl border border-white/5 shadow-sm text-center">
-        <h2 className="text-xl font-black text-[#E0E0E0] uppercase tracking-tight mb-2">
+      <div className="max-w-md mx-auto bg-card p-8 rounded-2xl border border-border shadow-sm text-center">
+        <h2 className="text-xl font-black text-text-light uppercase tracking-tight mb-2">
           Control de Asistencia
         </h2>
-        <p className="text-xs text-[#E0E0E0]/60 mb-8 font-medium">
+        <p className="text-xs text-text-light/60 mb-8 font-medium">
           Registra tu hora de entrada y salida del turno actual.
         </p>
 
@@ -262,7 +262,7 @@ export default function AsistenciaPage() {
                 Turno Activo
               </span>
             </div>
-            <p className="text-xs text-[#E0E0E0]/60 font-bold uppercase tracking-wider mb-1">
+            <p className="text-xs text-text-light/60 font-bold uppercase tracking-wider mb-1">
               Hora de entrada
             </p>
             <p className="text-3xl font-mono font-black text-emerald-400 mb-8">
@@ -279,13 +279,13 @@ export default function AsistenciaPage() {
           </div>
         ) : (
           <div>
-            <div className="w-36 h-36 mx-auto rounded-full bg-white/5 border-4 border-white/10 flex flex-col items-center justify-center mb-6">
-              <UserX className="h-8 w-8 text-[#E0E0E0]/40 mb-1" />
-              <span className="text-[#E0E0E0]/50 font-black text-sm uppercase tracking-wider">
+            <div className="w-36 h-36 mx-auto rounded-full bg-white/5 border-4 border-border flex flex-col items-center justify-center mb-6">
+              <UserX className="h-8 w-8 text-text-light/40 mb-1" />
+              <span className="text-text-light/50 font-black text-sm uppercase tracking-wider">
                 Fuera de Turno
               </span>
             </div>
-            <p className="text-xs text-[#E0E0E0]/50 font-medium mb-8">
+            <p className="text-xs text-text-light/50 font-medium mb-8">
               No tienes un turno activo en este momento.
             </p>
             <button
@@ -303,7 +303,7 @@ export default function AsistenciaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] pb-16">
+    <div className="min-h-screen bg-background pb-16">
       {/* Header reutilizable */}
       <PageHeader
         title="Control de Asistencia"
@@ -324,7 +324,7 @@ export default function AsistenciaPage() {
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {isLoading && !users.length && !attendances.length ? (
           <div className="flex justify-center py-20">
-            <span className="text-xs font-bold text-[#E0E0E0]/40 uppercase tracking-widest">
+            <span className="text-xs font-bold text-text-light/40 uppercase tracking-widest">
               Cargando datos de asistencia...
             </span>
           </div>

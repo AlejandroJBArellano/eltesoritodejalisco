@@ -124,7 +124,8 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
             {/* Footer Summary */}
             <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs text-text-light/40 font-medium">
               <span>
-                Presente en {item.orders.length} {item.orders.length === 1 ? "orden" : "órdenes"}
+                Presente en {item.orders.length}{" "}
+                {item.orders.length === 1 ? "orden" : "órdenes"}
               </span>
             </div>
           </div>

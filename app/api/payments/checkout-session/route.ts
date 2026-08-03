@@ -11,14 +11,14 @@ export async function POST(request: NextRequest) {
     if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
       return NextResponse.json(
         { error: "Debe incluir al menos un producto en la orden" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!customerName) {
       return NextResponse.json(
         { error: "El nombre del cliente es obligatorio" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       if (fetchError || !menuItem) {
         return NextResponse.json(
           { error: `El producto con ID ${item.menuItemId} no existe` },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
           console.error("Error creating Stripe product fallback:", stripeErr);
           return NextResponse.json(
             { error: "No se pudo sincronizar el producto con Stripe" },
-            { status: 500 }
+            { status: 500 },
           );
         }
       }
@@ -87,9 +87,9 @@ export async function POST(request: NextRequest) {
 
     // Origin site URL from referer header to support different ports/domains (e.g. Vite dev server)
     const referer = request.headers.get("referer");
-    const origin = referer 
-      ? new URL(referer).origin 
-      : (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000");
+    const origin = referer
+      ? new URL(referer).origin
+      : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
     const orderId = crypto.randomUUID();
 
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating Stripe checkout session:", error);
     return NextResponse.json(
       { error: "Error interno al iniciar el pago" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

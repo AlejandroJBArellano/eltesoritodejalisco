@@ -51,14 +51,14 @@ export function ProductModal({
     >
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+          <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
             Nombre del Platillo *
           </label>
           <input
             type="text"
             value={formState.name}
             onChange={(e) => onFormChange("name", e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#666666] outline-none focus:border-primary"
+            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#666666] outline-none focus:border-primary"
             placeholder="Ej. Torta Ahogada Sencilla"
           />
           {formErrors.name && (
@@ -70,7 +70,7 @@ export function ProductModal({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
               Precio ($) *
             </label>
             <input
@@ -78,7 +78,7 @@ export function ProductModal({
               step="0.01"
               value={formState.price}
               onChange={(e) => onFormChange("price", e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary"
+              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary"
               placeholder="0.00"
             />
             {formErrors.price && (
@@ -90,7 +90,7 @@ export function ProductModal({
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block">
+              <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block">
                 Categoría
               </label>
               {onAddCategory && (
@@ -106,7 +106,7 @@ export function ProductModal({
             <select
               value={formState.category}
               onChange={(e) => onFormChange("category", e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm font-bold text-[#E0E0E0] outline-none focus:border-primary"
+              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-primary"
             >
               <option value="">-- Sin Categoría --</option>
               {categories.map((c) => (
@@ -119,28 +119,30 @@ export function ProductModal({
         </div>
 
         <div>
-          <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+          <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
             Descripción
           </label>
           <textarea
             rows={2}
             value={formState.description}
             onChange={(e) => onFormChange("description", e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary"
+            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary"
             placeholder="Ingredientes principales, preparación, etc."
           />
         </div>
 
         <div>
-          <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+          <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
             Enlace Directo a Inventario (Control de Stock Directo)
           </label>
           <select
             value={formState.ingredientId || ""}
             onChange={(e) => onFormChange("ingredientId", e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary font-bold"
+            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-bold"
           >
-            <option value="">-- No trackear directamente (usar recetas si existen) --</option>
+            <option value="">
+              -- No trackear directamente (usar recetas si existen) --
+            </option>
             {ingredients.map((ing) => (
               <option key={ing.id} value={ing.id}>
                 {ing.name} ({ing.unit})
@@ -170,26 +172,28 @@ export function ProductModal({
           {showTranslations && (
             <div className="px-4 pb-4 space-y-3 border-t border-blue-500/10">
               <div className="pt-3">
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/40 uppercase tracking-wider block mb-1">
+                <label className="text-[10px] font-extrabold text-text-light/40 uppercase tracking-wider block mb-1">
                   Nombre en Inglés
                 </label>
                 <input
                   type="text"
                   value={formState.nameEn}
                   onChange={(e) => onFormChange("nameEn", e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#444] outline-none focus:border-blue-500"
+                  className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#444] outline-none focus:border-blue-500"
                   placeholder="e.g. Drowned Sandwich"
                 />
               </div>
               <div>
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/40 uppercase tracking-wider block mb-1">
+                <label className="text-[10px] font-extrabold text-text-light/40 uppercase tracking-wider block mb-1">
                   Descripción en Inglés
                 </label>
                 <textarea
                   rows={2}
                   value={formState.descriptionEn}
-                  onChange={(e) => onFormChange("descriptionEn", e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#444] outline-none focus:border-blue-500"
+                  onChange={(e) =>
+                    onFormChange("descriptionEn", e.target.value)
+                  }
+                  className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#444] outline-none focus:border-blue-500"
                   placeholder="e.g. Slow-cooked pork, chipotle sauce..."
                 />
               </div>
@@ -198,7 +202,7 @@ export function ProductModal({
         </div>
 
         <div>
-          <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+          <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
             Imagen del Producto
           </label>
           <div className="flex items-center gap-4">
@@ -207,10 +211,10 @@ export function ProductModal({
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="h-16 w-16 rounded-xl object-cover border border-white/10"
+                className="h-16 w-16 rounded-xl object-cover border border-border"
               />
             ) : (
-              <div className="h-16 w-16 rounded-xl bg-[#181818] border border-white/10 flex items-center justify-center text-[#E0E0E0]/30">
+              <div className="h-16 w-16 rounded-xl bg-dark/40 border border-border flex items-center justify-center text-text-light/30">
                 <ImageIcon className="h-6 w-6" />
               </div>
             )}
@@ -219,7 +223,7 @@ export function ProductModal({
               type="file"
               accept="image/*"
               onChange={onFileChange}
-              className="text-xs text-[#E0E0E0]/60 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-white/10 file:text-white hover:file:bg-white/20"
+              className="text-xs text-text-light/60 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-white/10 file:text-white hover:file:bg-white/20"
             />
           </div>
         </div>
@@ -230,18 +234,21 @@ export function ProductModal({
             id="isAvailable"
             checked={formState.isAvailable}
             onChange={(e) => onFormChange("isAvailable", e.target.checked)}
-            className="h-4 w-4 rounded border-white/10 bg-[#181818] text-primary focus:ring-primary"
+            className="h-4 w-4 rounded border-border bg-dark/40 text-primary focus:ring-primary"
           />
-          <label htmlFor="isAvailable" className="text-xs font-bold text-[#E0E0E0]">
+          <label
+            htmlFor="isAvailable"
+            className="text-xs font-bold text-text-light"
+          >
             Disponible para venta activa
           </label>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+        <div className="flex justify-end gap-3 pt-4 border-t border-border">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-white/10 px-4 py-2.5 text-xs font-bold text-[#E0E0E0]/70 hover:bg-white/5"
+            className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-white/5"
           >
             Cancelar
           </button>

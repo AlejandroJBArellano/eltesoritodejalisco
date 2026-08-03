@@ -47,13 +47,13 @@ export function RecipeModal({
     >
       <div className="space-y-6">
         <div>
-          <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+          <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
             Selecciona Producto del Menú
           </label>
           <select
             value={selectedRecipeMenuItemId}
             onChange={(e) => onSelectedRecipeMenuItemIdChange(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary font-bold"
+            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-bold"
           >
             <option value="">-- Seleccionar Producto --</option>
             {items.map((i) => (
@@ -68,10 +68,10 @@ export function RecipeModal({
           <>
             <form
               onSubmit={onSubmit}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#181818] p-4 rounded-xl border border-white/5"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border"
             >
               <div className="sm:col-span-2">
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+                <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
                   Ingrediente del Catálogo
                 </label>
                 <select
@@ -82,7 +82,7 @@ export function RecipeModal({
                       ingredientId: e.target.value,
                     })
                   }
-                  className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary font-bold"
+                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs text-text-light outline-none focus:border-primary font-bold"
                 >
                   <option value="">-- Seleccionar Ingrediente --</option>
                   {ingredients.map((ing) => (
@@ -99,7 +99,7 @@ export function RecipeModal({
               </div>
 
               <div>
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+                <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
                   Cantidad Requerida
                 </label>
                 <div className="flex gap-2">
@@ -113,7 +113,7 @@ export function RecipeModal({
                         quantityRequired: e.target.value,
                       })
                     }
-                    className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary"
+                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs text-text-light outline-none focus:border-primary"
                     placeholder="1"
                   />
                   <button
@@ -133,20 +133,20 @@ export function RecipeModal({
             </form>
 
             <div>
-              <h4 className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider mb-2">
+              <h4 className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider mb-2">
                 Ingredientes Configurados ({recipeItems.length})
               </h4>
               <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                 {recipeItems.map((rec) => (
                   <div
                     key={rec.id}
-                    className="flex items-center justify-between bg-[#181818] p-3 rounded-xl border border-white/5 text-xs"
+                    className="flex items-center justify-between bg-dark/40 p-3 rounded-xl border border-border text-xs"
                   >
-                    <span className="font-bold text-[#E0E0E0]">
+                    <span className="font-bold text-text-light">
                       {rec.ingredientName}
                     </span>
                     <div className="flex items-center gap-3">
-                      <span className="text-[#E0E0E0]/60 font-mono font-bold">
+                      <span className="text-text-light/60 font-mono font-bold">
                         {rec.quantityRequired} unidad(es)
                       </span>
                       <button
@@ -173,7 +173,7 @@ export function RecipeModal({
                   </div>
                 ))}
                 {recipeItems.length === 0 && (
-                  <p className="text-xs text-[#E0E0E0]/40 italic text-center py-4">
+                  <p className="text-xs text-text-light/40 italic text-center py-4">
                     No hay ingredientes registrados para este platillo.
                   </p>
                 )}
@@ -181,7 +181,7 @@ export function RecipeModal({
             </div>
           </>
         ) : (
-          <p className="text-xs text-[#E0E0E0]/40 italic text-center py-8">
+          <p className="text-xs text-text-light/40 italic text-center py-8">
             Selecciona un producto arriba para ver o agregar sus ingredientes.
           </p>
         )}

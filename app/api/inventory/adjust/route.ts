@@ -51,7 +51,7 @@ export async function PATCH(request: NextRequest) {
       ingredientId,
       parsedAdjustment,
       reason,
-      userId
+      userId,
     );
 
     if (!result.success) {

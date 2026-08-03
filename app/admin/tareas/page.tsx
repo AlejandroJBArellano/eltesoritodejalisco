@@ -20,7 +20,7 @@ export default async function AdminTareasPage() {
   const tasks = await getPrimordialTasks();
 
   return (
-    <main className="min-h-screen bg-[#121212] text-[#E0E0E0]">
+    <main className="min-h-screen bg-background text-text-light">
       <PageHeader
         title="Administración de Tareas"
         subtitle="Control, monitoreo y configuración del checklist operativo diario"

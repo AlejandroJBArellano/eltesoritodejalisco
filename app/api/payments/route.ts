@@ -54,10 +54,7 @@ export async function POST(request: NextRequest) {
     const orderId = body.orderId;
 
     if (!orderId) {
-      return NextResponse.json(
-        { error: "Missing orderId" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
     }
 
     const tenant = await getTenantContext();
@@ -72,15 +69,15 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (fetchOrderError || !orderToCheck) {
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     if (orderToCheck.corte_id || orderToCheck.estado_cierre === "ARCHIVADA") {
       return NextResponse.json(
-        { error: "La orden pertenece a un corte de caja cerrado y no puede ser modificada o cobrada" },
+        {
+          error:
+            "La orden pertenece a un corte de caja cerrado y no puede ser modificada o cobrada",
+        },
         { status: 400 },
       );
     }

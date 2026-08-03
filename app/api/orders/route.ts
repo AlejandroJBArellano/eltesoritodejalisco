@@ -56,7 +56,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body: CreateOrderRequest & { pickupTime?: string } = await request.json();
+    const body: CreateOrderRequest & { pickupTime?: string } =
+      await request.json();
     const { customerId, source, table, notes, orderItems, pickupTime } = body;
 
     if (!source) {
@@ -90,9 +91,7 @@ export async function POST(request: NextRequest) {
           quantity: Number(i.quantity),
           notes: i.notes || null,
         })),
-        p_pickup_time: pickupTime
-          ? new Date(pickupTime).toISOString()
-          : null,
+        p_pickup_time: pickupTime ? new Date(pickupTime).toISOString() : null,
       },
     );
 
@@ -145,7 +144,11 @@ export async function DELETE(request: NextRequest) {
 
     const tenant = await getTenantContext();
     const supabase = await createClient();
-    const { error } = await supabase.from("orders").delete().eq("id", id).eq("tenant_id", tenant.id);
+    const { error } = await supabase
+      .from("orders")
+      .delete()
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
 
     if (error) throw error;
 

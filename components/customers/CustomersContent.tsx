@@ -232,9 +232,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Error inesperado al eliminar",
+        error instanceof Error ? error.message : "Error inesperado al eliminar",
       );
     } finally {
       setIsSubmitting(false);
@@ -505,10 +503,11 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                         </button>
                         <button
                           onClick={() => handleDelete(c.id)}
-                          className={`rounded-lg border p-2 transition-all text-xs font-black ${deleteArmedId === c.id
+                          className={`rounded-lg border p-2 transition-all text-xs font-black ${
+                            deleteArmedId === c.id
                               ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
                               : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
-                            }`}
+                          }`}
                           title={
                             deleteArmedId === c.id
                               ? "Confirmar eliminación"

@@ -390,7 +390,7 @@ export default function GastosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#E0E0E0]">
+    <div className="min-h-screen bg-background text-text-light">
       {/* Header reutilizable */}
       <PageHeader
         title="Gastos Operativos"
@@ -413,7 +413,7 @@ export default function GastosPage() {
                 setNewCatTipoGasto("variable");
                 setIsCategoryModalOpen(true);
               }}
-              className="rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-xs font-bold text-[#E0E0E0] hover:bg-white/10 transition-all uppercase tracking-wider flex items-center gap-1.5"
+              className="rounded-xl bg-white/5 border border-border px-4 py-2 text-xs font-bold text-text-light hover:bg-white/10 transition-all uppercase tracking-wider flex items-center gap-1.5"
             >
               <Plus className="h-4 w-4 text-primary" />
               Nueva Categoría
@@ -425,22 +425,22 @@ export default function GastosPage() {
       {/* Main Single Column Layout */}
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 no-print space-y-8">
         {/* Selector de Mes */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
           <div>
-            <h2 className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+            <h2 className="text-xs font-extrabold text-text-light/50 uppercase tracking-widest">
               Resumen Financiero
             </h2>
-            <p className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase">
+            <p className="text-lg font-black text-text-light tracking-tight uppercase">
               Control de Egresos y Balance
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-[#E0E0E0]/40" />
+            <Calendar className="h-4 w-4 text-text-light/40" />
             <input
               type="month"
               value={currentMonth}
               onChange={(e) => setCurrentMonth(e.target.value)}
-              className="rounded-xl border border-white/5 bg-[#242424] px-4 py-2 text-xs font-bold text-[#E0E0E0] outline-none focus:border-primary transition-all scheme-dark"
+              className="rounded-xl border border-border bg-card px-4 py-2 text-xs font-bold text-text-light outline-none focus:border-primary transition-all scheme-dark"
             />
           </div>
         </div>
@@ -448,16 +448,16 @@ export default function GastosPage() {
         {/* 1. Resumen de Egresos (4 Top Metric Cards) */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Total Gastos */}
-          <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 transition-all hover:border-white/10">
+          <div className="rounded-2xl bg-card p-5 shadow-sm border border-border transition-all hover:border-border">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Gastos Totales ({currentMonth})
               </span>
               <div className="rounded-xl bg-red-500/10 p-2.5 text-red-400">
                 <ReceiptText className="h-5 w-5" />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-black text-[#E0E0E0] tracking-tight tabular-nums">
+            <p className="mt-2 text-2xl font-black text-text-light tracking-tight tabular-nums">
               $
               {totalExpenses.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
@@ -467,16 +467,16 @@ export default function GastosPage() {
           </div>
 
           {/* Gastos Facturados */}
-          <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 transition-all hover:border-white/10">
+          <div className="rounded-2xl bg-card p-5 shadow-sm border border-border transition-all hover:border-border">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Gastos Facturados
               </span>
               <div className="rounded-xl bg-blue-500/10 p-2.5 text-blue-400">
                 <FileText className="h-5 w-5" />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-black text-[#E0E0E0] tracking-tight tabular-nums">
+            <p className="mt-2 text-2xl font-black text-text-light tracking-tight tabular-nums">
               $
               {expenses
                 .filter((e) => e.has_invoice)
@@ -489,16 +489,16 @@ export default function GastosPage() {
           </div>
 
           {/* Ventas del Mes */}
-          <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 transition-all hover:border-white/10">
+          <div className="rounded-2xl bg-card p-5 shadow-sm border border-border transition-all hover:border-border">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Ventas del Mes
               </span>
               <div className="rounded-xl bg-success/10 p-2.5 text-success">
                 <DollarSign className="h-5 w-5" />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-black text-[#E0E0E0] tracking-tight tabular-nums">
+            <p className="mt-2 text-2xl font-black text-text-light tracking-tight tabular-nums">
               $
               {totalSales.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
@@ -508,9 +508,9 @@ export default function GastosPage() {
           </div>
 
           {/* Utilidad Neta */}
-          <div className="rounded-2xl bg-[#242424] p-5 shadow-sm border border-white/5 transition-all hover:border-white/10">
+          <div className="rounded-2xl bg-card p-5 shadow-sm border border-border transition-all hover:border-border">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Utilidad Neta (Margen)
               </span>
               <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
@@ -543,19 +543,19 @@ export default function GastosPage() {
         </div>
 
         {/* 2. Gráfica Lineal: Gastos Fijos vs Gastos Variables */}
-        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
-            <h2 className="text-base font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
+        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+            <h2 className="text-base font-black text-text-light uppercase tracking-wider flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-amber-400" />
               Tendencia de Egresos: Gastos Fijos vs Variables ({currentMonth})
             </h2>
 
             {/* Leyendas con totales */}
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
-              <div className="flex items-center gap-2 bg-[#1A1A1A] px-3 py-1.5 rounded-xl border border-white/5">
+              <div className="flex items-center gap-2 bg-dark/40 px-3 py-1.5 rounded-xl border border-border">
                 <span className="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
                 <div>
-                  <span className="text-[#E0E0E0]/40 font-bold uppercase text-[9px] block">
+                  <span className="text-text-light/40 font-bold uppercase text-[9px] block">
                     Gastos Fijos
                   </span>
                   <span className="text-amber-400 font-black">
@@ -564,10 +564,10 @@ export default function GastosPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 bg-[#1A1A1A] px-3 py-1.5 rounded-xl border border-white/5">
+              <div className="flex items-center gap-2 bg-dark/40 px-3 py-1.5 rounded-xl border border-border">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
                 <div>
-                  <span className="text-[#E0E0E0]/40 font-bold uppercase text-[9px] block">
+                  <span className="text-text-light/40 font-bold uppercase text-[9px] block">
                     Gastos Variables
                   </span>
                   <span className="text-emerald-400 font-black">
@@ -639,7 +639,7 @@ export default function GastosPage() {
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-[#E0E0E0]/30 text-xs italic">
+              <div className="h-full flex items-center justify-center text-text-light/30 text-xs italic">
                 Aún no hay gastos registrados este mes.
               </div>
             )}
@@ -647,13 +647,13 @@ export default function GastosPage() {
         </section>
 
         {/* 3. Sección Dedicada: Distribución de Gastos por Categoría (Gráfica de Barras Horizontales) */}
-        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-6">
-          <div className="flex items-center justify-between border-b border-white/5 pb-4">
-            <h2 className="text-base font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
+        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-6">
+          <div className="flex items-center justify-between border-b border-border pb-4">
+            <h2 className="text-base font-black text-text-light uppercase tracking-wider flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-purple-400" />
               Gastos por Categoría ({currentMonth})
             </h2>
-            <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
+            <span className="text-xs font-bold text-text-light/50 uppercase tracking-widest">
               {categoryExpensesData.length} categorías registradas
             </span>
           </div>
@@ -714,7 +714,7 @@ export default function GastosPage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-[#E0E0E0]/30 text-xs italic">
+              <div className="h-full flex items-center justify-center text-text-light/30 text-xs italic">
                 Aún no hay gastos registrados este mes.
               </div>
             )}
@@ -722,9 +722,9 @@ export default function GastosPage() {
         </section>
 
         {/* 4. Categorías de Gasto (Resumen & Administración) */}
-        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
-          <div className="flex items-center justify-between border-b border-white/5 pb-3">
-            <h2 className="text-sm font-black text-[#E0E0E0] uppercase tracking-wider flex items-center gap-2">
+        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <h2 className="text-sm font-black text-text-light uppercase tracking-wider flex items-center gap-2">
               <Tag className="h-4 w-4 text-purple-400" />
               Categorías Registradas
             </h2>
@@ -746,14 +746,14 @@ export default function GastosPage() {
             {categories.map((cat) => (
               <div
                 key={cat.id}
-                className="flex items-center justify-between p-3.5 rounded-xl bg-[#1A1A1A] border border-white/5 hover:border-white/10 transition-colors"
+                className="flex items-center justify-between p-3.5 rounded-xl bg-dark/40 border border-border hover:border-border transition-colors"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span
                     className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
                     style={{ backgroundColor: cat.color }}
                   />
-                  <span className="text-xs text-[#E0E0E0] font-black uppercase truncate">
+                  <span className="text-xs text-text-light font-black uppercase truncate">
                     {cat.name}
                   </span>
                 </div>
@@ -775,7 +775,7 @@ export default function GastosPage() {
                       setNewCatTipoGasto(cat.tipo_gasto || "variable");
                       setIsCategoryModalOpen(true);
                     }}
-                    className="text-xs text-[#E0E0E0]/40 hover:text-[#E0E0E0] p-1 transition-colors"
+                    className="text-xs text-text-light/40 hover:text-text-light p-1 transition-colors"
                     title="Editar categoría"
                   >
                     <Edit3 className="h-3.5 w-3.5" />
@@ -784,7 +784,7 @@ export default function GastosPage() {
               </div>
             ))}
             {categories.length === 0 && (
-              <p className="col-span-full text-[#E0E0E0]/40 text-xs italic text-center py-4">
+              <p className="col-span-full text-text-light/40 text-xs italic text-center py-4">
                 No hay categorías registradas.
               </p>
             )}
@@ -792,38 +792,38 @@ export default function GastosPage() {
         </section>
 
         {/* 5. Historial de Gastos (Tabla Full Width con Filtros, Ordenamiento y Paginación) */}
-        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 overflow-hidden space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
-            <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border overflow-hidden space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+            <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-red-500"></span>
               Historial de Gastos
             </h2>
-            <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
+            <span className="text-xs font-bold text-text-light/50 uppercase tracking-widest">
               Mostrando {paginatedExpenses.length} de {filteredExpenses.length}{" "}
               egresos ({expenses.length} totales)
             </span>
           </div>
 
           {/* BARRA DE FILTROS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-[#1A1A1A] p-4 rounded-xl border border-white/5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
             {/* Buscador por texto */}
             <div>
-              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Buscar
               </label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#E0E0E0]/40" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-light/40" />
                 <input
                   type="text"
                   value={tableSearch}
                   onChange={(e) => setTableSearch(e.target.value)}
                   placeholder="Descripción o categoría..."
-                  className="w-full rounded-xl border border-white/5 bg-[#181818] pl-8 pr-3 py-1.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
+                  className="w-full rounded-xl border border-border bg-dark/40 pl-8 pr-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
                 />
                 {tableSearch && (
                   <button
                     onClick={() => setTableSearch("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#E0E0E0]/40 hover:text-white"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-text-light/40 hover:text-white"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -833,13 +833,13 @@ export default function GastosPage() {
 
             {/* Filtro por Categoría */}
             <div>
-              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Categoría
               </label>
               <select
                 value={tableCategoryFilter}
                 onChange={(e) => setTableCategoryFilter(e.target.value)}
-                className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-1.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
               >
                 <option value="">Todas las Categorías</option>
                 {categories.map((cat) => (
@@ -852,7 +852,7 @@ export default function GastosPage() {
 
             {/* Filtro por Factura */}
             <div>
-              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Factura
               </label>
               <select
@@ -862,7 +862,7 @@ export default function GastosPage() {
                     e.target.value as "all" | "invoiced" | "no_invoice",
                   )
                 }
-                className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-1.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
               >
                 <option value="all">Todas</option>
                 <option value="invoiced">Solo Facturados (FAC)</option>
@@ -872,7 +872,7 @@ export default function GastosPage() {
 
             {/* Filtro por Tipo de Gasto */}
             <div>
-              <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Tipo de Gasto
               </label>
               <select
@@ -882,7 +882,7 @@ export default function GastosPage() {
                     e.target.value as "all" | "fijo" | "variable",
                   )
                 }
-                className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-1.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
               >
                 <option value="all">Todos los Tipos</option>
                 <option value="fijo">Solo Fijos</option>
@@ -894,13 +894,13 @@ export default function GastosPage() {
           {/* TABLA CON ENCABEZADOS DE ORDENAMIENTO */}
           <div className="overflow-x-auto">
             {isLoading ? (
-              <p className="py-8 text-center text-[#E0E0E0]/40 text-xs font-bold italic">
+              <p className="py-8 text-center text-text-light/40 text-xs font-bold italic">
                 Cargando historial de gastos...
               </p>
             ) : (
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-white/5 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                  <tr className="border-b border-border text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
                     <th
                       className="py-3 px-3 cursor-pointer select-none hover:text-white transition-colors"
                       onClick={() => handleSort("date")}
@@ -978,7 +978,7 @@ export default function GastosPage() {
                       key={exp.id}
                       className="hover:bg-white/5 transition-colors"
                     >
-                      <td className="py-3.5 px-3 text-[#E0E0E0]/80 font-medium">
+                      <td className="py-3.5 px-3 text-text-light/80 font-medium">
                         {new Intl.DateTimeFormat("es-MX", {
                           timeZone: "America/Mexico_City",
                         }).format(new Date(exp.date + "T12:00:00Z"))}
@@ -995,7 +995,7 @@ export default function GastosPage() {
                           {exp.expense_categories?.name || "Sin Categoría"}
                         </span>
                       </td>
-                      <td className="py-3.5 px-3 text-[#E0E0E0] font-bold">
+                      <td className="py-3.5 px-3 text-text-light font-bold">
                         {exp.description}
                       </td>
                       <td className="py-3.5 px-3 text-center">
@@ -1004,7 +1004,9 @@ export default function GastosPage() {
                             FAC
                           </span>
                         ) : (
-                          <span className="text-[#E0E0E0]/30 font-bold">—</span>
+                          <span className="text-text-light/30 font-bold">
+                            —
+                          </span>
                         )}
                       </td>
                       <td className="py-3.5 px-3 text-right font-mono font-black text-red-400">
@@ -1016,7 +1018,7 @@ export default function GastosPage() {
                     <tr>
                       <td
                         colSpan={5}
-                        className="py-8 text-center text-[#E0E0E0]/40 italic"
+                        className="py-8 text-center text-text-light/40 italic"
                       >
                         No hay registros de gastos encontrados para los filtros
                         seleccionados.
@@ -1030,13 +1032,13 @@ export default function GastosPage() {
 
           {/* CONTROLES DE PAGINACIÓN */}
           {filteredExpenses.length > 0 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-white/5 text-xs text-[#E0E0E0]/60 font-medium">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-border text-xs text-text-light/60 font-medium">
               <div className="flex items-center gap-2">
                 <span>Filas por página:</span>
                 <select
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="bg-[#181818] border border-white/5 rounded-lg px-2 py-1 text-xs text-[#E0E0E0] outline-none"
+                  className="bg-dark/40 border border-border rounded-lg px-2 py-1 text-xs text-text-light outline-none"
                 >
                   <option value={10}>10</option>
                   <option value={25}>25</option>
@@ -1047,8 +1049,8 @@ export default function GastosPage() {
               <div className="flex items-center gap-4">
                 <span>
                   Página{" "}
-                  <strong className="text-[#E0E0E0]">{currentPage}</strong> de{" "}
-                  <strong className="text-[#E0E0E0]">{totalPages}</strong>
+                  <strong className="text-text-light">{currentPage}</strong> de{" "}
+                  <strong className="text-text-light">{totalPages}</strong>
                 </span>
 
                 <div className="flex items-center gap-1">
@@ -1083,9 +1085,9 @@ export default function GastosPage() {
       {/* MODAL REGISTRAR GASTO */}
       {isExpenseModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 no-print">
-          <div className="w-full max-w-md rounded-2xl bg-[#242424] p-6 shadow-2xl border border-white/10 space-y-5">
-            <div className="flex justify-between items-center border-b border-white/5 pb-3">
-              <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+          <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl border border-border space-y-5">
+            <div className="flex justify-between items-center border-b border-border pb-3">
+              <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
                 <ReceiptText className="h-4 w-4 text-primary" />
                 Registrar Gasto
               </h3>
@@ -1094,7 +1096,7 @@ export default function GastosPage() {
                   setIsExpenseModalOpen(false);
                   setExpError(null);
                 }}
-                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors p-1 rounded-lg hover:bg-white/10"
+                className="text-text-light/40 hover:text-text-light transition-colors p-1 rounded-lg hover:bg-white/10"
                 type="button"
                 aria-label="Cerrar"
               >
@@ -1110,7 +1112,7 @@ export default function GastosPage() {
                 </div>
               )}
               <div>
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
                   Categoría *
                 </label>
                 {categories.length === 0 ? (
@@ -1119,22 +1121,18 @@ export default function GastosPage() {
                   </div>
                 ) : (
                   <div className="relative">
-                    <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+                    <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light/40" />
                     <select
                       value={categoryId}
                       onChange={(e) => setCategoryId(e.target.value)}
                       required
-                      className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-3 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+                      className="w-full rounded-xl border border-border bg-dark/40 pl-9 pr-3 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
                     >
-                      <option value="" disabled className="bg-[#242424]">
+                      <option value="" disabled className="bg-card">
                         Selecciona un rubro...
                       </option>
                       {categories.map((cat) => (
-                        <option
-                          key={cat.id}
-                          value={cat.id}
-                          className="bg-[#242424]"
-                        >
+                        <option key={cat.id} value={cat.id} className="bg-card">
                           {cat.name} (
                           {cat.tipo_gasto === "fijo" ? "Fijo" : "Variable"})
                         </option>
@@ -1145,11 +1143,11 @@ export default function GastosPage() {
               </div>
 
               <div>
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
                   Monto ($) *
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+                  <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light/40" />
                   <input
                     type="number"
                     step="0.01"
@@ -1157,31 +1155,31 @@ export default function GastosPage() {
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="Ej. 1500.00"
                     required
-                    className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-4 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30 font-mono"
+                    className="w-full rounded-xl border border-border bg-dark/40 pl-9 pr-4 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30 font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
                   Descripción / Motivo *
                 </label>
                 <div className="relative">
-                  <FileText className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+                  <FileText className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light/40" />
                   <input
                     type="text"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Ej. Compra de insumos a proveedor"
                     required
-                    className="w-full rounded-xl border border-white/5 bg-[#181818] pl-9 pr-4 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
+                    className="w-full rounded-xl border border-border bg-dark/40 pl-9 pr-4 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                  <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
                     Fecha
                   </label>
                   <input
@@ -1189,11 +1187,11 @@ export default function GastosPage() {
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     required
-                    className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors scheme-dark"
+                    className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors scheme-dark"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                  <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
                     ¿Facturado?
                   </label>
                   <div className="flex h-[42px] items-center">
@@ -1205,7 +1203,7 @@ export default function GastosPage() {
                         onChange={(e) => setHasInvoice(e.target.checked)}
                       />
                       <div className="peer h-6 w-11 rounded-full bg-white/10 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-white/20 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-500 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
-                      <span className="ml-2.5 text-xs font-black uppercase text-[#E0E0E0]/70">
+                      <span className="ml-2.5 text-xs font-black uppercase text-text-light/70">
                         {hasInvoice ? "Sí" : "No"}
                       </span>
                     </label>
@@ -1217,7 +1215,7 @@ export default function GastosPage() {
                 <button
                   type="button"
                   onClick={() => setIsExpenseModalOpen(false)}
-                  className="w-full bg-white/5 text-[#E0E0E0]/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider"
+                  className="w-full bg-white/5 text-text-light/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider"
                 >
                   Cancelar
                 </button>
@@ -1237,9 +1235,9 @@ export default function GastosPage() {
       {/* MODAL NUEVA / EDITAR CATEGORÍA */}
       {isCategoryModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 no-print">
-          <div className="w-full max-w-md rounded-2xl bg-[#242424] p-6 shadow-2xl border border-white/10 space-y-5">
-            <div className="flex justify-between items-center border-b border-white/5 pb-3">
-              <h3 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2">
+          <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl border border-border space-y-5">
+            <div className="flex justify-between items-center border-b border-border pb-3">
+              <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
                 <Tag className="h-4 w-4 text-purple-400" />
                 {editingCategory
                   ? "Editar Categoría"
@@ -1251,7 +1249,7 @@ export default function GastosPage() {
                   setEditingCategory(null);
                   setCatError(null);
                 }}
-                className="text-[#E0E0E0]/40 hover:text-[#E0E0E0] transition-colors p-1 rounded-lg hover:bg-white/10"
+                className="text-text-light/40 hover:text-text-light transition-colors p-1 rounded-lg hover:bg-white/10"
                 type="button"
                 aria-label="Cerrar"
               >
@@ -1267,7 +1265,7 @@ export default function GastosPage() {
                 </div>
               )}
               <div>
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
                   Nombre de la Categoría *
                 </label>
                 <input
@@ -1276,29 +1274,29 @@ export default function GastosPage() {
                   onChange={(e) => setNewCatName(e.target.value)}
                   placeholder="Ej. Publicidad, Gasolina, Mantenimiento"
                   required
-                  className="w-full rounded-xl border border-white/5 bg-[#181818] px-3.5 py-2.5 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
+                  className="w-full rounded-xl border border-border bg-dark/40 px-3.5 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
                   Color Distintivo
                 </label>
-                <div className="flex items-center gap-3 bg-[#181818] p-2 rounded-xl border border-white/5">
+                <div className="flex items-center gap-3 bg-dark/40 p-2 rounded-xl border border-border">
                   <input
                     type="color"
                     value={newCatColor}
                     onChange={(e) => setNewCatColor(e.target.value)}
                     className="h-8 w-12 cursor-pointer rounded-lg border-0 bg-transparent p-0"
                   />
-                  <span className="text-xs font-mono font-bold text-[#E0E0E0]/70">
+                  <span className="text-xs font-mono font-bold text-text-light/70">
                     {newCatColor}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+                <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
                   Tipo de Gasto *
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -1308,7 +1306,7 @@ export default function GastosPage() {
                     className={`py-2.5 px-3 rounded-xl border font-black text-xs uppercase tracking-wider transition-all ${
                       newCatTipoGasto === "variable"
                         ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
-                        : "bg-[#181818] border-white/5 text-[#E0E0E0]/50 hover:text-[#E0E0E0]"
+                        : "bg-dark/40 border-border text-text-light/50 hover:text-text-light"
                     }`}
                   >
                     Variable
@@ -1319,13 +1317,13 @@ export default function GastosPage() {
                     className={`py-2.5 px-3 rounded-xl border font-black text-xs uppercase tracking-wider transition-all ${
                       newCatTipoGasto === "fijo"
                         ? "bg-amber-500/20 border-amber-500 text-amber-400"
-                        : "bg-[#181818] border-white/5 text-[#E0E0E0]/50 hover:text-[#E0E0E0]"
+                        : "bg-dark/40 border-border text-text-light/50 hover:text-text-light"
                     }`}
                   >
                     Fijo
                   </button>
                 </div>
-                <p className="text-[10px] text-[#E0E0E0]/40 mt-2 italic">
+                <p className="text-[10px] text-text-light/40 mt-2 italic">
                   {newCatTipoGasto === "variable"
                     ? "💡 Variables: Restan en el Corte Diario (ej. insumos, compras de jornada)."
                     : "💡 Fijos: No restan en el Corte Diario (ej. rentas, servicios, nómina fija)."}
@@ -1339,7 +1337,7 @@ export default function GastosPage() {
                     setIsCategoryModalOpen(false);
                     setEditingCategory(null);
                   }}
-                  className="w-full bg-white/5 text-[#E0E0E0]/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider"
+                  className="w-full bg-white/5 text-text-light/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider"
                 >
                   Cancelar
                 </button>

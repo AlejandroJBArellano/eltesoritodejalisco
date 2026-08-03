@@ -36,7 +36,10 @@ export async function GET(
       .single();
 
     if (error || !order) {
-      return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Orden no encontrada" },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json({ order });
@@ -114,12 +117,13 @@ export async function PUT(
     }
 
     // Update quantities for items that remain in parallel
-    const updatePromises = itemsToKeep.map((item: { id: string; quantity: number }) =>
-      supabase
-        .from("order_items")
-        .update({ quantity: item.quantity })
-        .eq("id", item.id)
-        .eq("order_id", id)
+    const updatePromises = itemsToKeep.map(
+      (item: { id: string; quantity: number }) =>
+        supabase
+          .from("order_items")
+          .update({ quantity: item.quantity })
+          .eq("id", item.id)
+          .eq("order_id", id),
     );
 
     const updateResults = await Promise.all(updatePromises);
@@ -207,7 +211,9 @@ export async function PATCH(
     let additionalSubtotal = 0;
     const newItemsData = [];
 
-    const menuItemIds = orderItems.map((item: { menuItemId: string }) => item.menuItemId).filter(Boolean);
+    const menuItemIds = orderItems
+      .map((item: { menuItemId: string }) => item.menuItemId)
+      .filter(Boolean);
     const { data: menuItems, error: menuItemsError } = await supabase
       .from("menu_items")
       .select("*")
@@ -218,7 +224,9 @@ export async function PATCH(
       throw new Error("Failed to fetch menu items");
     }
 
-    const menuItemMap = new Map(menuItems?.map((item) => [item.id, item]) || []);
+    const menuItemMap = new Map(
+      menuItems?.map((item) => [item.id, item]) || [],
+    );
 
     // Process each new item
     for (const item of orderItems) {
@@ -329,7 +337,11 @@ export async function DELETE(
 
     const tenant = await getTenantContext();
     const supabase = await createClient();
-    const { error } = await supabase.from("orders").delete().eq("id", id).eq("tenant_id", tenant.id);
+    const { error } = await supabase
+      .from("orders")
+      .delete()
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
 
     if (error) throw error;
 

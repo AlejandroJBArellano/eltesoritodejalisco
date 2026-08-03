@@ -234,15 +234,15 @@ export function TareasClient({
       {/* Timeout Alert Modal */}
       {timeoutAlert && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-[#242424] border border-red-500/30 p-6 rounded-2xl max-w-sm w-full space-y-4 shadow-2xl">
+          <div className="bg-card border border-red-500/30 p-6 rounded-2xl max-w-sm w-full space-y-4 shadow-2xl">
             <div className="text-center">
               <div className="rounded-2xl bg-red-500/10 p-4 text-red-400 w-16 h-16 mx-auto flex items-center justify-center mb-3 border border-red-500/20">
                 <Clock className="h-8 w-8 animate-pulse" />
               </div>
-              <h3 className="text-lg font-black text-[#E0E0E0] uppercase tracking-tight">
+              <h3 className="text-lg font-black text-text-light uppercase tracking-tight">
                 ¿Sigues trabajando en esto?
               </h3>
-              <p className="text-[#E0E0E0]/60 text-xs mt-2 font-medium">
+              <p className="text-text-light/60 text-xs mt-2 font-medium">
                 La tarea{" "}
                 <strong className="text-red-400 font-bold">
                   &ldquo;{timeoutAlert.task.name}&rdquo;
@@ -262,7 +262,7 @@ export function TareasClient({
                   handleComplete(timeoutAlert.exec, timeoutAlert.task);
                   setTimeoutAlert(null);
                 }}
-                className="bg-[#181818] border border-white/10 hover:bg-white/10 text-[#E0E0E0] font-black text-xs uppercase tracking-wider py-3 rounded-xl transition-all active:scale-95 cursor-pointer"
+                className="bg-dark/40 border border-border hover:bg-white/10 text-text-light font-black text-xs uppercase tracking-wider py-3 rounded-xl transition-all active:scale-95 cursor-pointer"
               >
                 Olvidé cerrarla, Completar Ahora
               </button>
@@ -287,7 +287,7 @@ export function TareasClient({
           ),
         ).map(([categoryName, tasks]) => (
           <div key={categoryName} className="space-y-4">
-            <h2 className="text-base font-black text-[#E0E0E0] uppercase tracking-tight flex items-center gap-2.5 border-b border-white/5 pb-3">
+            <h2 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2.5 border-b border-border pb-3">
               <span className="h-2 w-2 rounded-full bg-primary"></span>
               <Folder className="h-4 w-4 text-primary" /> {categoryName}
             </h2>
@@ -305,17 +305,17 @@ export function TareasClient({
                     key={task.id}
                     className={`p-6 rounded-2xl border transition-all duration-300 ${
                       activeExecution
-                        ? "bg-[#242424] border-primary/40 shadow-lg shadow-primary/5"
-                        : "bg-[#242424] border-white/5 hover:border-white/10"
+                        ? "bg-card border-primary/40 shadow-lg shadow-primary/5"
+                        : "bg-card border-border hover:border-border"
                     }`}
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase">
+                        <h3 className="text-lg font-black text-text-light tracking-tight uppercase">
                           {task.name}
                         </h3>
                         <div className="flex flex-wrap gap-2 mt-2">
-                          <span className="rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[10px] font-black text-[#E0E0E0]/60 uppercase tracking-widest">
+                          <span className="rounded-full bg-white/5 border border-border px-3 py-1 text-[10px] font-black text-text-light/60 uppercase tracking-widest">
                             {task.frequency_type}
                           </span>
                           {task.requires_photo && (
@@ -329,9 +329,9 @@ export function TareasClient({
                     </div>
 
                     {activeExecution ? (
-                      <div className="mt-6 border-t border-white/5 pt-4 space-y-4">
-                        <div className="flex justify-between items-center bg-[#181818] px-4 py-3 rounded-xl border border-white/5">
-                          <span className="text-xs font-black text-[#E0E0E0]/50 uppercase tracking-wider flex items-center gap-1.5">
+                      <div className="mt-6 border-t border-border pt-4 space-y-4">
+                        <div className="flex justify-between items-center bg-dark/40 px-4 py-3 rounded-xl border border-border">
+                          <span className="text-xs font-black text-text-light/50 uppercase tracking-wider flex items-center gap-1.5">
                             {activeExecution.status === "PAUSED" ? (
                               <>
                                 <Pause className="h-3.5 w-3.5 text-amber-400" />{" "}
@@ -344,7 +344,7 @@ export function TareasClient({
                               </>
                             )}
                           </span>
-                          <span className="text-lg font-black text-[#E0E0E0] font-mono tracking-wider">
+                          <span className="text-lg font-black text-text-light font-mono tracking-wider">
                             {getLiveTimerString(activeExecution)}
                           </span>
                         </div>
@@ -352,7 +352,7 @@ export function TareasClient({
                         {/* Input Camera / Photo upload if required */}
                         {task.requires_photo && (
                           <div className="space-y-2">
-                            <label className="text-xs font-bold text-[#E0E0E0]/60 uppercase tracking-wider block">
+                            <label className="text-xs font-bold text-text-light/60 uppercase tracking-wider block">
                               Subir Foto de Evidencia
                             </label>
                             <input
@@ -365,7 +365,7 @@ export function TareasClient({
                                   e.target.files?.[0] || null,
                                 )
                               }
-                              className="block w-full text-xs text-[#E0E0E0]/60 file:mr-3 file:rounded-xl file:border-0 file:bg-white/10 file:px-4 file:py-2.5 file:text-xs file:font-black file:text-[#E0E0E0] hover:file:bg-white/20 file:transition-all cursor-pointer"
+                              className="block w-full text-xs text-text-light/60 file:mr-3 file:rounded-xl file:border-0 file:bg-white/10 file:px-4 file:py-2.5 file:text-xs file:font-black file:text-text-light hover:file:bg-white/20 file:transition-all cursor-pointer"
                             />
                             {photoErrors[activeExecution.id] && (
                               <p className="text-xs font-bold text-red-400 mt-1">

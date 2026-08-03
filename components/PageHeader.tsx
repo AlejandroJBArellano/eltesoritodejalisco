@@ -28,7 +28,7 @@ export function PageHeader({
   extra,
 }: PageHeaderProps) {
   return (
-    <header className="bg-[#121212]/90 backdrop-blur-md sticky top-0 z-30 border-b border-white/5 no-print">
+    <header className="bg-background/90 backdrop-blur-md sticky top-0 z-30 border-b border-border no-print">
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -36,7 +36,7 @@ export function PageHeader({
               <>
                 <Link
                   href={backHref}
-                  className="group flex items-center gap-1.5 text-xs font-bold text-[#E0E0E0]/60 hover:text-primary transition-colors shrink-0"
+                  className="group flex items-center gap-1.5 text-xs font-bold text-text-light/60 hover:text-primary transition-colors shrink-0"
                 >
                   <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
                   {backLabel}
@@ -48,7 +48,7 @@ export function PageHeader({
               </>
             )}
             <div>
-              <h1 className="text-lg sm:text-xl font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-black text-text-light tracking-tight uppercase flex items-center gap-2">
                 {icon ? (
                   icon
                 ) : (
@@ -59,7 +59,7 @@ export function PageHeader({
                 {title}
               </h1>
               {subtitle && (
-                <p className="text-xs text-[#E0E0E0]/50 font-medium mt-0.5">
+                <p className="text-xs text-text-light/50 font-medium mt-0.5">
                   {subtitle}
                 </p>
               )}
