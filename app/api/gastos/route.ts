@@ -1,12 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentCDMXDay } from "@/lib/utils";
 import { NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const month = searchParams.get("month"); // e.g. "2024-03"
 
   try {
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     let query = supabase
       .from("expenses")
@@ -16,6 +18,7 @@ export async function GET(req: Request) {
         expense_categories (name, color, tipo_gasto)
       `,
       )
+      .eq("tenant_id", tenant.id)
       .order("date", { ascending: false })
       .order("created_at", { ascending: false });
 
@@ -38,6 +41,7 @@ export async function GET(req: Request) {
       const { data: salesData, error: salesError } = await supabase
         .from("orders")
         .select("total")
+        .eq("tenant_id", tenant.id)
         .in("status", ["DELIVERED", "PAID"])
         .gte("operational_date", startDate)
         .lt("operational_date", endDate);
@@ -74,11 +78,13 @@ export async function POST(req: Request) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("expenses")
       .insert([
         {
+          tenant_id: tenant.id,
           category_id,
           amount: parseFloat(amount),
           description,
