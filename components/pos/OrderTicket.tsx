@@ -7,7 +7,7 @@ interface OrderTicketProps {
 }
 
 export function OrderTicket({ order }: OrderTicketProps) {
-  const { name, system_name } = useTenant();
+  const { name, system_name, rfc, postal_code, regimen_fiscal } = useTenant();
 
   const formatDate = (date: Date | string) => {
     const dateStr =
@@ -34,11 +34,9 @@ export function OrderTicket({ order }: OrderTicketProps) {
         <h2 className="text-lg font-bold">
           {name?.toUpperCase() || "EL TESORITO DE JALISCO"}
         </h2>
-        <p className="text-xs">RFC: AIVK991104QJ0</p>
-        <p className="text-xs">C.P.: 09090</p>
-        <p className="text-xs">
-          Régimen: 626 - Simplificado de Confianza (RESICO)
-        </p>
+        {rfc && <p className="text-xs">RFC: {rfc}</p>}
+        {postal_code && <p className="text-xs">C.P.: {postal_code}</p>}
+        {regimen_fiscal && <p className="text-xs">Régimen: {regimen_fiscal}</p>}
         <div className="border-b border-dashed my-2"></div>
       </div>
 

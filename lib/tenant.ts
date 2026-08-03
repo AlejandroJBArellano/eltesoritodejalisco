@@ -11,6 +11,9 @@ export interface TenantContextType {
   secondary_color: string;
   dark_bg_color: string;
   logo_url: string | null;
+  rfc: string | null;
+  postal_code: string | null;
+  regimen_fiscal: string | null;
 }
 
 export function getTenantSlugFromHost(host: string | null): string {
@@ -93,6 +96,9 @@ export async function getTenantContext(): Promise<TenantContextType> {
     primary_color: "#FFB7CE",
     secondary_color: "#FFD1DC",
     dark_bg_color: "#121212",
-    logo_url: null
+    logo_url: null,
+    rfc: "AIVK991104QJ0",
+    postal_code: "09090",
+    regimen_fiscal: "626 - Simplificado de Confianza (RESICO)",
   };
 }
