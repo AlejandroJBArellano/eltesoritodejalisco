@@ -1,9 +1,9 @@
-import { NextResponse, NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { getTenantSlugFromHost } from "@/lib/tenant";
+import { NextRequest, NextResponse } from "next/server";
 
 const ALLOWED_ORIGINS = [
-  "https://mili-order-portal.vercel.app",
+  "https://trykittn.com",
   "http://localhost:5173", // Local dev pickup client
 ];
 
@@ -60,7 +60,7 @@ function isPublicRoute(request: NextRequest): boolean {
   return false;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // CORS Preflight check
   if (request.method === "OPTIONS") {
     const corsHeaders = getCorsHeaders(request);
