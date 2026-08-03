@@ -262,8 +262,9 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
-    const { error } = await supabase.from("orders").delete().eq("id", id);
+    const { error } = await supabase.from("orders").delete().eq("id", id).eq("tenant_id", tenant.id);
 
     if (error) throw error;
 

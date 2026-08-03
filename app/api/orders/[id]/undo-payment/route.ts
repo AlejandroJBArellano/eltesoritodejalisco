@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { reverseInventoryForOrder } from "@/lib/services/inventory";
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -15,6 +16,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const { reason } = await request.json();
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     // 1. Get order details before any changes
@@ -22,6 +24,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .from("orders")
       .select("*, payments(*)")
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .single();
 
     if (fetchError || !order) {
@@ -50,6 +53,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .select()
       .single();
 

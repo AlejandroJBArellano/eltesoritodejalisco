@@ -63,9 +63,10 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // Resolve tenant slug from host header or explicit query param/header
+  // Resolve tenant slug: prefer explicit client header, fall back to host
+  const clientSlug = request.headers.get("x-tenant-slug");
   const host = request.headers.get("host");
-  const tenantSlug = getTenantSlugFromHost(host);
+  const tenantSlug = clientSlug || getTenantSlugFromHost(host);
 
   // Set the tenant slug header dynamically so layout/pages/API routes can read it
   const requestHeaders = new Headers(request.headers);

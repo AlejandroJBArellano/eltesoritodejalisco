@@ -45,6 +45,11 @@ export async function POST(request: NextRequest) {
         throw new Error("orderId description is missing in session metadata");
       }
 
+      const tenantId = metadata.tenantId;
+      if (!tenantId) {
+        throw new Error("tenantId is missing in session metadata");
+      }
+
       const customerName = metadata.customerName;
       const type = metadata.type || "takeout"; // 'takeout' | 'dine-in'
       const notes = metadata.notes || "";
@@ -53,11 +58,12 @@ export async function POST(request: NextRequest) {
 
       const supabaseAdmin = createAdminClient();
 
-      // 1. Generate daily order sequence (similar to api/orders/route.ts)
+      // 1. Generate daily order sequence (scoped to this tenant)
       const todayStart = getCurrentCDMXDay() + "T00:00:00-06:00";
       const { data: latestCut } = await supabaseAdmin
         .from("daily_cuts")
         .select("created_at")
+        .eq("tenant_id", tenantId)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -65,6 +71,7 @@ export async function POST(request: NextRequest) {
       let query = supabaseAdmin
         .from("orders")
         .select("order_number")
+        .eq("tenant_id", tenantId)
         .order("created_at", { ascending: false });
 
       const filterDate =
@@ -119,6 +126,7 @@ export async function POST(request: NextRequest) {
         .from("orders")
         .insert({
           id: orderId,
+          tenant_id: tenantId,
           order_number: orderNumber,
           source: "PICKUP_APP",
           status: "PENDING", // Appears immediately on the KDS
@@ -143,6 +151,7 @@ export async function POST(request: NextRequest) {
         .insert(
           itemsWithPrices.map((item) => ({
             ...item,
+            tenant_id: tenantId,
             order_id: order.id,
           }))
         );
@@ -155,6 +164,7 @@ export async function POST(request: NextRequest) {
         .from("payments")
         .insert({
           id: paymentId,
+          tenant_id: tenantId,
           order_id: order.id,
           method: "CARD",
           amount: total,

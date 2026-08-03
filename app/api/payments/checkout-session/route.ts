@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe";
+import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -21,6 +22,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     const lineItems = [];
@@ -31,6 +33,7 @@ export async function POST(request: NextRequest) {
         .from("menu_items")
         .select("*")
         .eq("id", item.menuItemId)
+        .eq("tenant_id", tenant.id)
         .single();
 
       if (fetchError || !menuItem) {
@@ -98,6 +101,7 @@ export async function POST(request: NextRequest) {
       cancel_url: `${origin}/`,
       metadata: {
         orderId,
+        tenantId: tenant.id,
         customerName,
         type, // 'takeout' | 'dine-in'
         notes: notes || "",

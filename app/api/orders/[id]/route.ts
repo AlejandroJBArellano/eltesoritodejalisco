@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 const TAX_RATE = 0;
 
@@ -14,6 +15,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     const { data: order, error } = await supabase
@@ -30,6 +32,7 @@ export async function GET(
       `,
       )
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .single();
 
     if (error || !order) {
@@ -69,13 +72,15 @@ export async function PUT(
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
-    // Verify the order exists
+    // Verify the order exists and belongs to this tenant
     const { data: order, error: fetchError } = await supabase
       .from("orders")
       .select("*")
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .single();
 
     if (fetchError || !order) {
@@ -145,6 +150,7 @@ export async function PUT(
         updated_at: getCurrentCDMXDate(),
       })
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .select(
         `
         *,
@@ -183,13 +189,15 @@ export async function PATCH(
       return NextResponse.json({ error: "No items to add" }, { status: 400 });
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
-    // Check if order exists
+    // Check if order exists and belongs to this tenant
     const { data: order, error: fetchError } = await supabase
       .from("orders")
       .select("*")
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .single();
 
     if (fetchError || !order) {
@@ -203,7 +211,8 @@ export async function PATCH(
     const { data: menuItems, error: menuItemsError } = await supabase
       .from("menu_items")
       .select("*")
-      .in("id", menuItemIds);
+      .in("id", menuItemIds)
+      .eq("tenant_id", tenant.id);
 
     if (menuItemsError) {
       throw new Error("Failed to fetch menu items");
@@ -282,6 +291,7 @@ export async function PATCH(
       .from("orders")
       .update(orderUpdate)
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .select(
         `
         *,
@@ -317,8 +327,9 @@ export async function DELETE(
   try {
     const { id } = await params;
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
-    const { error } = await supabase.from("orders").delete().eq("id", id);
+    const { error } = await supabase.from("orders").delete().eq("id", id).eq("tenant_id", tenant.id);
 
     if (error) throw error;
 

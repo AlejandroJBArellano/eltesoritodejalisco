@@ -2,6 +2,8 @@
 // Handles manual stock corrections (purchases, adjustments, mermas)
 
 import { adjustIngredientStock } from "@/lib/services/inventory";
+import { createClient } from "@/lib/supabase/server";
+import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -25,6 +27,23 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(
         { error: "adjustment must be a valid number" },
         { status: 400 },
+      );
+    }
+
+    // Validate ingredient belongs to current tenant
+    const tenant = await getTenantContext();
+    const supabase = await createClient();
+    const { data: ingredient } = await supabase
+      .from("ingredients")
+      .select("id")
+      .eq("id", ingredientId)
+      .eq("tenant_id", tenant.id)
+      .maybeSingle();
+
+    if (!ingredient) {
+      return NextResponse.json(
+        { error: "Ingredient not found" },
+        { status: 404 },
       );
     }
 

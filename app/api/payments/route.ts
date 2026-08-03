@@ -1,6 +1,7 @@
 // TesoritoOS - Payments API
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 
 type PaymentInput = {
   amount: number;
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     // Check if the order is already archived/closed under a daily cut
@@ -66,6 +68,7 @@ export async function POST(request: NextRequest) {
       .from("orders")
       .select("corte_id, estado_cierre")
       .eq("id", orderId)
+      .eq("tenant_id", tenant.id)
       .maybeSingle();
 
     if (fetchOrderError || !orderToCheck) {
@@ -207,12 +210,14 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     const { data: payments, error: paymentError } = await supabase
       .from("payments")
       .select("id, amount")
       .eq("order_id", orderId)
+      .eq("tenant_id", tenant.id)
       .order("created_at", { ascending: true });
 
     if (paymentError) throw paymentError;
