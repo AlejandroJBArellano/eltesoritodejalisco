@@ -1,11 +1,14 @@
 import { OrderWithDetails } from "@/types";
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
+import { useTenant } from "@/components/TenantProvider";
 
 interface OrderTicketProps {
   order: OrderWithDetails;
 }
 
 export function OrderTicket({ order }: OrderTicketProps) {
+  const { name, system_name } = useTenant();
+
   const formatDate = (date: Date | string) => {
     const dateStr =
       typeof date === "string" && !date.includes("Z") && !date.includes("+")
@@ -29,8 +32,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
     <div className="ticket-container bg-white p-4 w-[80mm] mx-auto text-black font-mono text-sm border shadow-sm">
       <div className="text-center mb-4">
         <h2 className="text-lg font-bold">
-          {process.env.NEXT_PUBLIC_APP_NAME?.toUpperCase() ||
-            "EL TESORITO DE JALISCO"}
+          {name?.toUpperCase() || "EL TESORITO DE JALISCO"}
         </h2>
         <p className="text-xs">RFC: AIVK991104QJ0</p>
         <p className="text-xs">C.P.: 09090</p>
@@ -92,7 +94,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
         <p className="text-xs font-bold">Venta al público en general</p>
         <p className="text-xs mt-2">¡Gracias por su preferencia!</p>
         <p className="text-[10px] text-gray-400 mt-2">
-          {process.env.NEXT_PUBLIC_SYSTEM_NAME || "TesoritoOS"}
+          {system_name || "TesoritoOS"}
         </p>
       </div>
 

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { getTenantContext } from "@/lib/tenant";
+import { TenantProvider } from "@/components/TenantProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,20 +15,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: `${process.env.NEXT_PUBLIC_SYSTEM_NAME || "TesoritoOS"} - Restaurant Management`,
-  description: `Sistema de gestión integral para ${process.env.NEXT_PUBLIC_APP_NAME || "El Tesorito de Jalisco"}`,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenantContext();
+  return {
+    title: `${tenant.system_name} - Restaurant Management`,
+    description: `Sistema de gestión integral para ${tenant.name}`,
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const primaryColor = process.env.NEXT_PUBLIC_THEME_PRIMARY_COLOR || "#FFB7CE";
-  const secondaryColor =
-    process.env.NEXT_PUBLIC_THEME_SECONDARY_COLOR || "#FFD1DC";
-  const darkBgColor = process.env.NEXT_PUBLIC_THEME_DARK_BG_COLOR || "#121212";
+  const tenant = await getTenantContext();
+
+  const primaryColor = tenant.primary_color || "#FFB7CE";
+  const secondaryColor = tenant.secondary_color || "#FFD1DC";
+  const darkBgColor = tenant.dark_bg_color || "#121212";
 
   return (
     <html
@@ -43,8 +49,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-dark text-text-light`}
       >
-        <Navbar />
-        {children}
+        <TenantProvider tenant={tenant}>
+          <Navbar />
+          {children}
+        </TenantProvider>
       </body>
     </html>
   );

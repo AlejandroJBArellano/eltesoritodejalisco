@@ -1,4 +1,5 @@
 import { login, loginWithGoogle } from "./actions";
+import { getTenantContext } from "@/lib/tenant";
 
 export default async function LoginPage({
   searchParams,
@@ -6,8 +7,9 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
+  const tenant = await getTenantContext();
 
-  const systemName = process.env.NEXT_PUBLIC_SYSTEM_NAME || "TesoritoOS";
+  const systemName = tenant.system_name || "TesoritoOS";
   const endsWithOS = systemName.toLowerCase().endsWith("os");
   const prefix = endsWithOS ? systemName.slice(0, -2) : systemName;
   const suffix = endsWithOS ? systemName.slice(-2) : "";

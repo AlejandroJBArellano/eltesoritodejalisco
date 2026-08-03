@@ -1,5 +1,6 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { getTenantSlugFromHost } from "@/lib/tenant";
 
 const ALLOWED_ORIGINS = [
   "https://mili-order-portal.vercel.app",
@@ -10,10 +11,16 @@ function getCorsHeaders(request: NextRequest) {
   const origin = request.headers.get("origin");
   const headers = new Headers();
 
-  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.startsWith("http://localhost:"))) {
+  if (
+    origin && 
+    (ALLOWED_ORIGINS.includes(origin) || 
+     origin.startsWith("http://localhost:") || 
+     origin.endsWith(".trykittn.com") ||
+     origin === "https://trykittn.com")
+  ) {
     headers.set("Access-Control-Allow-Origin", origin);
     headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
-    headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, stripe-signature");
+    headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, stripe-signature, x-tenant-slug");
     headers.set("Access-Control-Allow-Credentials", "true");
   }
   return headers;
@@ -54,14 +61,30 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  const isPublic = isPublicRoute(request);
-  const response = await updateSession(request, isPublic);
+  // Resolve tenant slug from host header or explicit query param/header
+  const host = request.headers.get("host");
+  const tenantSlug = getTenantSlugFromHost(host);
+
+  // Set the tenant slug header dynamically so layout/pages/API routes can read it
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-tenant-slug", tenantSlug);
+
+  // Create a new request cloned with the updated headers
+  const newRequest = new NextRequest(request, {
+    headers: requestHeaders,
+  });
+
+  const isPublic = isPublicRoute(newRequest);
+  const response = await updateSession(newRequest, isPublic);
 
   // Apply CORS headers for public API calls or requests originating from allowed clients
-  const corsHeaders = getCorsHeaders(request);
+  const corsHeaders = getCorsHeaders(newRequest);
   corsHeaders.forEach((value, key) => {
     response.headers.set(key, value);
   });
+  
+  // Expose the tenant slug header to the client/frontend if needed
+  response.headers.set("x-tenant-slug", tenantSlug);
 
   return response;
 }

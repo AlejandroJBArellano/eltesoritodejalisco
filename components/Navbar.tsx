@@ -5,10 +5,12 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { logout } from "@/app/login/actions";
 import { useEffect, useState } from "react";
+import { useTenant } from "@/components/TenantProvider";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [email, setEmail] = useState<string | null>(null);
+  const { system_name } = useTenant();
 
   useEffect(() => {
     const supabase = createClient();
@@ -37,7 +39,7 @@ export default function Navbar() {
 
   if (email === null) return null;
 
-  const systemName = process.env.NEXT_PUBLIC_SYSTEM_NAME || "TesoritoOS";
+  const systemName = system_name || "TesoritoOS";
   const endsWithOS = systemName.toLowerCase().endsWith("os");
   const prefix = endsWithOS ? systemName.slice(0, -2) : systemName;
   const suffix = endsWithOS ? systemName.slice(-2) : "";

@@ -3,9 +3,11 @@
 import { useState, useMemo } from "react";
 import { Order } from "@/types/pos";
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
+import { useTenant } from "@/components/TenantProvider";
 import type { SplitPayment } from "@/components/pos/SplitBillModal";
 
 export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
+  const { name } = useTenant();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
@@ -253,7 +255,7 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
 
   const generateWhatsAppMessage = () => {
     if (!checkoutOrder) return "";
-    let msg = `¡Gracias por tu visita a ${process.env.NEXT_PUBLIC_APP_NAME || "El Tesorito de Jalisco"}! 🌮🤩\n\n`;
+    let msg = `¡Gracias por tu visita a ${name || "El Tesorito de Jalisco"}! 🌮🤩\n\n`;
     msg += `🧾 *Ticket #${checkoutOrder.orderNumber}*\n`;
     if (checkoutOrder.table) {
       msg += `📍 Mesa: ${checkoutOrder.table}\n`;
