@@ -60,9 +60,9 @@ export function POSCartSidebar({
   return (
     <div className="space-y-6 lg:sticky lg:top-24">
       {/* Detalles Adicionales de la Orden */}
-      <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
-        <div className="flex items-center justify-between border-b border-white/5 pb-3">
-          <h2 className="text-xs font-black text-[#E0E0E0]/50 tracking-widest uppercase flex items-center gap-2">
+      <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <h2 className="text-xs font-black text-text-light/50 tracking-widest uppercase flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-secondary"></span>
             Detalles Adicionales
           </h2>
@@ -77,7 +77,7 @@ export function POSCartSidebar({
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all border ${
               formState.table === "Domicilio"
                 ? "bg-secondary/20 border-secondary text-secondary"
-                : "bg-white/5 border-transparent text-[#E0E0E0]/60 hover:border-white/10 hover:text-[#E0E0E0]"
+                : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
             }`}
           >
             <Bike className="h-3.5 w-3.5" />
@@ -87,13 +87,13 @@ export function POSCartSidebar({
 
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
-            <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+            <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
               Cliente
             </label>
             <select
               value={formState.customerId}
               onChange={(e) => handleFormChange("customerId", e.target.value)}
-              className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors"
+              className="w-full rounded-xl border border-border bg-[#181818] px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors"
             >
               <option value="">General</option>
               {customers.map((c) => (
@@ -105,16 +105,16 @@ export function POSCartSidebar({
           </div>
 
           <div>
-            <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+            <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
               Origen
             </label>
             <select
               value={formState.source}
               onChange={(e) => handleFormChange("source", e.target.value)}
-              className={`w-full rounded-xl border bg-[#181818] px-3 py-2 text-xs text-[#E0E0E0] outline-none transition-colors ${
+              className={`w-full rounded-xl border bg-[#181818] px-3 py-2 text-xs text-text-light outline-none transition-colors ${
                 formErrors.source
                   ? "border-red-500/50 focus:border-red-400"
-                  : "border-white/5 focus:border-primary"
+                  : "border-border focus:border-primary"
               }`}
             >
               {sourceOptions.map((s) => (
@@ -126,14 +126,14 @@ export function POSCartSidebar({
           </div>
 
           <div>
-            <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1.5">
+            <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
               Notas
             </label>
             <input
               type="text"
               value={formState.notes}
               onChange={(e) => handleFormChange("notes", e.target.value)}
-              className="w-full rounded-xl border border-white/5 bg-[#181818] px-3 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-colors placeholder:text-[#E0E0E0]/30"
+              className="w-full rounded-xl border border-border bg-[#181818] px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
               placeholder="Mesa 4, sin chile..."
             />
           </div>
@@ -141,9 +141,9 @@ export function POSCartSidebar({
       </section>
 
       {/* Tu Pedido (Carrito) */}
-      <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-5">
-        <div className="flex items-center justify-between border-b border-white/5 pb-3">
-          <h2 className="text-sm font-black uppercase text-[#E0E0E0] tracking-wider flex items-center gap-2">
+      <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-5">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <h2 className="text-sm font-black uppercase text-text-light tracking-wider flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-success"></span>
             Tu Pedido
           </h2>
@@ -173,12 +173,12 @@ export function POSCartSidebar({
         {/* Listado del Carrito */}
         <div className="space-y-2.5 max-h-[42vh] overflow-y-auto pr-1 custom-scrollbar">
           {formState.items.length === 0 ? (
-            <div className="text-center py-12 text-[#E0E0E0]/40 space-y-2">
+            <div className="text-center py-12 text-text-light/40 space-y-2">
               <ShoppingBag className="h-10 w-10 mx-auto opacity-20 text-primary" />
               <p className="text-xs font-extrabold uppercase tracking-widest">
                 El carrito está vacío
               </p>
-              <p className="text-[11px] font-medium text-[#E0E0E0]/30">
+              <p className="text-[11px] font-medium text-text-light/30">
                 Selecciona productos del catálogo
               </p>
             </div>
@@ -192,11 +192,11 @@ export function POSCartSidebar({
               return (
                 <div
                   key={index}
-                  className="bg-[#1A1A1A] rounded-xl border border-white/5 overflow-hidden"
+                  className="bg-card-light rounded-xl border border-border overflow-hidden"
                 >
                   <div className="flex items-center justify-between p-3 gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="font-black text-xs text-[#E0E0E0] uppercase tracking-tight truncate">
+                      <p className="font-black text-xs text-text-light uppercase tracking-tight truncate">
                         {product?.name || "Producto"}
                       </p>
                       {isMixed && item.notes ? (
@@ -204,34 +204,34 @@ export function POSCartSidebar({
                           {item.notes}
                         </p>
                       ) : (
-                        <p className="text-[10px] font-bold text-[#E0E0E0]/50 mt-0.5">
+                        <p className="text-[10px] font-bold text-text-light/50 mt-0.5">
                           ${product?.price.toFixed(2)} c/u
                         </p>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1 border border-white/5">
+                    <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1 border border-border">
                       <button
                         type="button"
                         onClick={() => handleQuantityChange(index, -1)}
-                        className="h-6 w-6 rounded-lg bg-white/5 hover:bg-red-500/20 text-[#E0E0E0] hover:text-red-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
+                        className="h-6 w-6 rounded-lg bg-white/5 hover:bg-red-500/20 text-text-light hover:text-red-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
                       >
                         <Minus className="h-3 w-3" />
                       </button>
-                      <span className="w-5 text-center font-black text-xs text-[#E0E0E0]">
+                      <span className="w-5 text-center font-black text-xs text-text-light">
                         {item.quantity}
                       </span>
                       <button
                         type="button"
                         onClick={() => handleQuantityChange(index, 1)}
-                        className="h-6 w-6 rounded-lg bg-white/5 hover:bg-emerald-500/20 text-[#E0E0E0] hover:text-emerald-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
+                        className="h-6 w-6 rounded-lg bg-white/5 hover:bg-emerald-500/20 text-text-light hover:text-emerald-400 flex items-center justify-center font-bold text-xs transition-colors active:scale-90"
                       >
                         <Plus className="h-3 w-3" />
                       </button>
                     </div>
 
                     <div className="flex items-center gap-2 min-w-[55px] justify-end">
-                      <p className="font-black text-xs text-[#E0E0E0] tabular-nums">
+                      <p className="font-black text-xs text-text-light tabular-nums">
                         $
                         {(
                           (product?.price || 0) * Number(item.quantity)
@@ -241,7 +241,7 @@ export function POSCartSidebar({
                         <button
                           type="button"
                           onClick={() => toggleNote(index)}
-                          className="text-[#E0E0E0]/30 hover:text-[#E0E0E0]/70 transition-colors"
+                          className="text-text-light/30 hover:text-text-light/70 transition-colors"
                           title="Agregar nota"
                         >
                           {noteExpanded ? (
@@ -264,7 +264,7 @@ export function POSCartSidebar({
                           handleItemNoteChange(index, e.target.value)
                         }
                         placeholder="Nota especial (sin cebolla, extra salsa...)"
-                        className="w-full rounded-lg border border-white/5 bg-[#141414] px-3 py-1.5 text-[11px] text-[#E0E0E0] outline-none focus:border-primary/40 transition-colors placeholder:text-[#E0E0E0]/25"
+                        className="w-full rounded-lg border border-border bg-dark/30 px-3 py-1.5 text-[11px] text-text-light outline-none focus:border-primary/40 transition-colors placeholder:text-text-light/25"
                         autoFocus
                       />
                     </div>
@@ -277,12 +277,12 @@ export function POSCartSidebar({
 
         {/* Total y Acción */}
         {formState.items.length > 0 && (
-          <div className="pt-4 border-t border-white/5 space-y-4">
+          <div className="pt-4 border-t border-border space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-widest">
+              <span className="text-xs font-bold text-text-light/50 uppercase tracking-widest">
                 Total a Pagar
               </span>
-              <span className="text-3xl font-black text-[#E0E0E0] tracking-tight tabular-nums">
+              <span className="text-3xl font-black text-text-light tracking-tight tabular-nums">
                 $
                 {formState.items
                   .reduce((total, item) => {

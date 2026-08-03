@@ -36,10 +36,10 @@ interface StatCardProps {
 
 function StatCard({ title, icon: Icon, value, themeClass }: StatCardProps) {
   return (
-    <div className="rounded-2xl bg-[#242424] p-3 sm:p-6 shadow-sm border border-white/5 transition-all hover:border-white/10">
+    <div className="rounded-2xl bg-card p-3 sm:p-6 shadow-sm border border-border transition-all hover:border-border/15">
       <div className="flex items-center justify-between sm:items-start gap-1">
         <div className="min-w-0">
-          <span className="text-[9px] sm:text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider block truncate">
+          <span className="text-[9px] sm:text-xs font-bold text-text-light/50 uppercase tracking-wider block truncate">
             {title}
           </span>
           <p className="mt-0.5 sm:mt-3 text-base sm:text-3xl font-black text-[#E0E0E0] tracking-tight tabular-nums truncate">
@@ -75,7 +75,7 @@ function ModuleCard({
 }: ModuleCardProps) {
   return (
     <Link href={href} className="group cursor-pointer focus:outline-none">
-      <div className="h-full rounded-2xl bg-[#242424] p-3 sm:p-8 shadow-sm border border-white/5 transition-all hover:shadow-xl hover:-translate-y-1 hover:border-white/10 flex flex-col justify-between min-h-[90px] sm:min-h-0">
+      <div className="h-full rounded-2xl bg-card p-3 sm:p-8 shadow-sm border border-border transition-all hover:shadow-xl hover:-translate-y-1 hover:border-border/15 flex flex-col justify-between min-h-[90px] sm:min-h-0">
         <div>
           {/* Top section: Icon + Badge */}
           <div className="mb-2 sm:mb-6 flex items-center justify-between">
@@ -313,7 +313,7 @@ export default async function Home() {
                   href="/admin/settings"
                   icon={Settings}
                   badge="Empresa"
-                  themeClass="bg-[#242424] text-white"
+                  themeClass="bg-card text-white border border-border"
                   hoverColor="var(--color-primary)"
                 />
               )}

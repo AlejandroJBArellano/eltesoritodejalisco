@@ -207,7 +207,7 @@ export default function POSPage() {
       />
 
       {/* Selector de pestañas para móvil/tablet */}
-      <div className="lg:hidden flex bg-[#1E1E1E] p-1.5 mx-2 rounded-2xl border border-white/5 gap-1.5 shadow-inner">
+      <div className="lg:hidden flex bg-card-light/50 p-1.5 mx-2 rounded-2xl border border-border gap-1.5 shadow-inner">
         <button
           type="button"
           onClick={() => setActiveTab("menu")}
@@ -279,9 +279,9 @@ export default function POSPage() {
       </main>
 
       {/* SECCIÓN: Últimas Órdenes */}
-      <section className="rounded-2xl bg-[#242424] p-4 sm:p-6 shadow-sm border border-white/5 overflow-hidden mx-2 md:mx-4 lg:mx-6">
-        <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
-          <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+      <section className="rounded-2xl bg-card p-4 sm:p-6 shadow-sm border border-border overflow-hidden mx-2 md:mx-4 lg:mx-6">
+        <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
+          <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-blue-500"></span>
             Últimas Órdenes
           </h2>
@@ -297,29 +297,29 @@ export default function POSPage() {
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+              <tr className="border-b border-border">
+                <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
                   Folio
                 </th>
-                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
                   Mesa / Tipo
                 </th>
-                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
                   Estado
                 </th>
-                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
                   Total
                 </th>
-                <th className="pb-3 px-3 text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest text-right">
+                <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest text-right">
                   Acciones
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border">
               {orders.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-16 text-center">
-                    <p className="text-xs font-extrabold uppercase tracking-widest text-[#E0E0E0]/30">
+                    <p className="text-xs font-extrabold uppercase tracking-widest text-text-light/30">
                       No hay órdenes todavía
                     </p>
                   </td>
@@ -338,15 +338,15 @@ export default function POSPage() {
                   return (
                     <tr
                       key={order.id}
-                      className="hover:bg-white/5 transition-colors"
+                      className="hover:bg-card-light/20 transition-colors"
                     >
                       <td className="py-3.5 px-3">
-                        <span className="font-mono font-black text-sm text-[#E0E0E0]">
+                        <span className="font-mono font-black text-sm text-text-light">
                           #{order.orderNumber}
                         </span>
                       </td>
                       <td className="py-3.5 px-3">
-                        <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black text-[#E0E0E0]/70 uppercase tracking-wider">
+                        <span className="rounded-full bg-card-light border border-border px-2.5 py-1 text-[10px] font-black text-text-light/70 uppercase tracking-wider">
                           {order.table || "Para Llevar"}
                         </span>
                       </td>
@@ -367,7 +367,7 @@ export default function POSPage() {
                       </td>
                       <td className="py-3.5 px-3">
                         <div className="flex flex-col">
-                          <span className="font-black text-sm text-[#E0E0E0] tabular-nums">
+                          <span className="font-black text-sm text-text-light tabular-nums">
                             ${order.total.toFixed(2)}
                           </span>
                           {tipAmt > 0 && (
@@ -477,7 +477,7 @@ export default function POSPage() {
                               setShowTicket(true);
                               setShowKitchenTicket(false);
                             }}
-                            className="rounded-xl bg-white/5 hover:bg-white/10 text-[#E0E0E0]/70 border border-white/5 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            className="rounded-xl bg-card-light hover:bg-card-light/80 text-text-light/70 border border-border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
                           >
                             <Printer className="h-3 w-3" />
                             Ticket
@@ -525,7 +525,7 @@ export default function POSPage() {
         <div className="md:hidden space-y-4 pt-4">
           {orders.length === 0 ? (
             <div className="py-16 text-center">
-              <p className="text-xs font-extrabold uppercase tracking-widest text-[#E0E0E0]/30">
+              <p className="text-xs font-extrabold uppercase tracking-widest text-text-light/30">
                 No hay órdenes todavía
               </p>
             </div>
@@ -543,15 +543,15 @@ export default function POSPage() {
               return (
                 <div
                   key={order.id}
-                  className="bg-[#1A1A1A] rounded-2xl p-4 border border-white/5 space-y-4"
+                  className="bg-card-light rounded-2xl p-4 border border-border space-y-4"
                 >
                   {/* Header de la tarjeta */}
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-mono font-black text-sm text-[#E0E0E0]">
+                      <p className="font-mono font-black text-sm text-text-light">
                         #{order.orderNumber}
                       </p>
-                      <p className="text-[10px] font-bold text-[#E0E0E0]/50 uppercase tracking-wider mt-0.5">
+                      <p className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider mt-0.5">
                         {new Date(order.createdAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -559,7 +559,7 @@ export default function POSPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                      <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black text-[#E0E0E0]/70 uppercase tracking-wider">
+                      <span className="rounded-full bg-card border border-border px-2.5 py-1 text-[10px] font-black text-text-light/70 uppercase tracking-wider">
                         {order.table || "Para Llevar"}
                       </span>
                       {order.status === "PAID" ? (
@@ -579,12 +579,12 @@ export default function POSPage() {
                   </div>
 
                   {/* Detalle de Total */}
-                  <div className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
-                    <span className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest">
+                  <div className="flex justify-between items-center bg-card p-3 rounded-xl border border-border">
+                    <span className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
                       Total
                     </span>
                     <div className="text-right">
-                      <span className="font-black text-sm text-[#E0E0E0] tabular-nums">
+                      <span className="font-black text-sm text-text-light tabular-nums">
                         ${order.total.toFixed(2)}
                       </span>
                       {tipAmt > 0 && (
@@ -681,7 +681,7 @@ export default function POSPage() {
                         setShowTicket(true);
                         setShowKitchenTicket(false);
                       }}
-                      className="rounded-xl bg-white/5 hover:bg-white/10 text-[#E0E0E0]/70 border border-white/5 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                      className="rounded-xl bg-card hover:bg-card/80 text-text-light/70 border border-border py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
                     >
                       <Printer className="h-3.5 w-3.5" />
                       Ticket

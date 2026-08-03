@@ -78,13 +78,13 @@ export function OrderCard({
         order.status !== OrderStatus.DELIVERED &&
         order.status !== OrderStatus.READY
           ? "border-red-500/70 bg-gradient-to-b from-[#2A1212] to-[#1F0C0C] shadow-lg shadow-red-950/40 ring-1 ring-red-500/20"
-          : "border-zinc-800/80 bg-[#18181b] hover:border-zinc-700 hover:shadow-xl"
+          : "border-border bg-card-light hover:border-border/80 hover:shadow-xl"
       }`}
     >
       {/* Card Header */}
-      <div className="mb-4 flex items-start justify-between border-b border-zinc-800/60 pb-3.5">
+      <div className="mb-4 flex items-start justify-between border-b border-border/60 pb-3.5">
         <div>
-          <h3 className="text-2xl font-black text-zinc-100 tracking-tight uppercase">
+          <h3 className="text-2xl font-black text-text-light tracking-tight uppercase">
             #{order.orderNumber}
           </h3>
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -109,7 +109,7 @@ export function OrderCard({
             order.status !== OrderStatus.DELIVERED &&
             order.status !== OrderStatus.READY
               ? "bg-red-600 text-white shadow-red-900/50 ring-2 ring-red-400/40"
-              : "bg-zinc-900 text-zinc-200 border border-zinc-700/50"
+              : "bg-card text-text-light border border-border"
           }`}
         >
           <Clock
@@ -125,10 +125,10 @@ export function OrderCard({
         {activeItems.map((item) => (
           <div
             key={item.id}
-            className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/90 p-3 transition-colors hover:border-zinc-700"
+            className="flex items-center justify-between rounded-xl border border-border bg-card p-3 transition-colors hover:border-border/80"
           >
             <div className="flex-1 pr-3">
-              <p className="font-bold text-zinc-100 text-sm leading-snug">
+              <p className="font-bold text-text-light text-sm leading-snug">
                 <span className="text-amber-400 font-black mr-1 text-base">
                   {item.quantity}x
                 </span>{" "}
@@ -162,11 +162,11 @@ export function OrderCard({
                   </button>
                 )}
                 {item.preparationTimeSeconds != null ? (
-                  <span className="mt-1 text-[10px] text-zinc-400 font-mono">
+                  <span className="mt-1 text-[10px] text-text-light/60 font-mono">
                     {formatTime(item.preparationTimeSeconds)}
                   </span>
                 ) : item.status !== OrderStatus.READY && item.createdAt ? (
-                  <span className="mt-1 text-[10px] text-zinc-400 font-mono">
+                  <span className="mt-1 text-[10px] text-text-light/60 font-mono">
                     {formatTime(getElapsedSeconds(item.createdAt))}
                   </span>
                 ) : null}
@@ -215,7 +215,7 @@ export function OrderCard({
         {order.status === OrderStatus.READY && (
           <button
             onClick={() => onStatusChange(order.id, OrderStatus.DELIVERED)}
-            className="w-full min-h-[48px] rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-3 text-xs font-black text-zinc-200 uppercase tracking-wider hover:bg-zinc-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"
+            className="w-full min-h-[48px] rounded-xl bg-card-light border border-border px-4 py-3 text-xs font-black text-text-light uppercase tracking-wider hover:bg-card-light/80 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"
           >
             Marcar Entregado
           </button>

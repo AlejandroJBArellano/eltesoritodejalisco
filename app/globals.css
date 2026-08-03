@@ -5,13 +5,15 @@
   --font-mono: var(--font-geist-mono);
 
   /* TesoritoOS Brand Palette (V2 Aesthetic Dark Mode) */
-  --color-primary: #ffb7ce; /* Pastel Pink */
-  --color-secondary: #ffd1dc; /* Lighter Pastel Pink */
-  --color-success: #03a63c; /* Green */
-  --color-warning: #f2cb05; /* Yellow/Gold */
-  --color-dark: #121212; /* Deep Black */
-  --color-card: #202020; /* Lighter Gray for Cards */
-  --color-text-light: #e0e0e0; /* Off-white for text */
+  --color-primary: var(--color-primary, #ffb7ce);
+  --color-secondary: var(--color-secondary, #ffd1dc);
+  --color-success: #03a63c;
+  --color-warning: #f2cb05;
+  --color-dark: var(--color-dark, #121212);
+  --color-card: color-mix(in srgb, white 7%, var(--color-dark, #121212));
+  --color-card-light: color-mix(in srgb, white 12%, var(--color-dark, #121212));
+  --color-border: color-mix(in srgb, white 6%, var(--color-dark, #121212));
+  --color-text-light: #e0e0e0;
 }
 
 :root {

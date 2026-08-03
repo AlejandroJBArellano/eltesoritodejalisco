@@ -75,9 +75,9 @@ function KanbanColumn({
   const theme = colorMap[colorClass];
 
   return (
-    <div className="rounded-2xl bg-zinc-900/80 p-5 shadow-lg border border-zinc-800/80 backdrop-blur-sm">
-      <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4 mb-5">
-        <h2 className="text-base font-black text-zinc-100 uppercase tracking-tight flex items-center gap-2.5">
+    <div className="rounded-2xl bg-card p-5 shadow-lg border border-border backdrop-blur-sm">
+      <div className="flex items-center justify-between border-b border-border pb-4 mb-5">
+        <h2 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2.5">
           <span
             className={`h-3 w-3 rounded-full ${theme.bg} shadow-sm ${theme.shadow}`}
           ></span>
@@ -100,12 +100,12 @@ function KanbanColumn({
           />
         ))}
         {orders.length === 0 && (
-          <div className="py-14 text-center rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 p-6">
-            <EmptyIcon className="mx-auto h-8 w-8 text-zinc-600 mb-2" />
-            <p className="text-xs font-black text-zinc-500 uppercase tracking-widest">
+          <div className="py-14 text-center rounded-xl border border-dashed border-border bg-dark/40 p-6">
+            <EmptyIcon className="mx-auto h-8 w-8 text-text-light/30 mb-2" />
+            <p className="text-xs font-black text-text-light/50 uppercase tracking-widest">
               {emptyTitle}
             </p>
-            <p className="text-[11px] text-zinc-600 mt-1">{emptyDescription}</p>
+            <p className="text-[11px] text-text-light/40 mt-1">{emptyDescription}</p>
           </div>
         )}
       </div>
@@ -258,7 +258,7 @@ export function KitchenDisplaySystem({
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f11] text-zinc-100 pb-12">
+    <div className="min-h-screen bg-background text-text-light pb-12">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-red-950/90 border border-red-500/50 p-4 text-xs font-bold text-red-200 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4">
@@ -293,13 +293,13 @@ export function KitchenDisplaySystem({
               </span>
             )}
 
-            <div className="flex items-center gap-1 rounded-xl border border-zinc-800 bg-zinc-900/90 p-1 shadow-inner">
+            <div className="flex items-center gap-1 rounded-xl border border-border bg-card/90 p-1 shadow-inner">
               <button
                 onClick={() => setView("kanban")}
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                   view === "kanban"
                     ? "bg-amber-500 text-zinc-950 shadow-md"
-                    : "text-zinc-400 hover:text-zinc-100"
+                    : "text-text-light/60 hover:text-text-light"
                 }`}
               >
                 <LayoutGrid className="h-4 w-4" /> Vista Kanban
@@ -309,7 +309,7 @@ export function KitchenDisplaySystem({
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                   view === "batching"
                     ? "bg-amber-500 text-zinc-950 shadow-md"
-                    : "text-zinc-400 hover:text-zinc-100"
+                    : "text-text-light/60 hover:text-text-light"
                 }`}
               >
                 <Layers className="h-4 w-4" /> Vista Lotes

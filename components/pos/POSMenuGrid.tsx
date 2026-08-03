@@ -71,28 +71,28 @@ export function POSMenuGrid({
   handleGridItemClick,
 }: POSMenuGridProps) {
   return (
-    <section className="rounded-2xl bg-[#242424] p-4 sm:p-6 shadow-sm border border-white/5 space-y-5 w-full overflow-hidden">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
-        <h2 className="text-lg font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+    <section className="rounded-2xl bg-card p-4 sm:p-6 shadow-sm border border-border space-y-5 w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+        <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-primary"></span>
           Catálogo de Productos
         </h2>
 
         {/* Buscador Rápido */}
         <div className="relative min-w-[220px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#E0E0E0]/40" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light/40" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar producto..."
-            className="w-full rounded-xl border border-white/5 bg-white/5 pl-9 pr-4 py-2 text-xs text-[#E0E0E0] outline-none focus:border-primary transition-all placeholder:text-[#E0E0E0]/30"
+            className="w-full rounded-xl border border-border bg-white/5 pl-9 pr-4 py-2 text-xs text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/30"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center rounded-lg text-[#E0E0E0]/40 hover:text-[#E0E0E0] hover:bg-white/10 transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center rounded-lg text-text-light/40 hover:text-text-light hover:bg-white/10 transition-colors"
               aria-label="Limpiar búsqueda"
             >
               <X className="h-3.5 w-3.5" />
@@ -108,8 +108,8 @@ export function POSMenuGrid({
           onClick={() => setActiveCategory("")}
           className={`px-4 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${
             activeCategory === ""
-              ? "bg-white/10 border-white/20 text-[#E0E0E0] shadow-sm scale-105"
-              : "bg-white/5 text-[#E0E0E0]/50 border-transparent hover:border-white/10 hover:text-[#E0E0E0]"
+              ? "bg-white/10 border-white/20 text-text-light shadow-sm scale-105"
+              : "bg-white/5 text-text-light/50 border-transparent hover:border-border/15 hover:text-text-light"
           }`}
         >
           Todos
@@ -125,7 +125,7 @@ export function POSMenuGrid({
               className={`px-4 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${
                 isActive
                   ? `${config.badgeBg} shadow-sm scale-105`
-                  : "bg-white/5 text-[#E0E0E0]/50 border-transparent hover:border-white/10 hover:text-[#E0E0E0]"
+                  : "bg-white/5 text-text-light/50 border-transparent hover:border-border/15 hover:text-text-light"
               }`}
             >
               {config.label}
@@ -139,10 +139,10 @@ export function POSMenuGrid({
         {filteredMenuItems.length === 0 ? (
           <div className="col-span-full py-16 text-center space-y-2">
             <PackageSearch className="h-10 w-10 mx-auto opacity-30 text-primary" />
-            <p className="text-xs font-extrabold uppercase tracking-widest text-[#E0E0E0]/40">
+            <p className="text-xs font-extrabold uppercase tracking-widest text-text-light/40">
               Sin resultados
             </p>
-            <p className="text-[11px] font-medium text-[#E0E0E0]/30">
+            <p className="text-[11px] font-medium text-text-light/30">
               Intenta con otra categoría o búsqueda
             </p>
           </div>
@@ -154,10 +154,10 @@ export function POSMenuGrid({
                 key={m.id}
                 type="button"
                 onClick={() => handleGridItemClick(m)}
-                className="group relative rounded-2xl bg-[#1A1A1A] p-4 border border-white/5 hover:border-primary/40 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between text-left h-28 overflow-hidden active:scale-95"
+                className="group relative rounded-2xl bg-card-light p-4 border border-border hover:border-primary/40 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between text-left h-28 overflow-hidden active:scale-95"
               >
                 <div className="flex items-start justify-between gap-1 w-full">
-                  <span className="font-black text-xs text-[#E0E0E0] uppercase tracking-tight leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                  <span className="font-black text-xs text-text-light uppercase tracking-tight leading-snug line-clamp-2 group-hover:text-primary transition-colors">
                     {m.name}
                   </span>
                   {isMixed && (
@@ -167,7 +167,7 @@ export function POSMenuGrid({
                   )}
                 </div>
                 <div className="mt-2 flex items-center justify-between w-full">
-                  <span className="rounded-xl bg-white/5 border border-white/5 px-2.5 py-1 text-xs font-black text-[#E0E0E0] tabular-nums">
+                  <span className="rounded-xl bg-white/5 border border-border px-2.5 py-1 text-xs font-black text-text-light tabular-nums">
                     ${m.price.toFixed(2)}
                   </span>
                   <span className="rounded-lg bg-primary/10 p-1.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
