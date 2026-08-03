@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, useEffect } from "react";
 import {
   CategoryFormState,
   EMPTY_CATEGORY_FORM,
@@ -13,6 +13,10 @@ export function useMenuCategories() {
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   // Category modal state
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -57,7 +61,7 @@ export function useMenuCategories() {
 
   const handleCategorySubmit = async (
     event: FormEvent<HTMLFormElement>,
-    onSuccess: () => void,
+    onSuccess: (newCategoryName?: string) => void,
   ) => {
     event.preventDefault();
     const errors: Record<string, string> = {};
@@ -84,7 +88,7 @@ export function useMenuCategories() {
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Error al guardar");
       await fetchCategories();
-      onSuccess(); // caller can re-fetch menu items if needed
+      onSuccess(data.category?.name); // caller can re-fetch menu items if needed
       setIsCategoryModalOpen(false);
       setCategoryForm(EMPTY_CATEGORY_FORM);
       setErrorMessage(null);

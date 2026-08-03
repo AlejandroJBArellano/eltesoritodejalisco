@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { BookOpen, Plus, RefreshCw, Tag } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 
@@ -119,11 +119,24 @@ export function MenuContent({ initialItems }: MenuContentProps) {
 
   useEffect(() => {
     fetchIngredients();
+    fetchCategories();
   }, []);
 
+  const dbCategories = useMemo(() => {
+    const set = new Set<string>();
+    menuCategories.forEach((c) => set.add(c.name));
+    items.forEach((i) => {
+      if (i.category) set.add(i.category);
+    });
+    return Array.from(set).sort();
+  }, [menuCategories, items]);
+
   // Sync category submit with menu item refresh (in case category rename cascades or needs update)
-  const onCategorySubmitSuccess = async () => {
+  const onCategorySubmitSuccess = async (newName?: string) => {
     await fetchMenu();
+    if (newName) {
+      handleFormChange("category", newName);
+    }
   };
 
   const activeErrors = errorMessage || categoryErrorMessage;
@@ -210,7 +223,7 @@ export function MenuContent({ initialItems }: MenuContentProps) {
             searchQuery={searchQuery}
             categoryFilter={categoryFilter}
             availabilityFilter={availabilityFilter}
-            categories={categories}
+            categories={dbCategories}
             onSearchChange={(v) => {
               setSearchQuery(v);
               setCurrentPage(1);
@@ -253,7 +266,7 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         formErrors={formErrors}
         isEditing={isEditing}
         isSubmitting={isSubmitting}
-        categories={categories}
+        categories={dbCategories}
         ingredients={ingredients}
         showTranslations={showTranslations}
         onToggleTranslations={() => setShowTranslations((v) => !v)}
@@ -261,6 +274,7 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         imagePreview={imagePreview}
         fileInputRef={fileInputRef}
         onFileChange={handleFileChange}
+        onAddCategory={() => openCategoryModal()}
       />
 
       {/* MODAL DE CATEGORÍA */}

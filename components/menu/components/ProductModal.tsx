@@ -19,6 +19,7 @@ interface ProductModalProps {
   imagePreview: string | null;
   fileInputRef: RefObject<HTMLInputElement | null>;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onAddCategory?: () => void;
 }
 
 export function ProductModal({
@@ -37,6 +38,7 @@ export function ProductModal({
   imagePreview,
   fileInputRef,
   onFileChange,
+  onAddCategory,
 }: ProductModalProps) {
   return (
     <Modal
@@ -87,22 +89,32 @@ export function ProductModal({
           </div>
 
           <div>
-            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
-              Categoría
-            </label>
-            <input
-              type="text"
-              list="category-suggestions"
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block">
+                Categoría
+              </label>
+              {onAddCategory && (
+                <button
+                  type="button"
+                  onClick={onAddCategory}
+                  className="text-[10px] text-amber-400 font-extrabold uppercase tracking-widest hover:underline"
+                >
+                  + Nueva Categoría
+                </button>
+              )}
+            </div>
+            <select
               value={formState.category}
               onChange={(e) => onFormChange("category", e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-primary"
-              placeholder="Ej. Platos Fuertes"
-            />
-            <datalist id="category-suggestions">
+              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm font-bold text-[#E0E0E0] outline-none focus:border-primary"
+            >
+              <option value="">-- Sin Categoría --</option>
               {categories.map((c) => (
-                <option key={c} value={c} />
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
-            </datalist>
+            </select>
           </div>
         </div>
 
