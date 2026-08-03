@@ -20,9 +20,9 @@ export function MenuFilters({
   onAvailabilityChange,
 }: MenuFiltersProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#1A1A1A] p-4 rounded-xl border border-white/5">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
       <div>
-        <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+        <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
           Buscar Producto
         </label>
         <TableSearchInput
@@ -33,13 +33,13 @@ export function MenuFilters({
       </div>
 
       <div>
-        <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+        <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
           Categoría
         </label>
         <select
           value={categoryFilter}
           onChange={(e) => onCategoryChange(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-[#E0E0E0] outline-none focus:border-primary"
+          className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary cursor-pointer transition-colors duration-200"
         >
           <option value="all">Todas las Categorías</option>
           {categories.map((cat) => (
@@ -51,7 +51,7 @@ export function MenuFilters({
       </div>
 
       <div>
-        <label className="text-[10px] font-extrabold text-[#E0E0E0]/50 uppercase tracking-widest block mb-1">
+        <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
           Estado
         </label>
         <select
@@ -61,7 +61,7 @@ export function MenuFilters({
               e.target.value as "all" | "available" | "unavailable",
             )
           }
-          className="w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-xs font-bold text-[#E0E0E0] outline-none focus:border-primary"
+          className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary cursor-pointer transition-colors duration-200"
         >
           <option value="all">Todos los Estados</option>
           <option value="available">Disponibles</option>

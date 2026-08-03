@@ -1,27 +1,27 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
-import {
-  Users,
-  Award,
-  DollarSign,
-  User,
-  Phone,
-  Mail,
-  Cake,
-  Plus,
-  Edit3,
-  Trash2,
-  RefreshCw,
-  Gift,
-} from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { Modal } from "@/components/ui/Modal";
 import {
-  TableSearchInput,
   TableHeaderSortCell,
   TablePagination,
+  TableSearchInput,
 } from "@/components/ui/DataTableControls";
+import { Modal } from "@/components/ui/Modal";
+import {
+  Award,
+  Cake,
+  DollarSign,
+  Edit3,
+  Gift,
+  Mail,
+  Phone,
+  Plus,
+  RefreshCw,
+  Trash2,
+  User,
+  Users,
+} from "lucide-react";
+import { useMemo, useState, type FormEvent } from "react";
 
 type Customer = {
   id: string;
@@ -291,7 +291,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#E0E0E0]">
+    <div className="min-h-screen bg-background text-text-light">
       <PageHeader
         title="Clientes & CRM"
         subtitle="Gestión de fidelización, puntos y directorio de clientes"
@@ -299,7 +299,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
         actions={
           <button
             onClick={openNewCustomerModal}
-            className="rounded-xl bg-emerald-500 px-4 py-2 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+            className="rounded-xl bg-emerald-500 px-4 py-2 text-xs font-black text-black hover:brightness-105 active:scale-95 transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20 outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             <Plus className="h-4 w-4" />
             Nuevo Cliente
@@ -316,12 +316,12 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
 
         {/* Tarjetas de Métricas de CRM */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Total Registrados
               </p>
-              <p className="mt-1 text-2xl font-black text-[#E0E0E0]">
+              <p className="mt-1 text-2xl font-black text-text-light">
                 {customers.length}
               </p>
             </div>
@@ -330,9 +330,9 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Puntos de Lealtad
               </p>
               <p className="mt-1 text-2xl font-black text-amber-400">
@@ -344,9 +344,9 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Consumo Acumulado
               </p>
               <p className="mt-1 text-2xl font-black text-emerald-400">
@@ -361,9 +361,9 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#242424] p-5 border border-white/5 flex items-center justify-between">
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-[#E0E0E0]/50 uppercase tracking-wider">
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Prom. Puntos/Cliente
               </p>
               <p className="mt-1 text-2xl font-black text-purple-400">
@@ -377,9 +377,9 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
         </div>
 
         {/* TABLA DE CLIENTES */}
-        <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
-            <h2 className="text-base font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+            <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
               Directorio de Clientes ({filteredCustomers.length})
             </h2>
@@ -394,7 +394,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
               />
               <button
                 onClick={fetchCustomers}
-                className="text-xs text-[#E0E0E0]/60 hover:text-white flex items-center gap-1.5 font-bold"
+                className="text-xs text-text-light/60 hover:text-text-light flex items-center gap-1.5 font-bold cursor-pointer transition-colors duration-200"
               >
                 <RefreshCw
                   className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`}
@@ -403,9 +403,9 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-white/5">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#181818] uppercase tracking-wider text-[#E0E0E0]/60 border-b border-white/5">
+              <thead className="bg-dark/40 uppercase tracking-wider text-text-light/60 border-b border-border">
                 <tr>
                   <TableHeaderSortCell
                     field="name"
@@ -439,13 +439,13 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                   <th className="py-3 px-4 font-bold text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {paginatedCustomers.map((c) => (
                   <tr
                     key={c.id}
-                    className="hover:bg-white/[0.02] transition-colors"
+                    className="hover:bg-white/2 dark:hover:bg-card-light/10 transition-colors"
                   >
-                    <td className="py-3 px-4 font-bold text-[#E0E0E0] flex items-center gap-2">
+                    <td className="py-3 px-4 font-bold text-text-light flex items-center gap-2">
                       <div className="h-8 w-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black">
                         {c.name.charAt(0).toUpperCase()}
                       </div>
@@ -454,25 +454,25 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                     <td className="py-3 px-4">
                       <div className="space-y-0.5">
                         {c.phone && (
-                          <p className="text-[#E0E0E0]/80 flex items-center gap-1.5 font-mono">
-                            <Phone className="h-3 w-3 text-[#E0E0E0]/40" />
+                          <p className="text-text-light/80 flex items-center gap-1.5 font-mono">
+                            <Phone className="h-3 w-3 text-text-light/40" />
                             {c.phone}
                           </p>
                         )}
                         {c.email && (
-                          <p className="text-[#E0E0E0]/50 flex items-center gap-1.5">
-                            <Mail className="h-3 w-3 text-[#E0E0E0]/40" />
+                          <p className="text-text-light/50 flex items-center gap-1.5">
+                            <Mail className="h-3 w-3 text-text-light/40" />
                             {c.email}
                           </p>
                         )}
                         {!c.phone && !c.email && (
-                          <span className="text-[#E0E0E0]/30 italic">
+                          <span className="text-text-light/30 italic">
                             Sin datos
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-[#E0E0E0]/70">
+                    <td className="py-3 px-4 text-text-light/70">
                       {c.birthday ? (
                         <span className="inline-flex items-center gap-1">
                           <Cake className="h-3.5 w-3.5 text-pink-400" />
@@ -482,7 +482,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                           })}
                         </span>
                       ) : (
-                        <span className="text-[#E0E0E0]/30 italic">-</span>
+                        <span className="text-text-light/30 italic">-</span>
                       )}
                     </td>
                     <td className="py-3 px-4">
@@ -498,18 +498,17 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openEditCustomerModal(c)}
-                          className="rounded-lg bg-white/5 border border-white/10 p-2 text-[#E0E0E0]/80 hover:text-white hover:bg-white/10 transition-colors"
+                          className="rounded-lg bg-white/5 border border-border p-2 text-text-light/80 hover:text-white hover:bg-white/10 transition-all duration-200 cursor-pointer"
                           title="Editar Cliente"
                         >
                           <Edit3 className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(c.id)}
-                          className={`rounded-lg border p-2 transition-all text-xs font-black ${
-                            deleteArmedId === c.id
+                          className={`rounded-lg border p-2 transition-all text-xs font-black ${deleteArmedId === c.id
                               ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
                               : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
-                          }`}
+                            }`}
                           title={
                             deleteArmedId === c.id
                               ? "Confirmar eliminación"
@@ -530,7 +529,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                   <tr>
                     <td
                       colSpan={6}
-                      className="py-8 text-center text-xs text-[#E0E0E0]/40 italic"
+                      className="py-8 text-center text-xs text-text-light/40 italic"
                     >
                       No se encontraron clientes.
                     </td>
@@ -565,14 +564,14 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
               Nombre Completo *
             </label>
             <input
               type="text"
               value={formState.name}
               onChange={(e) => handleFormChange("name", e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-emerald-500 transition-colors duration-200"
               placeholder="Ej. Juan Pérez"
             />
             {formErrors.name && (
@@ -583,14 +582,14 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
           </div>
 
           <div>
-            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
               Teléfono
             </label>
             <input
               type="tel"
               value={formState.phone}
               onChange={(e) => handleFormChange("phone", e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-emerald-500 transition-colors duration-200"
               placeholder="Ej. 3312345678"
             />
             {formErrors.phone && (
@@ -601,14 +600,14 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
           </div>
 
           <div>
-            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
               Correo Electrónico
             </label>
             <input
               type="email"
               value={formState.email}
               onChange={(e) => handleFormChange("email", e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-emerald-500 transition-colors duration-200"
               placeholder="ejemplo@correo.com"
             />
             {formErrors.email && (
@@ -619,22 +618,22 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
           </div>
 
           <div>
-            <label className="text-xs font-extrabold text-[#E0E0E0]/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
               Fecha de Cumpleaños
             </label>
             <input
               type="date"
               value={formState.birthday}
               onChange={(e) => handleFormChange("birthday", e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#181818] px-4 py-2.5 text-sm text-[#E0E0E0] outline-none focus:border-emerald-500 scheme-dark"
+              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-emerald-500 scheme-dark transition-colors duration-200"
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="rounded-xl border border-white/10 px-4 py-2.5 text-xs font-bold text-[#E0E0E0]/70 hover:bg-white/5"
+              className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-white/5 transition-colors duration-200 cursor-pointer"
             >
               Cancelar
             </button>

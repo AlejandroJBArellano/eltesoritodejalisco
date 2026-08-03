@@ -21,15 +21,15 @@ export function CategoriesPanel({
   onMoveOrder,
 }: CategoriesPanelProps) {
   return (
-    <section className="rounded-2xl bg-[#242424] p-6 shadow-sm border border-white/5 space-y-4">
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
-        <h2 className="text-base font-black text-[#E0E0E0] tracking-tight uppercase flex items-center gap-2">
+    <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+      <div className="flex items-center justify-between border-b border-border pb-4">
+        <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-amber-400" />
           Categorías ({menuCategories.length})
         </h2>
         <button
           onClick={onOpenCreate}
-          className="text-xs font-black text-amber-400 hover:text-amber-300 flex items-center gap-1.5"
+          className="text-xs font-black text-amber-400 hover:text-amber-300 flex items-center gap-1.5 cursor-pointer transition-colors duration-200"
         >
           <Plus className="h-3.5 w-3.5" />
           Nueva Categoría
@@ -43,16 +43,16 @@ export function CategoriesPanel({
           .map((cat, index, arr) => (
             <div
               key={cat.id}
-              className="flex items-center justify-between bg-[#1A1A1A] border border-white/5 rounded-xl px-4 py-3"
+              className="flex items-center justify-between bg-dark/40 border border-border rounded-xl px-4 py-3"
             >
               <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black text-[#E0E0E0]/30 tabular-nums w-5 text-right">
+                <span className="text-[10px] font-black text-text-light/30 tabular-nums w-5 text-right">
                   {index + 1}
                 </span>
                 <div>
-                  <p className="text-sm font-black text-[#E0E0E0]">{cat.name}</p>
+                  <p className="text-sm font-black text-text-light">{cat.name}</p>
                   {cat.translations?.en?.name && (
-                    <p className="text-[10px] text-[#E0E0E0]/40 font-bold flex items-center gap-1">
+                    <p className="text-[10px] text-text-light/40 font-bold flex items-center gap-1">
                       <Globe className="h-2.5 w-2.5" />
                       EN: {cat.translations.en.name}
                     </p>
@@ -64,7 +64,7 @@ export function CategoriesPanel({
                 <button
                   onClick={() => onMoveOrder(index, "up")}
                   disabled={index === 0 || isSubmitting}
-                  className="rounded-lg p-1.5 text-[#E0E0E0]/40 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                  className="rounded-lg p-1.5 text-text-light/40 hover:text-text-light hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 cursor-pointer"
                   title="Mover arriba"
                 >
                   <ArrowUp className="h-3.5 w-3.5" />
@@ -72,7 +72,7 @@ export function CategoriesPanel({
                 <button
                   onClick={() => onMoveOrder(index, "down")}
                   disabled={index === arr.length - 1 || isSubmitting}
-                  className="rounded-lg p-1.5 text-[#E0E0E0]/40 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                  className="rounded-lg p-1.5 text-text-light/40 hover:text-text-light hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 cursor-pointer"
                   title="Mover abajo"
                 >
                   <ArrowDown className="h-3.5 w-3.5" />
@@ -80,7 +80,7 @@ export function CategoriesPanel({
                 {/* Edit */}
                 <button
                   onClick={() => onOpenEdit(cat)}
-                  className="rounded-lg p-1.5 text-[#E0E0E0]/60 hover:text-white hover:bg-white/10 transition-colors"
+                  className="rounded-lg p-1.5 text-text-light/60 hover:text-text-light hover:bg-white/10 transition-all duration-150 active:scale-95 cursor-pointer"
                   title="Editar"
                 >
                   <Pencil className="h-3.5 w-3.5" />
@@ -101,7 +101,7 @@ export function CategoriesPanel({
             </div>
           ))}
         {menuCategories.length === 0 && (
-          <p className="text-xs text-[#E0E0E0]/30 italic text-center py-4">
+          <p className="text-xs text-text-light/30 italic text-center py-4">
             No hay categorías registradas. Crea una para empezar.
           </p>
         )}

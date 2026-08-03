@@ -1,11 +1,11 @@
 "use client";
 
+import { logout } from "@/app/login/actions";
+import { useTenant } from "@/components/TenantProvider";
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { logout } from "@/app/login/actions";
 import { useEffect, useState } from "react";
-import { useTenant } from "@/components/TenantProvider";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -14,7 +14,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const supabase = createClient();
-    
+
     // Fetch initial user
     supabase.auth.getUser().then(({ data: { user } }) => {
       setEmail(user?.email ?? null);
@@ -51,7 +51,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-dark border-b border-white/5 text-white sticky top-0 z-40">
+    <nav className="bg-dark border-b border-border text-white sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center gap-4">
           {/* Logo */}
@@ -74,11 +74,10 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
-                    isActive
+                  className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${isActive
                       ? "bg-primary/15 text-primary"
-                      : "text-[#E0E0E0]/50 hover:text-[#E0E0E0] hover:bg-white/5"
-                  }`}
+                      : "text-text-light/50 hover:text-text-light hover:bg-white/5"
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -90,7 +89,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3 shrink-0">
             {email && (
               <span
-                className="hidden sm:block text-xs font-medium text-[#E0E0E0]/40 max-w-[180px] truncate"
+                className="hidden sm:block text-xs font-medium text-text-light/40 max-w-45 truncate"
                 title={email}
               >
                 {email}
@@ -99,7 +98,7 @@ export default function Navbar() {
             <form action={logout}>
               <button
                 type="submit"
-                className="text-xs font-black uppercase tracking-wider text-[#E0E0E0]/50 hover:text-red-400 bg-white/5 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 px-3 py-1.5 rounded-lg transition-all"
+                className="text-xs font-black uppercase tracking-wider text-text-light/50 hover:text-red-400 bg-white/5 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 px-3 py-1.5 rounded-lg transition-all duration-200 ease-out"
               >
                 Salir
               </button>
