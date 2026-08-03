@@ -19,6 +19,7 @@ import {
   BarChart3,
   ReceiptText,
   ArrowUpRight,
+  Settings,
 } from "lucide-react";
 import React from "react";
 import CollapsibleSection from "@/components/CollapsibleSection";
@@ -337,6 +338,17 @@ export default async function Home() {
                   badge="Config"
                   themeClass="bg-amber-500/10 text-amber-500"
                   hoverColor="#f59e0b"
+                />
+              )}
+              {isAdmin && (
+                <ModuleCard
+                  title="Configuración"
+                  description="Ajustes de marca, colores del portal, datos fiscales y ticket."
+                  href="/admin/settings"
+                  icon={Settings}
+                  badge="Empresa"
+                  themeClass="bg-[#242424] text-white"
+                  hoverColor="var(--color-primary)"
                 />
               )}
             </div>
