@@ -33,7 +33,7 @@
   input,
   select,
   textarea {
-    @apply bg-dark/40 text-text-light border-[#333333] placeholder-[#888888] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors;
+    @apply bg-dark/40 text-text-light border-border placeholder-text-light/30 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors;
   }
 
   /* Dark color-scheme for native date/time inputs */

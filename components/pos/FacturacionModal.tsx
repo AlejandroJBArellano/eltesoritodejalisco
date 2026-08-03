@@ -79,7 +79,7 @@ export function FacturacionModal({ order, onClose }: FacturacionModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 no-print">
-      <div className="bg-[#1E1E1E] rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl border border-border max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div className="bg-card rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl border border-border max-h-[90vh] overflow-y-auto custom-scrollbar">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-black text-white uppercase tracking-tighter">
             🧾 Facturación

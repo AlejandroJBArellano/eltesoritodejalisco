@@ -52,7 +52,7 @@ export function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
       <div
-        className={`relative bg-[#1E1E1E] border border-border rounded-2xl w-full ${maxWidthMap[maxWidth]} shadow-2xl overflow-hidden my-8 z-10`}
+        className={`relative bg-card border border-border rounded-2xl w-full ${maxWidthMap[maxWidth]} shadow-2xl overflow-hidden my-8 z-10`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">

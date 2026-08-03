@@ -1750,7 +1750,7 @@ export default function HistoryPage() {
                       {isExpanded && (
                         <tr className="bg-dark/40">
                           <td colSpan={8} className="px-6 py-4">
-                            <div className="bg-[#1D1D1D] rounded-xl border border-border p-4 space-y-3">
+                            <div className="bg-card rounded-xl border border-border p-4 space-y-3">
                               <div className="flex items-center justify-between border-b border-border pb-2">
                                 <h4 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-1.5">
                                   <ShoppingBag className="h-3.5 w-3.5 text-primary" />

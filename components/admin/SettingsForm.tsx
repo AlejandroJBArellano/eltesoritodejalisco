@@ -116,7 +116,7 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                 Logotipo del Restaurante
               </label>
 
-              <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-xl border border-border bg-[#1e1e1e]/50">
+              <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-xl border border-border bg-card/50">
                 {/* Logo Preview box */}
                 <div className="h-20 w-20 shrink-0 rounded-2xl border border-border bg-background overflow-hidden flex items-center justify-center relative group">
                   {logoPreview ? (

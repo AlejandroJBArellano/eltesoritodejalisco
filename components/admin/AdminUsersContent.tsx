@@ -481,28 +481,19 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                           }
                           className={`rounded-xl border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer ${roleConfig.badgeBg} ${roleConfig.color} ${roleConfig.badgeBorder}`}
                         >
-                          <option
-                            value="ADMIN"
-                            className="bg-[#1E1E1E] text-white"
-                          >
+                          <option value="ADMIN" className="bg-card text-white">
                             ADMIN
                           </option>
                           <option
                             value="MANAGER"
-                            className="bg-[#1E1E1E] text-white"
+                            className="bg-card text-white"
                           >
                             MANAGER
                           </option>
-                          <option
-                            value="WAITER"
-                            className="bg-[#1E1E1E] text-white"
-                          >
+                          <option value="WAITER" className="bg-card text-white">
                             WAITER
                           </option>
-                          <option
-                            value="CHEF"
-                            className="bg-[#1E1E1E] text-white"
-                          >
+                          <option value="CHEF" className="bg-card text-white">
                             CHEF
                           </option>
                         </select>

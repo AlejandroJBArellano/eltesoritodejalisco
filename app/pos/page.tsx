@@ -933,7 +933,7 @@ export default function POSPage() {
               setActiveTab("cart");
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="w-full bg-[#1e1e1e]/95 backdrop-blur-md hover:bg-[#262626]/95 border border-primary/20 text-white rounded-2xl p-4 flex items-center justify-between shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
+            className="w-full bg-card/95 backdrop-blur-md hover:bg-[#262626]/95 border border-primary/20 text-white rounded-2xl p-4 flex items-center justify-between shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
           >
             <div className="flex items-center gap-3">
               <div className="bg-primary/20 border border-primary/30 h-10 w-10 rounded-xl flex items-center justify-center text-primary">
