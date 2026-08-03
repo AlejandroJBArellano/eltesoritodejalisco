@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { updateTenantSettings } from "@/app/admin/settings/actions";
-import { Sliders, Building, CheckCircle2, AlertCircle, Trash2, Upload, Sparkles } from "lucide-react";
+import { Sliders, Building, CheckCircle2, AlertCircle, Upload, Sparkles, FileText, Check } from "lucide-react";
 import type { TenantContextType } from "@/lib/tenant";
 
 interface SettingsFormProps {
@@ -110,6 +110,16 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
     setDarkBgColor(preset.darkBg);
   };
 
+  /** Returns #121212 or #f5f5f5 depending on the relative luminance of the hex color. */
+  const getContrastColor = (hex: string): string => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    // Perceived luminance (WCAG formula)
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.55 ? "#121212" : "#f5f5f5";
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSuccess(false);
@@ -153,7 +163,7 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
         {/* Left Column: Config Forms */}
         <div className="lg:col-span-2 space-y-8">
           {/* Section 1: General Info */}
-          <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/10">
+          <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20">
             <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
               <Building className="h-4 w-4 text-primary" /> Datos de la Empresa
             </h3>
@@ -258,9 +268,9 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
           </div>
 
           {/* Section 2: Ticket Config */}
-          <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/10">
+          <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20">
             <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
-              📄 Configuración del Ticket Fiscal
+              <FileText className="h-4 w-4 text-primary" /> Configuración del Ticket Fiscal
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -307,7 +317,7 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
 
         {/* Right Column: Visual Theme / Presets */}
         <div className="space-y-8">
-          <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/10">
+          <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20">
             <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
               <Sliders className="h-4 w-4 text-primary" /> Colores de Marca
             </h3>
@@ -328,29 +338,33 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                       key={preset.name}
                       type="button"
                       onClick={() => applyPreset(preset)}
+                      aria-pressed={isSelected}
                       className={`flex items-center gap-3 p-2.5 rounded-xl border text-left transition duration-200 cursor-pointer ${
                         isSelected
-                          ? "border-primary bg-primary/10"
+                          ? "border-primary bg-primary/10 ring-1 ring-primary/30"
                           : "border-border bg-dark/20 hover:bg-dark/40 hover:border-text-light/20"
                       }`}
                     >
                       <div className="flex -space-x-1 shrink-0">
                         <div
-                          className="h-4.5 w-4.5 rounded-full border border-black/30 shadow-sm"
+                          className="h-[18px] w-[18px] rounded-full border border-black/30 shadow-sm"
                           style={{ backgroundColor: preset.primary }}
                         />
                         <div
-                          className="h-4.5 w-4.5 rounded-full border border-black/30 shadow-sm"
+                          className="h-[18px] w-[18px] rounded-full border border-black/30 shadow-sm"
                           style={{ backgroundColor: preset.secondary }}
                         />
                         <div
-                          className="h-4.5 w-4.5 rounded-full border border-black/30 shadow-sm"
+                          className="h-[18px] w-[18px] rounded-full border border-black/30 shadow-sm"
                           style={{ backgroundColor: preset.darkBg }}
                         />
                       </div>
                       <span className="text-xs font-bold truncate text-text-light flex-1">
                         {preset.name}
                       </span>
+                      {isSelected && (
+                        <Check className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+                      )}
                     </button>
                   );
                 })}
@@ -372,6 +386,7 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                     <input
                       type="color"
                       value={primaryColor}
+                      aria-label="Seleccionar color primario"
                       onChange={(e) => setPrimaryColor(e.target.value)}
                       className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                     />
@@ -399,6 +414,7 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                     <input
                       type="color"
                       value={secondaryColor}
+                      aria-label="Seleccionar color secundario"
                       onChange={(e) => setSecondaryColor(e.target.value)}
                       className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                     />
@@ -426,6 +442,7 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                     <input
                       type="color"
                       value={darkBgColor}
+                      aria-label="Seleccionar color de fondo oscuro"
                       onChange={(e) => setDarkBgColor(e.target.value)}
                       className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                     />
@@ -448,10 +465,10 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
               </span>
               <button
                 type="button"
-                className="w-full py-2.5 rounded-xl font-black text-xs text-white uppercase tracking-wider shadow-lg transition active:scale-95 pointer-events-none"
+                className="w-full py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg transition active:scale-95 pointer-events-none"
                 style={{
                   background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`,
-                  color: "#121212", // dark text for high contrast on light pastel gradient
+                  color: getContrastColor(primaryColor),
                   boxShadow: `0 4px 14px 0 ${primaryColor}40`,
                 }}
               >
@@ -467,10 +484,10 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-xl font-extrabold px-8 py-3.5 text-sm uppercase tracking-wider transition active:scale-95 shadow-lg cursor-pointer flex items-center justify-center gap-2"
+          className="rounded-xl font-extrabold px-8 py-3.5 text-sm uppercase tracking-wider transition active:scale-95 shadow-lg cursor-pointer flex items-center justify-center gap-2 disabled:cursor-not-allowed"
           style={{
             background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`,
-            color: "#121212", // dark text for high contrast on light pastel gradient
+            color: getContrastColor(primaryColor),
             boxShadow: `0 4px 14px 0 ${primaryColor}30`,
             opacity: loading ? 0.7 : 1,
           }}

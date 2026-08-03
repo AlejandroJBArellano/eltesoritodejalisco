@@ -36,8 +36,8 @@ export async function updateTenantSettings(
       // Ensure the "logos" bucket exists and is public
       try {
         await adminClient.storage.createBucket("logos", { public: true });
-      } catch (e) {
-        // already exists
+      } catch {
+        // Bucket already exists — safe to ignore
       }
 
       const fileExt = logoFile.name.split(".").pop() || "jpg";
