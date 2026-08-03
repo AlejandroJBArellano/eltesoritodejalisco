@@ -104,6 +104,7 @@ export async function POST(request: NextRequest) {
       imageUrl = await uploadImageToStorage(imageFile);
     }
 
+    const tenant = await getTenantContext();
     const supabaseAdmin = createAdminClient();
     const id = crypto.randomUUID();
 
@@ -136,6 +137,7 @@ export async function POST(request: NextRequest) {
         stripe_product_id: stripeProductId,
         translations,
         ingredient_id: ingredientId,
+        tenant_id: tenant.id,
         updated_at: new Date().toISOString(),
       })
       .select()
@@ -196,16 +198,25 @@ export async function PUT(request: NextRequest) {
       imageUrl = await uploadImageToStorage(imageFile);
     }
 
+    const tenant = await getTenantContext();
     const supabaseAdmin = createAdminClient();
 
     // Fetch existing product to check if it has a stripe_product_id
-    const { data: existingItem } = await supabaseAdmin
+    const { data: existingItem, error: fetchError } = await supabaseAdmin
       .from("menu_items")
       .select("stripe_product_id")
       .eq("id", id)
-      .single();
+      .eq("tenant_id", tenant.id)
+      .maybeSingle();
 
-    let stripeProductId = existingItem?.stripe_product_id || null;
+    if (fetchError || !existingItem) {
+      return NextResponse.json(
+        { error: "Producto no encontrado o no autorizado" },
+        { status: 404 },
+      );
+    }
+
+    let stripeProductId = existingItem.stripe_product_id || null;
     try {
       if (process.env.STRIPE_SECRET_KEY) {
         const { stripe } = await import("@/lib/stripe");
@@ -244,6 +255,7 @@ export async function PUT(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .select()
       .single();
 
@@ -279,11 +291,13 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabaseAdmin = createAdminClient();
     const { error } = await supabaseAdmin
       .from("menu_items")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
 
     if (error) throw error;
 
