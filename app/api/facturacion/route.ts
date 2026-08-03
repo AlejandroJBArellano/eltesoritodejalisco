@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/tenant";
 import {
   generarTicketAutofactura,
   crearFacturaDirecta,
@@ -16,6 +17,8 @@ export async function POST(req: Request) {
       );
     }
 
+    const tenant = await getTenantContext();
+
     if (tipo === "DIRECTA") {
       if (!cliente) {
         return NextResponse.json(
@@ -27,10 +30,10 @@ export async function POST(req: Request) {
         );
       }
 
-      const factura = await crearFacturaDirecta(venta, cliente, orderId);
+      const factura = await crearFacturaDirecta(venta, cliente, orderId, tenant.id);
       return NextResponse.json(factura);
     } else if (tipo === "TICKET") {
-      const ticket = await generarTicketAutofactura(venta, orderId);
+      const ticket = await generarTicketAutofactura(venta, orderId, tenant.id);
       return NextResponse.json({
         ticketId: ticket.Id || ticket.Folio,
         ticketData: ticket,
@@ -52,3 +55,4 @@ export async function POST(req: Request) {
     );
   }
 }
+

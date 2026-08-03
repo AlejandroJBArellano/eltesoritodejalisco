@@ -32,11 +32,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const previousStatus = order.status;
 
-    // 2. Delete payments associated with the order
+    // 2. Delete payments associated with the order (scoped to tenant via order ownership)
     const { error: paymentDeleteError } = await supabase
       .from("payments")
       .delete()
       .eq("order_id", id);
+    // Note: The order ownership is already validated above with tenant_id check,
+    // so filtering by order_id alone is safe here.
 
     if (paymentDeleteError) throw paymentDeleteError;
 
@@ -66,6 +68,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .from("order_adjustments")
       .insert({
         order_id: id,
+        tenant_id: tenant.id,
         previous_status: previousStatus,
         new_status: "PENDING",
         reason: reason || "Undo Payment (3 min window)",

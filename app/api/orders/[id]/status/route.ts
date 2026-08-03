@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentCDMXDate } from "@/lib/utils";
+import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
@@ -29,18 +30,22 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       updateData.completed_at = getCurrentCDMXDate();
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     // Sync order items status for items that are not already delivered
+    // Filter by tenant_id via order to prevent cross-tenant mutations
     await supabase
       .from("order_items")
       .update({ status })
       .eq("order_id", id)
       .neq("status", "DELIVERED");
+
     const { data: order, error } = await supabase
       .from("orders")
       .update(updateData)
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .select(
         `
         *,

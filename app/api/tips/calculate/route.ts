@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getTenantContext } from "@/lib/tenant";
 import { NextResponse } from "next/server";
 import { format } from "date-fns-tz";
 import { differenceInMinutes } from "date-fns";
@@ -27,10 +28,13 @@ export async function POST(request: Request) {
     const totalTips =
       (Number(total_card_tips) || 0) + (Number(total_cash_tips) || 0);
 
+    const tenant = await getTenantContext();
+
     // 1. Fetch finished attendances for the date
     const { data: attendances, error: fetchError } = await supabase
       .from("attendance")
       .select("id, user_id, check_in, check_out, users(id, name)")
+      .eq("tenant_id", tenant.id)
       .eq("date", targetDate)
       .eq("status", "FINISHED");
 

@@ -50,7 +50,11 @@ function getAuthHeader() {
  * @param orderId ID de la orden en la base de datos para relacionar el ticket.
  * @returns El ticket generado.
  */
-export async function generarTicketAutofactura(venta: Venta, orderId: string) {
+export async function generarTicketAutofactura(
+  venta: Venta,
+  orderId: string,
+  tenantId: string,
+) {
   // Ignoramos la propina para el cálculo de la factura
   const totalTicket = venta.subtotal + venta.iva;
 
@@ -85,6 +89,7 @@ export async function generarTicketAutofactura(venta: Venta, orderId: string) {
     const supabase = await createClient();
     const { error: dbError } = await supabase.from("facturas").insert({
       order_id: orderId,
+      tenant_id: tenantId,
       facturama_id: ticketData.Id || ticketData.Folio,
       total: totalTicket,
       status: "ticket_autofactura",
@@ -113,6 +118,7 @@ export async function crearFacturaDirecta(
   venta: Venta,
   cliente: ClienteFactura,
   orderId: string,
+  tenantId: string,
 ) {
   // Ignoramos la propina, solo tomamos subtotal e iva.
   const totalFactura = venta.subtotal + venta.iva;
@@ -180,6 +186,7 @@ export async function crearFacturaDirecta(
     const supabase = await createClient();
     const { error: dbError } = await supabase.from("facturas").insert({
       order_id: orderId,
+      tenant_id: tenantId,
       facturama_id: facturaId,
       pdf_url: pdfUrl,
       xml_url: xmlUrl,

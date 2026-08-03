@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
@@ -30,11 +31,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .select("id, created_at, status")
       .eq("id", orderId)
+      .eq("tenant_id", tenant.id)
       .single();
 
     if (orderError || !order) {
