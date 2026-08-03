@@ -116,6 +116,19 @@ export async function POST(request: NextRequest) {
     let subtotal = 0;
     const itemsWithPrices = [];
 
+    const menuItemIds = orderItems.map((item) => item.menuItemId).filter(Boolean);
+    const { data: menuItems, error: menuItemsError } = await supabase
+      .from("menu_items")
+      .select("*")
+      .in("id", menuItemIds)
+      .eq("tenant_id", tenant.id);
+
+    if (menuItemsError) {
+      throw new Error("Failed to fetch menu items");
+    }
+
+    const menuItemMap = new Map(menuItems?.map((item) => [item.id, item]) || []);
+
     for (const item of orderItems) {
       if (!item.menuItemId) {
         throw new Error("Menu item is required");
@@ -126,15 +139,10 @@ export async function POST(request: NextRequest) {
         throw new Error("Quantity must be greater than 0");
       }
 
-      const { data: menuItem, error: menuError } = await supabase
-        .from("menu_items")
-        .select("*")
-        .eq("id", item.menuItemId)
-        .eq("tenant_id", tenant.id)
-        .single();
-
-      if (menuError || !menuItem)
+      const menuItem = menuItemMap.get(item.menuItemId);
+      if (!menuItem) {
         throw new Error(`Menu item ${item.menuItemId} not found`);
+      }
 
       const itemTotal = menuItem.price * parsedQuantity;
       subtotal += itemTotal;

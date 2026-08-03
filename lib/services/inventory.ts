@@ -118,7 +118,10 @@ export async function deductInventoryForOrder(
       }
     }
 
-    // Process deductions
+    // Process deductions in parallel
+    const updatePromises = [];
+    const adjustmentsToInsert = [];
+
     for (const [
       ingredientId,
       { ingredient, totalRequired },
@@ -126,32 +129,26 @@ export async function deductInventoryForOrder(
       const previousStock = ingredient.current_stock;
       const newStock = previousStock - totalRequired;
 
-      // Update the ingredient stock (allow negative)
-      const { error: updateError } = await supabase
-        .from("ingredients")
-        .update({ current_stock: newStock })
-        .eq("id", ingredientId);
+      updatePromises.push(
+        supabase
+          .from("ingredients")
+          .update({ current_stock: newStock })
+          .eq("id", ingredientId)
+          .then(({ error }) => {
+            if (error) {
+              result.success = false;
+              result.errors?.push(`Failed to update stock for ${ingredient.name}`);
+            }
+          })
+      );
 
-      if (updateError) {
-        result.success = false;
-        result.errors?.push(`Failed to update stock for ${ingredient.name}`);
-        continue;
-      }
-
-      // Log the deduction
-      const { error: logError } = await supabase
-        .from("stock_adjustments")
-        .insert({
-          ingredient_id: ingredient.id,
-          adjustment: -totalRequired,
-          reason: `Order deduction`,
-          tenant_id: (order as { tenant_id: string }).tenant_id,
-          created_at: new Date().toISOString(),
-        });
-
-      if (logError) {
-        console.error("Failed to log stock adjustment:", logError);
-      }
+      adjustmentsToInsert.push({
+        ingredient_id: ingredient.id,
+        adjustment: -totalRequired,
+        reason: `Order deduction`,
+        tenant_id: (order as { tenant_id: string }).tenant_id,
+        created_at: new Date().toISOString(),
+      });
 
       // Record the deduction
       result.deductions.push({
@@ -161,6 +158,18 @@ export async function deductInventoryForOrder(
         previousStock,
         newStock,
       });
+    }
+
+    if (updatePromises.length > 0) {
+      await Promise.all(updatePromises);
+
+      const { error: logError } = await supabase
+        .from("stock_adjustments")
+        .insert(adjustmentsToInsert);
+
+      if (logError) {
+        console.error("Failed to log stock adjustments:", logError);
+      }
     }
 
     return result;
@@ -267,7 +276,10 @@ export async function reverseInventoryForOrder(
       }
     }
 
-    // Process reversals
+    // Process reversals in parallel
+    const updatePromises = [];
+    const adjustmentsToInsert = [];
+
     for (const [
       ingredientId,
       { ingredient, totalRequired },
@@ -275,32 +287,26 @@ export async function reverseInventoryForOrder(
       const previousStock = ingredient.current_stock;
       const newStock = previousStock + totalRequired;
 
-      // Update the ingredient stock
-      const { error: updateError } = await supabase
-        .from("ingredients")
-        .update({ current_stock: newStock })
-        .eq("id", ingredientId);
+      updatePromises.push(
+        supabase
+          .from("ingredients")
+          .update({ current_stock: newStock })
+          .eq("id", ingredientId)
+          .then(({ error }) => {
+            if (error) {
+              result.success = false;
+              result.errors?.push(`Failed to update stock for ${ingredient.name}`);
+            }
+          })
+      );
 
-      if (updateError) {
-        result.success = false;
-        result.errors?.push(`Failed to update stock for ${ingredient.name}`);
-        continue;
-      }
-
-      // Log the reversal
-      const { error: logError } = await supabase
-        .from("stock_adjustments")
-        .insert({
-          ingredient_id: ingredient.id,
-          adjustment: totalRequired,
-          reason: `Order reversal (undo)`,
-          tenant_id: (order as { tenant_id: string }).tenant_id,
-          created_at: new Date().toISOString(),
-        });
-
-      if (logError) {
-        console.error("Failed to log stock adjustment:", logError);
-      }
+      adjustmentsToInsert.push({
+        ingredient_id: ingredient.id,
+        adjustment: totalRequired,
+        reason: `Order reversal (undo)`,
+        tenant_id: (order as { tenant_id: string }).tenant_id,
+        created_at: new Date().toISOString(),
+      });
 
       // Record the deduction
       result.deductions.push({
@@ -310,6 +316,18 @@ export async function reverseInventoryForOrder(
         previousStock,
         newStock,
       });
+    }
+
+    if (updatePromises.length > 0) {
+      await Promise.all(updatePromises);
+
+      const { error: logError } = await supabase
+        .from("stock_adjustments")
+        .insert(adjustmentsToInsert);
+
+      if (logError) {
+        console.error("Failed to log stock adjustments:", logError);
+      }
     }
 
     return result;

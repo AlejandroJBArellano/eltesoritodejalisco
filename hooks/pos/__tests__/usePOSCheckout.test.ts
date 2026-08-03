@@ -3,6 +3,13 @@ import { renderHook, act } from "@testing-library/react";
 import { usePOSCheckout } from "../usePOSCheckout";
 import { OrderStatus, OrderWithDetails } from "@/types";
 
+vi.mock("@/components/TenantProvider", () => ({
+  useTenant: () => ({
+    id: "tenant-1",
+    name: "El Tesorito de Jalisco",
+  }),
+}));
+
 const mockRefreshOrders = vi.fn().mockResolvedValue([] as OrderWithDetails[]);
 
 const mockOrder: OrderWithDetails = {
