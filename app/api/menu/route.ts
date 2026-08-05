@@ -22,7 +22,24 @@ export async function GET() {
 
     if (error) throw error;
 
-    return NextResponse.json({ items });
+    // Fetch only the top 5 most ordered item IDs from the database view
+    const { data: popularData } = await supabase
+      .from("popular_menu_items")
+      .select("menu_item_id")
+      .eq("tenant_id", tenant.id)
+      .gte("order_count", 5)
+      .order("order_count", { ascending: false })
+      .limit(5);
+
+    const popularIds = new Set((popularData || []).map((row) => row.menu_item_id));
+
+    const enrichedItems = (items || []).map((item) => ({
+      ...item,
+      is_popular: popularIds.has(item.id),
+      is_recommended: false,
+    }));
+
+    return NextResponse.json({ items: enrichedItems });
   } catch (error) {
     console.error("Error fetching menu items:", error);
     return NextResponse.json(
