@@ -244,6 +244,44 @@ export function ProductModal({
           </label>
         </div>
 
+        <div className="border-t border-border/50 pt-4 mt-2">
+          <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-2">
+            Opciones de Servicio (Kittn Pickup)
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="showInDineIn"
+                checked={formState.showInDineIn}
+                onChange={(e) => onFormChange("showInDineIn", e.target.checked)}
+                className="h-4 w-4 rounded border-border bg-dark/40 text-primary focus:ring-primary"
+              />
+              <label
+                htmlFor="showInDineIn"
+                className="text-xs font-bold text-text-light"
+              >
+                Comer aquí (Dine-in)
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="showInTakeaway"
+                checked={formState.showInTakeaway}
+                onChange={(e) => onFormChange("showInTakeaway", e.target.checked)}
+                className="h-4 w-4 rounded border-border bg-dark/40 text-primary focus:ring-primary"
+              />
+              <label
+                htmlFor="showInTakeaway"
+                className="text-xs font-bold text-text-light"
+              >
+                Para llevar (Takeout)
+              </label>
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
           <button
             type="button"

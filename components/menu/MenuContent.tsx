@@ -287,6 +287,9 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         isSubmitting={isCategorySubmitting}
         onNameChange={(name) => setCategoryForm((p) => ({ ...p, name }))}
         onNameEnChange={(nameEn) => setCategoryForm((p) => ({ ...p, nameEn }))}
+        onShowInPickupChange={(showInPickup) =>
+          setCategoryForm((p) => ({ ...p, showInPickup }))
+        }
       />
 
       {/* MODAL DE RECETAS */}

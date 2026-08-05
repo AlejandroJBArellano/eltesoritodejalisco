@@ -84,6 +84,8 @@ export async function POST(request: NextRequest) {
     const translationsRaw = formData.get("translations") as string | null;
     const translations = translationsRaw ? JSON.parse(translationsRaw) : {};
     const ingredientId = (formData.get("ingredientId") as string) || null;
+    const showInDineIn = formData.get("showInDineIn") !== "false";
+    const showInTakeaway = formData.get("showInTakeaway") !== "false";
 
     if (!name) {
       return NextResponse.json(
@@ -138,6 +140,8 @@ export async function POST(request: NextRequest) {
         translations,
         ingredient_id: ingredientId,
         tenant_id: tenant.id,
+        show_in_dine_in: showInDineIn,
+        show_in_takeaway: showInTakeaway,
         updated_at: new Date().toISOString(),
       })
       .select()
@@ -180,6 +184,8 @@ export async function PUT(request: NextRequest) {
       ? JSON.parse(translationsRaw)
       : undefined;
     const ingredientId = (formData.get("ingredientId") as string) || null;
+    const showInDineIn = formData.get("showInDineIn");
+    const showInTakeaway = formData.get("showInTakeaway");
 
     if (!id || !name) {
       return NextResponse.json(
@@ -254,6 +260,8 @@ export async function PUT(request: NextRequest) {
         stripe_product_id: stripeProductId,
         ingredient_id: ingredientId,
         ...(translations !== undefined ? { translations } : {}),
+        ...(showInDineIn !== null ? { show_in_dine_in: showInDineIn === "true" } : {}),
+        ...(showInTakeaway !== null ? { show_in_takeaway: showInTakeaway === "true" } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)

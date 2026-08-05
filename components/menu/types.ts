@@ -16,6 +16,8 @@ export type MenuItem = {
   isAvailable: boolean;
   translations?: Translations;
   ingredientId?: string | null;
+  show_in_dine_in?: boolean;
+  show_in_takeaway?: boolean;
 };
 
 export type MenuCategory = {
@@ -24,6 +26,7 @@ export type MenuCategory = {
   translations?: Translations;
   sort_order: number;
   is_active: boolean;
+  show_in_pickup: boolean;
 };
 
 export type RecipeItem = {
@@ -47,6 +50,8 @@ export type MenuFormState = {
   nameEn: string;
   descriptionEn: string;
   ingredientId: string;
+  showInDineIn: boolean;
+  showInTakeaway: boolean;
 };
 
 export type RecipeFormState = {
@@ -58,6 +63,7 @@ export type CategoryFormState = {
   id?: string;
   name: string;
   nameEn: string;
+  showInPickup: boolean;
 };
 
 // API shape coming from Supabase before mapping
@@ -71,6 +77,8 @@ export interface DatabaseMenuItem {
   image_url?: string | null;
   translations?: Translations;
   ingredient_id?: string | null;
+  show_in_dine_in?: boolean;
+  show_in_takeaway?: boolean;
 }
 
 // Default empty states
@@ -84,11 +92,14 @@ export const EMPTY_PRODUCT_FORM: MenuFormState = {
   nameEn: "",
   descriptionEn: "",
   ingredientId: "",
+  showInDineIn: true,
+  showInTakeaway: true,
 };
 
 export const EMPTY_CATEGORY_FORM: CategoryFormState = {
   name: "",
   nameEn: "",
+  showInPickup: true,
 };
 
 export const EMPTY_RECIPE_FORM: RecipeFormState = {

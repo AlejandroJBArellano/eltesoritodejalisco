@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   try {
     const tenant = await getTenantContext();
     const body = await request.json();
-    const { name, translations = {}, sort_order } = body;
+    const { name, translations = {}, sort_order, show_in_pickup = true } = body;
 
     if (!name || !name.trim()) {
       return NextResponse.json(
@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
         sort_order: finalSortOrder,
         is_active: true,
         tenant_id: tenant.id,
+        show_in_pickup: show_in_pickup !== false,
       })
       .select()
       .single();
@@ -131,7 +132,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Single category update
-    const { id, name, translations, sort_order, is_active } = body;
+    const { id, name, translations, sort_order, is_active, show_in_pickup } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -160,6 +161,7 @@ export async function PUT(request: NextRequest) {
     if (translations !== undefined) updatePayload.translations = translations;
     if (sort_order !== undefined) updatePayload.sort_order = sort_order;
     if (is_active !== undefined) updatePayload.is_active = is_active;
+    if (show_in_pickup !== undefined) updatePayload.show_in_pickup = show_in_pickup;
 
     const { data: category, error: updateError } = await supabase
       .from("menu_categories")

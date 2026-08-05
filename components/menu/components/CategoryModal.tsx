@@ -12,6 +12,7 @@ interface CategoryModalProps {
   isSubmitting: boolean;
   onNameChange: (value: string) => void;
   onNameEnChange: (value: string) => void;
+  onShowInPickupChange: (value: boolean) => void;
 }
 
 export function CategoryModal({
@@ -23,6 +24,7 @@ export function CategoryModal({
   isSubmitting,
   onNameChange,
   onNameEnChange,
+  onShowInPickupChange,
 }: CategoryModalProps) {
   return (
     <Modal
@@ -42,7 +44,7 @@ export function CategoryModal({
             type="text"
             value={categoryForm.name}
             onChange={(e) => onNameChange(e.target.value)}
-            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#666] outline-none focus:border-primary"
+            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#66] outline-none focus:border-primary"
             placeholder="Ej. ANTOJITOS"
           />
           {categoryErrors.name && (
@@ -60,9 +62,24 @@ export function CategoryModal({
             type="text"
             value={categoryForm.nameEn}
             onChange={(e) => onNameEnChange(e.target.value)}
-            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#444] outline-none focus:border-blue-500"
+            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#44] outline-none focus:border-blue-500"
             placeholder="e.g. Snacks"
           />
+        </div>
+        <div className="flex items-center gap-2 pt-2">
+          <input
+            type="checkbox"
+            id="showInPickup"
+            checked={categoryForm.showInPickup}
+            onChange={(e) => onShowInPickupChange(e.target.checked)}
+            className="h-4 w-4 rounded border-border bg-dark/40 text-amber-500 focus:ring-amber-500"
+          />
+          <label
+            htmlFor="showInPickup"
+            className="text-xs font-bold text-text-light"
+          >
+            Mostrar en Kittn Pickup
+          </label>
         </div>
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
           <button

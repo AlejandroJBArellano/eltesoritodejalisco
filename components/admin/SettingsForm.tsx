@@ -11,7 +11,7 @@ interface SettingsFormProps {
 
 const COLOR_PRESETS = [
   {
-    name: "El Tesorito (Rosa)",
+    name: "Rosa",
     primary: "#FFB7CE",
     secondary: "#FFD1DC",
     darkBg: "#121212",

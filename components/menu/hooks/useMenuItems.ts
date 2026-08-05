@@ -113,6 +113,8 @@ export function useMenuItems(initialItems: MenuItem[]) {
           imageUrl: item.image_url,
           translations: item.translations,
           ingredientId: item.ingredient_id,
+          show_in_dine_in: item.show_in_dine_in,
+          show_in_takeaway: item.show_in_takeaway,
         })),
       );
       setErrorMessage(null);
@@ -177,6 +179,8 @@ export function useMenuItems(initialItems: MenuItem[]) {
       nameEn: item.translations?.en?.name || "",
       descriptionEn: item.translations?.en?.description || "",
       ingredientId: item.ingredientId || "",
+      showInDineIn: item.show_in_dine_in ?? true,
+      showInTakeaway: item.show_in_takeaway ?? true,
     });
     setImagePreview(item.imageUrl || null);
     setFormErrors({});
@@ -204,6 +208,8 @@ export function useMenuItems(initialItems: MenuItem[]) {
       formData.append("isAvailable", String(formState.isAvailable));
       formData.append("imageUrl", formState.imageUrl || "");
       formData.append("ingredientId", formState.ingredientId || "");
+      formData.append("showInDineIn", String(formState.showInDineIn));
+      formData.append("showInTakeaway", String(formState.showInTakeaway));
 
       const enTranslation: Record<string, string> = {};
       if (formState.nameEn.trim()) enTranslation.name = formState.nameEn.trim();

@@ -51,6 +51,7 @@ export function useMenuCategories() {
         id: category.id,
         name: category.name,
         nameEn: category.translations?.en?.name || "",
+        showInPickup: category.show_in_pickup ?? true,
       });
     } else {
       setCategoryForm(EMPTY_CATEGORY_FORM);
@@ -83,6 +84,7 @@ export function useMenuCategories() {
           ...(isEditing ? { id: categoryForm.id } : {}),
           name: categoryForm.name.trim(),
           translations,
+          show_in_pickup: categoryForm.showInPickup,
         }),
       });
       const data = await response.json();
