@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { orderItems, type, customerName, notes, pickupTime } = body;
+    const { orderItems, type, customerName, notes, pickupTime, tipAmount } = body;
 
     if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
       return NextResponse.json(
@@ -85,6 +85,20 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const validatedTipAmount = Number(tipAmount) || 0;
+    if (validatedTipAmount > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "mxn",
+          unit_amount: Math.round(validatedTipAmount * 1.035 * 100),
+          product_data: {
+            name: "Propina / Tip",
+          },
+        },
+        quantity: 1,
+      });
+    }
+
     // Origin site URL from referer header to support different ports/domains (e.g. Vite dev server)
     const referer = request.headers.get("referer");
     const origin = referer
@@ -107,6 +121,7 @@ export async function POST(request: NextRequest) {
         notes: notes || "",
         orderItems: JSON.stringify(validatedItems),
         pickupTime: pickupTime || "",
+        tipAmount: validatedTipAmount.toString(),
       },
     });
 

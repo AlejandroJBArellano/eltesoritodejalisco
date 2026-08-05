@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
       const notes = metadata.notes || "";
       const orderItems = JSON.parse(metadata.orderItems);
       const pickupTime = metadata.pickupTime || null;
+      const tipAmount = Number(metadata.tipAmount || 0);
 
       const supabaseAdmin = createAdminClient();
 
@@ -167,8 +168,9 @@ export async function POST(request: NextRequest) {
           order_id: order.id,
           method: "CARD",
           amount: total,
-          received_amount: total,
+          received_amount: total + Math.round(tipAmount * 1.035 * 100) / 100,
           change: 0,
+          tip_amount: tipAmount,
           created_at: new Date().toISOString(),
         });
 
