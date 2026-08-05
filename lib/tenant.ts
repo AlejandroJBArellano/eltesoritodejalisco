@@ -14,6 +14,8 @@ export interface TenantContextType {
   rfc: string | null;
   postal_code: string | null;
   regimen_fiscal: string | null;
+  stripe_secret_key?: string | null;
+  stripe_webhook_secret?: string | null;
 }
 
 export function getTenantSlugFromHost(host: string | null): string {
@@ -105,5 +107,7 @@ export async function getTenantContext(): Promise<TenantContextType> {
     rfc: "AIVK991104QJ0",
     postal_code: "09090",
     regimen_fiscal: "626 - Simplificado de Confianza (RESICO)",
+    stripe_secret_key: null,
+    stripe_webhook_secret: null,
   };
 }

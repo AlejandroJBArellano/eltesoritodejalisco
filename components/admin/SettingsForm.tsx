@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { updateTenantSettings } from "@/app/admin/settings/actions";
-import { Sliders, Building, CheckCircle2, AlertCircle, Upload, Sparkles, FileText, Check } from "lucide-react";
+import { Sliders, Building, CheckCircle2, AlertCircle, Upload, Sparkles, FileText, Check, CreditCard } from "lucide-react";
 import type { TenantContextType } from "@/lib/tenant";
 
 interface SettingsFormProps {
@@ -310,6 +310,38 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                 defaultValue={initialTenant.regimen_fiscal || ""}
                 placeholder="626 - Simplificado de Confianza (RESICO)"
                 className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+              />
+            </div>
+          </div>
+
+          {/* Section 3: Pasarela de Pagos (Stripe) */}
+          <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20">
+            <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
+              <CreditCard className="h-4 w-4 text-primary" /> Pasarela de Pagos (Stripe)
+            </h3>
+
+            <div className="bg-primary/5 rounded-xl border border-primary/10 p-4 text-xs space-y-2 text-text-light/80">
+              <p className="font-bold text-primary">Configuración Automatizada</p>
+              <p>
+                Al ingresar tu <strong>Stripe Secret Key</strong>, el sistema configurará 
+                automáticamente el Webhook en tu cuenta de Stripe para procesar los pagos. 
+                No necesitas configurar nada manualmente en Stripe.
+              </p>
+              <p className="text-[10px] text-text-light/40">
+                Deja el campo vacío si deseas desactivar los pagos en línea para este inquilino.
+              </p>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-text-light/60 uppercase tracking-wider block mb-1.5">
+                Stripe Secret Key (sk_test_... o sk_live_...)
+              </label>
+              <input
+                type="password"
+                name="stripeSecretKey"
+                defaultValue={initialTenant.stripe_secret_key ? "••••••••" : ""}
+                placeholder="sk_test_51..."
+                className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary transition font-mono"
               />
             </div>
           </div>

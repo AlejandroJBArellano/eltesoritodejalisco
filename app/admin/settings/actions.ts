@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getStripeClient } from "@/lib/stripe";
+import { headers } from "next/headers";
 
 export interface UpdateSettingsState {
   success?: boolean;
@@ -63,20 +65,56 @@ export async function updateTenantSettings(
       return { error: "El nombre del restaurante es obligatorio" };
     }
 
+    const stripeSecretKey = formData.get("stripeSecretKey") as string;
+
+    const updateData: any = {
+      name: name.trim(),
+      system_name: systemName ? systemName.trim() : "KittnOS",
+      rfc: rfc ? rfc.trim() : null,
+      postal_code: postalCode ? postalCode.trim() : null,
+      regimen_fiscal: regimenFiscal ? regimenFiscal.trim() : null,
+      primary_color: primaryColor || "#FFB7CE",
+      secondary_color: secondaryColor || "#FFD1DC",
+      dark_bg_color: darkBgColor || "#121212",
+      logo_url: logoUrl ? logoUrl.trim() : null,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Automate Stripe Webhook creation when key is configured/updated
+    if (stripeSecretKey === "") {
+      // Clear Stripe credentials if input was cleared
+      updateData.stripe_secret_key = null;
+      updateData.stripe_webhook_secret = null;
+    } else if (stripeSecretKey && stripeSecretKey !== "••••••••") {
+      const trimmedKey = stripeSecretKey.trim();
+      try {
+        const stripeClient = getStripeClient(trimmedKey);
+        
+        // Resolve dynamic server callback origin
+        const headersList = await headers();
+        const host = headersList.get("x-forwarded-host") || headersList.get("host");
+        const protocol = headersList.get("x-forwarded-proto") || (process.env.NODE_ENV === "production" ? "https" : "http");
+        const origin = host ? `${protocol}://${host}` : process.env.NEXT_PUBLIC_SITE_URL || "https://trykittn.com";
+        
+        const webhookUrl = `${origin}/api/webhooks/stripe?tenant_slug=${tenant.slug}`;
+        
+        // Create the webhook endpoint on the tenant's Stripe account via SDK
+        const webhook = await stripeClient.webhookEndpoints.create({
+          url: webhookUrl,
+          enabled_events: ["checkout.session.completed"],
+        });
+
+        updateData.stripe_secret_key = trimmedKey;
+        updateData.stripe_webhook_secret = webhook.secret;
+      } catch (stripeErr) {
+        console.error("Error registering Stripe webhook:", stripeErr);
+        return { error: `La llave secreta de Stripe no es válida o no se pudo crear el webhook: ${(stripeErr as Error).message}` };
+      }
+    }
+
     const { error } = await supabase
       .from("tenants")
-      .update({
-        name: name.trim(),
-        system_name: systemName ? systemName.trim() : "KittnOS",
-        rfc: rfc ? rfc.trim() : null,
-        postal_code: postalCode ? postalCode.trim() : null,
-        regimen_fiscal: regimenFiscal ? regimenFiscal.trim() : null,
-        primary_color: primaryColor || "#FFB7CE",
-        secondary_color: secondaryColor || "#FFD1DC",
-        dark_bg_color: darkBgColor || "#121212",
-        logo_url: logoUrl ? logoUrl.trim() : null,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq("id", tenant.id);
 
     if (error) {

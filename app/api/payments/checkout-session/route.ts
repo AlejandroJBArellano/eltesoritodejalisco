@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { stripe } from "@/lib/stripe";
+import { getStripeClient } from "@/lib/stripe";
 import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const tenant = await getTenantContext();
+    const stripeClient = getStripeClient(tenant.stripe_secret_key);
     const supabase = await createClient();
 
     const lineItems = [];
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
       // Fallback: If stripe_product_id is missing, create it on Stripe on the fly
       if (!stripeProductId) {
         try {
-          const stripeProduct = await stripe.products.create({
+          const stripeProduct = await stripeClient.products.create({
             name: menuItem.name,
             description: menuItem.description || undefined,
             active: menuItem.is_available,
@@ -107,7 +108,8 @@ export async function POST(request: NextRequest) {
 
     const orderId = crypto.randomUUID();
 
-    const session = await stripe.checkout.sessions.create({
+
+    const session = await stripeClient.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",

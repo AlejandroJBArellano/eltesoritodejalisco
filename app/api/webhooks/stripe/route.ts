@@ -1,4 +1,4 @@
-import { stripe } from "@/lib/stripe";
+import { getStripeClient } from "@/lib/stripe";
 import type Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentCDMXDate, getCurrentCDMXDay } from "@/lib/utils";
@@ -6,20 +6,53 @@ import { deductInventoryForOrder } from "@/lib/services/inventory";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const tenantIdParam = searchParams.get("tenant_id");
+  const tenantSlugParam = searchParams.get("tenant_slug");
+
   const bodyText = await request.text();
   const sig = request.headers.get("stripe-signature");
 
   let event;
+  let tenantSecretKey: string | null = null;
+  let webhookSecret: string | null = null;
 
   try {
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const supabase = createAdminClient();
+    if (tenantIdParam || tenantSlugParam) {
+      let query = supabase
+        .from("tenants")
+        .select("stripe_secret_key, stripe_webhook_secret");
+      
+      if (tenantIdParam) {
+        query = query.eq("id", tenantIdParam);
+      } else {
+        query = query.eq("slug", tenantSlugParam);
+      }
+
+      const { data: tenantData, error: dbError } = await query.maybeSingle();
+      if (tenantData) {
+        tenantSecretKey = tenantData.stripe_secret_key ?? null;
+        webhookSecret = tenantData.stripe_webhook_secret ?? null;
+      }
+      if (dbError) {
+        console.error("Error looking up tenant for webhook verification:", dbError);
+      }
+    }
+
+    if (!webhookSecret) {
+      webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? null;
+    }
+
     if (!webhookSecret) {
       throw new Error("STRIPE_WEBHOOK_SECRET is not configured.");
     }
     if (!sig) {
       throw new Error("stripe-signature header is missing.");
     }
-    event = stripe.webhooks.constructEvent(bodyText, sig, webhookSecret);
+
+    const stripeClient = getStripeClient(tenantSecretKey);
+    event = stripeClient.webhooks.constructEvent(bodyText, sig, webhookSecret);
   } catch (err) {
     console.error("Webhook signature verification failed:", err);
     return NextResponse.json(
