@@ -36,6 +36,12 @@ export async function GET(request: NextRequest) {
       query = query.in("status", statuses);
     }
 
+    const posParam = searchParams.get("pos");
+    if (posParam === "true") {
+      const today = getCurrentCDMXDay();
+      query = query.or(`operational_date.eq.${today},and(corte_id.is.null,estado_cierre.neq.ARCHIVADA)`);
+    }
+
     const { data: orders, error } = await query;
 
     if (error) throw error;

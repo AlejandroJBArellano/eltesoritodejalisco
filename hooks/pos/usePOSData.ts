@@ -111,7 +111,7 @@ export function usePOSData() {
   };
 
   const fetchOrders = useCallback(async () => {
-    const response = await fetch("/api/orders");
+    const response = await fetch("/api/orders?pos=true");
     const data = await response.json();
     if (!response.ok) throw new Error(data?.error || "Error al cargar órdenes");
     const mappedOrders = (data.orders || []).map((dbOrder: DbOrderPayload) =>
