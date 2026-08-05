@@ -138,28 +138,26 @@ export function useMenuCategories() {
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= sorted.length) return;
 
+    // Swap items in the sorted array
     const updated = [...sorted];
-    const tempOrder = updated[index].sort_order;
-    updated[index] = {
-      ...updated[index],
-      sort_order: updated[targetIndex].sort_order,
-    };
-    updated[targetIndex] = { ...updated[targetIndex], sort_order: tempOrder };
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
 
-    setMenuCategories(updated); // optimistic update
+    // Assign sequential sort_orders to resolve duplicates and guarantee order
+    const localUpdated = updated.map((cat, i) => ({
+      ...cat,
+      sort_order: (i + 1) * 10,
+    }));
+
+    setMenuCategories(localUpdated); // optimistic update
 
     try {
       const response = await fetch("/api/menu-categories", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          reorder: [
-            { id: updated[index].id, sort_order: updated[index].sort_order },
-            {
-              id: updated[targetIndex].id,
-              sort_order: updated[targetIndex].sort_order,
-            },
-          ],
+          reorder: localUpdated.map((c) => ({ id: c.id, sort_order: c.sort_order })),
         }),
       });
       if (!response.ok) await fetchCategories(); // revert on error
