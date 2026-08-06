@@ -1,7 +1,7 @@
 import { FormEvent } from "react";
 import { BookOpen, Plus, Trash2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
-import { MenuItem, RecipeFormState, RecipeItem } from "../types";
+import { MenuItem, RecipeFormState, RecipeItem, Ingredient } from "../types";
 
 interface RecipeModalProps {
   isOpen: boolean;
@@ -9,7 +9,7 @@ interface RecipeModalProps {
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   items: MenuItem[];
   recipeItems: RecipeItem[];
-  ingredients: any[];
+  ingredients: Ingredient[];
   selectedRecipeMenuItemId: string;
   onSelectedRecipeMenuItemIdChange: (id: string) => void;
   recipeForm: RecipeFormState;
@@ -18,6 +18,7 @@ interface RecipeModalProps {
   isSubmitting: boolean;
   deleteArmedRecipeId: string | null;
   onDeleteRecipe: (recipeId: string) => void;
+  onAddIngredient?: () => void;
 }
 
 export function RecipeModal({
@@ -35,6 +36,7 @@ export function RecipeModal({
   isSubmitting,
   deleteArmedRecipeId,
   onDeleteRecipe,
+  onAddIngredient,
 }: RecipeModalProps) {
   return (
     <Modal
@@ -71,9 +73,20 @@ export function RecipeModal({
               className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border"
             >
               <div className="sm:col-span-2">
-                <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
-                  Ingrediente del Catálogo
-                </label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-wider block">
+                    Ingrediente del Catálogo
+                  </label>
+                  {onAddIngredient && (
+                    <button
+                      type="button"
+                      onClick={onAddIngredient}
+                      className="text-[9px] text-purple-400 font-extrabold uppercase tracking-widest hover:underline cursor-pointer"
+                    >
+                      + Nuevo Ingrediente
+                    </button>
+                  )}
+                </div>
                 <select
                   value={recipeForm.ingredientId}
                   onChange={(e) =>

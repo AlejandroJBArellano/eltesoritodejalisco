@@ -1,7 +1,7 @@
 import { FormEvent, RefObject } from "react";
 import { Image as ImageIcon, Utensils, Globe, ChevronDown } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
-import { MenuFormState } from "../types";
+import { MenuFormState, Ingredient } from "../types";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ interface ProductModalProps {
   isEditing: boolean;
   isSubmitting: boolean;
   categories: string[];
-  ingredients: any[];
+  ingredients: Ingredient[];
   showTranslations: boolean;
   onToggleTranslations: () => void;
   onFormChange: (field: keyof MenuFormState, value: string | boolean) => void;
@@ -20,6 +20,7 @@ interface ProductModalProps {
   fileInputRef: RefObject<HTMLInputElement | null>;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAddCategory?: () => void;
+  onAddIngredient?: () => void;
 }
 
 export function ProductModal({
@@ -39,6 +40,7 @@ export function ProductModal({
   fileInputRef,
   onFileChange,
   onAddCategory,
+  onAddIngredient,
 }: ProductModalProps) {
   return (
     <Modal
@@ -132,9 +134,20 @@ export function ProductModal({
         </div>
 
         <div>
-          <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
-            Enlace Directo a Inventario (Control de Stock Directo)
-          </label>
+          <div className="flex justify-between items-center mb-1">
+            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block">
+              Enlace Directo a Inventario (Control de Stock Directo)
+            </label>
+            {onAddIngredient && (
+              <button
+                type="button"
+                onClick={onAddIngredient}
+                className="text-[10px] text-purple-400 font-extrabold uppercase tracking-widest hover:underline cursor-pointer"
+              >
+                + Nuevo Ingrediente
+              </button>
+            )}
+          </div>
           <select
             value={formState.ingredientId || ""}
             onChange={(e) => onFormChange("ingredientId", e.target.value)}

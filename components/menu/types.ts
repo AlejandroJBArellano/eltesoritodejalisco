@@ -6,6 +6,18 @@ export type Translations = Record<
   { name?: string; description?: string; category?: string }
 >;
 
+export type Ingredient = {
+  id: string;
+  name: string;
+  unit: string;
+  currentStock: number;
+  minimumStock: number;
+  costPerUnit?: number | null;
+  trackingType: "MEASURABLE" | "PIECE";
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type MenuItem = {
   id: string;
   name: string;
@@ -66,6 +78,16 @@ export type CategoryFormState = {
   showInPickup: boolean;
 };
 
+export type IngredientFormState = {
+  id?: string;
+  name: string;
+  unit: string;
+  currentStock: string;
+  minimumStock: string;
+  costPerUnit: string;
+  trackingType: "MEASURABLE" | "PIECE";
+};
+
 // API shape coming from Supabase before mapping
 export interface DatabaseMenuItem {
   id: string;
@@ -100,6 +122,15 @@ export const EMPTY_CATEGORY_FORM: CategoryFormState = {
   name: "",
   nameEn: "",
   showInPickup: true,
+};
+
+export const EMPTY_INGREDIENT_FORM: IngredientFormState = {
+  name: "",
+  unit: "unit",
+  currentStock: "0",
+  minimumStock: "0",
+  costPerUnit: "",
+  trackingType: "MEASURABLE",
 };
 
 export const EMPTY_RECIPE_FORM: RecipeFormState = {

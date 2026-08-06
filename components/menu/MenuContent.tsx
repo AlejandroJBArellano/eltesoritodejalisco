@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, FormEvent } from "react";
 import { BookOpen, Plus, RefreshCw, Tag } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 
@@ -15,8 +15,9 @@ import { MenuTable } from "./components/MenuTable";
 import { ProductModal } from "./components/ProductModal";
 import { CategoryModal } from "./components/CategoryModal";
 import { RecipeModal } from "./components/RecipeModal";
+import { IngredientModal } from "./components/IngredientModal";
 
-import { MenuItem } from "./types";
+import { MenuItem, IngredientFormState, EMPTY_INGREDIENT_FORM, Ingredient } from "./types";
 
 interface MenuContentProps {
   initialItems: MenuItem[];
@@ -103,7 +104,13 @@ export function MenuContent({ initialItems }: MenuContentProps) {
     deleteRecipe,
   } = useRecipes(items);
 
-  const [ingredients, setIngredients] = useState<any[]>([]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+
+  // Ingredient modal state
+  const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
+  const [ingredientForm, setIngredientForm] = useState<IngredientFormState>(EMPTY_INGREDIENT_FORM);
+  const [ingredientErrors, setIngredientErrors] = useState<Record<string, string>>({});
+  const [isIngredientSubmitting, setIsIngredientSubmitting] = useState(false);
 
   const fetchIngredients = async () => {
     try {
@@ -114,6 +121,64 @@ export function MenuContent({ initialItems }: MenuContentProps) {
       }
     } catch (error) {
       console.error("Error fetching ingredients:", error);
+    }
+  };
+
+  const handleIngredientFormChange = (field: keyof IngredientFormState, value: string) => {
+    setIngredientForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleIngredientSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const errors: Record<string, string> = {};
+    if (!ingredientForm.name.trim()) {
+      errors.name = "El nombre es obligatorio";
+    }
+    setIngredientErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    try {
+      setIsIngredientSubmitting(true);
+      const response = await fetch("/api/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: ingredientForm.name.trim(),
+          unit: ingredientForm.unit,
+          currentStock: Number(ingredientForm.currentStock || 0),
+          minimumStock: Number(ingredientForm.minimumStock || 0),
+          costPerUnit: ingredientForm.costPerUnit ? Number(ingredientForm.costPerUnit) : null,
+          trackingType: ingredientForm.trackingType,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || "Error al crear el ingrediente");
+      }
+
+      await fetchIngredients();
+
+      const newIngredient = data.ingredient;
+      if (newIngredient) {
+        if (isProductModalOpen) {
+          handleFormChange("ingredientId", newIngredient.id);
+        }
+        if (isRecipeModalOpen) {
+          setRecipeForm((prev) => ({
+            ...prev,
+            ingredientId: newIngredient.id,
+          }));
+        }
+      }
+
+      setIsIngredientModalOpen(false);
+      setIngredientForm(EMPTY_INGREDIENT_FORM);
+    } catch (err) {
+      console.error("Error saving ingredient:", err);
+      setErrorMessage(err instanceof Error ? err.message : "Error al guardar el ingrediente");
+    } finally {
+      setIsIngredientSubmitting(false);
     }
   };
 
@@ -149,6 +214,17 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         badgeColor="bg-primary"
         actions={
           <>
+            <button
+              onClick={() => {
+                setIngredientForm(EMPTY_INGREDIENT_FORM);
+                setIngredientErrors({});
+                setIsIngredientModalOpen(true);
+              }}
+              className="rounded-xl border border-border bg-card px-4 py-2 text-xs font-bold text-text-light hover:bg-card-light transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm focus-visible:ring-2 focus-visible:ring-primary outline-none"
+            >
+              <Plus className="h-4 w-4 text-purple-400" />
+              Nuevo Ingrediente
+            </button>
             <button
               onClick={() => openRecipeModal()}
               className="rounded-xl border border-border bg-card px-4 py-2 text-xs font-bold text-text-light hover:bg-card-light transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm focus-visible:ring-2 focus-visible:ring-primary outline-none"
@@ -275,6 +351,7 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         fileInputRef={fileInputRef}
         onFileChange={handleFileChange}
         onAddCategory={() => openCategoryModal()}
+        onAddIngredient={() => setIsIngredientModalOpen(true)}
       />
 
       {/* MODAL DE CATEGORÍA */}
@@ -311,6 +388,18 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         isSubmitting={isRecipeSubmitting}
         deleteArmedRecipeId={deleteArmedRecipeId}
         onDeleteRecipe={deleteRecipe}
+        onAddIngredient={() => setIsIngredientModalOpen(true)}
+      />
+
+      {/* MODAL DE INGREDIENTE */}
+      <IngredientModal
+        isOpen={isIngredientModalOpen}
+        onClose={() => setIsIngredientModalOpen(false)}
+        onSubmit={handleIngredientSubmit}
+        ingredientForm={ingredientForm}
+        ingredientErrors={ingredientErrors}
+        isSubmitting={isIngredientSubmitting}
+        onFormChange={handleIngredientFormChange}
       />
     </div>
   );
