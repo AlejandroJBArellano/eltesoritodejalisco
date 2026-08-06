@@ -1,16 +1,14 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { getProfile } from "@/lib/auth";
 
 export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
+  const supabase = await createClient();
 
   try {
     const supabaseAdmin = createAdminClient();
@@ -60,14 +58,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
-
-  if (!currentUser) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
+  const supabase = await createClient();
 
   try {
     const body = await request.json();
@@ -125,14 +120,11 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const supabase = await createClient();
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
-
-  if (!currentUser) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
+  const supabase = await createClient();
 
   try {
     const { id } = await request.json();

@@ -2,12 +2,18 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentCDMXDay } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
+import { getProfile } from "@/lib/auth";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const month = searchParams.get("month"); // e.g. "2024-03"
-
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const month = searchParams.get("month"); // e.g. "2024-03"
+
     const tenant = await getTenantContext();
     const supabase = await createClient();
     let query = supabase
@@ -68,6 +74,10 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const body = await req.json();
     const { category_id, amount, description, has_invoice, date } = body;
 

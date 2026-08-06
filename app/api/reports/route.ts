@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MEX_TIMEZONE } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
+import { getProfile } from "@/lib/auth";
 
 interface ReportOrder {
   id: string;
@@ -23,6 +24,10 @@ interface ReportOrder {
 
 export async function GET(request: NextRequest) {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const { searchParams } = new URL(request.url);
     const period = searchParams.get("period") || "7days"; // today | yesterday | 7days | 30days | month | last_month | custom
     const customStartParam = searchParams.get("startDate");
