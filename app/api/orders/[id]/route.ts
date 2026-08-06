@@ -259,6 +259,7 @@ export async function PATCH(
       newItemsData.push({
         id: crypto.randomUUID(),
         order_id: id,
+        tenant_id: tenant.id,
         menu_item_id: item.menuItemId,
         quantity: quantity,
         unit_price: menuItem.price,

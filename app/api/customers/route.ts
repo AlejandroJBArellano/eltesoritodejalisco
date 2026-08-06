@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
+import { getTenantContext } from "@/lib/tenant";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
 const phoneRegex = /^[0-9+\-()\s]{7,20}$/;
@@ -15,10 +16,12 @@ const phoneRegex = /^[0-9+\-()\s]{7,20}$/;
  */
 export async function GET() {
   try {
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     const { data: customers, error } = await supabase
       .from("customers")
       .select("*")
+      .eq("tenant_id", tenant.id)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -39,6 +42,7 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
   try {
+    const tenant = await getTenantContext();
     const body = await request.json();
     const { name, phone, email, birthday } = body;
 
@@ -82,6 +86,7 @@ export async function POST(request: NextRequest) {
         email: email || null,
         birthday: parsedBirthday,
         updated_at: getCurrentCDMXDate(),
+        tenant_id: tenant.id,
       })
       .select()
       .single();
@@ -104,6 +109,7 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
+    const tenant = await getTenantContext();
     const body = await request.json();
     const { id, name, phone, email, birthday } = body;
 
@@ -150,6 +156,7 @@ export async function PUT(request: NextRequest) {
         birthday: parsedBirthday,
       })
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .select()
       .single();
 
@@ -175,6 +182,7 @@ export async function DELETE(request: NextRequest) {
     if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
+    const tenant = await getTenantContext();
     const { id } = await request.json();
 
     if (!id) {
@@ -185,7 +193,11 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const { error } = await supabase.from("customers").delete().eq("id", id);
+    const { error } = await supabase
+      .from("customers")
+      .delete()
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
 
     if (error) throw error;
 

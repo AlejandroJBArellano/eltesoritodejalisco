@@ -49,6 +49,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .select("id, status")
       .eq("id", itemId)
       .eq("order_id", orderId)
+      .eq("tenant_id", tenant.id)
       .single();
 
     if (itemError || !orderItem) {
@@ -72,6 +73,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .update(updateItemData)
       .eq("id", itemId)
       .eq("order_id", orderId)
+      .eq("tenant_id", tenant.id)
       .select("id, status, tiempo_preparacion_segundos")
       .single();
 

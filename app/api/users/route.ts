@@ -23,6 +23,7 @@ export async function GET() {
           .from("users")
           .select("*")
           .eq("email", authUser.email)
+          .eq("tenant_id", profile.tenant_id)
           .maybeSingle();
 
         if (!dbUser && authUser.email) {
@@ -35,6 +36,7 @@ export async function GET() {
             password: "MANAGED_BY_SUPABASE",
             created_at: nowIso,
             updated_at: nowIso,
+            tenant_id: profile.tenant_id,
           });
         }
       }
@@ -43,6 +45,7 @@ export async function GET() {
     const { data: users, error: fetchError } = await supabase
       .from("users")
       .select("*")
+      .eq("tenant_id", profile.tenant_id)
       .order("created_at", { ascending: false });
 
     if (fetchError) throw fetchError;
@@ -81,7 +84,7 @@ export async function POST(request: Request) {
         email,
         password,
         email_confirm: true,
-        user_metadata: { name, role },
+        user_metadata: { name, role, tenant_id: profile.tenant_id },
       });
 
     if (authError) {
@@ -103,6 +106,7 @@ export async function POST(request: Request) {
         name,
         role,
         password: "MANAGED_BY_SUPABASE",
+        tenant_id: profile.tenant_id,
       })
       .select()
       .single();
@@ -133,6 +137,7 @@ export async function DELETE(request: Request) {
       .from("users")
       .select("*")
       .eq("id", id)
+      .eq("tenant_id", profile.tenant_id)
       .single();
 
     if (fetchError || !userToDelete) {
@@ -158,7 +163,8 @@ export async function DELETE(request: Request) {
     const { error: deleteError } = await supabase
       .from("users")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .eq("tenant_id", profile.tenant_id);
 
     if (deleteError) throw deleteError;
 

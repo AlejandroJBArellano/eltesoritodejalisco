@@ -39,6 +39,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .from("order_items")
       .update({ status })
       .eq("order_id", id)
+      .eq("tenant_id", tenant.id)
       .neq("status", "DELIVERED");
 
     const { data: order, error } = await supabase

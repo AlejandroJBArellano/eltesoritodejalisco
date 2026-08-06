@@ -136,11 +136,13 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
     const { data: recipeItem, error } = await supabase
       .from("recipe_items")
       .update({ quantity_required: parsedQuantity })
       .eq("id", id)
+      .eq("tenant_id", tenant.id)
       .select("*, ingredients(*)")
       .single();
 
@@ -183,8 +185,13 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
     const supabase = await createClient();
-    const { error } = await supabase.from("recipe_items").delete().eq("id", id);
+    const { error } = await supabase
+      .from("recipe_items")
+      .delete()
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
 
     if (error) throw error;
 

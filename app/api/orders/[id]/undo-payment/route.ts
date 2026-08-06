@@ -41,7 +41,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { error: paymentDeleteError } = await supabase
       .from("payments")
       .delete()
-      .eq("order_id", id);
+      .eq("order_id", id)
+      .eq("tenant_id", tenant.id);
     // Note: The order ownership is already validated above with tenant_id check,
     // so filtering by order_id alone is safe here.
 
