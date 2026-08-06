@@ -4,6 +4,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
+import { getProfile } from "@/lib/auth";
 
 /**
  * GET /api/inventory
@@ -61,6 +62,10 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const tenant = await getTenantContext();
     const body = await request.json();
     const {

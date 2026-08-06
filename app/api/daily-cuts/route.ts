@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
+import { getProfile } from "@/lib/auth";
 
 async function archiveOrdersForCut(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -23,6 +24,10 @@ async function archiveOrdersForCut(
 
 export async function GET() {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
@@ -47,6 +52,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const body = await request.json();
 
     const {

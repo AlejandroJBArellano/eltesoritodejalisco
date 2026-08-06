@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
+import { getProfile } from "@/lib/auth";
 
 /**
  * GET /api/menu
@@ -90,6 +91,10 @@ async function uploadImageToStorage(imageFile: File): Promise<string> {
  */
 export async function POST(request: NextRequest) {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const formData = await request.formData();
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
@@ -187,6 +192,10 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const formData = await request.formData();
     const id = formData.get("id") as string;
     const name = formData.get("name") as string;
@@ -309,6 +318,10 @@ export async function PUT(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const { id } = await request.json();
 
     if (!id) {

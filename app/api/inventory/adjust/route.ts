@@ -5,6 +5,7 @@ import { adjustIngredientStock } from "@/lib/services/inventory";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
+import { getProfile } from "@/lib/auth";
 
 /**
  * PATCH /api/inventory/adjust
@@ -12,6 +13,10 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export async function PATCH(request: NextRequest) {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const body = await request.json();
     const { ingredientId, adjustment, reason, userId } = body;
 
