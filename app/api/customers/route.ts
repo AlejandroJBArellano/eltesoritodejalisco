@@ -4,6 +4,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
+import { getProfile } from "@/lib/auth";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
 const phoneRegex = /^[0-9+\-()\s]{7,20}$/;
@@ -170,6 +171,10 @@ export async function PUT(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const { id } = await request.json();
 
     if (!id) {

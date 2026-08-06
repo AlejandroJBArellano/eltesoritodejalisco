@@ -3,20 +3,17 @@ import { getTenantContext } from "@/lib/tenant";
 import { NextResponse } from "next/server";
 import { format } from "date-fns-tz";
 import { differenceInMinutes } from "date-fns";
+import { getProfile } from "@/lib/auth";
 
 const TZ = "America/Mexico_City";
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
+    const supabase = await createClient();
 
     // Only allow admin or managers? Let's check role if strict, or assume caller is admin
     // since this is used during Corte Diario.

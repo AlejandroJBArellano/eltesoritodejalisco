@@ -1,11 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
+import { getProfile } from "@/lib/auth";
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function POST(request: NextRequest) {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const { cutDate } = await request.json();
 
     if (!cutDate || typeof cutDate !== "string" || !DATE_REGEX.test(cutDate)) {
