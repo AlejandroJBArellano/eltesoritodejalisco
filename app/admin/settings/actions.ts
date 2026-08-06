@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getProfile } from "@/lib/auth";
 
 export interface UpdateSettingsState {
   success?: boolean;
@@ -14,6 +15,10 @@ export async function updateTenantSettings(
   formData: FormData,
 ): Promise<UpdateSettingsState> {
   try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return { error: "No autorizado" };
+    }
     const tenant = await getTenantContext();
     const supabase = await createClient();
 

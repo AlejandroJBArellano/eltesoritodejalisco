@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "../supabase/server";
-import { getUser } from "../auth";
+import { getUser, getProfile } from "../auth";
 import { getTenantContext } from "../tenant";
 import { revalidatePath } from "next/cache";
 
@@ -182,8 +182,10 @@ export async function completeTask(executionId: string, photoUrl?: string) {
 }
 
 export async function approveTask(executionId: string) {
-  const user = await getUser();
-  if (!user) throw new Error("Unauthorized");
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    throw new Error("Unauthorized");
+  }
 
   const tenant = await getTenantContext();
   const supabase = await createClient();
@@ -223,8 +225,10 @@ export async function getTaskCategories() {
 }
 
 export async function createTaskCategory(name: string) {
-  const user = await getUser();
-  if (!user) throw new Error("Unauthorized");
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    throw new Error("Unauthorized");
+  }
 
   const tenant = await getTenantContext();
   const supabase = await createClient();
@@ -241,8 +245,10 @@ export async function createTaskCategory(name: string) {
 }
 
 export async function updateTaskCategory(id: string, name: string) {
-  const user = await getUser();
-  if (!user) throw new Error("Unauthorized");
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    throw new Error("Unauthorized");
+  }
 
   const tenant = await getTenantContext();
   const supabase = await createClient();
@@ -261,8 +267,10 @@ export async function updateTaskCategory(id: string, name: string) {
 }
 
 export async function deleteTaskCategory(id: string) {
-  const user = await getUser();
-  if (!user) throw new Error("Unauthorized");
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    throw new Error("Unauthorized");
+  }
 
   const tenant = await getTenantContext();
   const supabase = await createClient();
@@ -289,8 +297,10 @@ export async function createPrimordialTask(
   timeoutMinutes: number,
   categoryId: string,
 ) {
-  const user = await getUser();
-  if (!user) throw new Error("Unauthorized");
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    throw new Error("Unauthorized");
+  }
 
   const tenant = await getTenantContext();
   const supabase = await createClient();
@@ -323,8 +333,10 @@ export async function updatePrimordialTask(
   categoryId: string,
   isActive: boolean = true,
 ) {
-  const user = await getUser();
-  if (!user) throw new Error("Unauthorized");
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    throw new Error("Unauthorized");
+  }
 
   const tenant = await getTenantContext();
   const supabase = await createClient();
@@ -351,8 +363,10 @@ export async function updatePrimordialTask(
 }
 
 export async function deletePrimordialTask(id: string) {
-  const user = await getUser();
-  if (!user) throw new Error("Unauthorized");
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    throw new Error("Unauthorized");
+  }
 
   const tenant = await getTenantContext();
   const supabase = await createClient();
@@ -376,8 +390,10 @@ export async function deletePrimordialTask(id: string) {
 // =====================================================================
 
 export async function getExecutionsForDate(dateStr: string) {
-  const user = await getUser();
-  if (!user) throw new Error("Unauthorized");
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    throw new Error("Unauthorized");
+  }
 
   const tenant = await getTenantContext();
   const supabase = await createClient();
@@ -414,8 +430,10 @@ export async function getExecutionsForDate(dateStr: string) {
 }
 
 export async function getStaffPerformanceMetrics(dateStr: string) {
-  const user = await getUser();
-  if (!user) throw new Error("Unauthorized");
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    throw new Error("Unauthorized");
+  }
 
   const tenant = await getTenantContext();
   const supabase = await createClient();

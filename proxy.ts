@@ -7,6 +7,25 @@ const ALLOWED_ORIGINS = [
   "http://localhost:5173", // Local dev pickup client
 ];
 
+// Simple in-memory rate limiter
+const ipCache = new Map<string, { count: number; resetTime: number }>();
+
+function isRateLimited(ip: string, limit = 60, windowMs = 60 * 1000): boolean {
+  const now = Date.now();
+  const record = ipCache.get(ip);
+
+  if (!record || now > record.resetTime) {
+    ipCache.set(ip, { count: 1, resetTime: now + windowMs });
+    return false;
+  }
+
+  record.count++;
+  if (record.count > limit) {
+    return true;
+  }
+  return false;
+}
+
 function getCorsHeaders(request: NextRequest) {
   const origin = request.headers.get("origin");
   const headers = new Headers();
@@ -61,6 +80,22 @@ function isPublicRoute(request: NextRequest): boolean {
 }
 
 export async function proxy(request: NextRequest) {
+  // Rate Limiting check for API routes
+  if (request.nextUrl.pathname.startsWith("/api")) {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || (request as any).ip || "127.0.0.1";
+    if (isRateLimited(ip, 60, 60 * 1000)) {
+      const corsHeaders = getCorsHeaders(request);
+      corsHeaders.set("Content-Type", "application/json");
+      return new NextResponse(
+        JSON.stringify({ error: "Too many requests. Please try again later." }),
+        {
+          status: 429,
+          headers: corsHeaders,
+        }
+      );
+    }
+  }
+
   // CORS Preflight check
   if (request.method === "OPTIONS") {
     const corsHeaders = getCorsHeaders(request);
