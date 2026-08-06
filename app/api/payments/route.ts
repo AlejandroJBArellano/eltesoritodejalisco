@@ -13,9 +13,10 @@ type PaymentInput = {
 
 const CENTS_PER_PESO = 100;
 
-const toPaymentInsert = (orderId: string, payment: PaymentInput) => ({
+const toPaymentInsert = (orderId: string, payment: PaymentInput, tenantId: string) => ({
   id: crypto.randomUUID(),
   order_id: orderId,
+  tenant_id: tenantId,
   method: payment.method,
   amount: Number(payment.amount),
   received_amount:
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
       // 1. Insertar un registro de pago por cada parte
       const { error: splitError } = await supabase
         .from("payments")
-        .insert(splits.map((split) => toPaymentInsert(orderId, split)));
+        .insert(splits.map((split) => toPaymentInsert(orderId, split, tenant.id)));
 
       if (splitError) {
         console.error(
@@ -150,7 +151,7 @@ export async function POST(request: NextRequest) {
           receivedAmount,
           change,
           tipAmount,
-        }),
+        }, tenant.id),
       })
       .select()
       .single();
