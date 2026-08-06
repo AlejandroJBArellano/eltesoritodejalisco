@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
           .from("menu_items")
           .select("*")
           .eq("id", item.menuItemId)
+          .eq("tenant_id", tenantId)
           .single();
 
         if (menuItem) {
