@@ -172,6 +172,31 @@ export async function deductInventoryForOrder(
       if (logError) {
         console.error("Failed to log stock adjustments:", logError);
       }
+
+      // Fire-and-forget: send email alert if any ingredient dropped to/below minimum
+      const hasLowStock = result.deductions.some(
+        (d) => d.newStock <= 0 || d.newStock <= (
+          // We need minimum_stock — fetch it for affected ingredients
+          0 // placeholder; actual check is done in the alert API
+        ),
+      );
+
+      // Trigger alert for any deduction that results in stock at or below 0
+      // (conservative: we alert on out-of-stock; the /alert API checks minimum_stock server-side)
+      const hasOutOfStock = result.deductions.some((d) => d.newStock <= 0);
+      if (hasOutOfStock) {
+        // Non-blocking fire-and-forget
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+        fetch(`${siteUrl}/api/inventory/alert`, {
+          method: "POST",
+          headers: {
+            // We call this internally, bypassing auth check by adding a server secret header
+            "x-internal-secret": process.env.INTERNAL_API_SECRET || "kittnos-internal",
+          },
+        }).catch((err) =>
+          console.error("Failed to send stock alert email:", err),
+        );
+      }
     }
 
     return result;

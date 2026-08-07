@@ -22,6 +22,7 @@ import {
   ArrowUpRight,
   Settings,
   Package,
+  AlertTriangle,
 } from "lucide-react";
 import React from "react";
 import CollapsibleSection from "@/components/CollapsibleSection";
@@ -136,19 +137,28 @@ export default async function Home() {
   let salesToday = 0;
   let customersCount = 0;
   let tipsToday = 0;
+  let lowStockAlerts: Array<{ id: string; name: string; current_stock: number; minimum_stock: number; unit: string }> = [];
 
   if (isAdmin) {
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
-    const { data: stats, error } = await supabase.rpc("get_dashboard_stats", {
-      p_tenant_id: tenant.id,
-    });
+    const [statsResult, ingredientsResult] = await Promise.all([
+      supabase.rpc("get_dashboard_stats", { p_tenant_id: tenant.id }),
+      supabase
+        .from("ingredients")
+        .select("id, name, current_stock, minimum_stock, unit")
+        .eq("tenant_id", tenant.id)
+        .order("current_stock", { ascending: true }),
+    ]);
 
-    if (error) {
-      console.error("Error fetching dashboard stats:", error);
-    } else if (stats && stats.length > 0) {
-      const s = stats[0];
+    // Filter low/out-of-stock client-side (Supabase can't filter WHERE col1 <= col2 without RPC)
+    lowStockAlerts = (ingredientsResult.data || []).filter(
+      (ing) => ing.current_stock <= ing.minimum_stock,
+    );
+
+    if (!statsResult.error && statsResult.data && statsResult.data.length > 0) {
+      const s = statsResult.data[0];
       activeOrdersCount = Number(s.active_orders || 0);
       salesToday = Number(s.sales_today || 0);
       tipsToday = Number(s.tips_today || 0);
@@ -159,6 +169,64 @@ export default async function Home() {
   return (
     <div className="min-h-screen">
       <main className="mx-auto max-w-7xl px-4 py-6 sm:py-12 sm:px-6 lg:px-8">
+        {/* === ALERTA DE STOCK BAJO / AGOTADO — Admin only === */}
+        {isAdmin && lowStockAlerts.length > 0 && (
+          <div className="rounded-2xl border border-red-500/25 bg-red-500/5 overflow-hidden mb-2 sm:mb-6">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-red-500/15">
+              <div className="flex items-center gap-3">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/15">
+                  <AlertTriangle className="h-4 w-4 text-red-400" />
+                </span>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-wider text-red-400">
+                    Alerta de Inventario
+                  </p>
+                  <p className="text-[11px] text-text-light/40 font-medium">
+                    {lowStockAlerts.filter((i) => i.current_stock <= 0).length} agotado(s) ·{" "}
+                    {lowStockAlerts.filter((i) => i.current_stock > 0).length} bajo mínimo
+                  </p>
+                </div>
+              </div>
+              <a
+                href="/inventario"
+                className="text-[11px] font-black uppercase tracking-wider text-red-400 hover:text-red-300 border border-red-500/30 hover:border-red-500/50 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-xl transition-all"
+              >
+                Ver Inventario →
+              </a>
+            </div>
+            <div className="flex flex-wrap gap-2 px-5 py-3.5">
+              {lowStockAlerts.map((ing) => {
+                const isOut = ing.current_stock <= 0;
+                return (
+                  <div
+                    key={ing.id}
+                    className={`flex items-center gap-2 rounded-xl px-3 py-1.5 border text-xs ${
+                      isOut
+                        ? "bg-red-500/10 border-red-500/20"
+                        : "bg-amber-500/10 border-amber-500/20"
+                    }`}
+                  >
+                    <Package
+                      className={`h-3 w-3 ${isOut ? "text-red-400" : "text-amber-400"}`}
+                    />
+                    <span
+                      className={`font-bold ${isOut ? "text-red-300" : "text-amber-300"}`}
+                    >
+                      {ing.name}
+                    </span>
+                    <span
+                      className={`tabular-nums font-black ${isOut ? "text-red-400" : "text-amber-400"}`}
+                    >
+                      {ing.current_stock}{" "}
+                      <span className="font-medium opacity-70">/ {ing.minimum_stock} mín</span>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Quick Stats - Only for Admins */}
         {isAdmin && (
           <CollapsibleSection title="Resumen del Día" defaultOpen={false}>

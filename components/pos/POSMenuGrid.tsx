@@ -165,22 +165,19 @@ export function POSMenuGrid({
               <button
                 key={m.id}
                 type="button"
-                onClick={() => !isOutOfStock && handleGridItemClick(m)}
-                disabled={isOutOfStock}
-                className={`group relative rounded-2xl bg-card-light p-4 border transition-all shadow-sm flex flex-col justify-between text-left h-28 overflow-hidden ${
+                onClick={() => handleGridItemClick(m)}
+                className={`group relative rounded-2xl bg-card-light p-4 border transition-all shadow-sm flex flex-col justify-between text-left h-28 overflow-hidden active:scale-95 ${
                   isOutOfStock
-                    ? "opacity-50 cursor-not-allowed border-red-500/20 bg-red-500/5"
+                    ? "border-red-500/25 hover:border-red-500/50 hover:shadow-md hover:-translate-y-0.5"
                     : isLowStock
-                    ? "border-amber-500/30 hover:border-amber-500/60 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
-                    : "border-border hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+                    ? "border-amber-500/30 hover:border-amber-500/60 hover:shadow-md hover:-translate-y-0.5"
+                    : "border-border hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5"
                 }`}
               >
-                {/* Agotado overlay label */}
+                {/* Sin Stock warning badge — visual only, no bloqueo */}
                 {isOutOfStock && (
-                  <span className="absolute inset-0 flex items-center justify-center z-10">
-                    <span className="rounded-lg bg-red-500/20 border border-red-500/30 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-red-400">
-                      Agotado
-                    </span>
+                  <span className="absolute top-2 right-2 z-10 rounded-md bg-red-500/20 border border-red-500/30 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-red-400">
+                    Sin Stock
                   </span>
                 )}
 
@@ -188,13 +185,13 @@ export function POSMenuGrid({
                   <span
                     className={`font-black text-xs uppercase tracking-tight leading-snug line-clamp-2 transition-colors ${
                       isOutOfStock
-                        ? "text-text-light/40"
+                        ? "text-text-light/60 group-hover:text-red-300"
                         : "text-text-light group-hover:text-primary"
                     }`}
                   >
                     {m.name}
                   </span>
-                  {isMixed && (
+                  {isMixed && !isOutOfStock && (
                     <span className="rounded-full bg-amber-500/10 text-amber-400 text-[9px] font-black px-1.5 py-0.5 uppercase tracking-widest shrink-0 border border-amber-500/20">
                       Mixto
                     </span>
@@ -222,12 +219,9 @@ export function POSMenuGrid({
                     </span>
                   )}
 
-                  {/* Add icon — hidden when out of stock */}
-                  {!isOutOfStock && (
-                    <span className="rounded-lg bg-primary/10 p-1.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
-                      <Plus className="h-3.5 w-3.5" />
-                    </span>
-                  )}
+                  <span className="rounded-lg bg-primary/10 p-1.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+                    <Plus className="h-3.5 w-3.5" />
+                  </span>
                 </div>
               </button>
             );

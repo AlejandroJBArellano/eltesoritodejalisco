@@ -7,6 +7,7 @@ import { getTenantContext } from "@/lib/tenant";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
 import { InventarioTable } from "@/components/inventario/InventarioTable";
+import { AlertButton } from "@/components/inventario/AlertButton";
 import { Package } from "lucide-react";
 import type { Ingredient } from "@/types";
 
@@ -50,11 +51,16 @@ export default async function InventarioPage() {
   return (
     <div className="min-h-screen">
       <main className="mx-auto max-w-7xl px-4 py-6 sm:py-10 sm:px-6 lg:px-8 space-y-6">
-        <PageHeader
-          title="Inventario"
-          icon={<Package className="h-5 w-5 text-primary" />}
-          subtitle={`${ingredients.length} ingredientes registrados`}
-        />
+        <div className="flex items-start justify-between gap-4">
+          <PageHeader
+            title="Inventario"
+            icon={<Package className="h-5 w-5 text-primary" />}
+            subtitle={`${ingredients.length} ingredientes registrados`}
+          />
+          <div className="shrink-0 pt-1">
+            <AlertButton />
+          </div>
+        </div>
         <InventarioTable initialIngredients={ingredients} />
       </main>
     </div>
