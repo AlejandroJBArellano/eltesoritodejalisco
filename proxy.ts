@@ -112,7 +112,11 @@ export async function proxy(request: NextRequest) {
 
   // Set the tenant slug header dynamically so layout/pages/API routes can read it
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-tenant-slug", tenantSlug);
+  if (tenantSlug) {
+    requestHeaders.set("x-tenant-slug", tenantSlug);
+  } else {
+    requestHeaders.delete("x-tenant-slug");
+  }
 
   // Create a new request cloned with the updated headers
   const newRequest = new NextRequest(request, {
@@ -129,7 +133,9 @@ export async function proxy(request: NextRequest) {
   });
 
   // Expose the tenant slug header to the client/frontend if needed
-  response.headers.set("x-tenant-slug", tenantSlug);
+  if (tenantSlug) {
+    response.headers.set("x-tenant-slug", tenantSlug);
+  }
 
   return response;
 }

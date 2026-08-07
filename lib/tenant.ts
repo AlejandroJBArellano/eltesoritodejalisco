@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { cache } from "react";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 export interface TenantContextType {
   id: string;
@@ -17,8 +17,8 @@ export interface TenantContextType {
   regimen_fiscal: string | null;
 }
 
-export function getTenantSlugFromHost(host: string | null): string {
-  if (!host) return "tesorito";
+export function getTenantSlugFromHost(host: string | null): string | null {
+  if (!host) return null;
 
   // Clean host (remove port if any)
   const hostname = host.split(":")[0];
@@ -50,7 +50,7 @@ export function getTenantSlugFromHost(host: string | null): string {
     }
   }
 
-  return "tesorito";
+  return null;
 }
 
 // Cached function to fetch tenant details from the database based on the slug
@@ -88,6 +88,10 @@ export async function getTenantContext(): Promise<TenantContextType> {
   if (!slug) {
     const host = headersList.get("host");
     slug = getTenantSlugFromHost(host);
+  }
+
+  if (!slug) {
+    notFound();
   }
 
   const tenant = await getTenantBySlug(slug);
