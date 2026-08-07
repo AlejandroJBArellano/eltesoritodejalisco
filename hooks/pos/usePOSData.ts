@@ -23,6 +23,9 @@ interface DbMenuItem {
   category?: string;
   image_url?: string;
   is_available: boolean;
+  ingredient_id?: string | null;
+  current_stock?: number | null;
+  minimum_stock?: number | null;
 }
 
 /** Get today's date string in CDMX timezone (YYYY-MM-DD). */
@@ -98,6 +101,9 @@ export function usePOSData() {
         ...item,
         category: item.category,
         isAvailable: item.is_available,
+        ingredientId: item.ingredient_id ?? null,
+        currentStock: item.current_stock ?? null,
+        minimumStock: item.minimum_stock ?? null,
       })),
     );
   };
@@ -191,6 +197,19 @@ export function usePOSData() {
     };
   }, [orders]);
 
+  /** Items con tracking de ingrediente y stock en nivel bajo o agotado */
+  const lowStockItems = useMemo(
+    () =>
+      availableMenuItems.filter(
+        (m) =>
+          m.ingredientId != null &&
+          m.currentStock != null &&
+          m.minimumStock != null &&
+          m.currentStock <= m.minimumStock,
+      ),
+    [availableMenuItems],
+  );
+
   return {
     menuItems,
     availableMenuItems,
@@ -207,5 +226,6 @@ export function usePOSData() {
     filteredMenuItems,
     nextFolioDisplay,
     todayStats,
+    lowStockItems,
   };
 }

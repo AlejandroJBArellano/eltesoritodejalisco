@@ -19,6 +19,7 @@ import { KitchenTicket } from "@/components/pos/KitchenTicket";
 import { OrderTicket } from "@/components/pos/OrderTicket";
 import { SplitBillModal } from "@/components/pos/SplitBillModal";
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
+import { LowStockBanner } from "@/components/pos/LowStockBanner";
 
 import {
   Ban,
@@ -55,6 +56,7 @@ export default function POSPage() {
     nextFolioDisplay,
     todayStats,
     refreshOrders,
+    lowStockItems,
   } = usePOSData();
 
   const {
@@ -249,8 +251,9 @@ export default function POSPage() {
       <main className="grid gap-6 lg:grid-cols-12 items-start mx-2 md:mx-4 lg:mx-6">
         {/* SECCIÓN DEL MENÚ */}
         <div
-          className={`lg:col-span-7 xl:col-span-8 w-full min-w-0 ${activeTab === "menu" ? "block" : "hidden lg:block"}`}
+          className={`lg:col-span-7 xl:col-span-8 w-full min-w-0 space-y-4 ${activeTab === "menu" ? "block" : "hidden lg:block"}`}
         >
+          <LowStockBanner items={lowStockItems} />
           <POSMenuGrid
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}

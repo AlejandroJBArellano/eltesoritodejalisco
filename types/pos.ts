@@ -7,6 +7,10 @@ export type MenuItem = {
   isAvailable: boolean;
   category?: string;
   imageUrl?: string;
+  /** Stock del ingrediente vinculado directamente (tracking PIECE). null = sin tracking directo. */
+  currentStock?: number | null;
+  minimumStock?: number | null;
+  ingredientId?: string | null;
 };
 
 export type Customer = {

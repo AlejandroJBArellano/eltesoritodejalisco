@@ -21,6 +21,7 @@ import {
   ReceiptText,
   ArrowUpRight,
   Settings,
+  Package,
 } from "lucide-react";
 import React from "react";
 import CollapsibleSection from "@/components/CollapsibleSection";
@@ -266,6 +267,17 @@ export default async function Home() {
                   icon={UtensilsCrossed}
                   themeClass="bg-primary/10 text-primary"
                   hoverColor="var(--color-primary)"
+                />
+              )}
+              {isAdmin && (
+                <ModuleCard
+                  title="Inventario"
+                  description="Control de stock, alertas de bajo inventario y ajustes."
+                  href="/inventario"
+                  icon={Package}
+                  badge="Stock"
+                  themeClass="bg-emerald-500/10 text-emerald-500"
+                  hoverColor="#10b981"
                 />
               )}
               {isAdmin && (

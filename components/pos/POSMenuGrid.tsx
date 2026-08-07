@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, X, Plus, PackageSearch } from "lucide-react";
+import { Search, X, Plus, PackageSearch, Package } from "lucide-react";
 import { MenuItem } from "@/types/pos";
 import { isMixedOrderItem } from "@/hooks/pos/usePOSCart";
 
@@ -50,6 +50,14 @@ const CATEGORY_CONFIG: Record<
     text: "#E4E4E7",
   },
 };
+
+/** Derive stock status for a menu item */
+function getStockStatus(item: MenuItem): "out" | "low" | "ok" | "untracked" {
+  if (item.ingredientId == null || item.currentStock == null) return "untracked";
+  if (item.currentStock <= 0) return "out";
+  if (item.minimumStock != null && item.currentStock <= item.minimumStock) return "low";
+  return "ok";
+}
 
 interface POSMenuGridProps {
   searchQuery: string;
@@ -149,15 +157,41 @@ export function POSMenuGrid({
         ) : (
           filteredMenuItems.map((m) => {
             const isMixed = isMixedOrderItem(m.name);
+            const stockStatus = getStockStatus(m);
+            const isOutOfStock = stockStatus === "out";
+            const isLowStock = stockStatus === "low";
+
             return (
               <button
                 key={m.id}
                 type="button"
-                onClick={() => handleGridItemClick(m)}
-                className="group relative rounded-2xl bg-card-light p-4 border border-border hover:border-primary/40 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between text-left h-28 overflow-hidden active:scale-95"
+                onClick={() => !isOutOfStock && handleGridItemClick(m)}
+                disabled={isOutOfStock}
+                className={`group relative rounded-2xl bg-card-light p-4 border transition-all shadow-sm flex flex-col justify-between text-left h-28 overflow-hidden ${
+                  isOutOfStock
+                    ? "opacity-50 cursor-not-allowed border-red-500/20 bg-red-500/5"
+                    : isLowStock
+                    ? "border-amber-500/30 hover:border-amber-500/60 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+                    : "border-border hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+                }`}
               >
+                {/* Agotado overlay label */}
+                {isOutOfStock && (
+                  <span className="absolute inset-0 flex items-center justify-center z-10">
+                    <span className="rounded-lg bg-red-500/20 border border-red-500/30 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-red-400">
+                      Agotado
+                    </span>
+                  </span>
+                )}
+
                 <div className="flex items-start justify-between gap-1 w-full">
-                  <span className="font-black text-xs text-text-light uppercase tracking-tight leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                  <span
+                    className={`font-black text-xs uppercase tracking-tight leading-snug line-clamp-2 transition-colors ${
+                      isOutOfStock
+                        ? "text-text-light/40"
+                        : "text-text-light group-hover:text-primary"
+                    }`}
+                  >
                     {m.name}
                   </span>
                   {isMixed && (
@@ -166,13 +200,34 @@ export function POSMenuGrid({
                     </span>
                   )}
                 </div>
-                <div className="mt-2 flex items-center justify-between w-full">
+
+                <div className="mt-2 flex items-center justify-between w-full gap-1 flex-wrap">
                   <span className="rounded-xl bg-white/5 border border-border px-2.5 py-1 text-xs font-black text-text-light tabular-nums">
                     ${m.price.toFixed(2)}
                   </span>
-                  <span className="rounded-lg bg-primary/10 p-1.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Plus className="h-3.5 w-3.5" />
-                  </span>
+
+                  {/* Stock badge — only when ingredient is tracked */}
+                  {stockStatus !== "untracked" && (
+                    <span
+                      className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-black tabular-nums border ${
+                        isOutOfStock
+                          ? "bg-red-500/10 border-red-500/20 text-red-400"
+                          : isLowStock
+                          ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      }`}
+                    >
+                      <Package className="h-2.5 w-2.5 shrink-0" />
+                      {m.currentStock}
+                    </span>
+                  )}
+
+                  {/* Add icon — hidden when out of stock */}
+                  {!isOutOfStock && (
+                    <span className="rounded-lg bg-primary/10 p-1.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+                      <Plus className="h-3.5 w-3.5" />
+                    </span>
+                  )}
                 </div>
               </button>
             );

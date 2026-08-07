@@ -9,7 +9,7 @@ import { getProfile } from "@/lib/auth";
 
 /**
  * GET /api/menu
- * Get all menu items (including translations for i18n)
+ * Get all menu items (including translations for i18n and ingredient stock)
  */
 export async function GET() {
   try {
@@ -17,7 +17,7 @@ export async function GET() {
     const supabase = await createClient();
     const { data: items, error } = await supabase
       .from("menu_items")
-      .select("*, translations")
+      .select("*, translations, ingredients(id, current_stock, minimum_stock)")
       .eq("tenant_id", tenant.id)
       .order("name", { ascending: true });
 
@@ -34,11 +34,18 @@ export async function GET() {
 
     const popularIds = new Set((popularData || []).map((row) => row.menu_item_id));
 
-    const enrichedItems = (items || []).map((item) => ({
-      ...item,
-      is_popular: popularIds.has(item.id),
-      is_recommended: false,
-    }));
+    const enrichedItems = (items || []).map((item) => {
+      const ingredient = item.ingredients as { id: string; current_stock: number; minimum_stock: number } | null;
+      return {
+        ...item,
+        // Flatten ingredient stock fields for easy consumption in the POS
+        ingredient_id: item.ingredient_id ?? null,
+        current_stock: ingredient ? ingredient.current_stock : null,
+        minimum_stock: ingredient ? ingredient.minimum_stock : null,
+        is_popular: popularIds.has(item.id),
+        is_recommended: false,
+      };
+    });
 
     return NextResponse.json({ items: enrichedItems });
   } catch (error) {
