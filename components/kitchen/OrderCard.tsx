@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { useOrderTimer } from "@/hooks/useOrders";
 import { formatTime } from "@/lib/utils";
 import { OrderStatus, type OrderWithDetails } from "@/types";
@@ -23,6 +25,7 @@ interface OrderItemRowProps {
   item: OrderWithDetails["orderItems"][number];
   orderId: string;
   orderStatus: OrderStatus;
+  timerStartTime: Date;
   onItemReady?: (orderId: string, itemId: string) => void;
   updatingItemIds?: Set<string>;
 }
@@ -31,13 +34,14 @@ function OrderItemRow({
   item,
   orderId,
   orderStatus,
+  timerStartTime,
   onItemReady,
   updatingItemIds,
 }: OrderItemRowProps) {
   const isItemReady = item.status === OrderStatus.READY;
   const elapsedSeconds = useOrderTimer(
-    item.createdAt,
-    isItemReady ? new Date() : null,
+    timerStartTime,
+    isItemReady ? timerStartTime : null,
   );
 
   return (
@@ -106,7 +110,15 @@ export function OrderCard({
     order.status === OrderStatus.READY ||
     order.status === OrderStatus.DELIVERED;
   const endTime = isCompleted ? order.completedAt || order.updatedAt : null;
-  const elapsedSeconds = useOrderTimer(order.createdAt, endTime);
+
+  const timerStartTime = useMemo(() => {
+    if (order.pickupTime) {
+      return new Date(new Date(order.pickupTime).getTime() - 30 * 60 * 1000);
+    }
+    return order.createdAt;
+  }, [order.pickupTime, order.createdAt]);
+
+  const elapsedSeconds = useOrderTimer(timerStartTime, endTime);
   const isOverdue = elapsedSeconds / 60 >= ALERT_THRESHOLD_MINUTES;
 
   const getStatusBadge = (status: OrderStatus) => {
@@ -204,6 +216,7 @@ export function OrderCard({
             item={item}
             orderId={order.id}
             orderStatus={order.status}
+            timerStartTime={timerStartTime}
             onItemReady={onItemReady}
             updatingItemIds={updatingItemIds}
           />
