@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -57,7 +58,7 @@ export function getTenantSlugFromHost(host: string | null): string | null {
 export const getTenantBySlug = cache(
   async (slug: string): Promise<TenantContextType | null> => {
     try {
-      const supabase = await createClient();
+      const supabase = createAdminClient();
       const { data, error } = await supabase
         .from("tenants")
         .select("*")
