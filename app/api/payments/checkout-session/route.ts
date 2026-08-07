@@ -121,7 +121,10 @@ export async function POST(request: NextRequest) {
     if (pickupTime) {
       try {
         const dateObj = new Date(pickupTime);
-        timeFormatted = dateObj.toLocaleTimeString(isEn ? "en-US" : "es-MX", {
+        timeFormatted = dateObj.toLocaleString(isEn ? "en-US" : "es-MX", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
           hour: "2-digit",
           minute: "2-digit",
           hour12: isEn,
