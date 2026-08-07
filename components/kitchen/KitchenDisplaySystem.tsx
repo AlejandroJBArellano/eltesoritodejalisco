@@ -14,7 +14,7 @@ import {
   LayoutGrid,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { OrderCard } from "./OrderCard";
 import { SmartBatchingView } from "./SmartBatchingView";
 
@@ -145,12 +145,12 @@ export function KitchenDisplaySystem({
     return () => clearInterval(timer);
   }, []);
 
-  const showToast = (message: string) => {
+  const showToast = useCallback((message: string) => {
     setToastMessage(message);
     setTimeout(() => {
       setToastMessage((prev) => (prev === message ? null : prev));
     }, 4000);
-  };
+  }, []);
 
   const handleEnableSound = () => {
     setSoundEnabled(true);
@@ -164,7 +164,7 @@ export function KitchenDisplaySystem({
     }
   };
 
-  const handleStatusChange = async (
+  const handleStatusChange = useCallback(async (
     orderId: string,
     newStatus: OrderStatus,
   ) => {
@@ -190,9 +190,9 @@ export function KitchenDisplaySystem({
         "Error al actualizar el estado de la orden. Por favor reintenta.",
       );
     }
-  };
+  }, [showToast, setOrders]);
 
-  const handleItemReady = async (orderId: string, itemId: string) => {
+  const handleItemReady = useCallback(async (orderId: string, itemId: string) => {
     try {
       setUpdatingItemIds((prev) => {
         const next = new Set(prev);
@@ -244,7 +244,7 @@ export function KitchenDisplaySystem({
         return next;
       });
     }
-  };
+  }, [showToast, setOrders, setUpdatingItemIds]);
 
   const releasedOrders = orders.filter((o) => {
     // Direct POS / ASAP orders have no scheduled pickupTime and show immediately

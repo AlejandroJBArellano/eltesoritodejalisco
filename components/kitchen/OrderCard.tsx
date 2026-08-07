@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 
 import { useOrderTimer } from "@/hooks/useOrders";
 import { formatTime } from "@/lib/utils";
@@ -27,16 +27,16 @@ interface OrderItemRowProps {
   orderStatus: OrderStatus;
   timerStartTime: Date;
   onItemReady?: (orderId: string, itemId: string) => void;
-  updatingItemIds?: Set<string>;
+  isUpdating: boolean;
 }
 
-function OrderItemRow({
+const OrderItemRow = memo(function OrderItemRow({
   item,
   orderId,
   orderStatus,
   timerStartTime,
   onItemReady,
-  updatingItemIds,
+  isUpdating,
 }: OrderItemRowProps) {
   const isItemReady = item.status === OrderStatus.READY;
   const elapsedSeconds = useOrderTimer(
@@ -70,10 +70,10 @@ function OrderItemRow({
           ) : (
             <button
               onClick={() => onItemReady?.(orderId, item.id)}
-              disabled={updatingItemIds?.has(item.id)}
+              disabled={isUpdating}
               className="min-h-11 min-w-19 rounded-xl bg-emerald-500/15 border border-emerald-500/30 px-4 py-2 text-xs font-black text-emerald-400 uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-all duration-200 ease-out disabled:opacity-50 active:scale-95 cursor-pointer flex items-center justify-center shadow-sm focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
             >
-              {updatingItemIds?.has(item.id) ? (
+              {isUpdating ? (
                 <span className="animate-pulse">...</span>
               ) : (
                 "Listo"
@@ -93,13 +93,13 @@ function OrderItemRow({
       )}
     </div>
   );
-}
+});
 
 /**
  * KDS Order Card Component
  * Displays order details with real-time timer and status management
  */
-export function OrderCard({
+export const OrderCard = memo(function OrderCard({
   order,
   onStatusChange,
   onItemReady,
@@ -218,7 +218,7 @@ export function OrderCard({
             orderStatus={order.status}
             timerStartTime={timerStartTime}
             onItemReady={onItemReady}
-            updatingItemIds={updatingItemIds}
+            isUpdating={!!updatingItemIds?.has(item.id)}
           />
         ))}
       </div>
@@ -270,4 +270,21 @@ export function OrderCard({
       </div>
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  if (prevProps.order !== nextProps.order) return false;
+  if (prevProps.onStatusChange !== nextProps.onStatusChange) return false;
+  if (prevProps.onItemReady !== nextProps.onItemReady) return false;
+
+  const prevItems = prevProps.order.orderItems;
+  const nextItems = nextProps.order.orderItems;
+  
+  if (prevItems.length !== nextItems.length) return false;
+
+  for (let i = 0; i < prevItems.length; i++) {
+    const prevUpdating = !!prevProps.updatingItemIds?.has(prevItems[i].id);
+    const nextUpdating = !!nextProps.updatingItemIds?.has(nextItems[i].id);
+    if (prevUpdating !== nextUpdating) return false;
+  }
+
+  return true;
+});

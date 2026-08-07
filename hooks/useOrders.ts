@@ -136,6 +136,27 @@ export function useRealtimeOrders(
   return { orders, loading, error, refetch: fetchOrders, setOrders };
 }
 
+// Shared singleton clock to coordinate timers, avoiding multiple intervals and enabling React's auto-batching.
+const clockListeners = new Set<(now: Date) => void>();
+let clockIntervalId: NodeJS.Timeout | null = null;
+
+function subscribeToClock(listener: (now: Date) => void) {
+  clockListeners.add(listener);
+  if (!clockIntervalId) {
+    clockIntervalId = setInterval(() => {
+      const now = new Date();
+      clockListeners.forEach((l) => l(now));
+    }, 1000);
+  }
+  return () => {
+    clockListeners.delete(listener);
+    if (clockListeners.size === 0 && clockIntervalId) {
+      clearInterval(clockIntervalId);
+      clockIntervalId = null;
+    }
+  };
+}
+
 /**
  * Hook to calculate elapsed time for orders
  */
@@ -172,15 +193,13 @@ export function useOrderTimer(
   useEffect(() => {
     if (!startTimestamp || endTimestamp) return;
 
-    const calculateElapsed = () => {
-      const now = new Date();
-      const diffMs = Math.max(0, now.getTime() - startTimestamp);
+    const calculateElapsed = (currentDate: Date) => {
+      const diffMs = Math.max(0, currentDate.getTime() - startTimestamp);
       setElapsedSeconds(Math.floor(diffMs / 1000));
     };
 
-    const interval = setInterval(calculateElapsed, 1000);
-
-    return () => clearInterval(interval);
+    const unsubscribe = subscribeToClock(calculateElapsed);
+    return unsubscribe;
   }, [startTimestamp, endTimestamp]);
 
   return elapsedSeconds;
