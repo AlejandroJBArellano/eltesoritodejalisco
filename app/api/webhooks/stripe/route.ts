@@ -56,7 +56,64 @@ export async function POST(request: NextRequest) {
       const pickupTime = metadata.pickupTime || null;
       const tipAmount = Number(metadata.tipAmount || 0);
 
+      const email = session.customer_details?.email || null;
+      const rawPhone = session.customer_details?.phone || null;
+
+      // Normalize phone to E.164 (preserve leading '+' and digits)
+      const phone = rawPhone ? (rawPhone.startsWith("+") ? "+" : "") + rawPhone.replace(/\D/g, "") : null;
+
       const supabaseAdmin = createAdminClient();
+
+      // Look up or create the customer in the CRM (customers table)
+      let customerId: string | null = null;
+      if (email || phone) {
+        try {
+          let customerQuery = supabaseAdmin
+            .from("customers")
+            .select("id")
+            .eq("tenant_id", tenantId);
+
+          if (email && phone) {
+            customerQuery = customerQuery.or(`email.eq.${email},phone.eq.${phone}`);
+          } else if (email) {
+            customerQuery = customerQuery.eq("email", email);
+          } else if (phone) {
+            customerQuery = customerQuery.eq("phone", phone);
+          }
+
+          const { data: existingCustomer, error: findError } = await customerQuery.limit(1).maybeSingle();
+          if (findError) {
+            console.error("Error looking up existing customer:", findError);
+          }
+
+          if (existingCustomer) {
+            customerId = existingCustomer.id;
+          } else {
+            // Create new customer
+            const newCustomerId = crypto.randomUUID();
+            const { data: newCustomer, error: insertCustomerError } = await supabaseAdmin
+              .from("customers")
+              .insert({
+                id: newCustomerId,
+                name: customerName,
+                phone: phone,
+                email: email,
+                tenant_id: tenantId,
+                updated_at: getCurrentCDMXDate(),
+              })
+              .select("id")
+              .single();
+
+            if (insertCustomerError) {
+              console.error("Error creating new customer:", insertCustomerError);
+            } else if (newCustomer) {
+              customerId = newCustomer.id;
+            }
+          }
+        } catch (crmErr) {
+          console.error("Failed CRM operation during stripe webhook:", crmErr);
+        }
+      }
 
       // 1. Generate daily order sequence (scoped to this tenant)
       const todayStart = getCurrentCDMXDay() + "T00:00:00-06:00";
@@ -123,16 +180,19 @@ export async function POST(request: NextRequest) {
       const total = subtotal; // tax = 0%
 
       // 3. Create the order
+      const notesWithContact = `${notes} (Cliente: ${customerName}${phone ? ` | Tel: ${phone}` : ""}${email ? ` | Correo: ${email}` : ""})`.trim();
+
       const { data: order, error: orderError } = await supabaseAdmin
         .from("orders")
         .insert({
           id: orderId,
           tenant_id: tenantId,
+          customer_id: customerId,
           order_number: orderNumber,
           source: "PICKUP_APP",
           status: "PENDING", // Appears immediately on the KDS
           table: type === "dine-in" ? "Comer Aquí" : "Para Llevar",
-          notes: `${notes} (Cliente: ${customerName})`.trim(),
+          notes: notesWithContact,
           subtotal: subtotal,
           tax: 0,
           total: total,

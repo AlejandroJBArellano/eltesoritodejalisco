@@ -1,12 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe";
+import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { orderItems, type, customerName, notes, pickupTime, tipAmount } = body;
+    const { orderItems, type, customerName, notes, pickupTime, tipAmount, locale } = body;
 
     if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
       return NextResponse.json(
@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
 
     const lineItems = [];
     const validatedItems = [];
+    const descriptionItems = [];
 
     for (const item of orderItems) {
       const { data: menuItem, error: fetchError } = await supabase
@@ -83,6 +84,11 @@ export async function POST(request: NextRequest) {
         quantity: Number(item.quantity),
         notes: item.notes || "",
       });
+
+      descriptionItems.push({
+        name: menuItem.name,
+        quantity: Number(item.quantity),
+      });
     }
 
     const validatedTipAmount = Number(tipAmount) || 0;
@@ -107,10 +113,57 @@ export async function POST(request: NextRequest) {
 
     const orderId = crypto.randomUUID();
 
+    const isEn = locale === "en";
+    const typeLabel = type === "dine-in"
+      ? (isEn ? "Dine-in" : "Comer aquí")
+      : (isEn ? "Takeout" : "Para llevar");
+
+    let timeFormatted = isEn ? "I'm on my way (~30 min)" : "Voy para allá (~30 min)";
+    if (pickupTime) {
+      try {
+        const dateObj = new Date(pickupTime);
+        timeFormatted = dateObj.toLocaleTimeString(isEn ? "en-US" : "es-MX", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: isEn,
+        });
+      } catch (err) {
+        console.error("Error formatting pickup time:", err);
+      }
+    }
+
+    const itemsSummary = descriptionItems
+      .map((i) => `${i.quantity}x ${i.name}`)
+      .join(", ");
+
+    const paymentDescription = isEn
+      ? `Customer: ${customerName} | Order: ${itemsSummary} | Type: ${typeLabel} | Time: ${timeFormatted}${notes ? ` | Notes: ${notes}` : ""}`
+      : `Cliente: ${customerName} | Orden: ${itemsSummary} | Tipo: ${typeLabel} | Hora: ${timeFormatted}${notes ? ` | Notas: ${notes}` : ""}`;
+
+    const paymentDescriptionTruncated = paymentDescription.substring(0, 1000);
+
+    const submitMessage = isEn
+      ? `Order for ${customerName} (${typeLabel}). Pickup/Dine-in: ${timeFormatted}.`
+      : `Orden para ${customerName} (${typeLabel}). Hora programada: ${timeFormatted}.`;
+
+    const stripeLocale = isEn ? "en" : "es";
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
+      locale: stripeLocale,
+      phone_number_collection: {
+        enabled: true,
+      },
+      payment_intent_data: {
+        description: paymentDescriptionTruncated,
+      },
+      custom_text: {
+        submit: {
+          message: submitMessage,
+        },
+      },
       success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/`,
       metadata: {
