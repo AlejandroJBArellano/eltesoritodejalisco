@@ -29,6 +29,12 @@ export async function POST(request: NextRequest) {
     const validatedItems = [];
     const descriptionItems = [];
 
+    const referer = request.headers.get("referer");
+    const origin = referer
+      ? new URL(referer).origin
+      : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const isEn = locale === "en";
+
     for (const item of orderItems) {
       const { data: menuItem, error: fetchError } = await supabase
         .from("menu_items")
@@ -98,22 +104,15 @@ export async function POST(request: NextRequest) {
           currency: "mxn",
           unit_amount: Math.round(validatedTipAmount * 1.035 * 100),
           product_data: {
-            name: "Propina / Tip",
+            name: isEn ? "Tip" : "Propina",
           },
         },
         quantity: 1,
       });
     }
 
-    // Origin site URL from referer header to support different ports/domains (e.g. Vite dev server)
-    const referer = request.headers.get("referer");
-    const origin = referer
-      ? new URL(referer).origin
-      : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
     const orderId = crypto.randomUUID();
 
-    const isEn = locale === "en";
     const typeLabel = type === "dine-in"
       ? (isEn ? "Dine-in" : "Comer aquí")
       : (isEn ? "Takeout" : "Para llevar");
@@ -143,8 +142,8 @@ export async function POST(request: NextRequest) {
     const paymentDescriptionTruncated = paymentDescription.substring(0, 1000);
 
     const submitMessage = isEn
-      ? `Order for ${customerName} (${typeLabel}). Pickup/Dine-in: ${timeFormatted}.`
-      : `Orden para ${customerName} (${typeLabel}). Hora programada: ${timeFormatted}.`;
+      ? `Order for ${customerName} (${typeLabel}). Date: ${timeFormatted}.`
+      : `Orden para ${customerName} (${typeLabel}). Fecha: ${timeFormatted}.`;
 
     const stripeLocale = isEn ? "en" : "es";
 
