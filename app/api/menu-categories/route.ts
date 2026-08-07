@@ -22,7 +22,14 @@ export async function GET() {
 
     if (error) throw error;
 
-    return NextResponse.json({ categories });
+    return NextResponse.json(
+      { categories },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=10, s-maxage=60, stale-while-revalidate=600",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching menu categories:", error);
     return NextResponse.json(

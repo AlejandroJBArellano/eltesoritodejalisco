@@ -22,7 +22,14 @@ export async function GET() {
 
     if (error) throw error;
 
-    return NextResponse.json({ hours });
+    return NextResponse.json(
+      { hours },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=10, s-maxage=60, stale-while-revalidate=600",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching business hours:", error);
     return NextResponse.json(

@@ -47,7 +47,14 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ items: enrichedItems });
+    return NextResponse.json(
+      { items: enrichedItems },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=10, s-maxage=60, stale-while-revalidate=600",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching menu items:", error);
     return NextResponse.json(
