@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { cache } from "react";
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 
 export interface TenantContextType {
   id: string;
@@ -90,20 +91,9 @@ export async function getTenantContext(): Promise<TenantContextType> {
   }
 
   const tenant = await getTenantBySlug(slug);
-  if (tenant) return tenant;
+  if (!tenant) {
+    notFound();
+  }
 
-  // Fallback tenant profile if database lookup fails
-  return {
-    id: "808b838b-f7e2-4f88-955d-ab4639a2e485", // Seeded tesorito UUID
-    name: "El Tesorito de Jalisco",
-    system_name: "TesoritoOS",
-    slug: "tesorito",
-    primary_color: "#FFB7CE",
-    secondary_color: "#FFD1DC",
-    dark_bg_color: "#121212",
-    logo_url: null,
-    rfc: "AIVK991104QJ0",
-    postal_code: "09090",
-    regimen_fiscal: "626 - Simplificado de Confianza (RESICO)",
-  };
+  return tenant;
 }

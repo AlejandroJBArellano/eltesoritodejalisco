@@ -9,25 +9,54 @@ export default async function LoginPage({
   const { error } = await searchParams;
   const tenant = await getTenantContext();
 
-  const systemName = tenant.system_name || "TesoritoOS";
-  const endsWithOS = systemName.toLowerCase().endsWith("os");
-  const prefix = endsWithOS ? systemName.slice(0, -2) : systemName;
+  const systemName = tenant.system_name;
+  const endsWithOS = systemName ? systemName.toLowerCase().endsWith("os") : false;
+  const prefix = endsWithOS ? systemName.slice(0, -2) : (systemName || "");
   const suffix = endsWithOS ? systemName.slice(-2) : "";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-dark px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-6 bg-card p-8 rounded-2xl border border-border shadow-2xl">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-black tracking-tighter uppercase">
-            <span className="text-primary">{prefix}</span>
-            {suffix && <span className="text-warning">{suffix}</span>}
-          </h1>
-          <h2 className="text-lg font-black text-text-light uppercase tracking-tight">
-            Iniciar sesión
-          </h2>
-          <p className="text-xs font-medium text-text-light/50">
-            Ingresa tus credenciales para acceder al sistema
-          </p>
+        <div className="text-center space-y-4">
+          {/* Logo container showing KITTN and Tenant logo if set */}
+          <div className="flex items-center justify-center gap-4">
+            {tenant.logo_url ? (
+              <>
+                <img
+                  src={tenant.logo_url}
+                  alt={tenant.name}
+                  className="h-14 w-14 rounded-2xl object-cover border border-border/80 shadow-md"
+                />
+                <div className="h-8 w-px bg-border/60" />
+                <svg className="h-14 w-14 text-primary" fill="none" viewBox="0 0 160 100" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M 40,72 C 30,72 24,46 31,24 C 36,8 46,32 55,52" />
+                  <path d="M 120,72 C 130,72 136,46 129,24 C 124,8 114,32 105,52" />
+                  <path d="M 55,52 Q 80,44 105,52" />
+                  <path d="M 60,49 L 63,28 L 71,38 L 80,16 L 89,38 L 97,28 L 100,49" />
+                </svg>
+              </>
+            ) : (
+              <svg className="h-16 w-16 text-primary" fill="none" viewBox="0 0 160 100" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M 40,72 C 30,72 24,46 31,24 C 36,8 46,32 55,52" />
+                <path d="M 120,72 C 130,72 136,46 129,24 C 124,8 114,32 105,52" />
+                <path d="M 55,52 Q 80,44 105,52" />
+                <path d="M 60,49 L 63,28 L 71,38 L 80,16 L 89,38 L 97,28 L 100,49" />
+              </svg>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <h1 className="text-3xl font-black tracking-tighter uppercase">
+              <span className="text-primary">{prefix}</span>
+              {suffix && <span className="text-warning">{suffix}</span>}
+            </h1>
+            <h2 className="text-sm font-black text-text-light/80 uppercase tracking-wider">
+              Iniciar sesión
+            </h2>
+            <p className="text-[10px] font-bold text-text-light/40 uppercase tracking-widest">
+              Ingresa tus credenciales para acceder al sistema
+            </p>
+          </div>
         </div>
 
         <form className="space-y-4" action={login}>

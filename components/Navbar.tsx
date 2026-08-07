@@ -39,9 +39,9 @@ export default function Navbar() {
 
   if (email === null) return null;
 
-  const systemName = system_name || "TesoritoOS";
-  const endsWithOS = systemName.toLowerCase().endsWith("os");
-  const prefix = endsWithOS ? systemName.slice(0, -2) : systemName;
+  const systemName = system_name;
+  const endsWithOS = systemName ? systemName.toLowerCase().endsWith("os") : false;
+  const prefix = endsWithOS ? systemName.slice(0, -2) : (systemName || "");
   const suffix = endsWithOS ? systemName.slice(-2) : "";
 
   const navLinks = [
@@ -57,12 +57,20 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            className="text-xl font-black tracking-tighter shrink-0"
+            className="flex items-center gap-2.5 text-xl font-black tracking-tighter shrink-0 group"
           >
-            <span className="text-primary">{prefix.toUpperCase()}</span>
-            {suffix && (
-              <span className="text-warning">{suffix.toUpperCase()}</span>
-            )}
+            <svg className="w-7 h-7 text-primary transition-transform group-hover:scale-105" fill="none" viewBox="0 0 160 100" stroke="currentColor" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M 40,72 C 30,72 24,46 31,24 C 36,8 46,32 55,52" />
+              <path d="M 120,72 C 130,72 136,46 129,24 C 124,8 114,32 105,52" />
+              <path d="M 55,52 Q 80,44 105,52" />
+              <path d="M 60,49 L 63,28 L 71,38 L 80,16 L 89,38 L 97,28 L 100,49" />
+            </svg>
+            <div className="flex items-center">
+              <span className="text-white">{prefix.toUpperCase()}</span>
+              {suffix && (
+                <span className="text-warning">{suffix.toUpperCase()}</span>
+              )}
+            </div>
           </Link>
 
           {/* Quick nav links */}
