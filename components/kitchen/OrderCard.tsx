@@ -161,13 +161,12 @@ export const OrderCard = memo(function OrderCard({
 
   return (
     <div
-      className={`rounded-2xl border p-5 shadow-md transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-3 ease-out ${
-        isOverdue &&
-        order.status !== OrderStatus.DELIVERED &&
-        order.status !== OrderStatus.READY
+      className={`rounded-2xl border p-3 shadow-md transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-3 ease-out ${isOverdue &&
+          order.status !== OrderStatus.DELIVERED &&
+          order.status !== OrderStatus.READY
           ? "border-red-500/70 bg-linear-to-b from-[#2A1212] to-[#1F0C0C] shadow-lg shadow-red-950/40 ring-1 ring-red-500/20"
           : "border-border bg-card-light hover:border-border/80 hover:shadow-xl"
-      }`}
+        }`}
     >
       {/* Card Header */}
       <div className="mb-4 flex items-start justify-between border-b border-border/60 pb-3.5">
@@ -192,13 +191,12 @@ export const OrderCard = memo(function OrderCard({
 
         {/* Timer Badge */}
         <div
-          className={`rounded-xl px-3.5 py-1.5 font-mono text-base font-black shadow-inner flex items-center gap-1.5 transition-colors ${
-            isOverdue &&
-            order.status !== OrderStatus.DELIVERED &&
-            order.status !== OrderStatus.READY
+          className={`rounded-xl px-3.5 py-1.5 font-mono text-base font-black shadow-inner flex items-center gap-1.5 transition-colors ${isOverdue &&
+              order.status !== OrderStatus.DELIVERED &&
+              order.status !== OrderStatus.READY
               ? "bg-red-600 text-white shadow-red-900/50 ring-2 ring-red-400/40"
               : "bg-card text-text-light border border-border"
-          }`}
+            }`}
         >
           <Clock
             className={`h-4 w-4 ${isOverdue ? "animate-spin" : ""}`}
@@ -277,7 +275,7 @@ export const OrderCard = memo(function OrderCard({
 
   const prevItems = prevProps.order.orderItems;
   const nextItems = nextProps.order.orderItems;
-  
+
   if (prevItems.length !== nextItems.length) return false;
 
   for (let i = 0; i < prevItems.length; i++) {

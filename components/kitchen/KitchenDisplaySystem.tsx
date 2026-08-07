@@ -75,7 +75,7 @@ function KanbanColumn({
   const theme = colorMap[colorClass];
 
   return (
-    <div className="flex flex-col w-[85vw] sm:w-87.5 md:w-auto shrink-0 snap-start md:h-[calc(100vh-170px)] rounded-2xl bg-card p-5 shadow-lg border border-border backdrop-blur-sm">
+    <div className="flex flex-col w-[85vw] sm:w-87.5 md:w-auto shrink-0 snap-start md:h-[calc(100vh-170px)] rounded-2xl bg-card p-3 shadow-lg border border-border backdrop-blur-sm">
       <div className="flex items-center justify-between border-b border-border pb-4 mb-5 shrink-0">
         <h2 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2.5">
           <span
@@ -158,7 +158,7 @@ export function KitchenDisplaySystem({
     try {
       const testAudio = new Audio("/new_order.mp3");
       testAudio.volume = 0.1;
-      testAudio.play().catch(() => {});
+      testAudio.play().catch(() => { });
     } catch {
       // Ignore initial user gesture unlock error
     }
@@ -224,11 +224,11 @@ export function KitchenDisplaySystem({
             orderItems: order.orderItems.map((item) =>
               item.id === itemId
                 ? {
-                    ...item,
-                    status: data.item.status,
-                    preparationTimeSeconds:
-                      data.item.preparationTimeSeconds ?? null,
-                  }
+                  ...item,
+                  status: data.item.status,
+                  preparationTimeSeconds:
+                    data.item.preparationTimeSeconds ?? null,
+                }
                 : item,
             ),
           };
@@ -302,21 +302,19 @@ export function KitchenDisplaySystem({
             <div className="flex items-center gap-1 rounded-xl border border-border bg-card/90 p-1 shadow-inner">
               <button
                 onClick={() => setView("kanban")}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${
-                  view === "kanban"
-                    ? "bg-amber-500 text-zinc-950 shadow-md"
-                    : "text-text-light/60 hover:text-text-light"
-                }`}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${view === "kanban"
+                  ? "bg-amber-500 text-zinc-950 shadow-md"
+                  : "text-text-light/60 hover:text-text-light"
+                  }`}
               >
                 <LayoutGrid className="h-4 w-4" /> Vista Kanban
               </button>
               <button
                 onClick={() => setView("batching")}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${
-                  view === "batching"
-                    ? "bg-amber-500 text-zinc-950 shadow-md"
-                    : "text-text-light/60 hover:text-text-light"
-                }`}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${view === "batching"
+                  ? "bg-amber-500 text-zinc-950 shadow-md"
+                  : "text-text-light/60 hover:text-text-light"
+                  }`}
               >
                 <Layers className="h-4 w-4" /> Vista Lotes
               </button>
@@ -326,7 +324,7 @@ export function KitchenDisplaySystem({
       />
 
       {/* Main Content Area */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
+      <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 mt-6">
         {view === "kanban" ? (
           <div className="flex md:grid gap-6 md:grid-cols-3 items-start overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 snap-x snap-mandatory no-scrollbar">
             <KanbanColumn
