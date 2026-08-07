@@ -50,7 +50,8 @@ export function usePOSData() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);      // gates the POS UI (menu + customers)
+  const [ordersLoading, setOrdersLoading] = useState(true); // non-blocking: orders section only
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const availableMenuItems = useMemo(
@@ -144,7 +145,8 @@ export function usePOSData() {
     const load = async () => {
       try {
         setIsLoading(true);
-        await Promise.all([fetchMenu(), fetchCustomers(), fetchOrders()]);
+        // Phase 1: critical data — unblocks the POS UI as soon as it resolves
+        await Promise.all([fetchMenu(), fetchCustomers()]);
         setErrorMessage(null);
       } catch (error) {
         setErrorMessage(
@@ -152,6 +154,16 @@ export function usePOSData() {
         );
       } finally {
         setIsLoading(false);
+      }
+
+      // Phase 2: orders — loads concurrently, does NOT block rendering
+      try {
+        setOrdersLoading(true);
+        await fetchOrders();
+      } catch {
+        // Orders failing is non-fatal; the POS still works
+      } finally {
+        setOrdersLoading(false);
       }
     };
     load();
@@ -217,6 +229,7 @@ export function usePOSData() {
     orders,
     categories,
     isLoading,
+    ordersLoading,
     errorMessage,
     refreshOrders,
     activeCategory,
