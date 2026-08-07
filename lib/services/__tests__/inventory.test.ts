@@ -5,7 +5,7 @@ import {
 } from "../inventory";
 
 // Mock the supabase server client
-vi.mock("@/lib/supabase/server", () => {
+const { mockFrom } = vi.hoisted(() => {
   const mockSingle = vi.fn();
   const mockEq = vi.fn().mockReturnValue({ single: mockSingle });
   const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
@@ -24,18 +24,20 @@ vi.mock("@/lib/supabase/server", () => {
     return { select: mockSelect };
   });
 
-  return {
-    createClient: vi.fn().mockResolvedValue({
-      from: mockFrom,
-    }),
-    mockFrom,
-    mockSelect,
-    mockEq,
-    mockSingle,
-    mockUpdate,
-    mockInsert,
-  };
+  return { mockFrom };
 });
+
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: vi.fn().mockResolvedValue({
+    from: mockFrom,
+  }),
+}));
+
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: vi.fn().mockReturnValue({
+    from: mockFrom,
+  }),
+}));
 
 import { createClient } from "@/lib/supabase/server";
 
