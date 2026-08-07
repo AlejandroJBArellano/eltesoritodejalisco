@@ -2,7 +2,7 @@
 // Automatically deducts ingredients from stock when an order is completed
 
 import type { InventoryDeductionResult } from "@/types";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 interface InventoryIngredient {
   id: string;
@@ -41,7 +41,7 @@ export async function deductInventoryForOrder(
   };
 
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Fetch the order with all its items and recipe information
     const { data: order, error: fetchError } = await supabase
@@ -226,7 +226,7 @@ export async function reverseInventoryForOrder(
   };
 
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Fetch the order with all its items and recipe information
     const { data: order, error: fetchError } = await supabase
@@ -384,7 +384,7 @@ export async function adjustIngredientStock(
   userId?: string,
 ) {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Get current ingredient
     const { data: ingredient, error: fetchError } = await supabase
@@ -443,7 +443,7 @@ export async function adjustIngredientStock(
  * Check which ingredients are below minimum stock level
  */
 export async function checkLowStockIngredients() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data: ingredients, error } = await supabase
     .from("ingredients")
     .select("*")
@@ -465,7 +465,7 @@ export async function getIngredientUsageHistory(
   startDate: Date,
   endDate: Date,
 ) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data: adjustments, error } = await supabase
     .from("stock_adjustments")
     .select("*")
