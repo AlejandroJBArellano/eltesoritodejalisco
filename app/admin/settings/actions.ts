@@ -30,6 +30,8 @@ export async function updateTenantSettings(
     const primaryColor = formData.get("primaryColor") as string;
     const secondaryColor = formData.get("secondaryColor") as string;
     const darkBgColor = formData.get("darkBgColor") as string;
+    const loyaltyEnabled = formData.get("loyaltyEnabled") === "true";
+    const loyaltyRatio = parseInt(formData.get("loyaltyRatio") as string, 10) || 10;
 
     // File Upload handling
     const logoFile = formData.get("logoFile") as File | null;
@@ -80,6 +82,8 @@ export async function updateTenantSettings(
         secondary_color: secondaryColor || "#FFD1DC",
         dark_bg_color: darkBgColor || "#121212",
         logo_url: logoUrl ? logoUrl.trim() : null,
+        loyalty_enabled: loyaltyEnabled,
+        loyalty_ratio: loyaltyRatio,
         updated_at: new Date().toISOString(),
       })
       .eq("id", tenant.id);

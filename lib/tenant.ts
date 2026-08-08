@@ -16,6 +16,8 @@ export interface TenantContextType {
   rfc: string | null;
   postal_code: string | null;
   regimen_fiscal: string | null;
+  loyalty_enabled: boolean;
+  loyalty_ratio: number;
 }
 
 export function getTenantSlugFromHost(host: string | null): string | null {
