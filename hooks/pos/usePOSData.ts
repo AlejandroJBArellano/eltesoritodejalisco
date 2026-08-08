@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { MenuItem, Customer, Order } from "@/types/pos";
 import { mapOrderData } from "@/lib/mappers/orders";
 import type { DbOrderPayload } from "@/lib/mappers/orders";
+import { createClient } from "@/lib/supabase/client";
 
 const CATEGORY_ORDER = [
   "ANTOJITOS",
@@ -46,13 +47,18 @@ const getOrderDateStr = (createdAt: Date | string): string =>
     day: "2-digit",
   }).format(new Date(createdAt));
 
-export function usePOSData() {
+export function usePOSData(tenantId?: string) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);      // gates the POS UI (menu + customers)
   const [ordersLoading, setOrdersLoading] = useState(true); // non-blocking: orders section only
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Stabilise Supabase client across renders
+  const supabase = useMemo(() => createClient(), []);
+  // Debounce ref to batch rapid realtime events
+  const fetchDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const availableMenuItems = useMemo(
     () => menuItems.filter((item) => item.isAvailable),
@@ -168,6 +174,36 @@ export function usePOSData() {
     };
     load();
   }, [fetchOrders]);
+
+  // Realtime subscription: any INSERT/UPDATE/DELETE on orders for this tenant
+  // triggers a debounced refetch, so the POS stays in sync without manual refresh.
+  useEffect(() => {
+    if (!tenantId) return;
+
+    const debouncedFetch = () => {
+      if (fetchDebounceRef.current) clearTimeout(fetchDebounceRef.current);
+      fetchDebounceRef.current = setTimeout(() => fetchOrders(), 300);
+    };
+
+    const channel = supabase
+      .channel(`pos_orders_${tenantId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+          filter: `tenant_id=eq.${tenantId}`,
+        },
+        debouncedFetch,
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+      if (fetchDebounceRef.current) clearTimeout(fetchDebounceRef.current);
+    };
+  }, [tenantId, supabase, fetchOrders]);
 
   // Calculate next folio for display
   const nextFolioDisplay = useMemo(() => {

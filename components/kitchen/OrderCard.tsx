@@ -121,37 +121,6 @@ export const OrderCard = memo(function OrderCard({
   const elapsedSeconds = useOrderTimer(timerStartTime, endTime);
   const isOverdue = elapsedSeconds / 60 >= ALERT_THRESHOLD_MINUTES;
 
-  const getStatusBadge = (status: OrderStatus) => {
-    switch (status) {
-      case OrderStatus.PENDING:
-        return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-[11px] font-black text-amber-400 uppercase tracking-widest">
-            <Clock className="h-3.5 w-3.5" /> Pendiente
-          </span>
-        );
-      case OrderStatus.PREPARING:
-        return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 px-3 py-1 text-[11px] font-black text-blue-400 uppercase tracking-widest">
-            <Utensils className="h-3.5 w-3.5" /> En Preparación
-          </span>
-        );
-      case OrderStatus.READY:
-        return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 text-[11px] font-black text-emerald-400 uppercase tracking-widest">
-            <CheckCircle2 className="h-3.5 w-3.5" /> Listo
-          </span>
-        );
-      case OrderStatus.DELIVERED:
-        return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-800 border border-zinc-700/60 px-3 py-1 text-[11px] font-black text-zinc-400 uppercase tracking-widest">
-            Entregado
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
   const activeItems = order.orderItems.filter(
     (item) => item.status !== OrderStatus.DELIVERED,
   );
@@ -162,10 +131,10 @@ export const OrderCard = memo(function OrderCard({
   return (
     <div
       className={`rounded-2xl border p-3 shadow-md transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-3 ease-out ${isOverdue &&
-          order.status !== OrderStatus.DELIVERED &&
-          order.status !== OrderStatus.READY
-          ? "border-red-500/70 bg-linear-to-b from-[#2A1212] to-[#1F0C0C] shadow-lg shadow-red-950/40 ring-1 ring-red-500/20"
-          : "border-border bg-card-light hover:border-border/80 hover:shadow-xl"
+        order.status !== OrderStatus.DELIVERED &&
+        order.status !== OrderStatus.READY
+        ? "border-red-500/70 bg-linear-to-b from-[#2A1212] to-[#1F0C0C] shadow-lg shadow-red-950/40 ring-1 ring-red-500/20"
+        : "border-border bg-card-light hover:border-border/80 hover:shadow-xl"
         }`}
     >
       {/* Card Header */}
@@ -192,10 +161,10 @@ export const OrderCard = memo(function OrderCard({
         {/* Timer Badge */}
         <div
           className={`rounded-xl px-3.5 py-1.5 font-mono text-base font-black shadow-inner flex items-center gap-1.5 transition-colors ${isOverdue &&
-              order.status !== OrderStatus.DELIVERED &&
-              order.status !== OrderStatus.READY
-              ? "bg-red-600 text-white shadow-red-900/50 ring-2 ring-red-400/40"
-              : "bg-card text-text-light border border-border"
+            order.status !== OrderStatus.DELIVERED &&
+            order.status !== OrderStatus.READY
+            ? "bg-red-600 text-white shadow-red-900/50 ring-2 ring-red-400/40"
+            : "bg-card text-text-light border border-border"
             }`}
         >
           <Clock
@@ -230,11 +199,6 @@ export const OrderCard = memo(function OrderCard({
           </div>
         </div>
       )}
-
-      {/* Order Status Badge */}
-      <div className="mb-4 flex items-center justify-between">
-        {getStatusBadge(order.status)}
-      </div>
 
       {/* Action Buttons */}
       <div className="flex gap-2">
