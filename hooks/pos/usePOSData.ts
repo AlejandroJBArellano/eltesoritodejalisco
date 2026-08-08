@@ -57,8 +57,9 @@ export function usePOSData(tenantId?: string) {
 
   // Stabilise Supabase client across renders
   const supabase = useMemo(() => createClient(), []);
-  // Debounce ref to batch rapid realtime events
+  // Debounce refs to batch rapid realtime events
   const fetchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const menuDebounceRef  = useRef<NodeJS.Timeout | null>(null);
 
   const availableMenuItems = useMemo(
     () => menuItems.filter((item) => item.isAvailable),
@@ -99,8 +100,8 @@ export function usePOSData(tenantId?: string) {
 
   const categories = useMemo(() => CATEGORY_ORDER, []);
 
-  const fetchMenu = async () => {
-    const response = await fetch("/api/menu");
+  const fetchMenu = useCallback(async () => {
+    const response = await fetch("/api/menu", { cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error(data?.error || "Error al cargar menú");
     setMenuItems(
@@ -113,7 +114,7 @@ export function usePOSData(tenantId?: string) {
         minimumStock: item.minimum_stock ?? null,
       })),
     );
-  };
+  }, []);
 
   const fetchCustomers = async () => {
     const response = await fetch("/api/customers");
@@ -180,9 +181,14 @@ export function usePOSData(tenantId?: string) {
   useEffect(() => {
     if (!tenantId) return;
 
-    const debouncedFetch = () => {
+    const debouncedFetchOrders = () => {
       if (fetchDebounceRef.current) clearTimeout(fetchDebounceRef.current);
       fetchDebounceRef.current = setTimeout(() => fetchOrders(), 300);
+    };
+
+    const debouncedFetchMenu = () => {
+      if (menuDebounceRef.current) clearTimeout(menuDebounceRef.current);
+      menuDebounceRef.current = setTimeout(() => fetchMenu(), 500);
     };
 
     const channel = supabase
@@ -195,15 +201,25 @@ export function usePOSData(tenantId?: string) {
           table: "orders",
           filter: `tenant_id=eq.${tenantId}`,
         },
-        debouncedFetch,
+        debouncedFetchOrders,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "ingredients",
+        },
+        debouncedFetchMenu,
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
       if (fetchDebounceRef.current) clearTimeout(fetchDebounceRef.current);
+      if (menuDebounceRef.current)  clearTimeout(menuDebounceRef.current);
     };
-  }, [tenantId, supabase, fetchOrders]);
+  }, [tenantId, supabase, fetchOrders, fetchMenu]);
 
   // Calculate next folio for display
   const nextFolioDisplay = useMemo(() => {
