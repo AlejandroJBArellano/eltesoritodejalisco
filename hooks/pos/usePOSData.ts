@@ -101,7 +101,7 @@ export function usePOSData(tenantId?: string) {
   const categories = useMemo(() => CATEGORY_ORDER, []);
 
   const fetchMenu = useCallback(async () => {
-    const response = await fetch("/api/menu", { cache: "no-store" });
+    const response = await fetch("/api/menu");
     const data = await response.json();
     if (!response.ok) throw new Error(data?.error || "Error al cargar menú");
     setMenuItems(
@@ -149,44 +149,34 @@ export function usePOSData(tenantId?: string) {
   }, [fetchOrders]);
 
   useEffect(() => {
-    const load = async () => {
+    async function load() {
       try {
         setIsLoading(true);
-        // Phase 1: critical data — unblocks the POS UI as soon as it resolves
-        await Promise.all([fetchMenu(), fetchCustomers()]);
-        setErrorMessage(null);
-      } catch (error) {
-        setErrorMessage(
-          error instanceof Error ? error.message : "Error al cargar",
-        );
+        setOrdersLoading(true);
+        await Promise.all([fetchMenu(), fetchCustomers(), fetchOrders()]);
+      } catch (err) {
+        setErrorMessage(err instanceof Error ? err.message : "Error al cargar datos");
       } finally {
         setIsLoading(false);
-      }
-
-      // Phase 2: orders — loads concurrently, does NOT block rendering
-      try {
-        setOrdersLoading(true);
-        await fetchOrders();
-      } catch {
-        // Orders failing is non-fatal; the POS still works
-      } finally {
         setOrdersLoading(false);
       }
-    };
+    }
     load();
-  }, [fetchOrders]);
+  }, [fetchOrders, fetchMenu]);
 
   // Realtime subscription: any INSERT/UPDATE/DELETE on orders for this tenant
   // triggers a debounced refetch, so the POS stays in sync without manual refresh.
   useEffect(() => {
     if (!tenantId) return;
 
-    const debouncedFetchOrders = () => {
+    const debouncedFetchOrders = (payload: any) => {
+      console.log("[POS Realtime] Order event:", payload);
       if (fetchDebounceRef.current) clearTimeout(fetchDebounceRef.current);
       fetchDebounceRef.current = setTimeout(() => fetchOrders(), 300);
     };
 
-    const debouncedFetchMenu = () => {
+    const debouncedFetchMenu = (payload: any) => {
+      console.log("[POS Realtime] Ingredient update event:", payload);
       if (menuDebounceRef.current) clearTimeout(menuDebounceRef.current);
       menuDebounceRef.current = setTimeout(() => fetchMenu(), 500);
     };
@@ -206,13 +196,15 @@ export function usePOSData(tenantId?: string) {
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
+          event: "*",
           schema: "public",
           table: "ingredients",
         },
         debouncedFetchMenu,
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log(`[POS Realtime] Subscription status for tenant ${tenantId}:`, status, err);
+      });
 
     return () => {
       supabase.removeChannel(channel);

@@ -47,14 +47,7 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json(
-      { items: enrichedItems },
-      {
-        headers: {
-          "Cache-Control": "public, max-age=10, s-maxage=60, stale-while-revalidate=600",
-        },
-      }
-    );
+    return NextResponse.json({ items: enrichedItems });
   } catch (error) {
     console.error("Error fetching menu items:", error);
     return NextResponse.json(
@@ -63,6 +56,8 @@ export async function GET() {
     );
   }
 }
+
+export const dynamic = "force-dynamic";
 
 /**
  * Helper to upload image using Admin Client (bypassing RLS on storage.objects)
