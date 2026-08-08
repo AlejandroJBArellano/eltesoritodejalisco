@@ -138,7 +138,7 @@ export const OrderCard = memo(function OrderCard({
         }`}
     >
       {/* Card Header */}
-      <div className="mb-4 flex items-start justify-between border-b border-border/60 pb-3.5">
+      <div className="mb-4 flex items-start justify-between">
         <div>
           <h3 className="text-2xl font-black text-text-light tracking-tight uppercase">
             #{order.orderNumber}
