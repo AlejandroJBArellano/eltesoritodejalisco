@@ -59,18 +59,28 @@ export function useRealtimeOrders(
     if (initialData.length === 0) {
       fetchOrders();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once on mount
 
+  // Keep a ref so the channel closure always reads the latest value
+  // without needing to destroy/recreate the channel on every toggle.
+  const soundEnabledRef = useRef(soundEnabled);
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
+
+  useEffect(() => {
     let lastAudioTime = 0;
 
     const playBell = () => {
-      if (!soundEnabled) return;
+      if (!soundEnabledRef.current) return;
       const now = Date.now();
       if (now - lastAudioTime > 2000) {
         // 2 seconds debounce
         lastAudioTime = now;
         try {
           const audio = new Audio("/new_order.mp3");
-          audio.play().catch(() => {});
+          audio.play().catch(() => { });
         } catch {
           // Audio playback fail fallback
         }
@@ -104,6 +114,8 @@ export function useRealtimeOrders(
           table: "order_items" as const,
         };
 
+    let isFirstSubscription = true;
+
     const channel = supabase
       .channel(`orders_realtime_${tenantId || "global"}`)
       .on("postgres_changes", ordersFilter, (payload) => {
@@ -116,7 +128,16 @@ export function useRealtimeOrders(
         playBell();
         debouncedFetchOrders();
       })
-      .subscribe();
+      .subscribe((status) => {
+        // On reconnect after a WebSocket drop, refetch to catch missed events
+        if (status === "SUBSCRIBED") {
+          if (isFirstSubscription) {
+            isFirstSubscription = false;
+          } else {
+            fetchOrders();
+          }
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -125,9 +146,7 @@ export function useRealtimeOrders(
       }
     };
   }, [
-    soundEnabled,
     supabase,
-    initialData.length,
     fetchOrders,
     debouncedFetchOrders,
     tenantId,
