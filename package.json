@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
+    "db:types": "npx supabase gen types typescript --db-url \"$DIRECT_URL\" > types/supabase.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
