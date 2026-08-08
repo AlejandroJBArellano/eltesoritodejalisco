@@ -75,8 +75,8 @@ function KanbanColumn({
   const theme = colorMap[colorClass];
 
   return (
-    <div className="flex flex-col w-[85vw] sm:w-87.5 md:w-auto shrink-0 snap-start md:h-[calc(100vh-170px)] rounded-2xl bg-card p-3 shadow-lg border border-border backdrop-blur-sm">
-      <div className="flex items-center justify-between border-b border-border pb-4 mb-5 shrink-0">
+    <div className="flex flex-col gap-2 w-[85vw] sm:w-87.5 md:w-auto shrink-0 snap-start md:h-[calc(100vh-170px)] rounded-2xl bg-card p-3 shadow-lg border border-border backdrop-blur-sm">
+      <div className="flex items-center justify-between border-b border-border mb-5 shrink-0">
         <h2 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2.5">
           <span
             className={`h-3 w-3 rounded-full ${theme.bg} shadow-sm ${theme.shadow}`}
