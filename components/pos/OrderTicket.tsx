@@ -1,13 +1,14 @@
-import { OrderWithDetails } from "@/types";
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { useTenant } from "@/components/TenantProvider";
+import { OrderWithDetails } from "@/types";
+import { QRCodeSVG } from "qrcode.react";
 
 interface OrderTicketProps {
   order: OrderWithDetails;
 }
 
 export function OrderTicket({ order }: OrderTicketProps) {
-  const { name, system_name, rfc, postal_code, regimen_fiscal } = useTenant();
+  const { id: tenantId, name, system_name, rfc, postal_code, regimen_fiscal } = useTenant();
 
   const formatDate = (date: Date | string) => {
     const dateStr =
@@ -31,9 +32,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
   return (
     <div className="ticket-container bg-white p-4 w-[80mm] mx-auto text-black font-mono text-sm border shadow-sm">
       <div className="text-center mb-4">
-        <h2 className="text-lg font-bold">
-          {name?.toUpperCase() || "EL TESORITO DE JALISCO"}
-        </h2>
+        <h2 className="text-lg font-bold">{name.toUpperCase()}</h2>
         {rfc && <p className="text-xs">RFC: {rfc}</p>}
         {postal_code && <p className="text-xs">C.P.: {postal_code}</p>}
         {regimen_fiscal && <p className="text-xs">Régimen: {regimen_fiscal}</p>}
@@ -94,6 +93,18 @@ export function OrderTicket({ order }: OrderTicketProps) {
         <p className="text-[10px] text-gray-400 mt-2">
           {system_name || "TesoritoOS"}
         </p>
+
+        <div className="border-t border-dashed border-gray-300 mt-4 pt-4 flex flex-col items-center justify-center">
+          <p className="text-xs font-bold text-gray-800">powered by Kittn</p>
+          <p className="text-[10px] text-gray-500 mb-2">Get Yours</p>
+          <div className="bg-white p-1.5 border border-gray-200 rounded-sm shadow-sm">
+            <QRCodeSVG
+              value={`https://trykittn.com?ref=pos_${order.id}_${tenantId}`}
+              size={80}
+              level="M"
+            />
+          </div>
+        </div>
       </div>
 
       <style jsx global>{`
