@@ -16,15 +16,6 @@ vi.mock("@/components/TenantProvider", () => ({
   }),
 }));
 
-// Mock qrcode.react to inspect its properties easily
-vi.mock("qrcode.react", () => ({
-  QRCodeSVG: vi.fn(({ value, size }) => (
-    <div data-testid="qr-code" data-value={value} data-size={size}>
-      Mock QR Code
-    </div>
-  )),
-}));
-
 const mockOrder: OrderWithDetails = {
   id: "order-123",
   orderNumber: "1050",
@@ -119,10 +110,13 @@ describe("OrderTicket Component", () => {
     // QR Code assertions
     const qrCode = screen.getByTestId("qr-code");
     expect(qrCode).toBeInTheDocument();
-    expect(qrCode.getAttribute("data-size")).toBe("80");
+    expect(qrCode.tagName.toLowerCase()).toBe("img");
+    expect(qrCode.getAttribute("width")).toBe("80");
+    expect(qrCode.getAttribute("height")).toBe("80");
     
-    // Check that the URL encodes the order-id and tenant-id as query params
+    // Check that the URL encodes the order-id and tenant-id as query params and matches the QR Code API
     const expectedUrl = "https://trykittn.com?ref=pos_order-123_tenant-abc";
-    expect(qrCode.getAttribute("data-value")).toBe(expectedUrl);
+    const expectedSrc = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&ecc=M&data=${encodeURIComponent(expectedUrl)}`;
+    expect(qrCode.getAttribute("src")).toBe(expectedSrc);
   });
 });

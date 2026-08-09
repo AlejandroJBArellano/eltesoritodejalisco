@@ -1,7 +1,6 @@
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { useTenant } from "@/components/TenantProvider";
 import { OrderWithDetails } from "@/types";
-import { QRCodeSVG } from "qrcode.react";
 
 interface OrderTicketProps {
   order: OrderWithDetails;
@@ -95,10 +94,15 @@ export function OrderTicket({ order }: OrderTicketProps) {
           <p className="text-xs font-bold text-gray-800">Powered by Kittn</p>
           <p className="text-[10px] text-gray-500 mb-2">Get Yours at trykittn.com</p>
           <div className="bg-white p-1.5 border border-gray-200 rounded-sm shadow-sm">
-            <QRCodeSVG
-              value={`https://trykittn.com?ref=pos_${order.id}_${tenantId}`}
-              size={80}
-              level="M"
+            <img
+              data-testid="qr-code"
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&ecc=M&data=${encodeURIComponent(
+                `https://trykittn.com?ref=pos_${order.id}_${tenantId}`
+              )}`}
+              alt="Kittn QR Code"
+              width={80}
+              height={80}
+              className="w-[80px] h-[80px]"
             />
           </div>
         </div>
