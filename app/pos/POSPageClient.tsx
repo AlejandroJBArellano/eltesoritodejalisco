@@ -234,7 +234,7 @@ function POSPageContent() {
       {mixedOrderMenuItem && <POSMixedOrderModal />}
 
       {(showTicket || showKitchenTicket) && checkoutOrder && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-md print-modal-container">
+        <div className="fixed inset-0 bg-black/80 flex items-start justify-center p-4 z-50 overflow-y-auto backdrop-blur-md print-modal-container">
           <div className="max-w-md w-full py-10 space-y-6">
             <div className="flex justify-center gap-3 no-print flex-wrap">
               <button
