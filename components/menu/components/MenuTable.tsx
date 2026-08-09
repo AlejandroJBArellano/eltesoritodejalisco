@@ -1,15 +1,15 @@
 import {
-  Image as ImageIcon,
-  BookOpen,
-  Pencil,
-  Trash2,
-  CheckCircle2,
-  XCircle,
-} from "lucide-react";
-import {
   TableHeaderSortCell,
   TablePagination,
 } from "@/components/ui/DataTableControls";
+import {
+  BookOpen,
+  CheckCircle2,
+  Image as ImageIcon,
+  Pencil,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 import { MenuItem, SortField } from "../types";
 
 interface MenuTableProps {
@@ -87,7 +87,7 @@ export function MenuTable({
             {paginatedItems.map((item) => (
               <tr
                 key={item.id}
-                className="hover:bg-white/[0.02] transition-colors"
+                className="hover:bg-white/2 transition-colors"
               >
                 <td className="py-3 px-4">
                   {item.imageUrl ? (
@@ -121,11 +121,10 @@ export function MenuTable({
                 </td>
                 <td className="py-3 px-4">
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                      item.isAvailable
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${item.isAvailable
                         ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                         : "bg-red-500/10 text-red-400 border border-red-500/20"
-                    }`}
+                      }`}
                   >
                     {item.isAvailable ? (
                       <>
@@ -158,11 +157,10 @@ export function MenuTable({
                     </button>
                     <button
                       onClick={() => onDelete(item.id)}
-                      className={`rounded-lg border p-2 transition-all text-xs font-black ${
-                        deleteArmedItemId === item.id
+                      className={`rounded-lg border p-2 transition-all text-xs font-black ${deleteArmedItemId === item.id
                           ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
                           : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
-                      }`}
+                        }`}
                       title={
                         deleteArmedItemId === item.id
                           ? "Confirmar eliminación"
