@@ -1,14 +1,16 @@
-import React from "react";
+import { usePOSCart } from "@/hooks/pos/usePOSCart";
+import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
+import { usePOSData } from "@/hooks/pos/usePOSData";
 import {
-  X,
-  DollarSign,
+  AlertCircle,
+  AlertTriangle,
   CreditCard,
+  DollarSign,
   Landmark,
   Scissors,
-  AlertTriangle,
-  AlertCircle,
+  X,
 } from "lucide-react";
-import { Order } from "@/types/pos";
+import React from "react";
 
 const PAYMENT_METHODS = [
   { value: "CASH", label: "Efectivo", icon: DollarSign },
@@ -16,62 +18,47 @@ const PAYMENT_METHODS = [
   { value: "TRANSFER", label: "Transferencia", icon: Landmark },
 ];
 
-interface POSCheckoutModalProps {
-  checkoutOrder: Order | null;
-  setCheckoutOrder: (order: Order | null) => void;
-  tipAmountCalculated: number;
-  tipType: string;
-  setTipType: (type: "NONE" | "PERCENTAGE" | "FIXED") => void;
-  tipInput: string;
-  setTipInput: (val: string) => void;
-  paymentMethod: string;
-  setPaymentMethod: (val: string) => void;
-  receivedAmount: string;
-  setReceivedAmount: (val: string) => void;
-  change: number;
-  handleProcessPayment: (forceConfirmed?: boolean) => void;
-  isSubmitting: boolean;
-  setShowSplitBill: (show: boolean) => void;
-  openModifyModal: (order: Order) => void;
-  handleFailedPayment: () => void;
-  checkoutError: string | null;
-  unusualTipInfo: { amount: number; percentage: number } | null;
-  setUnusualTipInfo: (
-    info: { amount: number; percentage: number } | null,
-  ) => void;
-}
+export function POSCheckoutModal() {
+  const {
+    availableMenuItems,
+    refreshOrders,
+  } = usePOSData();
 
-export function POSCheckoutModal({
-  checkoutOrder,
-  setCheckoutOrder,
-  tipAmountCalculated,
-  tipType,
-  setTipType,
-  tipInput,
-  setTipInput,
-  paymentMethod,
-  setPaymentMethod,
-  receivedAmount,
-  setReceivedAmount,
-  change,
-  handleProcessPayment,
-  isSubmitting,
-  setShowSplitBill,
-  openModifyModal,
-  handleFailedPayment,
-  checkoutError,
-  unusualTipInfo,
-  setUnusualTipInfo,
-}: POSCheckoutModalProps) {
+  const {
+    openModifyModal,
+  } = usePOSCart(availableMenuItems, refreshOrders);
+
+  const {
+    isSubmittingCheckout,
+    checkoutError,
+    checkoutOrder,
+    setCheckoutOrder,
+    paymentMethod,
+    setPaymentMethod,
+    receivedAmount,
+    setReceivedAmount,
+    tipType,
+    setTipType,
+    tipInput,
+    setTipInput,
+    tipAmountCalculated,
+    change,
+    unusualTipInfo,
+    setUnusualTipInfo,
+    setShowSplitBill,
+    handleProcessPayment,
+    handleFailedPayment,
+  } = usePOSCheckout(refreshOrders);
+
   if (!checkoutOrder) return null;
 
   const isSubmitDisabled =
-    isSubmitting ||
+    isSubmittingCheckout ||
     !!unusualTipInfo ||
     (paymentMethod === "CASH" &&
       (!receivedAmount ||
         Number(receivedAmount) <
-          checkoutOrder.total + tipAmountCalculated));
+        checkoutOrder!.total + tipAmountCalculated));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,12 +76,12 @@ export function POSCheckoutModal({
         <div className="flex justify-between items-center border-b border-border pb-3">
           <h2 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse"></span>
-            Cobrar Orden #{checkoutOrder.orderNumber}
+            Cobrar Orden #{checkoutOrder!.orderNumber}
           </h2>
           <button
             type="button"
             onClick={() => setCheckoutOrder(null)}
-            disabled={isSubmitting}
+            disabled={isSubmittingCheckout}
             className="text-text-light/40 hover:text-text-light focus-visible:text-text-light focus-visible:bg-white/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-30 disabled:pointer-events-none transition-all p-1.5 rounded-lg hover:bg-white/10"
             aria-label="Cerrar"
           >
@@ -136,7 +123,7 @@ export function POSCheckoutModal({
               <button
                 type="button"
                 onClick={() => handleProcessPayment(true)}
-                disabled={isSubmitting}
+                disabled={isSubmittingCheckout}
                 className="flex-1 py-2 text-[10px] rounded-xl font-black uppercase border border-amber-500/40 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none transition-all duration-200 disabled:opacity-50"
               >
                 Sí, confirmar
@@ -151,7 +138,7 @@ export function POSCheckoutModal({
               Total a Pagar
             </p>
             <p className="text-4xl font-black text-text-light tabular-nums tracking-tight">
-              ${(checkoutOrder.total + tipAmountCalculated).toFixed(2)}
+              ${(checkoutOrder!.total + tipAmountCalculated).toFixed(2)}
             </p>
             {tipAmountCalculated > 0 && (
               <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/10 text-blue-400 border border-blue-500/25 uppercase tracking-wider">
@@ -168,40 +155,37 @@ export function POSCheckoutModal({
             <div className="flex gap-2">
               <button
                 type="button"
-                disabled={isSubmitting}
+                disabled={isSubmittingCheckout}
                 onClick={() => {
                   setTipType("NONE");
                   setTipInput("");
                 }}
-                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${
-                  tipType === "NONE"
-                    ? "bg-primary/20 border-primary text-primary"
-                    : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
-                }`}
+                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${tipType === "NONE"
+                  ? "bg-primary/20 border-primary text-primary"
+                  : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
+                  }`}
               >
                 Sin Propina
               </button>
               <button
                 type="button"
-                disabled={isSubmitting}
+                disabled={isSubmittingCheckout}
                 onClick={() => setTipType("PERCENTAGE")}
-                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${
-                  tipType === "PERCENTAGE"
-                    ? "bg-primary/20 border-primary text-primary"
-                    : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
-                }`}
+                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${tipType === "PERCENTAGE"
+                  ? "bg-primary/20 border-primary text-primary"
+                  : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
+                  }`}
               >
                 Porcentaje (%)
               </button>
               <button
                 type="button"
-                disabled={isSubmitting}
+                disabled={isSubmittingCheckout}
                 onClick={() => setTipType("FIXED")}
-                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${
-                  tipType === "FIXED"
-                    ? "bg-primary/20 border-primary text-primary"
-                    : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
-                }`}
+                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${tipType === "FIXED"
+                  ? "bg-primary/20 border-primary text-primary"
+                  : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
+                  }`}
               >
                 Fijo ($)
               </button>
@@ -215,16 +199,15 @@ export function POSCheckoutModal({
                 <button
                   key={pct}
                   type="button"
-                  disabled={isSubmitting}
+                  disabled={isSubmittingCheckout}
                   onClick={() => {
                     setTipType("PERCENTAGE");
                     setTipInput(pct);
                   }}
-                  className={`py-2 text-xs rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${
-                    tipType === "PERCENTAGE" && tipInput === pct
-                      ? "bg-primary text-black border-primary shadow-lg shadow-primary/10"
-                      : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
-                  }`}
+                  className={`py-2 text-xs rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${tipType === "PERCENTAGE" && tipInput === pct
+                    ? "bg-primary text-black border-primary shadow-lg shadow-primary/10"
+                    : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
+                    }`}
                 >
                   {pct}%
                 </button>
@@ -235,7 +218,7 @@ export function POSCheckoutModal({
               <input
                 type="number"
                 value={tipInput}
-                disabled={isSubmitting}
+                disabled={isSubmittingCheckout}
                 onChange={(e) => setTipInput(e.target.value)}
                 placeholder={
                   tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto propina"
@@ -257,13 +240,12 @@ export function POSCheckoutModal({
                   <button
                     key={m.value}
                     type="button"
-                    disabled={isSubmitting}
+                    disabled={isSubmittingCheckout}
                     onClick={() => setPaymentMethod(m.value)}
-                    className={`py-3 text-xs rounded-xl font-black uppercase border flex flex-col items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 disabled:opacity-50 ${
-                      paymentMethod === m.value
-                        ? "border-blue-400 bg-blue-500/10 text-blue-400 shadow-lg shadow-blue-500/5"
-                        : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
-                    }`}
+                    className={`py-3 text-xs rounded-xl font-black uppercase border flex flex-col items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 disabled:opacity-50 ${paymentMethod === m.value
+                      ? "border-blue-400 bg-blue-500/10 text-blue-400 shadow-lg shadow-blue-500/5"
+                      : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
+                      }`}
                   >
                     <IconComp className="h-4 w-4" />
                     {m.label}
@@ -279,7 +261,7 @@ export function POSCheckoutModal({
               <input
                 type="number"
                 value={receivedAmount}
-                disabled={isSubmitting}
+                disabled={isSubmittingCheckout}
                 onChange={(e) => setReceivedAmount(e.target.value)}
                 className="w-full text-3xl font-black p-4 border border-border bg-dark/40 rounded-xl focus:border-success focus:ring-2 focus:ring-success/20 outline-none text-center text-text-light transition-all duration-200 placeholder:text-text-light/20 disabled:opacity-50"
                 placeholder="Monto recibido ($)..."
@@ -303,13 +285,13 @@ export function POSCheckoutModal({
               disabled={isSubmitDisabled}
               className="w-full bg-success text-white py-4 rounded-xl font-black text-base hover:brightness-110 active:scale-[0.98] shadow-lg shadow-success/20 focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-30 disabled:pointer-events-none transition-all uppercase tracking-wider"
             >
-              {isSubmitting ? "Procesando..." : "Registrar Pago"}
+              {isSubmittingCheckout ? "Procesando..." : "Registrar Pago"}
             </button>
 
             <button
               type="button"
               onClick={() => setShowSplitBill(true)}
-              disabled={isSubmitting}
+              disabled={isSubmittingCheckout}
               className="w-full bg-blue-500/10 text-blue-400 border border-blue-500/20 py-2.5 rounded-xl font-black text-xs hover:bg-blue-500/20 hover:border-blue-500/30 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
             >
               <Scissors className="h-3.5 w-3.5" /> Dividir Cuenta
@@ -317,9 +299,9 @@ export function POSCheckoutModal({
 
             <button
               type="button"
-              disabled={isSubmitting}
+              disabled={isSubmittingCheckout}
               onClick={() => {
-                openModifyModal(checkoutOrder);
+                openModifyModal(checkoutOrder!);
                 setCheckoutOrder(null);
               }}
               className="w-full bg-white/5 text-text-light/60 py-2.5 rounded-xl font-black text-xs hover:bg-white/10 hover:text-text-light hover:border-text-light/30 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider border border-border"
@@ -330,7 +312,7 @@ export function POSCheckoutModal({
             <button
               type="button"
               onClick={() => handleFailedPayment()}
-              disabled={isSubmitting}
+              disabled={isSubmittingCheckout}
               className="w-full bg-red-500/10 text-red-400 border border-red-500/20 py-2.5 rounded-xl font-black text-xs hover:bg-red-500/20 hover:border-red-500/30 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider"
             >
               Marcar como Pago Fallido

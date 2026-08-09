@@ -137,3 +137,12 @@ export const EMPTY_RECIPE_FORM: RecipeFormState = {
   ingredientId: "",
   quantityRequired: "",
 };
+
+export const sourceOptions = [
+  "TikTok",
+  "Instagram",
+  "Pasaba por ahí",
+  "Recomendación",
+  "Google Maps",
+  "Otro",
+];

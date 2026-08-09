@@ -1,27 +1,22 @@
-import React from "react";
-import { X, Minus, Plus, Trash2 } from "lucide-react";
-import { Order, ModifyItem } from "@/types/pos";
+import { usePOSCart } from "@/hooks/pos/usePOSCart";
+import { usePOSData } from "@/hooks/pos/usePOSData";
+import { Minus, Plus, Trash2, X } from "lucide-react";
 
-interface POSModifyOrderModalProps {
-  modifyingOrder: Order | null;
-  setModifyingOrder: (order: Order | null) => void;
-  modifyItems: ModifyItem[];
-  handleModifyQuantityChange: (index: number, delta: number) => void;
-  handleModifyRemoveItem: (index: number) => void;
-  handleSaveModifiedOrder: () => void;
-  isSubmitting: boolean;
-}
+export function POSModifyOrderModal() {
+  const {
+    availableMenuItems,
+    refreshOrders,
+  } = usePOSData();
 
-export function POSModifyOrderModal({
-  modifyingOrder,
-  setModifyingOrder,
-  modifyItems,
-  handleModifyQuantityChange,
-  handleModifyRemoveItem,
-  handleSaveModifiedOrder,
-  isSubmitting,
-}: POSModifyOrderModalProps) {
-  if (!modifyingOrder) return null;
+  const {
+    modifyingOrder,
+    setModifyingOrder,
+    modifyItems,
+    handleModifyQuantityChange,
+    handleModifyRemoveItem,
+    handleSaveModifiedOrder,
+    isSubmittingCart,
+  } = usePOSCart(availableMenuItems, refreshOrders);
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
@@ -29,7 +24,7 @@ export function POSModifyOrderModal({
         <div className="flex justify-between items-center border-b border-border pb-3">
           <h2 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-orange-400"></span>
-            Modificar Orden #{modifyingOrder.orderNumber}
+            Modificar Orden #{modifyingOrder!.orderNumber}
           </h2>
           <button
             type="button"
@@ -81,7 +76,7 @@ export function POSModifyOrderModal({
                 </button>
               </div>
 
-              <div className="flex items-center gap-2 min-w-[70px] justify-end">
+              <div className="flex items-center gap-2 min-w-17.5 justify-end">
                 <p className="font-black text-xs text-text-light tabular-nums">
                   ${(item.unitPrice * item.quantity).toFixed(2)}
                 </p>
@@ -122,10 +117,10 @@ export function POSModifyOrderModal({
           <button
             type="button"
             onClick={handleSaveModifiedOrder}
-            disabled={isSubmitting || modifyItems.length === 0}
+            disabled={isSubmittingCart || modifyItems.length === 0}
             className="w-full bg-primary text-black py-3 rounded-xl font-black hover:brightness-105 transition-all uppercase text-xs tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50"
           >
-            {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+            {isSubmittingCart ? "Guardando..." : "Guardar Cambios"}
           </button>
         </div>
       </div>

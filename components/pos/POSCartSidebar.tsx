@@ -1,17 +1,20 @@
-import React, { useState } from "react";
+import { isMixedOrderItem, usePOSCart } from "@/hooks/pos/usePOSCart";
+import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
+import { usePOSData } from "@/hooks/pos/usePOSData";
+import { Customer, MenuItem, OrderFormState } from "@/types/pos";
 import {
-  ShoppingBag,
+  AlertTriangle,
+  Bike,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
   Minus,
   Plus,
   Printer,
-  Bike,
-  AlertTriangle,
-  Loader2,
-  ChevronDown,
-  ChevronUp,
+  ShoppingBag,
 } from "lucide-react";
-import { OrderFormState, MenuItem, Customer } from "@/types/pos";
-import { isMixedOrderItem } from "@/hooks/pos/usePOSCart";
+import { useState } from "react";
+import { sourceOptions } from "../menu/types";
 
 interface POSCartSidebarProps {
   formState: OrderFormState;
@@ -28,20 +31,100 @@ interface POSCartSidebarProps {
   isSubmitting: boolean;
 }
 
-export function POSCartSidebar({
-  formState,
-  handleFormChange,
-  customers,
-  sourceOptions,
-  formErrors,
-  cartError,
-  handleClearCart,
-  clearCartArmed,
-  handleQuantityChange,
-  handleItemNoteChange,
-  availableMenuItems,
-  isSubmitting,
-}: POSCartSidebarProps) {
+export function POSCartSidebar() {
+  const {
+    availableMenuItems,
+    customers,
+    isLoading,
+    ordersLoading,
+    errorMessage,
+    activeCategory,
+    setActiveCategory,
+    searchQuery,
+    setSearchQuery,
+    categories,
+    filteredMenuItems,
+    nextFolioDisplay,
+    refreshOrders,
+    lowStockItems,
+  } = usePOSData();
+
+  const {
+    formState,
+    formErrors,
+    cartError,
+    editingOrder,
+    setEditingOrder,
+    additionalItems,
+    modifyingOrder,
+    setModifyingOrder,
+    modifyItems,
+    mixedOrderMenuItem,
+    setMixedOrderMenuItem,
+    mixedFlavorCounts,
+    handleFormChange,
+    handleGridItemClick,
+    handleMixedFlavorChange,
+    handleMixedOrderConfirm,
+    handleQuantityChange,
+    handleItemNoteChange,
+    handleClearCart,
+    clearCartArmed,
+    openModifyModal,
+    handleModifyQuantityChange,
+    handleModifyRemoveItem,
+    handleSaveModifiedOrder,
+    addAdditionalItemRow,
+    handleAdditionalItemChange,
+    removeAdditionalItemRow,
+    handleAddItems,
+    handleCheckoutSubmit,
+    handleCancelOrder,
+    isSubmittingCart,
+  } = usePOSCart(availableMenuItems, refreshOrders);
+
+  const {
+    isSubmittingCheckout,
+    checkoutError,
+    checkoutOrder,
+    setCheckoutOrder,
+    paymentMethod,
+    setPaymentMethod,
+    receivedAmount,
+    setReceivedAmount,
+    showTicket,
+    setShowTicket,
+    showKitchenTicket,
+    setShowKitchenTicket,
+    tipType,
+    setTipType,
+    tipInput,
+    setTipInput,
+    tipAmountCalculated,
+    change,
+    unusualTipInfo,
+    setUnusualTipInfo,
+    showWhatsAppModal,
+    setShowWhatsAppModal,
+    whatsappNumber,
+    setWhatsappNumber,
+    generateWhatsAppMessage,
+    editingTipOrder,
+    setEditingTipOrder,
+    editTipType,
+    setEditTipType,
+    editTipInput,
+    setEditTipInput,
+    editTipAmountCalculated,
+    showSplitBill,
+    setShowSplitBill,
+    billingOrder,
+    setBillingOrder,
+    handleProcessPayment,
+    handleSplitPayment,
+    handleUpdateTip,
+    handleFailedPayment,
+  } = usePOSCheckout(refreshOrders);
   // Track which cart items have the note input expanded
   const [expandedNotes, setExpandedNotes] = useState<Set<number>>(new Set());
 
@@ -74,11 +157,10 @@ export function POSCartSidebar({
                 formState.table === "Domicilio" ? "" : "Domicilio",
               )
             }
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all border ${
-              formState.table === "Domicilio"
-                ? "bg-secondary/20 border-secondary text-secondary"
-                : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
-            }`}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all border ${formState.table === "Domicilio"
+              ? "bg-secondary/20 border-secondary text-secondary"
+              : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
+              }`}
           >
             <Bike className="h-3.5 w-3.5" />
             DOMICILIO
@@ -111,11 +193,10 @@ export function POSCartSidebar({
             <select
               value={formState.source}
               onChange={(e) => handleFormChange("source", e.target.value)}
-              className={`w-full rounded-xl border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none transition-colors ${
-                formErrors.source
-                  ? "border-red-500/50 focus:border-red-400"
-                  : "border-border focus:border-primary"
-              }`}
+              className={`w-full rounded-xl border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none transition-colors ${formErrors.source
+                ? "border-red-500/50 focus:border-red-400"
+                : "border-border focus:border-primary"
+                }`}
             >
               {sourceOptions.map((s) => (
                 <option key={s} value={s}>
@@ -151,11 +232,10 @@ export function POSCartSidebar({
             <button
               type="button"
               onClick={handleClearCart}
-              className={`text-[10px] font-black uppercase tracking-wider transition-all px-2.5 py-1 rounded-lg border ${
-                clearCartArmed
-                  ? "bg-red-500/20 border-red-500/50 text-red-400 animate-[pulse_0.5s_ease-in-out_infinite]"
-                  : "border-transparent text-red-400/60 hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/10"
-              }`}
+              className={`text-[10px] font-black uppercase tracking-wider transition-all px-2.5 py-1 rounded-lg border ${clearCartArmed
+                ? "bg-red-500/20 border-red-500/50 text-red-400 animate-[pulse_0.5s_ease-in-out_infinite]"
+                : "border-transparent text-red-400/60 hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/10"
+                }`}
             >
               {clearCartArmed ? "¿Confirmar?" : "Vaciar"}
             </button>
@@ -299,10 +379,10 @@ export function POSCartSidebar({
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmittingCart || isSubmittingCheckout}
               className="w-full rounded-xl bg-primary py-3.5 text-black font-black text-sm hover:brightness-105 active:scale-[0.98] transition-all uppercase tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {isSubmitting ? (
+              {isSubmittingCart || isSubmittingCheckout ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   GUARDANDO...

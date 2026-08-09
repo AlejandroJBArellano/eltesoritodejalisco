@@ -1,35 +1,103 @@
-import React from "react";
-import { X, Plus, Trash2 } from "lucide-react";
-import { Order, MenuItem, OrderItemDraft } from "@/types/pos";
+import { Plus, Trash2, X } from "lucide-react";
 
-interface POSAddItemsModalProps {
-  editingOrder: Order | null;
-  setEditingOrder: (order: Order | null) => void;
-  handleAddItems: (e: React.FormEvent) => void;
-  additionalItems: { menuItemId: string; quantity: string }[];
-  addAdditionalItemRow: () => void;
-  handleAdditionalItemChange: (
-    index: number,
-    field: keyof OrderItemDraft,
-    value: string,
-  ) => void;
-  removeAdditionalItemRow: (index: number) => void;
-  availableMenuItems: MenuItem[];
-  isSubmitting: boolean;
-}
+import { usePOSCart } from "@/hooks/pos/usePOSCart";
+import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
+import { usePOSData } from "@/hooks/pos/usePOSData";
 
-export function POSAddItemsModal({
-  editingOrder,
-  setEditingOrder,
-  handleAddItems,
-  additionalItems,
-  addAdditionalItemRow,
-  handleAdditionalItemChange,
-  removeAdditionalItemRow,
-  availableMenuItems,
-  isSubmitting,
-}: POSAddItemsModalProps) {
-  if (!editingOrder) return null;
+export function POSAddItemsModal() {
+  const {
+    availableMenuItems,
+    customers,
+    isLoading,
+    ordersLoading,
+    errorMessage,
+    activeCategory,
+    setActiveCategory,
+    searchQuery,
+    setSearchQuery,
+    categories,
+    filteredMenuItems,
+    nextFolioDisplay,
+    refreshOrders,
+    lowStockItems,
+  } = usePOSData();
+
+  const {
+    formState,
+    formErrors,
+    cartError,
+    editingOrder,
+    setEditingOrder,
+    additionalItems,
+    modifyingOrder,
+    setModifyingOrder,
+    modifyItems,
+    mixedOrderMenuItem,
+    setMixedOrderMenuItem,
+    mixedFlavorCounts,
+    handleFormChange,
+    handleGridItemClick,
+    handleMixedFlavorChange,
+    handleMixedOrderConfirm,
+    handleQuantityChange,
+    handleItemNoteChange,
+    handleClearCart,
+    clearCartArmed,
+    openModifyModal,
+    handleModifyQuantityChange,
+    handleModifyRemoveItem,
+    handleSaveModifiedOrder,
+    addAdditionalItemRow,
+    handleAdditionalItemChange,
+    removeAdditionalItemRow,
+    handleAddItems,
+    handleCheckoutSubmit,
+    handleCancelOrder,
+    isSubmittingCart,
+  } = usePOSCart(availableMenuItems, refreshOrders);
+
+  const {
+    isSubmittingCheckout,
+    checkoutError,
+    checkoutOrder,
+    setCheckoutOrder,
+    paymentMethod,
+    setPaymentMethod,
+    receivedAmount,
+    setReceivedAmount,
+    showTicket,
+    setShowTicket,
+    showKitchenTicket,
+    setShowKitchenTicket,
+    tipType,
+    setTipType,
+    tipInput,
+    setTipInput,
+    tipAmountCalculated,
+    change,
+    unusualTipInfo,
+    setUnusualTipInfo,
+    showWhatsAppModal,
+    setShowWhatsAppModal,
+    whatsappNumber,
+    setWhatsappNumber,
+    generateWhatsAppMessage,
+    editingTipOrder,
+    setEditingTipOrder,
+    editTipType,
+    setEditTipType,
+    editTipInput,
+    setEditTipInput,
+    editTipAmountCalculated,
+    showSplitBill,
+    setShowSplitBill,
+    billingOrder,
+    setBillingOrder,
+    handleProcessPayment,
+    handleSplitPayment,
+    handleUpdateTip,
+    handleFailedPayment,
+  } = usePOSCheckout(refreshOrders);
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
@@ -37,12 +105,12 @@ export function POSAddItemsModal({
         <div className="flex justify-between items-center border-b border-border pb-3">
           <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)] animate-pulse"></span>
-            Agregar Productos a Orden #{editingOrder.orderNumber}
+            Agregar Productos a Orden #{editingOrder!.orderNumber}
           </h3>
           <button
             type="button"
             onClick={() => setEditingOrder(null)}
-            disabled={isSubmitting}
+            disabled={isSubmittingCart}
             className="text-text-light/40 hover:text-text-light focus-visible:text-text-light focus-visible:bg-white/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-30 disabled:pointer-events-none transition-all p-1.5 rounded-lg hover:bg-white/10"
             aria-label="Cerrar"
           >
@@ -59,7 +127,7 @@ export function POSAddItemsModal({
               <button
                 type="button"
                 onClick={addAdditionalItemRow}
-                disabled={isSubmitting}
+                disabled={isSubmittingCart}
                 className="text-xs text-primary font-black uppercase tracking-wider flex items-center gap-1 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none rounded px-1 transition-all disabled:opacity-40 disabled:pointer-events-none"
               >
                 <Plus className="h-3.5 w-3.5" /> Fila
@@ -70,7 +138,7 @@ export function POSAddItemsModal({
               <div key={index} className="flex gap-2 items-center">
                 <select
                   value={item.menuItemId}
-                  disabled={isSubmitting}
+                  disabled={isSubmittingCart}
                   onChange={(e) =>
                     handleAdditionalItemChange(
                       index,
@@ -93,7 +161,7 @@ export function POSAddItemsModal({
                 <input
                   type="number"
                   value={item.quantity}
-                  disabled={isSubmitting}
+                  disabled={isSubmittingCart}
                   onChange={(e) =>
                     handleAdditionalItemChange(
                       index,
@@ -107,7 +175,7 @@ export function POSAddItemsModal({
                 />
                 <button
                   type="button"
-                  disabled={isSubmitting}
+                  disabled={isSubmittingCart}
                   onClick={() => removeAdditionalItemRow(index)}
                   className="text-red-400/60 hover:text-red-400 hover:bg-red-500/10 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 outline-none p-1.5 rounded-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
                 >
@@ -120,7 +188,7 @@ export function POSAddItemsModal({
           <div className="flex gap-3 pt-2">
             <button
               type="button"
-              disabled={isSubmitting}
+              disabled={isSubmittingCart}
               onClick={() => setEditingOrder(null)}
               className="w-full bg-white/5 text-text-light/60 py-3 rounded-xl font-black border border-border hover:bg-white/10 hover:text-text-light hover:border-text-light/30 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase text-xs tracking-wider"
             >
@@ -128,10 +196,10 @@ export function POSAddItemsModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmittingCart}
               className="w-full bg-purple-500 text-white py-3 rounded-xl font-black hover:brightness-110 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none transition-all uppercase text-xs tracking-wider shadow-lg shadow-purple-500/20 disabled:opacity-30 disabled:pointer-events-none"
             >
-              {isSubmitting ? "Guardando..." : "Agregar Productos"}
+              {isSubmittingCart ? "Guardando..." : "Agregar Productos"}
             </button>
           </div>
         </form>

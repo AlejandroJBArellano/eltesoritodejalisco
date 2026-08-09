@@ -40,99 +40,42 @@ import WhatsAppTicketPOS from "./WhatsAppTicketPOS";
 export default function POSPageClient({ tenantId }: { tenantId: string }) {
   const {
     availableMenuItems,
-    customers,
-    orders,
     isLoading,
     ordersLoading,
     errorMessage,
-    activeCategory,
-    setActiveCategory,
-    searchQuery,
-    setSearchQuery,
-    categories,
-    filteredMenuItems,
     nextFolioDisplay,
-    todayStats,
     refreshOrders,
     lowStockItems,
   } = usePOSData(tenantId);
 
   const {
     formState,
-    formErrors,
-    cartError,
     editingOrder,
-    setEditingOrder,
-    additionalItems,
     modifyingOrder,
-    setModifyingOrder,
-    modifyItems,
     mixedOrderMenuItem,
-    setMixedOrderMenuItem,
-    mixedFlavorCounts,
-    handleFormChange,
-    handleGridItemClick,
-    handleMixedFlavorChange,
-    handleMixedOrderConfirm,
-    handleQuantityChange,
-    handleItemNoteChange,
-    handleClearCart,
-    clearCartArmed,
-    openModifyModal,
-    handleModifyQuantityChange,
-    handleModifyRemoveItem,
-    handleSaveModifiedOrder,
-    addAdditionalItemRow,
-    handleAdditionalItemChange,
-    removeAdditionalItemRow,
-    handleAddItems,
     handleCheckoutSubmit,
     handleCancelOrder,
-    isSubmittingCart,
   } = usePOSCart(availableMenuItems, refreshOrders);
 
   const {
     isSubmittingCheckout,
-    checkoutError,
     checkoutOrder,
     setCheckoutOrder,
-    paymentMethod,
-    setPaymentMethod,
-    receivedAmount,
-    setReceivedAmount,
     showTicket,
     setShowTicket,
     showKitchenTicket,
     setShowKitchenTicket,
-    tipType,
-    setTipType,
-    tipInput,
-    setTipInput,
-    tipAmountCalculated,
-    change,
-    unusualTipInfo,
-    setUnusualTipInfo,
     showWhatsAppModal,
     setShowWhatsAppModal,
     whatsappNumber,
     setWhatsappNumber,
     generateWhatsAppMessage,
     editingTipOrder,
-    setEditingTipOrder,
-    editTipType,
-    setEditTipType,
-    editTipInput,
-    setEditTipInput,
-    editTipAmountCalculated,
     showSplitBill,
     setShowSplitBill,
     billingOrder,
     setBillingOrder,
-    handleProcessPayment,
     handleSplitPayment,
-    handleUpdateTip,
-    handleUndoPayment,
-    handleFailedPayment,
   } = usePOSCheckout(refreshOrders);
 
   // Two-step cancel order: stores the orderId being armed for cancel
@@ -187,15 +130,6 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
     setCancelArmedId(null);
     await handleCancelOrder(orderId);
   };
-
-  const sourceOptions = [
-    "TikTok",
-    "Instagram",
-    "Pasaba por ahí",
-    "Recomendación",
-    "Google Maps",
-    "Otro",
-  ];
 
   const onClickCancel = (orderId: string) => {
     cancelArmedId === orderId
@@ -270,15 +204,7 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
           className={`lg:col-span-7 xl:col-span-8 w-full min-w-0 space-y-4 ${activeTab === "menu" ? "block" : "hidden lg:block"}`}
         >
           <LowStockBanner items={lowStockItems} />
-          <POSMenuGrid
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            activeCategory={activeCategory}
-            setActiveCategory={setActiveCategory}
-            categories={categories}
-            filteredMenuItems={filteredMenuItems}
-            handleGridItemClick={handleGridItemClick}
-          />
+          <POSMenuGrid />
         </div>
 
         {/* SECCIÓN DEL CARRITO */}
@@ -292,20 +218,7 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
           }
           className={`lg:col-span-5 xl:col-span-4 h-full w-full min-w-0 ${activeTab === "cart" ? "block" : "hidden lg:block"}`}
         >
-          <POSCartSidebar
-            formState={formState}
-            handleFormChange={handleFormChange}
-            customers={customers}
-            sourceOptions={sourceOptions}
-            formErrors={formErrors}
-            cartError={cartError}
-            handleClearCart={handleClearCart}
-            clearCartArmed={clearCartArmed}
-            handleQuantityChange={handleQuantityChange}
-            handleItemNoteChange={handleItemNoteChange}
-            availableMenuItems={availableMenuItems}
-            isSubmitting={isSubmittingCart || isSubmittingCheckout}
-          />
+          <POSCartSidebar />
         </form>
       </main>
 
@@ -338,35 +251,11 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
       </section>
 
       {/* ALL MODALS */}
-      <POSAddItemsModal
-        editingOrder={editingOrder}
-        setEditingOrder={setEditingOrder}
-        handleAddItems={handleAddItems}
-        additionalItems={additionalItems}
-        addAdditionalItemRow={addAdditionalItemRow}
-        handleAdditionalItemChange={handleAdditionalItemChange}
-        removeAdditionalItemRow={removeAdditionalItemRow}
-        availableMenuItems={availableMenuItems}
-        isSubmitting={isSubmittingCart}
-      />
+      {editingOrder && <POSAddItemsModal />}
 
-      <POSModifyOrderModal
-        modifyingOrder={modifyingOrder}
-        setModifyingOrder={setModifyingOrder}
-        modifyItems={modifyItems}
-        handleModifyQuantityChange={handleModifyQuantityChange}
-        handleModifyRemoveItem={handleModifyRemoveItem}
-        handleSaveModifiedOrder={handleSaveModifiedOrder}
-        isSubmitting={isSubmittingCart}
-      />
+      {modifyingOrder && <POSModifyOrderModal />}
 
-      <POSMixedOrderModal
-        mixedOrderMenuItem={mixedOrderMenuItem}
-        setMixedOrderMenuItem={setMixedOrderMenuItem}
-        mixedFlavorCounts={mixedFlavorCounts}
-        handleMixedFlavorChange={handleMixedFlavorChange}
-        handleMixedOrderConfirm={handleMixedOrderConfirm}
-      />
+      {mixedOrderMenuItem && <POSMixedOrderModal />}
 
       {(showTicket || showKitchenTicket) && checkoutOrder && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-md print-modal-container">
@@ -420,29 +309,8 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
         </div>
       )}
 
-      {!showTicket && !showKitchenTicket && (
-        <POSCheckoutModal
-          checkoutOrder={checkoutOrder}
-          setCheckoutOrder={setCheckoutOrder}
-          tipAmountCalculated={tipAmountCalculated}
-          tipType={tipType}
-          setTipType={setTipType}
-          tipInput={tipInput}
-          setTipInput={setTipInput}
-          paymentMethod={paymentMethod}
-          setPaymentMethod={setPaymentMethod}
-          receivedAmount={receivedAmount}
-          setReceivedAmount={setReceivedAmount}
-          change={change}
-          handleProcessPayment={handleProcessPayment}
-          isSubmitting={isSubmittingCheckout}
-          setShowSplitBill={setShowSplitBill}
-          openModifyModal={openModifyModal}
-          handleFailedPayment={handleFailedPayment}
-          checkoutError={checkoutError}
-          unusualTipInfo={unusualTipInfo}
-          setUnusualTipInfo={setUnusualTipInfo}
-        />
+      {!showTicket && !showKitchenTicket && checkoutOrder && (
+        <POSCheckoutModal />
       )}
 
       {showWhatsAppModal && checkoutOrder && (
@@ -478,17 +346,7 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
         />
       )}
 
-      <POSTipModal
-        editingTipOrder={editingTipOrder}
-        setEditingTipOrder={setEditingTipOrder}
-        editTipType={editTipType}
-        setEditTipType={setEditTipType}
-        editTipInput={editTipInput}
-        setEditTipInput={setEditTipInput}
-        editTipAmountCalculated={editTipAmountCalculated}
-        handleUpdateTip={handleUpdateTip}
-        isSubmitting={isSubmittingCheckout}
-      />
+      {editingTipOrder && <POSTipModal />}
 
       {/* Barra flotante para móviles cuando el carrito tiene ítems y estamos en la pestaña del catálogo */}
       {totalCartItems > 0 && activeTab === "menu" && (

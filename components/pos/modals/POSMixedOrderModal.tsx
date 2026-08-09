@@ -1,28 +1,24 @@
-import React from "react";
-import { X, Minus, Plus, UtensilsCrossed } from "lucide-react";
+import { usePOSCart } from "@/hooks/pos/usePOSCart";
+import { usePOSData } from "@/hooks/pos/usePOSData";
 import {
-  MenuItem,
-  MIXED_ORDER_TOTAL,
   MIXED_ORDER_FLAVORS,
-  MixedFlavor,
+  MIXED_ORDER_TOTAL
 } from "@/types/pos";
+import { Minus, Plus, UtensilsCrossed, X } from "lucide-react";
 
-interface POSMixedOrderModalProps {
-  mixedOrderMenuItem: MenuItem | null;
-  setMixedOrderMenuItem: (item: MenuItem | null) => void;
-  mixedFlavorCounts: Record<MixedFlavor, number>;
-  handleMixedFlavorChange: (flavor: MixedFlavor, delta: number) => void;
-  handleMixedOrderConfirm: () => void;
-}
+export function POSMixedOrderModal() {
+  const {
+    availableMenuItems,
+    refreshOrders,
+  } = usePOSData();
 
-export function POSMixedOrderModal({
-  mixedOrderMenuItem,
-  setMixedOrderMenuItem,
-  mixedFlavorCounts,
-  handleMixedFlavorChange,
-  handleMixedOrderConfirm,
-}: POSMixedOrderModalProps) {
-  if (!mixedOrderMenuItem) return null;
+  const {
+    mixedOrderMenuItem,
+    setMixedOrderMenuItem,
+    mixedFlavorCounts,
+    handleMixedFlavorChange,
+    handleMixedOrderConfirm,
+  } = usePOSCart(availableMenuItems, refreshOrders);
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
@@ -30,7 +26,7 @@ export function POSMixedOrderModal({
         <div className="flex justify-between items-center border-b border-border pb-3">
           <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
             <UtensilsCrossed className="h-4 w-4 text-amber-400" />
-            {mixedOrderMenuItem.name}
+            {mixedOrderMenuItem!.name}
           </h3>
           <button
             type="button"
@@ -91,11 +87,10 @@ export function POSMixedOrderModal({
             return (
               <div
                 key={i}
-                className={`w-3.5 h-3.5 rounded-full border transition-all ${
-                  filled
-                    ? "bg-primary border-primary shadow-sm shadow-primary/50"
-                    : "border-white/20 bg-transparent"
-                }`}
+                className={`w-3.5 h-3.5 rounded-full border transition-all ${filled
+                  ? "bg-primary border-primary shadow-sm shadow-primary/50"
+                  : "border-white/20 bg-transparent"
+                  }`}
               />
             );
           })}
