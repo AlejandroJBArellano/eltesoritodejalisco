@@ -56,9 +56,33 @@ export function getTenantSlugFromHost(host: string | null): string | null {
   return null;
 }
 
-// Cached function to fetch tenant details from the database based on the slug
+/** Process-level in-memory cache for tenant lookups.
+ *  react.cache() only survives a single render tree — it does NOT persist
+ *  between Route Handler invocations. This Map lives in the Node.js worker
+ *  process and eliminates the DB round-trip (~60-80ms) for every API request
+ *  once the tenant has been fetched once.
+ *  TTL: 5 minutes — safe for config data that rarely changes.
+ */
+const TENANT_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min
+
+interface TenantCacheEntry {
+  data: TenantContextType;
+  expiresAt: number;
+}
+
+const tenantMemoryCache = new Map<string, TenantCacheEntry>();
+
+// Cached function to fetch tenant details from the database based on the slug.
+// react.cache() deduplicates concurrent calls within the same render pass;
+// tenantMemoryCache deduplicates across requests within the same worker process.
 export const getTenantBySlug = cache(
   async (slug: string): Promise<TenantContextType | null> => {
+    // 1. Check process-level cache first
+    const cached = tenantMemoryCache.get(slug);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
     try {
       const supabase = createAdminClient();
       const { data, error } = await supabase
@@ -72,7 +96,15 @@ export const getTenantBySlug = cache(
         return null;
       }
 
-      return data as TenantContextType;
+      const tenant = data as TenantContextType;
+
+      // 2. Populate process-level cache
+      tenantMemoryCache.set(slug, {
+        data: tenant,
+        expiresAt: Date.now() + TENANT_CACHE_TTL_MS,
+      });
+
+      return tenant;
     } catch (err) {
       console.error("Error in getTenantBySlug:", err);
       return null;
