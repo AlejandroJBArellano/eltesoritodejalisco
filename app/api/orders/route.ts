@@ -100,8 +100,8 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // 1. Create order + items in a single atomic RPC call.
-    //    The SQL function generates the order_number automatically.
-    const { data: orderId, error: rpcError } = await supabase.rpc(
+    //    The SQL function generates the order_number and returns the full nested order object.
+    const { data: fullOrder, error: rpcError } = await supabase.rpc(
       "create_order_with_items",
       {
         p_tenant_id: tenant.id,
@@ -119,26 +119,6 @@ export async function POST(request: NextRequest) {
     );
 
     if (rpcError) throw rpcError;
-
-    // 2. Fetch the full order with nested relations (single read)
-    const { data: fullOrder, error: fetchError } = await supabase
-      .from("orders")
-      .select(
-        `
-        *,
-        order_items (
-          *,
-          menu_items (*)
-        ),
-        payments (*),
-        customer:customers (*)
-      `,
-      )
-      .eq("id", orderId)
-      .eq("tenant_id", tenant.id)
-      .single();
-
-    if (fetchError) throw fetchError;
 
     return NextResponse.json({ order: fullOrder }, { status: 201 });
   } catch (error) {

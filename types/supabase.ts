@@ -1241,7 +1241,7 @@ export type Database = {
           p_table?: string
           p_tenant_id: string
         }
-        Returns: string
+        Returns: Json
       }
       fn_deduct_inventory_for_order: {
         Args: { p_order_id: string }
