@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import ErrorPOS from "./ErrorPOS";
+import LoadingOrdersPOS from "./LoadingOrdersPOS";
 import LoadingPOS from "./LoadingPOS";
 import NoOrdersPOS from "./NoOrdersPOS";
 import WhatsAppTicketPOS from "./WhatsAppTicketPOS";
@@ -327,16 +328,7 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
         </div>
 
         {ordersLoading ? (
-          /* Skeleton while orders are streaming in */
-          <div className="space-y-3 py-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-12 rounded-xl bg-card-light/60 animate-pulse"
-                style={{ opacity: 1 - i * 0.2 }}
-              />
-            ))}
-          </div>
+          <LoadingOrdersPOS />
         ) : (
           <>
             <div className="hidden md:block overflow-x-auto">
