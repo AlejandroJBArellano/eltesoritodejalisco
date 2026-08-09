@@ -2,6 +2,7 @@ import { isMixedOrderItem, usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { MenuItem } from "@/types/pos";
 import { Package, PackageSearch, Plus, Search, X } from "lucide-react";
+import { memo } from "react";
 
 const CATEGORY_CONFIG: Record<
   string,
@@ -61,19 +62,15 @@ function getStockStatus(item: MenuItem): "out" | "low" | "ok" | "untracked" {
 
 export function POSMenuGrid() {
   const {
-    availableMenuItems,
     activeCategory,
     setActiveCategory,
     searchQuery,
     setSearchQuery,
     categories,
     filteredMenuItems,
-    refreshOrders,
   } = usePOSData();
 
-  const {
-    handleGridItemClick,
-  } = usePOSCart(availableMenuItems, refreshOrders);
+  const { handleGridItemClick } = usePOSCart();
   return (
     <section className="rounded-2xl bg-card p-4 sm:p-6 shadow-sm border border-border space-y-5 w-full overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
@@ -83,7 +80,7 @@ export function POSMenuGrid() {
         </h2>
 
         {/* Buscador Rápido */}
-        <div className="relative min-w-[220px]">
+        <div className="relative min-w-55">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light/40" />
           <input
             type="text"
@@ -149,76 +146,84 @@ export function POSMenuGrid() {
             </p>
           </div>
         ) : (
-          filteredMenuItems.map((m) => {
-            const isMixed = isMixedOrderItem(m.name);
-            const stockStatus = getStockStatus(m);
-            const isOutOfStock = stockStatus === "out";
-            const isLowStock = stockStatus === "low";
-
-            return (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => handleGridItemClick(m)}
-                className={`group relative rounded-2xl bg-card-light p-4 border transition-all shadow-sm flex flex-col justify-between text-left h-28 overflow-hidden active:scale-95 ${isOutOfStock
-                  ? "border-red-500/25 hover:border-red-500/50 hover:shadow-md hover:-translate-y-0.5"
-                  : isLowStock
-                    ? "border-amber-500/30 hover:border-amber-500/60 hover:shadow-md hover:-translate-y-0.5"
-                    : "border-border hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5"
-                  }`}
-              >
-                {/* Sin Stock warning badge — visual only, no bloqueo */}
-                {isOutOfStock && (
-                  <span className="absolute top-2 right-2 z-10 rounded-md bg-red-500/20 border border-red-500/30 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-red-400">
-                    Sin Stock
-                  </span>
-                )}
-
-                <div className="flex items-start justify-between gap-1 w-full">
-                  <span
-                    className={`font-black text-xs uppercase tracking-tight leading-snug line-clamp-2 transition-colors ${isOutOfStock
-                      ? "text-text-light/60 group-hover:text-red-300"
-                      : "text-text-light group-hover:text-primary"
-                      }`}
-                  >
-                    {m.name}
-                  </span>
-                  {isMixed && !isOutOfStock && (
-                    <span className="rounded-full bg-amber-500/10 text-amber-400 text-[9px] font-black px-1.5 py-0.5 uppercase tracking-widest shrink-0 border border-amber-500/20">
-                      Mixto
-                    </span>
-                  )}
-                </div>
-
-                <div className="mt-2 flex items-center justify-between w-full gap-1 flex-wrap">
-                  <span className="rounded-xl bg-white/5 border border-border px-2.5 py-1 text-xs font-black text-text-light tabular-nums">
-                    ${m.price.toFixed(2)}
-                  </span>
-
-                  {/* Stock badge — only when ingredient is tracked */}
-                  {stockStatus !== "untracked" && (
-                    <span
-                      className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-black tabular-nums border ${isOutOfStock
-                        ? "bg-red-500/10 border-red-500/20 text-red-400"
-                        : isLowStock
-                          ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                        }`}
-                    >
-                      <Package className="h-2.5 w-2.5 shrink-0" />
-                      {m.currentStock}
-                    </span>
-                  )}
-
-                  <span className="rounded-lg bg-primary/10 p-1.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
-                    <Plus className="h-3.5 w-3.5" />
-                  </span>
-                </div>
-              </button>
-            );
-          })
+          filteredMenuItems.map((m) => (
+            <MenuItemCard key={m.id} item={m} onClick={handleGridItemClick} />
+          ))
         )}
       </div>
     </section>
   );
 }
+
+interface MenuItemCardProps {
+  item: MenuItem;
+  onClick: (item: MenuItem) => void;
+}
+
+const MenuItemCard = memo(function MenuItemCard({ item: m, onClick }: MenuItemCardProps) {
+  const isMixed = isMixedOrderItem(m.name);
+  const stockStatus = getStockStatus(m);
+  const isOutOfStock = stockStatus === "out";
+  const isLowStock = stockStatus === "low";
+
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(m)}
+      className={`group relative rounded-2xl bg-card-light p-4 border transition-all shadow-sm flex flex-col justify-between text-left h-28 overflow-hidden active:scale-95 ${isOutOfStock
+        ? "border-red-500/25 hover:border-red-500/50 hover:shadow-md hover:-translate-y-0.5"
+        : isLowStock
+          ? "border-amber-500/30 hover:border-amber-500/60 hover:shadow-md hover:-translate-y-0.5"
+          : "border-border hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5"
+        }`}
+    >
+      {/* Sin Stock warning badge — visual only, no bloqueo */}
+      {isOutOfStock && (
+        <span className="absolute top-2 right-2 z-10 rounded-md bg-red-500/20 border border-red-500/30 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-red-400">
+          Sin Stock
+        </span>
+      )}
+
+      <div className="flex items-start justify-between gap-1 w-full">
+        <span
+          className={`font-black text-xs uppercase tracking-tight leading-snug line-clamp-2 transition-colors ${isOutOfStock
+            ? "text-text-light/60 group-hover:text-red-300"
+            : "text-text-light group-hover:text-primary"
+            }`}
+        >
+          {m.name}
+        </span>
+        {isMixed && !isOutOfStock && (
+          <span className="rounded-full bg-amber-500/10 text-amber-400 text-[9px] font-black px-1.5 py-0.5 uppercase tracking-widest shrink-0 border border-amber-500/20">
+            Mixto
+          </span>
+        )}
+      </div>
+
+      <div className="mt-2 flex items-center justify-between w-full gap-1 flex-wrap">
+        <span className="rounded-xl bg-white/5 border border-border px-2.5 py-1 text-xs font-black text-text-light tabular-nums">
+          ${m.price.toFixed(2)}
+        </span>
+
+        {/* Stock badge — only when ingredient is tracked */}
+        {stockStatus !== "untracked" && (
+          <span
+            className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-black tabular-nums border ${isOutOfStock
+              ? "bg-red-500/10 border-red-500/20 text-red-400"
+              : isLowStock
+                ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+              }`}
+          >
+            <Package className="h-2.5 w-2.5 shrink-0" />
+            {m.currentStock}
+          </span>
+        )}
+
+        <span className="rounded-lg bg-primary/10 p-1.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+          <Plus className="h-3.5 w-3.5" />
+        </span>
+      </div>
+    </button>
+  );
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React, { useState, useEffect, useMemo, createContext, useContext } from "react";
 import {
   Order,
   OrderFormState,
@@ -89,6 +89,23 @@ function usePOSCartInternal(
 
   // Two-step clear cart: null = idle, true = armed (waiting for confirm click)
   const [clearCartArmed, setClearCartArmed] = useState(false);
+  // Ref to cancel the auto-reset timer on unmount
+  const clearCartArmRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /** Pre-computed cart totals — avoids double .reduce() in consuming components */
+  const totalCartItems = useMemo(
+    () => formState.items.reduce((sum, item) => sum + Number(item.quantity), 0),
+    [formState.items],
+  );
+
+  const cartTotal = useMemo(
+    () =>
+      formState.items.reduce((total, item) => {
+        const product = availableMenuItems.find((m) => m.id === item.menuItemId);
+        return total + (product?.price || 0) * Number(item.quantity);
+      }, 0),
+    [formState.items, availableMenuItems],
+  );
 
   // Initializing default empty cart
   useEffect(() => {
@@ -208,9 +225,10 @@ function usePOSCartInternal(
   const handleClearCart = () => {
     if (!clearCartArmed) {
       setClearCartArmed(true);
-      setTimeout(() => setClearCartArmed(false), 3000);
+      clearCartArmRef.current = setTimeout(() => setClearCartArmed(false), 3000);
       return;
     }
+    if (clearCartArmRef.current) clearTimeout(clearCartArmRef.current);
     setFormState((prev) => ({ ...prev, items: [] }));
     setClearCartArmed(false);
   };
@@ -444,6 +462,8 @@ function usePOSCartInternal(
     handleItemNoteChange,
     handleClearCart,
     clearCartArmed,
+    totalCartItems,
+    cartTotal,
 
     // Mixed Order
     mixedOrderMenuItem,

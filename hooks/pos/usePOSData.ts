@@ -71,15 +71,19 @@ function usePOSDataInternal(tenantId?: string) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);      // gates the POS UI (menu + customers)
+  const [menuLoading, setMenuLoading] = useState(true);
+  const [customersLoading, setCustomersLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true); // non-blocking: orders section only
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Derived: gate the POS UI only on menu + customers being ready
+  const isLoading = menuLoading || customersLoading;
 
   // Stabilise Supabase client across renders
   const supabase = useMemo(() => createClient(), []);
   // Debounce refs to batch rapid realtime events
-  const fetchDebounceRef = useRef<NodeJS.Timeout | null>(null);
-  const menuDebounceRef  = useRef<NodeJS.Timeout | null>(null);
+  const fetchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const menuDebounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const availableMenuItems = useMemo(
     () => menuItems.filter((item) => item.isAvailable),
@@ -118,7 +122,7 @@ function usePOSDataInternal(tenantId?: string) {
     });
   }, [availableMenuItems, searchQuery, activeCategory]);
 
-  const categories = useMemo(() => CATEGORY_ORDER, []);
+  const categories = CATEGORY_ORDER;
 
   const fetchMenu = useCallback(async () => {
     const response = await fetch("/api/menu");
@@ -136,13 +140,13 @@ function usePOSDataInternal(tenantId?: string) {
     );
   }, []);
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     const response = await fetch("/api/customers");
     const data = await response.json();
     if (!response.ok)
       throw new Error(data?.error || "Error al cargar clientes");
     setCustomers(data.customers || []);
-  };
+  }, []);
 
   const fetchOrders = useCallback(async () => {
     const response = await fetch("/api/orders?pos=true");
@@ -171,18 +175,21 @@ function usePOSDataInternal(tenantId?: string) {
   useEffect(() => {
     async function load() {
       try {
-        setIsLoading(true);
+        setMenuLoading(true);
+        setCustomersLoading(true);
         setOrdersLoading(true);
-        await Promise.all([fetchMenu(), fetchCustomers(), fetchOrders()]);
+        // Menu and customers gate the main UI; orders are non-blocking
+        await Promise.all([
+          fetchMenu().finally(() => setMenuLoading(false)),
+          fetchCustomers().finally(() => setCustomersLoading(false)),
+          fetchOrders().finally(() => setOrdersLoading(false)),
+        ]);
       } catch (err) {
         setErrorMessage(err instanceof Error ? err.message : "Error al cargar datos");
-      } finally {
-        setIsLoading(false);
-        setOrdersLoading(false);
       }
     }
     load();
-  }, [fetchOrders, fetchMenu]);
+  }, [fetchOrders, fetchMenu, fetchCustomers]);
 
   // Realtime subscription: any INSERT/UPDATE/DELETE on orders for this tenant
   // triggers a debounced refetch, so the POS stays in sync without manual refresh.

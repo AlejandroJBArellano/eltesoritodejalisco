@@ -15,22 +15,24 @@ export async function GET() {
   try {
     const tenant = await getTenantContext();
     const supabase = await createClient();
-    const { data: items, error } = await supabase
-      .from("menu_items")
-      .select("*, translations, ingredients(id, current_stock, minimum_stock)")
-      .eq("tenant_id", tenant.id)
-      .order("name", { ascending: true });
+
+    // Run both queries in parallel — they are independent
+    const [{ data: items, error }, { data: popularData }] = await Promise.all([
+      supabase
+        .from("menu_items")
+        .select("*, translations, ingredients(id, current_stock, minimum_stock)")
+        .eq("tenant_id", tenant.id)
+        .order("name", { ascending: true }),
+      supabase
+        .from("popular_menu_items")
+        .select("menu_item_id")
+        .eq("tenant_id", tenant.id)
+        .gte("order_count", 5)
+        .order("order_count", { ascending: false })
+        .limit(5),
+    ]);
 
     if (error) throw error;
-
-    // Fetch only the top 5 most ordered item IDs from the database view
-    const { data: popularData } = await supabase
-      .from("popular_menu_items")
-      .select("menu_item_id")
-      .eq("tenant_id", tenant.id)
-      .gte("order_count", 5)
-      .order("order_count", { ascending: false })
-      .limit(5);
 
     const popularIds = new Set((popularData || []).map((row) => row.menu_item_id));
 

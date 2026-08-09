@@ -181,4 +181,57 @@ describe("usePOSCart Hook", () => {
     });
     expect(result.current.mixedFlavorCounts.Pastor).toBe(0); // stayed 0
   });
+
+  it("totalCartItems should reflect the sum of all item quantities", () => {
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
+    // Empty cart → 0
+    expect(result.current.totalCartItems).toBe(0);
+
+    // Add 1x Taco Pastor
+    act(() => {
+      result.current.handleGridItemClick(mockMenuItems[0]);
+    });
+    expect(result.current.totalCartItems).toBe(1);
+
+    // Add 1x Gringa
+    act(() => {
+      result.current.handleGridItemClick(mockMenuItems[1]);
+    });
+    expect(result.current.totalCartItems).toBe(2);
+
+    // Increment Taco Pastor quantity by 2 more
+    act(() => {
+      result.current.handleQuantityChange(0, 1);
+    });
+    act(() => {
+      result.current.handleQuantityChange(0, 1);
+    });
+    expect(result.current.totalCartItems).toBe(4); // 3x Taco + 1x Gringa
+  });
+
+  it("cartTotal should reflect item prices × quantities", () => {
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
+    // Empty cart → 0
+    expect(result.current.cartTotal).toBe(0);
+
+    // Add 2x Taco Pastor ($20 each) + 1x Gringa ($35)
+    act(() => {
+      result.current.handleGridItemClick(mockMenuItems[0]); // 1x $20
+    });
+    act(() => {
+      result.current.handleGridItemClick(mockMenuItems[0]); // now 2x $20
+    });
+    act(() => {
+      result.current.handleGridItemClick(mockMenuItems[1]); // 1x $35
+    });
+
+    // Expected: 2*20 + 1*35 = 75
+    expect(result.current.cartTotal).toBe(75);
+  });
 });

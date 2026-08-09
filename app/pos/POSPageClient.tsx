@@ -3,7 +3,7 @@
 import { POSCartProvider, usePOSCart } from "@/hooks/pos/usePOSCart";
 import { POSCheckoutProvider, usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { POSDataProvider, usePOSData } from "@/hooks/pos/usePOSData";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { POSCartSidebar } from "@/components/pos/POSCartSidebar";
 import { POSMenuGrid } from "@/components/pos/POSMenuGrid";
@@ -60,7 +60,6 @@ function POSCartAndCheckoutProviders({ children }: { children: React.ReactNode }
 
 function POSPageContent() {
   const {
-    availableMenuItems,
     isLoading,
     ordersLoading,
     errorMessage,
@@ -74,6 +73,8 @@ function POSPageContent() {
     mixedOrderMenuItem,
     handleCheckoutSubmit,
     handleCancelOrder,
+    totalCartItems,
+    cartTotal,
   } = usePOSCart();
 
   const {
@@ -99,6 +100,7 @@ function POSPageContent() {
 
   // Two-step cancel order: stores the orderId being armed for cancel
   const [cancelArmedId, setCancelArmedId] = useState<string | null>(null);
+  const cancelArmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [activeTab, setActiveTab] = useState<"menu" | "cart">("menu");
   const [isDownloadingImage, setIsDownloadingImage] = useState(false);
 
@@ -141,11 +143,13 @@ function POSPageContent() {
   };
 
   const handleCancelArm = (orderId: string) => {
+    if (cancelArmTimerRef.current) clearTimeout(cancelArmTimerRef.current);
     setCancelArmedId(orderId);
-    setTimeout(() => setCancelArmedId(null), 3000);
+    cancelArmTimerRef.current = setTimeout(() => setCancelArmedId(null), 3000);
   };
 
   const handleCancelConfirm = async (orderId: string) => {
+    if (cancelArmTimerRef.current) clearTimeout(cancelArmTimerRef.current);
     setCancelArmedId(null);
     await handleCancelOrder(orderId);
   };
@@ -166,14 +170,6 @@ function POSPageContent() {
     );
   }
 
-  const totalCartItems = formState.items.reduce(
-    (sum, item) => sum + Number(item.quantity),
-    0,
-  );
-  const cartTotal = formState.items.reduce((total, item) => {
-    const product = availableMenuItems.find((m) => m.id === item.menuItemId);
-    return total + (product?.price || 0) * Number(item.quantity);
-  }, 0);
 
   return (
     <div className="space-y-2 lg:space-y-6 pb-20 pos-client-root">

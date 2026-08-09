@@ -13,22 +13,38 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const statusParam = searchParams.get("status");
+    const posParam = searchParams.get("pos");
 
     const tenant = await getTenantContext();
     const supabase = await createClient();
+
+    // POS view uses a narrower select — only columns read by mapOrderData
+    const selectFields = posParam === "true"
+      ? `
+          id, order_number, customer_id, source, status, table, notes,
+          subtotal, tax, total, created_at, updated_at, completed_at,
+          corte_id, estado_cierre, operational_date, pickup_time,
+          order_items (
+            id, order_id, menu_item_id, quantity, unit_price, notes, status,
+            tiempo_preparacion_segundos, created_at,
+            menu_items ( id, name, price, image_url, is_available )
+          ),
+          payments ( id, order_id, method, amount, received_amount, change, tip_amount, created_at ),
+          customer:customers ( id, name, email, phone )
+        `
+      : `
+          *,
+          order_items (
+            *,
+            menu_items (*)
+          ),
+          payments (*),
+          customer:customers (*)
+        `;
+
     let query = supabase
       .from("orders")
-      .select(
-        `
-        *,
-        order_items (
-          *,
-          menu_items (*)
-        ),
-        payments (*),
-        customer:customers (*)
-      `,
-      )
+      .select(selectFields)
       .eq("tenant_id", tenant.id)
       .order("created_at", { ascending: false });
 
@@ -37,7 +53,6 @@ export async function GET(request: NextRequest) {
       query = query.in("status", statuses);
     }
 
-    const posParam = searchParams.get("pos");
     if (posParam === "true") {
       const today = getCurrentCDMXDay();
       query = query.or(`operational_date.eq.${today},and(corte_id.is.null,estado_cierre.neq.ARCHIVADA)`);
