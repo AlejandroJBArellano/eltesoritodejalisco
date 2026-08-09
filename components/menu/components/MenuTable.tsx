@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   TableHeaderSortCell,
   TablePagination,
@@ -91,10 +92,11 @@ export function MenuTable({
               >
                 <td className="py-3 px-4">
                   {item.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={item.imageUrl}
                       alt={item.name}
+                      width={40}
+                      height={40}
                       className="h-10 w-10 rounded-xl object-cover border border-border"
                     />
                   ) : (
