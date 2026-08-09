@@ -1,25 +1,16 @@
 import { Plus, Globe, ArrowUp, ArrowDown, Pencil, Trash2 } from "lucide-react";
-import { MenuCategory } from "../types";
+import { useMenuCategories } from "../hooks/useMenuCategories";
 
-interface CategoriesPanelProps {
-  menuCategories: MenuCategory[];
-  isSubmitting: boolean;
-  deleteArmedCategoryId: string | null;
-  onOpenCreate: () => void;
-  onOpenEdit: (cat: MenuCategory) => void;
-  onDelete: (id: string) => void;
-  onMoveOrder: (index: number, direction: "up" | "down") => void;
-}
+export function CategoriesPanel() {
+  const {
+    menuCategories,
+    isSubmitting,
+    deleteArmedCategoryId,
+    openCategoryModal,
+    handleDeleteCategory: onDelete,
+    handleMoveCategoryOrder: onMoveOrder,
+  } = useMenuCategories();
 
-export function CategoriesPanel({
-  menuCategories,
-  isSubmitting,
-  deleteArmedCategoryId,
-  onOpenCreate,
-  onOpenEdit,
-  onDelete,
-  onMoveOrder,
-}: CategoriesPanelProps) {
   return (
     <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
       <div className="flex items-center justify-between border-b border-border pb-4">
@@ -28,7 +19,7 @@ export function CategoriesPanel({
           Categorías ({menuCategories.length})
         </h2>
         <button
-          onClick={onOpenCreate}
+          onClick={() => openCategoryModal()}
           className="text-xs font-black text-amber-400 hover:text-amber-300 flex items-center gap-1.5 cursor-pointer transition-colors duration-200"
         >
           <Plus className="h-3.5 w-3.5" />
@@ -81,7 +72,7 @@ export function CategoriesPanel({
                 </button>
                 {/* Edit */}
                 <button
-                  onClick={() => onOpenEdit(cat)}
+                  onClick={() => openCategoryModal(cat)}
                   className="rounded-lg p-1.5 text-text-light/60 hover:text-text-light hover:bg-white/10 transition-all duration-150 active:scale-95 cursor-pointer"
                   title="Editar"
                 >

@@ -1,16 +1,27 @@
+import { useMemo } from "react";
 import { CheckCircle2, Filter, Utensils } from "lucide-react";
+import { useMenuItems } from "../hooks/useMenuItems";
+import { useMenuCategories } from "../hooks/useMenuCategories";
 
-interface MenuStatsCardsProps {
-  totalItems: number;
-  activeCount: number;
-  categoriesCount: number;
-}
+export function MenuStatsCards() {
+  const { items } = useMenuItems();
+  const { menuCategories } = useMenuCategories();
 
-export function MenuStatsCards({
-  totalItems,
-  activeCount,
-  categoriesCount,
-}: MenuStatsCardsProps) {
+  const totalItems = items.length;
+  const activeCount = useMemo(
+    () => items.filter((i) => i.isAvailable).length,
+    [items],
+  );
+
+  const categoriesCount = useMemo(() => {
+    const set = new Set<string>();
+    menuCategories.forEach((c) => set.add(c.name));
+    items.forEach((i) => {
+      if (i.category) set.add(i.category);
+    });
+    return set.size;
+  }, [menuCategories, items]);
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
