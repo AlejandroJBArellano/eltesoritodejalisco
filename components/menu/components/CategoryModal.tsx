@@ -1,31 +1,31 @@
-import { FormEvent } from "react";
+import React from "react";
 import { Tag, Globe } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
-import { CategoryFormState } from "../types";
+import { useMenuCategories } from "../hooks/useMenuCategories";
+import { useMenuItems } from "../hooks/useMenuItems";
 
-interface CategoryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
-  categoryForm: CategoryFormState;
-  categoryErrors: Record<string, string>;
-  isSubmitting: boolean;
-  onNameChange: (value: string) => void;
-  onNameEnChange: (value: string) => void;
-  onShowInPickupChange: (value: boolean) => void;
-}
+export function CategoryModal() {
+  const { handleFormChange } = useMenuItems();
+  const {
+    isCategoryModalOpen: isOpen,
+    setIsCategoryModalOpen,
+    handleCategorySubmit,
+    categoryForm,
+    categoryErrors,
+    isSubmitting,
+    setCategoryForm,
+  } = useMenuCategories();
 
-export function CategoryModal({
-  isOpen,
-  onClose,
-  onSubmit,
-  categoryForm,
-  categoryErrors,
-  isSubmitting,
-  onNameChange,
-  onNameEnChange,
-  onShowInPickupChange,
-}: CategoryModalProps) {
+  const onClose = () => setIsCategoryModalOpen(false);
+
+  const onSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    handleCategorySubmit(e, (newName) => {
+      if (newName) {
+        handleFormChange("category", newName);
+      }
+    });
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -43,7 +43,9 @@ export function CategoryModal({
           <input
             type="text"
             value={categoryForm.name}
-            onChange={(e) => onNameChange(e.target.value)}
+            onChange={(e) =>
+              setCategoryForm((p) => ({ ...p, name: e.target.value }))
+            }
             className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#66] outline-none focus:border-primary"
             placeholder="Ej. ANTOJITOS"
           />
@@ -61,7 +63,9 @@ export function CategoryModal({
           <input
             type="text"
             value={categoryForm.nameEn}
-            onChange={(e) => onNameEnChange(e.target.value)}
+            onChange={(e) =>
+              setCategoryForm((p) => ({ ...p, nameEn: e.target.value }))
+            }
             className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#44] outline-none focus:border-blue-500"
             placeholder="e.g. Snacks"
           />
@@ -71,7 +75,9 @@ export function CategoryModal({
             type="checkbox"
             id="showInPickup"
             checked={categoryForm.showInPickup}
-            onChange={(e) => onShowInPickupChange(e.target.checked)}
+            onChange={(e) =>
+              setCategoryForm((p) => ({ ...p, showInPickup: e.target.checked }))
+            }
             className="h-4 w-4 rounded border-border bg-dark/40 text-amber-500 focus:ring-amber-500"
           />
           <label
@@ -98,7 +104,7 @@ export function CategoryModal({
               ? "Guardando..."
               : categoryForm.id
                 ? "Actualizar"
-                : "Crear Categoría"}
+                : "Guardar"}
           </button>
         </div>
       </form>

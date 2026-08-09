@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useTransition } from "react";
 import {
   TableHeaderSortCell,
   TablePagination,
@@ -12,42 +14,57 @@ import {
   XCircle,
 } from "lucide-react";
 import { MenuItem, SortField } from "../types";
+import { useMenuItems } from "../hooks/useMenuItems";
+import { useRecipes } from "../hooks/useRecipes";
 
 interface MenuTableProps {
   paginatedItems: MenuItem[];
-  sortField: SortField;
-  sortDirection: "asc" | "desc";
-  currentPage: number;
   totalPages: number;
   totalItems: number;
-  pageSize: number;
-  deleteArmedItemId: string | null;
-  onSort: (field: SortField) => void;
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (size: number) => void;
-  onOpenRecipe: (itemId: string) => void;
-  onEdit: (item: MenuItem) => void;
-  onDelete: (itemId: string) => void;
 }
 
 export function MenuTable({
   paginatedItems,
-  sortField,
-  sortDirection,
-  currentPage,
   totalPages,
   totalItems,
-  pageSize,
-  deleteArmedItemId,
-  onSort,
-  onPageChange,
-  onPageSizeChange,
-  onOpenRecipe,
-  onEdit,
-  onDelete,
 }: MenuTableProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const rawSearchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  const { openEditProductModal, handleDelete: onDelete, deleteArmedItemId } = useMenuItems();
+  const { openRecipeModal: onOpenRecipe } = useRecipes();
+
+  const sortField = (rawSearchParams.get("sort") as SortField) || "name";
+  const sortDirection = (rawSearchParams.get("direction") as "asc" | "desc") || "asc";
+  const currentPage = Number(rawSearchParams.get("page")) || 1;
+  const pageSize = Number(rawSearchParams.get("pageSize")) || 10;
+
+  const updateSearchParam = (updates: Record<string, string | number | null>) => {
+    const params = new URLSearchParams(rawSearchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === "" || value === "all") {
+        params.delete(key);
+      } else {
+        params.set(key, String(value));
+      }
+    });
+    if (updates.page === undefined) {
+      params.delete("page");
+    }
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
+  };
+
+  const handleSort = (field: SortField) => {
+    const nextDirection = sortField === field && sortDirection === "asc" ? "desc" : "asc";
+    updateSearchParam({ sort: field, direction: nextDirection });
+  };
+
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}>
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-left text-sm">
           <thead className="bg-dark/40 text-xs uppercase tracking-wider text-text-light/60 border-b border-border">
@@ -58,28 +75,28 @@ export function MenuTable({
                 label="Nombre"
                 currentSortField={sortField}
                 sortDirection={sortDirection}
-                onSort={(f) => onSort(f as SortField)}
+                onSort={(f) => handleSort(f as SortField)}
               />
               <TableHeaderSortCell
                 field="category"
                 label="Categoría"
                 currentSortField={sortField}
                 sortDirection={sortDirection}
-                onSort={(f) => onSort(f as SortField)}
+                onSort={(f) => handleSort(f as SortField)}
               />
               <TableHeaderSortCell
                 field="price"
                 label="Precio"
                 currentSortField={sortField}
                 sortDirection={sortDirection}
-                onSort={(f) => onSort(f as SortField)}
+                onSort={(f) => handleSort(f as SortField)}
               />
               <TableHeaderSortCell
                 field="isAvailable"
                 label="Estado"
                 currentSortField={sortField}
                 sortDirection={sortDirection}
-                onSort={(f) => onSort(f as SortField)}
+                onSort={(f) => handleSort(f as SortField)}
               />
               <th className="py-3 px-4 font-bold text-right">Acciones</th>
             </tr>
@@ -151,7 +168,7 @@ export function MenuTable({
                       <BookOpen className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => onEdit(item)}
+                      onClick={() => openEditProductModal(item)}
                       className="rounded-lg bg-white/5 border border-border p-2 text-text-light/80 hover:text-white hover:bg-white/10 transition-colors"
                       title="Editar Producto"
                     >
@@ -198,10 +215,9 @@ export function MenuTable({
         totalPages={totalPages}
         totalItems={totalItems}
         pageSize={pageSize}
-        onPageChange={onPageChange}
+        onPageChange={(page) => updateSearchParam({ page })}
         onPageSizeChange={(size) => {
-          onPageSizeChange(size);
-          onPageChange(1);
+          updateSearchParam({ pageSize: size, page: 1 });
         }}
       />
     </div>

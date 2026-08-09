@@ -2,12 +2,12 @@
 
 import { PageHeader } from "@/components/PageHeader";
 import { BookOpen, Plus, RefreshCw, Tag } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { SubmitEvent, useMemo, useState, useTransition } from "react";
 
-import { useMenuCategories } from "./hooks/useMenuCategories";
-import { useMenuItems } from "./hooks/useMenuItems";
-import { useRecipes } from "./hooks/useRecipes";
+import { MenuCategoriesProvider, useMenuCategories } from "./hooks/useMenuCategories";
+import { MenuItemsProvider, useMenuItems } from "./hooks/useMenuItems";
+import { RecipesProvider, useRecipes } from "./hooks/useRecipes";
 
 import { CategoriesPanel } from "./components/CategoriesPanel";
 import { CategoryModal } from "./components/CategoryModal";
@@ -40,77 +40,48 @@ interface MenuContentProps {
   };
 }
 
-export function MenuContent({
+export function MenuContent(props: MenuContentProps) {
+  return (
+    <MenuItemsProvider items={props.items}>
+      <RecipesProvider items={props.items}>
+        <MenuCategoriesProvider initialCategories={props.initialMenuCategories}>
+          <MenuContentInner {...props} />
+        </MenuCategoriesProvider>
+      </RecipesProvider>
+    </MenuItemsProvider>
+  );
+}
+
+function MenuContentInner({
   items,
   paginatedItems,
-  categories,
-  activeCount,
   totalPages,
   totalItems,
-  initialMenuCategories,
   initialIngredients,
-  searchParams,
 }: MenuContentProps) {
   const router = useRouter();
-  const pathname = usePathname();
-  const rawSearchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const {
-    isSubmitting,
     errorMessage,
     setErrorMessage,
     isProductModalOpen,
-    setIsProductModalOpen,
-    showTranslations,
-    setShowTranslations,
-    formState,
-    formErrors,
-    isEditing,
-    imagePreview,
-    fileInputRef,
-    deleteArmedItemId,
     openNewProductModal,
-    openEditProductModal,
-    handleSubmit: handleProductSubmit,
-    handleDelete: handleProductDelete,
     handleFormChange,
-    handleFileChange,
-  } = useMenuItems(items);
+  } = useMenuItems();
 
   const {
     menuCategories,
     categoriesLoaded,
-    isSubmitting: isCategorySubmitting,
     errorMessage: categoryErrorMessage,
-    isCategoryModalOpen,
-    setIsCategoryModalOpen,
-    categoryForm,
-    setCategoryForm,
-    categoryErrors,
-    deleteArmedCategoryId,
     openCategoryModal,
-    handleCategorySubmit,
-    handleDeleteCategory,
-    handleMoveCategoryOrder,
-  } = useMenuCategories(initialMenuCategories);
+  } = useMenuCategories();
 
   const {
-    recipeItems,
-    selectedRecipeMenuItemId,
-    setSelectedRecipeMenuItemId,
-    recipeForm,
-    setRecipeForm,
-    recipeErrors,
-    isRecipeModalOpen,
-    setIsRecipeModalOpen,
-    isSubmitting: isRecipeSubmitting,
-    deleteArmedRecipeId,
-    fetchRecipes,
     openRecipeModal,
-    handleRecipeSubmit,
-    deleteRecipe,
-  } = useRecipes(items);
+    isRecipeModalOpen,
+    setRecipeForm,
+  } = useRecipes();
 
   // Ingredient modal state
   const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
@@ -118,39 +89,11 @@ export function MenuContent({
   const [ingredientErrors, setIngredientErrors] = useState<Record<string, string>>({});
   const [isIngredientSubmitting, setIsIngredientSubmitting] = useState(false);
 
-
-
-  const updateSearchParam = (updates: Record<string, string | number | null>) => {
-    const params = new URLSearchParams(rawSearchParams.toString());
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === null || value === "" || value === "all") {
-        params.delete(key);
-      } else {
-        params.set(key, String(value));
-      }
-    });
-    // Reset page when filtering unless specifically setting page
-    if (updates.page === undefined) {
-      params.delete("page");
-    }
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`);
-    });
-  };
-
-  const handleSort = (field: SortField) => {
-    const nextDirection =
-      searchParams.sort === field && searchParams.direction === "asc"
-        ? "desc"
-        : "asc";
-    updateSearchParam({ sort: field, direction: nextDirection });
-  };
-
   const handleIngredientFormChange = (field: keyof IngredientFormState, value: string) => {
     setIngredientForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleIngredientSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleIngredientSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errors: Record<string, string> = {};
     if (!ingredientForm.name.trim()) {
@@ -213,13 +156,6 @@ export function MenuContent({
     return Array.from(set).sort();
   }, [menuCategories, items]);
 
-  const onCategorySubmitSuccess = async (newName?: string) => {
-    router.refresh();
-    if (newName) {
-      handleFormChange("category", newName);
-    }
-  };
-
   const activeErrors = errorMessage || categoryErrorMessage;
 
   return (
@@ -273,25 +209,13 @@ export function MenuContent({
           </div>
         )}
 
-        <MenuStatsCards
-          totalItems={items.length}
-          activeCount={activeCount}
-          categoriesCount={categories.length}
-        />
+        <MenuStatsCards />
 
         {categoriesLoaded && (
-          <CategoriesPanel
-            menuCategories={menuCategories}
-            isSubmitting={isCategorySubmitting}
-            deleteArmedCategoryId={deleteArmedCategoryId}
-            onOpenCreate={() => openCategoryModal()}
-            onOpenEdit={(cat) => openCategoryModal(cat)}
-            onDelete={handleDeleteCategory}
-            onMoveOrder={handleMoveCategoryOrder}
-          />
+          <CategoriesPanel />
         )}
 
-        <section className={`rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4 ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}>
+        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
             <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-primary" />
@@ -312,87 +236,26 @@ export function MenuContent({
             </button>
           </div>
 
-          <MenuFilters
-            searchQuery={searchParams.q}
-            categoryFilter={searchParams.category || "all"}
-            availabilityFilter={(searchParams.availability || "all") as any}
-            categories={categories}
-            onSearchSubmit={(q) => updateSearchParam({ q })}
-            onCategoryChange={(v) => updateSearchParam({ category: v })}
-            onAvailabilityChange={(v) => updateSearchParam({ availability: v })}
-          />
+          <MenuFilters />
 
           <MenuTable
             paginatedItems={paginatedItems}
-            sortField={searchParams.sort}
-            sortDirection={searchParams.direction}
-            currentPage={searchParams.page}
             totalPages={totalPages}
             totalItems={totalItems}
-            pageSize={searchParams.pageSize}
-            deleteArmedItemId={deleteArmedItemId}
-            onSort={handleSort}
-            onPageChange={(page) => updateSearchParam({ page })}
-            onPageSizeChange={(pageSize) => updateSearchParam({ pageSize, page: 1 })}
-            onOpenRecipe={openRecipeModal}
-            onEdit={openEditProductModal}
-            onDelete={handleProductDelete}
           />
         </section>
       </main>
 
       <ProductModal
-        isOpen={isProductModalOpen}
-        onClose={() => setIsProductModalOpen(false)}
-        onSubmit={handleProductSubmit}
-        formState={formState}
-        formErrors={formErrors}
-        isEditing={isEditing}
-        isSubmitting={isSubmitting}
         categories={dbCategories}
         ingredients={initialIngredients}
-        showTranslations={showTranslations}
-        onToggleTranslations={() => setShowTranslations((v) => !v)}
-        onFormChange={handleFormChange}
-        imagePreview={imagePreview}
-        fileInputRef={fileInputRef}
-        onFileChange={handleFileChange}
-        onAddCategory={() => openCategoryModal()}
         onAddIngredient={() => setIsIngredientModalOpen(true)}
       />
 
-      <CategoryModal
-        isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
-        onSubmit={(e) => handleCategorySubmit(e, onCategorySubmitSuccess)}
-        categoryForm={categoryForm}
-        categoryErrors={categoryErrors}
-        isSubmitting={isCategorySubmitting}
-        onNameChange={(name) => setCategoryForm((p) => ({ ...p, name }))}
-        onNameEnChange={(nameEn) => setCategoryForm((p) => ({ ...p, nameEn }))}
-        onShowInPickupChange={(showInPickup) =>
-          setCategoryForm((p) => ({ ...p, showInPickup }))
-        }
-      />
+      <CategoryModal />
 
       <RecipeModal
-        isOpen={isRecipeModalOpen}
-        onClose={() => setIsRecipeModalOpen(false)}
-        onSubmit={handleRecipeSubmit}
-        items={items}
-        recipeItems={recipeItems}
         ingredients={initialIngredients}
-        selectedRecipeMenuItemId={selectedRecipeMenuItemId}
-        onSelectedRecipeMenuItemIdChange={(id) => {
-          setSelectedRecipeMenuItemId(id);
-          if (id) fetchRecipes(id);
-        }}
-        recipeForm={recipeForm}
-        onRecipeFormChange={setRecipeForm}
-        recipeErrors={recipeErrors}
-        isSubmitting={isRecipeSubmitting}
-        deleteArmedRecipeId={deleteArmedRecipeId}
-        onDeleteRecipe={deleteRecipe}
         onAddIngredient={() => setIsIngredientModalOpen(true)}
       />
 

@@ -1,47 +1,42 @@
-import { FormEvent, RefObject } from "react";
+import React from "react";
 import { Image as ImageIcon, Utensils, Globe, ChevronDown } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
-import { MenuFormState, Ingredient } from "../types";
+import { Ingredient } from "../types";
+import { useMenuItems } from "../hooks/useMenuItems";
+import { useMenuCategories } from "../hooks/useMenuCategories";
 
 interface ProductModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
-  formState: MenuFormState;
-  formErrors: Record<string, string>;
-  isEditing: boolean;
-  isSubmitting: boolean;
   categories: string[];
   ingredients: Ingredient[];
-  showTranslations: boolean;
-  onToggleTranslations: () => void;
-  onFormChange: (field: keyof MenuFormState, value: string | boolean) => void;
-  imagePreview: string | null;
-  fileInputRef: RefObject<HTMLInputElement | null>;
-  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onAddCategory?: () => void;
   onAddIngredient?: () => void;
 }
 
 export function ProductModal({
-  isOpen,
-  onClose,
-  onSubmit,
-  formState,
-  formErrors,
-  isEditing,
-  isSubmitting,
   categories,
   ingredients,
-  showTranslations,
-  onToggleTranslations,
-  onFormChange,
-  imagePreview,
-  fileInputRef,
-  onFileChange,
-  onAddCategory,
   onAddIngredient,
 }: ProductModalProps) {
+  const {
+    isProductModalOpen: isOpen,
+    setIsProductModalOpen,
+    handleSubmit: onSubmit,
+    formState,
+    formErrors,
+    isEditing,
+    isSubmitting,
+    showTranslations,
+    setShowTranslations,
+    handleFormChange: onFormChange,
+    imagePreview,
+    fileInputRef,
+    handleFileChange: onFileChange,
+  } = useMenuItems();
+
+  const { openCategoryModal: onAddCategory } = useMenuCategories();
+
+  const onClose = () => setIsProductModalOpen(false);
+  const onToggleTranslations = () => setShowTranslations((v) => !v);
+
   return (
     <Modal
       isOpen={isOpen}
@@ -76,8 +71,7 @@ export function ProductModal({
               Precio ($) *
             </label>
             <input
-              type="number"
-              step="0.01"
+              type="text"
               value={formState.price}
               onChange={(e) => onFormChange("price", e.target.value)}
               className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary"
@@ -95,15 +89,13 @@ export function ProductModal({
               <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block">
                 Categoría
               </label>
-              {onAddCategory && (
-                <button
-                  type="button"
-                  onClick={onAddCategory}
-                  className="text-[10px] text-amber-400 font-extrabold uppercase tracking-widest hover:underline"
-                >
-                  + Nueva Categoría
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => onAddCategory()}
+                className="text-[10px] text-amber-400 font-extrabold uppercase tracking-widest hover:underline"
+              >
+                + Nueva Categoría
+              </button>
             </div>
             <select
               value={formState.category}
@@ -164,7 +156,6 @@ export function ProductModal({
           </select>
         </div>
 
-        {/* SECCIÓN DE TRADUCCIONES — colapsable */}
         <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 overflow-hidden">
           <button
             type="button"

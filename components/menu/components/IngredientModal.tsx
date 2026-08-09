@@ -1,4 +1,4 @@
-import { FormEvent } from "react";
+import React from "react";
 import { Package } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { IngredientFormState } from "../types";
@@ -6,7 +6,7 @@ import { IngredientFormState } from "../types";
 interface IngredientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void;
   ingredientForm: IngredientFormState;
   ingredientErrors: Record<string, string>;
   isSubmitting: boolean;

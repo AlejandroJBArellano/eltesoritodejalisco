@@ -1,43 +1,37 @@
-import { FormEvent } from "react";
 import { BookOpen, Plus, Trash2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
-import { MenuItem, RecipeFormState, RecipeItem, Ingredient } from "../types";
+import { Ingredient } from "../types";
+import { useRecipes } from "../hooks/useRecipes";
+import { useMenuItems } from "../hooks/useMenuItems";
 
 interface RecipeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
-  items: MenuItem[];
-  recipeItems: RecipeItem[];
   ingredients: Ingredient[];
-  selectedRecipeMenuItemId: string;
-  onSelectedRecipeMenuItemIdChange: (id: string) => void;
-  recipeForm: RecipeFormState;
-  onRecipeFormChange: (form: RecipeFormState) => void;
-  recipeErrors: Record<string, string>;
-  isSubmitting: boolean;
-  deleteArmedRecipeId: string | null;
-  onDeleteRecipe: (recipeId: string) => void;
   onAddIngredient?: () => void;
 }
 
 export function RecipeModal({
-  isOpen,
-  onClose,
-  onSubmit,
-  items,
-  recipeItems,
   ingredients,
-  selectedRecipeMenuItemId,
-  onSelectedRecipeMenuItemIdChange,
-  recipeForm,
-  onRecipeFormChange,
-  recipeErrors,
-  isSubmitting,
-  deleteArmedRecipeId,
-  onDeleteRecipe,
   onAddIngredient,
 }: RecipeModalProps) {
+  const { items } = useMenuItems();
+  const {
+    isRecipeModalOpen: isOpen,
+    setIsRecipeModalOpen,
+    handleRecipeSubmit: onSubmit,
+    recipeItems,
+    selectedRecipeMenuItemId,
+    setSelectedRecipeMenuItemId,
+    recipeForm,
+    setRecipeForm,
+    recipeErrors,
+    isSubmitting,
+    deleteArmedRecipeId,
+    deleteRecipe: onDeleteRecipe,
+    fetchRecipes,
+  } = useRecipes();
+
+  const onClose = () => setIsRecipeModalOpen(false);
+
   return (
     <Modal
       isOpen={isOpen}
@@ -54,7 +48,11 @@ export function RecipeModal({
           </label>
           <select
             value={selectedRecipeMenuItemId}
-            onChange={(e) => onSelectedRecipeMenuItemIdChange(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSelectedRecipeMenuItemId(val);
+              if (val) fetchRecipes(val);
+            }}
             className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-bold"
           >
             <option value="">-- Seleccionar Producto --</option>
@@ -90,7 +88,7 @@ export function RecipeModal({
                 <select
                   value={recipeForm.ingredientId}
                   onChange={(e) =>
-                    onRecipeFormChange({
+                    setRecipeForm({
                       ...recipeForm,
                       ingredientId: e.target.value,
                     })
@@ -121,7 +119,7 @@ export function RecipeModal({
                     step="0.01"
                     value={recipeForm.quantityRequired}
                     onChange={(e) =>
-                      onRecipeFormChange({
+                      setRecipeForm({
                         ...recipeForm,
                         quantityRequired: e.target.value,
                       })
