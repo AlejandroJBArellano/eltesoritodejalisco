@@ -2,7 +2,7 @@ import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
-import { Ban, ChefHat, DollarSign, Edit3, FileText, HandCoins, Plus, Printer, Undo2 } from "lucide-react";
+import { Ban, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, Undo2 } from "lucide-react";
 
 
 export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
@@ -192,7 +192,7 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
                                                 </span>
                                             </button>
                                         )}
-                                        {order.status === "PAID" && (
+                                        {/* {order.status === "PAID" && (
                                             <button
                                                 type="button"
                                                 onClick={() => setBillingOrder(order)}
@@ -201,7 +201,7 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
                                                 <FileText className="h-3 w-3" />
                                                 Factura
                                             </button>
-                                        )}
+                                        )} */}
                                         <button
                                             type="button"
                                             onClick={() => {

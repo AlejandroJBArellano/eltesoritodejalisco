@@ -1,5 +1,25 @@
 "use client";
 
+import { PageHeader } from "@/components/PageHeader";
+import {
+  AlertTriangle,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  BarChart3,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  DollarSign,
+  Edit3,
+  FileText,
+  Plus,
+  ReceiptText,
+  Search,
+  Tag,
+  TrendingUp,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bar,
@@ -9,31 +29,11 @@ import {
   Legend,
   Line,
   LineChart,
-  ResponsiveContainer,
   Tooltip as RechartsTooltip,
+  ResponsiveContainer,
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  ReceiptText,
-  FileText,
-  DollarSign,
-  TrendingUp,
-  BarChart3,
-  Tag,
-  Calendar,
-  Plus,
-  Edit3,
-  AlertTriangle,
-  X,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-} from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
 
 type Category = {
   id: string;
@@ -159,11 +159,11 @@ export default function GastosPage() {
       const method = isEditing ? "PUT" : "POST";
       const payload = isEditing
         ? {
-            id: editingCategory.id,
-            name: newCatName,
-            color: newCatColor,
-            tipo_gasto: newCatTipoGasto,
-          }
+          id: editingCategory.id,
+          name: newCatName,
+          color: newCatColor,
+          tipo_gasto: newCatTipoGasto,
+        }
         : { name: newCatName, color: newCatColor, tipo_gasto: newCatTipoGasto };
 
       const res = await fetch(url, {
@@ -519,9 +519,8 @@ export default function GastosPage() {
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <p
-                className={`text-2xl font-black tracking-tight tabular-nums ${
-                  netUtility >= 0 ? "text-emerald-400" : "text-red-400"
-                }`}
+                className={`text-2xl font-black tracking-tight tabular-nums ${netUtility >= 0 ? "text-emerald-400" : "text-red-400"
+                  }`}
               >
                 $
                 {netUtility.toLocaleString(undefined, {
@@ -530,11 +529,10 @@ export default function GastosPage() {
                 })}
               </p>
               <span
-                className={`text-xs font-black uppercase rounded-md px-1.5 py-0.5 ${
-                  profitMargin >= 0
+                className={`text-xs font-black uppercase rounded-md px-1.5 py-0.5 ${profitMargin >= 0
                     ? "bg-emerald-500/10 text-emerald-400"
                     : "bg-red-500/10 text-red-400"
-                }`}
+                  }`}
               >
                 {profitMargin.toFixed(1)}%
               </span>
@@ -604,13 +602,13 @@ export default function GastosPage() {
                       value: number | string | undefined,
                       name: string | number | undefined,
                     ) => [
-                      `$${Number(value).toFixed(2)}`,
-                      name === "fijos"
-                        ? "Gasto Fijo"
-                        : name === "variables"
-                          ? "Gasto Variable"
-                          : "Total",
-                    ]}
+                        `$${Number(value).toFixed(2)}`,
+                        name === "fijos"
+                          ? "Gasto Fijo"
+                          : name === "variables"
+                            ? "Gasto Variable"
+                            : "Total",
+                      ]}
                   />
                   <Legend
                     wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }}
@@ -697,13 +695,12 @@ export default function GastosPage() {
                       name: string | number | undefined,
                       item: { payload?: { tipo?: string } },
                     ) => [
-                      `$${Number(value).toFixed(2)} (${
-                        totalExpenses > 0
+                        `$${Number(value).toFixed(2)} (${totalExpenses > 0
                           ? ((Number(value) / totalExpenses) * 100).toFixed(1)
                           : 0
-                      }%)`,
-                      `Gasto ${item.payload?.tipo === "fijo" ? "Fijo" : "Variable"}`,
-                    ]}
+                        }%)`,
+                        `Gasto ${item.payload?.tipo === "fijo" ? "Fijo" : "Variable"}`,
+                      ]}
                     cursor={{ fill: "#1F1F1F" }}
                   />
                   <Bar dataKey="value" barSize={22} radius={[0, 6, 6, 0]}>
@@ -759,11 +756,10 @@ export default function GastosPage() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span
-                    className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider ${
-                      cat.tipo_gasto === "fijo"
+                    className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider ${cat.tipo_gasto === "fijo"
                         ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                         : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    }`}
+                      }`}
                   >
                     {cat.tipo_gasto === "fijo" ? "Fijo" : "Var"}
                   </span>
@@ -851,7 +847,7 @@ export default function GastosPage() {
             </div>
 
             {/* Filtro por Factura */}
-            <div>
+            {/* <div>
               <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Factura
               </label>
@@ -868,7 +864,7 @@ export default function GastosPage() {
                 <option value="invoiced">Solo Facturados (FAC)</option>
                 <option value="no_invoice">Sin Factura</option>
               </select>
-            </div>
+            </div> */}
 
             {/* Filtro por Tipo de Gasto */}
             <div>
@@ -1303,22 +1299,20 @@ export default function GastosPage() {
                   <button
                     type="button"
                     onClick={() => setNewCatTipoGasto("variable")}
-                    className={`py-2.5 px-3 rounded-xl border font-black text-xs uppercase tracking-wider transition-all ${
-                      newCatTipoGasto === "variable"
+                    className={`py-2.5 px-3 rounded-xl border font-black text-xs uppercase tracking-wider transition-all ${newCatTipoGasto === "variable"
                         ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
                         : "bg-dark/40 border-border text-text-light/50 hover:text-text-light"
-                    }`}
+                      }`}
                   >
                     Variable
                   </button>
                   <button
                     type="button"
                     onClick={() => setNewCatTipoGasto("fijo")}
-                    className={`py-2.5 px-3 rounded-xl border font-black text-xs uppercase tracking-wider transition-all ${
-                      newCatTipoGasto === "fijo"
+                    className={`py-2.5 px-3 rounded-xl border font-black text-xs uppercase tracking-wider transition-all ${newCatTipoGasto === "fijo"
                         ? "bg-amber-500/20 border-amber-500 text-amber-400"
                         : "bg-dark/40 border-border text-text-light/50 hover:text-text-light"
-                    }`}
+                      }`}
                   >
                     Fijo
                   </button>

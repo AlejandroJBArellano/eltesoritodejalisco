@@ -2,7 +2,7 @@ import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
-import { Ban, ChefHat, DollarSign, Edit3, FileText, HandCoins, Plus, Printer, Undo2 } from "lucide-react";
+import { Ban, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, Undo2 } from "lucide-react";
 import NoOrdersPOS from "./NoOrdersPOS";
 
 export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
@@ -160,15 +160,14 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
                                         <HandCoins className="h-3.5 w-3.5" />
                                         Propina
                                     </button>
-                                    <button
+                                    {/* <button
                                         type="button"
                                         onClick={() => setBillingOrder(order)}
                                         className="rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
                                     >
                                         <FileText className="h-3.5 w-3.5" />
                                         Factura
-                                    </button>
-
+                                    </button> */}
                                 </>
                             )}
                             <button
