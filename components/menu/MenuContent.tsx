@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo, FormEvent } from "react";
+import { useState, useEffect, useMemo, useTransition, FormEvent } from "react";
 import { BookOpen, Plus, RefreshCw, Tag } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 import { useMenuItems } from "./hooks/useMenuItems";
 import { useMenuCategories } from "./hooks/useMenuCategories";
@@ -17,22 +18,41 @@ import { CategoryModal } from "./components/CategoryModal";
 import { RecipeModal } from "./components/RecipeModal";
 import { IngredientModal } from "./components/IngredientModal";
 
-import { MenuItem, IngredientFormState, EMPTY_INGREDIENT_FORM, Ingredient } from "./types";
+import { MenuItem, IngredientFormState, EMPTY_INGREDIENT_FORM, Ingredient, SortField } from "./types";
 
 interface MenuContentProps {
-  initialItems: MenuItem[];
+  items: MenuItem[];
+  paginatedItems: MenuItem[];
+  categories: string[];
+  activeCount: number;
+  totalPages: number;
+  totalItems: number;
+  searchParams: {
+    q: string;
+    category: string;
+    availability: string;
+    sort: SortField;
+    direction: "asc" | "desc";
+    page: number;
+    pageSize: number;
+  };
 }
 
-export function MenuContent({ initialItems }: MenuContentProps) {
+export function MenuContent({
+  items,
+  paginatedItems,
+  categories,
+  activeCount,
+  totalPages,
+  totalItems,
+  searchParams,
+}: MenuContentProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const rawSearchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
   const {
-    items,
-    categories,
-    activeCount,
-    filteredItems,
-    sortedItems,
-    paginatedItems,
-    totalPages,
-    isLoading,
     isSubmitting,
     errorMessage,
     setErrorMessage,
@@ -45,28 +65,14 @@ export function MenuContent({ initialItems }: MenuContentProps) {
     isEditing,
     imagePreview,
     fileInputRef,
-    searchQuery,
-    setSearchQuery,
-    categoryFilter,
-    setCategoryFilter,
-    availabilityFilter,
-    setAvailabilityFilter,
-    sortField,
-    sortDirection,
-    currentPage,
-    setCurrentPage,
-    pageSize,
-    setPageSize,
     deleteArmedItemId,
-    fetchMenu,
     openNewProductModal,
     openEditProductModal,
     handleSubmit: handleProductSubmit,
     handleDelete: handleProductDelete,
     handleFormChange,
     handleFileChange,
-    handleSort,
-  } = useMenuItems(initialItems);
+  } = useMenuItems(items);
 
   const {
     menuCategories,
@@ -111,6 +117,48 @@ export function MenuContent({ initialItems }: MenuContentProps) {
   const [ingredientForm, setIngredientForm] = useState<IngredientFormState>(EMPTY_INGREDIENT_FORM);
   const [ingredientErrors, setIngredientErrors] = useState<Record<string, string>>({});
   const [isIngredientSubmitting, setIsIngredientSubmitting] = useState(false);
+
+  // Local search query input to avoid lag
+  const [localSearch, setLocalSearch] = useState(searchParams.q);
+
+  useEffect(() => {
+    setLocalSearch(searchParams.q);
+  }, [searchParams.q]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== searchParams.q) {
+        updateSearchParam({ q: localSearch });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [localSearch]);
+
+  const updateSearchParam = (updates: Record<string, string | number | null>) => {
+    const params = new URLSearchParams(rawSearchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === "" || value === "all") {
+        params.delete(key);
+      } else {
+        params.set(key, String(value));
+      }
+    });
+    // Reset page when filtering unless specifically setting page
+    if (updates.page === undefined) {
+      params.delete("page");
+    }
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
+  };
+
+  const handleSort = (field: SortField) => {
+    const nextDirection =
+      searchParams.sort === field && searchParams.direction === "asc"
+        ? "desc"
+        : "asc";
+    updateSearchParam({ sort: field, direction: nextDirection });
+  };
 
   const fetchIngredients = async () => {
     try {
@@ -196,9 +244,8 @@ export function MenuContent({ initialItems }: MenuContentProps) {
     return Array.from(set).sort();
   }, [menuCategories, items]);
 
-  // Sync category submit with menu item refresh (in case category rename cascades or needs update)
   const onCategorySubmitSuccess = async (newName?: string) => {
-    await fetchMenu();
+    router.refresh();
     if (newName) {
       handleFormChange("category", newName);
     }
@@ -257,14 +304,12 @@ export function MenuContent({ initialItems }: MenuContentProps) {
           </div>
         )}
 
-        {/* Tarjetas Informativas */}
         <MenuStatsCards
           totalItems={items.length}
           activeCount={activeCount}
           categoriesCount={categories.length}
         />
 
-        {/* PANEL DE CATEGORÍAS */}
         {categoriesLoaded && (
           <CategoriesPanel
             menuCategories={menuCategories}
@@ -277,55 +322,49 @@ export function MenuContent({ initialItems }: MenuContentProps) {
           />
         )}
 
-        {/* TABLA DE PRODUCTOS */}
-        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+        <section className={`rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4 ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
             <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-primary" />
-              Catálogo de Menú ({filteredItems.length})
+              Catálogo de Menú ({totalItems})
             </h2>
             <button
-              onClick={fetchMenu}
+              onClick={() => {
+                startTransition(() => {
+                  router.refresh();
+                });
+              }}
               className="text-xs text-text-light/60 hover:text-text-light flex items-center gap-1.5 font-bold cursor-pointer transition-colors duration-200 ease-out"
             >
               <RefreshCw
-                className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`}
+                className={`h-3.5 w-3.5 ${isPending ? "animate-spin" : ""}`}
               />
               Actualizar Lista
             </button>
           </div>
 
           <MenuFilters
-            searchQuery={searchQuery}
-            categoryFilter={categoryFilter}
-            availabilityFilter={availabilityFilter}
-            categories={dbCategories}
-            onSearchChange={(v) => {
-              setSearchQuery(v);
-              setCurrentPage(1);
-            }}
-            onCategoryChange={(v) => {
-              setCategoryFilter(v);
-              setCurrentPage(1);
-            }}
-            onAvailabilityChange={(v) => {
-              setAvailabilityFilter(v);
-              setCurrentPage(1);
-            }}
+            searchQuery={localSearch}
+            categoryFilter={searchParams.category || "all"}
+            availabilityFilter={(searchParams.availability || "all") as any}
+            categories={categories}
+            onSearchChange={setLocalSearch}
+            onCategoryChange={(v) => updateSearchParam({ category: v })}
+            onAvailabilityChange={(v) => updateSearchParam({ availability: v })}
           />
 
           <MenuTable
             paginatedItems={paginatedItems}
-            sortField={sortField}
-            sortDirection={sortDirection}
-            currentPage={currentPage}
+            sortField={searchParams.sort}
+            sortDirection={searchParams.direction}
+            currentPage={searchParams.page}
             totalPages={totalPages}
-            totalItems={sortedItems.length}
-            pageSize={pageSize}
+            totalItems={totalItems}
+            pageSize={searchParams.pageSize}
             deleteArmedItemId={deleteArmedItemId}
             onSort={handleSort}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={setPageSize}
+            onPageChange={(page) => updateSearchParam({ page })}
+            onPageSizeChange={(pageSize) => updateSearchParam({ pageSize, page: 1 })}
             onOpenRecipe={openRecipeModal}
             onEdit={openEditProductModal}
             onDelete={handleProductDelete}
@@ -333,7 +372,6 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         </section>
       </main>
 
-      {/* MODAL DE PRODUCTO */}
       <ProductModal
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
@@ -354,7 +392,6 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         onAddIngredient={() => setIsIngredientModalOpen(true)}
       />
 
-      {/* MODAL DE CATEGORÍA */}
       <CategoryModal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
@@ -369,7 +406,6 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         }
       />
 
-      {/* MODAL DE RECETAS */}
       <RecipeModal
         isOpen={isRecipeModalOpen}
         onClose={() => setIsRecipeModalOpen(false)}
@@ -391,7 +427,6 @@ export function MenuContent({ initialItems }: MenuContentProps) {
         onAddIngredient={() => setIsIngredientModalOpen(true)}
       />
 
-      {/* MODAL DE INGREDIENTE */}
       <IngredientModal
         isOpen={isIngredientModalOpen}
         onClose={() => setIsIngredientModalOpen(false)}

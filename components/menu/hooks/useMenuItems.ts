@@ -1,18 +1,16 @@
 "use client";
 
-import { useMemo, useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import {
-  DatabaseMenuItem,
   EMPTY_PRODUCT_FORM,
   MenuItem,
   MenuFormState,
-  SortField,
   Translations,
 } from "../types";
 
-export function useMenuItems(initialItems: MenuItem[]) {
-  const [items, setItems] = useState<MenuItem[]>(initialItems);
-  const [isLoading, setIsLoading] = useState(false);
+export function useMenuItems(items: MenuItem[]) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -32,100 +30,10 @@ export function useMenuItems(initialItems: MenuItem[]) {
     null,
   );
 
-  // Table filters, sort & pagination
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [availabilityFilter, setAvailabilityFilter] = useState<
-    "all" | "available" | "unavailable"
-  >("all");
-  const [sortField, setSortField] = useState<SortField>("name");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
   // Derived values
   const isEditing = Boolean(formState.id);
 
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    items.forEach((i) => {
-      if (i.category) set.add(i.category);
-    });
-    return Array.from(set).sort();
-  }, [items]);
-
-  const activeCount = useMemo(
-    () => items.filter((item) => item.isAvailable).length,
-    [items],
-  );
-
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchName = item.name.toLowerCase().includes(q);
-        const matchDesc = (item.description || "").toLowerCase().includes(q);
-        const matchCat = (item.category || "").toLowerCase().includes(q);
-        if (!matchName && !matchDesc && !matchCat) return false;
-      }
-      if (categoryFilter !== "all" && item.category !== categoryFilter)
-        return false;
-      if (availabilityFilter === "available" && !item.isAvailable) return false;
-      if (availabilityFilter === "unavailable" && item.isAvailable)
-        return false;
-      return true;
-    });
-  }, [items, searchQuery, categoryFilter, availabilityFilter]);
-
-  const sortedItems = useMemo(() => {
-    return [...filteredItems].sort((a, b) => {
-      let comp = 0;
-      if (sortField === "name") comp = a.name.localeCompare(b.name);
-      else if (sortField === "price") comp = a.price - b.price;
-      else if (sortField === "category")
-        comp = (a.category || "").localeCompare(b.category || "");
-      else if (sortField === "isAvailable")
-        comp = (a.isAvailable ? 1 : 0) - (b.isAvailable ? 1 : 0);
-      return sortDirection === "asc" ? comp : -comp;
-    });
-  }, [filteredItems, sortField, sortDirection]);
-
-  const totalPages = Math.ceil(sortedItems.length / pageSize) || 1;
-
-  const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return sortedItems.slice(start, start + pageSize);
-  }, [sortedItems, currentPage, pageSize]);
-
   // ── Handlers ──────────────────────────────────────────────────
-
-  const fetchMenu = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch("/api/menu");
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data?.error || "Error al cargar el menú");
-      setItems(
-        (data.items || []).map((item: DatabaseMenuItem) => ({
-          ...item,
-          isAvailable: item.is_available,
-          imageUrl: item.image_url,
-          translations: item.translations,
-          ingredientId: item.ingredient_id,
-          show_in_dine_in: item.show_in_dine_in,
-          show_in_takeaway: item.show_in_takeaway,
-        })),
-      );
-      setErrorMessage(null);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado al cargar",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const validateForm = (state: MenuFormState): Record<string, string> => {
     const errors: Record<string, string> = {};
@@ -228,7 +136,8 @@ export function useMenuItems(initialItems: MenuItem[]) {
       const data = await response.json();
       if (!response.ok)
         throw new Error(data?.error || "No se pudo guardar el producto");
-      await fetchMenu();
+
+      router.refresh();
       resetForm();
       setIsProductModalOpen(false);
       setErrorMessage(null);
@@ -258,7 +167,8 @@ export function useMenuItems(initialItems: MenuItem[]) {
       const data = await response.json();
       if (!response.ok)
         throw new Error(data?.error || "No se pudo eliminar el producto");
-      await fetchMenu();
+
+      router.refresh();
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
@@ -269,31 +179,10 @@ export function useMenuItems(initialItems: MenuItem[]) {
     }
   };
 
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-    setCurrentPage(1);
-  };
-
   return {
-    // Data
-    items,
-    categories,
-    activeCount,
-    filteredItems,
-    sortedItems,
-    paginatedItems,
-    totalPages,
-    // Loading / error
-    isLoading,
     isSubmitting,
     errorMessage,
     setErrorMessage,
-    // Product modal
     isProductModalOpen,
     setIsProductModalOpen,
     showTranslations,
@@ -301,31 +190,14 @@ export function useMenuItems(initialItems: MenuItem[]) {
     formState,
     formErrors,
     isEditing,
-    // Image
     imagePreview,
     fileInputRef,
-    // Table
-    searchQuery,
-    setSearchQuery,
-    categoryFilter,
-    setCategoryFilter,
-    availabilityFilter,
-    setAvailabilityFilter,
-    sortField,
-    sortDirection,
-    currentPage,
-    setCurrentPage,
-    pageSize,
-    setPageSize,
     deleteArmedItemId,
-    // Actions
-    fetchMenu,
     openNewProductModal,
     openEditProductModal,
     handleSubmit,
     handleDelete,
     handleFormChange,
     handleFileChange,
-    handleSort,
   };
 }
