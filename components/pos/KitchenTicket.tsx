@@ -81,7 +81,7 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
               : [];
 
           return (
-            <div key={item.id} className="border-b border-dashed border-gray-300 pb-2">
+            <div key={item.id} className="border-b border-dashed border-gray-300 pb-2 kitchen-item-row">
               <div className="flex justify-between items-start">
                 <span className="text-2xl font-black mr-2 bg-black text-white px-1.5 py-0.5 rounded-sm">
                   {item.quantity}
@@ -132,21 +132,52 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
 
       <style jsx global>{`
         @media print {
-          body * {
-            visibility: hidden;
+          .kitchen-ticket {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 80mm !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: white !important;
+            padding: 10px !important;
+            margin: 0 auto !important;
           }
+          /* Fuerza colores negro puro y elimina dithering de grises */
           .kitchen-ticket,
           .kitchen-ticket * {
-            visibility: visible;
+            color: #000000 !important;
+            border-color: #000000 !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            text-shadow: none !important;
           }
-          .kitchen-ticket {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 80mm;
-            border: none;
-            box-shadow: none;
-            padding: 0;
+          /* Conserva el fondo negro y texto blanco para cantidades */
+          .kitchen-ticket .bg-black {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          /* Conserva texto blanco en el bloque de pickupTime que tiene bg-black */
+          .kitchen-ticket .bg-black * {
+            color: #ffffff !important;
+          }
+          .kitchen-ticket .border-2,
+          .kitchen-ticket .border-4 {
+            border-color: #000000 !important;
+          }
+          .kitchen-ticket .kitchen-item-row {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .kitchen-ticket hr,
+          .kitchen-ticket .border-dashed {
+            border-style: dashed !important;
+            border-color: #000000 !important;
+          }
+          @page {
+            size: 80mm auto;
             margin: 0;
           }
         }

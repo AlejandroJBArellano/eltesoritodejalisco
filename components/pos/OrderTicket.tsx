@@ -58,10 +58,10 @@ export function OrderTicket({ order }: OrderTicketProps) {
         </thead>
         <tbody>
           {order.orderItems.map((item) => (
-            <tr key={item.id}>
-              <td>{item.quantity}</td>
-              <td className="max-w-[40mm] truncate">{item.menuItem.name}</td>
-              <td className="text-right">
+            <tr key={item.id} className="align-top">
+              <td className="pr-2">{item.quantity}</td>
+              <td className="whitespace-normal break-words">{item.menuItem.name}</td>
+              <td className="text-right pl-2">
                 ${(item.quantity * item.unitPrice).toFixed(2)}
               </td>
             </tr>
@@ -106,20 +106,42 @@ export function OrderTicket({ order }: OrderTicketProps) {
 
       <style jsx global>{`
         @media print {
-          body * {
-            visibility: hidden;
+          .ticket-container {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 80mm !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: white !important;
+            padding: 10px !important;
+            margin: 0 auto !important;
           }
+          /* Fuerza colores negro puro y elimina dithering de grises */
           .ticket-container,
           .ticket-container * {
-            visibility: visible;
+            color: #000000 !important;
+            border-color: #000000 !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            text-shadow: none !important;
           }
-          .ticket-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 80mm;
-            border: none;
-            box-shadow: none;
+          .ticket-container table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+          }
+          .ticket-container tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .ticket-container td,
+          .ticket-container th {
+            vertical-align: top !important;
+          }
+          .ticket-container hr,
+          .ticket-container .border-dashed {
+            border-style: dashed !important;
+            border-color: #000000 !important;
           }
           @page {
             size: 80mm auto;

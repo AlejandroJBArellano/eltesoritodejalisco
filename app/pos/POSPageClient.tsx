@@ -26,6 +26,7 @@ import {
   ChefHat,
   ChevronRight,
   DollarSign,
+  Download,
   Edit3,
   FileText,
   HandCoins,
@@ -39,6 +40,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { toPng } from "html-to-image";
 
 export default function POSPageClient({ tenantId }: { tenantId: string }) {
   const {
@@ -141,6 +143,45 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
   // Two-step cancel order: stores the orderId being armed for cancel
   const [cancelArmedId, setCancelArmedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"menu" | "cart">("menu");
+  const [isDownloadingImage, setIsDownloadingImage] = useState(false);
+
+  const handleDownloadImage = async () => {
+    if (!checkoutOrder) return;
+    setIsDownloadingImage(true);
+
+    const selector = showTicket ? ".ticket-container" : ".kitchen-ticket";
+    const element = document.querySelector(selector);
+
+    if (!element) {
+      setIsDownloadingImage(false);
+      return;
+    }
+
+    try {
+      const dataUrl = await toPng(element as HTMLElement, {
+        backgroundColor: "#ffffff",
+        pixelRatio: 3,
+        style: {
+          transform: "scale(1)",
+          margin: "0",
+          border: "none",
+          boxShadow: "none",
+        },
+      });
+
+      const prefix = showTicket ? "ticket_venta" : "comanda";
+      const filename = `${prefix}_#${checkoutOrder.orderNumber}.png`;
+
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("Error al descargar el ticket como imagen:", err);
+    } finally {
+      setIsDownloadingImage(false);
+    }
+  };
 
   const handleCancelArm = (orderId: string) => {
     setCancelArmedId(orderId);
@@ -205,7 +246,7 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
   }, 0);
 
   return (
-    <div className="space-y-2 lg:space-y-6 pb-20">
+    <div className="space-y-2 lg:space-y-6 pb-20 pos-client-root">
       <PageHeader
         title="Punto de Venta"
         icon={<Receipt className="h-5 w-5 text-primary" />}
@@ -788,15 +829,24 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
       />
 
       {(showTicket || showKitchenTicket) && checkoutOrder && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-md">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-md print-modal-container">
           <div className="max-w-md w-full py-10 space-y-6">
-            <div className="flex justify-center gap-3 no-print">
+            <div className="flex justify-center gap-3 no-print flex-wrap">
               <button
                 type="button"
                 onClick={() => window.print()}
                 className="bg-success text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
               >
                 <Printer className="h-4 w-4" /> Imprimir Ticket
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadImage}
+                disabled={isDownloadingImage}
+                className="bg-sky-600 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg hover:bg-sky-500 active:scale-95 transition-all flex items-center gap-1.5"
+              >
+                <Download className="h-4 w-4" />
+                {isDownloadingImage ? "Descargando..." : "Descargar Imagen"}
               </button>
               {showTicket && (
                 <button
