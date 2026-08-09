@@ -1231,31 +1231,18 @@ export type Database = {
       }
     }
     Functions: {
-      create_order_with_items:
-        | {
-            Args: {
-              p_customer_id: string
-              p_items: Json
-              p_notes: string
-              p_pickup_time?: string
-              p_source: string
-              p_table: string
-              p_tenant_id: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              p_customer_id?: string
-              p_items?: Json
-              p_notes?: string
-              p_pickup_time?: string
-              p_source?: string
-              p_table?: string
-              p_tenant_id: string
-            }
-            Returns: string
-          }
+      create_order_with_items: {
+        Args: {
+          p_customer_id?: string
+          p_items?: Json
+          p_notes?: string
+          p_pickup_time?: string
+          p_source?: string
+          p_table?: string
+          p_tenant_id: string
+        }
+        Returns: string
+      }
       fn_deduct_inventory_for_order: {
         Args: { p_order_id: string }
         Returns: undefined
