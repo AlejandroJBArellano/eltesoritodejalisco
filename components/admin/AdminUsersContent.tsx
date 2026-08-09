@@ -479,22 +479,22 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                           onChange={(e) =>
                             handleRoleChange(p.id, e.target.value)
                           }
-                          className={`rounded-xl border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer ${roleConfig.badgeBg} ${roleConfig.color} ${roleConfig.badgeBorder}`}
+                          className={`rounded-xl border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card ${roleConfig.badgeBg} ${roleConfig.color} ${roleConfig.badgeBorder}`}
                         >
-                          <option value="ADMIN" className="bg-card text-white">
-                            ADMIN
+                          <option value="ADMIN" className="bg-card text-text-light">
+                            Administrador
                           </option>
                           <option
                             value="MANAGER"
-                            className="bg-card text-white"
+                            className="bg-card text-text-light"
                           >
-                            MANAGER
+                            Gerente
                           </option>
-                          <option value="WAITER" className="bg-card text-white">
-                            WAITER
+                          <option value="WAITER" className="bg-card text-text-light">
+                            Mesero
                           </option>
-                          <option value="CHEF" className="bg-card text-white">
-                            CHEF
+                          <option value="CHEF" className="bg-card text-text-light">
+                            Cocinero / Chef
                           </option>
                         </select>
                       </td>
