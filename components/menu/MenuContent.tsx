@@ -18,7 +18,7 @@ import { CategoryModal } from "./components/CategoryModal";
 import { RecipeModal } from "./components/RecipeModal";
 import { IngredientModal } from "./components/IngredientModal";
 
-import { MenuItem, IngredientFormState, EMPTY_INGREDIENT_FORM, Ingredient, SortField } from "./types";
+import { MenuItem, IngredientFormState, EMPTY_INGREDIENT_FORM, Ingredient, SortField, MenuCategory } from "./types";
 
 interface MenuContentProps {
   items: MenuItem[];
@@ -27,6 +27,7 @@ interface MenuContentProps {
   activeCount: number;
   totalPages: number;
   totalItems: number;
+  initialMenuCategories: MenuCategory[];
   searchParams: {
     q: string;
     category: string;
@@ -45,6 +46,7 @@ export function MenuContent({
   activeCount,
   totalPages,
   totalItems,
+  initialMenuCategories,
   searchParams,
 }: MenuContentProps) {
   const router = useRouter();
@@ -79,19 +81,17 @@ export function MenuContent({
     categoriesLoaded,
     isSubmitting: isCategorySubmitting,
     errorMessage: categoryErrorMessage,
-    setErrorMessage: setCategoryErrorMessage,
     isCategoryModalOpen,
     setIsCategoryModalOpen,
     categoryForm,
     setCategoryForm,
     categoryErrors,
     deleteArmedCategoryId,
-    fetchCategories,
     openCategoryModal,
     handleCategorySubmit,
     handleDeleteCategory,
     handleMoveCategoryOrder,
-  } = useMenuCategories();
+  } = useMenuCategories(initialMenuCategories);
 
   const {
     recipeItems,
@@ -232,7 +232,6 @@ export function MenuContent({
 
   useEffect(() => {
     fetchIngredients();
-    fetchCategories();
   }, []);
 
   const dbCategories = useMemo(() => {

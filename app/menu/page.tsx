@@ -1,12 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { MenuContent } from "@/components/menu/MenuContent";
 import { getTenantContext } from "@/lib/tenant";
-import { MenuItem, SortField } from "@/components/menu/types";
+import { MenuItem, SortField, MenuCategory } from "@/components/menu/types";
+import { Database } from "@/types/supabase";
+
+type DbMenuItem = Database["public"]["Tables"]["menu_items"]["Row"];
+type DbMenuCategory = Database["public"]["Tables"]["menu_categories"]["Row"];
 
 async function getMenuItems(): Promise<MenuItem[]> {
   const tenant = await getTenantContext();
   const supabase = await createClient();
-  const { data: items, error } = await supabase
+  const { data, error } = await supabase
     .from("menu_items")
     .select("*")
     .eq("tenant_id", tenant.id)
@@ -17,7 +21,9 @@ async function getMenuItems(): Promise<MenuItem[]> {
     return [];
   }
 
-  return (items || []).map((item) => ({
+  const items = (data || []) as DbMenuItem[];
+
+  return items.map((item) => ({
     id: item.id,
     name: item.name,
     description: item.description,
@@ -25,10 +31,36 @@ async function getMenuItems(): Promise<MenuItem[]> {
     category: item.category,
     imageUrl: item.image_url,
     isAvailable: item.is_available,
-    translations: item.translations,
+    translations: item.translations as any,
     ingredientId: item.ingredient_id,
-    show_in_dine_in: item.show_in_dine_in,
-    show_in_takeaway: item.show_in_takeaway,
+    show_in_dine_in: item.show_in_dine_in ?? true,
+    show_in_takeaway: item.show_in_takeaway ?? true,
+  }));
+}
+
+async function getMenuCategories(): Promise<MenuCategory[]> {
+  const tenant = await getTenantContext();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("menu_categories")
+    .select("*")
+    .eq("tenant_id", tenant.id)
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching menu categories:", error);
+    return [];
+  }
+
+  const categories = (data || []) as DbMenuCategory[];
+
+  return categories.map((cat) => ({
+    id: cat.id,
+    name: cat.name,
+    sort_order: cat.sort_order ?? 0,
+    is_active: cat.is_active ?? true,
+    show_in_pickup: cat.show_in_pickup ?? true,
+    translations: cat.translations as any,
   }));
 }
 
@@ -54,7 +86,10 @@ export default async function MenuPage({
   const page = Number(params.page) || 1;
   const pageSize = Number(params.pageSize) || 10;
 
-  const rawItems = await getMenuItems();
+  const [rawItems, initialCategories] = await Promise.all([
+    getMenuItems(),
+    getMenuCategories(),
+  ]);
 
   // 1. Filter
   const filteredItems = rawItems.filter((item) => {
@@ -106,6 +141,7 @@ export default async function MenuPage({
       activeCount={activeCount}
       totalPages={totalPages}
       totalItems={totalItems}
+      initialMenuCategories={initialCategories}
       searchParams={{
         q,
         category,

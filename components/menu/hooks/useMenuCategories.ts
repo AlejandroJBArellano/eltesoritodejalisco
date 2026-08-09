@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   CategoryFormState,
   EMPTY_CATEGORY_FORM,
@@ -8,15 +9,17 @@ import {
   Translations,
 } from "../types";
 
-export function useMenuCategories() {
-  const [menuCategories, setMenuCategories] = useState<MenuCategory[]>([]);
-  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+export function useMenuCategories(initialCategories: MenuCategory[]) {
+  const router = useRouter();
+  const [menuCategories, setMenuCategories] = useState<MenuCategory[]>(initialCategories);
+  const [categoriesLoaded] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Sync with server-side props updates
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    setMenuCategories(initialCategories);
+  }, [initialCategories]);
 
   // Category modal state
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -31,21 +34,7 @@ export function useMenuCategories() {
 
   // ── Handlers ──────────────────────────────────────────────────
 
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("/api/menu-categories");
-      const data = await response.json();
-      if (response.ok) {
-        setMenuCategories(data.categories || []);
-        setCategoriesLoaded(true);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
   const openCategoryModal = (category?: MenuCategory) => {
-    if (!categoriesLoaded) fetchCategories();
     if (category) {
       setCategoryForm({
         id: category.id,
@@ -89,7 +78,8 @@ export function useMenuCategories() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Error al guardar");
-      await fetchCategories();
+      
+      router.refresh();
       onSuccess(data.category?.name); // caller can re-fetch menu items if needed
       setIsCategoryModalOpen(false);
       setCategoryForm(EMPTY_CATEGORY_FORM);
@@ -119,7 +109,8 @@ export function useMenuCategories() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "No se pudo eliminar");
-      await fetchCategories();
+      
+      router.refresh();
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(
@@ -162,9 +153,9 @@ export function useMenuCategories() {
           reorder: localUpdated.map((c) => ({ id: c.id, sort_order: c.sort_order })),
         }),
       });
-      if (!response.ok) await fetchCategories(); // revert on error
+      router.refresh();
     } catch {
-      await fetchCategories();
+      router.refresh();
     }
   };
 
@@ -182,7 +173,6 @@ export function useMenuCategories() {
     categoryErrors,
     deleteArmedCategoryId,
     // Actions
-    fetchCategories,
     openCategoryModal,
     handleCategorySubmit,
     handleDeleteCategory,
