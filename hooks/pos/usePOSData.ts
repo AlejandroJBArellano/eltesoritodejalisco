@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef, createContext, useContext } from "react";
 import { MenuItem, Customer, Order } from "@/types/pos";
 import { mapOrderData } from "@/lib/mappers/orders";
 import type { DbOrderPayload } from "@/lib/mappers/orders";
@@ -47,7 +47,27 @@ const getOrderDateStr = (createdAt: Date | string): string =>
     day: "2-digit",
   }).format(new Date(createdAt));
 
+type POSDataValue = ReturnType<typeof usePOSDataInternal>;
+const POSDataContext = createContext<POSDataValue | null>(null);
+
+export function POSDataProvider({
+  children,
+  tenantId,
+}: {
+  children: React.ReactNode;
+  tenantId?: string;
+}) {
+  const value = usePOSDataInternal(tenantId);
+  return React.createElement(POSDataContext.Provider, { value }, children);
+}
+
 export function usePOSData(tenantId?: string) {
+  const context = useContext(POSDataContext);
+  if (context) return context;
+  return usePOSDataInternal(tenantId);
+}
+
+function usePOSDataInternal(tenantId?: string) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);

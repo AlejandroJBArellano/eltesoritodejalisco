@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import {
   Order,
   OrderFormState,
@@ -36,7 +36,32 @@ export const formatMixedNotes = (counts: Record<MixedFlavor, number>) =>
     .map((f) => `${counts[f]}x ${f}`)
     .join(", ");
 
+type POSCartValue = ReturnType<typeof usePOSCartInternal>;
+const POSCartContext = createContext<POSCartValue | null>(null);
+
+export function POSCartProvider({
+  children,
+  availableMenuItems,
+  refreshOrders,
+}: {
+  children: React.ReactNode;
+  availableMenuItems: MenuItem[];
+  refreshOrders: () => Promise<Order[]>;
+}) {
+  const value = usePOSCartInternal(availableMenuItems, refreshOrders);
+  return React.createElement(POSCartContext.Provider, { value }, children);
+}
+
 export function usePOSCart(
+  availableMenuItems?: MenuItem[],
+  refreshOrders?: () => Promise<Order[]>,
+) {
+  const context = useContext(POSCartContext);
+  if (context) return context;
+  return usePOSCartInternal(availableMenuItems || [], refreshOrders || (async () => []));
+}
+
+function usePOSCartInternal(
   availableMenuItems: MenuItem[],
   refreshOrders: () => Promise<Order[]>,
 ) {

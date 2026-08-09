@@ -1,8 +1,8 @@
 "use client";
 
-import { usePOSCart } from "@/hooks/pos/usePOSCart";
-import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
-import { usePOSData } from "@/hooks/pos/usePOSData";
+import { usePOSCart, POSCartProvider } from "@/hooks/pos/usePOSCart";
+import { usePOSCheckout, POSCheckoutProvider } from "@/hooks/pos/usePOSCheckout";
+import { usePOSData, POSDataProvider } from "@/hooks/pos/usePOSData";
 import { useState } from "react";
 
 import { POSCartSidebar } from "@/components/pos/POSCartSidebar";
@@ -38,6 +38,27 @@ import TabSelectorPOS from "../../components/pos/TabSelectorPOS";
 import WhatsAppTicketPOS from "../../components/pos/WhatsAppTicketPOS";
 
 export default function POSPageClient({ tenantId }: { tenantId: string }) {
+  return (
+    <POSDataProvider tenantId={tenantId}>
+      <POSCartAndCheckoutProviders>
+        <POSPageContent />
+      </POSCartAndCheckoutProviders>
+    </POSDataProvider>
+  );
+}
+
+function POSCartAndCheckoutProviders({ children }: { children: React.ReactNode }) {
+  const { availableMenuItems, refreshOrders } = usePOSData();
+  return (
+    <POSCartProvider availableMenuItems={availableMenuItems} refreshOrders={refreshOrders}>
+      <POSCheckoutProvider refreshOrders={refreshOrders}>
+        {children}
+      </POSCheckoutProvider>
+    </POSCartProvider>
+  );
+}
+
+function POSPageContent() {
   const {
     availableMenuItems,
     isLoading,
@@ -46,7 +67,7 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
     nextFolioDisplay,
     refreshOrders,
     lowStockItems,
-  } = usePOSData(tenantId);
+  } = usePOSData();
 
   const {
     formState,
@@ -55,7 +76,7 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
     mixedOrderMenuItem,
     handleCheckoutSubmit,
     handleCancelOrder,
-  } = usePOSCart(availableMenuItems, refreshOrders);
+  } = usePOSCart();
 
   const {
     isSubmittingCheckout,
@@ -76,7 +97,7 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
     billingOrder,
     setBillingOrder,
     handleSplitPayment,
-  } = usePOSCheckout(refreshOrders);
+  } = usePOSCheckout();
 
   // Two-step cancel order: stores the orderId being armed for cancel
   const [cancelArmedId, setCancelArmedId] = useState<string | null>(null);

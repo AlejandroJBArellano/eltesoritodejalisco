@@ -4,9 +4,29 @@ import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import type { SplitPayment } from "@/components/pos/SplitBillModal";
 import { useTenant } from "@/components/TenantProvider";
 import { Order } from "@/types/pos";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState, createContext, useContext } from "react";
 
-export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
+type POSCheckoutValue = ReturnType<typeof usePOSCheckoutInternal>;
+const POSCheckoutContext = createContext<POSCheckoutValue | null>(null);
+
+export function POSCheckoutProvider({
+  children,
+  refreshOrders,
+}: {
+  children: React.ReactNode;
+  refreshOrders: () => Promise<Order[]>;
+}) {
+  const value = usePOSCheckoutInternal(refreshOrders);
+  return React.createElement(POSCheckoutContext.Provider, { value }, children);
+}
+
+export function usePOSCheckout(refreshOrders?: () => Promise<Order[]>) {
+  const context = useContext(POSCheckoutContext);
+  if (context) return context;
+  return usePOSCheckoutInternal(refreshOrders || (async () => []));
+}
+
+function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
   const { name } = useTenant();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
