@@ -51,7 +51,6 @@ const defaultDataValue = {
   setSearchQuery: vi.fn(),
   categories: mockCategories,
   filteredMenuItems: mockItems,
-  nextFolioDisplay: "",
   refreshOrders: vi.fn(),
   lowStockItems: [],
 };

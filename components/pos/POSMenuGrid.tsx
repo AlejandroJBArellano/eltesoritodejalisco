@@ -1,5 +1,4 @@
 import { isMixedOrderItem, usePOSCart } from "@/hooks/pos/usePOSCart";
-import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { MenuItem } from "@/types/pos";
 import { Package, PackageSearch, Plus, Search, X } from "lucide-react";
@@ -63,97 +62,18 @@ function getStockStatus(item: MenuItem): "out" | "low" | "ok" | "untracked" {
 export function POSMenuGrid() {
   const {
     availableMenuItems,
-    customers,
-    isLoading,
-    ordersLoading,
-    errorMessage,
     activeCategory,
     setActiveCategory,
     searchQuery,
     setSearchQuery,
     categories,
     filteredMenuItems,
-    nextFolioDisplay,
     refreshOrders,
-    lowStockItems,
   } = usePOSData();
 
   const {
-    formState,
-    formErrors,
-    cartError,
-    editingOrder,
-    setEditingOrder,
-    additionalItems,
-    modifyingOrder,
-    setModifyingOrder,
-    modifyItems,
-    mixedOrderMenuItem,
-    setMixedOrderMenuItem,
-    mixedFlavorCounts,
-    handleFormChange,
     handleGridItemClick,
-    handleMixedFlavorChange,
-    handleMixedOrderConfirm,
-    handleQuantityChange,
-    handleItemNoteChange,
-    handleClearCart,
-    clearCartArmed,
-    openModifyModal,
-    handleModifyQuantityChange,
-    handleModifyRemoveItem,
-    handleSaveModifiedOrder,
-    addAdditionalItemRow,
-    handleAdditionalItemChange,
-    removeAdditionalItemRow,
-    handleAddItems,
-    handleCheckoutSubmit,
-    handleCancelOrder,
-    isSubmittingCart,
   } = usePOSCart(availableMenuItems, refreshOrders);
-
-  const {
-    isSubmittingCheckout,
-    checkoutError,
-    checkoutOrder,
-    setCheckoutOrder,
-    paymentMethod,
-    setPaymentMethod,
-    receivedAmount,
-    setReceivedAmount,
-    showTicket,
-    setShowTicket,
-    showKitchenTicket,
-    setShowKitchenTicket,
-    tipType,
-    setTipType,
-    tipInput,
-    setTipInput,
-    tipAmountCalculated,
-    change,
-    unusualTipInfo,
-    setUnusualTipInfo,
-    showWhatsAppModal,
-    setShowWhatsAppModal,
-    whatsappNumber,
-    setWhatsappNumber,
-    generateWhatsAppMessage,
-    editingTipOrder,
-    setEditingTipOrder,
-    editTipType,
-    setEditTipType,
-    editTipInput,
-    setEditTipInput,
-    editTipAmountCalculated,
-    showSplitBill,
-    setShowSplitBill,
-    billingOrder,
-    setBillingOrder,
-    handleProcessPayment,
-    handleSplitPayment,
-    handleUpdateTip,
-    handleFailedPayment,
-  } = usePOSCheckout(refreshOrders);
   return (
     <section className="rounded-2xl bg-card p-4 sm:p-6 shadow-sm border border-border space-y-5 w-full overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
@@ -191,8 +111,8 @@ export function POSMenuGrid() {
           type="button"
           onClick={() => setActiveCategory("")}
           className={`px-4 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${activeCategory === ""
-              ? "bg-white/10 border-white/20 text-text-light shadow-sm scale-105"
-              : "bg-white/5 text-text-light/50 border-transparent hover:border-border/15 hover:text-text-light"
+            ? "bg-white/10 border-white/20 text-text-light shadow-sm scale-105"
+            : "bg-white/5 text-text-light/50 border-transparent hover:border-border/15 hover:text-text-light"
             }`}
         >
           Todos
@@ -206,8 +126,8 @@ export function POSMenuGrid() {
               type="button"
               onClick={() => setActiveCategory(cat)}
               className={`px-4 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${isActive
-                  ? `${config.badgeBg} shadow-sm scale-105`
-                  : "bg-white/5 text-text-light/50 border-transparent hover:border-border/15 hover:text-text-light"
+                ? `${config.badgeBg} shadow-sm scale-105`
+                : "bg-white/5 text-text-light/50 border-transparent hover:border-border/15 hover:text-text-light"
                 }`}
             >
               {config.label}
@@ -241,10 +161,10 @@ export function POSMenuGrid() {
                 type="button"
                 onClick={() => handleGridItemClick(m)}
                 className={`group relative rounded-2xl bg-card-light p-4 border transition-all shadow-sm flex flex-col justify-between text-left h-28 overflow-hidden active:scale-95 ${isOutOfStock
-                    ? "border-red-500/25 hover:border-red-500/50 hover:shadow-md hover:-translate-y-0.5"
-                    : isLowStock
-                      ? "border-amber-500/30 hover:border-amber-500/60 hover:shadow-md hover:-translate-y-0.5"
-                      : "border-border hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5"
+                  ? "border-red-500/25 hover:border-red-500/50 hover:shadow-md hover:-translate-y-0.5"
+                  : isLowStock
+                    ? "border-amber-500/30 hover:border-amber-500/60 hover:shadow-md hover:-translate-y-0.5"
+                    : "border-border hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5"
                   }`}
               >
                 {/* Sin Stock warning badge — visual only, no bloqueo */}
@@ -257,8 +177,8 @@ export function POSMenuGrid() {
                 <div className="flex items-start justify-between gap-1 w-full">
                   <span
                     className={`font-black text-xs uppercase tracking-tight leading-snug line-clamp-2 transition-colors ${isOutOfStock
-                        ? "text-text-light/60 group-hover:text-red-300"
-                        : "text-text-light group-hover:text-primary"
+                      ? "text-text-light/60 group-hover:text-red-300"
+                      : "text-text-light group-hover:text-primary"
                       }`}
                   >
                     {m.name}
@@ -279,10 +199,10 @@ export function POSMenuGrid() {
                   {stockStatus !== "untracked" && (
                     <span
                       className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-black tabular-nums border ${isOutOfStock
-                          ? "bg-red-500/10 border-red-500/20 text-red-400"
-                          : isLowStock
-                            ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                            : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                        ? "bg-red-500/10 border-red-500/20 text-red-400"
+                        : isLowStock
+                          ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
                         }`}
                     >
                       <Package className="h-2.5 w-2.5 shrink-0" />

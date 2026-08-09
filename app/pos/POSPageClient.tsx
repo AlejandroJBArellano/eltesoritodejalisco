@@ -1,8 +1,8 @@
 "use client";
 
-import { usePOSCart, POSCartProvider } from "@/hooks/pos/usePOSCart";
-import { usePOSCheckout, POSCheckoutProvider } from "@/hooks/pos/usePOSCheckout";
-import { usePOSData, POSDataProvider } from "@/hooks/pos/usePOSData";
+import { POSCartProvider, usePOSCart } from "@/hooks/pos/usePOSCart";
+import { POSCheckoutProvider, usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
+import { POSDataProvider, usePOSData } from "@/hooks/pos/usePOSData";
 import { useState } from "react";
 
 import { POSCartSidebar } from "@/components/pos/POSCartSidebar";
@@ -64,8 +64,6 @@ function POSPageContent() {
     isLoading,
     ordersLoading,
     errorMessage,
-    nextFolioDisplay,
-    refreshOrders,
     lowStockItems,
   } = usePOSData();
 
@@ -182,7 +180,6 @@ function POSPageContent() {
       <PageHeader
         title="Punto de Venta"
         icon={<Receipt className="h-5 w-5 text-primary" />}
-        subtitle={`Siguiente Folio: #${nextFolioDisplay}`}
       />
 
       {/* Selector de pestañas para móvil/tablet */}

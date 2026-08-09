@@ -233,23 +233,6 @@ function usePOSDataInternal(tenantId?: string) {
     };
   }, [tenantId, supabase, fetchOrders, fetchMenu]);
 
-  // Calculate next folio for display
-  const nextFolioDisplay = useMemo(() => {
-    const todayDateStr = getTodayDateStr();
-
-    const todayOrders = orders.filter(
-      (o) => getOrderDateStr(o.createdAt) === todayDateStr,
-    );
-
-    if (todayOrders.length === 0) return "001";
-    const lastNum = Math.max(
-      ...todayOrders.map((o) => {
-        const parts = (o.orderNumber || "0").split("-");
-        return parseInt(parts[parts.length - 1], 10) || 0;
-      }),
-    );
-    return (lastNum + 1).toString().padStart(3, "0");
-  }, [orders]);
 
   // Today metrics summary
   const todayStats = useMemo(() => {
@@ -301,7 +284,6 @@ function usePOSDataInternal(tenantId?: string) {
     searchQuery,
     setSearchQuery,
     filteredMenuItems,
-    nextFolioDisplay,
     todayStats,
     lowStockItems,
   };
