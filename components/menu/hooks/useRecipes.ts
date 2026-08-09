@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import React, { createContext, useContext, useState } from "react";
 import {
   EMPTY_RECIPE_FORM,
   MenuItem,
@@ -8,7 +8,11 @@ import {
   RecipeItem,
 } from "../types";
 
-export function useRecipes(items: MenuItem[]) {
+type RecipesContextType = ReturnType<typeof useRecipesInner>;
+
+const RecipesContext = createContext<RecipesContextType | null>(null);
+
+function useRecipesInner(items: MenuItem[]) {
   const [recipeItems, setRecipeItems] = useState<RecipeItem[]>([]);
   const [selectedRecipeMenuItemId, setSelectedRecipeMenuItemId] = useState("");
   const [recipeForm, setRecipeForm] =
@@ -42,7 +46,7 @@ export function useRecipes(items: MenuItem[]) {
     setIsRecipeModalOpen(true);
   };
 
-  const handleRecipeSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleRecipeSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedRecipeMenuItemId) {
       setRecipeErrors({ menuItemId: "Selecciona un producto" });
@@ -122,4 +126,27 @@ export function useRecipes(items: MenuItem[]) {
     handleRecipeSubmit,
     deleteRecipe,
   };
+}
+
+export function RecipesProvider({
+  items,
+  children,
+}: {
+  items: MenuItem[];
+  children: React.ReactNode;
+}) {
+  const value = useRecipesInner(items);
+  return React.createElement(RecipesContext.Provider, { value }, children);
+}
+
+export function useRecipes(items?: MenuItem[]) {
+  const context = useContext(RecipesContext);
+  if (context) return context;
+
+  // Fallback for tests/isolated calls
+  if (!items) {
+    throw new Error("useRecipes must be used within a RecipesProvider or passed items directly");
+  }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  return useRecipesInner(items);
 }

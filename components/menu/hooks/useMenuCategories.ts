@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   CategoryFormState,
@@ -9,7 +9,11 @@ import {
   Translations,
 } from "../types";
 
-export function useMenuCategories(initialCategories: MenuCategory[]) {
+type MenuCategoriesContextType = ReturnType<typeof useMenuCategoriesInner>;
+
+const MenuCategoriesContext = createContext<MenuCategoriesContextType | null>(null);
+
+function useMenuCategoriesInner(initialCategories: MenuCategory[]) {
   const router = useRouter();
   const [menuCategories, setMenuCategories] = useState<MenuCategory[]>(initialCategories);
   const [categoriesLoaded] = useState(true);
@@ -50,7 +54,7 @@ export function useMenuCategories(initialCategories: MenuCategory[]) {
   };
 
   const handleCategorySubmit = async (
-    event: FormEvent<HTMLFormElement>,
+    event: React.SubmitEvent<HTMLFormElement>,
     onSuccess: (newCategoryName?: string) => void,
   ) => {
     event.preventDefault();
@@ -78,7 +82,7 @@ export function useMenuCategories(initialCategories: MenuCategory[]) {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Error al guardar");
-      
+
       router.refresh();
       onSuccess(data.category?.name); // caller can re-fetch menu items if needed
       setIsCategoryModalOpen(false);
@@ -109,7 +113,7 @@ export function useMenuCategories(initialCategories: MenuCategory[]) {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "No se pudo eliminar");
-      
+
       router.refresh();
       setErrorMessage(null);
     } catch (error) {
@@ -178,4 +182,27 @@ export function useMenuCategories(initialCategories: MenuCategory[]) {
     handleDeleteCategory,
     handleMoveCategoryOrder,
   };
+}
+
+export function MenuCategoriesProvider({
+  initialCategories,
+  children,
+}: {
+  initialCategories: MenuCategory[];
+  children: React.ReactNode;
+}) {
+  const value = useMenuCategoriesInner(initialCategories);
+  return React.createElement(MenuCategoriesContext.Provider, { value }, children);
+}
+
+export function useMenuCategories(initialCategories?: MenuCategory[]) {
+  const context = useContext(MenuCategoriesContext);
+  if (context) return context;
+
+  // Fallback for tests/isolated calls
+  if (!initialCategories) {
+    throw new Error("useMenuCategories must be used within a MenuCategoriesProvider or passed initialCategories directly");
+  }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  return useMenuCategoriesInner(initialCategories);
 }

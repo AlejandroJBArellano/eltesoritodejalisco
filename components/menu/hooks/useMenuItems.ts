@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import React, { createContext, useContext, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   EMPTY_PRODUCT_FORM,
@@ -9,7 +9,11 @@ import {
   Translations,
 } from "../types";
 
-export function useMenuItems(items: MenuItem[]) {
+type MenuItemsContextType = ReturnType<typeof useMenuItemsInner>;
+
+const MenuItemsContext = createContext<MenuItemsContextType | null>(null);
+
+function useMenuItemsInner(items: MenuItem[]) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -99,7 +103,7 @@ export function useMenuItems(items: MenuItem[]) {
     setIsProductModalOpen(true);
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const errors = validateForm(formState);
     setFormErrors(errors);
@@ -180,6 +184,7 @@ export function useMenuItems(items: MenuItem[]) {
   };
 
   return {
+    items,
     isSubmitting,
     errorMessage,
     setErrorMessage,
@@ -200,4 +205,27 @@ export function useMenuItems(items: MenuItem[]) {
     handleFormChange,
     handleFileChange,
   };
+}
+
+export function MenuItemsProvider({
+  items,
+  children,
+}: {
+  items: MenuItem[];
+  children: React.ReactNode;
+}) {
+  const value = useMenuItemsInner(items);
+  return React.createElement(MenuItemsContext.Provider, { value }, children);
+}
+
+export function useMenuItems(items?: MenuItem[]) {
+  const context = useContext(MenuItemsContext);
+  if (context) return context;
+
+  // Fallback for tests/isolated calls
+  if (!items) {
+    throw new Error("useMenuItems must be used within a MenuItemsProvider or passed items directly");
+  }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  return useMenuItemsInner(items);
 }
