@@ -99,6 +99,8 @@ export function POSAddItemsModal() {
     handleFailedPayment,
   } = usePOSCheckout(refreshOrders);
 
+  if (!editingOrder) return null;
+
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
       <div className="bg-card rounded-2xl max-w-md w-full p-6 shadow-2xl border border-border space-y-6">

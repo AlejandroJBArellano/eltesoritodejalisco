@@ -1,9 +1,24 @@
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { POSAddItemsModal } from "../modals/POSAddItemsModal";
 import { Order, MenuItem } from "@/types/pos";
 import { OrderStatus } from "@/types";
+import { usePOSData } from "@/hooks/pos/usePOSData";
+import { usePOSCart } from "@/hooks/pos/usePOSCart";
+import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
+
+vi.mock("@/hooks/pos/usePOSData", () => ({
+  usePOSData: vi.fn(),
+}));
+
+vi.mock("@/hooks/pos/usePOSCart", () => ({
+  usePOSCart: vi.fn(),
+}));
+
+vi.mock("@/hooks/pos/usePOSCheckout", () => ({
+  usePOSCheckout: vi.fn(() => ({})),
+}));
 
 const mockOrder: Order = {
   id: "order-123",
@@ -27,7 +42,11 @@ const mockAvailableItems: MenuItem[] = [
 ];
 
 describe("POSAddItemsModal Component", () => {
-  const defaultProps = {
+  const defaultDataValue = {
+    availableMenuItems: mockAvailableItems,
+  };
+
+  const defaultCartValue = {
     editingOrder: mockOrder,
     setEditingOrder: vi.fn(),
     handleAddItems: vi.fn(),
@@ -35,19 +54,26 @@ describe("POSAddItemsModal Component", () => {
     addAdditionalItemRow: vi.fn(),
     handleAdditionalItemChange: vi.fn(),
     removeAdditionalItemRow: vi.fn(),
-    availableMenuItems: mockAvailableItems,
-    isSubmitting: false,
+    isSubmittingCart: false,
   };
 
+  beforeEach(() => {
+    vi.mocked(usePOSData).mockReturnValue(defaultDataValue as any);
+    vi.mocked(usePOSCart).mockReturnValue(defaultCartValue as any);
+  });
+
   it("should render null when editingOrder is null", () => {
-    const { container } = render(
-      <POSAddItemsModal {...defaultProps} editingOrder={null} />
-    );
+    vi.mocked(usePOSCart).mockReturnValue({
+      ...defaultCartValue,
+      editingOrder: null,
+    } as any);
+
+    const { container } = render(<POSAddItemsModal />);
     expect(container.firstChild).toBeNull();
   });
 
   it("should render header, items selectors, and actions correctly", () => {
-    render(<POSAddItemsModal {...defaultProps} />);
+    render(<POSAddItemsModal />);
 
     expect(screen.getByText("Agregar Productos a Orden #1050")).toBeInTheDocument();
     expect(screen.getByText("Nuevos Productos")).toBeInTheDocument();
@@ -67,18 +93,18 @@ describe("POSAddItemsModal Component", () => {
     const handleAdditionalItemChange = vi.fn();
     const removeAdditionalItemRow = vi.fn();
     const setEditingOrder = vi.fn();
-    const handleAddItems = vi.fn();
+    const handleAddItems = vi.fn((e) => e.preventDefault());
 
-    render(
-      <POSAddItemsModal
-        {...defaultProps}
-        addAdditionalItemRow={addAdditionalItemRow}
-        handleAdditionalItemChange={handleAdditionalItemChange}
-        removeAdditionalItemRow={removeAdditionalItemRow}
-        setEditingOrder={setEditingOrder}
-        handleAddItems={handleAddItems}
-      />
-    );
+    vi.mocked(usePOSCart).mockReturnValue({
+      ...defaultCartValue,
+      addAdditionalItemRow,
+      handleAdditionalItemChange,
+      removeAdditionalItemRow,
+      setEditingOrder,
+      handleAddItems,
+    } as any);
+
+    render(<POSAddItemsModal />);
 
     // Add Row Click
     const addRowBtn = screen.getByRole("button", { name: /Fila/i });
@@ -107,7 +133,12 @@ describe("POSAddItemsModal Component", () => {
   });
 
   it("should disable inputs and select components during submitting", () => {
-    render(<POSAddItemsModal {...defaultProps} isSubmitting={true} />);
+    vi.mocked(usePOSCart).mockReturnValue({
+      ...defaultCartValue,
+      isSubmittingCart: true,
+    } as any);
+
+    render(<POSAddItemsModal />);
 
     expect(screen.getByRole("combobox")).toBeDisabled();
     expect(screen.getByRole("spinbutton")).toBeDisabled();

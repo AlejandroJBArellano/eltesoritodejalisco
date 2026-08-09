@@ -1,9 +1,24 @@
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { POSCheckoutModal } from "../modals/POSCheckoutModal";
 import { Order } from "@/types/pos";
 import { OrderStatus } from "@/types";
+import { usePOSData } from "@/hooks/pos/usePOSData";
+import { usePOSCart } from "@/hooks/pos/usePOSCart";
+import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
+
+vi.mock("@/hooks/pos/usePOSData", () => ({
+  usePOSData: vi.fn(),
+}));
+
+vi.mock("@/hooks/pos/usePOSCart", () => ({
+  usePOSCart: vi.fn(),
+}));
+
+vi.mock("@/hooks/pos/usePOSCheckout", () => ({
+  usePOSCheckout: vi.fn(),
+}));
 
 const mockOrder: Order = {
   id: "order-123",
@@ -41,38 +56,55 @@ const mockOrder: Order = {
 };
 
 describe("POSCheckoutModal Component", () => {
-  const defaultProps = {
+  const defaultDataValue = {
+    availableMenuItems: [],
+    refreshOrders: vi.fn(),
+  };
+
+  const defaultCartValue = {
+    openModifyModal: vi.fn(),
+  };
+
+  const defaultCheckoutValue = {
+    isSubmittingCheckout: false,
+    checkoutError: null,
     checkoutOrder: mockOrder,
     setCheckoutOrder: vi.fn(),
-    tipAmountCalculated: 0,
-    tipType: "NONE",
-    setTipType: vi.fn(),
-    tipInput: "",
-    setTipInput: vi.fn(),
     paymentMethod: "CARD",
     setPaymentMethod: vi.fn(),
     receivedAmount: "",
     setReceivedAmount: vi.fn(),
+    tipType: "NONE",
+    setTipType: vi.fn(),
+    tipInput: "",
+    setTipInput: vi.fn(),
+    tipAmountCalculated: 0,
     change: 0,
-    handleProcessPayment: vi.fn(),
-    isSubmitting: false,
-    setShowSplitBill: vi.fn(),
-    openModifyModal: vi.fn(),
-    handleFailedPayment: vi.fn(),
-    checkoutError: null,
     unusualTipInfo: null,
     setUnusualTipInfo: vi.fn(),
+    setShowSplitBill: vi.fn(),
+    handleProcessPayment: vi.fn(),
+    handleFailedPayment: vi.fn(),
   };
 
+  beforeEach(() => {
+    vi.mocked(usePOSData).mockReturnValue(defaultDataValue as any);
+    vi.mocked(usePOSCart).mockReturnValue(defaultCartValue as any);
+    vi.mocked(usePOSCheckout).mockReturnValue(defaultCheckoutValue as any);
+  });
+
   it("should render null when checkoutOrder is null", () => {
-    const { container } = render(
-      <POSCheckoutModal {...defaultProps} checkoutOrder={null} />
-    );
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      checkoutOrder: null,
+    } as any);
+
+    const { container } = render(<POSCheckoutModal />);
     expect(container.firstChild).toBeNull();
   });
 
   it("should render order detail, totals, tip choices and payment methods", () => {
-    render(<POSCheckoutModal {...defaultProps} />);
+    render(<POSCheckoutModal />);
 
     // Header
     expect(screen.getByText("Cobrar Orden #1050")).toBeInTheDocument();
@@ -99,14 +131,14 @@ describe("POSCheckoutModal Component", () => {
   });
 
   it("should render received amount input and change when payment method is CASH", () => {
-    render(
-      <POSCheckoutModal
-        {...defaultProps}
-        paymentMethod="CASH"
-        receivedAmount="150"
-        change={34}
-      />
-    );
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      paymentMethod: "CASH",
+      receivedAmount: "150",
+      change: 34,
+    } as any);
+
+    render(<POSCheckoutModal />);
 
     const receivedInput = screen.getByPlaceholderText("Monto recibido ($)...");
     expect(receivedInput).toBeInTheDocument();
@@ -117,21 +149,27 @@ describe("POSCheckoutModal Component", () => {
   });
 
   it("should render checkout error when present", () => {
-    render(<POSCheckoutModal {...defaultProps} checkoutError="Ocurrió un error al procesar el pago" />);
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      checkoutError: "Ocurrió un error al procesar el pago",
+    } as any);
+
+    render(<POSCheckoutModal />);
     expect(screen.getByText("Ocurrió un error al procesar el pago")).toBeInTheDocument();
   });
 
   it("should render unusual tip warning banner and buttons when present", () => {
     const handleProcessPayment = vi.fn();
     const setUnusualTipInfo = vi.fn();
-    render(
-      <POSCheckoutModal
-        {...defaultProps}
-        unusualTipInfo={{ amount: 200, percentage: 50 }}
-        handleProcessPayment={handleProcessPayment}
-        setUnusualTipInfo={setUnusualTipInfo}
-      />
-    );
+
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      unusualTipInfo: { amount: 200, percentage: 50 },
+      handleProcessPayment,
+      setUnusualTipInfo,
+    } as any);
+
+    render(<POSCheckoutModal />);
 
     expect(screen.getByText("Propina inusual")).toBeInTheDocument();
     expect(screen.getByText("$200.00 (50.0%) — ¿es correcto?")).toBeInTheDocument();
@@ -155,17 +193,20 @@ describe("POSCheckoutModal Component", () => {
     const setCheckoutOrder = vi.fn();
     const handleFailedPayment = vi.fn();
 
-    render(
-      <POSCheckoutModal
-        {...defaultProps}
-        setPaymentMethod={setPaymentMethod}
-        setTipType={setTipType}
-        setShowSplitBill={setShowSplitBill}
-        openModifyModal={openModifyModal}
-        setCheckoutOrder={setCheckoutOrder}
-        handleFailedPayment={handleFailedPayment}
-      />
-    );
+    vi.mocked(usePOSCart).mockReturnValue({
+      openModifyModal,
+    } as any);
+
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      setPaymentMethod,
+      setTipType,
+      setShowSplitBill,
+      setCheckoutOrder,
+      handleFailedPayment,
+    } as any);
+
+    render(<POSCheckoutModal />);
 
     // Click CASH payment method
     const cashBtn = screen.getByRole("button", { name: /Efectivo/i });
@@ -196,12 +237,13 @@ describe("POSCheckoutModal Component", () => {
 
   it("should support submitting using the form element", () => {
     const handleProcessPayment = vi.fn();
-    render(
-      <POSCheckoutModal
-        {...defaultProps}
-        handleProcessPayment={handleProcessPayment}
-      />
-    );
+
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      handleProcessPayment,
+    } as any);
+
+    render(<POSCheckoutModal />);
 
     const submitBtn = screen.getByRole("button", { name: /Registrar Pago/i });
     fireEvent.click(submitBtn);
