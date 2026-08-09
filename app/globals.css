@@ -73,7 +73,8 @@ body {
 
 /* ── Print utility ────────────────────────────────────── */
 @media print {
-  .no-print {
+  .no-print,
+  nav {
     display: none !important;
   }
   .pos-client-root > *:not(.print-modal-container) {
