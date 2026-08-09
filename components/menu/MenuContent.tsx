@@ -1,24 +1,24 @@
 "use client";
 
-import { useState, useEffect, useMemo, useTransition, FormEvent } from "react";
-import { BookOpen, Plus, RefreshCw, Tag } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { BookOpen, Plus, RefreshCw, Tag } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, useMemo, useState, useTransition } from "react";
 
-import { useMenuItems } from "./hooks/useMenuItems";
 import { useMenuCategories } from "./hooks/useMenuCategories";
+import { useMenuItems } from "./hooks/useMenuItems";
 import { useRecipes } from "./hooks/useRecipes";
 
-import { MenuStatsCards } from "./components/MenuStatsCards";
 import { CategoriesPanel } from "./components/CategoriesPanel";
+import { CategoryModal } from "./components/CategoryModal";
+import { IngredientModal } from "./components/IngredientModal";
 import { MenuFilters } from "./components/MenuFilters";
+import { MenuStatsCards } from "./components/MenuStatsCards";
 import { MenuTable } from "./components/MenuTable";
 import { ProductModal } from "./components/ProductModal";
-import { CategoryModal } from "./components/CategoryModal";
 import { RecipeModal } from "./components/RecipeModal";
-import { IngredientModal } from "./components/IngredientModal";
 
-import { MenuItem, IngredientFormState, EMPTY_INGREDIENT_FORM, Ingredient, SortField, MenuCategory } from "./types";
+import { EMPTY_INGREDIENT_FORM, Ingredient, IngredientFormState, MenuCategory, MenuItem, SortField } from "./types";
 
 interface MenuContentProps {
   items: MenuItem[];
@@ -28,6 +28,7 @@ interface MenuContentProps {
   totalPages: number;
   totalItems: number;
   initialMenuCategories: MenuCategory[];
+  initialIngredients: Ingredient[];
   searchParams: {
     q: string;
     category: string;
@@ -47,6 +48,7 @@ export function MenuContent({
   totalPages,
   totalItems,
   initialMenuCategories,
+  initialIngredients,
   searchParams,
 }: MenuContentProps) {
   const router = useRouter();
@@ -110,29 +112,13 @@ export function MenuContent({
     deleteRecipe,
   } = useRecipes(items);
 
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-
   // Ingredient modal state
   const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
   const [ingredientForm, setIngredientForm] = useState<IngredientFormState>(EMPTY_INGREDIENT_FORM);
   const [ingredientErrors, setIngredientErrors] = useState<Record<string, string>>({});
   const [isIngredientSubmitting, setIsIngredientSubmitting] = useState(false);
 
-  // Local search query input to avoid lag
-  const [localSearch, setLocalSearch] = useState(searchParams.q);
 
-  useEffect(() => {
-    setLocalSearch(searchParams.q);
-  }, [searchParams.q]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (localSearch !== searchParams.q) {
-        updateSearchParam({ q: localSearch });
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [localSearch]);
 
   const updateSearchParam = (updates: Record<string, string | number | null>) => {
     const params = new URLSearchParams(rawSearchParams.toString());
@@ -158,18 +144,6 @@ export function MenuContent({
         ? "desc"
         : "asc";
     updateSearchParam({ sort: field, direction: nextDirection });
-  };
-
-  const fetchIngredients = async () => {
-    try {
-      const response = await fetch("/api/inventory");
-      const data = await response.json();
-      if (response.ok) {
-        setIngredients(data.ingredients || []);
-      }
-    } catch (error) {
-      console.error("Error fetching ingredients:", error);
-    }
   };
 
   const handleIngredientFormChange = (field: keyof IngredientFormState, value: string) => {
@@ -205,7 +179,7 @@ export function MenuContent({
         throw new Error(data?.error || "Error al crear el ingrediente");
       }
 
-      await fetchIngredients();
+      router.refresh();
 
       const newIngredient = data.ingredient;
       if (newIngredient) {
@@ -229,10 +203,6 @@ export function MenuContent({
       setIsIngredientSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    fetchIngredients();
-  }, []);
 
   const dbCategories = useMemo(() => {
     const set = new Set<string>();
@@ -343,11 +313,11 @@ export function MenuContent({
           </div>
 
           <MenuFilters
-            searchQuery={localSearch}
+            searchQuery={searchParams.q}
             categoryFilter={searchParams.category || "all"}
             availabilityFilter={(searchParams.availability || "all") as any}
             categories={categories}
-            onSearchChange={setLocalSearch}
+            onSearchSubmit={(q) => updateSearchParam({ q })}
             onCategoryChange={(v) => updateSearchParam({ category: v })}
             onAvailabilityChange={(v) => updateSearchParam({ availability: v })}
           />
@@ -380,7 +350,7 @@ export function MenuContent({
         isEditing={isEditing}
         isSubmitting={isSubmitting}
         categories={dbCategories}
-        ingredients={ingredients}
+        ingredients={initialIngredients}
         showTranslations={showTranslations}
         onToggleTranslations={() => setShowTranslations((v) => !v)}
         onFormChange={handleFormChange}
@@ -411,7 +381,7 @@ export function MenuContent({
         onSubmit={handleRecipeSubmit}
         items={items}
         recipeItems={recipeItems}
-        ingredients={ingredients}
+        ingredients={initialIngredients}
         selectedRecipeMenuItemId={selectedRecipeMenuItemId}
         onSelectedRecipeMenuItemIdChange={(id) => {
           setSelectedRecipeMenuItemId(id);
