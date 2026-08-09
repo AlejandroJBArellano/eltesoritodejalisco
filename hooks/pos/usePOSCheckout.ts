@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Order } from "@/types/pos";
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
-import { useTenant } from "@/components/TenantProvider";
 import type { SplitPayment } from "@/components/pos/SplitBillModal";
+import { useTenant } from "@/components/TenantProvider";
+import { Order } from "@/types/pos";
+import { useMemo, useState } from "react";
 
 export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
   const { name } = useTenant();
@@ -255,7 +255,7 @@ export function usePOSCheckout(refreshOrders: () => Promise<Order[]>) {
 
   const generateWhatsAppMessage = () => {
     if (!checkoutOrder) return "";
-    let msg = `¡Gracias por tu visita a ${name || "El Tesorito de Jalisco"}! 🌮🤩\n\n`;
+    let msg = `¡Gracias por tu visita a ${name}! 🌮🤩\n\n`;
     msg += `🧾 *Ticket #${checkoutOrder.orderNumber}*\n`;
     if (checkoutOrder.table) {
       msg += `📍 Mesa: ${checkoutOrder.table}\n`;

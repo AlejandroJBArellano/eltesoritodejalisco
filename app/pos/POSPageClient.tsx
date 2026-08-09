@@ -21,6 +21,7 @@ import { OrderTicket } from "@/components/pos/OrderTicket";
 import { SplitBillModal } from "@/components/pos/SplitBillModal";
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 
+import { toPng } from "html-to-image";
 import {
   Ban,
   ChefHat,
@@ -34,13 +35,14 @@ import {
   Plus,
   Printer,
   Receipt,
-  Send,
   ShoppingBag,
-  Undo2,
-  X,
+  Undo2
 } from "lucide-react";
 import Link from "next/link";
-import { toPng } from "html-to-image";
+import ErrorPOS from "./ErrorPOS";
+import LoadingPOS from "./LoadingPOS";
+import NoOrdersPOS from "./NoOrdersPOS";
+import WhatsAppTicketPOS from "./WhatsAppTicketPOS";
 
 export default function POSPageClient({ tenantId }: { tenantId: string }) {
   const {
@@ -203,36 +205,12 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
   ];
 
   if (isLoading) {
-    return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
-          <p className="text-sm font-bold text-text-light/50 uppercase tracking-widest animate-pulse">
-            Iniciando POS...
-          </p>
-        </div>
-      </div>
-    );
+    return <LoadingPOS />
   }
 
   if (errorMessage) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center p-6">
-        <div className="rounded-2xl bg-red-500/10 p-8 border border-red-500/20 max-w-md text-center">
-          <h2 className="mb-3 text-lg font-black text-red-400 uppercase tracking-wider">
-            Error de Conexión
-          </h2>
-          <p className="text-sm font-medium text-red-400/80 mb-6">
-            {errorMessage}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-red-500 text-white px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider hover:brightness-110 transition-all"
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
+      <ErrorPOS>{errorMessage}</ErrorPOS>
     );
   }
 
@@ -259,8 +237,8 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
           type="button"
           onClick={() => setActiveTab("menu")}
           className={`flex-1 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border ${activeTab === "menu"
-              ? "bg-primary text-black border-primary shadow-lg shadow-primary/10"
-              : "bg-transparent text-text-light/60 border-transparent hover:text-text-light"
+            ? "bg-primary text-black border-primary shadow-lg shadow-primary/10"
+            : "bg-transparent text-text-light/60 border-transparent hover:text-text-light"
             }`}
         >
           Catálogo
@@ -269,16 +247,16 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
           type="button"
           onClick={() => setActiveTab("cart")}
           className={`flex-1 py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border relative ${activeTab === "cart"
-              ? "bg-secondary text-black border-secondary shadow-lg shadow-secondary/10"
-              : "bg-transparent text-text-light/60 border-transparent hover:text-text-light"
+            ? "bg-secondary text-black border-secondary shadow-lg shadow-secondary/10"
+            : "bg-transparent text-text-light/60 border-transparent hover:text-text-light"
             }`}
         >
           Pedido
           {totalCartItems > 0 && (
             <span
               className={`rounded-full text-[10px] font-black h-5 min-w-5 px-1.5 flex items-center justify-center transition-colors ${activeTab === "cart"
-                  ? "bg-black text-white"
-                  : "bg-primary text-black"
+                ? "bg-black text-white"
+                : "bg-primary text-black"
                 }`}
             >
               {totalCartItems}
@@ -562,8 +540,8 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
                                       isSubmittingCart || isSubmittingCheckout
                                     }
                                     className={`rounded-xl p-1 text-[10px] font-black uppercase transition-all disabled:opacity-50 ${cancelArmedId === order.id
-                                        ? "bg-red-500/30 border border-red-500/50 text-red-300 px-2"
-                                        : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
+                                      ? "bg-red-500/30 border border-red-500/50 text-red-300 px-2"
+                                      : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
                                       }`}
                                     title={
                                       cancelArmedId === order.id
@@ -591,11 +569,7 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
             {/* VISTA DE TARJETAS PARA MÓVIL (Últimas Órdenes) */}
             <div className="md:hidden space-y-4 pt-4">
               {orders.length === 0 ? (
-                <div className="py-16 text-center">
-                  <p className="text-xs font-extrabold uppercase tracking-widest text-text-light/30">
-                    No hay órdenes todavía
-                  </p>
-                </div>
+                <NoOrdersPOS />
               ) : (
                 orders.slice(0, 10).map((order) => {
                   const tipAmt = getOrderTipAmount(order);
@@ -696,50 +670,47 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
                           Comanda
                         </button>
                         {order.status !== "PAID" && (
-                          <button
-                            type="button"
-                            onClick={() => setEditingOrder(order)}
-                            className="rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
-                          >
-                            <Plus className="h-3.5 w-3.5" />
-                            Agregar
-                          </button>
-                        )}
-                        {order.status !== "PAID" && (
-                          <button
-                            type="button"
-                            onClick={() => openModifyModal(order)}
-                            className="rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
-                          >
-                            <Edit3 className="h-3.5 w-3.5" />
-                            Editar
-                          </button>
-                        )}
-                        {order.status === "PAID" && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingTipOrder(order);
-                              setEditTipType("FIXED");
-                              setEditTipInput(
-                                order.payments?.[0]?.tipAmount?.toString() || "0",
-                              );
-                            }}
-                            className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
-                          >
-                            <HandCoins className="h-3.5 w-3.5" />
-                            Propina
-                          </button>
-                        )}
-                        {order.status === "PAID" && (
-                          <button
-                            type="button"
-                            onClick={() => setBillingOrder(order)}
-                            className="rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
-                          >
-                            <FileText className="h-3.5 w-3.5" />
-                            Factura
-                          </button>
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setEditingOrder(order)}
+                              className="rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                            >
+                              <Plus className="h-3.5 w-3.5" />
+                              Agregar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openModifyModal(order)}
+                              className="rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                            >
+                              <Edit3 className="h-3.5 w-3.5" />
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingTipOrder(order);
+                                setEditTipType("FIXED");
+                                setEditTipInput(
+                                  order.payments?.[0]?.tipAmount?.toString() || "0",
+                                );
+                              }}
+                              className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                            >
+                              <HandCoins className="h-3.5 w-3.5" />
+                              Propina
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setBillingOrder(order)}
+                              className="rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                            >
+                              <FileText className="h-3.5 w-3.5" />
+                              Factura
+                            </button>
+
+                          </>
                         )}
                         <button
                           type="button"
@@ -764,8 +735,8 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
                               }
                               disabled={isSubmittingCart || isSubmittingCheckout}
                               className={`rounded-xl py-2.5 text-[10px] font-black uppercase transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 ${cancelArmedId === order.id
-                                  ? "bg-red-500/30 border border-red-500/50 text-red-300"
-                                  : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
+                                ? "bg-red-500/30 border border-red-500/50 text-red-300"
+                                : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
                                 }`}
                             >
                               {cancelArmedId === order.id ? (
@@ -906,57 +877,20 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
       )}
 
       {showWhatsAppModal && checkoutOrder && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
-          <div className="bg-card rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-border space-y-5">
-            <div className="flex justify-between items-center border-b border-border pb-3">
-              <h2 className="text-base font-black flex items-center gap-2 text-text-light uppercase tracking-tight">
-                <MessageCircle className="h-5 w-5 text-emerald-400" />
-                Ticket por WhatsApp
-              </h2>
-              <button
-                type="button"
-                onClick={() => setShowWhatsAppModal(false)}
-                className="text-text-light/40 hover:text-text-light transition-colors p-1 rounded-lg hover:bg-white/10"
-                aria-label="Cerrar"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
-              Ingresa los 10 dígitos del número celular
-            </p>
-
-            <input
-              type="tel"
-              maxLength={10}
-              value={whatsappNumber}
-              onChange={(e) =>
-                setWhatsappNumber(e.target.value.replace(/\D/g, ""))
-              }
-              placeholder="3312345678"
-              autoFocus
-              className="w-full text-2xl font-black p-4 border border-border bg-dark/40 rounded-xl focus:border-emerald-400 outline-none text-center text-text-light tracking-[0.2em] transition-colors placeholder:text-text-light/20"
-            />
-
-            <button
-              type="button"
-              disabled={whatsappNumber.length !== 10}
-              onClick={() => {
-                const url = `https://wa.me/52${whatsappNumber}?text=${generateWhatsAppMessage()}`;
-                window.open(url, "_blank");
-                setShowWhatsAppModal(false);
-                setCheckoutOrder(null);
-                setShowTicket(false);
-                setShowKitchenTicket(false);
-                setWhatsappNumber("");
-              }}
-              className="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-black text-sm hover:brightness-110 disabled:opacity-30 active:scale-[0.98] transition-all shadow-lg shadow-emerald-500/20 uppercase tracking-wider flex items-center justify-center gap-2"
-            >
-              <Send className="h-4 w-4" /> Enviar Ticket
-            </button>
-          </div>
-        </div>
+        <WhatsAppTicketPOS
+          onClickClose={() => setShowWhatsAppModal(false)}
+          whatsappNumber={whatsappNumber}
+          setWhatsappNumber={setWhatsappNumber}
+          onClickGenerate={() => {
+            const url = `https://wa.me/52${whatsappNumber}?text=${generateWhatsAppMessage()}`;
+            window.open(url, "_blank");
+            setShowWhatsAppModal(false);
+            setCheckoutOrder(null);
+            setShowTicket(false);
+            setShowKitchenTicket(false);
+            setWhatsappNumber("");
+          }}
+        />
       )}
 
       {billingOrder && (
