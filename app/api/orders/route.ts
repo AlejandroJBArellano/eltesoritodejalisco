@@ -84,7 +84,8 @@ export async function POST(request: NextRequest) {
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
-    // 1. Create order + items in a single atomic RPC call
+    // 1. Create order + items in a single atomic RPC call.
+    //    The SQL function generates the order_number automatically.
     const { data: orderId, error: rpcError } = await supabase.rpc(
       "create_order_with_items",
       {
