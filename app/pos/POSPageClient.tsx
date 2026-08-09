@@ -22,15 +22,14 @@ import { SplitBillModal } from "@/components/pos/SplitBillModal";
 
 import { toPng } from "html-to-image";
 import {
-  ChevronRight,
   Download,
   MessageCircle,
   Printer,
-  Receipt,
-  ShoppingBag
+  Receipt
 } from "lucide-react";
-import Link from "next/link";
 import ErrorPOS from "./ErrorPOS";
+import FloatingMobileBarPOS from "./FloatingMobileBarPOS";
+import LastOrders from "./LastOrders";
 import LoadingOrdersPOS from "./LoadingOrdersPOS";
 import LoadingPOS from "./LoadingPOS";
 import OrdersMobileFunction from "./OrdersMobilePOS";
@@ -224,19 +223,7 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
 
       {/* SECCIÓN: Últimas Órdenes */}
       <section className="rounded-2xl bg-card p-4 sm:p-6 shadow-sm border border-border overflow-hidden mx-2 md:mx-4 lg:mx-6">
-        <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
-          <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-blue-500"></span>
-            Últimas Órdenes
-          </h2>
-          <Link
-            href="/history"
-            className="text-xs font-bold text-primary hover:underline uppercase tracking-wider flex items-center gap-1"
-          >
-            Ver Historial Completo
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
+        <LastOrders />
 
         {ordersLoading ? (
           <LoadingOrdersPOS />
@@ -350,33 +337,7 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
 
       {/* Barra flotante para móviles cuando el carrito tiene ítems y estamos en la pestaña del catálogo */}
       {totalCartItems > 0 && activeTab === "menu" && (
-        <div className="lg:hidden fixed bottom-6 left-4 right-4 z-40 animate-[slideUp_0.3s_ease-out]">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab("cart");
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-            className="w-full bg-card/95 backdrop-blur-md hover:bg-[#262626]/95 border border-primary/20 text-white rounded-2xl p-4 flex items-center justify-between shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
-          >
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/20 border border-primary/30 h-10 w-10 rounded-xl flex items-center justify-center text-primary">
-                <ShoppingBag className="h-5 w-5" />
-              </div>
-              <div className="text-left">
-                <p className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest leading-none mb-1">
-                  Ver Pedido ({totalCartItems} items)
-                </p>
-                <p className="text-lg font-black text-text-light">
-                  ${cartTotal.toFixed(2)}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 font-black text-xs text-primary uppercase tracking-wider">
-              Continuar <ChevronRight className="h-4 w-4" />
-            </div>
-          </button>
-        </div>
+        <FloatingMobileBarPOS totalCartItems={totalCartItems} cartTotal={cartTotal} setActiveTab={setActiveTab} />
       )}
     </div>
   );
