@@ -90,13 +90,10 @@ export function OrderTicket({ order }: OrderTicketProps) {
       <div className="text-center mt-6">
         <p className="text-xs font-bold">Venta al público en general</p>
         <p className="text-xs mt-2">¡Gracias por su preferencia!</p>
-        <p className="text-[10px] text-gray-400 mt-2">
-          {system_name || "TesoritoOS"}
-        </p>
 
         <div className="border-t border-dashed border-gray-300 mt-4 pt-4 flex flex-col items-center justify-center">
-          <p className="text-xs font-bold text-gray-800">powered by Kittn</p>
-          <p className="text-[10px] text-gray-500 mb-2">Get Yours</p>
+          <p className="text-xs font-bold text-gray-800">Powered by Kittn</p>
+          <p className="text-[10px] text-gray-500 mb-2">Get Yours at trykittn.com</p>
           <div className="bg-white p-1.5 border border-gray-200 rounded-sm shadow-sm">
             <QRCodeSVG
               value={`https://trykittn.com?ref=pos_${order.id}_${tenantId}`}

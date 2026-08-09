@@ -113,8 +113,8 @@ describe("OrderTicket Component", () => {
     render(<OrderTicket order={mockOrder} />);
 
     // Powered by Kittn text elements
-    expect(screen.getByText("powered by Kittn")).toBeInTheDocument();
-    expect(screen.getByText("Get Yours")).toBeInTheDocument();
+    expect(screen.getByText(/Powered by Kittn/i)).toBeInTheDocument();
+    expect(screen.getByText(/Get Yours/i)).toBeInTheDocument();
 
     // QR Code assertions
     const qrCode = screen.getByTestId("qr-code");
