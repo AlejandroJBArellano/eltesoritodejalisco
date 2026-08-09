@@ -27,15 +27,15 @@ import {
   Printer,
   Receipt
 } from "lucide-react";
-import ErrorPOS from "./ErrorPOS";
-import FloatingMobileBarPOS from "./FloatingMobileBarPOS";
-import LastOrders from "./LastOrders";
-import LoadingOrdersPOS from "./LoadingOrdersPOS";
-import LoadingPOS from "./LoadingPOS";
-import OrdersMobileFunction from "./OrdersMobilePOS";
-import OrdersPOS from "./OrdersPOS";
-import TabSelectorPOS from "./TabSelectorPOS";
-import WhatsAppTicketPOS from "./WhatsAppTicketPOS";
+import ErrorPOS from "../../components/pos/ErrorPOS";
+import FloatingMobileBarPOS from "../../components/pos/FloatingMobileBarPOS";
+import LastOrders from "../../components/pos/LastOrders";
+import LoadingOrdersPOS from "../../components/pos/LoadingOrdersPOS";
+import LoadingPOS from "../../components/pos/LoadingPOS";
+import OrdersMobileFunction from "../../components/pos/OrdersMobilePOS";
+import OrdersPOS from "../../components/pos/OrdersPOS";
+import TabSelectorPOS from "../../components/pos/TabSelectorPOS";
+import WhatsAppTicketPOS from "../../components/pos/WhatsAppTicketPOS";
 
 export default function POSPageClient({ tenantId }: { tenantId: string }) {
   const {
