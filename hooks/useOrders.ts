@@ -19,6 +19,7 @@ export function useRealtimeOrders(
   initialData: OrderWithDetails[] = [],
   soundEnabled: boolean = false,
   tenantId?: string,
+  pollIntervalMs: number = 15000,
 ) {
   const [orders, setOrders] = useState<OrderWithDetails[]>(initialData);
   const [loading, setLoading] = useState(initialData.length === 0);
@@ -28,6 +29,7 @@ export function useRealtimeOrders(
   const supabase = useMemo(() => createClient(), []);
 
   const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -40,7 +42,13 @@ export function useRealtimeOrders(
       setOrders((data.orders || []).map(mapOrderData));
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setError(msg);
+      // Auto-retry once after 3 seconds on transient network failure
+      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = setTimeout(() => {
+        fetchOrders();
+      }, 3000);
     } finally {
       setLoading(false);
     }
@@ -68,6 +76,28 @@ export function useRealtimeOrders(
   useEffect(() => {
     soundEnabledRef.current = soundEnabled;
   }, [soundEnabled]);
+
+  // Periodic safety-net polling to recover missed events (e.g. tablet sleep or packet loss)
+  useEffect(() => {
+    if (pollIntervalMs <= 0) return;
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, pollIntervalMs);
+    return () => clearInterval(interval);
+  }, [fetchOrders, pollIntervalMs]);
+
+  // Tab / Screen visibility change listener to refetch immediately when screen is unlocked or tab active
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchOrders();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [fetchOrders]);
 
   useEffect(() => {
     let lastAudioTime = 0;
@@ -129,13 +159,19 @@ export function useRealtimeOrders(
         debouncedFetchOrders();
       })
       .subscribe((status) => {
-        // On reconnect after a WebSocket drop, refetch to catch missed events
         if (status === "SUBSCRIBED") {
           if (isFirstSubscription) {
             isFirstSubscription = false;
           } else {
             fetchOrders();
           }
+        } else if (
+          status === "CHANNEL_ERROR" ||
+          status === "TIMED_OUT" ||
+          status === "CLOSED"
+        ) {
+          // Fetch orders immediately and queue a reconnect fetch if socket was interrupted
+          fetchOrders();
         }
       });
 
@@ -143,6 +179,9 @@ export function useRealtimeOrders(
       supabase.removeChannel(channel);
       if (fetchTimeoutRef.current) {
         clearTimeout(fetchTimeoutRef.current);
+      }
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
       }
     };
   }, [

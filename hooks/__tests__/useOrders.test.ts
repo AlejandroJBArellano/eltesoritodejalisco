@@ -99,12 +99,55 @@ describe("useOrders Hook utilities & timers", () => {
       ];
 
       const { result } = renderHook(() =>
-        useRealtimeOrders(initialOrders, false),
+        useRealtimeOrders(initialOrders, false, undefined, 0),
       );
 
       expect(result.current.orders.length).toBe(1);
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBeNull();
+    });
+
+    it("should fetch orders periodically when polling interval is set", async () => {
+      const globalFetch = vi.spyOn(global, "fetch").mockResolvedValue({
+        ok: true,
+        json: async () => ({ orders: [] }),
+      } as Response);
+
+      renderHook(() => useRealtimeOrders([], false, undefined, 5000));
+
+      expect(globalFetch).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+
+      expect(globalFetch).toHaveBeenCalledTimes(2);
+
+      globalFetch.mockRestore();
+    });
+
+    it("should refetch orders when document becomes visible", async () => {
+      const globalFetch = vi.spyOn(global, "fetch").mockResolvedValue({
+        ok: true,
+        json: async () => ({ orders: [] }),
+      } as Response);
+
+      renderHook(() => useRealtimeOrders([], false, undefined, 0));
+
+      expect(globalFetch).toHaveBeenCalledTimes(1);
+
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "visible",
+      });
+
+      await act(async () => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+
+      expect(globalFetch).toHaveBeenCalledTimes(2);
+
+      globalFetch.mockRestore();
     });
   });
 });
