@@ -153,6 +153,7 @@ export async function POST(request: NextRequest) {
       // 2. Fetch prices and calculate totals
       let subtotal = 0;
       const itemsWithPrices = [];
+      const itemSummaries = [];
 
       for (const item of orderItems) {
         const { data: menuItem } = await supabaseAdmin
@@ -174,13 +175,43 @@ export async function POST(request: NextRequest) {
             unit_price: itemPrice,
             notes: item.notes || null,
           });
+
+          itemSummaries.push(`${quantity}x ${menuItem.name}`);
         }
       }
 
       const total = subtotal; // tax = 0%
 
-      // 3. Create the order
-      const notesWithContact = `${notes} (Cliente: ${customerName}${phone ? ` | Tel: ${phone}` : ""}${email ? ` | Correo: ${email}` : ""})`.trim();
+      // 3. Format full order notes matching Stripe description structure
+      const typeLabel = type === "dine-in" ? "Comer Aquí" : "Para Llevar";
+      let timeFormatted = "Voy para allá (~30 min)";
+      if (pickupTime) {
+        try {
+          const dateObj = new Date(pickupTime);
+          timeFormatted = dateObj.toLocaleString("es-MX", {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        } catch (err) {
+          console.error("Error formatting pickup time:", err);
+        }
+      }
+
+      const itemsSummary = itemSummaries.join(", ");
+      const notesFormatted = [
+        `Cliente: ${customerName}`,
+        phone ? `Tel: ${phone}` : null,
+        email ? `Correo: ${email}` : null,
+        itemsSummary ? `Orden: ${itemsSummary}` : null,
+        `Tipo: ${typeLabel}`,
+        `Hora: ${timeFormatted}`,
+        notes ? `Notas: ${notes}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | ");
 
       const { data: order, error: orderError } = await supabaseAdmin
         .from("orders")
@@ -192,7 +223,7 @@ export async function POST(request: NextRequest) {
           source: "PICKUP_APP",
           status: "PENDING", // Appears immediately on the KDS
           table: type === "dine-in" ? "Comer Aquí" : "Para Llevar",
-          notes: notesWithContact,
+          notes: notesFormatted,
           subtotal: subtotal,
           tax: 0,
           total: total,
