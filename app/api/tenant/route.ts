@@ -16,7 +16,13 @@ export async function GET() {
         },
       }
     );
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      return NextResponse.json(
+        { error: "Tenant not found", redirect: "https://trykittn.com" },
+        { status: 404 },
+      );
+    }
     console.error("Error fetching tenant config:", error);
     return NextResponse.json(
       { error: "Failed to fetch tenant config" },

@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Tables } from "@/types/supabase";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { cache } from "react";
 
 export type TenantContextType = Tables<"tenants">;
@@ -120,12 +120,12 @@ export async function getTenantContext(): Promise<TenantContextType> {
   }
 
   if (!slug) {
-    notFound();
+    redirect("https://trykittn.com");
   }
 
   const tenant = await getTenantBySlug(slug);
   if (!tenant) {
-    notFound();
+    redirect("https://trykittn.com");
   }
 
   return tenant;
