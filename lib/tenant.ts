@@ -47,9 +47,9 @@ export function getTenantSlugFromHost(host: string | null): string | null {
  *  between Route Handler invocations. This Map lives in the Node.js worker
  *  process and eliminates the DB round-trip (~60-80ms) for every API request
  *  once the tenant has been fetched once.
- *  TTL: 5 minutes — safe for config data that rarely changes.
+ *  TTL: 2 minutes — safe for config data that rarely changes.
  */
-const TENANT_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min
+const TENANT_CACHE_TTL_MS = 2 * 60 * 1000; // 2 min
 
 interface TenantCacheEntry {
   data: TenantContextType;
