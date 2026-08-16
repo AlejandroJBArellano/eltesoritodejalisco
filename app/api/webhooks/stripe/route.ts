@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ received: true });
       }
 
-      let commissionRate: number = 0;
+      let commissionRate: number = 0.037;
       if (metadata.commissionRate) {
         commissionRate = Number(metadata.commissionRate);
       } else {
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
           .select("commission_rate")
           .eq("id", tenantId)
           .single();
-        commissionRate = tenantData?.commission_rate ?? 0;
+        commissionRate = tenantData?.commission_rate ?? 0.037;
       }
 
       // Look up or create the customer in the CRM (customers table)
