@@ -1,5 +1,5 @@
 import { getProfile } from "@/lib/auth";
-import { getTenantContext } from "@/lib/tenant";
+import { getTenantContext, invalidateTenantCache } from "@/lib/tenant";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe";
 import { redirect } from "next/navigation";
@@ -43,6 +43,7 @@ export default async function SettingsPage() {
 
         tenant.stripe_charges_enabled = account.charges_enabled;
         tenant.stripe_details_submitted = account.details_submitted;
+        invalidateTenantCache(tenant.slug);
       }
     } catch (err) {
       console.error("Error auto-syncing Stripe account status:", err);

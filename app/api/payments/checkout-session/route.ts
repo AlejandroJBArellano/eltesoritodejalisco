@@ -59,37 +59,14 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      let stripeProductId = menuItem.stripe_product_id;
-
-      // Fallback: If stripe_product_id is missing, create it on Stripe on the fly
-      if (!stripeProductId) {
-        try {
-          const stripeProduct = await stripe.products.create({
-            name: menuItem.name,
-            description: menuItem.description || undefined,
-            active: menuItem.is_available,
-          });
-          stripeProductId = stripeProduct.id;
-
-          // Save back to local DB
-          await supabase
-            .from("menu_items")
-            .update({ stripe_product_id: stripeProductId })
-            .eq("id", menuItem.id);
-        } catch (stripeErr) {
-          console.error("Error creating Stripe product fallback:", stripeErr);
-          return NextResponse.json(
-            { error: "No se pudo sincronizar el producto con Stripe" },
-            { status: 500 },
-          );
-        }
-      }
-
       lineItems.push({
         price_data: {
           currency: "mxn",
           unit_amount: Math.round(menuItem.price * 100),
-          product: stripeProductId,
+          product_data: {
+            name: menuItem.name,
+            description: menuItem.description || undefined,
+          },
         },
         quantity: Number(item.quantity),
       });
@@ -179,6 +156,12 @@ export async function POST(request: NextRequest) {
       ? `Order for ${customerName} (${typeLabel}). Date: ${timeFormatted}.`
       : `Orden para ${customerName} (${typeLabel}). Fecha: ${timeFormatted}.`;
 
+    const compactOrderItems = validatedItems.map((item) =>
+      item.notes
+        ? [item.menuItemId, item.quantity, item.notes.slice(0, 100)]
+        : [item.menuItemId, item.quantity]
+    );
+
     const stripeLocale = isEn ? "en" : "es";
 
     const session = await stripe.checkout.sessions.create({
@@ -205,10 +188,10 @@ export async function POST(request: NextRequest) {
       metadata: {
         orderId,
         tenantId: tenant.id,
-        customerName,
+        customerName: (customerName || "").slice(0, 100),
         type, // 'takeout' | 'dine-in'
-        notes: notes || "",
-        orderItems: JSON.stringify(validatedItems),
+        notes: (notes || "").slice(0, 300),
+        orderItems: JSON.stringify(compactOrderItems),
         pickupTime: pickupTime || "",
         tipAmount: validatedTipAmount.toString(),
         commissionRate: commissionRate.toString(),

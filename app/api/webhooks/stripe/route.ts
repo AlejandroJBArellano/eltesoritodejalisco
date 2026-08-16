@@ -80,8 +80,25 @@ export async function POST(request: NextRequest) {
       const customerName = metadata.customerName;
       const type = metadata.type || "takeout"; // 'takeout' | 'dine-in'
       const notes = metadata.notes || "";
-      const orderItems = JSON.parse(metadata.orderItems);
       const pickupTime = metadata.pickupTime || null;
+      const rawOrderItems = JSON.parse(metadata.orderItems);
+      const orderItems: Array<{ menuItemId: string; quantity: number; notes: string }> =
+        Array.isArray(rawOrderItems)
+          ? rawOrderItems.map((item: any) => {
+              if (Array.isArray(item)) {
+                return {
+                  menuItemId: String(item[0]),
+                  quantity: Number(item[1]),
+                  notes: String(item[2] || ""),
+                };
+              }
+              return {
+                menuItemId: String(item.menuItemId),
+                quantity: Number(item.quantity),
+                notes: String(item.notes || ""),
+              };
+            })
+          : [];
       const tipAmount = Number(metadata.tipAmount || 0);
 
       const email = session.customer_details?.email || null;
@@ -91,6 +108,18 @@ export async function POST(request: NextRequest) {
       const phone = rawPhone ? (rawPhone.startsWith("+") ? "+" : "") + rawPhone.replace(/\D/g, "") : null;
 
       const supabaseAdmin = createAdminClient();
+
+      // Idempotency check: if this order was already processed, return 200 OK immediately
+      const { data: existingOrder } = await supabaseAdmin
+        .from("orders")
+        .select("id")
+        .eq("id", orderId)
+        .maybeSingle();
+
+      if (existingOrder) {
+        console.log(`[Stripe Webhook] Order ${orderId} already processed. Skipping duplicate.`);
+        return NextResponse.json({ received: true });
+      }
 
       let commissionRate: number;
       if (metadata.commissionRate) {
@@ -184,7 +213,8 @@ export async function POST(request: NextRequest) {
       if (lastOrder && lastOrder.order_number) {
         const parts = lastOrder.order_number.split("-");
         const lastSeqStr = parts[parts.length - 1];
-        nextSeq = parseInt(lastSeqStr, 10) + 1;
+        const parsed = parseInt(lastSeqStr, 10);
+        nextSeq = !Number.isNaN(parsed) ? parsed + 1 : 1;
       }
 
       const todayStr = getCurrentCDMXDay().replace(/-/g, "").slice(2);

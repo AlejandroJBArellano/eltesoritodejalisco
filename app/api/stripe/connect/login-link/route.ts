@@ -22,6 +22,13 @@ export async function POST() {
       );
     }
 
+    if (!tenant.stripe_details_submitted) {
+      return NextResponse.json(
+        { error: "Debes completar el registro en Stripe antes de acceder al panel" },
+        { status: 400 }
+      );
+    }
+
     const loginLink = await stripe.accounts.createLoginLink(
       tenant.stripe_account_id
     );
