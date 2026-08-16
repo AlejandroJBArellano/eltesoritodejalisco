@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentCDMXDate, getCurrentCDMXDay } from "@/lib/utils";
 import { deductInventoryForOrder } from "@/lib/services/inventory";
+import { invalidateTenantCache } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
       if (updateError) {
         console.error("Error updating tenant Stripe Connect status:", updateError);
       } else {
+        invalidateTenantCache();
         console.log(
           `[Stripe Webhook] Updated Connect status for account ${account.id}: charges_enabled=${account.charges_enabled}`,
         );

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getTenantContext } from "@/lib/tenant";
+import { getTenantContext, invalidateTenantCache } from "@/lib/tenant";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getProfile } from "@/lib/auth";
@@ -92,6 +92,9 @@ export async function updateTenantSettings(
       console.error("Error updating tenant settings:", error);
       return { error: "Error al guardar los cambios en la base de datos" };
     }
+
+    // Invalidate in-memory tenant cache
+    invalidateTenantCache(tenant.slug);
 
     // Force revalidation of all server-rendered layouts and components
     revalidatePath("/", "layout");

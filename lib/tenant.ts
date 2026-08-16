@@ -1,28 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { Tables } from "@/types/supabase";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-export interface TenantContextType {
-  id: string;
-  name: string;
-  system_name: string;
-  slug: string;
-  primary_color: string;
-  secondary_color: string;
-  dark_bg_color: string;
-  logo_url: string | null;
-  rfc: string | null;
-  postal_code: string | null;
-  regimen_fiscal: string | null;
-  loyalty_enabled: boolean;
-  loyalty_ratio: number;
-  stripe_account_id?: string | null;
-  stripe_charges_enabled?: boolean | null;
-  stripe_details_submitted?: boolean | null;
-  commission_rate?: number | null;
-}
+export type TenantContextType = Tables<"tenants">;
 
 export function getTenantSlugFromHost(host: string | null): string | null {
   if (!host) return null;
@@ -75,6 +57,14 @@ interface TenantCacheEntry {
 }
 
 const tenantMemoryCache = new Map<string, TenantCacheEntry>();
+
+export function invalidateTenantCache(slug?: string) {
+  if (slug) {
+    tenantMemoryCache.delete(slug);
+  } else {
+    tenantMemoryCache.clear();
+  }
+}
 
 // Cached function to fetch tenant details from the database based on the slug.
 // react.cache() deduplicates concurrent calls within the same render pass;

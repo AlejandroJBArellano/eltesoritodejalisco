@@ -1,7 +1,7 @@
 import { stripe } from "@/lib/stripe";
 import { getProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getTenantContext } from "@/lib/tenant";
+import { getTenantContext, invalidateTenantCache } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -50,6 +50,8 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         );
       }
+
+      invalidateTenantCache(tenant.slug);
     }
 
     const referer = request.headers.get("referer");
