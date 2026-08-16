@@ -1,31 +1,31 @@
+import CollapsibleSection from "@/components/CollapsibleSection";
 import { getProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant";
-import { MEX_TIMEZONE } from "@/lib/utils";
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  BarChart3,
+  BookOpen,
+  CheckSquare,
+  ChefHat,
+  ClipboardCheck,
+  ClipboardList,
+  Clock,
+  DollarSign,
+  HandCoins,
+  Package,
+  Receipt,
+  ReceiptText,
+  Settings,
+  ShoppingBag,
+  UserCog,
+  Users,
+  UtensilsCrossed,
+} from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  ClipboardList,
-  DollarSign,
-  Users,
-  HandCoins,
-  ChefHat,
-  Receipt,
-  BookOpen,
-  UtensilsCrossed,
-  CheckSquare,
-  ClipboardCheck,
-  Clock,
-  UserCog,
-  BarChart3,
-  ReceiptText,
-  ArrowUpRight,
-  Settings,
-  Package,
-  AlertTriangle,
-} from "lucide-react";
 import React from "react";
-import CollapsibleSection from "@/components/CollapsibleSection";
 
 // --- Extracted UI Components for Dashboard ---
 
@@ -66,6 +66,7 @@ interface ModuleCardProps {
   themeClass: string;
   hoverColor: string;
   badge?: string;
+  target?: string;
 }
 
 function ModuleCard({
@@ -76,10 +77,16 @@ function ModuleCard({
   themeClass,
   hoverColor,
   badge,
+  target,
 }: ModuleCardProps) {
   return (
-    <Link href={href} className="group cursor-pointer focus:outline-none">
-      <div className="h-full rounded-2xl bg-card p-3 sm:p-8 shadow-sm border border-border transition-all hover:shadow-xl hover:-translate-y-1 hover:border-border/15 flex flex-col justify-between min-h-[90px] sm:min-h-0">
+    <Link
+      href={href}
+      target={target}
+      rel={target === "_blank" ? "noopener noreferrer" : undefined}
+      className="group cursor-pointer focus:outline-none"
+    >
+      <div className="h-full rounded-2xl bg-card p-3 sm:p-8 shadow-sm border border-border transition-all hover:shadow-xl hover:-translate-y-1 hover:border-border/15 flex flex-col justify-between min-h-22.5 sm:min-h-0">
         <div>
           {/* Top section: Icon + Badge */}
           <div className="mb-2 sm:mb-6 flex items-center justify-between">
@@ -100,7 +107,7 @@ function ModuleCard({
             className="text-xs sm:text-xl font-black text-text-light tracking-tight uppercase transition-colors flex items-center justify-between"
             style={{ "--hover-color": hoverColor } as React.CSSProperties}
           >
-            <span className="group-hover:text-[var(--hover-color)] transition-colors truncate">
+            <span className="group-hover:text-(--hover-color) transition-colors truncate">
               {title}
             </span>
             <ArrowUpRight className="hidden sm:block h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -133,6 +140,7 @@ export default async function Home() {
   const isAdmin = profile.role === "ADMIN" || profile.role === "MANAGER";
   const isWaiter = profile.role === "WAITER";
 
+  const tenant = await getTenantContext();
   let activeOrdersCount = 0;
   let salesToday = 0;
   let customersCount = 0;
@@ -140,7 +148,6 @@ export default async function Home() {
   let lowStockAlerts: Array<{ id: string; name: string; current_stock: number; minimum_stock: number; unit: string }> = [];
 
   if (isAdmin) {
-    const tenant = await getTenantContext();
     const supabase = await createClient();
 
     const [statsResult, ingredientsResult] = await Promise.all([
@@ -200,11 +207,10 @@ export default async function Home() {
                 return (
                   <div
                     key={ing.id}
-                    className={`flex items-center gap-2 rounded-xl px-3 py-1.5 border text-xs ${
-                      isOut
-                        ? "bg-red-500/10 border-red-500/20"
-                        : "bg-amber-500/10 border-amber-500/20"
-                    }`}
+                    className={`flex items-center gap-2 rounded-xl px-3 py-1.5 border text-xs ${isOut
+                      ? "bg-red-500/10 border-red-500/20"
+                      : "bg-amber-500/10 border-amber-500/20"
+                      }`}
                   >
                     <Package
                       className={`h-3 w-3 ${isOut ? "text-red-400" : "text-amber-400"}`}
@@ -318,6 +324,32 @@ export default async function Home() {
             dotColorClass="bg-success"
           >
             <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-3">
+              <ModuleCard
+                title="Kittn Pickup"
+                description={
+                  tenant.stripe_charges_enabled
+                    ? "Portal de pedidos para clientes en línea."
+                    : "Activar tienda online y cobros con Stripe."
+                }
+                href={
+                  tenant.stripe_charges_enabled
+                    ? `https://${tenant.slug}.trykittn.com`
+                    : "/admin/settings#pickup"
+                }
+                target={tenant.stripe_charges_enabled ? "_blank" : undefined}
+                icon={ShoppingBag}
+                badge={tenant.stripe_charges_enabled ? "Online" : "Inactivo"}
+                themeClass={
+                  tenant.stripe_charges_enabled
+                    ? "bg-emerald-500/10 text-emerald-400"
+                    : "bg-zinc-800 text-text-light/50"
+                }
+                hoverColor={
+                  tenant.stripe_charges_enabled
+                    ? "#10b981"
+                    : "var(--color-primary)"
+                }
+              />
               <ModuleCard
                 title="Clientes"
                 description="Lealtad y fuentes de visita."

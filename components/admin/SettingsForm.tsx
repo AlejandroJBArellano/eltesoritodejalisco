@@ -2,7 +2,22 @@
 
 import { updateTenantSettings } from "@/app/admin/settings/actions";
 import type { TenantContextType } from "@/lib/tenant";
-import { AlertCircle, ArrowRight, Building, Check, CheckCircle2, CreditCard, ExternalLink, FileText, Gift, Sliders, Sparkles, Upload } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowRight,
+  Building,
+  Check,
+  CheckCircle2,
+  Copy,
+  ExternalLink,
+  FileText,
+  Gift,
+  Globe,
+  ShoppingBag,
+  Sliders,
+  Sparkles,
+  Upload,
+} from "lucide-react";
 import React, { useRef, useState } from "react";
 
 interface SettingsFormProps {
@@ -71,7 +86,25 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
 
   const [isDragging, setIsDragging] = useState(false);
   const [connectingStripe, setConnectingStripe] = useState(false);
+  const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const pickupUrl =
+    typeof window !== "undefined" && window.location.hostname.endsWith(".localhost")
+      ? `http://${initialTenant.slug}.localhost:5173`
+      : `https://${initialTenant.slug}.trykittn.com`;
+
+  const handleCopyLink = async () => {
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(pickupUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error("Error al copiar enlace:", err);
+    }
+  };
 
   const handleStripeConnect = async () => {
     try {
@@ -422,21 +455,87 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
             )}
           </div>
 
-            {/* Section 4: Stripe Connect Payments */}
-            <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20">
-              <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
-                <CreditCard className="h-4 w-4 text-primary" /> Pagos Digitales & Stripe Connect
-              </h3>
+            {/* Section 4: Portal Kittn Pickup & Pagos con Stripe */}
+            <div id="pickup" className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20 scroll-mt-6">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2">
+                  <ShoppingBag className="h-4 w-4 text-primary" /> Portal Kittn Pickup & Pagos con Stripe
+                </h3>
+                {initialTenant.stripe_charges_enabled ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Online
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-800 text-text-light/40 border border-border">
+                    Inactivo
+                  </span>
+                )}
+              </div>
 
+              {/* Explicación de Kittn Pickup */}
+              <p className="text-xs text-text-light/60 leading-relaxed">
+                <strong className="text-text-light">Kittn Pickup</strong> es el portal web donde tus comensales exploran tu menú digital, configuran pedidos para llevar o comer aquí, y pagan con tarjeta bancaria. Para que tu portal esté activo y reciba cobros, tu restaurante debe conectarse con Stripe.
+              </p>
+
+              {/* Enlace de tu Menú Pickup */}
+              <div className="rounded-xl bg-dark/30 border border-border/70 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-text-light/50 uppercase tracking-wider flex items-center gap-1.5">
+                    <Globe className="h-3.5 w-3.5 text-primary" /> Enlace de tu Menú Kittn Pickup
+                  </label>
+                  {initialTenant.stripe_charges_enabled ? (
+                    <span className="text-[10px] font-bold text-emerald-400">Listo para compartir</span>
+                  ) : (
+                    <span className="text-[10px] font-bold text-amber-400/80">Requiere activar Stripe</span>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="flex-1 rounded-lg bg-background/80 border border-border px-3.5 py-2 text-xs font-mono text-text-light truncate select-all">
+                    {pickupUrl}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={handleCopyLink}
+                      className="flex-1 sm:flex-none px-3.5 py-2 rounded-lg bg-border/40 hover:bg-border/70 text-text-light text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-border/50"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <span className="text-emerald-400 font-bold">¡Copiado!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5 text-text-light/70" />
+                          <span>Copiar Link</span>
+                        </>
+                      )}
+                    </button>
+                    <a
+                      href={pickupUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3.5 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-primary/25"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      <span>Abrir Tienda</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Estado de Cuenta Stripe */}
               <div className="space-y-4">
                 {initialTenant.stripe_charges_enabled ? (
                   <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
                       <div>
-                        <h4 className="text-sm font-bold text-emerald-300">Cuenta de Stripe Activa</h4>
+                        <h4 className="text-sm font-bold text-emerald-300">Cuenta de Stripe Activa & Cobros Habilitados</h4>
                         <p className="text-xs text-emerald-200/70">
-                          Tu restaurante está habilitado para recibir pagos en Kittn Pickup (Comisión Kittn: 8%).
+                          Tus clientes ya pueden pedir y pagar en línea en Kittn Pickup. Los cobros se depositan en tu cuenta bancaria (Comisión Kittn: 8%).
                         </p>
                       </div>
                     </div>
@@ -457,7 +556,7 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                       <div>
                         <h4 className="text-sm font-bold text-amber-300">Verificación Pendiente en Stripe</h4>
                         <p className="text-xs text-amber-200/70">
-                          Tu cuenta de Stripe requiere información adicional para habilitar los cobros digitales.
+                          Tu cuenta de Stripe requiere información fiscal o bancaria adicional antes de poder recibir pagos de clientes en Kittn Pickup.
                         </p>
                       </div>
                     </div>
@@ -476,7 +575,7 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                     <div className="space-y-1">
                       <h4 className="text-sm font-bold text-text-light">Conecta tu cuenta bancaria con Stripe</h4>
                       <p className="text-xs text-text-light/50">
-                        Configura tus datos fiscales y CLABE para recibir depósitos directos de Kittn Pickup.
+                        Configura tu CLABE y datos fiscales para recibir depósitos directos y activar tu menú en línea de Kittn Pickup.
                       </p>
                     </div>
                     <button
@@ -485,7 +584,7 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                       disabled={connectingStripe}
                       className="px-5 py-2.5 bg-primary text-dark font-extrabold text-xs uppercase tracking-wider rounded-xl hover:opacity-90 transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md"
                     >
-                      {connectingStripe ? "Generando liga..." : "Conectar con Stripe"}
+                      {connectingStripe ? "Generando liga..." : "Conectar Stripe y Activar Pickup"}
                       <ArrowRight className="h-3.5 w-3.5" />
                     </button>
                   </div>
