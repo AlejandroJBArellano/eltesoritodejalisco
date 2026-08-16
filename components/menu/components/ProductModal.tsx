@@ -1,9 +1,8 @@
-import React from "react";
-import { Image as ImageIcon, Utensils, Globe, ChevronDown } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
-import { Ingredient } from "../types";
-import { useMenuItems } from "../hooks/useMenuItems";
+import { ChevronDown, Globe, Image as ImageIcon, Utensils } from "lucide-react";
 import { useMenuCategories } from "../hooks/useMenuCategories";
+import { useMenuItems } from "../hooks/useMenuItems";
+import { Ingredient } from "../types";
 
 interface ProductModalProps {
   categories: string[];
@@ -244,13 +243,13 @@ export function ProductModal({
             htmlFor="isAvailable"
             className="text-xs font-bold text-text-light"
           >
-            Disponible para venta activa
+            Disponible para Punto de Venta
           </label>
         </div>
 
         <div className="border-t border-border/50 pt-4 mt-2">
           <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-2">
-            Opciones de Servicio (Kittn Pickup)
+            Opciones de Servicio Digital
           </label>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-2">
@@ -265,7 +264,7 @@ export function ProductModal({
                 htmlFor="showInDineIn"
                 className="text-xs font-bold text-text-light"
               >
-                Comer aquí (Dine-in)
+                Comer aquí / Dine-in
               </label>
             </div>
             <div className="flex items-center gap-2">
@@ -280,7 +279,7 @@ export function ProductModal({
                 htmlFor="showInTakeaway"
                 className="text-xs font-bold text-text-light"
               >
-                Para llevar (Takeout)
+                Para llevar / Takeout
               </label>
             </div>
           </div>
