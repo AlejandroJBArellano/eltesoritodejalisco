@@ -25,23 +25,25 @@ export async function POST(request: NextRequest) {
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
-    if (!tenant.stripe_account_id || !tenant.stripe_charges_enabled) {
+    if (!tenant.stripe_account_id || !tenant.stripe_charges_enabled || tenant.commission_rate == null) {
       return NextResponse.json(
         { error: "El restaurante aún no ha configurado sus pagos digitales con Stripe Connect" },
         { status: 400 },
       );
     }
 
-    const commissionRate = tenant.commission_rate!;
+    const commissionRate = tenant.commission_rate;
 
     const lineItems = [];
     const validatedItems = [];
     const descriptionItems = [];
 
     const referer = request.headers.get("referer");
-    const origin = referer
-      ? new URL(referer).origin
-      : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const origin =
+      request.headers.get("origin") ||
+      (referer ? new URL(referer).origin : null) ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      "http://localhost:3000";
     const isEn = locale === "en";
 
     for (const item of orderItems) {

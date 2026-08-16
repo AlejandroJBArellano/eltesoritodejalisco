@@ -1,10 +1,10 @@
-import { stripe } from "@/lib/stripe";
-import type Stripe from "stripe";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { getCurrentCDMXDate, getCurrentCDMXDay } from "@/lib/utils";
 import { deductInventoryForOrder } from "@/lib/services/inventory";
+import { stripe } from "@/lib/stripe";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { invalidateTenantCache } from "@/lib/tenant";
+import { getCurrentCDMXDate, getCurrentCDMXDay } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
+import type Stripe from "stripe";
 
 export async function POST(request: NextRequest) {
   const bodyText = await request.text();
@@ -85,21 +85,28 @@ export async function POST(request: NextRequest) {
       const orderItems: Array<{ menuItemId: string; quantity: number; notes: string }> =
         Array.isArray(rawOrderItems)
           ? rawOrderItems.map((item: any) => {
-              if (Array.isArray(item)) {
-                return {
-                  menuItemId: String(item[0]),
-                  quantity: Number(item[1]),
-                  notes: String(item[2] || ""),
-                };
-              }
+            if (Array.isArray(item)) {
               return {
-                menuItemId: String(item.menuItemId),
-                quantity: Number(item.quantity),
-                notes: String(item.notes || ""),
+                menuItemId: String(item[0]),
+                quantity: Number(item[1]),
+                notes: String(item[2] || ""),
               };
-            })
+            }
+            return {
+              menuItemId: String(item.menuItemId),
+              quantity: Number(item.quantity),
+              notes: String(item.notes || ""),
+            };
+          })
           : [];
       const tipAmount = Number(metadata.tipAmount || 0);
+
+      if (session.payment_status !== "paid") {
+        console.log(
+          `[Stripe Webhook] Checkout session ${session.id} payment_status is '${session.payment_status}'. Skipping order creation until paid.`
+        );
+        return NextResponse.json({ received: true });
+      }
 
       const email = session.customer_details?.email || null;
       const rawPhone = session.customer_details?.phone || null;
@@ -121,7 +128,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ received: true });
       }
 
-      let commissionRate: number;
+      let commissionRate: number = 0;
       if (metadata.commissionRate) {
         commissionRate = Number(metadata.commissionRate);
       } else {
@@ -130,7 +137,7 @@ export async function POST(request: NextRequest) {
           .select("commission_rate")
           .eq("id", tenantId)
           .single();
-        commissionRate = tenantData!.commission_rate!;
+        commissionRate = tenantData?.commission_rate ?? 0;
       }
 
       // Look up or create the customer in the CRM (customers table)

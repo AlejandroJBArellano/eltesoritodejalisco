@@ -24,8 +24,14 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ orderId });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error retrieving Stripe session:", error);
+    if (error?.code === "resource_missing" || error?.statusCode === 404) {
+      return NextResponse.json(
+        { error: "Session not found" },
+        { status: 404 },
+      );
+    }
     return NextResponse.json(
       { error: "Failed to retrieve session" },
       { status: 500 },
