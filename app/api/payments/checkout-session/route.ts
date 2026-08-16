@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       lineItems.push({
         price_data: {
           currency: "mxn",
-          unit_amount: Math.round(menuItem.price * (1 + commissionRate) * 100),
+          unit_amount: Math.round(menuItem.price * 100),
           product: stripeProductId,
         },
         quantity: Number(item.quantity),
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       lineItems.push({
         price_data: {
           currency: "mxn",
-          unit_amount: Math.round(validatedTipAmount * (1 + commissionRate) * 100),
+          unit_amount: Math.round(validatedTipAmount * 100),
           product_data: {
             name: isEn ? "Tip" : "Propina",
           },
@@ -120,12 +120,27 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Calculate total session amount and platform fee based on tenant.commission_rate
-    const totalAmountCents = lineItems.reduce(
+    // Calculate base total amount in cents and add separate Comisión por servicio digital line item
+    const baseTotalAmountCents = lineItems.reduce(
       (acc, item) => acc + item.price_data.unit_amount * item.quantity,
       0,
     );
-    const applicationFeeAmount = Math.round(totalAmountCents * commissionRate);
+    const digitalFeeCents = Math.round(baseTotalAmountCents * commissionRate);
+
+    if (digitalFeeCents > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "mxn",
+          unit_amount: digitalFeeCents,
+          product_data: {
+            name: isEn ? "Digital service fee" : "Comisión por servicio digital",
+          },
+        },
+        quantity: 1,
+      });
+    }
+
+    const applicationFeeAmount = digitalFeeCents;
 
     const orderId = crypto.randomUUID();
 

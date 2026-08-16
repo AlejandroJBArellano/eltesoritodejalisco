@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (menuItem) {
-          const itemPrice = Math.round(menuItem.price * (1 + commissionRate) * 100) / 100;
+          const itemPrice = menuItem.price;
           const quantity = Number(item.quantity);
           subtotal += itemPrice * quantity;
 
@@ -300,7 +300,7 @@ export async function POST(request: NextRequest) {
           order_id: order.id,
           method: "CARD",
           amount: total,
-          received_amount: total + Math.round(tipAmount * (1 + commissionRate) * 100) / 100,
+          received_amount: total + tipAmount,
           change: 0,
           tip_amount: tipAmount,
           created_at: new Date().toISOString(),
