@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useRef } from "react";
 import { updateTenantSettings } from "@/app/admin/settings/actions";
-import { Sliders, Building, CheckCircle2, AlertCircle, Upload, Sparkles, FileText, Check, Gift } from "lucide-react";
 import type { TenantContextType } from "@/lib/tenant";
+import { AlertCircle, ArrowRight, Building, Check, CheckCircle2, CreditCard, ExternalLink, FileText, Gift, Sliders, Sparkles, Upload } from "lucide-react";
+import React, { useRef, useState } from "react";
 
 interface SettingsFormProps {
   initialTenant: TenantContextType;
@@ -70,7 +70,50 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
   );
 
   const [isDragging, setIsDragging] = useState(false);
+  const [connectingStripe, setConnectingStripe] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleStripeConnect = async () => {
+    try {
+      setConnectingStripe(true);
+      setError(null);
+      const res = await fetch("/api/stripe/connect/onboarding-link", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setError(data.error || "Error al conectar con Stripe");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error de red al conectar con Stripe");
+    } finally {
+      setConnectingStripe(false);
+    }
+  };
+
+  const handleStripeLogin = async () => {
+    try {
+      setConnectingStripe(true);
+      setError(null);
+      const res = await fetch("/api/stripe/connect/login-link", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.open(data.url, "_blank");
+      } else {
+        setError(data.error || "Error al abrir el panel de Stripe");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error de red al consultar Stripe");
+    } finally {
+      setConnectingStripe(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -212,11 +255,10 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`relative flex flex-col items-center justify-center p-8 rounded-xl border-2 border-dashed transition-all duration-300 ${
-                  isDragging
+                className={`relative flex flex-col items-center justify-center p-8 rounded-xl border-2 border-dashed transition-all duration-300 ${isDragging
                     ? "border-primary bg-primary/5"
                     : "border-border bg-dark/20 hover:bg-dark/30 hover:border-text-light/20"
-                }`}
+                  }`}
               >
                 <input
                   ref={fileInputRef}
@@ -334,24 +376,22 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                   Permite a los clientes acumular puntos por sus compras usando su número telefónico.
                 </span>
               </div>
-              
+
               <input
                 type="hidden"
                 name="loyaltyEnabled"
                 value={loyaltyEnabled ? "true" : "false"}
               />
-              
+
               <button
                 type="button"
                 onClick={() => setLoyaltyEnabled(!loyaltyEnabled)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
-                  loyaltyEnabled ? "bg-primary" : "bg-dark/60"
-                } border border-border`}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${loyaltyEnabled ? "bg-primary" : "bg-dark/60"
+                  } border border-border`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-text-light shadow ring-0 transition duration-200 ease-in-out ${
-                    loyaltyEnabled ? "translate-x-5" : "translate-x-0"
-                  }`}
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-text-light shadow ring-0 transition duration-200 ease-in-out ${loyaltyEnabled ? "translate-x-5" : "translate-x-0"
+                    }`}
                 />
               </button>
             </div>
@@ -407,23 +447,22 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
                       type="button"
                       onClick={() => applyPreset(preset)}
                       aria-pressed={isSelected}
-                      className={`flex items-center gap-3 p-2.5 rounded-xl border text-left transition duration-200 cursor-pointer ${
-                        isSelected
+                      className={`flex items-center gap-3 p-2.5 rounded-xl border text-left transition duration-200 cursor-pointer ${isSelected
                           ? "border-primary bg-primary/10 ring-1 ring-primary/30"
                           : "border-border bg-dark/20 hover:bg-dark/40 hover:border-text-light/20"
-                      }`}
+                        }`}
                     >
                       <div className="flex -space-x-1 shrink-0">
                         <div
-                          className="h-[18px] w-[18px] rounded-full border border-black/30 shadow-sm"
+                          className="size-4.5 rounded-full border border-black/30 shadow-sm"
                           style={{ backgroundColor: preset.primary }}
                         />
                         <div
-                          className="h-[18px] w-[18px] rounded-full border border-black/30 shadow-sm"
+                          className="size-4.5 rounded-full border border-black/30 shadow-sm"
                           style={{ backgroundColor: preset.secondary }}
                         />
                         <div
-                          className="h-[18px] w-[18px] rounded-full border border-black/30 shadow-sm"
+                          className="size-4.5 rounded-full border border-black/30 shadow-sm"
                           style={{ backgroundColor: preset.darkBg }}
                         />
                       </div>
@@ -544,6 +583,85 @@ export function SettingsForm({ initialTenant }: SettingsFormProps) {
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Stripe Connect Payments Section */}
+      <div className="bg-dark/40 border border-border rounded-2xl p-6 sm:p-8 space-y-6">
+        <div className="flex items-center gap-3 border-b border-border pb-4">
+          <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+            <CreditCard className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-text-light">Pagos Digitales & Stripe Connect</h2>
+            <p className="text-xs text-text-light/60">
+              Conecta la cuenta bancaria de tu restaurante para recibir depósitos directos de Kittn Pickup (Comisión Kittn: 8%).
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {initialTenant.stripe_charges_enabled ? (
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-6 w-6 text-emerald-400 shrink-0" />
+                <div>
+                  <h4 className="text-sm font-bold text-emerald-300">Cuenta de Stripe Activa</h4>
+                  <p className="text-xs text-emerald-200/70">
+                    Tu restaurante está habilitado para recibir pagos en Kittn Pickup. Comisión retribuida: 8%.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleStripeLogin}
+                disabled={connectingStripe}
+                className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold rounded-xl border border-emerald-500/40 transition flex items-center gap-2 shrink-0 cursor-pointer"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Ver Saldo y Depósitos en Stripe
+              </button>
+            </div>
+          ) : initialTenant.stripe_account_id ? (
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="h-6 w-6 text-amber-400 shrink-0" />
+                <div>
+                  <h4 className="text-sm font-bold text-amber-300">Verificación Pendiente en Stripe</h4>
+                  <p className="text-xs text-amber-200/70">
+                    Tu cuenta de Stripe requiere información adicional para habilitar los cobros digitales.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleStripeConnect}
+                disabled={connectingStripe}
+                className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold rounded-xl border border-amber-500/40 transition flex items-center gap-2 shrink-0 cursor-pointer"
+              >
+                {connectingStripe ? "Cargando..." : "Completar Registro en Stripe"}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h4 className="text-sm font-bold text-text-light">Conecta tu cuenta bancaria con Stripe</h4>
+                <p className="text-xs text-text-light/60">
+                  Configura tus datos fiscales y CLABE para que los pagos de Kittn Pickup lleguen directo a tu banco.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleStripeConnect}
+                disabled={connectingStripe}
+                className="px-5 py-2.5 bg-primary text-dark font-extrabold text-xs uppercase tracking-wider rounded-xl hover:opacity-90 transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md"
+              >
+                {connectingStripe ? "Generando liga..." : "Conectar con Stripe"}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

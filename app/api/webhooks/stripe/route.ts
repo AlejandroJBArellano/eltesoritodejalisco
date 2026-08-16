@@ -28,6 +28,32 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Handle account.updated event (Stripe Connect onboarding status change)
+  if (event.type === "account.updated") {
+    const account = event.data.object as Stripe.Account;
+    try {
+      const supabaseAdmin = createAdminClient();
+      const { error: updateError } = await supabaseAdmin
+        .from("tenants")
+        .update({
+          stripe_charges_enabled: account.charges_enabled,
+          stripe_details_submitted: account.details_submitted,
+          updated_at: getCurrentCDMXDate(),
+        })
+        .eq("stripe_account_id", account.id);
+
+      if (updateError) {
+        console.error("Error updating tenant Stripe Connect status:", updateError);
+      } else {
+        console.log(
+          `[Stripe Webhook] Updated Connect status for account ${account.id}: charges_enabled=${account.charges_enabled}`,
+        );
+      }
+    } catch (err) {
+      console.error("Failed handling account.updated webhook:", err);
+    }
+  }
+
   // Handle checkout.session.completed event
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;

@@ -18,6 +18,10 @@ export interface TenantContextType {
   regimen_fiscal: string | null;
   loyalty_enabled: boolean;
   loyalty_ratio: number;
+  stripe_account_id?: string | null;
+  stripe_charges_enabled?: boolean | null;
+  stripe_details_submitted?: boolean | null;
+  commission_rate?: number | null;
 }
 
 export function getTenantSlugFromHost(host: string | null): string | null {

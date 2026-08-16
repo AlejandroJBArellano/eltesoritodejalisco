@@ -25,6 +25,13 @@ export async function POST(request: NextRequest) {
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
+    if (!tenant.stripe_account_id || !tenant.stripe_charges_enabled) {
+      return NextResponse.json(
+        { error: "El restaurante aún no ha configurado sus pagos digitales con Stripe Connect" },
+        { status: 400 },
+      );
+    }
+
     const lineItems = [];
     const validatedItems = [];
     const descriptionItems = [];
@@ -111,6 +118,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Calculate total session amount and 8% platform fee (or custom tenant.commission_rate)
+    const totalAmountCents = lineItems.reduce(
+      (acc, item) => acc + item.price_data.unit_amount * item.quantity,
+      0,
+    );
+    const commissionRate = tenant.commission_rate ?? 0.08;
+    const applicationFeeAmount = Math.round(totalAmountCents * commissionRate);
+
     const orderId = crypto.randomUUID();
 
     const typeLabel = type === "dine-in"
@@ -159,6 +174,10 @@ export async function POST(request: NextRequest) {
       },
       payment_intent_data: {
         description: paymentDescriptionTruncated,
+        application_fee_amount: applicationFeeAmount,
+        transfer_data: {
+          destination: tenant.stripe_account_id,
+        },
       },
       custom_text: {
         submit: {

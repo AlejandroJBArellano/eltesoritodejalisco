@@ -1108,6 +1108,7 @@ export type Database = {
       }
       tenants: {
         Row: {
+          commission_rate: number | null
           created_at: string | null
           custom_domain: string | null
           dark_bg_color: string | null
@@ -1122,10 +1123,14 @@ export type Database = {
           rfc: string | null
           secondary_color: string | null
           slug: string
+          stripe_account_id: string | null
+          stripe_charges_enabled: boolean | null
+          stripe_details_submitted: boolean | null
           system_name: string
           updated_at: string | null
         }
         Insert: {
+          commission_rate?: number | null
           created_at?: string | null
           custom_domain?: string | null
           dark_bg_color?: string | null
@@ -1140,10 +1145,14 @@ export type Database = {
           rfc?: string | null
           secondary_color?: string | null
           slug: string
+          stripe_account_id?: string | null
+          stripe_charges_enabled?: boolean | null
+          stripe_details_submitted?: boolean | null
           system_name?: string
           updated_at?: string | null
         }
         Update: {
+          commission_rate?: number | null
           created_at?: string | null
           custom_domain?: string | null
           dark_bg_color?: string | null
@@ -1158,6 +1167,9 @@ export type Database = {
           rfc?: string | null
           secondary_color?: string | null
           slug?: string
+          stripe_account_id?: string | null
+          stripe_charges_enabled?: boolean | null
+          stripe_details_submitted?: boolean | null
           system_name?: string
           updated_at?: string | null
         }
