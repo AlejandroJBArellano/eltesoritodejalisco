@@ -59,14 +59,37 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      let stripeProductId = menuItem.stripe_product_id;
+
+      // Fallback: If stripe_product_id is missing, create it on Stripe on the fly
+      if (!stripeProductId) {
+        try {
+          const stripeProduct = await stripe.products.create({
+            name: menuItem.name,
+            description: menuItem.description || undefined,
+            active: menuItem.is_available,
+          });
+          stripeProductId = stripeProduct.id;
+
+          // Save back to local DB
+          await supabase
+            .from("menu_items")
+            .update({ stripe_product_id: stripeProductId })
+            .eq("id", menuItem.id);
+        } catch (stripeErr) {
+          console.error("Error creating Stripe product fallback:", stripeErr);
+          return NextResponse.json(
+            { error: "No se pudo sincronizar el producto con Stripe" },
+            { status: 500 },
+          );
+        }
+      }
+
       lineItems.push({
         price_data: {
           currency: "mxn",
           unit_amount: Math.round(menuItem.price * 100),
-          product_data: {
-            name: menuItem.name,
-            description: menuItem.description || undefined,
-          },
+          product: stripeProductId,
         },
         quantity: Number(item.quantity),
       });
