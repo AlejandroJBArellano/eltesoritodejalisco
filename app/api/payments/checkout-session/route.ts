@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       request.headers.get("origin") ||
       (referer ? new URL(referer).origin : null) ||
       process.env.NEXT_PUBLIC_SITE_URL ||
-      "http://localhost:3000";
+      "https://trykittn.com";
     const isEn = locale === "en";
 
     for (const item of orderItems) {
