@@ -92,6 +92,18 @@ export async function POST(request: NextRequest) {
 
       const supabaseAdmin = createAdminClient();
 
+      let commissionRate: number;
+      if (metadata.commissionRate) {
+        commissionRate = Number(metadata.commissionRate);
+      } else {
+        const { data: tenantData } = await supabaseAdmin
+          .from("tenants")
+          .select("commission_rate")
+          .eq("id", tenantId)
+          .single();
+        commissionRate = tenantData!.commission_rate!;
+      }
+
       // Look up or create the customer in the CRM (customers table)
       let customerId: string | null = null;
       if (email || phone) {
@@ -192,7 +204,7 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (menuItem) {
-          const itemPrice = Math.round(menuItem.price * 1.035 * 100) / 100;
+          const itemPrice = Math.round(menuItem.price * (1 + commissionRate) * 100) / 100;
           const quantity = Number(item.quantity);
           subtotal += itemPrice * quantity;
 
@@ -288,7 +300,7 @@ export async function POST(request: NextRequest) {
           order_id: order.id,
           method: "CARD",
           amount: total,
-          received_amount: total + Math.round(tipAmount * 1.035 * 100) / 100,
+          received_amount: total + Math.round(tipAmount * (1 + commissionRate) * 100) / 100,
           change: 0,
           tip_amount: tipAmount,
           created_at: new Date().toISOString(),

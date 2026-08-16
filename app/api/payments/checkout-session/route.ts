@@ -32,6 +32,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const commissionRate = tenant.commission_rate!;
+
     const lineItems = [];
     const validatedItems = [];
     const descriptionItems = [];
@@ -86,7 +88,7 @@ export async function POST(request: NextRequest) {
       lineItems.push({
         price_data: {
           currency: "mxn",
-          unit_amount: Math.round(menuItem.price * 1.035 * 100),
+          unit_amount: Math.round(menuItem.price * (1 + commissionRate) * 100),
           product: stripeProductId,
         },
         quantity: Number(item.quantity),
@@ -109,7 +111,7 @@ export async function POST(request: NextRequest) {
       lineItems.push({
         price_data: {
           currency: "mxn",
-          unit_amount: Math.round(validatedTipAmount * 1.035 * 100),
+          unit_amount: Math.round(validatedTipAmount * (1 + commissionRate) * 100),
           product_data: {
             name: isEn ? "Tip" : "Propina",
           },
@@ -118,12 +120,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Calculate total session amount and 8% platform fee (or custom tenant.commission_rate)
+    // Calculate total session amount and platform fee based on tenant.commission_rate
     const totalAmountCents = lineItems.reduce(
       (acc, item) => acc + item.price_data.unit_amount * item.quantity,
       0,
     );
-    const commissionRate = tenant.commission_rate ?? 0.08;
     const applicationFeeAmount = Math.round(totalAmountCents * commissionRate);
 
     const orderId = crypto.randomUUID();
@@ -195,6 +196,7 @@ export async function POST(request: NextRequest) {
         orderItems: JSON.stringify(validatedItems),
         pickupTime: pickupTime || "",
         tipAmount: validatedTipAmount.toString(),
+        commissionRate: commissionRate.toString(),
       },
     });
 
