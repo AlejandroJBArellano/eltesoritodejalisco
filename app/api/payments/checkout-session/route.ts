@@ -61,6 +61,28 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      if (type === "takeout" && menuItem.show_in_takeaway === false) {
+        return NextResponse.json(
+          {
+            error: isEn
+              ? `Item "${menuItem.name}" is only available for dine-in`
+              : `El producto "${menuItem.name}" solo está disponible para consumo en el restaurante`,
+          },
+          { status: 400 },
+        );
+      }
+
+      if (type === "dine-in" && menuItem.show_in_dine_in === false) {
+        return NextResponse.json(
+          {
+            error: isEn
+              ? `Item "${menuItem.name}" is only available for takeout`
+              : `El producto "${menuItem.name}" solo está disponible para llevar`,
+          },
+          { status: 400 },
+        );
+      }
+
       let stripeProductId = menuItem.stripe_product_id;
 
       // Fallback: If stripe_product_id is missing, create it on Stripe on the fly
