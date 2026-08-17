@@ -1,4 +1,5 @@
 import { deductInventoryForOrder } from "@/lib/services/inventory";
+import { sendNewOrderNotificationEmail } from "@/lib/services/email";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { invalidateTenantCache } from "@/lib/tenant";
@@ -128,16 +129,15 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ received: true });
       }
 
-      let commissionRate: number = 0.037;
+      const { data: tenantData } = await supabaseAdmin
+        .from("tenants")
+        .select("id, name, slug, system_name, commission_rate")
+        .eq("id", tenantId)
+        .single();
+
+      let commissionRate: number = tenantData?.commission_rate ?? 0.037;
       if (metadata.commissionRate) {
         commissionRate = Number(metadata.commissionRate);
-      } else {
-        const { data: tenantData } = await supabaseAdmin
-          .from("tenants")
-          .select("commission_rate")
-          .eq("id", tenantId)
-          .single();
-        commissionRate = tenantData?.commission_rate ?? 0.037;
       }
 
       // Look up or create the customer in the CRM (customers table)
@@ -231,6 +231,7 @@ export async function POST(request: NextRequest) {
       let subtotal = 0;
       const itemsWithPrices = [];
       const itemSummaries = [];
+      const itemsForEmail: Array<{ name: string; quantity: number; unitPrice: number; notes?: string }> = [];
 
       for (const item of orderItems) {
         const { data: menuItem } = await supabaseAdmin
@@ -251,6 +252,13 @@ export async function POST(request: NextRequest) {
             quantity: quantity,
             unit_price: itemPrice,
             notes: item.notes || null,
+          });
+
+          itemsForEmail.push({
+            name: menuItem.name,
+            quantity: quantity,
+            unitPrice: itemPrice,
+            notes: item.notes || undefined,
           });
 
           itemSummaries.push(`${quantity}x ${menuItem.name}`);
@@ -347,6 +355,30 @@ export async function POST(request: NextRequest) {
 
       // 6. Deduct inventory ingredients automatically
       await deductInventoryForOrder(order.id);
+
+      // 7. Trigger async email notification to tenant admins (non-blocking)
+      sendNewOrderNotificationEmail({
+        tenant: {
+          id: tenantId,
+          name: tenantData?.name || "KittnOS",
+          slug: tenantData?.slug || "mili",
+          system_name: tenantData?.system_name || "KittnOS",
+        },
+        orderNumber,
+        customerName,
+        phone,
+        email,
+        type,
+        table: type === "dine-in" ? "Comer Aquí" : "Para Llevar",
+        notes,
+        pickupTime,
+        items: itemsForEmail,
+        subtotal,
+        tipAmount,
+        total,
+      }).catch((emailErr) => {
+        console.error("[Stripe Webhook] Failed to send new order email:", emailErr);
+      });
 
       console.log(
         `[Stripe Webhook] Order ${orderNumber} created successfully via checkout session.`,

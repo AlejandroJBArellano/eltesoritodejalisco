@@ -2,15 +2,29 @@ import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
-import { Ban, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, Undo2 } from "lucide-react";
+import { Ban, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, ShoppingBag, Undo2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import NoOrdersPOS from "./NoOrdersPOS";
 
 export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
     onClickCancel: (orderId: string) => void;
     cancelArmedId: string | null
 }) {
-    const { refreshOrders, availableMenuItems, orders } = usePOSData()
-    const { isSubmittingCart, setEditingOrder, openModifyModal } = usePOSCart(availableMenuItems, refreshOrders)
+    const { refreshOrders, availableMenuItems, orders } = usePOSData();
+    const [sourceFilter, setSourceFilter] = useState<"ALL" | "POS" | "PICKUP_APP">("ALL");
+
+    const filteredOrders = useMemo(() => {
+        return orders.filter((o) => {
+            if (sourceFilter === "POS") return o.source !== "PICKUP_APP";
+            if (sourceFilter === "PICKUP_APP") return o.source === "PICKUP_APP";
+            return true;
+        });
+    }, [orders, sourceFilter]);
+
+    const pickupCount = useMemo(() => orders.filter((o) => o.source === "PICKUP_APP").length, [orders]);
+    const posCount = useMemo(() => orders.filter((o) => o.source !== "PICKUP_APP").length, [orders]);
+
+    const { isSubmittingCart, setEditingOrder, openModifyModal } = usePOSCart(availableMenuItems, refreshOrders);
     const {
         isSubmittingCheckout,
         setCheckoutOrder,
@@ -26,42 +40,92 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
         setBillingOrder,
         handleUndoPayment,
     } = usePOSCheckout(refreshOrders);
-    return <div className="md:hidden space-y-4 pt-4">
-        {orders.length === 0 ? (
-            <NoOrdersPOS />
-        ) : (
-            orders.slice(0, 10).map((order) => {
-                const tipAmt = getOrderTipAmount(order);
-                const isUndoable = (() => {
-                    const lastUpdate = new Date(
-                        order.updatedAt || order.createdAt,
-                    ).getTime();
-                    const now = new Date().getTime();
-                    return now - lastUpdate < 3 * 60 * 1000;
-                })();
 
-                return (
-                    <div
-                        key={order.id}
-                        className="bg-card-light rounded-2xl p-4 border border-border space-y-4"
-                    >
-                        {/* Header de la tarjeta */}
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="font-mono font-black text-sm text-text-light">
-                                    #{order.orderNumber}
-                                </p>
-                                <p className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider mt-0.5">
-                                    {new Date(order.createdAt).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    })}
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                                <span className="rounded-full bg-card border border-border px-2.5 py-1 text-[10px] font-black text-text-light/70 uppercase tracking-wider">
-                                    {order.table || "Para Llevar"}
-                                </span>
+    return (
+        <div className="md:hidden space-y-4 pt-4">
+            {/* Filter Buttons */}
+            <div className="flex items-center gap-1 bg-dark/40 p-1 rounded-xl border border-border overflow-x-auto">
+                <button
+                    type="button"
+                    onClick={() => setSourceFilter("ALL")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                        sourceFilter === "ALL"
+                            ? "bg-card text-text-light border border-border/80 shadow-sm"
+                            : "text-text-light/50 hover:text-text-light"
+                    }`}
+                >
+                    Todas ({orders.length})
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setSourceFilter("POS")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition flex items-center gap-1 cursor-pointer ${
+                        sourceFilter === "POS"
+                            ? "bg-card text-text-light border border-border/80 shadow-sm"
+                            : "text-text-light/50 hover:text-text-light"
+                    }`}
+                >
+                    <span>🍽️ POS ({posCount})</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setSourceFilter("PICKUP_APP")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition flex items-center gap-1 cursor-pointer ${
+                        sourceFilter === "PICKUP_APP"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
+                            : "text-text-light/50 hover:text-emerald-400"
+                    }`}
+                >
+                    <ShoppingBag className="h-3 w-3" />
+                    <span>Pickup ({pickupCount})</span>
+                </button>
+            </div>
+
+            {filteredOrders.length === 0 ? (
+                <div className="py-12 text-center bg-card/40 rounded-2xl border border-dashed border-border p-6">
+                    <p className="text-xs font-extrabold uppercase tracking-widest text-text-light/40">
+                        No hay órdenes {sourceFilter === "PICKUP_APP" ? "de Kittn Pickup" : sourceFilter === "POS" ? "de POS" : ""}
+                    </p>
+                </div>
+            ) : (
+                filteredOrders.slice(0, 10).map((order) => {
+                    const tipAmt = getOrderTipAmount(order);
+                    const isUndoable = (() => {
+                        const lastUpdate = new Date(
+                            order.updatedAt || order.createdAt,
+                        ).getTime();
+                        const now = new Date().getTime();
+                        return now - lastUpdate < 3 * 60 * 1000;
+                    })();
+
+                    return (
+                        <div
+                            key={order.id}
+                            className="bg-card-light rounded-2xl p-4 border border-border space-y-4"
+                        >
+                            {/* Header de la tarjeta */}
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="font-mono font-black text-sm text-text-light">
+                                        #{order.orderNumber}
+                                    </p>
+                                    <p className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider mt-0.5">
+                                        {new Date(order.createdAt).toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                                    <span className="rounded-full bg-card border border-border px-2.5 py-1 text-[10px] font-black text-text-light/70 uppercase tracking-wider">
+                                        {order.table || "Para Llevar"}
+                                    </span>
+                                    {order.source === "PICKUP_APP" && (
+                                        <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+                                            <ShoppingBag className="h-2.5 w-2.5" />
+                                            Pickup
+                                        </span>
+                                    )}
                                 {order.status === "PAID" ? (
                                     <span className="rounded-full bg-success/10 px-2.5 py-1 text-[10px] font-black text-success uppercase tracking-widest">
                                         Pagado
@@ -219,4 +283,5 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
             })
         )}
     </div>
+  );
 }

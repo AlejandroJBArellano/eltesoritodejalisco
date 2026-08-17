@@ -152,6 +152,7 @@ export default function HistoryPage() {
   const [dateFilter, setDateFilter] = useState(""); // YYYY-MM-DD
   const [tableFilter, setTableFilter] = useState("");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
+  const [sourceFilter, setSourceFilter] = useState("");
 
   // Table Controls State - Orders Table
   type OrderSortField = "orderNumber" | "createdAt" | "table" | "total";
@@ -557,9 +558,15 @@ export default function HistoryPage() {
         if (!paymentMethods.includes(paymentMethodFilter as PaymentMethod))
           return false;
       }
+      if (sourceFilter) {
+        if (sourceFilter === "PICKUP_APP" && order.source !== "PICKUP_APP")
+          return false;
+        if (sourceFilter === "POS" && order.source === "PICKUP_APP")
+          return false;
+      }
       return true;
     });
-  }, [orders, searchQuery, dateFilter, tableFilter, paymentMethodFilter]);
+  }, [orders, searchQuery, dateFilter, tableFilter, paymentMethodFilter, sourceFilter]);
 
   const sortedOrders = useMemo(() => {
     return [...filteredOrders].sort((a, b) => {
@@ -583,6 +590,7 @@ export default function HistoryPage() {
     dateFilter,
     tableFilter,
     paymentMethodFilter,
+    sourceFilter,
     ordersSortField,
     ordersSortDir,
     ordersPageSize,
@@ -898,7 +906,7 @@ export default function HistoryPage() {
             Filtros de Búsqueda
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
                 Buscar Folio
@@ -945,6 +953,21 @@ export default function HistoryPage() {
                     {t}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
+                Canal / Origen
+              </label>
+              <select
+                value={sourceFilter}
+                onChange={(e) => setSourceFilter(e.target.value)}
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors"
+              >
+                <option value="">Todos los Orígenes</option>
+                <option value="POS">🍽️ Punto de Venta (POS)</option>
+                <option value="PICKUP_APP">🛍️ Kittn Pickup (Online)</option>
               </select>
             </div>
 
@@ -1721,9 +1744,17 @@ export default function HistoryPage() {
                           )}
                         </td>
                         <td className="py-3.5 px-3">
-                          <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black text-text-light/70 uppercase tracking-wider">
-                            {order.table || "Para Llevar"}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black text-text-light/70 uppercase tracking-wider">
+                              {order.table || "Para Llevar"}
+                            </span>
+                            {order.source === "PICKUP_APP" && (
+                              <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+                                <ShoppingBag className="h-2.5 w-2.5" />
+                                Pickup
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3.5 px-3">
                           <span

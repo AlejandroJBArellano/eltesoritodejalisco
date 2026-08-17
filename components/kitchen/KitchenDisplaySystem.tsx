@@ -12,6 +12,8 @@ import {
   Clock,
   Layers,
   LayoutGrid,
+  ShoppingBag,
+  UtensilsCrossed,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -130,6 +132,7 @@ export function KitchenDisplaySystem({
     tenantId,
   );
   const [view, setView] = useState<"kanban" | "batching">("kanban");
+  const [sourceFilter, setSourceFilter] = useState<"ALL" | "POS" | "PICKUP_APP">("ALL");
   const [updatingItemIds, setUpdatingItemIds] = useState<Set<string>>(
     () => new Set(),
   );
@@ -236,7 +239,7 @@ export function KitchenDisplaySystem({
       );
     } catch (error) {
       console.error("Error updating item status:", error);
-      showToast("Error al actualizar el platillo. Por favor reintenta.");
+      showToast("Error al marcar platillo como listo. Reintenta.");
     } finally {
       setUpdatingItemIds((prev) => {
         const next = new Set(prev);
@@ -256,11 +259,20 @@ export function KitchenDisplaySystem({
     return pickupMs - nowMs <= 30 * 60 * 1000;
   });
 
+  const channelFilteredOrders = releasedOrders.filter((o) => {
+    if (sourceFilter === "POS") return o.source !== "PICKUP_APP";
+    if (sourceFilter === "PICKUP_APP") return o.source === "PICKUP_APP";
+    return true;
+  });
+
+  const pickupCount = releasedOrders.filter((o) => o.source === "PICKUP_APP").length;
+  const posCount = releasedOrders.filter((o) => o.source !== "PICKUP_APP").length;
+
   // Group orders by status for Kanban view
   const ordersByStatus = {
-    pending: releasedOrders.filter((o) => o.status === OrderStatus.PENDING),
-    preparing: releasedOrders.filter((o) => o.status === OrderStatus.PREPARING),
-    ready: releasedOrders.filter((o) => o.status === OrderStatus.READY),
+    pending: channelFilteredOrders.filter((o) => o.status === OrderStatus.PENDING),
+    preparing: channelFilteredOrders.filter((o) => o.status === OrderStatus.PREPARING),
+    ready: channelFilteredOrders.filter((o) => o.status === OrderStatus.READY),
   };
 
   return (
@@ -325,6 +337,45 @@ export function KitchenDisplaySystem({
 
       {/* Main Content Area */}
       <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 mt-6">
+        {/* Channel / Source Filter Tabs */}
+        <div className="flex items-center gap-1.5 bg-card/60 p-1 rounded-xl border border-border w-fit mb-4 overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setSourceFilter("ALL")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer whitespace-nowrap ${
+              sourceFilter === "ALL"
+                ? "bg-amber-500 text-zinc-950 shadow-sm"
+                : "text-text-light/60 hover:text-text-light"
+            }`}
+          >
+            Todas ({releasedOrders.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setSourceFilter("POS")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              sourceFilter === "POS"
+                ? "bg-amber-500 text-zinc-950 shadow-sm"
+                : "text-text-light/60 hover:text-text-light"
+            }`}
+          >
+            <UtensilsCrossed className="h-3.5 w-3.5" />
+            <span>En Sala / POS ({posCount})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setSourceFilter("PICKUP_APP")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              sourceFilter === "PICKUP_APP"
+                ? "bg-emerald-500 text-zinc-950 shadow-sm"
+                : "text-text-light/60 hover:text-emerald-400"
+            }`}
+          >
+            <ShoppingBag className="h-3.5 w-3.5" />
+            <span>Kittn Pickup ({pickupCount})</span>
+          </button>
+        </div>
+
         {view === "kanban" ? (
           <div className="flex md:grid gap-6 md:grid-cols-3 items-start overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 snap-x snap-mandatory no-scrollbar">
             <KanbanColumn
@@ -367,7 +418,7 @@ export function KitchenDisplaySystem({
             />
           </div>
         ) : (
-          <SmartBatchingView orders={releasedOrders} />
+          <SmartBatchingView orders={channelFilteredOrders} />
         )}
       </div>
     </div>

@@ -2,15 +2,28 @@ import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
-import { Ban, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, Undo2 } from "lucide-react";
-
+import { Ban, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, ShoppingBag, Undo2 } from "lucide-react";
+import { useMemo, useState } from "react";
 
 export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
     onClickCancel: (orderId: string) => void;
     cancelArmedId: string | null
 }) {
-    const { refreshOrders, availableMenuItems, orders } = usePOSData()
-    const { isSubmittingCart, setEditingOrder, openModifyModal } = usePOSCart(availableMenuItems, refreshOrders)
+    const { refreshOrders, availableMenuItems, orders } = usePOSData();
+    const [sourceFilter, setSourceFilter] = useState<"ALL" | "POS" | "PICKUP_APP">("ALL");
+
+    const filteredOrders = useMemo(() => {
+        return orders.filter((o) => {
+            if (sourceFilter === "POS") return o.source !== "PICKUP_APP";
+            if (sourceFilter === "PICKUP_APP") return o.source === "PICKUP_APP";
+            return true;
+        });
+    }, [orders, sourceFilter]);
+
+    const pickupCount = useMemo(() => orders.filter((o) => o.source === "PICKUP_APP").length, [orders]);
+    const posCount = useMemo(() => orders.filter((o) => o.source !== "PICKUP_APP").length, [orders]);
+
+    const { isSubmittingCart, setEditingOrder, openModifyModal } = usePOSCart(availableMenuItems, refreshOrders);
     const {
         isSubmittingCheckout,
         setCheckoutOrder,
@@ -26,38 +39,83 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
         setBillingOrder,
         handleUndoPayment,
     } = usePOSCheckout(refreshOrders);
-    return <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-left">
-            <thead>
-                <tr className="border-b border-border">
-                    <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
-                        Folio
-                    </th>
-                    <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
-                        Mesa / Tipo
-                    </th>
-                    <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
-                        Estado
-                    </th>
-                    <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
-                        Total
-                    </th>
-                    <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest text-right">
-                        Acciones
-                    </th>
-                </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-                {orders.length === 0 ? (
-                    <tr>
-                        <td colSpan={5} className="py-16 text-center">
-                            <p className="text-xs font-extrabold uppercase tracking-widest text-text-light/30">
-                                No hay órdenes todavía
-                            </p>
-                        </td>
-                    </tr>
-                ) : (
-                    orders.slice(0, 10).map((order) => {
+
+    return (
+        <div className="hidden md:block space-y-3">
+            {/* Filter Buttons */}
+            <div className="flex items-center gap-1.5 bg-dark/40 p-1 rounded-xl border border-border w-fit">
+                <button
+                    type="button"
+                    onClick={() => setSourceFilter("ALL")}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                        sourceFilter === "ALL"
+                            ? "bg-card text-text-light border border-border/80 shadow-sm"
+                            : "text-text-light/50 hover:text-text-light"
+                    }`}
+                >
+                    Todas ({orders.length})
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setSourceFilter("POS")}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                        sourceFilter === "POS"
+                            ? "bg-card text-text-light border border-border/80 shadow-sm"
+                            : "text-text-light/50 hover:text-text-light"
+                    }`}
+                >
+                    <span>🍽️ POS Directo</span>
+                    <span className="text-[10px] opacity-70">({posCount})</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setSourceFilter("PICKUP_APP")}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                        sourceFilter === "PICKUP_APP"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
+                            : "text-text-light/50 hover:text-emerald-400"
+                    }`}
+                >
+                    <ShoppingBag className="h-3 w-3" />
+                    <span>Kittn Pickup</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                        {pickupCount}
+                    </span>
+                </button>
+            </div>
+
+            <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                    <thead>
+                        <tr className="border-b border-border">
+                            <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
+                                Folio
+                            </th>
+                            <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
+                                Mesa / Origen
+                            </th>
+                            <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
+                                Estado
+                            </th>
+                            <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest">
+                                Total
+                            </th>
+                            <th className="pb-3 px-3 text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest text-right">
+                                Acciones
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                        {filteredOrders.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="py-16 text-center">
+                                    <p className="text-xs font-extrabold uppercase tracking-widest text-text-light/30">
+                                        No hay órdenes {sourceFilter === "PICKUP_APP" ? "de Kittn Pickup" : sourceFilter === "POS" ? "de POS" : ""} todavía
+                                    </p>
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredOrders.slice(0, 10).map((order) => {
                         const tipAmt = getOrderTipAmount(order);
                         const isUndoable = (() => {
                             const lastUpdate = new Date(
@@ -78,9 +136,17 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
                                     </span>
                                 </td>
                                 <td className="py-3.5 px-3">
-                                    <span className="rounded-full bg-card-light border border-border px-2.5 py-1 text-[10px] font-black text-text-light/70 uppercase tracking-wider">
-                                        {order.table || "Para Llevar"}
-                                    </span>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="rounded-full bg-card-light border border-border px-2.5 py-1 text-[10px] font-black text-text-light/70 uppercase tracking-wider">
+                                            {order.table || "Para Llevar"}
+                                        </span>
+                                        {order.source === "PICKUP_APP" && (
+                                            <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+                                                <ShoppingBag className="h-2.5 w-2.5" />
+                                                Pickup
+                                            </span>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="py-3.5 px-3">
                                     {order.status === "PAID" ? (
@@ -249,5 +315,7 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
                 )}
             </tbody>
         </table>
+      </div>
     </div>
+  );
 }

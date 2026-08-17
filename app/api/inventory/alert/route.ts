@@ -6,11 +6,10 @@ import { getProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext } from "@/lib/tenant";
+import { getTenantAdminEmails, getTenantAdminUrl } from "@/lib/services/email";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-const ALERT_TO = "arellanodev2021@gmail.com";
 const ALERT_FROM = "alerts@trykittn.com";
 
 /**
@@ -56,8 +55,20 @@ export async function POST(request: NextRequest) {
     const outOfStock = lowStock.filter((i) => i.current_stock <= 0);
     const belowMin = lowStock.filter((i) => i.current_stock > 0);
 
-    const tenantName =
-      process.env.NEXT_PUBLIC_APP_NAME || "KittnOS";
+    const tenantName = tenant.name || tenant.system_name || "KittnOS";
+    const inventoryUrl = getTenantAdminUrl(tenant.slug, "/inventario");
+    const recipients = await getTenantAdminEmails(tenant.id);
+
+    if (recipients.length === 0) {
+      console.warn(
+        `[Inventory Alert] No admin emails found for tenant ${tenant.id} (${tenantName}). Skipping email.`,
+      );
+      return NextResponse.json({
+        message: "No hay administradores registrados para recibir alertas.",
+        sent: false,
+      });
+    }
+
     const now = new Date().toLocaleString("es-MX", {
       timeZone: "America/Mexico_City",
       dateStyle: "full",
@@ -136,7 +147,7 @@ export async function POST(request: NextRequest) {
 
     <!-- CTA -->
     <div style="padding:4px 28px 28px;">
-      <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://app.trykittn.com"}/inventario"
+      <a href="${inventoryUrl}"
         style="display:block;text-align:center;background:#FFB7CE;color:#000;font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;padding:14px 24px;border-radius:12px;text-decoration:none;">
         Actualizar Inventario →
       </a>
@@ -156,8 +167,8 @@ export async function POST(request: NextRequest) {
         : `🟡 Alerta de stock bajo — ${tenantName}`;
 
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: ALERT_FROM,
-      to: [ALERT_TO],
+      from: `${tenantName} <${ALERT_FROM}>`,
+      to: recipients,
       subject,
       html,
     });
