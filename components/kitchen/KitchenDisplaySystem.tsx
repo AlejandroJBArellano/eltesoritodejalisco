@@ -16,6 +16,7 @@ import {
   UtensilsCrossed,
   X,
 } from "lucide-react";
+import { PushNotificationPrompt } from "@/components/notifications/PushNotificationPrompt";
 import { useCallback, useEffect, useState } from "react";
 import { OrderCard } from "./OrderCard";
 import { SmartBatchingView } from "./SmartBatchingView";
@@ -310,6 +311,8 @@ export function KitchenDisplaySystem({
                 <Bell className="h-4 w-4 text-emerald-400" /> Sonidos Activos
               </span>
             )}
+
+            <PushNotificationPrompt compact role="KITCHEN" />
 
             <div className="flex items-center gap-1 rounded-xl border border-border bg-card/90 p-1 shadow-inner">
               <button

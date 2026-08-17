@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
+  getContrastTextColor,
   getTenantAdminEmails,
   getTenantAdminUrl,
   sendNewOrderNotificationEmail,
+  sendLowStockAlertEmail,
 } from "../email";
 
 const { mockResendSend, mockSupabaseFrom } = vi.hoisted(() => {
@@ -47,6 +49,25 @@ vi.mock("@/lib/supabase/admin", () => ({
 describe("lib/services/email", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe("getContrastTextColor", () => {
+    it("should return dark text #121212 for light background colors", () => {
+      expect(getContrastTextColor("#FFFFFF")).toBe("#121212");
+      expect(getContrastTextColor("#FFB7CE")).toBe("#121212");
+      expect(getContrastTextColor("#F59E0B")).toBe("#121212");
+    });
+
+    it("should return light text #ffffff for dark background colors", () => {
+      expect(getContrastTextColor("#000000")).toBe("#ffffff");
+      expect(getContrastTextColor("#1E1B4B")).toBe("#ffffff");
+      expect(getContrastTextColor("#7F1D1D")).toBe("#ffffff");
+    });
+
+    it("should default to dark text if null or empty", () => {
+      expect(getContrastTextColor(null)).toBe("#121212");
+      expect(getContrastTextColor("")).toBe("#121212");
+    });
   });
 
   describe("getTenantAdminUrl", () => {
@@ -133,7 +154,7 @@ describe("lib/services/email", () => {
       expect(mockResendSend).not.toHaveBeenCalled();
     });
 
-    it("should send email to tenant admins with dynamic tenant name in subject and body", async () => {
+    it("should send email with custom primary color and logo URL", async () => {
       mockSupabaseFrom().select().eq().in.mockResolvedValueOnce({
         data: [{ email: "admin@sucursalprueba.com" }],
         error: null,
@@ -142,9 +163,11 @@ describe("lib/services/email", () => {
       const result = await sendNewOrderNotificationEmail({
         tenant: {
           id: "tenant-123",
-          name: "Sucursal de Prueba",
-          slug: "sucursal-prueba",
-          system_name: "Sucursal de Prueba",
+          name: "Tacos El Profe",
+          slug: "tacos-el-profe",
+          system_name: "Tacos El Profe",
+          primary_color: "#3B82F6",
+          logo_url: "https://example.com/logo.png",
         },
         orderNumber: "102",
         customerName: "María López",
@@ -165,10 +188,52 @@ describe("lib/services/email", () => {
       expect(result.emailId).toBe("resend-msg-123");
       expect(mockResendSend).toHaveBeenCalledWith(
         expect.objectContaining({
-          from: "Sucursal de Prueba <orders@trykittn.com>",
+          from: "Tacos El Profe <orders@trykittn.com>",
           to: ["admin@sucursalprueba.com"],
-          subject: expect.stringContaining("Sucursal de Prueba"),
-          html: expect.stringContaining("Sucursal de Prueba"),
+          subject: expect.stringContaining("Tacos El Profe"),
+          html: expect.stringContaining("#3B82F6"),
+        }),
+      );
+      const callArgs = mockResendSend.mock.calls[0][0];
+      expect(callArgs.html).toContain("https://example.com/logo.png");
+      expect(callArgs.html).toContain("background:#3B82F6");
+    });
+  });
+
+  describe("sendLowStockAlertEmail", () => {
+    it("should render low stock email with tenant branding and item details", async () => {
+      mockSupabaseFrom().select().eq().in.mockResolvedValueOnce({
+        data: [{ email: "manager@restaurante.com" }],
+        error: null,
+      });
+
+      const result = await sendLowStockAlertEmail({
+        tenant: {
+          id: "tenant-456",
+          name: "Restaurante Central",
+          slug: "restaurante-central",
+          system_name: "Restaurante Central",
+          primary_color: "#10B981",
+        },
+        lowStock: [
+          { id: "ing-1", name: "Carne Asada", current_stock: 0, minimum_stock: 5, unit: "kg" },
+          { id: "ing-2", name: "Queso Oaxaca", current_stock: 2, minimum_stock: 4, unit: "kg" },
+        ],
+        outOfStock: [
+          { id: "ing-1", name: "Carne Asada", current_stock: 0, minimum_stock: 5, unit: "kg" },
+        ],
+        belowMin: [
+          { id: "ing-2", name: "Queso Oaxaca", current_stock: 2, minimum_stock: 4, unit: "kg" },
+        ],
+      });
+
+      expect(result.success).toBe(true);
+      expect(mockResendSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: "Restaurante Central <alerts@trykittn.com>",
+          to: ["manager@restaurante.com"],
+          subject: expect.stringContaining("1 ingrediente(s) AGOTADO(S)"),
+          html: expect.stringContaining("background:#10B981"),
         }),
       );
     });

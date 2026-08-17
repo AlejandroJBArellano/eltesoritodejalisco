@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { Tables } from "@/types/supabase";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const DEFAULT_FROM = "alerts@trykittn.com";
+const ALERT_FROM = "alerts@trykittn.com";
 const ORDERS_FROM = "orders@trykittn.com";
 
 export interface OrderItemEmailData {
@@ -13,8 +13,18 @@ export interface OrderItemEmailData {
   notes?: string;
 }
 
+export type TenantEmailInfo = Pick<
+  Tables<"tenants">,
+  "id" | "name" | "slug" | "system_name"
+> & {
+  primary_color?: string | null;
+  secondary_color?: string | null;
+  logo_url?: string | null;
+  dark_bg_color?: string | null;
+};
+
 export interface NewOrderEmailParams {
-  tenant: Pick<Tables<"tenants">, "id" | "name" | "slug" | "system_name">;
+  tenant: TenantEmailInfo;
   orderNumber: string | number;
   customerName?: string | null;
   phone?: string | null;
@@ -38,10 +48,36 @@ export interface LowStockItemEmailData {
 }
 
 export interface LowStockEmailParams {
-  tenant: Pick<Tables<"tenants">, "id" | "name" | "slug" | "system_name">;
+  tenant: TenantEmailInfo;
   lowStock: LowStockItemEmailData[];
   outOfStock: LowStockItemEmailData[];
   belowMin: LowStockItemEmailData[];
+}
+
+/**
+ * Calculates optimal text color (#121212 or #ffffff) based on background hex luminance.
+ */
+export function getContrastTextColor(hexColor?: string | null): string {
+  if (!hexColor) return "#121212";
+  const hex = hexColor.replace("#", "");
+  if (hex.length !== 6 && hex.length !== 3) return "#121212";
+
+  let r = 0,
+    g = 0,
+    b = 0;
+  if (hex.length === 3) {
+    r = parseInt(hex[0] + hex[0], 16);
+    g = parseInt(hex[1] + hex[1], 16);
+    b = parseInt(hex[2] + hex[2], 16);
+  } else {
+    r = parseInt(hex.substring(0, 2), 16);
+    g = parseInt(hex.substring(2, 4), 16);
+    b = parseInt(hex.substring(4, 6), 16);
+  }
+
+  // YIQ luminance formula
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 150 ? "#121212" : "#ffffff";
 }
 
 /**
@@ -108,6 +144,9 @@ export async function sendNewOrderNotificationEmail(params: NewOrderEmailParams)
   } = params;
 
   const tenantName = tenant.name || tenant.system_name || "KittnOS";
+  const primaryColor = tenant.primary_color || "#FFB7CE";
+  const primaryTextColor = getContrastTextColor(primaryColor);
+  const logoUrl = tenant.logo_url;
   const recipients = await getTenantAdminEmails(tenant.id);
 
   if (recipients.length === 0) {
@@ -151,14 +190,21 @@ export async function sendNewOrderNotificationEmail(params: NewOrderEmailParams)
     
     <!-- Header -->
     <div style="background:#27272a;border-bottom:1px solid #3f3f46;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;color:#10b981;background:rgba(16,185,129,0.15);padding:4px 10px;border-radius:20px;border:1px solid rgba(16,185,129,0.3);">
-          🛍️ Kittn Pickup (Pagado)
-        </span>
-        <h1 style="margin:10px 0 2px;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.02em;">
-          Pedido #${orderNumber}
-        </h1>
-        <p style="margin:0;font-size:12px;color:#a1a1aa;">${tenantName} · ${now}</p>
+      <div style="display:flex;align-items:center;gap:14px;">
+        ${
+          logoUrl
+            ? `<img src="${logoUrl}" alt="${tenantName}" style="height:44px;max-width:120px;object-fit:contain;border-radius:8px;" />`
+            : ""
+        }
+        <div>
+          <span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;color:${primaryColor};background:${primaryColor}22;padding:4px 10px;border-radius:20px;border:1px solid ${primaryColor}55;">
+            🛍️ Kittn Pickup (Pagado)
+          </span>
+          <h1 style="margin:10px 0 2px;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.02em;">
+            Pedido #${orderNumber}
+          </h1>
+          <p style="margin:0;font-size:12px;color:#a1a1aa;">${tenantName} · ${now}</p>
+        </div>
       </div>
     </div>
 
@@ -189,7 +235,7 @@ export async function sendNewOrderNotificationEmail(params: NewOrderEmailParams)
         <div>
           <span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#71717a;display:block;margin-bottom:2px;">Contacto</span>
           <span style="font-size:13px;color:#a1a1aa;">
-            ${phone ? `<a href="tel:${phone}" style="color:#38bdf8;text-decoration:none;font-weight:700;">📞 ${phone}</a>` : ""}
+            ${phone ? `<a href="tel:${phone}" style="color:${primaryColor};text-decoration:none;font-weight:700;">📞 ${phone}</a>` : ""}
             ${email ? `<br/><a href="mailto:${email}" style="color:#a1a1aa;text-decoration:none;font-size:11px;">✉️ ${email}</a>` : ""}
             ${!phone && !email ? "Sin datos de contacto" : ""}
           </span>
@@ -219,7 +265,7 @@ export async function sendNewOrderNotificationEmail(params: NewOrderEmailParams)
         <div style="padding:12px 16px;${idx < items.length - 1 ? "border-bottom:1px solid #2e2e33;" : ""}display:flex;align-items:flex-start;justify-content:space-between;">
           <div style="flex:1;">
             <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:13px;font-weight:900;color:#10b981;background:rgba(16,185,129,0.15);padding:2px 7px;border-radius:6px;">
+              <span style="font-size:13px;font-weight:900;color:${primaryColor};background:${primaryColor}22;padding:2px 7px;border-radius:6px;">
                 ${item.quantity}x
               </span>
               <strong style="font-size:13px;color:#ffffff;">${item.name}</strong>
@@ -241,7 +287,7 @@ export async function sendNewOrderNotificationEmail(params: NewOrderEmailParams)
 
     <!-- Financial Totals -->
     <div style="padding:0 28px 24px;">
-      <div style="background:#202024;border:1px solid #2e2e33;border-radius:12px;padding:14px 18px;space-y:6px;">
+      <div style="background:#202024;border:1px solid #2e2e33;border-radius:12px;padding:14px 18px;">
         <div style="display:flex;justify-content:space-between;font-size:12px;color:#a1a1aa;margin-bottom:6px;">
           <span>Subtotal</span>
           <span style="font-variant-numeric:tabular-nums;color:#d4d4d8;">${formatCurrency(subtotal)}</span>
@@ -257,15 +303,15 @@ export async function sendNewOrderNotificationEmail(params: NewOrderEmailParams)
         }
         <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:900;color:#ffffff;border-top:1px solid #2e2e33;padding-top:8px;margin-top:6px;">
           <span>Total Cobrado (Stripe)</span>
-          <span style="font-variant-numeric:tabular-nums;color:#10b981;">${formatCurrency(total + tipAmount)}</span>
+          <span style="font-variant-numeric:tabular-nums;color:${primaryColor};">${formatCurrency(total + tipAmount)}</span>
         </div>
       </div>
     </div>
 
-    <!-- CTA Button -->
+    <!-- CTA Button with Dynamic Tenant Color -->
     <div style="padding:0 28px 28px;">
       <a href="${kitchenUrl}"
-        style="display:block;text-align:center;background:#FFB7CE;color:#121212;font-weight:900;font-size:13px;text-transform:uppercase;letter-spacing:0.08em;padding:15px 24px;border-radius:14px;text-decoration:none;box-shadow:0 4px 14px rgba(255,183,206,0.25);">
+        style="display:block;text-align:center;background:${primaryColor};color:${primaryTextColor};font-weight:900;font-size:13px;text-transform:uppercase;letter-spacing:0.08em;padding:15px 24px;border-radius:14px;text-decoration:none;box-shadow:0 4px 14px ${primaryColor}44;">
         Ver Pedido en Cocina (KDS) →
       </a>
     </div>
@@ -299,6 +345,153 @@ export async function sendNewOrderNotificationEmail(params: NewOrderEmailParams)
     return { success: true, emailId: data?.id };
   } catch (err) {
     console.error("[Email Notification Exception] Error sending order email:", err);
+    return { success: false, error: err };
+  }
+}
+
+/**
+ * Sends a low-stock / out-of-stock email alert to tenant admins using dynamic tenant branding.
+ */
+export async function sendLowStockAlertEmail(params: LowStockEmailParams) {
+  const { tenant, lowStock, outOfStock, belowMin } = params;
+
+  const tenantName = tenant.name || tenant.system_name || "KittnOS";
+  const primaryColor = tenant.primary_color || "#FFB7CE";
+  const primaryTextColor = getContrastTextColor(primaryColor);
+  const logoUrl = tenant.logo_url;
+  const inventoryUrl = getTenantAdminUrl(tenant.slug, "/inventario");
+  const recipients = await getTenantAdminEmails(tenant.id);
+
+  if (recipients.length === 0) {
+    console.warn(
+      `[Inventory Alert] No admin emails found for tenant ${tenant.id} (${tenantName}). Skipping email.`,
+    );
+    return { success: false, reason: "no_recipients" };
+  }
+
+  const now = new Date().toLocaleString("es-MX", {
+    timeZone: "America/Mexico_City",
+    dateStyle: "full",
+    timeStyle: "short",
+  });
+
+  const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alerta de Inventario — ${tenantName}</title>
+</head>
+<body style="margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:40px auto;background:#1a1a1a;border-radius:16px;overflow:hidden;border:1px solid #2a2a2a;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+    <!-- Header -->
+    <div style="background:#1f1f1f;border-bottom:1px solid #2a2a2a;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;background:#ef444420;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">⚠️</div>
+        <div>
+          <p style="margin:0;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:0.08em;color:#f87171;">Alerta de Inventario</p>
+          <p style="margin:0;font-size:12px;color:#a1a1aa;font-weight:500;">${tenantName} · ${now}</p>
+        </div>
+      </div>
+      ${
+        logoUrl
+          ? `<img src="${logoUrl}" alt="${tenantName}" style="height:36px;max-width:100px;object-fit:contain;border-radius:6px;" />`
+          : ""
+      }
+    </div>
+
+    <!-- Summary -->
+    <div style="padding:24px 28px 0;">
+      <p style="margin:0 0 16px;font-size:14px;color:#a1a1aa;font-weight:500;">
+        Se detectaron <strong style="color:#e5e5e5;">${lowStock.length} ingrediente(s)</strong> con niveles críticos de stock.
+      </p>
+    </div>
+
+    ${
+      outOfStock.length > 0
+        ? `
+    <!-- Agotados -->
+    <div style="padding:0 28px 20px;">
+      <p style="margin:0 0 10px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;color:#f87171;">🔴 Agotados (${outOfStock.length})</p>
+      <div style="border-radius:12px;overflow:hidden;border:1px solid #2f1515;">
+        ${outOfStock
+          .map(
+            (ing, i) => `
+        <div style="background:#1c1212;padding:12px 16px;${i < outOfStock.length - 1 ? "border-bottom:1px solid #2f1515;" : ""}display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;font-weight:700;color:#fca5a5;">${ing.name}</span>
+          <span style="font-size:12px;font-weight:900;color:#f87171;font-variant-numeric:tabular-nums;">${ing.current_stock} / ${ing.minimum_stock} ${ing.unit} mín</span>
+        </div>`,
+          )
+          .join("")}
+      </div>
+    </div>
+    `
+        : ""
+    }
+
+    ${
+      belowMin.length > 0
+        ? `
+    <!-- Bajo mínimo -->
+    <div style="padding:0 28px 20px;">
+      <p style="margin:0 0 10px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;color:#f59e0b;">🟡 Bajo Mínimo (${belowMin.length})</p>
+      <div style="border-radius:12px;overflow:hidden;border:1px solid #2e2010;">
+        ${belowMin
+          .map(
+            (ing, i) => `
+        <div style="background:#1a1710;padding:12px 16px;${i < belowMin.length - 1 ? "border-bottom:1px solid #2e2010;" : ""}display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;font-weight:700;color:#fcd34d;">${ing.name}</span>
+          <span style="font-size:12px;font-weight:900;color:#f59e0b;font-variant-numeric:tabular-nums;">${ing.current_stock} / ${ing.minimum_stock} ${ing.unit} mín</span>
+        </div>`,
+          )
+          .join("")}
+      </div>
+    </div>
+    `
+        : ""
+    }
+
+    <!-- CTA Button with Dynamic Tenant Color -->
+    <div style="padding:4px 28px 28px;">
+      <a href="${inventoryUrl}"
+        style="display:block;text-align:center;background:${primaryColor};color:${primaryTextColor};font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;padding:14px 24px;border-radius:12px;text-decoration:none;box-shadow:0 4px 14px ${primaryColor}44;">
+        Actualizar Inventario →
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding:16px 28px;border-top:1px solid #2a2a2a;text-align:center;background:#141416;">
+      <p style="margin:0;font-size:11px;color:#52525b;">Este mensaje fue enviado automáticamente por ${tenantName} · <a href="mailto:${ALERT_FROM}" style="color:#71717a;text-decoration:none;">${ALERT_FROM}</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const subject =
+    outOfStock.length > 0
+      ? `🔴 ${outOfStock.length} ingrediente(s) AGOTADO(S) — ${tenantName}`
+      : `🟡 Alerta de stock bajo — ${tenantName}`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `${tenantName} <${ALERT_FROM}>`,
+      to: recipients,
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error("[Resend Error] Failed to send low stock alert:", error);
+      return { success: false, error };
+    }
+
+    console.log(
+      `[Inventory Alert Email] Low stock alert sent to ${recipients.join(", ")} (id: ${data?.id})`,
+    );
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error("[Inventory Alert Exception] Error sending low stock email:", err);
     return { success: false, error: err };
   }
 }

@@ -2,6 +2,7 @@
 
 import { logout } from "@/app/login/actions";
 import { useTenant } from "@/components/TenantProvider";
+import { PushNotificationPrompt } from "@/components/notifications/PushNotificationPrompt";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -94,8 +95,9 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Right: email + logout */}
+          {/* Right: notifications + email + logout */}
           <div className="flex items-center gap-3 shrink-0">
+            <PushNotificationPrompt compact role="ADMIN" />
             {email && (
               <span
                 className="hidden sm:block text-xs font-medium text-text-light/40 max-w-45 truncate"

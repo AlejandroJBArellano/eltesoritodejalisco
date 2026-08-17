@@ -1,5 +1,6 @@
-import { deductInventoryForOrder } from "@/lib/services/inventory";
 import { sendNewOrderNotificationEmail } from "@/lib/services/email";
+import { deductInventoryForOrder } from "@/lib/services/inventory";
+import { sendTenantPushNotification } from "@/lib/services/push";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { invalidateTenantCache } from "@/lib/tenant";
@@ -131,7 +132,9 @@ export async function POST(request: NextRequest) {
 
       const { data: tenantData } = await supabaseAdmin
         .from("tenants")
-        .select("id, name, slug, system_name, commission_rate")
+        .select(
+          "id, name, slug, system_name, commission_rate, primary_color, secondary_color, logo_url, dark_bg_color",
+        )
         .eq("id", tenantId)
         .single();
 
@@ -358,12 +361,7 @@ export async function POST(request: NextRequest) {
 
       // 7. Trigger async email notification to tenant admins (non-blocking)
       sendNewOrderNotificationEmail({
-        tenant: {
-          id: tenantId,
-          name: tenantData?.name || "KittnOS",
-          slug: tenantData?.slug || "mili",
-          system_name: tenantData?.system_name || "KittnOS",
-        },
+        tenant: tenantData!,
         orderNumber,
         customerName,
         phone,
@@ -378,6 +376,25 @@ export async function POST(request: NextRequest) {
         total,
       }).catch((emailErr) => {
         console.error("[Stripe Webhook] Failed to send new order email:", emailErr);
+      });
+
+      // 8. Trigger Web Push notification to kitchen tablets, POS, and managers (non-blocking)
+      const serviceMode = type === "dine-in" ? "Comer Aquí" : "Para Llevar";
+      const itemsBrief = itemsForEmail
+        .map((i) => `${i.quantity}x ${i.name}`)
+        .join(", ");
+
+      sendTenantPushNotification(
+        tenantId,
+        {
+          title: `🛍️ Nuevo Pedido #${orderNumber} (${serviceMode})`,
+          body: `${itemsBrief} · Total: $${(total + tipAmount).toFixed(2)} MXN`,
+          url: "/kitchen",
+          tag: `order-${orderNumber}`,
+        },
+        ["ADMIN", "MANAGER", "KITCHEN", "CASHIER", "WAITER"],
+      ).catch((pushErr) => {
+        console.error("[Stripe Webhook] Failed to send push notification:", pushErr);
       });
 
       console.log(
