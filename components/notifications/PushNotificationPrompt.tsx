@@ -41,13 +41,15 @@ export function PushNotificationPrompt({
       setIsSupported(true);
       setPermission(Notification.permission);
 
-      navigator.serviceWorker.ready
-        .then((reg) => reg.pushManager.getSubscription())
+      // Register SW on load and check existing push subscription
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((reg) => reg?.pushManager?.getSubscription())
         .then((sub) => {
           setIsSubscribed(Boolean(sub));
         })
         .catch((err) => {
-          console.error("[Push Notification Check Error]", err);
+          console.warn("[Push Notification Init Warning]", err);
         })
         .finally(() => {
           setLoading(false);
@@ -63,19 +65,36 @@ export function PushNotificationPrompt({
     setLoading(true);
 
     try {
+      if (typeof window === "undefined" || !("Notification" in window)) {
+        throw new Error("Tu navegador no soporta notificaciones.");
+      }
+
+      // 1. Request permission from browser
       const perm = await Notification.requestPermission();
       setPermission(perm);
+
+      if (perm === "denied") {
+        setErrorMsg(
+          "Notificaciones bloqueadas en tu navegador. Habilítalas en el ícono de ajustes/candado en la barra de URL.",
+        );
+        setLoading(false);
+        return;
+      }
 
       if (perm !== "granted") {
         setLoading(false);
         return;
       }
 
+      // 2. Validate VAPID key
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!vapidPublicKey) {
-        throw new Error("NEXT_PUBLIC_VAPID_PUBLIC_KEY no está configurada.");
+        throw new Error(
+          "Falta configurar NEXT_PUBLIC_VAPID_PUBLIC_KEY en tu archivo .env.",
+        );
       }
 
+      // 3. Register SW and subscribe
       const reg = await navigator.serviceWorker.register("/sw.js");
       await navigator.serviceWorker.ready;
 
@@ -87,6 +106,7 @@ export function PushNotificationPrompt({
         });
       }
 
+      // 4. Save subscription in backend
       const res = await fetch("/api/notifications/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -98,13 +118,17 @@ export function PushNotificationPrompt({
       });
 
       if (!res.ok) {
-        throw new Error("No se pudo registrar la suscripción en el servidor.");
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(
+          errData.error || "No se pudo registrar la suscripción en el servidor.",
+        );
       }
 
       setIsSubscribed(true);
     } catch (err: unknown) {
       console.error("[Push Subscription Error]", err);
-      const msg = err instanceof Error ? err.message : "Error al activar notificaciones.";
+      const msg =
+        err instanceof Error ? err.message : "Error al activar notificaciones.";
       setErrorMsg(msg);
     } finally {
       setLoading(false);
@@ -131,7 +155,8 @@ export function PushNotificationPrompt({
       setIsSubscribed(false);
     } catch (err: unknown) {
       console.error("[Push Unsubscription Error]", err);
-      const msg = err instanceof Error ? err.message : "Error al desactivar notificaciones.";
+      const msg =
+        err instanceof Error ? err.message : "Error al desactivar notificaciones.";
       setErrorMsg(msg);
     } finally {
       setLoading(false);
@@ -144,27 +169,35 @@ export function PushNotificationPrompt({
 
   if (compact) {
     return (
-      <button
-        type="button"
-        onClick={isSubscribed ? handleUnsubscribe : handleSubscribe}
-        disabled={loading || permission === "denied"}
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-          isSubscribed
-            ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
-            : permission === "denied"
-              ? "bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed"
-              : "bg-primary/20 text-primary border border-primary/40 hover:bg-primary/30"
-        } ${className}`}
-        title={
-          permission === "denied"
-            ? "Notificaciones bloqueadas en el navegador"
-            : isSubscribed
-              ? "Notificaciones push activas (clic para pausar)"
-              : "Activar notificaciones push en este dispositivo"
-        }
-      >
-        <span>{isSubscribed ? "🔔 Activadas" : "🔕 Activar Push"}</span>
-      </button>
+      <div className="relative inline-flex items-center">
+        <button
+          type="button"
+          onClick={isSubscribed ? handleUnsubscribe : handleSubscribe}
+          disabled={loading}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            isSubscribed
+              ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
+              : permission === "denied"
+                ? "bg-rose-500/10 text-rose-400 border border-rose-500/25 hover:bg-rose-500/20"
+                : "bg-primary/20 text-primary border border-primary/40 hover:bg-primary/30"
+          } ${className}`}
+          title={
+            permission === "denied"
+              ? "Notificaciones bloqueadas en el navegador (clic para ver ayuda)"
+              : isSubscribed
+                ? "Notificaciones push activas (clic para pausar)"
+                : "Activar notificaciones push en este dispositivo"
+          }
+        >
+          <span>
+            {isSubscribed
+              ? "🔔 Activadas"
+              : permission === "denied"
+                ? "🚫 Bloqueadas"
+                : "🔕 Activar Push"}
+          </span>
+        </button>
+      </div>
     );
   }
 
@@ -175,7 +208,7 @@ export function PushNotificationPrompt({
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-lg shrink-0">
-            {isSubscribed ? "🔔" : "🔕"}
+            {isSubscribed ? "🔔" : permission === "denied" ? "🚫" : "🔕"}
           </div>
           <div>
             <h4 className="text-sm font-black text-white">
@@ -183,7 +216,7 @@ export function PushNotificationPrompt({
             </h4>
             <p className="text-xs text-zinc-400">
               {permission === "denied"
-                ? "Permiso bloqueado en tu navegador. Habilítalo en los ajustes del sitio."
+                ? "Permiso bloqueado en tu navegador. Habilítalo en los ajustes/candado del sitio en la barra de URL."
                 : isSubscribed
                   ? "Este dispositivo recibirá avisos de pedidos online y stock bajo."
                   : "Recibe alertas en tiempo real en esta pantalla aunque no esté visible."}
@@ -199,12 +232,12 @@ export function PushNotificationPrompt({
         <button
           type="button"
           onClick={isSubscribed ? handleUnsubscribe : handleSubscribe}
-          disabled={loading || permission === "denied"}
-          className={`px-3.5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all shrink-0 ${
+          disabled={loading}
+          className={`px-3.5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer ${
             isSubscribed
               ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700"
               : permission === "denied"
-                ? "bg-zinc-800/50 text-zinc-600 border border-zinc-800 cursor-not-allowed"
+                ? "bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30"
                 : "bg-primary text-zinc-950 hover:opacity-90 shadow-md shadow-primary/20"
           }`}
         >
@@ -212,7 +245,9 @@ export function PushNotificationPrompt({
             ? "Procesando..."
             : isSubscribed
               ? "Desactivar"
-              : "Activar Alertas"}
+              : permission === "denied"
+                ? "Reintentar"
+                : "Activar Alertas"}
         </button>
       </div>
     </div>
