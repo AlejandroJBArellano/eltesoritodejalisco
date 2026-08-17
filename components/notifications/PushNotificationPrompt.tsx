@@ -174,13 +174,12 @@ export function PushNotificationPrompt({
           type="button"
           onClick={isSubscribed ? handleUnsubscribe : handleSubscribe}
           disabled={loading}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-            isSubscribed
-              ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
-              : permission === "denied"
-                ? "bg-rose-500/10 text-rose-400 border border-rose-500/25 hover:bg-rose-500/20"
-                : "bg-primary/20 text-primary border border-primary/40 hover:bg-primary/30"
-          } ${className}`}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${isSubscribed
+            ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
+            : permission === "denied"
+              ? "bg-rose-500/10 text-rose-400 border border-rose-500/25 hover:bg-rose-500/20"
+              : "bg-primary/20 text-primary border border-primary/40 hover:bg-primary/30"
+            } ${className}`}
           title={
             permission === "denied"
               ? "Notificaciones bloqueadas en el navegador (clic para ver ayuda)"
@@ -191,10 +190,10 @@ export function PushNotificationPrompt({
         >
           <span>
             {isSubscribed
-              ? "🔔 Activadas"
+              ? "🔔 Notificaciones Activas"
               : permission === "denied"
-                ? "🚫 Bloqueadas"
-                : "🔕 Activar Push"}
+                ? "🚫 Notificaciones Bloqueadas"
+                : "🔕 Activar Notificaciones"}
           </span>
         </button>
       </div>
@@ -233,13 +232,12 @@ export function PushNotificationPrompt({
           type="button"
           onClick={isSubscribed ? handleUnsubscribe : handleSubscribe}
           disabled={loading}
-          className={`px-3.5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer ${
-            isSubscribed
-              ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700"
-              : permission === "denied"
-                ? "bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30"
-                : "bg-primary text-zinc-950 hover:opacity-90 shadow-md shadow-primary/20"
-          }`}
+          className={`px-3.5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer ${isSubscribed
+            ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700"
+            : permission === "denied"
+              ? "bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30"
+              : "bg-primary text-zinc-950 hover:opacity-90 shadow-md shadow-primary/20"
+            }`}
         >
           {loading
             ? "Procesando..."
