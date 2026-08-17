@@ -61,6 +61,17 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      if (menuItem.is_available === false) {
+        return NextResponse.json(
+          {
+            error: isEn
+              ? `Item "${menuItem.name}" is currently sold out or unavailable`
+              : `El producto "${menuItem.name}" está agotado o no disponible en este momento`,
+          },
+          { status: 400 },
+        );
+      }
+
       if (type === "takeout" && menuItem.show_in_takeaway === false) {
         return NextResponse.json(
           {
@@ -130,7 +141,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const validatedTipAmount = Number(tipAmount) || 0;
+    const rawTip = Number(tipAmount);
+    const validatedTipAmount = Number.isFinite(rawTip)
+      ? Math.max(0, Math.min(Math.round(rawTip * 100) / 100, 10000))
+      : 0;
     if (validatedTipAmount > 0) {
       lineItems.push({
         price_data: {
