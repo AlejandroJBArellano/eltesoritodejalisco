@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
         : [item.menuItemId, item.quantity]
     );
 
-    const stripeLocale = isEn ? "en" : "es";
+    const stripeLocale = isEn ? "en" : "es-419";
 
     const session = await stripe.checkout.sessions.create({
       line_items: lineItems,
