@@ -41,7 +41,7 @@ describe("PushNotificationPrompt Component", () => {
     render(<PushNotificationPrompt compact role="KITCHEN" />);
     const button = await screen.findByRole("button");
     expect(button).toBeInTheDocument();
-    expect(button).toHaveTextContent(/Activar Push/i);
+    expect(button).toHaveTextContent(/Activar Notificaciones/i);
   });
 
   it("renders full banner mode with title and description", async () => {

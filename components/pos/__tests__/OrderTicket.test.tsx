@@ -4,16 +4,21 @@ import { render, screen } from "@testing-library/react";
 import { OrderTicket } from "../OrderTicket";
 import { OrderWithDetails, OrderStatus, PaymentMethod } from "@/types";
 
+let mockTenant = {
+  id: "tenant-abc",
+  slug: "tesorito",
+  name: "El Tesorito de Jalisco",
+  system_name: "TesoritoOS",
+  rfc: "XAXX010101000",
+  postal_code: "44100",
+  regimen_fiscal: "601",
+  google_reviews_url: null as string | null,
+  ticket_footer_text: null as string | null,
+};
+
 // Mock useTenant
 vi.mock("@/components/TenantProvider", () => ({
-  useTenant: () => ({
-    id: "tenant-abc",
-    name: "El Tesorito de Jalisco",
-    system_name: "TesoritoOS",
-    rfc: "XAXX010101000",
-    postal_code: "44100",
-    regimen_fiscal: "601",
-  }),
+  useTenant: () => mockTenant,
 }));
 
 const mockOrder: OrderWithDetails = {
@@ -100,23 +105,55 @@ describe("OrderTicket Component", () => {
     expect(screen.getByText("PAGO TOTAL: $136.00")).toBeInTheDocument();
   });
 
-  it("should render the Powered by Kittn promotion with the correct QR code redirect URL", () => {
+  it("should render a single centered Pickup QR code when Google Reviews URL is not configured", () => {
+    mockTenant.google_reviews_url = null;
+    mockTenant.ticket_footer_text = null;
+
     render(<OrderTicket order={mockOrder} />);
 
-    // Powered by Kittn text elements
-    expect(screen.getByText(/Powered by Kittn/i)).toBeInTheDocument();
-    expect(screen.getByText(/Get Yours/i)).toBeInTheDocument();
+    // Check Pickup QR
+    const qrPickup = screen.getByTestId("qr-pickup");
+    expect(qrPickup).toBeInTheDocument();
+    expect(qrPickup.getAttribute("width")).toBe("80");
+    expect(qrPickup.getAttribute("height")).toBe("80");
 
-    // QR Code assertions
-    const qrCode = screen.getByTestId("qr-code");
-    expect(qrCode).toBeInTheDocument();
-    expect(qrCode.tagName.toLowerCase()).toBe("img");
-    expect(qrCode.getAttribute("width")).toBe("80");
-    expect(qrCode.getAttribute("height")).toBe("80");
-    
-    // Check that the URL encodes the order-id and tenant-id as query params and matches the QR Code API
-    const expectedUrl = "https://trykittn.com?ref=pos_order-123_tenant-abc";
-    const expectedSrc = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&ecc=M&data=${encodeURIComponent(expectedUrl)}`;
-    expect(qrCode.getAttribute("src")).toBe(expectedSrc);
+    const expectedPickupUrl = "https://tesorito.trykittn.com";
+    expect(qrPickup.getAttribute("src")).toContain(encodeURIComponent(expectedPickupUrl));
+
+    // Reviews QR should NOT be rendered
+    expect(screen.queryByTestId("qr-reviews")).not.toBeInTheDocument();
+
+    // Powered by Kittn footer
+    expect(screen.getByText(/Powered by Kittn • trykittn.com/i)).toBeInTheDocument();
+  });
+
+  it("should render dual QR codes (Pickup + Google Reviews) and social footer when configured", () => {
+    mockTenant.google_reviews_url = "https://g.page/r/CbXxExample/review";
+    mockTenant.ticket_footer_text = "📸 @el_tesorito_jalisco • 🎵 @tesorito";
+
+    render(<OrderTicket order={mockOrder} />);
+
+    // Check Pickup QR in dual mode (size 70x70)
+    const qrPickup = screen.getByTestId("qr-pickup");
+    expect(qrPickup).toBeInTheDocument();
+    expect(qrPickup.getAttribute("width")).toBe("70");
+    expect(qrPickup.getAttribute("height")).toBe("70");
+
+    // Check Google Reviews QR in dual mode (size 70x70)
+    const qrReviews = screen.getByTestId("qr-reviews");
+    expect(qrReviews).toBeInTheDocument();
+    expect(qrReviews.getAttribute("width")).toBe("70");
+    expect(qrReviews.getAttribute("height")).toBe("70");
+    expect(qrReviews.getAttribute("src")).toContain(encodeURIComponent("https://g.page/r/CbXxExample/review"));
+
+    // Check headers
+    expect(screen.getByText("Pide en Línea")).toBeInTheDocument();
+    expect(screen.getByText("Califícanos")).toBeInTheDocument();
+
+    // Check social footer
+    expect(screen.getByText("📸 @el_tesorito_jalisco • 🎵 @tesorito")).toBeInTheDocument();
+
+    // Powered by Kittn footer
+    expect(screen.getByText(/Powered by Kittn • trykittn.com/i)).toBeInTheDocument();
   });
 });

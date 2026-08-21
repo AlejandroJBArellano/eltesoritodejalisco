@@ -903,6 +903,53 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string | null
+          endpoint: string
+          id: string
+          p256dh: string
+          role: string | null
+          tenant_id: string
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          auth: string
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          p256dh: string
+          role?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          auth?: string
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          role?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipe_items: {
         Row: {
           id: string
@@ -1112,6 +1159,7 @@ export type Database = {
           created_at: string | null
           custom_domain: string | null
           dark_bg_color: string | null
+          google_reviews_url: string | null
           id: string
           logo_url: string | null
           loyalty_enabled: boolean | null
@@ -1127,6 +1175,7 @@ export type Database = {
           stripe_charges_enabled: boolean | null
           stripe_details_submitted: boolean | null
           system_name: string
+          ticket_footer_text: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1134,6 +1183,7 @@ export type Database = {
           created_at?: string | null
           custom_domain?: string | null
           dark_bg_color?: string | null
+          google_reviews_url?: string | null
           id?: string
           logo_url?: string | null
           loyalty_enabled?: boolean | null
@@ -1149,6 +1199,7 @@ export type Database = {
           stripe_charges_enabled?: boolean | null
           stripe_details_submitted?: boolean | null
           system_name?: string
+          ticket_footer_text?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1156,6 +1207,7 @@ export type Database = {
           created_at?: string | null
           custom_domain?: string | null
           dark_bg_color?: string | null
+          google_reviews_url?: string | null
           id?: string
           logo_url?: string | null
           loyalty_enabled?: boolean | null
@@ -1171,6 +1223,7 @@ export type Database = {
           stripe_charges_enabled?: boolean | null
           stripe_details_submitted?: boolean | null
           system_name?: string
+          ticket_footer_text?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1245,12 +1298,12 @@ export type Database = {
     Functions: {
       create_order_with_items: {
         Args: {
-          p_customer_id?: string
-          p_items?: Json
-          p_notes?: string
+          p_customer_id: string
+          p_items: Json
+          p_notes: string
           p_pickup_time?: string
-          p_source?: string
-          p_table?: string
+          p_source: string
+          p_table: string
           p_tenant_id: string
         }
         Returns: Json

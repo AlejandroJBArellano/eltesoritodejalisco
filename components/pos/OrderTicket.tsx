@@ -7,7 +7,17 @@ interface OrderTicketProps {
 }
 
 export function OrderTicket({ order }: OrderTicketProps) {
-  const { id: tenantId, name, system_name, rfc, postal_code, regimen_fiscal } = useTenant();
+  const {
+    id: tenantId,
+    name,
+    system_name,
+    rfc,
+    postal_code,
+    regimen_fiscal,
+    slug,
+    google_reviews_url,
+    ticket_footer_text,
+  } = useTenant();
 
   const formatDate = (date: Date | string) => {
     const dateStr =
@@ -27,6 +37,9 @@ export function OrderTicket({ order }: OrderTicketProps) {
   const iva = total - subtotal;
   const tipAmount = getOrderTipAmount(order);
   const finalTotal = total + tipAmount;
+
+  const pickupUrl = `https://${slug || tenantId}.trykittn.com`;
+  const reviewsUrl = google_reviews_url?.trim() || null;
 
   return (
     <div className="ticket-container bg-white p-4 w-[80mm] mx-auto text-black font-mono text-sm border shadow-sm">
@@ -59,7 +72,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
           {order.orderItems.map((item) => (
             <tr key={item.id} className="align-top">
               <td className="pr-2">{item.quantity}</td>
-              <td className="whitespace-normal break-words">{item.menuItem.name}</td>
+              <td className="whitespace-normal wrap-break-word">{item.menuItem.name}</td>
               <td className="text-right pl-2">
                 ${(item.quantity * item.unitPrice).toFixed(2)}
               </td>
@@ -90,21 +103,85 @@ export function OrderTicket({ order }: OrderTicketProps) {
         <p className="text-xs font-bold">Venta al público en general</p>
         <p className="text-xs mt-2">¡Gracias por su preferencia!</p>
 
-        <div className="border-t border-dashed border-gray-300 mt-4 pt-4 flex flex-col items-center justify-center">
-          <p className="text-xs font-bold text-gray-800">Powered by Kittn</p>
-          <p className="text-[10px] text-gray-500 mb-2">Get Yours at trykittn.com</p>
-          <div className="bg-white p-1.5 border border-gray-200 rounded-sm shadow-sm">
-            <img
-              data-testid="qr-code"
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&ecc=M&data=${encodeURIComponent(
-                `https://trykittn.com?ref=pos_${order.id}_${tenantId}`
-              )}`}
-              alt="Kittn QR Code"
-              width={80}
-              height={80}
-              className="w-[80px] h-[80px]"
-            />
-          </div>
+        <div className="border-t border-dashed border-gray-300 mt-4 pt-4">
+          {reviewsUrl ? (
+            /* Dual QR Layout: Side by Side */
+            <div className="flex items-start justify-around gap-2 mb-3">
+              {/* QR 1: Menú en Línea */}
+              <div className="flex flex-col items-center flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-1">
+                  Pide en Línea
+                </p>
+                <div className="bg-white p-1 border border-gray-200 rounded-sm shadow-sm inline-block">
+                  <img
+                    data-testid="qr-pickup"
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=70x70&ecc=M&data=${encodeURIComponent(
+                      pickupUrl
+                    )}`}
+                    alt="Menú Digital Pickup"
+                    width={70}
+                    height={70}
+                    className="size-17.5"
+                  />
+                </div>
+                <p className="text-[9px] text-gray-500 mt-1">Menú Digital</p>
+              </div>
+
+              {/* QR 2: Califícanos */}
+              <div className="flex flex-col items-center flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-1">
+                  Califícanos
+                </p>
+                <div className="bg-white p-1 border border-gray-200 rounded-sm shadow-sm inline-block">
+                  <img
+                    data-testid="qr-reviews"
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=70x70&ecc=M&data=${encodeURIComponent(
+                      reviewsUrl
+                    )}`}
+                    alt="Google Reviews"
+                    width={70}
+                    height={70}
+                    className="size-17.5"
+                  />
+                </div>
+                <p className="text-[9px] text-gray-500 mt-1">Google Maps</p>
+              </div>
+            </div>
+          ) : (
+            /* Single Centered QR Layout: Menú Digital */
+            <div className="flex flex-col items-center justify-center mb-3">
+              <p className="text-[11px] font-bold uppercase tracking-wider mb-1">
+                Pide en Línea
+              </p>
+              <div className="bg-white p-1.5 border border-gray-200 rounded-sm shadow-sm">
+                <img
+                  data-testid="qr-pickup"
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&ecc=M&data=${encodeURIComponent(
+                    pickupUrl
+                  )}`}
+                  alt="Menú Digital Pickup"
+                  width={80}
+                  height={80}
+                  className="size-20"
+                />
+              </div>
+              <p className="text-[10px] text-gray-500 mt-1">
+                {slug ? `${slug}.trykittn.com` : "Menú Digital & Pickup"}
+              </p>
+            </div>
+          )}
+
+          {/* Redes Sociales / Mensaje personalizado */}
+          {ticket_footer_text && (
+            <p className="text-xs font-bold text-gray-800 mt-2 px-1 text-center whitespace-pre-wrap wrap-break-word">
+              {ticket_footer_text}
+            </p>
+          )}
+
+          {/* Mención discreta de la plataforma */}
+          <p className="text-[9px] text-gray-400 mt-3 text-center">
+            Powered by Kittn • trykittn.com
+          </p>
         </div>
       </div>
 
