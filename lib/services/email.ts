@@ -495,3 +495,234 @@ export async function sendLowStockAlertEmail(params: LowStockEmailParams) {
     return { success: false, error: err };
   }
 }
+
+/**
+ * Helper to build the customer pickup URL for a tenant.
+ */
+export function getTenantPickupUrl(slug: string, path = ""): string {
+  const isLocal =
+    process.env.NODE_ENV === "development" ||
+    (typeof window !== "undefined" &&
+      window.location &&
+      window.location.hostname.includes("localhost") &&
+      process.env.NODE_ENV !== "production");
+
+  if (isLocal) {
+    return `http://${slug}.localhost:5173${path}`;
+  }
+  return `https://${slug}.trykittn.com${path}`;
+}
+
+export interface CustomerOrderEmailParams {
+  tenant: TenantEmailInfo;
+  orderId: string;
+  orderNumber: string | number;
+  customerName?: string | null;
+  customerEmail: string;
+  type: string; // 'takeout' | 'dine-in'
+  table?: string;
+  pickupTime?: string | null;
+  items: OrderItemEmailData[];
+  subtotal: number;
+  tipAmount: number;
+  total: number;
+}
+
+/**
+ * Sends a friendly branded confirmation email to the customer with live tracking link.
+ */
+export async function sendCustomerOrderConfirmationEmail(params: CustomerOrderEmailParams) {
+  const {
+    tenant,
+    orderId,
+    orderNumber,
+    customerName,
+    customerEmail,
+    type,
+    table,
+    pickupTime,
+    items,
+    subtotal,
+    tipAmount,
+    total,
+  } = params;
+
+  if (!customerEmail || !customerEmail.includes("@")) {
+    return { success: false, reason: "invalid_email" };
+  }
+
+  const tenantName = tenant.name || tenant.system_name || "Kittn";
+  const primaryColor = tenant.primary_color || "#FFB7CE";
+  const primaryTextColor = getContrastTextColor(primaryColor);
+  const logoUrl = tenant.logo_url;
+
+  const serviceLabel = type === "dine-in" ? "Comer Aquí" : "Para Llevar";
+  const formattedPickupTime = pickupTime
+    ? new Date(pickupTime).toLocaleString("es-MX", {
+        timeZone: "America/Mexico_City",
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+
+  const trackingUrl = getTenantPickupUrl(tenant.slug, `/?order_id=${orderId}`);
+
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(amount);
+
+  const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirmación de tu Pedido #${orderNumber} — ${tenantName}</title>
+</head>
+<body style="margin:0;padding:0;background:#0f0f11;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#f4f4f5;">
+  <div style="max-width:540px;margin:30px auto;background:#18181b;border-radius:24px;overflow:hidden;border:1px solid #27272a;box-shadow:0 10px 30px rgba(0,0,0,0.4);">
+    
+    <!-- Header with Branding -->
+    <div style="background:#202024;border-bottom:1px solid #2e2e33;padding:28px 24px;text-align:center;">
+      ${
+        logoUrl
+          ? `<img src="${logoUrl}" alt="${tenantName}" style="height:50px;max-width:140px;object-fit:contain;border-radius:12px;margin-bottom:16px;" />`
+          : ""
+      }
+      <div style="display:inline-block;margin-bottom:8px;">
+        <span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.08em;color:${primaryColor};background:${primaryColor}18;padding:4px 12px;border-radius:20px;border:1px solid ${primaryColor}44;">
+          ✅ Pedido Confirmado
+        </span>
+      </div>
+      <h1 style="margin:8px 0 4px;font-size:24px;font-weight:900;color:#ffffff;letter-spacing:-0.02em;">
+        ¡Gracias por tu compra${customerName ? `, ${customerName}` : ""}!
+      </h1>
+      <p style="margin:0;font-size:13px;color:#a1a1aa;">
+        Folio <strong style="color:#ffffff;">#${orderNumber}</strong> en ${tenantName}
+      </p>
+    </div>
+
+    <!-- Live Tracking CTA -->
+    <div style="padding:24px 24px 12px;text-align:center;">
+      <a href="${trackingUrl}" target="_blank" style="display:block;background:${primaryColor};color:${primaryTextColor};text-decoration:none;font-weight:900;font-size:14px;padding:16px 24px;border-radius:16px;box-shadow:0 6px 20px ${primaryColor}40;letter-spacing:-0.01em;">
+        📍 Ver estado de mi pedido en vivo →
+      </a>
+    </div>
+
+    <!-- Order Info Card -->
+    <div style="padding:12px 24px 16px;">
+      <div style="background:#202024;border:1px solid #2e2e33;border-radius:16px;padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#71717a;display:block;margin-bottom:2px;">Modalidad</span>
+          <strong style="font-size:13px;color:#f4f4f5;">${serviceLabel}</strong>
+        </div>
+        ${
+          formattedPickupTime
+            ? `
+        <div>
+          <span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#f59e0b;display:block;margin-bottom:2px;">Hora de recogida</span>
+          <strong style="font-size:13px;color:#fbbf24;">⏰ ${formattedPickupTime}</strong>
+        </div>`
+            : `
+        <div>
+          <span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#71717a;display:block;margin-bottom:2px;">Mesa / Destino</span>
+          <strong style="font-size:13px;color:#f4f4f5;">${table || "Mostrador"}</strong>
+        </div>`
+        }
+      </div>
+    </div>
+
+    <!-- Items Breakdown -->
+    <div style="padding:0 24px 16px;">
+      <h3 style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;color:#a1a1aa;margin:0 0 10px;">
+        Resumen de tu Orden
+      </h3>
+      <div style="border-radius:16px;overflow:hidden;border:1px solid #2e2e33;background:#202024;">
+        ${items
+          .map(
+            (item, idx) => `
+        <div style="padding:12px 16px;${idx < items.length - 1 ? "border-bottom:1px solid #2e2e33;" : ""}display:flex;align-items:flex-start;justify-content:space-between;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:12px;font-weight:900;color:${primaryColor};background:${primaryColor}18;padding:2px 6px;border-radius:6px;">
+                ${item.quantity}x
+              </span>
+              <strong style="font-size:13px;color:#ffffff;">${item.name}</strong>
+            </div>
+            ${
+              item.notes
+                ? `<p style="margin:3px 0 0 28px;font-size:11px;color:#a1a1aa;font-style:italic;">Notas: ${item.notes}</p>`
+                : ""
+            }
+          </div>
+          <span style="font-size:13px;font-weight:800;color:#f4f4f5;margin-left:12px;">
+            ${formatCurrency(item.unitPrice * item.quantity)}
+          </span>
+        </div>`,
+          )
+          .join("")}
+      </div>
+    </div>
+
+    <!-- Financial Totals -->
+    <div style="padding:0 24px 24px;">
+      <div style="background:#202024;border:1px solid #2e2e33;border-radius:16px;padding:14px 18px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#a1a1aa;margin-bottom:6px;">
+          <span>Subtotal</span>
+          <span style="color:#d4d4d8;">${formatCurrency(subtotal)}</span>
+        </div>
+        ${
+          tipAmount > 0
+            ? `
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#a1a1aa;margin-bottom:6px;">
+          <span>Propina</span>
+          <span style="color:#34d399;font-weight:700;">+ ${formatCurrency(tipAmount)}</span>
+        </div>`
+            : ""
+        }
+        <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:900;color:#ffffff;border-top:1px solid #2e2e33;padding-top:8px;margin-top:4px;">
+          <span>Total Pagado</span>
+          <span style="color:${primaryColor};">${formatCurrency(total + tipAmount)}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background:#202024;border-top:1px solid #2e2e33;padding:18px 24px;text-align:center;">
+      <p style="margin:0;font-size:11px;color:#71717a;">
+        Este recibo fue generado automáticamente para tu compra en <strong>${tenantName}</strong> a través de Kittn Pickup.
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
+`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `${tenantName} <${ORDERS_FROM}>`,
+      to: [customerEmail],
+      subject: `Confirmación de pedido #${orderNumber} — ${tenantName}`,
+      html,
+    });
+
+    if (error) {
+      console.error("[Email Customer Confirmation] Resend API error:", error);
+      return { success: false, error };
+    }
+
+    console.log(
+      `[Email Customer Confirmation] Sent confirmation email for order #${orderNumber} to ${customerEmail} (ID: ${data?.id})`,
+    );
+    return { success: true, id: data?.id };
+  } catch (err) {
+    console.error("[Email Customer Confirmation] Unexpected error:", err);
+    return { success: false, error: err };
+  }
+}

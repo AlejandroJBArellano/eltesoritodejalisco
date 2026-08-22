@@ -1,4 +1,7 @@
-import { sendNewOrderNotificationEmail } from "@/lib/services/email";
+import {
+  sendCustomerOrderConfirmationEmail,
+  sendNewOrderNotificationEmail,
+} from "@/lib/services/email";
 import { deductInventoryForOrder } from "@/lib/services/inventory";
 import { sendTenantPushNotification } from "@/lib/services/push";
 import { stripe } from "@/lib/stripe";
@@ -378,7 +381,27 @@ export async function POST(request: NextRequest) {
         console.error("[Stripe Webhook] Failed to send new order email:", emailErr);
       });
 
-      // 8. Trigger Web Push notification to kitchen tablets, POS, and managers (non-blocking)
+      // 8. Trigger async confirmation email to the customer (non-blocking)
+      if (email && email.includes("@")) {
+        sendCustomerOrderConfirmationEmail({
+          tenant: tenantData!,
+          orderId: order.id,
+          orderNumber,
+          customerName,
+          customerEmail: email,
+          type,
+          table: type === "dine-in" ? "Comer Aquí" : "Para Llevar",
+          pickupTime,
+          items: itemsForEmail,
+          subtotal,
+          tipAmount,
+          total,
+        }).catch((custEmailErr) => {
+          console.error("[Stripe Webhook] Failed to send customer confirmation email:", custEmailErr);
+        });
+      }
+
+      // 9. Trigger Web Push notification to kitchen tablets, POS, and managers (non-blocking)
       const serviceMode = type === "dine-in" ? "Comer Aquí" : "Para Llevar";
       const itemsBrief = itemsForEmail
         .map((i) => `${i.quantity}x ${i.name}`)
