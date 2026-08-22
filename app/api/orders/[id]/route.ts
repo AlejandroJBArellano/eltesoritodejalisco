@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
@@ -16,7 +17,7 @@ export async function GET(
   try {
     const { id } = await params;
     const tenant = await getTenantContext();
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data: order, error } = await supabase
       .from("orders")
