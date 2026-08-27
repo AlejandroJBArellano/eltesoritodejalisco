@@ -108,6 +108,7 @@ export default function ReportsPage() {
   ) => {
     try {
       setIsLoading(true);
+      setErrorMessage(null);
       setSelectedDay(null);
       let url = `/api/reports?period=${p}`;
       if (p === "custom") {
@@ -115,8 +116,10 @@ export default function ReportsPage() {
         if (endDateStr) url += `&endDate=${endDateStr}`;
       }
       const response = await fetch(url);
-      if (!response.ok) throw new Error("Error al cargar reportes");
       const json = await response.json();
+      if (!response.ok) {
+        throw new Error(json.error || "Error al cargar reportes");
+      }
       setData(json);
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : "Error desconocido");
@@ -339,13 +342,13 @@ export default function ReportsPage() {
               </div>
               <p className="mt-3 text-3xl font-black text-text-light tracking-tight">
                 $
-                {data.summary.totalSales.toLocaleString(undefined, {
+                {(data.summary?.totalSales || 0).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </p>
               <p className="mt-1 text-xs text-text-light/40 font-medium">
-                Total ingresado a caja ({data.summary.totalOrders} órdenes)
+                Total ingresado a caja ({data.summary?.totalOrders || 0} órdenes)
               </p>
             </div>
 
@@ -361,7 +364,7 @@ export default function ReportsPage() {
               </div>
               <p className="mt-3 text-3xl font-black text-red-400 tracking-tight">
                 -$
-                {(data.summary.totalExpenses || 0).toLocaleString(undefined, {
+                {(data.summary?.totalExpenses || 0).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
@@ -407,7 +410,7 @@ export default function ReportsPage() {
               </div>
               <p className="mt-3 text-3xl font-black text-text-light tracking-tight">
                 $
-                {data.summary.averageTicket.toLocaleString(undefined, {
+                {(data.summary?.averageTicket || 0).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
@@ -428,7 +431,7 @@ export default function ReportsPage() {
                 </div>
               </div>
               <p className="mt-3 text-3xl font-black text-text-light tracking-tight">
-                {Math.round(data.summary.averageCompletionTimeMinutes)}{" "}
+                {Math.round(data.summary?.averageCompletionTimeMinutes || 0)}{" "}
                 <span className="text-sm font-bold text-text-light/50 uppercase">
                   min
                 </span>
@@ -449,7 +452,7 @@ export default function ReportsPage() {
                 </div>
               </div>
               <p className="mt-3 text-3xl font-black text-text-light tracking-tight">
-                {data.customers.newCustomersCount}
+                {data.customers?.newCustomersCount ?? 0}
               </p>
               <p className="mt-1 text-xs text-text-light/40 font-medium">
                 Registrados en el período
@@ -468,7 +471,7 @@ export default function ReportsPage() {
               </div>
               <p className="mt-3 text-3xl font-black text-amber-400 tracking-tight">
                 $
-                {(data.summary.totalUncollected || 0).toLocaleString(
+                {(data.summary?.totalUncollected || 0).toLocaleString(
                   undefined,
                   { minimumFractionDigits: 2, maximumFractionDigits: 2 },
                 )}
@@ -490,7 +493,7 @@ export default function ReportsPage() {
               </div>
               <p className="mt-3 text-3xl font-black text-text-light tracking-tight">
                 $
-                {(data.summary.totalTips || 0).toLocaleString(undefined, {
+                {(data.summary?.totalTips || 0).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
@@ -822,7 +825,7 @@ export default function ReportsPage() {
             </div>
 
             <div className="space-y-4">
-              {data.topSellingItems.map((item, index) => {
+              {(data.topSellingItems || []).map((item, index) => {
                 const badgeColor =
                   index === 0
                     ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
@@ -852,13 +855,13 @@ export default function ReportsPage() {
                         {item.quantity} vendidos
                       </p>
                       <p className="text-xs font-bold text-emerald-400">
-                        ${item.revenue.toFixed(2)}
+                        ${(item.revenue || 0).toFixed(2)}
                       </p>
                     </div>
                   </div>
                 );
               })}
-              {data.topSellingItems.length === 0 && (
+              {(!data.topSellingItems || data.topSellingItems.length === 0) && (
                 <p className="py-8 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest">
                   No hay ventas registradas aún.
                 </p>
@@ -876,7 +879,7 @@ export default function ReportsPage() {
             </div>
 
             <div className="space-y-4">
-              {Object.entries(data.salesBySource).map(([source, stats]) => (
+              {Object.entries(data.salesBySource || {}).map(([source, stats]) => (
                 <div
                   key={source}
                   className="p-4 rounded-xl bg-dark/40 border border-border flex items-center justify-between"
@@ -897,14 +900,14 @@ export default function ReportsPage() {
                   <div className="text-right">
                     <p className="text-base font-black text-text-light">
                       $
-                      {stats.total.toLocaleString(undefined, {
+                      {(stats.total || 0).toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                       })}
                     </p>
                   </div>
                 </div>
               ))}
-              {Object.keys(data.salesBySource).length === 0 && (
+              {Object.keys(data.salesBySource || {}).length === 0 && (
                 <p className="py-8 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest">
                   No hay fuentes registradas.
                 </p>
@@ -938,32 +941,46 @@ export default function ReportsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {data.customers.topCustomers.map((customer, index) => (
-                  <tr
-                    key={index}
-                    className="hover:bg-white/2 transition-colors"
-                  >
-                    <td className="py-3.5 px-3">
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-xs font-black text-primary">
-                          {customer.name.substring(0, 2).toUpperCase()}
+                {(data.customers?.topCustomers || []).map((customer, index) => {
+                  const name = customer.name || "Cliente";
+                  const totalSpend =
+                    customer.totalSpend ??
+                    (customer as unknown as { total_spend?: number }).total_spend ??
+                    0;
+                  const loyaltyPoints =
+                    customer.loyaltyPoints ??
+                    (customer as unknown as { loyalty_points?: number })
+                      .loyalty_points ??
+                    0;
+
+                  return (
+                    <tr
+                      key={index}
+                      className="hover:bg-white/2 transition-colors"
+                    >
+                      <td className="py-3.5 px-3">
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-xs font-black text-primary">
+                            {name.substring(0, 2).toUpperCase()}
+                          </span>
+                          <span className="font-bold text-text-light uppercase">
+                            {name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-3 text-right text-base font-black text-emerald-400">
+                        ${totalSpend.toFixed(2)}
+                      </td>
+                      <td className="py-3.5 px-3 text-right">
+                        <span className="inline-flex items-center rounded-full bg-purple-500/10 px-3 py-1 text-xs font-black text-purple-400 uppercase tracking-widest border border-purple-500/20">
+                          {loyaltyPoints} pts
                         </span>
-                        <span className="font-bold text-text-light uppercase">
-                          {customer.name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-3 text-right text-base font-black text-emerald-400">
-                      ${customer.totalSpend.toFixed(2)}
-                    </td>
-                    <td className="py-3.5 px-3 text-right">
-                      <span className="inline-flex items-center rounded-full bg-purple-500/10 px-3 py-1 text-xs font-black text-purple-400 uppercase tracking-widest border border-purple-500/20">
-                        {customer.loyaltyPoints} pts
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {data.customers.topCustomers.length === 0 && (
+                      </td>
+                    </tr>
+                  );
+                })}
+                {(!data.customers?.topCustomers ||
+                  data.customers.topCustomers.length === 0) && (
                   <tr>
                     <td
                       colSpan={3}
