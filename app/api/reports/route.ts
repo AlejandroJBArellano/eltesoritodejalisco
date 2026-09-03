@@ -177,6 +177,7 @@ export async function GET(request: NextRequest) {
         totalUncollected,
       },
       salesByDay: salesMetrics.salesByDay,
+      ordersByDay: salesMetrics.ordersByDay,
       itemsByDay: salesMetrics.itemsByDay,
       salesBySource: salesMetrics.salesBySource,
       topSellingItems: salesMetrics.topSellingItems,

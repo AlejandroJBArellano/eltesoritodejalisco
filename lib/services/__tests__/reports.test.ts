@@ -166,6 +166,7 @@ describe("lib/services/reports", () => {
       expect(metrics.averageTicket).toBe(175);
       expect(metrics.averageCompletionTimeMinutes).toBe(12.5); // (15 + 10) / 2
       expect(metrics.salesByDay["2026-08-27"]).toBe(350);
+      expect(metrics.ordersByDay["2026-08-27"]).toBe(2);
       expect(metrics.salesBySource["Comedor"]).toEqual({ count: 1, total: 250 });
       expect(metrics.salesBySource["Pickup"]).toEqual({ count: 1, total: 100 });
 

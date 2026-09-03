@@ -52,6 +52,7 @@ type ReportData = {
     totalUncollected: number;
   };
   salesByDay: Record<string, number>;
+  ordersByDay?: Record<string, number>;
   itemsByDay: Record<
     string,
     { name: string; quantity: number; revenue: number }[]
@@ -85,13 +86,67 @@ const PERIOD_LABELS: Record<Period, string> = {
   custom: "Personalizado",
 };
 
-const PRODUCT_SALES_EXPORT_COLUMNS: ExportColumn<ProductSaleItem>[] = [
+export interface DailySaleExportItem {
+  date: string;
+  dayOfWeek: string;
+  totalSales: number;
+  totalOrders: number;
+  averageTicket: number;
+  topProduct: string;
+  percentageOfPeriod: number;
+}
+
+export const DAILY_SALES_EXPORT_COLUMNS: ExportColumn<DailySaleExportItem>[] = [
+  { header: "Fecha", key: "date" },
+  { header: "Día de la Semana", key: "dayOfWeek" },
+  {
+    header: "Ventas Totales",
+    accessor: (d) => `$${d.totalSales.toFixed(2)}`,
+  },
+  { header: "Órdenes", key: "totalOrders" },
+  {
+    header: "Ticket Promedio",
+    accessor: (d) => `$${d.averageTicket.toFixed(2)}`,
+  },
+  { header: "Producto Estrella", key: "topProduct" },
+  {
+    header: "% del Total",
+    accessor: (d) => `${d.percentageOfPeriod.toFixed(1)}%`,
+  },
+];
+
+export interface EnrichedProductSaleItem extends ProductSaleItem {
+  rank?: number;
+  averageUnitPrice?: number;
+  percentageOfTotal?: number;
+}
+
+export const PRODUCT_SALES_EXPORT_COLUMNS: ExportColumn<EnrichedProductSaleItem>[] = [
+  {
+    header: "Ranking",
+    accessor: (p) => (p.rank ? `#${p.rank}` : "-"),
+  },
   { header: "Producto", key: "name" },
-  { header: "Categoría", key: "category" },
+  { header: "Categoría", accessor: (p) => p.category || "General" },
   { header: "Unidades Vendidas", key: "quantity" },
   {
-    header: "Ingresos",
+    header: "Precio Promedio",
+    accessor: (p) => {
+      const avg =
+        p.averageUnitPrice ?? (p.quantity > 0 ? p.revenue / p.quantity : 0);
+      return `$${avg.toFixed(2)}`;
+    },
+  },
+  {
+    header: "Ingresos Totales",
     accessor: (p) => `$${p.revenue.toFixed(2)}`,
+  },
+  {
+    header: "% Participación",
+    accessor: (p) =>
+      typeof p.percentageOfTotal === "number"
+        ? `${p.percentageOfTotal.toFixed(1)}%`
+        : "-",
   },
 ];
 
@@ -189,6 +244,54 @@ export default function ReportsPage() {
     }));
   }, [data]);
 
+  const dailySalesData = useMemo<DailySaleExportItem[]>(() => {
+    if (!data?.salesByDay) return [];
+    const totalPeriodSales = data.summary?.totalSales || 0;
+    const sortedDates = Object.keys(data.salesByDay).sort();
+
+    return sortedDates.map((date) => {
+      const totalSales = Number(data.salesByDay[date] || 0);
+      const totalOrders = Number(data.ordersByDay?.[date] || 0);
+      const averageTicket =
+        totalOrders > 0 ? totalSales / totalOrders : totalSales;
+
+      const dayDate = new Date(`${date}T12:00:00-06:00`);
+      const rawDay = dayDate.toLocaleDateString("es-MX", {
+        weekday: "long",
+        timeZone: "America/Mexico_City",
+      });
+      const dayOfWeek = rawDay.charAt(0).toUpperCase() + rawDay.slice(1);
+
+      const topItem = data.itemsByDay?.[date]?.[0];
+      const topProduct = topItem
+        ? `${topItem.name} (${topItem.quantity} u.)`
+        : "N/A";
+      const percentageOfPeriod =
+        totalPeriodSales > 0 ? (totalSales / totalPeriodSales) * 100 : 0;
+
+      return {
+        date,
+        dayOfWeek,
+        totalSales,
+        totalOrders,
+        averageTicket,
+        topProduct,
+        percentageOfPeriod,
+      };
+    });
+  }, [data]);
+
+  const enrichedProductSales = useMemo<EnrichedProductSaleItem[]>(() => {
+    if (!data?.productSales) return [];
+    const totalSales = data.summary?.totalSales || 0;
+    return data.productSales.map((p, index) => ({
+      ...p,
+      rank: index + 1,
+      averageUnitPrice: p.quantity > 0 ? p.revenue / p.quantity : 0,
+      percentageOfTotal: totalSales > 0 ? (p.revenue / totalSales) * 100 : 0,
+    }));
+  }, [data]);
+
   const selectedDayItems = useMemo(() => {
     if (!selectedDay || !data?.itemsByDay) return [];
     return data.itemsByDay[selectedDay] || [];
@@ -269,13 +372,20 @@ export default function ReportsPage() {
         subtitle={`Análisis financiero y métricas de desempeño (${PERIOD_LABELS[period]})`}
         badgeColor="bg-primary"
         actions={
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
             <ExportButton
-              data={data.productSales || []}
+              data={dailySalesData}
+              columns={DAILY_SALES_EXPORT_COLUMNS}
+              filename={() => `ventas_diarias_${period}_${new Date().toISOString().split("T")[0]}`}
+              sheetName="Ventas Diarias"
+              label="Exportar Ventas Diarias"
+            />
+            <ExportButton
+              data={enrichedProductSales}
               columns={PRODUCT_SALES_EXPORT_COLUMNS}
               filename={() => `ventas_productos_${period}_${new Date().toISOString().split("T")[0]}`}
               sheetName="Ventas por Producto"
-              label="Exportar Ventas"
+              label="Exportar Productos"
             />
             <button
               onClick={() => window.print()}
@@ -547,19 +657,30 @@ export default function ReportsPage() {
 
         {/* Section: Interactive Sales Chart (Ventas por Día) */}
         <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
-          <div className="mb-6 flex items-center justify-between border-b border-border pb-3">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
             <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-secondary"></span>
               Tendencia de Ventas por Día
             </h2>
-            {selectedDay && (
-              <button
-                onClick={() => setSelectedDay(null)}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-wider active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none rounded"
-              >
-                <X className="h-3.5 w-3.5" /> Cerrar filtro diario
-              </button>
-            )}
+            <div className="flex items-center gap-2.5">
+              {dailySalesData.length > 0 && (
+                <ExportButton
+                  data={dailySalesData}
+                  columns={DAILY_SALES_EXPORT_COLUMNS}
+                  filename={() => `ventas_diarias_${period}_${new Date().toISOString().split("T")[0]}`}
+                  sheetName="Ventas Diarias"
+                  label="Exportar Días"
+                />
+              )}
+              {selectedDay && (
+                <button
+                  onClick={() => setSelectedDay(null)}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-wider active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none rounded"
+                >
+                  <X className="h-3.5 w-3.5" /> Cerrar filtro diario
+                </button>
+              )}
+            </div>
           </div>
 
           <p className="text-xs text-text-light/60 mb-6 font-medium">

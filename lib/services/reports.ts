@@ -150,6 +150,7 @@ export function aggregateSalesData(orders: RawReportOrder[] | null | undefined) 
       : 0;
 
   const salesByDay: Record<string, number> = {};
+  const ordersByDay: Record<string, number> = {};
   const itemsByDay: Record<
     string,
     Record<string, { name: string; quantity: number; revenue: number }>
@@ -171,6 +172,7 @@ export function aggregateSalesData(orders: RawReportOrder[] | null | undefined) 
     if (!order.created_at) return;
     const date = getMexicoDateStr(new Date(order.created_at));
     salesByDay[date] = (salesByDay[date] || 0) + Number(order.total || 0);
+    ordersByDay[date] = (ordersByDay[date] || 0) + 1;
 
     const source = order.source || "Desconocido";
     if (!salesBySource[source]) {
@@ -247,6 +249,7 @@ export function aggregateSalesData(orders: RawReportOrder[] | null | undefined) 
     averageTicket,
     averageCompletionTimeMinutes,
     salesByDay,
+    ordersByDay,
     itemsByDay: itemsByDaySorted,
     salesBySource,
     productSales,
