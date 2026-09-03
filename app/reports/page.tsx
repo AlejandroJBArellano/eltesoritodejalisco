@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/PageHeader";
+import { ExportButton, type ExportColumn } from "@/components/ui/DataTableControls";
 import {
   AlertTriangle,
   Award,
@@ -83,6 +84,36 @@ const PERIOD_LABELS: Record<Period, string> = {
   last_month: "Mes Anterior",
   custom: "Personalizado",
 };
+
+const PRODUCT_SALES_EXPORT_COLUMNS: ExportColumn<ProductSaleItem>[] = [
+  { header: "Producto", key: "name" },
+  { header: "Categoría", key: "category" },
+  { header: "Unidades Vendidas", key: "quantity" },
+  {
+    header: "Ingresos",
+    accessor: (p) => `$${p.revenue.toFixed(2)}`,
+  },
+];
+
+type TopCustomerExport = {
+  name?: string;
+  totalSpend?: number;
+  total_spend?: number;
+  loyaltyPoints?: number;
+  loyalty_points?: number;
+};
+
+const TOP_CUSTOMERS_EXPORT_COLUMNS: ExportColumn<TopCustomerExport>[] = [
+  { header: "Cliente", accessor: (c) => c.name || "Cliente" },
+  {
+    header: "Gasto Total",
+    accessor: (c) => `$${Number(c.totalSpend ?? c.total_spend ?? 0).toFixed(2)}`,
+  },
+  {
+    header: "Puntos Lealtad",
+    accessor: (c) => c.loyaltyPoints ?? c.loyalty_points ?? 0,
+  },
+];
 
 export default function ReportsPage() {
   const [data, setData] = useState<ReportData | null>(null);
@@ -238,12 +269,21 @@ export default function ReportsPage() {
         subtitle={`Análisis financiero y métricas de desempeño (${PERIOD_LABELS[period]})`}
         badgeColor="bg-primary"
         actions={
-          <button
-            onClick={() => window.print()}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition-all shadow-lg shadow-primary/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
-          >
-            <Printer className="h-4 w-4" /> Imprimir / PDF
-          </button>
+          <div className="flex items-center gap-2.5">
+            <ExportButton
+              data={data.productSales || []}
+              columns={PRODUCT_SALES_EXPORT_COLUMNS}
+              filename={() => `ventas_productos_${period}_${new Date().toISOString().split("T")[0]}`}
+              sheetName="Ventas por Producto"
+              label="Exportar Ventas"
+            />
+            <button
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition-all shadow-lg shadow-primary/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+            >
+              <Printer className="h-4 w-4" /> Imprimir / PDF
+            </button>
+          </div>
         }
       />
 
@@ -923,6 +963,12 @@ export default function ReportsPage() {
               <Users className="h-5 w-5 text-primary" />
               Mejores Clientes
             </h2>
+            <ExportButton
+              data={data.customers?.topCustomers || []}
+              columns={TOP_CUSTOMERS_EXPORT_COLUMNS}
+              filename={() => `mejores_clientes_${period}_${new Date().toISOString().split("T")[0]}`}
+              sheetName="Mejores Clientes"
+            />
           </div>
 
           <div className="overflow-x-auto">

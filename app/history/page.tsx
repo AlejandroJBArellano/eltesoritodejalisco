@@ -80,6 +80,8 @@ import {
 import {
   TableHeaderSortCell,
   TablePagination,
+  ExportButton,
+  type ExportColumn,
 } from "@/components/ui/DataTableControls";
 import { usePendingCut } from "@/hooks/usePendingCut";
 import { createClient } from "@/lib/supabase/client";
@@ -139,6 +141,77 @@ type DailyCut = {
   expenses_detail: ExpenseDetailItem[] | null;
   created_at: string;
 };
+
+const ORDERS_EXPORT_COLUMNS: ExportColumn<Order>[] = [
+  { header: "Folio", key: "orderNumber" },
+  {
+    header: "Fecha",
+    accessor: (o) =>
+      o.createdAt
+        ? new Date(o.createdAt).toLocaleString("es-MX", {
+            timeZone: "America/Mexico_City",
+          })
+        : "N/A",
+  },
+  {
+    header: "Mesa/Tipo",
+    accessor: (o) => o.table || (o.source === "PICKUP_APP" ? "Pickup" : "Para Llevar"),
+  },
+  {
+    header: "Método de Pago",
+    accessor: (o) => getOrderPaymentLabel(o),
+  },
+  {
+    header: "Subtotal",
+    accessor: (o) => `$${((o.total || 0) - (o.tax || 0)).toFixed(2)}`,
+  },
+  {
+    header: "IVA",
+    accessor: (o) => `$${(o.tax || 0).toFixed(2)}`,
+  },
+  {
+    header: "Propina",
+    accessor: (o) => `$${getOrderTipAmount(o).toFixed(2)}`,
+  },
+  {
+    header: "Total",
+    accessor: (o) => `$${(Number(o.total || 0) + getOrderTipAmount(o)).toFixed(2)}`,
+  },
+  { header: "Estado", key: "status" },
+  {
+    header: "Productos",
+    accessor: (o) =>
+      o.orderItems
+        ?.map((i) => `${i.quantity}x ${i.menuItem?.name || "Producto"}`)
+        .join("; ") || "",
+  },
+];
+
+const DAILY_CUTS_EXPORT_COLUMNS: ExportColumn<DailyCut>[] = [
+  { header: "Fecha", key: "cut_date" },
+  { header: "Órdenes", key: "total_orders" },
+  {
+    header: "Venta Bruta",
+    accessor: (c) =>
+      `$${(Number(c.venta_neta || 0) + Number(c.iva_acumulado || 0)).toFixed(2)}`,
+  },
+  {
+    header: "Venta Neta",
+    accessor: (c) => `$${Number(c.venta_neta || 0).toFixed(2)}`,
+  },
+  {
+    header: "IVA",
+    accessor: (c) => `$${Number(c.iva_acumulado || 0).toFixed(2)}`,
+  },
+  {
+    header: "Gastos",
+    accessor: (c) => `-$${Number(c.total_gastos || 0).toFixed(2)}`,
+  },
+  {
+    header: "Utilidad Final",
+    accessor: (c) => `$${Number(c.utilidad_final || 0).toFixed(2)}`,
+  },
+];
 
 export default function HistoryPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -1320,10 +1393,20 @@ export default function HistoryPage() {
         {/* ARCHIVO DE CORTES */}
         {showCutsArchive && (
           <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
-            <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2 border-b border-border pb-3">
-              <Folder className="h-5 w-5 text-blue-400" />
-              Archivo de Cortes Diarios
-            </h2>
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
+                <Folder className="h-5 w-5 text-blue-400" />
+                Archivo de Cortes Diarios
+              </h2>
+              {dailyCuts.length > 0 && (
+                <ExportButton
+                  data={sortedDailyCuts}
+                  columns={DAILY_CUTS_EXPORT_COLUMNS}
+                  filename={() => `cortes_diarios_${new Date().toISOString().split("T")[0]}`}
+                  sheetName="Cortes Diarios"
+                />
+              )}
+            </div>
 
             {isLoadingCuts ? (
               <p className="text-xs text-text-light/50 font-bold italic py-4">
@@ -1624,10 +1707,18 @@ export default function HistoryPage() {
               <span className="h-2 w-2 rounded-full bg-success"></span>
               Registros de Órdenes
             </h2>
-            <span className="text-xs font-bold text-text-light/50 uppercase tracking-widest">
-              Mostrando {filteredOrders.length} orden
-              {filteredOrders.length !== 1 ? "es" : ""}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-text-light/50 uppercase tracking-widest hidden sm:inline">
+                Mostrando {filteredOrders.length} orden
+                {filteredOrders.length !== 1 ? "es" : ""}
+              </span>
+              <ExportButton
+                data={sortedOrders}
+                columns={ORDERS_EXPORT_COLUMNS}
+                filename={() => `ordenes_${new Date().toISOString().split("T")[0]}`}
+                sheetName="Órdenes"
+              />
+            </div>
           </div>
 
           <div className="overflow-x-auto space-y-4">

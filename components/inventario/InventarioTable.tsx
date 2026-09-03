@@ -1,19 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import {
-  Package,
-  ArrowUp,
-  ArrowDown,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
   SlidersHorizontal,
   Search,
   X,
 } from "lucide-react";
 import type { Ingredient } from "@/types";
 import { AjusteStockModal } from "./AjusteStockModal";
+import { ExportButton, type ExportColumn } from "@/components/ui/DataTableControls";
 
 type FilterType = "all" | "low" | "out";
 
@@ -22,6 +17,25 @@ function getStatus(ing: Ingredient): "out" | "low" | "ok" {
   if (ing.currentStock <= ing.minimumStock) return "low";
   return "ok";
 }
+
+const INVENTORY_EXPORT_COLUMNS: ExportColumn<Ingredient>[] = [
+  { header: "Ingrediente", key: "name" },
+  { header: "Unidad", key: "unit" },
+  { header: "Stock Actual", key: "currentStock" },
+  { header: "Stock Mínimo", key: "minimumStock" },
+  {
+    header: "Costo Unitario",
+    accessor: (i) => (i.costPerUnit ? `$${i.costPerUnit.toFixed(2)}` : "N/A"),
+  },
+  { header: "Tipo de Rastreo", key: "trackingType" },
+  {
+    header: "Estado",
+    accessor: (i) => {
+      const s = getStatus(i);
+      return s === "out" ? "Agotado" : s === "low" ? "Stock Bajo" : "Normal";
+    },
+  },
+];
 
 const STATUS_CONFIG = {
   out: {
@@ -161,25 +175,33 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
             ))}
           </div>
 
-          {/* Search */}
-          <div className="relative w-full sm:w-56">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-light/30" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar ingrediente..."
-              className="w-full rounded-xl border border-border bg-white/5 pl-8 pr-8 py-2 text-xs text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/30"
+          {/* Actions: Search & Export */}
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <div className="relative w-full sm:w-56">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-light/30" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar ingrediente..."
+                className="w-full rounded-xl border border-border bg-white/5 pl-8 pr-8 py-2 text-xs text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/30"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-text-light/30 hover:text-text-light transition-colors"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+            <ExportButton
+              data={filtered}
+              columns={INVENTORY_EXPORT_COLUMNS}
+              filename={() => `inventario_${new Date().toISOString().split("T")[0]}`}
+              sheetName="Inventario"
             />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-text-light/30 hover:text-text-light transition-colors"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
           </div>
         </div>
 

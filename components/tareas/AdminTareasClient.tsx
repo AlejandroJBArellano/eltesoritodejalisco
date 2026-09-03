@@ -21,6 +21,8 @@ import {
   TableSearchInput,
   TableHeaderSortCell,
   TablePagination,
+  ExportButton,
+  type ExportColumn,
 } from "@/components/ui/DataTableControls";
 import { CheckSquare, Plus, FolderPlus, Edit3, Trash2 } from "lucide-react";
 
@@ -30,6 +32,69 @@ type StaffPerformanceMetric = {
   completedCount: number;
   avgDurationMinutes: number;
 };
+
+const EXECUTIONS_EXPORT_COLUMNS: ExportColumn<TaskExecution>[] = [
+  { header: "Tarea", accessor: (e) => e.task?.name || e.task_id },
+  {
+    header: "Colaborador",
+    accessor: (e) => e.user?.full_name || "Sin Asignar",
+  },
+  {
+    header: "Hora Inicio",
+    accessor: (e) =>
+      e.start_time
+        ? new Date(e.start_time).toLocaleString("es-MX", {
+            timeZone: "America/Mexico_City",
+          })
+        : "N/A",
+  },
+  {
+    header: "Hora Fin",
+    accessor: (e) =>
+      e.end_time
+        ? new Date(e.end_time).toLocaleString("es-MX", {
+            timeZone: "America/Mexico_City",
+          })
+        : "N/A",
+  },
+  {
+    header: "Duración (min)",
+    accessor: (e) => {
+      if (!e.start_time || !e.end_time) return "N/A";
+      const diffMs =
+        new Date(e.end_time).getTime() - new Date(e.start_time).getTime();
+      return Math.round(diffMs / 60000);
+    },
+  },
+  { header: "Estado", key: "status" },
+  {
+    header: "Aprobada",
+    accessor: (e) => (e.approved_at ? "Sí" : "Pendiente"),
+  },
+];
+
+const PERFORMANCE_EXPORT_COLUMNS: ExportColumn<StaffPerformanceMetric>[] = [
+  { header: "Colaborador", key: "name" },
+  { header: "Tareas Completadas", key: "completedCount" },
+  {
+    header: "Duración Promedio (min)",
+    accessor: (m) => `${m.avgDurationMinutes} min`,
+  },
+];
+
+const TASKS_CONFIG_EXPORT_COLUMNS: ExportColumn<PrimordialTask>[] = [
+  { header: "Tarea", key: "name" },
+  { header: "Categoría", accessor: (t) => t.category?.name || "Sin Categoría" },
+  { header: "Frecuencia", key: "frequency_type" },
+  {
+    header: "Tiempo Límite",
+    accessor: (t) => `${t.timeout_minutes} min`,
+  },
+  {
+    header: "Requiere Foto",
+    accessor: (t) => (t.requires_photo ? "Sí" : "No"),
+  },
+];
 
 interface AdminTareasClientProps {
   initialExecutions: TaskExecution[];
@@ -466,11 +531,19 @@ export function AdminTareasClient({
               <span className="h-2 w-2 rounded-full bg-primary" />
               Ejecución de Tareas - {selectedDate}
             </h2>
-            {loading === "data" && (
-              <span className="text-xs text-primary animate-pulse font-bold">
-                Cargando...
-              </span>
-            )}
+            <div className="flex items-center gap-3">
+              {loading === "data" && (
+                <span className="text-xs text-primary animate-pulse font-bold">
+                  Cargando...
+                </span>
+              )}
+              <ExportButton
+                data={sortedExecutions}
+                columns={EXECUTIONS_EXPORT_COLUMNS}
+                filename={() => `ejecucion_tareas_${selectedDate}`}
+                sheetName="Ejecución de Tareas"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
@@ -651,9 +724,19 @@ export function AdminTareasClient({
       {/* TAB 2: RENDIMIENTO */}
       {activeTab === "performance" && (
         <div className="space-y-4 rounded-2xl bg-card p-6 border border-border">
-          <h2 className="text-base font-black text-white uppercase tracking-wider">
-            Resumen de Rendimiento de Personal - {selectedDate}
-          </h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+            <h2 className="text-base font-black text-white uppercase tracking-wider">
+              Resumen de Rendimiento de Personal - {selectedDate}
+            </h2>
+            {metrics.length > 0 && (
+              <ExportButton
+                data={metrics}
+                columns={PERFORMANCE_EXPORT_COLUMNS}
+                filename={() => `rendimiento_personal_${selectedDate}`}
+                sheetName="Rendimiento de Personal"
+              />
+            )}
+          </div>
           <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-left text-sm text-gray-300">
               <thead className="bg-dark/40 text-xs font-black text-white uppercase tracking-wider border-b border-border">
@@ -703,6 +786,12 @@ export function AdminTareasClient({
                 <span className="h-2 w-2 rounded-full bg-primary" />
                 Catálogo de Tareas Primordiales ({filteredTasks.length})
               </h2>
+              <ExportButton
+                data={sortedTasks}
+                columns={TASKS_CONFIG_EXPORT_COLUMNS}
+                filename={() => `catalogo_tareas_${new Date().toISOString().split("T")[0]}`}
+                sheetName="Tareas Primordiales"
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border">

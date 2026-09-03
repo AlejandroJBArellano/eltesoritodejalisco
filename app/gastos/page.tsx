@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/PageHeader";
+import { ExportButton, type ExportColumn } from "@/components/ui/DataTableControls";
 import {
   AlertTriangle,
   ArrowDown,
@@ -55,6 +56,28 @@ type Expense = {
     tipo_gasto: "fijo" | "variable";
   };
 };
+
+const EXPENSES_EXPORT_COLUMNS: ExportColumn<Expense>[] = [
+  { header: "Fecha", key: "date" },
+  {
+    header: "Categoría",
+    accessor: (e) => e.expense_categories?.name || "Sin Categoría",
+  },
+  {
+    header: "Tipo de Gasto",
+    accessor: (e) =>
+      e.expense_categories?.tipo_gasto === "fijo" ? "Fijo" : "Variable",
+  },
+  { header: "Descripción", key: "description" },
+  {
+    header: "Monto",
+    accessor: (e) => `$${Number(e.amount || 0).toFixed(2)}`,
+  },
+  {
+    header: "Factura",
+    accessor: (e) => (e.has_invoice ? "Sí (FAC)" : "No"),
+  },
+];
 
 export default function GastosPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -794,10 +817,18 @@ export default function GastosPage() {
               <span className="h-2 w-2 rounded-full bg-red-500"></span>
               Historial de Gastos
             </h2>
-            <span className="text-xs font-bold text-text-light/50 uppercase tracking-widest">
-              Mostrando {paginatedExpenses.length} de {filteredExpenses.length}{" "}
-              egresos ({expenses.length} totales)
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-text-light/50 uppercase tracking-widest hidden sm:inline">
+                Mostrando {paginatedExpenses.length} de {filteredExpenses.length}{" "}
+                egresos ({expenses.length} totales)
+              </span>
+              <ExportButton
+                data={filteredExpenses}
+                columns={EXPENSES_EXPORT_COLUMNS}
+                filename={() => `gastos_${new Date().toISOString().split("T")[0]}`}
+                sheetName="Gastos Operativos"
+              />
+            </div>
           </div>
 
           {/* BARRA DE FILTROS */}
@@ -847,7 +878,7 @@ export default function GastosPage() {
             </div>
 
             {/* Filtro por Factura */}
-            {/* <div>
+            <div>
               <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
                 Factura
               </label>
@@ -864,7 +895,7 @@ export default function GastosPage() {
                 <option value="invoiced">Solo Facturados (FAC)</option>
                 <option value="no_invoice">Sin Factura</option>
               </select>
-            </div> */}
+            </div>
 
             {/* Filtro por Tipo de Gasto */}
             <div>

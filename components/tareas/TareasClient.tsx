@@ -9,6 +9,7 @@ import {
 } from "@/lib/actions/tasks";
 import { PrimordialTask, TaskExecution } from "@/types";
 import { createClient } from "@/lib/supabase/client";
+import { ExportButton } from "@/components/ui/DataTableControls";
 import {
   Folder,
   Camera,
@@ -270,6 +271,41 @@ export function TareasClient({
           </div>
         </div>
       )}
+
+      {/* Header Bar with Export */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-4 rounded-2xl border border-border">
+        <span className="text-xs font-black text-text-light uppercase tracking-wider">
+          Checklist de Turno ({initialTasks.length} tareas)
+        </span>
+        <ExportButton
+          data={initialTasks}
+          columns={[
+            { header: "Tarea", key: "name" },
+            {
+              header: "Categoría",
+              accessor: (t) => t.category?.name || "Sin Categoría",
+            },
+            { header: "Frecuencia", key: "frequency_type" },
+            {
+              header: "Tiempo Estimado",
+              accessor: (t) => `${t.timeout_minutes} min`,
+            },
+            {
+              header: "Estado Actual",
+              accessor: (t) => {
+                const exec = executions.find((e) => e.task_id === t.id);
+                if (!exec) return "PENDIENTE";
+                if (exec.status === "COMPLETED") return "COMPLETADA";
+                if (exec.status === "IN_PROGRESS") return "EN PROGRESO";
+                if (exec.status === "PAUSED") return "PAUSADA";
+                return exec.status;
+              },
+            },
+          ]}
+          filename={() => `checklist_tareas_${new Date().toISOString().split("T")[0]}`}
+          sheetName="Checklist"
+        />
+      </div>
 
       {/* Task List Grouped by Category */}
       <div className="space-y-10">

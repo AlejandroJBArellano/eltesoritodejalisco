@@ -5,6 +5,8 @@ import {
   TableHeaderSortCell,
   TablePagination,
   TableSearchInput,
+  ExportButton,
+  type ExportColumn,
 } from "@/components/ui/DataTableControls";
 import { Modal } from "@/components/ui/Modal";
 import {
@@ -33,6 +35,18 @@ type Customer = {
   total_spend: number;
   createdAt?: string;
 };
+
+const CUSTOMER_EXPORT_COLUMNS: ExportColumn<Customer>[] = [
+  { header: "Cliente", key: "name" },
+  { header: "Teléfono", accessor: (c) => c.phone || "N/A" },
+  { header: "Email", accessor: (c) => c.email || "N/A" },
+  { header: "Cumpleaños", accessor: (c) => c.birthday || "N/A" },
+  { header: "Puntos de Lealtad", key: "loyalty_points" },
+  {
+    header: "Gasto Total",
+    accessor: (c) => `$${Number(c.total_spend || 0).toFixed(2)}`,
+  },
+];
 
 type CustomerFormState = {
   id?: string;
@@ -389,6 +403,12 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                   handleFilterChange();
                 }}
                 placeholder="Buscar cliente, teléfono o email..."
+              />
+              <ExportButton
+                data={sortedCustomers}
+                columns={CUSTOMER_EXPORT_COLUMNS}
+                filename={() => `clientes_${new Date().toISOString().split("T")[0]}`}
+                sheetName="Clientes"
               />
               <button
                 onClick={fetchCustomers}
