@@ -38,6 +38,10 @@ interface DBOrder {
   customer_id?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
+  completed_at?: string | null;
+  pickup_time?: string | null;
+  notes?: string | null;
+  source?: string | null;
   order_items?: DBOrderItem[] | null;
   payments?: DBPayment[] | null;
   customers?: unknown;
@@ -142,7 +146,7 @@ type DailyCut = {
   created_at: string;
 };
 
-const ORDERS_EXPORT_COLUMNS: ExportColumn<Order>[] = [
+export const ORDERS_EXPORT_COLUMNS: ExportColumn<Order>[] = [
   { header: "Folio", key: "orderNumber" },
   {
     header: "Fecha",
@@ -154,8 +158,47 @@ const ORDERS_EXPORT_COLUMNS: ExportColumn<Order>[] = [
         : "N/A",
   },
   {
+    header: "Canal de Venta",
+    accessor: (o) =>
+      o.source === "PICKUP_APP" ? "App Móvil / Pickup" : "Punto de Venta (POS)",
+  },
+  {
     header: "Mesa/Tipo",
     accessor: (o) => o.table || (o.source === "PICKUP_APP" ? "Pickup" : "Para Llevar"),
+  },
+  {
+    header: "Fecha/Hora de Completado",
+    accessor: (o) => {
+      const raw =
+        o.completedAt ||
+        (o as unknown as { completed_at?: string | null }).completed_at;
+      if (!raw) return "N/A";
+      try {
+        const d = new Date(raw);
+        return isNaN(d.getTime())
+          ? "N/A"
+          : d.toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
+      } catch {
+        return "N/A";
+      }
+    },
+  },
+  {
+    header: "Hora de Pickup / Programada",
+    accessor: (o) => {
+      const raw =
+        o.pickupTime ||
+        (o as unknown as { pickup_time?: string | null }).pickup_time;
+      if (!raw) return "Inmediato / N/A";
+      try {
+        const d = new Date(raw);
+        return isNaN(d.getTime())
+          ? "Inmediato / N/A"
+          : d.toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
+      } catch {
+        return "Inmediato / N/A";
+      }
+    },
   },
   {
     header: "Método de Pago",
@@ -184,6 +227,10 @@ const ORDERS_EXPORT_COLUMNS: ExportColumn<Order>[] = [
       o.orderItems
         ?.map((i) => `${i.quantity}x ${i.menuItem?.name || "Producto"}`)
         .join("; ") || "",
+  },
+  {
+    header: "Notas del Pedido",
+    accessor: (o) => o.notes?.trim() || "N/A",
   },
 ];
 
@@ -331,6 +378,18 @@ export default function HistoryPage() {
             ? dbOrder.updated_at
             : `${dbOrder.updated_at.replace(" ", "T")}Z`
           : null,
+        completedAt: dbOrder.completed_at
+          ? dbOrder.completed_at.includes("Z") || dbOrder.completed_at.includes("+")
+            ? dbOrder.completed_at
+            : `${dbOrder.completed_at.replace(" ", "T")}Z`
+          : null,
+        pickupTime: dbOrder.pickup_time
+          ? dbOrder.pickup_time.includes("Z") || dbOrder.pickup_time.includes("+")
+            ? dbOrder.pickup_time
+            : `${dbOrder.pickup_time.replace(" ", "T")}Z`
+          : null,
+        notes: dbOrder.notes || "",
+        source: dbOrder.source || "POS",
         orderItems: Array.isArray(dbOrder.order_items)
           ? dbOrder.order_items.map((item: DBOrderItem) => ({
               ...item,
