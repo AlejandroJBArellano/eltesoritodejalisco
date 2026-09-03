@@ -11,6 +11,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { AnalyticsNav } from "./AnalyticsNav";
 import { PeakHoursCards } from "./PeakHoursCards";
 import { HourlySalesBarChart } from "./HourlySalesBarChart";
 import { HourlySalesHeatmap } from "./HourlySalesHeatmap";
@@ -150,6 +151,9 @@ export function HourlyAnalyticsView() {
       />
 
       <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+        {/* Navegación entre pestañas de Analytics y retorno a Reportes */}
+        <AnalyticsNav activeTab="hourly" />
+
         {/* Controls Bar: Period + View Filters */}
         <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-6">
           {/* Periods */}
