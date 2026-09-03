@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/PageHeader";
+import Link from "next/link";
 import { ExportButton, type ExportColumn } from "@/components/ui/DataTableControls";
 import {
   AlertTriangle,
@@ -373,6 +374,13 @@ export default function ReportsPage() {
         badgeColor="bg-primary"
         actions={
           <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              href="/analytics/hourly"
+              className="inline-flex items-center gap-2 rounded-xl bg-amber-500/15 border border-amber-500/30 px-3.5 py-2 text-xs font-black text-amber-400 hover:bg-amber-500/25 transition-all active:scale-95 shadow-sm"
+            >
+              <Clock className="h-4 w-4" />
+              Ver Horas Pico ⚡
+            </Link>
             <ExportButton
               data={dailySalesData}
               columns={DAILY_SALES_EXPORT_COLUMNS}

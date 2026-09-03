@@ -471,6 +471,15 @@ export default async function Home() {
                 themeClass="bg-zinc-800 text-text-light"
                 hoverColor="var(--color-primary)"
               />
+              <ModuleCard
+                title="Horas Pico"
+                description="Ventas por hora y detector inteligente de horas pico."
+                href="/analytics/hourly"
+                icon={Clock}
+                badge="NUEVO"
+                themeClass="bg-amber-500/10 text-amber-400"
+                hoverColor="#f59e0b"
+              />
             </div>
           </CollapsibleSection>
         )}
