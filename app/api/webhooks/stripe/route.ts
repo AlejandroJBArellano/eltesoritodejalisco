@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       const rawOrderItems = JSON.parse(metadata.orderItems);
       const orderItems: Array<{ menuItemId: string; quantity: number; notes: string }> =
         Array.isArray(rawOrderItems)
-          ? rawOrderItems.map((item: any) => {
+          ? rawOrderItems.map((item: unknown) => {
             if (Array.isArray(item)) {
               return {
                 menuItemId: String(item[0]),
@@ -97,10 +97,11 @@ export async function POST(request: NextRequest) {
                 notes: String(item[2] || ""),
               };
             }
+            const obj = (item || {}) as Record<string, unknown>;
             return {
-              menuItemId: String(item.menuItemId),
-              quantity: Number(item.quantity),
-              notes: String(item.notes || ""),
+              menuItemId: String(obj.menuItemId),
+              quantity: Number(obj.quantity),
+              notes: String(obj.notes || ""),
             };
           })
           : [];
@@ -145,6 +146,7 @@ export async function POST(request: NextRequest) {
       if (metadata.commissionRate) {
         commissionRate = Number(metadata.commissionRate);
       }
+      void commissionRate;
 
       // Look up or create the customer in the CRM (customers table)
       let customerId: string | null = null;

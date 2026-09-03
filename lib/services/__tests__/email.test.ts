@@ -73,22 +73,26 @@ describe("lib/services/email", () => {
   describe("getTenantAdminUrl", () => {
     it("should return the correct production URL with slug and path", () => {
       const originalEnv = process.env.NODE_ENV;
-      (process.env as any).NODE_ENV = "production";
+      (process.env as Record<string, string | undefined>).NODE_ENV =
+        "production";
 
       const url = getTenantAdminUrl("sucursal-prueba", "/kitchen");
       expect(url).toBe("https://sucursal-prueba.admin.trykittn.com/kitchen");
 
-      (process.env as any).NODE_ENV = originalEnv;
+      (process.env as Record<string, string | undefined>).NODE_ENV =
+        originalEnv;
     });
 
     it("should return localhost URL when in development", () => {
       const originalEnv = process.env.NODE_ENV;
-      (process.env as any).NODE_ENV = "development";
+      (process.env as Record<string, string | undefined>).NODE_ENV =
+        "development";
 
       const url = getTenantAdminUrl("sucursal-prueba", "/inventario");
       expect(url).toBe("http://sucursal-prueba.localhost:3000/inventario");
 
-      (process.env as any).NODE_ENV = originalEnv;
+      (process.env as Record<string, string | undefined>).NODE_ENV =
+        originalEnv;
     });
   });
 

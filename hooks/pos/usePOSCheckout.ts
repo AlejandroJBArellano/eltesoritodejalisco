@@ -23,6 +23,7 @@ export function POSCheckoutProvider({
 export function usePOSCheckout(refreshOrders?: () => Promise<Order[]>) {
   const context = useContext(POSCheckoutContext);
   if (context) return context;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   return usePOSCheckoutInternal(refreshOrders || (async () => []));
 }
 

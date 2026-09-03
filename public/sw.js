@@ -1,6 +1,6 @@
 // KittnOS - Web Push & Background Notifications Service Worker
 
-self.addEventListener("install", (event) => {
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 

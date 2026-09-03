@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentCDMXDate, getCurrentCDMXDay } from "@/lib/utils";
+import { getCurrentCDMXDay } from "@/lib/utils";
 import type { CreateOrderRequest } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";

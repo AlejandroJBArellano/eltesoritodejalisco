@@ -36,7 +36,6 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
         setEditingTipOrder,
         setEditTipType,
         setEditTipInput,
-        setBillingOrder,
         handleUndoPayment,
     } = usePOSCheckout(refreshOrders);
 

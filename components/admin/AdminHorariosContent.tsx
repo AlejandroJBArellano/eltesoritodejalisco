@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import type { DbBusinessHours } from "@/app/admin/horarios/page";
+import { PageHeader } from "@/components/PageHeader";
 import {
-  Clock,
-  Save,
-  ArrowLeft,
-  Loader2,
   AlertCircle,
+  ArrowLeft,
   CheckCircle,
+  Loader2,
+  Save,
 } from "lucide-react";
 import Link from "next/link";
-import { PageHeader } from "@/components/PageHeader";
-import type { DbBusinessHours } from "@/app/admin/horarios/page";
+import { useState } from "react";
 
 interface AdminHorariosContentProps {
   initialHours: DbBusinessHours[];
@@ -124,14 +123,14 @@ export function AdminHorariosContent({
         {/* Notifications */}
         {error && (
           <div className="mt-6 flex items-center gap-3 rounded-xl bg-red-950/40 border border-red-500/30 p-4 text-sm text-red-200">
-            <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
+            <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
             <p>{error}</p>
           </div>
         )}
 
         {success && (
           <div className="mt-6 flex items-center gap-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 p-4 text-sm text-emerald-200">
-            <CheckCircle className="h-5 w-5 text-emerald-400 flex-shrink-0" />
+            <CheckCircle className="h-5 w-5 text-emerald-400 shrink-0" />
             <p>Horarios comerciales actualizados exitosamente.</p>
           </div>
         )}
@@ -147,7 +146,7 @@ export function AdminHorariosContent({
                     className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 hover:bg-zinc-900/10 transition-all"
                   >
                     {/* Day & Closed Toggle */}
-                    <div className="flex items-center gap-4 min-w-[200px]">
+                    <div className="flex items-center gap-4 min-w-50">
                       <input
                         type="checkbox"
                         id={`closed-${dayHours.id}`}
@@ -157,11 +156,10 @@ export function AdminHorariosContent({
                       />
                       <label
                         htmlFor={`closed-${dayHours.id}`}
-                        className={`text-sm font-black uppercase tracking-wider cursor-pointer transition-colors ${
-                          dayHours.is_closed
-                            ? "text-zinc-600 line-through"
-                            : "text-zinc-200"
-                        }`}
+                        className={`text-sm font-black uppercase tracking-wider cursor-pointer transition-colors ${dayHours.is_closed
+                          ? "text-zinc-600 line-through"
+                          : "text-zinc-200"
+                          }`}
                       >
                         {dayName}
                       </label>

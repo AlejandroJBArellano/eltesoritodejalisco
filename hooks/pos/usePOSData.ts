@@ -64,6 +64,7 @@ export function POSDataProvider({
 export function usePOSData(tenantId?: string) {
   const context = useContext(POSDataContext);
   if (context) return context;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   return usePOSDataInternal(tenantId);
 }
 
@@ -196,13 +197,13 @@ function usePOSDataInternal(tenantId?: string) {
   useEffect(() => {
     if (!tenantId) return;
 
-    const debouncedFetchOrders = (payload: any) => {
+    const debouncedFetchOrders = (payload: unknown) => {
       console.log("[POS Realtime] Order event:", payload);
       if (fetchDebounceRef.current) clearTimeout(fetchDebounceRef.current);
       fetchDebounceRef.current = setTimeout(() => fetchOrders(), 300);
     };
 
-    const debouncedFetchMenu = (payload: any) => {
+    const debouncedFetchMenu = (payload: unknown) => {
       console.log("[POS Realtime] Ingredient update event:", payload);
       if (menuDebounceRef.current) clearTimeout(menuDebounceRef.current);
       menuDebounceRef.current = setTimeout(() => fetchMenu(), 500);

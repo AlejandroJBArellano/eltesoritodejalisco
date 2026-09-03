@@ -58,6 +58,7 @@ export function usePOSCart(
 ) {
   const context = useContext(POSCartContext);
   if (context) return context;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   return usePOSCartInternal(availableMenuItems || [], refreshOrders || (async () => []));
 }
 

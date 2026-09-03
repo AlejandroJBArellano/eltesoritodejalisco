@@ -7,10 +7,6 @@ import {
   Minus,
   Package,
   Loader2,
-  ShoppingCart,
-  Trash2,
-  Settings,
-  Wrench,
 } from "lucide-react";
 import type { Ingredient } from "@/types";
 

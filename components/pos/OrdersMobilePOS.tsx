@@ -4,7 +4,6 @@ import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { Ban, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, ShoppingBag, Undo2 } from "lucide-react";
 import { useMemo, useState } from "react";
-import NoOrdersPOS from "./NoOrdersPOS";
 
 export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
     onClickCancel: (orderId: string) => void;
@@ -37,7 +36,6 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
         setEditingTipOrder,
         setEditTipType,
         setEditTipInput,
-        setBillingOrder,
         handleUndoPayment,
     } = usePOSCheckout(refreshOrders);
 

@@ -16,8 +16,9 @@ export async function GET() {
         },
       }
     );
-  } catch (error: any) {
-    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+  } catch (error: unknown) {
+    const err = error as { digest?: string };
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) {
       return NextResponse.json(
         { error: "Tenant not found", redirect: "https://trykittn.com" },
         { status: 404 },

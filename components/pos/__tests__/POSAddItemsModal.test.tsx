@@ -6,7 +6,6 @@ import { Order, MenuItem } from "@/types/pos";
 import { OrderStatus } from "@/types";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
-import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 
 vi.mock("@/hooks/pos/usePOSData", () => ({
   usePOSData: vi.fn(),
@@ -14,10 +13,6 @@ vi.mock("@/hooks/pos/usePOSData", () => ({
 
 vi.mock("@/hooks/pos/usePOSCart", () => ({
   usePOSCart: vi.fn(),
-}));
-
-vi.mock("@/hooks/pos/usePOSCheckout", () => ({
-  usePOSCheckout: vi.fn(() => ({})),
 }));
 
 const mockOrder: Order = {
@@ -58,15 +53,19 @@ describe("POSAddItemsModal Component", () => {
   };
 
   beforeEach(() => {
-    vi.mocked(usePOSData).mockReturnValue(defaultDataValue as any);
-    vi.mocked(usePOSCart).mockReturnValue(defaultCartValue as any);
+    vi.mocked(usePOSData).mockReturnValue(
+      defaultDataValue as unknown as ReturnType<typeof usePOSData>,
+    );
+    vi.mocked(usePOSCart).mockReturnValue(
+      defaultCartValue as unknown as ReturnType<typeof usePOSCart>,
+    );
   });
 
   it("should render null when editingOrder is null", () => {
     vi.mocked(usePOSCart).mockReturnValue({
       ...defaultCartValue,
       editingOrder: null,
-    } as any);
+    } as unknown as ReturnType<typeof usePOSCart>);
 
     const { container } = render(<POSAddItemsModal />);
     expect(container.firstChild).toBeNull();
@@ -102,7 +101,7 @@ describe("POSAddItemsModal Component", () => {
       removeAdditionalItemRow,
       setEditingOrder,
       handleAddItems,
-    } as any);
+    } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSAddItemsModal />);
 
@@ -136,7 +135,7 @@ describe("POSAddItemsModal Component", () => {
     vi.mocked(usePOSCart).mockReturnValue({
       ...defaultCartValue,
       isSubmittingCart: true,
-    } as any);
+    } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSAddItemsModal />);
 

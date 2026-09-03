@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
+import type { Tables } from "@/types/supabase";
 
 /**
  * GET /api/inventory
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     const lowStock = searchParams.get("lowStock") === "true";
 
     const supabase = await createClient();
-    let query = supabase
+    const query = supabase
       .from("ingredients")
       .select("*")
       .eq("tenant_id", tenant.id)
@@ -26,15 +27,15 @@ export async function GET(request: NextRequest) {
     const { data: ingredients, error } = await query;
     if (error) throw error;
 
-    let result = ingredients || [];
+    let result: Tables<"ingredients">[] = ingredients || [];
     if (lowStock) {
       result = result.filter(
-        (ing: any) => ing.current_stock <= ing.minimum_stock,
+        (ing: Tables<"ingredients">) => ing.current_stock <= ing.minimum_stock,
       );
     }
 
     // Map database snake_case fields to frontend camelCase
-    const formatted = result.map((ing: any) => ({
+    const formatted = result.map((ing: Tables<"ingredients">) => ({
       id: ing.id,
       name: ing.name,
       unit: ing.unit,

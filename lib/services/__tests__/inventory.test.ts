@@ -86,7 +86,14 @@ describe("lib/services/inventory", () => {
     };
 
     const client = await createClient();
-    const mockSingle = (client.from as any)().select().eq().single;
+    const mockFrom = client.from as unknown as () => {
+      select: () => {
+        eq: () => {
+          single: { mockResolvedValue: (v: unknown) => void };
+        };
+      };
+    };
+    const mockSingle = mockFrom().select().eq().single;
     mockSingle.mockResolvedValue({ data: mockOrder, error: null });
 
     const result = await deductInventoryForOrder("order-123");
@@ -131,7 +138,14 @@ describe("lib/services/inventory", () => {
     };
 
     const client = await createClient();
-    const mockSingle = (client.from as any)().select().eq().single;
+    const mockFrom = client.from as unknown as () => {
+      select: () => {
+        eq: () => {
+          single: { mockResolvedValue: (v: unknown) => void };
+        };
+      };
+    };
+    const mockSingle = mockFrom().select().eq().single;
     mockSingle.mockResolvedValue({ data: mockOrder, error: null });
 
     const result = await reverseInventoryForOrder("order-123");

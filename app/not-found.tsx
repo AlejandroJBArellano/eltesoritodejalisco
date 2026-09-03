@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export default function NotFound() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#0b0b0d] px-4 text-white">

@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
+import type { Tables } from "@/types/supabase";
 
 /**
  * POST /api/register
@@ -167,12 +168,12 @@ export async function POST(request: NextRequest) {
         .select();
 
       if (!taskCatsError && insertedTaskCats) {
-        const aperturaCat = insertedTaskCats.find(
-          (c: any) => c.name === "Apertura",
-        );
-        const cierreCat = insertedTaskCats.find(
-          (c: any) => c.name === "Cierre",
-        );
+        const aperturaCat = (
+          insertedTaskCats as Tables<"task_categories">[]
+        ).find((c) => c.name === "Apertura");
+        const cierreCat = (
+          insertedTaskCats as Tables<"task_categories">[]
+        ).find((c) => c.name === "Cierre");
 
         const defaultTasks = [];
         if (aperturaCat) {

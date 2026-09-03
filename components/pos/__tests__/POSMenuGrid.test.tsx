@@ -134,9 +134,15 @@ const defaultCheckoutValue = {
 
 describe("POSMenuGrid Component", () => {
   beforeEach(() => {
-    vi.mocked(usePOSData).mockReturnValue(defaultDataValue as any);
-    vi.mocked(usePOSCart).mockReturnValue(defaultCartValue as any);
-    vi.mocked(usePOSCheckout).mockReturnValue(defaultCheckoutValue as any);
+    vi.mocked(usePOSData).mockReturnValue(
+      defaultDataValue as unknown as ReturnType<typeof usePOSData>,
+    );
+    vi.mocked(usePOSCart).mockReturnValue(
+      defaultCartValue as unknown as ReturnType<typeof usePOSCart>,
+    );
+    vi.mocked(usePOSCheckout).mockReturnValue(
+      defaultCheckoutValue as unknown as ReturnType<typeof usePOSCheckout>,
+    );
   });
 
   it("should render catalog title and menu items correctly", () => {
@@ -153,7 +159,7 @@ describe("POSMenuGrid Component", () => {
     vi.mocked(usePOSCart).mockReturnValue({
       ...defaultCartValue,
       handleGridItemClick,
-    } as any);
+    } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSMenuGrid />);
 
@@ -171,7 +177,7 @@ describe("POSMenuGrid Component", () => {
     vi.mocked(usePOSData).mockReturnValue({
       ...defaultDataValue,
       setSearchQuery,
-    } as any);
+    } as unknown as ReturnType<typeof usePOSData>);
 
     render(<POSMenuGrid />);
 

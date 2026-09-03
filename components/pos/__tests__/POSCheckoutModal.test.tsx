@@ -88,16 +88,22 @@ describe("POSCheckoutModal Component", () => {
   };
 
   beforeEach(() => {
-    vi.mocked(usePOSData).mockReturnValue(defaultDataValue as any);
-    vi.mocked(usePOSCart).mockReturnValue(defaultCartValue as any);
-    vi.mocked(usePOSCheckout).mockReturnValue(defaultCheckoutValue as any);
+    vi.mocked(usePOSData).mockReturnValue(
+      defaultDataValue as unknown as ReturnType<typeof usePOSData>,
+    );
+    vi.mocked(usePOSCart).mockReturnValue(
+      defaultCartValue as unknown as ReturnType<typeof usePOSCart>,
+    );
+    vi.mocked(usePOSCheckout).mockReturnValue(
+      defaultCheckoutValue as unknown as ReturnType<typeof usePOSCheckout>,
+    );
   });
 
   it("should render null when checkoutOrder is null", () => {
     vi.mocked(usePOSCheckout).mockReturnValue({
       ...defaultCheckoutValue,
       checkoutOrder: null,
-    } as any);
+    } as unknown as ReturnType<typeof usePOSCheckout>);
 
     const { container } = render(<POSCheckoutModal />);
     expect(container.firstChild).toBeNull();
@@ -136,7 +142,7 @@ describe("POSCheckoutModal Component", () => {
       paymentMethod: "CASH",
       receivedAmount: "150",
       change: 34,
-    } as any);
+    } as unknown as ReturnType<typeof usePOSCheckout>);
 
     render(<POSCheckoutModal />);
 
@@ -152,7 +158,7 @@ describe("POSCheckoutModal Component", () => {
     vi.mocked(usePOSCheckout).mockReturnValue({
       ...defaultCheckoutValue,
       checkoutError: "Ocurrió un error al procesar el pago",
-    } as any);
+    } as unknown as ReturnType<typeof usePOSCheckout>);
 
     render(<POSCheckoutModal />);
     expect(screen.getByText("Ocurrió un error al procesar el pago")).toBeInTheDocument();
@@ -167,7 +173,7 @@ describe("POSCheckoutModal Component", () => {
       unusualTipInfo: { amount: 200, percentage: 50 },
       handleProcessPayment,
       setUnusualTipInfo,
-    } as any);
+    } as unknown as ReturnType<typeof usePOSCheckout>);
 
     render(<POSCheckoutModal />);
 
@@ -195,7 +201,7 @@ describe("POSCheckoutModal Component", () => {
 
     vi.mocked(usePOSCart).mockReturnValue({
       openModifyModal,
-    } as any);
+    } as unknown as ReturnType<typeof usePOSCart>);
 
     vi.mocked(usePOSCheckout).mockReturnValue({
       ...defaultCheckoutValue,
@@ -204,7 +210,7 @@ describe("POSCheckoutModal Component", () => {
       setShowSplitBill,
       setCheckoutOrder,
       handleFailedPayment,
-    } as any);
+    } as unknown as ReturnType<typeof usePOSCheckout>);
 
     render(<POSCheckoutModal />);
 
@@ -241,7 +247,7 @@ describe("POSCheckoutModal Component", () => {
     vi.mocked(usePOSCheckout).mockReturnValue({
       ...defaultCheckoutValue,
       handleProcessPayment,
-    } as any);
+    } as unknown as ReturnType<typeof usePOSCheckout>);
 
     render(<POSCheckoutModal />);
 

@@ -5,6 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
+import type { Tables } from "@/types/supabase";
+
+type RecipeItemWithIngredient = Tables<"recipe_items"> & {
+  ingredients?: Tables<"ingredients"> | null;
+};
 
 /**
  * GET /api/recipes?menuItemId=...
@@ -29,7 +34,9 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
-    const formatted = (recipeItems || []).map((item: any) => ({
+    const formatted = (
+      (recipeItems as unknown as RecipeItemWithIngredient[]) || []
+    ).map((item) => ({
       id: item.id,
       menuItemId: item.menu_item_id,
       ingredientId: item.ingredient_id,

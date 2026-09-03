@@ -56,19 +56,19 @@ describe("OrdersPOS component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    (usePOSData as any).mockReturnValue({
+    vi.mocked(usePOSData).mockReturnValue({
       refreshOrders: vi.fn(),
       availableMenuItems: [],
       orders: mockOrders,
-    });
+    } as unknown as ReturnType<typeof usePOSData>);
 
-    (usePOSCart as any).mockReturnValue({
+    vi.mocked(usePOSCart).mockReturnValue({
       isSubmittingCart: false,
       setEditingOrder: vi.fn(),
       openModifyModal: vi.fn(),
-    });
+    } as unknown as ReturnType<typeof usePOSCart>);
 
-    (usePOSCheckout as any).mockReturnValue({
+    vi.mocked(usePOSCheckout).mockReturnValue({
       isSubmittingCheckout: false,
       setCheckoutOrder: vi.fn(),
       setPaymentMethod: vi.fn(),
@@ -82,7 +82,7 @@ describe("OrdersPOS component", () => {
       setEditTipInput: vi.fn(),
       setBillingOrder: vi.fn(),
       handleUndoPayment: vi.fn(),
-    });
+    } as unknown as ReturnType<typeof usePOSCheckout>);
   });
 
   it("renders filter buttons with order counts and shows all orders by default", () => {

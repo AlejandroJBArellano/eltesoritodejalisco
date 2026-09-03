@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import { OrderTicket } from "../OrderTicket";
 import { OrderWithDetails, OrderStatus, PaymentMethod } from "@/types";
 
-let mockTenant = {
+const mockTenant = {
   id: "tenant-abc",
   slug: "tesorito",
   name: "El Tesorito de Jalisco",

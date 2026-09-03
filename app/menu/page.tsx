@@ -1,7 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { MenuContent } from "@/components/menu/MenuContent";
 import { getTenantContext } from "@/lib/tenant";
-import { MenuItem, SortField, MenuCategory, Ingredient } from "@/components/menu/types";
+import {
+  MenuItem,
+  SortField,
+  MenuCategory,
+  Ingredient,
+  Translations,
+} from "@/components/menu/types";
 import { Database } from "@/types/supabase";
 
 type DbMenuItem = Database["public"]["Tables"]["menu_items"]["Row"];
@@ -51,7 +57,7 @@ async function getMenuCategories(): Promise<MenuCategory[]> {
     sort_order: cat.sort_order ?? 0,
     is_active: cat.is_active ?? true,
     show_in_pickup: cat.show_in_pickup ?? true,
-    translations: cat.translations as any,
+    translations: (cat.translations as unknown as Translations) || undefined,
   }));
 }
 
@@ -78,7 +84,7 @@ async function getIngredients(): Promise<Ingredient[]> {
     currentStock: ing.current_stock,
     minimumStock: ing.minimum_stock,
     costPerUnit: ing.cost_per_unit,
-    trackingType: ing.tracking_type as any,
+    trackingType: (ing.tracking_type === "PIECE" ? "PIECE" : "MEASURABLE") as "MEASURABLE" | "PIECE",
     createdAt: ing.created_at ?? "",
     updatedAt: ing.updated_at ?? "",
   }));
@@ -156,7 +162,7 @@ async function getFilteredMenuItems(params: {
     category: item.category,
     imageUrl: item.image_url,
     isAvailable: item.is_available,
-    translations: item.translations as any,
+    translations: (item.translations as unknown as Translations) || undefined,
     ingredientId: item.ingredient_id,
     show_in_dine_in: item.show_in_dine_in ?? true,
     show_in_takeaway: item.show_in_takeaway ?? true,
@@ -216,7 +222,7 @@ export default async function MenuPage({
 
   return (
     <MenuContent
-      items={dropdownItems as any}
+      items={dropdownItems as unknown as MenuItem[]}
       paginatedItems={filteredResult.items}
       categories={categoriesList}
       activeCount={stats.activeCount}

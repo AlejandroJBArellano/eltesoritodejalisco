@@ -34,7 +34,7 @@ describe("PushNotificationPrompt Component", () => {
       },
     });
 
-    (window as any).PushManager = class {};
+    (window as unknown as { PushManager: unknown }).PushManager = class {};
   });
 
   it("renders compact mode button correctly", async () => {

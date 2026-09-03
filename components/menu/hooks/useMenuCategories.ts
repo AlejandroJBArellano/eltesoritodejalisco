@@ -150,7 +150,7 @@ function useMenuCategoriesInner(initialCategories: MenuCategory[]) {
     setMenuCategories(localUpdated); // optimistic update
 
     try {
-      const response = await fetch("/api/menu-categories", {
+      await fetch("/api/menu-categories", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

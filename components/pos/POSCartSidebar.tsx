@@ -16,7 +16,7 @@ import {
 import { useState } from "react";
 import { sourceOptions } from "../menu/types";
 
-interface POSCartSidebarProps {
+export interface POSCartSidebarProps {
   formState: OrderFormState;
   handleFormChange: (field: keyof OrderFormState, value: string) => void;
   customers: Customer[];

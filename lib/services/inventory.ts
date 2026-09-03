@@ -173,14 +173,6 @@ export async function deductInventoryForOrder(
         console.error("Failed to log stock adjustments:", logError);
       }
 
-      // Fire-and-forget: send email alert if any ingredient dropped to/below minimum
-      const hasLowStock = result.deductions.some(
-        (d) => d.newStock <= 0 || d.newStock <= (
-          // We need minimum_stock — fetch it for affected ingredients
-          0 // placeholder; actual check is done in the alert API
-        ),
-      );
-
       // Trigger alert for any deduction that results in stock at or below 0
       // (conservative: we alert on out-of-stock; the /alert API checks minimum_stock server-side)
       const hasOutOfStock = result.deductions.some((d) => d.newStock <= 0);

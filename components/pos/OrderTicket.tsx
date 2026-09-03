@@ -10,7 +10,6 @@ export function OrderTicket({ order }: OrderTicketProps) {
   const {
     id: tenantId,
     name,
-    system_name,
     rfc,
     postal_code,
     regimen_fiscal,

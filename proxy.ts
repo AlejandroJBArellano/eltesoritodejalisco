@@ -82,7 +82,10 @@ function isPublicRoute(request: NextRequest): boolean {
 export async function proxy(request: NextRequest) {
   // Rate Limiting check for API routes
   if (request.nextUrl.pathname.startsWith("/api")) {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || (request as any).ip || "127.0.0.1";
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0] ||
+      (request as unknown as { ip?: string }).ip ||
+      "127.0.0.1";
     if (isRateLimited(ip, 60, 60 * 1000)) {
       const corsHeaders = getCorsHeaders(request);
       corsHeaders.set("Content-Type", "application/json");

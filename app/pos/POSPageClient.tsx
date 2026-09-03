@@ -67,7 +67,6 @@ function POSPageContent() {
   } = usePOSData();
 
   const {
-    formState,
     editingOrder,
     modifyingOrder,
     mixedOrderMenuItem,
@@ -155,10 +154,12 @@ function POSPageContent() {
   };
 
   const onClickCancel = (orderId: string) => {
-    cancelArmedId === orderId
-      ? handleCancelConfirm(orderId)
-      : handleCancelArm(orderId)
-  }
+    if (cancelArmedId === orderId) {
+      handleCancelConfirm(orderId);
+    } else {
+      handleCancelArm(orderId);
+    }
+  };
 
   if (isLoading) {
     return <LoadingPOS />

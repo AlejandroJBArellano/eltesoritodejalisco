@@ -1,5 +1,5 @@
 export default function TabSelectorPOS({
-    activeTab, setActiveTab, totalCartItems, cartTotal }: { totalCartItems: number, cartTotal: number, setActiveTab: (tab: "cart" | "menu") => void, activeTab: "cart" | "menu" }) {
+    activeTab, setActiveTab, totalCartItems }: { totalCartItems: number, cartTotal?: number, setActiveTab: (tab: "cart" | "menu") => void, activeTab: "cart" | "menu" }) {
     return <div className="lg:hidden flex bg-card-light/50 p-1.5 mx-2 rounded-2xl border border-border gap-1.5 shadow-inner">
         <button
             type="button"
