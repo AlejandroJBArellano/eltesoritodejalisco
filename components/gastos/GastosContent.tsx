@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { AlertTriangle } from "lucide-react";
-import { useGastosData } from "./hooks/useGastosData";
-import { useGastosTable } from "./hooks/useGastosTable";
+import { GastosProvider, useGastosContext } from "./GastosContext";
 import { GastosHeader } from "./GastosHeader";
 import { GastosMonthPicker } from "./GastosMonthPicker";
 import { GastosSummaryKPIs } from "./GastosSummaryKPIs";
@@ -14,61 +13,17 @@ import { GastosTable } from "./GastosTable";
 import { GastosPagination } from "./GastosPagination";
 import { ExpenseModal } from "./ExpenseModal";
 import { CategoryModal } from "./CategoryModal";
-import type { Category } from "./types";
 
-export function GastosContent() {
+function GastosMainView() {
   const {
-    currentMonth,
-    categories,
-    expenses,
     isLoading,
     errorMessage,
-    fetchData,
-    handleMonthChange,
-    handleCreateExpense,
-    handleCreateCategory,
-    handleUpdateCategory,
-    summary,
-    dailyExpensesData,
-    categoryExpensesData,
-  } = useGastosData();
-
-  const {
-    tableSearch,
-    tableCategoryFilter,
-    tableInvoiceFilter,
-    tableTypeFilter,
-    sortField,
-    sortDirection,
-    currentPage,
-    pageSize,
-    totalPages,
+    expenses,
+    categories,
     filteredExpenses,
-    paginatedExpenses,
-    handleSearchChange,
-    handleCategoryFilterChange,
-    handleInvoiceFilterChange,
-    handleTypeFilterChange,
-    handleSort,
-    setCurrentPage,
-    handlePageSizeChange,
-  } = useGastosTable(expenses);
-
-  // Modales
-  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState<boolean>(false);
-  const [isCategoryModalOpen, setIsCategoryModalOpen] =
-    useState<boolean>(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-
-  const handleOpenCreateCategory = () => {
-    setEditingCategory(null);
-    setIsCategoryModalOpen(true);
-  };
-
-  const handleEditCategory = (cat: Category) => {
-    setEditingCategory(cat);
-    setIsCategoryModalOpen(true);
-  };
+    fetchData,
+    currentMonth,
+  } = useGastosContext();
 
   if (isLoading && expenses.length === 0 && categories.length === 0) {
     return (
@@ -104,87 +59,41 @@ export function GastosContent() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      {/* Encabezado */}
-      <GastosHeader
-        onOpenExpenseModal={() => setIsExpenseModalOpen(true)}
-        onOpenCategoryModal={handleOpenCreateCategory}
-      />
+      {/* Encabezado (0 props) */}
+      <GastosHeader />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 no-print space-y-8">
-        {/* Selector de Mes */}
-        <GastosMonthPicker
-          currentMonth={currentMonth}
-          onMonthChange={handleMonthChange}
-        />
+        {/* Selector de Mes (0 props) */}
+        <GastosMonthPicker />
 
-        {/* Resumen Financiero y KPIs */}
-        <GastosSummaryKPIs summary={summary} currentMonth={currentMonth} />
+        {/* Resumen Financiero y KPIs (0 props) */}
+        <GastosSummaryKPIs />
 
-        {/* Sección de Gráficas Analíticas */}
-        <GastosChartsSection
-          currentMonth={currentMonth}
-          fixedExpensesTotal={summary.fixedExpensesTotal}
-          variableExpensesTotal={summary.variableExpensesTotal}
-          dailyExpensesData={dailyExpensesData}
-          categoryExpensesData={categoryExpensesData}
-        />
+        {/* Sección de Gráficas Analíticas (0 props) */}
+        <GastosChartsSection />
 
-        {/* Categorías Registradas */}
-        <GastosCategoriesGrid
-          categories={categories}
-          onOpenCreateCategory={handleOpenCreateCategory}
-          onEditCategory={handleEditCategory}
-        />
+        {/* Categorías Registradas (0 props) */}
+        <GastosCategoriesGrid />
 
-        {/* Historial de Gastos con Tabla, Filtros y Paginación */}
-        <GastosTable
-          expenses={paginatedExpenses}
-          filteredCount={filteredExpenses.length}
-          totalCount={expenses.length}
-          sortField={sortField}
-          sortDirection={sortDirection}
-          onSort={handleSort}
-        >
-          <GastosFilterBar
-            categories={categories}
-            search={tableSearch}
-            onSearchChange={handleSearchChange}
-            categoryFilter={tableCategoryFilter}
-            onCategoryFilterChange={handleCategoryFilterChange}
-            invoiceFilter={tableInvoiceFilter}
-            onInvoiceFilterChange={handleInvoiceFilterChange}
-            typeFilter={tableTypeFilter}
-            onTypeFilterChange={handleTypeFilterChange}
-          />
+        {/* Historial de Gastos con Tabla, Filtros y Paginación (0 props) */}
+        <GastosTable>
+          <GastosFilterBar />
         </GastosTable>
 
-        {filteredExpenses.length > 0 && (
-          <GastosPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            pageSize={pageSize}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={handlePageSizeChange}
-          />
-        )}
+        {filteredExpenses.length > 0 && <GastosPagination />}
       </main>
 
-      {/* Modal Registrar Gasto */}
-      <ExpenseModal
-        isOpen={isExpenseModalOpen}
-        onClose={() => setIsExpenseModalOpen(false)}
-        categories={categories}
-        onSubmit={handleCreateExpense}
-      />
-
-      {/* Modal Crear / Editar Categoría */}
-      <CategoryModal
-        isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
-        editingCategory={editingCategory}
-        onCreateCategory={handleCreateCategory}
-        onUpdateCategory={handleUpdateCategory}
-      />
+      {/* Modales (0 props) */}
+      <ExpenseModal />
+      <CategoryModal />
     </div>
+  );
+}
+
+export function GastosContent() {
+  return (
+    <GastosProvider>
+      <GastosMainView />
+    </GastosProvider>
   );
 }

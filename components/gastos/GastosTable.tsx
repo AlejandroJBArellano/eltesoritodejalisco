@@ -4,15 +4,16 @@ import React from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { ExportButton } from "@/components/ui/DataTableControls";
 import { EXPENSES_EXPORT_COLUMNS } from "./exportColumns";
+import { useGastosContextNullable } from "./GastosContext";
 import type { Expense, ExpenseSortField } from "./types";
 
 export interface GastosTableProps {
-  expenses: Expense[];
-  filteredCount: number;
-  totalCount: number;
-  sortField: ExpenseSortField;
-  sortDirection: "asc" | "desc";
-  onSort: (field: ExpenseSortField) => void;
+  expenses?: Expense[];
+  filteredCount?: number;
+  totalCount?: number;
+  sortField?: ExpenseSortField;
+  sortDirection?: "asc" | "desc";
+  onSort?: (field: ExpenseSortField) => void;
   children?: React.ReactNode;
 }
 
@@ -21,15 +22,16 @@ export const getGastosExportFilename = () => {
   return `gastos_${currentDateStr}`;
 };
 
-export function GastosTable({
-  expenses,
-  filteredCount,
-  totalCount,
-  sortField,
-  sortDirection,
-  onSort,
-  children,
-}: GastosTableProps) {
+export function GastosTable(props: GastosTableProps = {}) {
+  const context = useGastosContextNullable();
+  const expenses = props.expenses ?? context?.paginatedExpenses ?? [];
+  const filteredCount =
+    props.filteredCount ?? context?.filteredExpenses.length ?? 0;
+  const totalCount = props.totalCount ?? context?.expenses.length ?? 0;
+  const sortField = props.sortField ?? context?.sortField ?? "date";
+  const sortDirection = props.sortDirection ?? context?.sortDirection ?? "desc";
+  const onSort = props.onSort ?? context?.handleSort ?? (() => {});
+  const children = props.children;
   const renderSortArrow = (field: ExpenseSortField) => {
     if (sortField !== field) {
       return <ArrowUpDown className="h-3 w-3 opacity-40" />;

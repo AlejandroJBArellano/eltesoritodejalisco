@@ -3,21 +3,25 @@
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { useGastosContextNullable } from "./GastosContext";
+
 export interface GastosPaginationProps {
-  currentPage: number;
-  totalPages: number;
-  pageSize: number;
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (size: number) => void;
+  currentPage?: number;
+  totalPages?: number;
+  pageSize?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
 }
 
-export function GastosPagination({
-  currentPage,
-  totalPages,
-  pageSize,
-  onPageChange,
-  onPageSizeChange,
-}: GastosPaginationProps) {
+export function GastosPagination(props: GastosPaginationProps = {}) {
+  const context = useGastosContextNullable();
+  const currentPage = props.currentPage ?? context?.currentPage ?? 1;
+  const totalPages = props.totalPages ?? context?.totalPages ?? 1;
+  const pageSize = props.pageSize ?? context?.pageSize ?? 10;
+  const onPageChange =
+    props.onPageChange ?? context?.setCurrentPage ?? (() => {});
+  const onPageSizeChange =
+    props.onPageSizeChange ?? context?.handlePageSizeChange ?? (() => {});
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-border text-xs text-text-light/60 font-medium">
       <div className="flex items-center gap-2">

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { AlertTriangle, Tag, X } from "lucide-react";
+import { useGastosContextNullable } from "./GastosContext";
 import type { Category, ExpenseCategoryType } from "./types";
 import type {
   CreateCategoryPayload,
@@ -9,20 +10,25 @@ import type {
 } from "./hooks/useGastosData";
 
 export interface CategoryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  editingCategory: Category | null;
-  onCreateCategory: (payload: CreateCategoryPayload) => Promise<void>;
-  onUpdateCategory: (payload: UpdateCategoryPayload) => Promise<void>;
+  isOpen?: boolean;
+  onClose?: () => void;
+  editingCategory?: Category | null;
+  onCreateCategory?: (payload: CreateCategoryPayload) => Promise<void>;
+  onUpdateCategory?: (payload: UpdateCategoryPayload) => Promise<void>;
 }
 
-export function CategoryModal({
-  isOpen,
-  onClose,
-  editingCategory,
-  onCreateCategory,
-  onUpdateCategory,
-}: CategoryModalProps) {
+export function CategoryModal(props: CategoryModalProps = {}) {
+  const context = useGastosContextNullable();
+  const isOpen = props.isOpen ?? context?.isCategoryModalOpen ?? false;
+  const onClose = props.onClose ?? context?.handleCloseCategoryModal ?? (() => {});
+  const editingCategory =
+    props.editingCategory !== undefined
+      ? props.editingCategory
+      : context?.editingCategory ?? null;
+  const onCreateCategory =
+    props.onCreateCategory ?? context?.handleCreateCategory ?? (async () => {});
+  const onUpdateCategory =
+    props.onUpdateCategory ?? context?.handleUpdateCategory ?? (async () => {});
   const [name, setName] = useState<string>("");
   const [color, setColor] = useState<string>("#FFB7CE");
   const [tipoGasto, setTipoGasto] = useState<ExpenseCategoryType>("variable");

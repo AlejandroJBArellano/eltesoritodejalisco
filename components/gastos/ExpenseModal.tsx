@@ -2,22 +2,24 @@
 
 import React, { useState } from "react";
 import { AlertTriangle, DollarSign, FileText, ReceiptText, Tag, X } from "lucide-react";
+import { useGastosContextNullable } from "./GastosContext";
 import type { Category } from "./types";
 import type { CreateExpensePayload } from "./hooks/useGastosData";
 
 export interface ExpenseModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  categories: Category[];
-  onSubmit: (payload: CreateExpensePayload) => Promise<void>;
+  isOpen?: boolean;
+  onClose?: () => void;
+  categories?: Category[];
+  onSubmit?: (payload: CreateExpensePayload) => Promise<void>;
 }
 
-export function ExpenseModal({
-  isOpen,
-  onClose,
-  categories,
-  onSubmit,
-}: ExpenseModalProps) {
+export function ExpenseModal(props: ExpenseModalProps = {}) {
+  const context = useGastosContextNullable();
+  const isOpen = props.isOpen ?? context?.isExpenseModalOpen ?? false;
+  const onClose = props.onClose ?? context?.handleCloseExpenseModal ?? (() => {});
+  const categories = props.categories ?? context?.categories ?? [];
+  const onSubmit =
+    props.onSubmit ?? context?.handleCreateExpense ?? (async () => {});
   const [categoryId, setCategoryId] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [description, setDescription] = useState<string>("");

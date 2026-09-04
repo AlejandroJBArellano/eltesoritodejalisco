@@ -2,16 +2,18 @@
 
 import React from "react";
 import { Calendar } from "lucide-react";
+import { useGastosContextNullable } from "./GastosContext";
 
 export interface GastosMonthPickerProps {
-  currentMonth: string;
-  onMonthChange: (month: string) => void;
+  currentMonth?: string;
+  onMonthChange?: (month: string) => void;
 }
 
-export function GastosMonthPicker({
-  currentMonth,
-  onMonthChange,
-}: GastosMonthPickerProps) {
+export function GastosMonthPicker(props: GastosMonthPickerProps = {}) {
+  const context = useGastosContextNullable();
+  const currentMonth = props.currentMonth ?? context?.currentMonth ?? "";
+  const onMonthChange = props.onMonthChange ?? context?.handleMonthChange;
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
       <div>
@@ -31,7 +33,7 @@ export function GastosMonthPicker({
           id="gastos-month-select"
           type="month"
           value={currentMonth}
-          onChange={(e) => onMonthChange(e.target.value)}
+          onChange={(e) => onMonthChange?.(e.target.value)}
           aria-label="Seleccionar mes"
           className="rounded-xl border border-border bg-card px-4 py-2 text-xs font-bold text-text-light outline-none focus:border-primary transition-all scheme-dark cursor-pointer"
         />

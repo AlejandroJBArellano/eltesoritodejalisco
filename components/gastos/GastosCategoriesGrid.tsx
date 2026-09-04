@@ -2,19 +2,22 @@
 
 import React from "react";
 import { Edit3, Plus, Tag } from "lucide-react";
+import { useGastosContextNullable } from "./GastosContext";
 import type { Category } from "./types";
 
 export interface GastosCategoriesGridProps {
-  categories: Category[];
-  onOpenCreateCategory: () => void;
-  onEditCategory: (cat: Category) => void;
+  categories?: Category[];
+  onOpenCreateCategory?: () => void;
+  onEditCategory?: (cat: Category) => void;
 }
 
-export function GastosCategoriesGrid({
-  categories,
-  onOpenCreateCategory,
-  onEditCategory,
-}: GastosCategoriesGridProps) {
+export function GastosCategoriesGrid(props: GastosCategoriesGridProps = {}) {
+  const context = useGastosContextNullable();
+  const categories = props.categories ?? context?.categories ?? [];
+  const onOpenCreateCategory =
+    props.onOpenCreateCategory ?? context?.handleOpenCreateCategory ?? (() => {});
+  const onEditCategory =
+    props.onEditCategory ?? context?.handleOpenEditCategory ?? (() => {});
   return (
     <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
       <div className="flex items-center justify-between border-b border-border pb-3">

@@ -3,16 +3,20 @@
 import React from "react";
 import { Plus } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { useGastosContextNullable } from "./GastosContext";
 
 export interface GastosHeaderProps {
-  onOpenExpenseModal: () => void;
-  onOpenCategoryModal: () => void;
+  onOpenExpenseModal?: () => void;
+  onOpenCategoryModal?: () => void;
 }
 
-export function GastosHeader({
-  onOpenExpenseModal,
-  onOpenCategoryModal,
-}: GastosHeaderProps) {
+export function GastosHeader(props: GastosHeaderProps = {}) {
+  const context = useGastosContextNullable();
+  const onOpenExpenseModal =
+    props.onOpenExpenseModal ?? context?.handleOpenCreateExpense;
+  const onOpenCategoryModal =
+    props.onOpenCategoryModal ?? context?.handleOpenCreateCategory;
+
   return (
     <PageHeader
       title="Control de Gastos & Egresos"

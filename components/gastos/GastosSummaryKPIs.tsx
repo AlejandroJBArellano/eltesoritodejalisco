@@ -2,17 +2,29 @@
 
 import React from "react";
 import { DollarSign, FileText, ReceiptText, TrendingUp } from "lucide-react";
+import { useGastosContextNullable } from "./GastosContext";
 import type { GastosSummary } from "./types";
 
 export interface GastosSummaryKPIsProps {
-  summary: GastosSummary;
-  currentMonth: string;
+  summary?: GastosSummary;
+  currentMonth?: string;
 }
 
-export function GastosSummaryKPIs({
-  summary,
-  currentMonth,
-}: GastosSummaryKPIsProps) {
+const defaultSummary: GastosSummary = {
+  totalExpenses: 0,
+  fixedExpensesTotal: 0,
+  variableExpensesTotal: 0,
+  invoicedExpensesTotal: 0,
+  totalSales: 0,
+  netUtility: 0,
+  profitMargin: 0,
+};
+
+export function GastosSummaryKPIs(props: GastosSummaryKPIsProps = {}) {
+  const context = useGastosContextNullable();
+  const summary = props.summary ?? context?.summary ?? defaultSummary;
+  const currentMonth = props.currentMonth ?? context?.currentMonth ?? "";
+
   const formatCurrency = (val: number) => {
     const isNegative = val < 0;
     const formatted = Math.abs(val).toLocaleString(undefined, {

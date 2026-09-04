@@ -2,31 +2,38 @@
 
 import React from "react";
 import { Search, X } from "lucide-react";
+import { useGastosContextNullable } from "./GastosContext";
 import type { Category, ExpenseTypeFilter, InvoiceFilter } from "./types";
 
 export interface GastosFilterBarProps {
-  categories: Category[];
-  search: string;
-  onSearchChange: (val: string) => void;
-  categoryFilter: string;
-  onCategoryFilterChange: (catId: string) => void;
-  invoiceFilter: InvoiceFilter;
-  onInvoiceFilterChange: (filter: InvoiceFilter) => void;
-  typeFilter: ExpenseTypeFilter;
-  onTypeFilterChange: (filter: ExpenseTypeFilter) => void;
+  categories?: Category[];
+  search?: string;
+  onSearchChange?: (val: string) => void;
+  categoryFilter?: string;
+  onCategoryFilterChange?: (catId: string) => void;
+  invoiceFilter?: InvoiceFilter;
+  onInvoiceFilterChange?: (filter: InvoiceFilter) => void;
+  typeFilter?: ExpenseTypeFilter;
+  onTypeFilterChange?: (filter: ExpenseTypeFilter) => void;
 }
 
-export function GastosFilterBar({
-  categories,
-  search,
-  onSearchChange,
-  categoryFilter,
-  onCategoryFilterChange,
-  invoiceFilter,
-  onInvoiceFilterChange,
-  typeFilter,
-  onTypeFilterChange,
-}: GastosFilterBarProps) {
+export function GastosFilterBar(props: GastosFilterBarProps = {}) {
+  const context = useGastosContextNullable();
+  const categories = props.categories ?? context?.categories ?? [];
+  const search = props.search ?? context?.tableSearch ?? "";
+  const onSearchChange =
+    props.onSearchChange ?? context?.handleSearchChange ?? (() => {});
+  const categoryFilter =
+    props.categoryFilter ?? context?.tableCategoryFilter ?? "";
+  const onCategoryFilterChange =
+    props.onCategoryFilterChange ?? context?.handleCategoryFilterChange ?? (() => {});
+  const invoiceFilter =
+    props.invoiceFilter ?? context?.tableInvoiceFilter ?? "all";
+  const onInvoiceFilterChange =
+    props.onInvoiceFilterChange ?? context?.handleInvoiceFilterChange ?? (() => {});
+  const typeFilter = props.typeFilter ?? context?.tableTypeFilter ?? "all";
+  const onTypeFilterChange =
+    props.onTypeFilterChange ?? context?.handleTypeFilterChange ?? (() => {});
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
       {/* Buscador por texto */}

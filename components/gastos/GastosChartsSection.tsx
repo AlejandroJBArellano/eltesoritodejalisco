@@ -15,14 +15,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useGastosContextNullable } from "./GastosContext";
 import type { CategoryExpenseItem, DailyExpenseTrendItem } from "./types";
 
 export interface GastosChartsSectionProps {
-  currentMonth: string;
-  fixedExpensesTotal: number;
-  variableExpensesTotal: number;
-  dailyExpensesData: DailyExpenseTrendItem[];
-  categoryExpensesData: CategoryExpenseItem[];
+  currentMonth?: string;
+  fixedExpensesTotal?: number;
+  variableExpensesTotal?: number;
+  dailyExpensesData?: DailyExpenseTrendItem[];
+  categoryExpensesData?: CategoryExpenseItem[];
 }
 
 export const formatYAxisCurrency = (v: number | string) => `$${v}`;
@@ -35,13 +36,17 @@ export const formatCategoryTooltip = (val: unknown) => [
   "Gasto Acumulado",
 ];
 
-export function GastosChartsSection({
-  currentMonth,
-  fixedExpensesTotal,
-  variableExpensesTotal,
-  dailyExpensesData,
-  categoryExpensesData,
-}: GastosChartsSectionProps) {
+export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
+  const context = useGastosContextNullable();
+  const currentMonth = props.currentMonth ?? context?.currentMonth ?? "";
+  const fixedExpensesTotal =
+    props.fixedExpensesTotal ?? context?.summary.fixedExpensesTotal ?? 0;
+  const variableExpensesTotal =
+    props.variableExpensesTotal ?? context?.summary.variableExpensesTotal ?? 0;
+  const dailyExpensesData =
+    props.dailyExpensesData ?? context?.dailyExpensesData ?? [];
+  const categoryExpensesData =
+    props.categoryExpensesData ?? context?.categoryExpensesData ?? [];
   return (
     <div className="space-y-8">
       {/* 1. Gráfica Lineal: Gastos Fijos vs Gastos Variables */}
