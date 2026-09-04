@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { FacturacionModal } from "@/components/pos/FacturacionModal";
-import { createClient } from "@/lib/supabase/client";
+import { useOptionalUser } from "@/components/UserProvider";
 
 import { HistoryProvider, useHistoryContext } from "./HistoryContext";
 import { DailyCutBanner } from "./DailyCutBanner";
@@ -69,52 +69,9 @@ function HistoryMainView() {
 }
 
 export function HistoryContent() {
-  const [isCheckingRole, setIsCheckingRole] = useState(true);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const user = useOptionalUser();
 
-  const checkRole = useCallback(async () => {
-    try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        const tenantRes = await fetch("/api/tenant");
-        if (tenantRes.ok) {
-          const { tenant } = await tenantRes.json();
-          if (tenant) {
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("role")
-              .eq("id", user.id)
-              .eq("tenant_id", tenant.id)
-              .single();
-            setUserRole(profile?.role || null);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error checking role:", error);
-    } finally {
-      setIsCheckingRole(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void checkRole();
-  }, [checkRole]);
-
-  if (isCheckingRole) {
-    return (
-      <div className="min-h-screen bg-background flex justify-center items-center">
-        <p className="text-text-light/60 font-bold text-sm">
-          Verificando permisos...
-        </p>
-      </div>
-    );
-  }
-
-  if (userRole === "WAITER") {
+  if (user?.isWaiter) {
     return (
       <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
         <div className="bg-card p-8 rounded-2xl shadow-xl border border-red-500/20 max-w-md w-full text-center space-y-4">

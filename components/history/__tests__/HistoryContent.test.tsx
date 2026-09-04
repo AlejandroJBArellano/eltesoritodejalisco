@@ -1,28 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { HistoryContent } from "../HistoryContent";
+import { useOptionalUser } from "@/components/UserProvider";
 
-const mockGetUser = vi.fn().mockResolvedValue({
-  data: { user: { id: "user-admin" } },
-});
-
-const mockProfileSingle = vi.fn().mockResolvedValue({
-  data: { role: "ADMIN" },
-});
-
-vi.mock("@/lib/supabase/client", () => ({
-  createClient: () => ({
-    auth: { getUser: mockGetUser },
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          eq: () => ({
-            single: mockProfileSingle,
-          }),
-        }),
-      }),
-    }),
-  }),
+vi.mock("@/components/UserProvider", () => ({
+  useOptionalUser: vi.fn(),
 }));
 
 vi.mock("@/hooks/usePendingCut", () => ({
@@ -35,13 +17,27 @@ vi.mock("@/hooks/usePendingCut", () => ({
   }),
 }));
 
+vi.mock("@/components/pos/FacturacionModal", () => ({
+  FacturacionModal: ({ onClose }: { onClose: () => void }) => (
+    <div data-testid="facturacion-modal">
+      <span>Modal de Facturación</span>
+      <button onClick={onClose}>Cerrar Factura</button>
+    </div>
+  ),
+}));
+
 describe("HistoryContent Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "ADMIN",
+      isAdmin: true,
+      isWaiter: false,
+      isChef: false,
+      isAuthenticated: true,
+    });
     global.fetch = vi.fn().mockImplementation(async (url: string) => {
-      if (url === "/api/tenant") {
-        return { ok: true, json: async () => ({ tenant: { id: "tenant-1" } }) };
-      }
       if (url === "/api/orders") {
         return {
           ok: true,
@@ -55,6 +51,8 @@ describe("HistoryContent Component", () => {
                 total: 116,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
+                order_items: [],
+                payments: [],
               },
             ],
           }),
@@ -67,25 +65,25 @@ describe("HistoryContent Component", () => {
     });
   });
 
-  it("renders access denied view for WAITER role", async () => {
-    mockProfileSingle.mockResolvedValueOnce({
-      data: { role: "WAITER" },
+  it("renders access denied view for WAITER role", () => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "WAITER",
+      isAdmin: false,
+      isWaiter: true,
+      isChef: false,
+      isAuthenticated: true,
     });
 
     render(<HistoryContent />);
 
-    await waitFor(() => {
-      expect(screen.getByText("Acceso Denegado")).toBeDefined();
-    });
+    expect(screen.getByText("Acceso Denegado")).toBeDefined();
     expect(screen.getByText(/El rol de/)).toBeDefined();
     expect(screen.getByText("MESERO")).toBeDefined();
+    expect(screen.getByRole("link", { name: /Volver al Dashboard/i })).toBeDefined();
   });
 
-  it("renders full history view for ADMIN role and handles archive toggle and finalize modal", async () => {
-    mockProfileSingle.mockResolvedValueOnce({
-      data: { role: "ADMIN" },
-    });
-
+  it("renders full history view for ADMIN role, toggles archive, finalize modal, and billing modal", async () => {
     render(<HistoryContent />);
 
     await waitFor(() => {
@@ -114,12 +112,43 @@ describe("HistoryContent Component", () => {
       expect(screen.getByText("Tarjeta Caja")).toBeDefined();
     });
 
-    // Close modal
+    // Close finalize modal
     const cancelBtn = screen.getByText("Cancelar");
     fireEvent.click(cancelBtn);
 
     await waitFor(() => {
       expect(screen.queryByText("Efectivo Caja")).toBeNull();
     });
+
+    // Expand order row to trigger Facturar Orden
+    const row = screen.getByTestId("order-row-ord-1");
+    fireEvent.click(row);
+
+    await waitFor(() => {
+      expect(screen.getByText("Facturar Orden")).toBeDefined();
+    });
+
+    const facturarBtn = screen.getByText("Facturar Orden");
+    fireEvent.click(facturarBtn);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("facturacion-modal")).toBeDefined();
+    });
+
+    // Close facturacion modal
+    const closeFacturaBtn = screen.getByText("Cerrar Factura");
+    fireEvent.click(closeFacturaBtn);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("facturacion-modal")).toBeNull();
+    });
+  });
+
+  it("renders loading indicator while orders are being fetched", () => {
+    global.fetch = vi.fn().mockImplementation(() => new Promise(() => {}));
+
+    render(<HistoryContent />);
+
+    expect(screen.getByText("Cargando historial y datos...")).toBeDefined();
   });
 });
