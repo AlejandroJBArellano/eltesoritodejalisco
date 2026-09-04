@@ -16,6 +16,14 @@ export async function GET(request: NextRequest) {
     const statusParam = searchParams.get("status");
     const posParam = searchParams.get("pos");
 
+    const profile = await getProfile();
+    if (profile?.role === "WAITER" && posParam !== "true") {
+      return NextResponse.json(
+        { error: "No autorizado para consultar el historial general de órdenes" },
+        { status: 403 },
+      );
+    }
+
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
