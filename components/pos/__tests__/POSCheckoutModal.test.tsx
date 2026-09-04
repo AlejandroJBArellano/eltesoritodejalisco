@@ -7,6 +7,7 @@ import { OrderStatus } from "@/types";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
+import { useOptionalUser } from "@/components/UserProvider";
 
 vi.mock("@/hooks/pos/usePOSData", () => ({
   usePOSData: vi.fn(),
@@ -18,6 +19,10 @@ vi.mock("@/hooks/pos/usePOSCart", () => ({
 
 vi.mock("@/hooks/pos/usePOSCheckout", () => ({
   usePOSCheckout: vi.fn(),
+}));
+
+vi.mock("@/components/UserProvider", () => ({
+  useOptionalUser: vi.fn(),
 }));
 
 const mockOrder: Order = {
@@ -88,6 +93,14 @@ describe("POSCheckoutModal Component", () => {
   };
 
   beforeEach(() => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "ADMIN",
+      isAdmin: true,
+      isWaiter: false,
+      isChef: false,
+      isAuthenticated: true,
+    });
     vi.mocked(usePOSData).mockReturnValue(
       defaultDataValue as unknown as ReturnType<typeof usePOSData>,
     );
@@ -254,5 +267,39 @@ describe("POSCheckoutModal Component", () => {
     const submitBtn = screen.getByRole("button", { name: /Registrar Pago/i });
     fireEvent.click(submitBtn);
     expect(handleProcessPayment).toHaveBeenCalledWith(false);
+  });
+
+  it("should show tip badge when tipAmountCalculated > 0 and user is admin", () => {
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      tipAmountCalculated: 20,
+    } as unknown as ReturnType<typeof usePOSCheckout>);
+
+    render(<POSCheckoutModal />);
+
+    expect(screen.getByText("Incluye $20.00 de propina")).toBeInTheDocument();
+    expect(screen.getByText("$136.00")).toBeInTheDocument();
+  });
+
+  it("should hide tip badge when tipAmountCalculated > 0 and user is waiter, but keep total to pay", () => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "WAITER",
+      isAdmin: false,
+      isWaiter: true,
+      isChef: false,
+      isAuthenticated: true,
+    });
+
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      tipAmountCalculated: 20,
+    } as unknown as ReturnType<typeof usePOSCheckout>);
+
+    render(<POSCheckoutModal />);
+
+    expect(screen.queryByText(/Incluye.*propina/i)).toBeNull();
+    // Still shows the combined total to pay so the waiter knows what to charge the customer
+    expect(screen.getByText("$136.00")).toBeInTheDocument();
   });
 });

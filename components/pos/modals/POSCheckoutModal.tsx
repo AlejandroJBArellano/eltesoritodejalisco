@@ -1,6 +1,7 @@
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
+import { useOptionalUser } from "@/components/UserProvider";
 import {
   AlertCircle,
   AlertTriangle,
@@ -19,6 +20,9 @@ const PAYMENT_METHODS = [
 ];
 
 export function POSCheckoutModal() {
+  const user = useOptionalUser();
+  const isWaiter = user?.isWaiter ?? false;
+
   const {
     availableMenuItems,
     refreshOrders,
@@ -140,7 +144,7 @@ export function POSCheckoutModal() {
             <p className="text-4xl font-black text-text-light tabular-nums tracking-tight">
               ${(checkoutOrder!.total + tipAmountCalculated).toFixed(2)}
             </p>
-            {tipAmountCalculated > 0 && (
+            {!isWaiter && tipAmountCalculated > 0 && (
               <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/10 text-blue-400 border border-blue-500/25 uppercase tracking-wider">
                 Incluye ${tipAmountCalculated.toFixed(2)} de propina
               </span>
