@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ReportsContent } from "../ReportsContent";
+import { useOptionalUser } from "@/components/UserProvider";
 import type { ReportData } from "../types";
+
+vi.mock("@/components/UserProvider", () => ({
+  useOptionalUser: vi.fn(),
+}));
 
 const mockData: ReportData = {
   period: "7days",
@@ -41,6 +46,14 @@ const mockData: ReportData = {
 describe("ReportsContent Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "ADMIN",
+      isAdmin: true,
+      isWaiter: false,
+      isChef: false,
+      isAuthenticated: true,
+    });
   });
 
   it("renders loading state initially", () => {
@@ -96,5 +109,27 @@ describe("ReportsContent Component", () => {
       expect(screen.getByText("Ventas por Producto (Detallado)")).toBeInTheDocument();
       expect(screen.getByText("Mejores Clientes")).toBeInTheDocument();
     });
+  });
+
+  it("renders Acceso Denegado when user is Waiter", () => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "WAITER",
+      isAdmin: false,
+      isWaiter: true,
+      isChef: false,
+      isAuthenticated: true,
+    });
+
+    render(<ReportsContent />);
+
+    expect(screen.getByText("Acceso Denegado")).toBeInTheDocument();
+    expect(screen.getByText("MESERO")).toBeInTheDocument();
+    expect(
+      screen.getByText(/no cuenta con permisos para acceder a reportes/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Volver al Dashboard/i }),
+    ).toBeInTheDocument();
   });
 });
