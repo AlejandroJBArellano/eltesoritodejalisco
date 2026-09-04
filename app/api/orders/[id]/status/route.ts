@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentCDMXDate } from "@/lib/utils";
 import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
+import { reverseInventoryForOrder } from "@/lib/services/inventory";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -28,6 +29,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       status === "UNCOLLECTED"
     ) {
       updateData.completed_at = getCurrentCDMXDate();
+    }
+
+    if (status === "CANCELLED") {
+      await reverseInventoryForOrder(id);
     }
 
     const tenant = await getTenantContext();

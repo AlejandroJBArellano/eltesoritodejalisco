@@ -66,8 +66,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     if (orderUpdateError) throw orderUpdateError;
 
-    // 4. Inventory reversal is handled automatically by the
-    //    trg_order_status_inventory trigger (PAID → PENDING)
+    // 4. Inventory is NOT reversed on undo-payment because items were consumed
+    //    at order creation (inventory is only reversed if the order is CANCELLED).
 
     // 5. Log the adjustment
     const { error: logError } = await supabase

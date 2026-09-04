@@ -4,6 +4,7 @@ import type { CreateOrderRequest } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
 import { getProfile } from "@/lib/auth";
+import { reverseInventoryForOrder } from "@/lib/services/inventory";
 
 /**
  * GET /api/orders
@@ -151,6 +152,10 @@ export async function DELETE(request: NextRequest) {
 
     const tenant = await getTenantContext();
     const supabase = await createClient();
+
+    // Revert inventory before deleting order
+    await reverseInventoryForOrder(id);
+
     const { error } = await supabase
       .from("orders")
       .delete()

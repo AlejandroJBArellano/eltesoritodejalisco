@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
+import { deductInventoryForOrder } from "@/lib/services/inventory";
 
 const TAX_RATE = 0;
 
@@ -275,6 +276,9 @@ export async function PATCH(
       .insert(newItemsData);
 
     if (itemsError) throw itemsError;
+
+    // Deduct inventory immediately for the newly added items
+    await deductInventoryForOrder(id);
 
     const additionalTax = additionalSubtotal * 0;
     const additionalTotal = additionalSubtotal + additionalTax;
