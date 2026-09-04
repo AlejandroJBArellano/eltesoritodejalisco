@@ -10,6 +10,7 @@ import {
 import { PrimordialTask, TaskExecution } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import { ExportButton } from "@/components/ui/DataTableControls";
+import { ActiveTaskTimer } from "./ActiveTaskTimer";
 import {
   Folder,
   Camera,
@@ -49,16 +50,7 @@ export function TareasClient({
     task: PrimordialTask;
   } | null>(null);
 
-  // Estado para forzar re-renderizado del temporizador cada segundo
-  const [now, setNow] = useState(new Date());
-
   const supabase = createClient();
-
-  // Actualizar el reloj interno cada segundo para animar los temporizadores
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Comprobar periódicamente si hay tareas con Timeout
   useEffect(() => {
@@ -200,34 +192,6 @@ export function TareasClient({
     } finally {
       setLoadingTaskId(null);
     }
-  };
-
-  const getLiveTimerString = (exec: TaskExecution) => {
-    if (!exec.start_time) return "00:00";
-
-    const startTime = new Date(exec.start_time);
-    let elapsedSeconds = 0;
-
-    if (exec.status === "IN_PROGRESS") {
-      elapsedSeconds = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-    } else if (exec.status === "PAUSED" && exec.end_time) {
-      const endTime = new Date(exec.end_time);
-      elapsedSeconds = Math.floor(
-        (endTime.getTime() - startTime.getTime()) / 1000,
-      );
-    } else {
-      return "Pausado";
-    }
-
-    const netSeconds = elapsedSeconds - (exec.paused_seconds || 0);
-    const displaySeconds = netSeconds > 0 ? netSeconds : 0;
-
-    const h = Math.floor(displaySeconds / 3600);
-    const m = Math.floor((displaySeconds % 3600) / 60);
-    const s = displaySeconds % 60;
-
-    const pad = (num: number) => String(num).padStart(2, "0");
-    return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
   };
 
   return (
@@ -380,9 +344,7 @@ export function TareasClient({
                               </>
                             )}
                           </span>
-                          <span className="text-lg font-black text-text-light font-mono tracking-wider">
-                            {getLiveTimerString(activeExecution)}
-                          </span>
+                          <ActiveTaskTimer execution={activeExecution} />
                         </div>
 
                         {/* Input Camera / Photo upload if required */}
