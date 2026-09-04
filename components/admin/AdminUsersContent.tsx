@@ -1,32 +1,32 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
 import {
   createUser,
   deleteUser,
   updateUserRole,
 } from "@/app/admin/users/actions";
-import {
-  UserPlus,
-  Users,
-  ShieldCheck,
-  Trash2,
-  Mail,
-  Lock,
-  User,
-  CheckCircle2,
-  AlertTriangle,
-  ChefHat,
-  Receipt,
-  RefreshCw,
-} from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { Modal } from "@/components/ui/Modal";
 import {
-  TableSearchInput,
   TableHeaderSortCell,
   TablePagination,
+  TableSearchInput,
 } from "@/components/ui/DataTableControls";
+import { Modal } from "@/components/ui/Modal";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ChefHat,
+  Lock,
+  Mail,
+  Receipt,
+  RefreshCw,
+  ShieldCheck,
+  Trash2,
+  User,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
 
 type Profile = {
   id: string;
@@ -36,7 +36,7 @@ type Profile = {
   created_at: string;
 };
 
-const ROLE_PERMISSIONS: Record<
+export const ROLE_PERMISSIONS: Record<
   string,
   {
     title: string;
@@ -93,6 +93,7 @@ const ROLE_PERMISSIONS: Record<
     ],
     restrictions: [
       "Sin acceso a reportes financieros",
+      "Sin acceso a historial general de órdenes",
       "Sin acceso a edición de menú",
       "Sin acceso a administración de usuarios",
     ],
@@ -288,13 +289,13 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
         {/* Mensajes de notificación */}
         {errorMsg && (
           <div className="flex items-center gap-3 rounded-2xl bg-red-500/10 border border-red-500/20 p-4 text-red-400 text-xs font-bold shadow-sm">
-            <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+            <AlertTriangle className="h-5 w-5 shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
         {successMsg && (
           <div className="flex items-center gap-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-emerald-400 text-xs font-bold shadow-sm">
-            <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+            <CheckCircle2 className="h-5 w-5 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
@@ -456,7 +457,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                   return (
                     <tr
                       key={p.id}
-                      className="hover:bg-white/[0.02] transition-colors"
+                      className="hover:bg-white/2 transition-colors"
                     >
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
@@ -510,11 +511,10 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                           onClick={() =>
                             handleDelete(p.id, p.full_name || p.email)
                           }
-                          className={`rounded-lg border p-2 transition-all text-xs font-black ${
-                            deleteArmedId === p.id
-                              ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
-                              : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
-                          }`}
+                          className={`rounded-lg border p-2 transition-all text-xs font-black ${deleteArmedId === p.id
+                            ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
+                            : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                            }`}
                           title={
                             deleteArmedId === p.id
                               ? "Confirmar eliminación"
