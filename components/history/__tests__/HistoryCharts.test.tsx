@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { HistoryCharts } from "../HistoryCharts";
 import { OrderStatus, type OrderWithDetails } from "@/types";
 
@@ -51,5 +51,20 @@ describe("HistoryCharts Component", () => {
     render(<HistoryCharts orders={[]} />);
 
     expect(screen.getByText("Sin ventas suficientes este mes")).toBeDefined();
+    expect(screen.getByText("Sin ventas registradas este mes")).toBeDefined();
+  });
+
+  it("handles hover on line point and donut slice", () => {
+    render(<HistoryCharts orders={mockOrders} />);
+
+    // Donut slice hover
+    const caldosLegend = screen.getByText("Caldos");
+    expect(caldosLegend).toBeInTheDocument();
+
+    const paths = document.querySelectorAll("path");
+    paths.forEach((p) => {
+      fireEvent.mouseEnter(p);
+      fireEvent.mouseLeave(p);
+    });
   });
 });

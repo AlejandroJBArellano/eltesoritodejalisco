@@ -1,17 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { BarChart3, X } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
 
 export interface DayChartItem {
   date: string;
@@ -38,6 +28,23 @@ export function SalesTrendChart({
   onSelectDay,
   selectedDayItems,
 }: SalesTrendChartProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  // SVG Chart Dimensions & Calculations
+  const svgWidth = 900;
+  const svgHeight = 280;
+  const paddingLeft = 60;
+  const paddingRight = 20;
+  const paddingTop = 25;
+  const paddingBottom = 40;
+
+  const innerWidth = svgWidth - paddingLeft - paddingRight;
+  const innerHeight = svgHeight - paddingTop - paddingBottom;
+
+  const rawMax = Math.max(...chartData.map((d) => d.total), 0);
+  const maxVal = rawMax > 0 ? Math.ceil(rawMax * 1.15) : 100;
+  const yTicks = [0, maxVal * 0.25, maxVal * 0.5, maxVal * 0.75, maxVal];
+
   return (
     <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
@@ -63,67 +70,121 @@ export function SalesTrendChart({
       </div>
 
       {chartData.length > 0 ? (
-        <div className="h-72 w-full" data-testid="sales-trend-barchart">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                vertical={false}
-                stroke="rgba(255,255,255,0.05)"
-              />
-              <XAxis
-                dataKey="label"
-                tickLine={false}
-                axisLine={false}
-                tick={{ fill: "#888888", fontSize: 11, fontWeight: 700 }}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tick={{ fill: "#888888", fontSize: 11, fontWeight: 700 }}
-                tickFormatter={(value) => `$${value}`}
-              />
-              <RechartsTooltip
-                contentStyle={{
-                  backgroundColor: "#18181B",
-                  borderColor: "#27272A",
-                  borderRadius: "1rem",
-                  color: "#FFFFFF",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  boxShadow: "0 10px 15px -3px rgba(0,0,0,0.5)",
-                }}
-                formatter={(value: unknown) => [
-                  `$${Number(value ?? 0).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  })}`,
-                  "Ventas Totales",
-                ]}
-                cursor={{ fill: "rgba(255,255,255,0.05)" }}
-              />
-              <Bar
-                dataKey="total"
-                radius={[6, 6, 0, 0]}
-                style={{ cursor: "pointer" }}
-                onClick={(barData) => {
-                  const date = (barData?.payload as { date?: string })?.date;
-                  if (date) {
-                    onSelectDay(selectedDay === date ? null : date);
-                  }
-                }}
-              >
-                {chartData.map((entry) => (
-                  <Cell
-                    key={entry.date}
-                    fill={selectedDay === entry.date ? "#F59E0B" : "#3B82F6"}
+        <div
+          className="relative h-72 w-full select-none"
+          data-testid="sales-trend-barchart"
+        >
+          <svg
+            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+            className="h-full w-full overflow-visible"
+            preserveAspectRatio="none"
+          >
+            {/* Gridlines and Y-axis labels */}
+            {yTicks.map((tick, i) => {
+              const y = paddingTop + innerHeight - (tick / maxVal) * innerHeight;
+              return (
+                <g key={`ytick-${i}`}>
+                  <line
+                    x1={paddingLeft}
+                    y1={y}
+                    x2={svgWidth - paddingRight}
+                    y2={y}
+                    stroke="rgba(255,255,255,0.06)"
+                    strokeDasharray="3 3"
                   />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                  <text
+                    x={paddingLeft - 10}
+                    y={y + 4}
+                    textAnchor="end"
+                    fill="#888888"
+                    fontSize="11"
+                    fontWeight="700"
+                  >
+                    ${Math.round(tick).toLocaleString()}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* Bars */}
+            {chartData.map((entry, index) => {
+              const count = chartData.length;
+              const slotWidth = innerWidth / count;
+              const barWidth = Math.min(Math.max(slotWidth * 0.6, 12), 48);
+              const xCenter = paddingLeft + (index + 0.5) * slotWidth;
+              const barX = xCenter - barWidth / 2;
+              const barHeight = Math.max((entry.total / maxVal) * innerHeight, 2);
+              const barY = paddingTop + innerHeight - barHeight;
+              const isSelected = selectedDay === entry.date;
+              const isHovered = hoveredIndex === index;
+
+              const fillColor = isSelected
+                ? "#F59E0B"
+                : isHovered
+                  ? "#60A5FA"
+                  : "#3B82F6";
+
+              return (
+                <g
+                  key={entry.date}
+                  className="cursor-pointer transition-opacity"
+                  onClick={() =>
+                    onSelectDay(isSelected ? null : entry.date)
+                  }
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  <rect
+                    x={barX}
+                    y={barY}
+                    width={barWidth}
+                    height={barHeight}
+                    rx={5}
+                    fill={fillColor}
+                    className="transition-all duration-150"
+                  />
+                  {/* X-axis Label */}
+                  <text
+                    x={xCenter}
+                    y={svgHeight - 12}
+                    textAnchor="middle"
+                    fill={isSelected ? "#F59E0B" : "#888888"}
+                    fontSize="11"
+                    fontWeight={isSelected ? "900" : "700"}
+                  >
+                    {entry.label}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Floating Native Tooltip */}
+          {hoveredIndex !== null && chartData[hoveredIndex] && (
+            <div
+              style={{
+                left: `${
+                  ((paddingLeft +
+                    (hoveredIndex + 0.5) *
+                      (innerWidth / chartData.length)) /
+                    svgWidth) *
+                  100
+                }%`,
+                top: "15%",
+              }}
+              className="absolute pointer-events-none -translate-x-1/2 z-20 rounded-2xl border border-border bg-dark/95 p-3 shadow-2xl backdrop-blur-md whitespace-nowrap"
+            >
+              <p className="text-xs font-black text-white">
+                $
+                {chartData[hoveredIndex].total.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </p>
+              <p className="text-[10px] font-bold text-text-light/60 mt-0.5">
+                Ventas Totales • {chartData[hoveredIndex].label}
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <p className="py-16 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest">

@@ -1,16 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Layers } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip as RechartsTooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import type { ProductSaleItem } from "../reports/types";
 
 export interface ProductSalesDistributionChartProps {
@@ -34,6 +25,16 @@ export function ProductSalesDistributionChart({
   totalCategoryRevenue,
   totalCategoryQuantity,
 }: ProductSalesDistributionChartProps) {
+  const [hoveredProduct, setHoveredProduct] = useState<ProductSaleItem | null>(
+    null,
+  );
+
+  const rawMax = Math.max(
+    ...productChartData.map((p) => p[productMetric] || 0),
+    0,
+  );
+  const maxVal = rawMax > 0 ? rawMax : 1;
+
   return (
     <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
@@ -61,7 +62,11 @@ export function ProductSalesDistributionChart({
               className="bg-transparent text-text-light text-xs font-bold uppercase tracking-wider outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none rounded px-1"
             >
               {categoriesList.map((cat) => (
-                <option key={cat} value={cat} className="bg-card text-text-light">
+                <option
+                  key={cat}
+                  value={cat}
+                  className="bg-card text-text-light"
+                >
                   {cat}
                 </option>
               ))}
@@ -128,62 +133,72 @@ export function ProductSalesDistributionChart({
       </div>
 
       {productChartData.length > 0 ? (
-        <div className="h-80 w-full" data-testid="product-distribution-chart">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={productChartData}
-              layout="vertical"
-              margin={{ top: 10, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                horizontal={false}
-                stroke="rgba(255,255,255,0.05)"
-              />
-              <XAxis
-                type="number"
-                tickLine={false}
-                axisLine={false}
-                tick={{ fill: "#888888", fontSize: 11, fontWeight: 700 }}
-                tickFormatter={(val) =>
-                  productMetric === "revenue" ? `$${val}` : `${val} u.`
-                }
-              />
-              <YAxis
-                type="category"
-                dataKey="name"
-                width={140}
-                tickLine={false}
-                axisLine={false}
-                tick={{ fill: "#DDDDDD", fontSize: 11, fontWeight: 700 }}
-              />
-              <RechartsTooltip
-                contentStyle={{
-                  backgroundColor: "#18181B",
-                  borderColor: "#27272A",
-                  borderRadius: "1rem",
-                  color: "#FFFFFF",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  boxShadow: "0 10px 15px -3px rgba(0,0,0,0.5)",
-                }}
-                formatter={(val: unknown) => [
-                  productMetric === "revenue"
-                    ? `$${Number(val ?? 0).toLocaleString(undefined, {
+        <div
+          className="w-full space-y-3.5"
+          data-testid="product-distribution-chart"
+        >
+          {productChartData.map((product) => {
+            const val = product[productMetric] || 0;
+            const percentage = Math.max(Math.min((val / maxVal) * 100, 100), 1);
+            const isRevenue = productMetric === "revenue";
+            const barColor = isRevenue ? "bg-emerald-500" : "bg-purple-500";
+            const isHovered = hoveredProduct?.id === product.id;
+
+            return (
+              <div
+                key={product.id}
+                className="group relative cursor-pointer"
+                onMouseEnter={() => setHoveredProduct(product)}
+                onMouseLeave={() => setHoveredProduct(null)}
+              >
+                <div className="flex items-center justify-between text-xs mb-1.5 gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-bold text-text-light uppercase truncate">
+                      {product.name}
+                    </span>
+                    <span className="hidden sm:inline-block text-[10px] font-bold text-text-light/40 uppercase bg-dark/60 border border-border px-1.5 py-0.5 rounded">
+                      {product.category || "General"}
+                    </span>
+                  </div>
+                  <span
+                    className={`font-black shrink-0 ${
+                      isRevenue ? "text-emerald-400" : "text-purple-400"
+                    }`}
+                  >
+                    {isRevenue
+                      ? `$${val.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                        })}`
+                      : `${val.toLocaleString()} u.`}
+                  </span>
+                </div>
+
+                {/* Progress bar track */}
+                <div className="h-3 w-full bg-dark/60 border border-border/60 rounded-full overflow-hidden p-0.5">
+                  <div
+                    className={`h-full ${barColor} rounded-full transition-all duration-500 ease-out`}
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+
+                {/* Interactive hover card */}
+                {isHovered && (
+                  <div className="absolute right-0 bottom-full mb-1 z-20 pointer-events-none rounded-xl border border-border bg-dark/95 p-3 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap">
+                    <p className="font-black text-white">{product.name}</p>
+                    <p className="text-[11px] text-emerald-400 font-bold mt-0.5">
+                      Ingresos: $
+                      {(product.revenue || 0).toLocaleString(undefined, {
                         minimumFractionDigits: 2,
-                      })}`
-                    : `${Number(val ?? 0).toLocaleString()} unidades`,
-                  productMetric === "revenue" ? "Ingresos" : "Cantidad Vendida",
-                ]}
-                cursor={{ fill: "rgba(255,255,255,0.05)" }}
-              />
-              <Bar
-                dataKey={productMetric}
-                radius={[0, 6, 6, 0]}
-                fill={productMetric === "revenue" ? "#10B981" : "#A855F7"}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+                      })}
+                    </p>
+                    <p className="text-[11px] text-purple-400 font-bold">
+                      Unidades: {(product.quantity || 0).toLocaleString()}
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       ) : (
         <p className="py-16 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest">

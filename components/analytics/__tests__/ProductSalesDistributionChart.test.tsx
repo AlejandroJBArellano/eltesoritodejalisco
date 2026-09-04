@@ -28,17 +28,28 @@ describe("ProductSalesDistributionChart Component", () => {
     expect(screen.getByText("Distribución de Ventas por Producto")).toBeInTheDocument();
     expect(screen.getByText("$3,925.00")).toBeInTheDocument();
     expect(screen.getByText("65 u.")).toBeInTheDocument();
-    expect(screen.getByText("Latte Frío")).toBeInTheDocument();
+    expect(screen.getAllByText("Latte Frío").length).toBeGreaterThanOrEqual(1);
 
     const categorySelect = screen.getByLabelText("Filtrar por categoría");
     fireEvent.change(categorySelect, { target: { value: "Bebidas" } });
     expect(handleSelectCategory).toHaveBeenCalledWith("Bebidas");
+
+    const revenueBtn = screen.getByRole("button", { name: /\$ Ingresos/i });
+    fireEvent.click(revenueBtn);
+    expect(handleSelectMetric).toHaveBeenCalledWith("revenue");
 
     const unitsBtn = screen.getByRole("button", { name: /# Unidades/i });
     fireEvent.click(unitsBtn);
     expect(handleSelectMetric).toHaveBeenCalledWith("quantity");
 
     expect(screen.getByTestId("product-distribution-chart")).toBeInTheDocument();
+
+    const productRow = screen.getAllByText("Latte Frío")[1]?.closest(".group");
+    if (productRow) {
+      fireEvent.mouseEnter(productRow);
+      expect(screen.getByText("Ingresos: $2,925.00")).toBeInTheDocument();
+      fireEvent.mouseLeave(productRow);
+    }
   });
 
   it("renders empty state fallback when no products in selected category", () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import {
   GastosChartsSection,
   formatYAxisCurrency,
@@ -37,8 +37,8 @@ describe("GastosChartsSection Component", () => {
       screen.getByText(/Distribución por Categoría de Gasto \(2026-09\)/i),
     ).toBeInTheDocument();
 
-    expect(screen.getByText("$500.00")).toBeInTheDocument();
-    expect(screen.getByText("$550.00")).toBeInTheDocument();
+    expect(screen.getAllByText("$500.00").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("$550.00").length).toBeGreaterThanOrEqual(1);
 
     expect(screen.getByTestId("gastos-trend-linechart")).toBeInTheDocument();
     expect(screen.getByTestId("gastos-category-barchart")).toBeInTheDocument();
@@ -65,5 +65,31 @@ describe("GastosChartsSection Component", () => {
     expect(formatExpenseTooltip(null)).toEqual(["$0.00", ""]);
     expect(formatCategoryTooltip(800)).toEqual(["$800.00", "Gasto Acumulado"]);
     expect(formatCategoryTooltip(undefined)).toEqual(["$0.00", "Gasto Acumulado"]);
+  });
+
+  it("handles hover interactions on line points and category rows", () => {
+    render(
+      <GastosChartsSection
+        currentMonth="2026-09"
+        dailyExpensesData={mockDailyData}
+        categoryExpensesData={mockCategoryData}
+      />,
+    );
+
+    // Line chart point hover
+    const pointGroup = screen.getByText("09/01").parentElement;
+    if (pointGroup) {
+      fireEvent.mouseEnter(pointGroup);
+      expect(screen.getByText("Fijos:")).toBeInTheDocument();
+      fireEvent.mouseLeave(pointGroup);
+    }
+
+    // Category row hover
+    const catRow = screen.getByText("Insumos").closest(".group");
+    if (catRow) {
+      fireEvent.mouseEnter(catRow);
+      expect(screen.getByText(/Gasto Acumulado: \$550\.00/i)).toBeInTheDocument();
+      fireEvent.mouseLeave(catRow);
+    }
   });
 });

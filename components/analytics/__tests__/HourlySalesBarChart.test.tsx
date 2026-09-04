@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   HourlySalesBarChart,
@@ -118,6 +118,16 @@ describe("HourlySalesBarChart Component", () => {
     await user.click(salesBtn);
 
     expect(handleMetricChange).toHaveBeenCalledWith("sales");
+  });
+
+  it("should handle bar hover in chart canvas", () => {
+    render(<HourlySalesBarChart data={mockData} />);
+    const bar = screen.getByText("12:00").parentElement;
+    if (bar) {
+      fireEvent.mouseEnter(bar);
+      expect(screen.getByTestId("hourly-chart-tooltip")).toBeInTheDocument();
+      fireEvent.mouseLeave(bar);
+    }
   });
 
   describe("HourlyBarChartTooltip", () => {

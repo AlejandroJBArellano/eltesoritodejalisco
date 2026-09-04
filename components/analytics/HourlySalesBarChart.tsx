@@ -1,16 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
-  Tooltip as RechartsTooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { DollarSign, Flame, ShoppingBag } from "lucide-react";
 import type {
   HourlyAggregationMode,
@@ -43,7 +33,7 @@ export function HourlyBarChartTooltip({
   return (
     <div
       data-testid="hourly-chart-tooltip"
-      className="rounded-xl border border-border bg-dark/95 p-3.5 shadow-2xl backdrop-blur-md text-xs"
+      className="rounded-xl border border-border bg-dark/95 p-3.5 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap z-30"
     >
       <div className="font-black text-white text-sm mb-2 flex items-center justify-between gap-3 border-b border-border pb-1.5">
         <span>{formatHourRangeLabel(row.hour)}</span>
@@ -98,6 +88,8 @@ export function HourlySalesBarChart({
   mode = "sum",
 }: HourlySalesBarChartProps) {
   const [internalMetric, setInternalMetric] = useState<ChartMetric>("sales");
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   const metric = controlledMetric ?? internalMetric;
 
   const handleMetricChange = (m: ChartMetric) => {
@@ -120,6 +112,21 @@ export function HourlySalesBarChart({
       </div>
     );
   }
+
+  // SVG Chart Dimensions
+  const svgWidth = 960;
+  const svgHeight = 280;
+  const paddingLeft = 55;
+  const paddingRight = 20;
+  const paddingTop = 20;
+  const paddingBottom = 40;
+
+  const innerWidth = svgWidth - paddingLeft - paddingRight;
+  const innerHeight = svgHeight - paddingTop - paddingBottom;
+
+  const rawMax = Math.max(...data.map((d) => d[metric] || 0), 0);
+  const maxVal = rawMax > 0 ? Math.ceil(rawMax * 1.15) : 10;
+  const yTicks = [0, maxVal * 0.25, maxVal * 0.5, maxVal * 0.75, maxVal];
 
   return (
     <div
@@ -171,63 +178,118 @@ export function HourlySalesBarChart({
         </div>
       </div>
 
-      {/* Chart Canvas */}
-      <div className="h-80 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="var(--color-border)"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="hourLabel"
-              stroke="var(--color-text-light)"
-              fontSize={12}
-              tick={{ fill: "var(--color-text-light)" }}
-            />
-            <YAxis
-              stroke="var(--color-text-light)"
-              fontSize={12}
-              tick={{ fill: "var(--color-text-light)" }}
-              tickFormatter={(val) =>
-                metric === "sales" ? `$${val}` : `${val}`
-              }
-            />
-            <RechartsTooltip
-              content={(props) => (
-                <HourlyBarChartTooltip
-                  {...props}
-                  isAvg={isAvg}
-                  metric={metric}
+      {/* Responsive Native SVG Canvas */}
+      <div className="relative h-80 w-full select-none">
+        <svg
+          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+          className="h-full w-full overflow-visible"
+          preserveAspectRatio="none"
+        >
+          {/* Y-Axis Gridlines & Labels */}
+          {yTicks.map((tick, i) => {
+            const y = paddingTop + innerHeight - (tick / maxVal) * innerHeight;
+            return (
+              <g key={`ytick-${i}`}>
+                <line
+                  x1={paddingLeft}
+                  y1={y}
+                  x2={svgWidth - paddingRight}
+                  y2={y}
+                  stroke="rgba(255,255,255,0.06)"
+                  strokeDasharray="3 3"
                 />
-              )}
-            />
-            <Bar
-              dataKey={metric}
-              radius={[6, 6, 0, 0]}
-              animationDuration={800}
-            >
-              {data.map((entry) => {
-                let fill = "#3B82F6"; // default blue
-                if (metric === "sales") {
-                  if (entry.isPeakSales) fill = "#F59E0B"; // gold/amber peak
-                  else if (entry.isHighActivity) fill = "#38BDF8"; // sky blue
-                  else fill = "#2563EB";
-                } else {
-                  if (entry.isPeakOrders) fill = "#EA580C"; // fiery orange peak
-                  else if (entry.isHighActivity) fill = "#A855F7"; // purple
-                  else fill = "#6366F1";
-                }
+                <text
+                  x={paddingLeft - 8}
+                  y={y + 4}
+                  textAnchor="end"
+                  fill="#888888"
+                  fontSize="11"
+                  fontWeight="700"
+                >
+                  {metric === "sales"
+                    ? `$${Math.round(tick).toLocaleString()}`
+                    : Math.round(tick)}
+                </text>
+              </g>
+            );
+          })}
 
-                return <Cell key={`bar-${entry.hour}`} fill={fill} />;
-              })}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+          {/* Bars */}
+          {data.map((entry, index) => {
+            const slotWidth = innerWidth / data.length;
+            const barWidth = Math.min(Math.max(slotWidth * 0.7, 8), 34);
+            const xCenter = paddingLeft + (index + 0.5) * slotWidth;
+            const barX = xCenter - barWidth / 2;
+            const barHeight = Math.max(
+              ((entry[metric] || 0) / maxVal) * innerHeight,
+              2,
+            );
+            const barY = paddingTop + innerHeight - barHeight;
+
+            let fill = "#3B82F6";
+            if (metric === "sales") {
+              if (entry.isPeakSales) fill = "#F59E0B";
+              else if (entry.isHighActivity) fill = "#38BDF8";
+              else fill = "#2563EB";
+            } else {
+              if (entry.isPeakOrders) fill = "#EA580C";
+              else if (entry.isHighActivity) fill = "#A855F7";
+              else fill = "#6366F1";
+            }
+
+            return (
+              <g
+                key={`bar-${entry.hour}`}
+                className="cursor-pointer"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                <rect
+                  x={barX}
+                  y={barY}
+                  width={barWidth}
+                  height={barHeight}
+                  rx={4}
+                  fill={fill}
+                  className="transition-all duration-150 hover:brightness-110"
+                />
+                <text
+                  x={xCenter}
+                  y={svgHeight - 12}
+                  textAnchor="middle"
+                  fill="#888888"
+                  fontSize="10"
+                  fontWeight="700"
+                >
+                  {entry.displayHour || entry.hourLabel}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Floating Tooltip */}
+        {hoveredIndex !== null && data[hoveredIndex] && (
+          <div
+            style={{
+              left: `${
+                ((paddingLeft +
+                  (hoveredIndex + 0.5) * (innerWidth / data.length)) /
+                  svgWidth) *
+                100
+              }%`,
+              top: "10%",
+            }}
+            className="absolute pointer-events-none -translate-x-1/2"
+          >
+            <HourlyBarChartTooltip
+              active={true}
+              payload={[{ payload: data[hoveredIndex] }]}
+              isAvg={isAvg}
+              metric={metric}
+            />
+          </div>
+        )}
       </div>
 
       {/* Legend */}
@@ -235,21 +297,29 @@ export function HourlySalesBarChart({
         <div className="flex items-center gap-1.5">
           <span
             className="w-3 h-3 rounded-sm inline-block"
-            style={{ backgroundColor: metric === "sales" ? "#F59E0B" : "#EA580C" }}
+            style={{
+              backgroundColor: metric === "sales" ? "#F59E0B" : "#EA580C",
+            }}
           />
-          <span>Hora Pico {metric === "sales" ? "de Ventas" : "de Pedidos"}</span>
+          <span>
+            Hora Pico {metric === "sales" ? "de Ventas" : "de Pedidos"}
+          </span>
         </div>
         <div className="flex items-center gap-1.5">
           <span
             className="w-3 h-3 rounded-sm inline-block"
-            style={{ backgroundColor: metric === "sales" ? "#38BDF8" : "#A855F7" }}
+            style={{
+              backgroundColor: metric === "sales" ? "#38BDF8" : "#A855F7",
+            }}
           />
           <span>Alta Actividad</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span
             className="w-3 h-3 rounded-sm inline-block"
-            style={{ backgroundColor: metric === "sales" ? "#2563EB" : "#6366F1" }}
+            style={{
+              backgroundColor: metric === "sales" ? "#2563EB" : "#6366F1",
+            }}
           />
           <span>Flujo Estándar</span>
         </div>

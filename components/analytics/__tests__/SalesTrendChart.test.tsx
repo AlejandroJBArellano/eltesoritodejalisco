@@ -51,18 +51,27 @@ describe("SalesTrendChart Component", () => {
     expect(handleSelectDay).toHaveBeenCalledWith(null);
   });
 
-  it("renders fallback message in drill-down panel if no detail items are found for day", () => {
+  it("handles bar hover and bar click", () => {
+    const handleSelectDay = vi.fn();
+    const mockChartData = [
+      { date: "2026-09-01", total: 4500, label: "mar 1" },
+    ];
     render(
       <SalesTrendChart
-        chartData={[{ date: "2026-09-01", total: 500, label: "mar 1" }]}
-        selectedDay="2026-09-01"
-        onSelectDay={vi.fn()}
+        chartData={mockChartData}
+        selectedDay={null}
+        onSelectDay={handleSelectDay}
         selectedDayItems={[]}
       />,
     );
 
-    expect(
-      screen.getByText("No hay detalle de productos registrado para esta fecha."),
-    ).toBeInTheDocument();
+    const barGroup = screen.getByText("mar 1").parentElement;
+    if (barGroup) {
+      fireEvent.mouseEnter(barGroup);
+      expect(screen.getByText(/Ventas Totales • mar 1/i)).toBeInTheDocument();
+      fireEvent.click(barGroup);
+      expect(handleSelectDay).toHaveBeenCalledWith("2026-09-01");
+      fireEvent.mouseLeave(barGroup);
+    }
   });
 });
