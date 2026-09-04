@@ -1,6 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { ProductSalesSection } from "../ProductSalesSection";
+
+vi.mock("@/lib/export", () => ({
+  exportToCSV: vi.fn(),
+  exportToExcel: vi.fn(),
+}));
 
 describe("ProductSalesSection Component", () => {
   it("renders product table rows and top selling cards", () => {
@@ -53,7 +58,7 @@ describe("ProductSalesSection Component", () => {
     expect(screen.getByText("50 vendidos")).toBeInTheDocument();
   });
 
-  it("renders empty state fallbacks when no products exist", () => {
+  it("renders empty state fallbacks and triggers export", () => {
     render(
       <ProductSalesSection
         enrichedProductSales={[]}
@@ -67,6 +72,18 @@ describe("ProductSalesSection Component", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText("No hay ventas registradas aún."),
+    ).toBeInTheDocument();
+
+    const exportBtn = screen.getByRole("button", { name: /Exportar/i });
+    fireEvent.click(exportBtn);
+    const csvBtn = screen.getByText(/CSV \(\.csv\)/i);
+    fireEvent.click(csvBtn);
+  });
+
+  it("renders with default props when no props are provided", () => {
+    render(<ProductSalesSection />);
+    expect(
+      screen.getByText("Ventas por Producto (Detallado)"),
     ).toBeInTheDocument();
   });
 });

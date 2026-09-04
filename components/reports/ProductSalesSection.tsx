@@ -5,18 +5,21 @@ import { Award } from "lucide-react";
 import { ExportButton } from "@/components/ui/DataTableControls";
 import { PRODUCT_SALES_EXPORT_COLUMNS } from "./exportColumns";
 import type { EnrichedProductSaleItem, Period, ReportData } from "./types";
+import { useReportsContextNullable } from "./ReportsContext";
 
 export interface ProductSalesSectionProps {
-  enrichedProductSales: EnrichedProductSaleItem[];
-  topSellingItems: ReportData["topSellingItems"];
-  period: Period;
+  enrichedProductSales?: EnrichedProductSaleItem[];
+  topSellingItems?: ReportData["topSellingItems"];
+  period?: Period;
 }
 
-export function ProductSalesSection({
-  enrichedProductSales,
-  topSellingItems = [],
-  period,
-}: ProductSalesSectionProps) {
+export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
+  const context = useReportsContextNullable();
+  const enrichedProductSales =
+    props.enrichedProductSales ?? context?.enrichedProductSales ?? [];
+  const topSellingItems =
+    props.topSellingItems ?? context?.data?.topSellingItems ?? [];
+  const period = props.period ?? context?.period ?? "7days";
   const currentDateStr = new Date().toISOString().split("T")[0];
 
   return (

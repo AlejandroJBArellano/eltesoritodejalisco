@@ -3,12 +3,15 @@
 import React from "react";
 import { Store } from "lucide-react";
 import type { ReportData } from "./types";
+import { useReportsContextNullable } from "./ReportsContext";
 
 export interface SalesSourceCardProps {
-  salesBySource: ReportData["salesBySource"];
+  salesBySource?: ReportData["salesBySource"];
 }
 
-export function SalesSourceCard({ salesBySource = {} }: SalesSourceCardProps) {
+export function SalesSourceCard(props: SalesSourceCardProps = {}) {
+  const context = useReportsContextNullable();
+  const salesBySource = props.salesBySource ?? context?.data?.salesBySource ?? {};
   const sources = Object.entries(salesBySource || {});
 
   return (

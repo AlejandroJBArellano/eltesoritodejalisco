@@ -2,27 +2,32 @@
 
 import React from "react";
 import { Calendar } from "lucide-react";
+import { useReportsContextNullable } from "./ReportsContext";
 import { PERIOD_LABELS, type Period } from "./types";
 
 export interface ReportsPeriodFilterProps {
-  period: Period;
-  onPeriodChange: (p: Period) => void;
-  customStartDate: string;
-  customEndDate: string;
-  onCustomStartDateChange: (val: string) => void;
-  onCustomEndDateChange: (val: string) => void;
-  onApplyCustomDates: () => void;
+  period?: Period;
+  onPeriodChange?: (p: Period) => void;
+  customStartDate?: string;
+  customEndDate?: string;
+  onCustomStartDateChange?: (val: string) => void;
+  onCustomEndDateChange?: (val: string) => void;
+  onApplyCustomDates?: () => void;
 }
 
-export function ReportsPeriodFilter({
-  period,
-  onPeriodChange,
-  customStartDate,
-  customEndDate,
-  onCustomStartDateChange,
-  onCustomEndDateChange,
-  onApplyCustomDates,
-}: ReportsPeriodFilterProps) {
+export function ReportsPeriodFilter(props: ReportsPeriodFilterProps = {}) {
+  const context = useReportsContextNullable();
+  const period = props.period ?? context?.period ?? "7days";
+  const onPeriodChange = props.onPeriodChange ?? context?.handlePeriodChange ?? (() => {});
+  const customStartDate =
+    props.customStartDate ?? context?.customStartDate ?? "";
+  const customEndDate = props.customEndDate ?? context?.customEndDate ?? "";
+  const onCustomStartDateChange =
+    props.onCustomStartDateChange ?? context?.setCustomStartDate ?? (() => {});
+  const onCustomEndDateChange =
+    props.onCustomEndDateChange ?? context?.setCustomEndDate ?? (() => {});
+  const onApplyCustomDates =
+    props.onApplyCustomDates ?? context?.handleApplyCustomDates ?? (() => {});
   return (
     <section className="rounded-2xl bg-card p-6 shadow-sm border border-border">
       <div className="flex items-center justify-between mb-4">

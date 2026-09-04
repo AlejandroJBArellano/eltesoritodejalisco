@@ -5,16 +5,18 @@ import { Users } from "lucide-react";
 import { ExportButton } from "@/components/ui/DataTableControls";
 import { TOP_CUSTOMERS_EXPORT_COLUMNS } from "./exportColumns";
 import type { Period, ReportData } from "./types";
+import { useReportsContextNullable } from "./ReportsContext";
 
 export interface TopCustomersTableProps {
-  topCustomers: ReportData["customers"]["topCustomers"];
-  period: Period;
+  topCustomers?: ReportData["customers"]["topCustomers"];
+  period?: Period;
 }
 
-export function TopCustomersTable({
-  topCustomers = [],
-  period,
-}: TopCustomersTableProps) {
+export function TopCustomersTable(props: TopCustomersTableProps = {}) {
+  const context = useReportsContextNullable();
+  const topCustomers =
+    props.topCustomers ?? context?.data?.customers?.topCustomers ?? [];
+  const period = props.period ?? context?.period ?? "7days";
   const currentDateStr = new Date().toISOString().split("T")[0];
 
   return (

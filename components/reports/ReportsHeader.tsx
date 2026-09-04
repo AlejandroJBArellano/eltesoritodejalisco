@@ -9,6 +9,7 @@ import {
   DAILY_SALES_EXPORT_COLUMNS,
   PRODUCT_SALES_EXPORT_COLUMNS,
 } from "./exportColumns";
+import { useReportsContextNullable } from "./ReportsContext";
 import {
   PERIOD_LABELS,
   type DailySaleExportItem,
@@ -17,16 +18,18 @@ import {
 } from "./types";
 
 export interface ReportsHeaderProps {
-  period: Period;
-  dailySalesData: DailySaleExportItem[];
-  enrichedProductSales: EnrichedProductSaleItem[];
+  period?: Period;
+  dailySalesData?: DailySaleExportItem[];
+  enrichedProductSales?: EnrichedProductSaleItem[];
 }
 
-export function ReportsHeader({
-  period,
-  dailySalesData,
-  enrichedProductSales,
-}: ReportsHeaderProps) {
+export function ReportsHeader(props: ReportsHeaderProps = {}) {
+  const context = useReportsContextNullable();
+  const period = props.period ?? context?.period ?? "7days";
+  const dailySalesData = props.dailySalesData ?? context?.dailySalesData ?? [];
+  const enrichedProductSales =
+    props.enrichedProductSales ?? context?.enrichedProductSales ?? [];
+
   const currentDateStr = new Date().toISOString().split("T")[0];
 
   return (

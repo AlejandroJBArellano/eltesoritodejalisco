@@ -1,6 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { DailySalesTable } from "../DailySalesTable";
+
+vi.mock("@/lib/export", () => ({
+  exportToCSV: vi.fn(),
+  exportToExcel: vi.fn(),
+}));
 
 describe("DailySalesTable Component", () => {
   it("renders daily sales rows and header details", () => {
@@ -38,8 +43,21 @@ describe("DailySalesTable Component", () => {
     expect(screen.getByText("Miércoles")).toBeInTheDocument();
   });
 
-  it("renders empty state when no data provided", () => {
+  it("renders empty state when no data provided and triggers export filename", () => {
     render(<DailySalesTable dailySalesData={[]} period="today" />);
+    expect(
+      screen.getByText("No hay ventas registradas en el período."),
+    ).toBeInTheDocument();
+
+    const exportBtn = screen.getByRole("button", { name: /Exportar/i });
+    fireEvent.click(exportBtn);
+    const csvBtn = screen.getByText(/CSV \(\.csv\)/i);
+    fireEvent.click(csvBtn);
+  });
+
+  it("renders with default props when no props are passed", () => {
+    render(<DailySalesTable />);
+    expect(screen.getByText("Detalle de Ventas Diarias")).toBeInTheDocument();
     expect(
       screen.getByText("No hay ventas registradas en el período."),
     ).toBeInTheDocument();

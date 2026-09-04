@@ -1,6 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { TopCustomersTable } from "../TopCustomersTable";
+
+vi.mock("@/lib/export", () => ({
+  exportToCSV: vi.fn(),
+  exportToExcel: vi.fn(),
+}));
 
 describe("TopCustomersTable Component", () => {
   it("renders top customers with spend and points", () => {
@@ -22,10 +27,20 @@ describe("TopCustomersTable Component", () => {
     expect(screen.getByText("$1100.00")).toBeInTheDocument();
   });
 
-  it("renders empty state when no customers exist", () => {
+  it("renders empty state when no customers exist and triggers export", () => {
     render(<TopCustomersTable topCustomers={[]} period="today" />);
     expect(
       screen.getByText("No hay clientes registrados en este período."),
     ).toBeInTheDocument();
+
+    const exportBtn = screen.getByRole("button", { name: /Exportar/i });
+    fireEvent.click(exportBtn);
+    const csvBtn = screen.getByText(/CSV \(\.csv\)/i);
+    fireEvent.click(csvBtn);
+  });
+
+  it("renders with default props when no props are provided", () => {
+    render(<TopCustomersTable />);
+    expect(screen.getByText("Mejores Clientes")).toBeInTheDocument();
   });
 });

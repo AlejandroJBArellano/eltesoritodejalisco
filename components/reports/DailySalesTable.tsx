@@ -4,16 +4,17 @@ import React from "react";
 import { ExportButton } from "@/components/ui/DataTableControls";
 import { DAILY_SALES_EXPORT_COLUMNS } from "./exportColumns";
 import type { DailySaleExportItem, Period } from "./types";
+import { useReportsContextNullable } from "./ReportsContext";
 
 export interface DailySalesTableProps {
-  dailySalesData: DailySaleExportItem[];
-  period: Period;
+  dailySalesData?: DailySaleExportItem[];
+  period?: Period;
 }
 
-export function DailySalesTable({
-  dailySalesData,
-  period,
-}: DailySalesTableProps) {
+export function DailySalesTable(props: DailySalesTableProps = {}) {
+  const context = useReportsContextNullable();
+  const dailySalesData = props.dailySalesData ?? context?.dailySalesData ?? [];
+  const period = props.period ?? context?.period ?? "7days";
   const currentDateStr = new Date().toISOString().split("T")[0];
 
   return (

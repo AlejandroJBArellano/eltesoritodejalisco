@@ -12,18 +12,20 @@ import {
   Wallet,
 } from "lucide-react";
 import type { ReportData } from "./types";
+import { useReportsContextNullable } from "./ReportsContext";
 
 export interface FinancialSummaryKPIsProps {
-  summary: ReportData["summary"];
+  summary?: ReportData["summary"];
   newCustomersCount?: number;
-  netUtility: number;
+  netUtility?: number;
 }
 
-export function FinancialSummaryKPIs({
-  summary,
-  newCustomersCount = 0,
-  netUtility,
-}: FinancialSummaryKPIsProps) {
+export function FinancialSummaryKPIs(props: FinancialSummaryKPIsProps = {}) {
+  const context = useReportsContextNullable();
+  const summary = props.summary ?? context?.data?.summary;
+  const newCustomersCount =
+    props.newCustomersCount ?? context?.data?.customers?.newCustomersCount ?? 0;
+  const netUtility = props.netUtility ?? context?.netUtility ?? 0;
   const formatCurrency = (val: number) => {
     const isNegative = val < 0;
     const formatted = Math.abs(val).toLocaleString(undefined, {

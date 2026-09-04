@@ -17,7 +17,7 @@ export function useReportsData(options: UseReportsDataOptions = {}) {
   const { initialPeriod = "7days", autoFetch = true } = options;
 
   const [data, setData] = useState<ReportData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(autoFetch);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>(initialPeriod);
   const [customStartDate, setCustomStartDate] = useState<string>("");
