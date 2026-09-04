@@ -172,7 +172,10 @@ Customer (Clientes CRM)
    ├── Asigna número único
    ├── Calcula subtotal + IVA
    ├── Si hay cliente: suma puntos de lealtad
-   └── Guarda en DB
+   ├── Guarda en DB
+   └── TRIGGER/RPC: deductInventoryForOrder()
+       ├── Descuenta insumos inmediatamente al crear la comanda
+       └── Marca items como inventory_deducted = true
 
 3. Orden aparece en KDS
    ├── Inicia temporizador
@@ -186,27 +189,37 @@ Customer (Clientes CRM)
    └── Notifica mesero
 
 5. Entrega y pago
-   ├── Mesero marca: DELIVERED
-   ├── TRIGGER: deductInventoryForOrder()
-   │   ├── Calcula ingredientes usados
-   │   ├── Verifica stock suficiente
-   │   └── Descuenta de inventario
-   └── Actualiza loyalty points del cliente
+   ├── Mesero marca: DELIVERED / PAID
+   └── Cobro no vuelve a descontar (los items ya tienen inventory_deducted = true)
+
+6. Cancelación o Eliminación
+   └── TRIGGER/API: reverseInventoryForOrder()
+       ├── Si la orden se cancela o elimina, revierte insumos al stock
+       └── Marca items como inventory_deducted = false
 ```
 
 ### Flujo 2: Gestión de Inventario
 
 ```
 Desconteo Automático:
-Order.status → DELIVERED
+Creación de Orden / Agregado de Productos Extras
   └→ deductInventoryForOrder(orderId)
-      ├→ Fetch order + items + recipes
+      ├→ Fetch order + items + recipes (filtra items con inventory_deducted = false)
       ├→ Calculate requirements per ingredient
       ├→ Transaction:
       │   ├→ Check stock
       │   ├→ Update Ingredient.currentStock
-      │   └→ Log deduction
+      │   ├→ Log deduction
+      │   └→ Update order_items SET inventory_deducted = true
       └→ Return result
+
+Reversión Automática:
+Orden CANCELLED o Eliminada
+  └→ reverseInventoryForOrder(orderId)
+      ├→ Fetch order + items + recipes (filtra items con inventory_deducted = true)
+      ├→ Reintegra Ingredient.currentStock (+qty)
+      ├→ Log reversal (StockAdjustment)
+      └→ Update order_items SET inventory_deducted = false
 
 Ajuste Manual:
 Admin ajusta stock
