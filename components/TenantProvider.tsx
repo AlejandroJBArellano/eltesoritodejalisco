@@ -24,3 +24,7 @@ export function useTenant() {
   }
   return context;
 }
+
+export function useOptionalTenant(): TenantContextType | null {
+  return useContext(TenantContext);
+}

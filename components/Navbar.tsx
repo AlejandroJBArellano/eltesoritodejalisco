@@ -2,6 +2,7 @@
 
 import { logout } from "@/app/login/actions";
 import { useTenant } from "@/components/TenantProvider";
+import { useOptionalUser } from "@/components/UserProvider";
 import { PushNotificationPrompt } from "@/components/notifications/PushNotificationPrompt";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
@@ -10,7 +11,10 @@ import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [email, setEmail] = useState<string | null>(null);
+  const user = useOptionalUser();
+  const [email, setEmail] = useState<string | null>(
+    user?.profile?.email ?? null,
+  );
   const { system_name } = useTenant();
 
   useEffect(() => {
@@ -97,7 +101,15 @@ export default function Navbar() {
 
           {/* Right: notifications + email + logout */}
           <div className="flex items-center gap-3 shrink-0">
-            <PushNotificationPrompt compact role="ADMIN" />
+            <PushNotificationPrompt
+              compact
+              role={
+                user?.role === "CHEF"
+                  ? "KITCHEN"
+                  : (user?.role as "ADMIN" | "MANAGER" | "WAITER" | undefined) ??
+                    "ADMIN"
+              }
+            />
             {email && (
               <span
                 className="hidden sm:block text-xs font-medium text-text-light/40 max-w-45 truncate"

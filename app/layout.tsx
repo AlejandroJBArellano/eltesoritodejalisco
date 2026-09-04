@@ -3,7 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { getTenantContext } from "@/lib/tenant";
+import { getProfile } from "@/lib/auth";
 import { TenantProvider } from "@/components/TenantProvider";
+import { UserProvider } from "@/components/UserProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +36,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const tenant = await getTenantContext();
+  const [tenant, profile] = await Promise.all([
+    getTenantContext(),
+    getProfile(),
+  ]);
 
   const primaryColor = tenant.primary_color || "#FFB7CE";
   const secondaryColor = tenant.secondary_color || "#FFD1DC";
@@ -56,8 +61,10 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-dark text-text-light`}
       >
         <TenantProvider tenant={tenant}>
-          <Navbar />
-          {children}
+          <UserProvider initialProfile={profile}>
+            <Navbar />
+            {children}
+          </UserProvider>
         </TenantProvider>
       </body>
     </html>
