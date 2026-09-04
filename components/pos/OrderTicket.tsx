@@ -1,5 +1,6 @@
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { useTenant } from "@/components/TenantProvider";
+import { useOptionalUser } from "@/components/UserProvider";
 import { OrderWithDetails } from "@/types";
 
 interface OrderTicketProps {
@@ -7,6 +8,9 @@ interface OrderTicketProps {
 }
 
 export function OrderTicket({ order }: OrderTicketProps) {
+  const user = useOptionalUser();
+  const isWaiter = user?.isWaiter ?? false;
+
   const {
     id: tenantId,
     name,
@@ -88,7 +92,11 @@ export function OrderTicket({ order }: OrderTicketProps) {
         <p className="font-bold text-md">TOTAL VENTA: ${total.toFixed(2)}</p>
 
         {tipAmount > 0 && (
-          <p className="font-bold text-md text-gray-700">
+          <p
+            className={`font-bold text-md text-gray-700 ${
+              isWaiter ? "hidden print:block" : ""
+            }`}
+          >
             PROPINA: ${tipAmount.toFixed(2)}
           </p>
         )}

@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { OrderTicket } from "../OrderTicket";
 import { OrderWithDetails, OrderStatus, PaymentMethod } from "@/types";
+import { useOptionalUser } from "@/components/UserProvider";
 
 const mockTenant = {
   id: "tenant-abc",
@@ -19,6 +20,10 @@ const mockTenant = {
 // Mock useTenant
 vi.mock("@/components/TenantProvider", () => ({
   useTenant: () => mockTenant,
+}));
+
+vi.mock("@/components/UserProvider", () => ({
+  useOptionalUser: vi.fn(),
 }));
 
 const mockOrder: OrderWithDetails = {
@@ -67,6 +72,18 @@ const mockOrder: OrderWithDetails = {
 };
 
 describe("OrderTicket Component", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "ADMIN",
+      isAdmin: true,
+      isWaiter: false,
+      isChef: false,
+      isAuthenticated: true,
+    });
+  });
+
   it("should render order receipt layout correctly", () => {
     render(<OrderTicket order={mockOrder} />);
 
@@ -155,5 +172,31 @@ describe("OrderTicket Component", () => {
 
     // Powered by Kittn footer
     expect(screen.getByText(/Powered by Kittn • trykittn.com/i)).toBeInTheDocument();
+  });
+
+  it("should display tip without hidden class on screen when user is Admin", () => {
+    render(<OrderTicket order={mockOrder} />);
+
+    const tipElement = screen.getByText("PROPINA: $20.00");
+    expect(tipElement).toBeInTheDocument();
+    expect(tipElement).not.toHaveClass("hidden");
+  });
+
+  it("should add hidden print:block class to tip when user is Waiter", () => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "WAITER",
+      isAdmin: false,
+      isWaiter: true,
+      isChef: false,
+      isAuthenticated: true,
+    });
+
+    render(<OrderTicket order={mockOrder} />);
+
+    const tipElement = screen.getByText("PROPINA: $20.00");
+    expect(tipElement).toBeInTheDocument();
+    expect(tipElement).toHaveClass("hidden");
+    expect(tipElement).toHaveClass("print:block");
   });
 });
