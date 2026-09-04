@@ -12,7 +12,9 @@ interface InventoryIngredient {
 
 interface InventoryOrder {
   order_items: Array<{
+    id: string;
     quantity: number;
+    inventory_deducted?: boolean;
     menu_items: {
       ingredient_id: string | null;
       ingredients: InventoryIngredient | null;
@@ -71,13 +73,22 @@ export async function deductInventoryForOrder(
       return result;
     }
 
+    // Only process items that have not been deducted yet
+    const pendingItems = (
+      order as unknown as InventoryOrder
+    ).order_items.filter((item) => !item.inventory_deducted);
+
+    if (pendingItems.length === 0) {
+      return result;
+    }
+
     // Calculate total ingredient requirements
     const ingredientRequirements = new Map<
       string,
       { ingredient: InventoryIngredient; totalRequired: number }
     >();
 
-    for (const orderItem of (order as unknown as InventoryOrder).order_items) {
+    for (const orderItem of pendingItems) {
       const { menu_items: menuItem, quantity } = orderItem;
 
       if (!menuItem) continue;
@@ -173,6 +184,21 @@ export async function deductInventoryForOrder(
         console.error("Failed to log stock adjustments:", logError);
       }
 
+      // Mark processed items as deducted
+      const pendingItemIds = pendingItems
+        .map((item) => item.id)
+        .filter(Boolean);
+      if (pendingItemIds.length > 0) {
+        const { error: markError } = await supabase
+          .from("order_items")
+          .update({ inventory_deducted: true })
+          .in("id", pendingItemIds);
+
+        if (markError) {
+          console.error("Failed to mark order items as deducted:", markError);
+        }
+      }
+
       // Trigger alert for any deduction that results in stock at or below 0
       // (conservative: we alert on out-of-stock; the /alert API checks minimum_stock server-side)
       const hasOutOfStock = result.deductions.some((d) => d.newStock <= 0);
@@ -248,13 +274,22 @@ export async function reverseInventoryForOrder(
       return result;
     }
 
+    // Only process items that were previously deducted
+    const deductedItems = (
+      order as unknown as InventoryOrder
+    ).order_items.filter((item) => item.inventory_deducted === true);
+
+    if (deductedItems.length === 0) {
+      return result;
+    }
+
     // Calculate total ingredient requirements to reverse
     const ingredientRequirements = new Map<
       string,
       { ingredient: InventoryIngredient; totalRequired: number }
     >();
 
-    for (const orderItem of (order as unknown as InventoryOrder).order_items) {
+    for (const orderItem of deductedItems) {
       const { menu_items: menuItem, quantity } = orderItem;
 
       if (!menuItem) continue;
@@ -324,7 +359,7 @@ export async function reverseInventoryForOrder(
       adjustmentsToInsert.push({
         ingredient_id: ingredient.id,
         adjustment: totalRequired,
-        reason: `Order reversal (undo)`,
+        reason: `Order cancellation`,
         tenant_id: (order as { tenant_id: string }).tenant_id,
         created_at: new Date().toISOString(),
       });
@@ -348,6 +383,24 @@ export async function reverseInventoryForOrder(
 
       if (logError) {
         console.error("Failed to log stock adjustments:", logError);
+      }
+
+      // Mark processed items as no longer deducted
+      const revertedItemIds = deductedItems
+        .map((item) => item.id)
+        .filter(Boolean);
+      if (revertedItemIds.length > 0) {
+        const { error: markError } = await supabase
+          .from("order_items")
+          .update({ inventory_deducted: false })
+          .in("id", revertedItemIds);
+
+        if (markError) {
+          console.error(
+            "Failed to mark order items as not deducted:",
+            markError,
+          );
+        }
       }
     }
 
