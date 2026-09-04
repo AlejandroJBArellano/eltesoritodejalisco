@@ -1,7 +1,7 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import OrdersPOS from "../OrdersPOS";
+import OrdersMobileFunction from "../OrdersMobilePOS";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
@@ -44,7 +44,7 @@ const mockOrders: OrderWithDetails[] = [
     id: "ord-2",
     orderNumber: "102",
     source: "PICKUP_APP",
-    status: OrderStatus.PAID,
+    status: OrderStatus.PENDING,
     table: "Para Llevar",
     notes: "Cliente: Juan",
     subtotal: 250,
@@ -58,7 +58,7 @@ const mockOrders: OrderWithDetails[] = [
         id: "pay-1",
         orderId: "ord-2",
         amount: 250,
-        tipAmount: 35,
+        tipAmount: 25,
         paymentMethod: "CARD",
         createdAt: new Date(),
       },
@@ -66,7 +66,7 @@ const mockOrders: OrderWithDetails[] = [
   },
 ];
 
-describe("OrdersPOS component", () => {
+describe("OrdersMobileFunction component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -109,43 +109,33 @@ describe("OrdersPOS component", () => {
   });
 
   it("renders filter buttons with order counts and shows all orders by default", () => {
-    render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
+    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
 
     expect(screen.getByText(/Todas \(2\)/i)).toBeDefined();
-    expect(screen.getByText(/POS Directo/i)).toBeDefined();
-    expect(screen.getByText(/Kittn Pickup/i)).toBeDefined();
+    expect(screen.getByText(/POS \(1\)/i)).toBeDefined();
+    expect(screen.getByText(/Pickup \(1\)/i)).toBeDefined();
 
     expect(screen.getByText("#101")).toBeDefined();
     expect(screen.getByText("#102")).toBeDefined();
-    expect(screen.getAllByText(/Pickup/i).length).toBeGreaterThanOrEqual(1);
   });
 
-  it("filters only POS orders when clicking on POS Directo filter", () => {
-    render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
+  it("filters only POS orders when clicking on POS filter", () => {
+    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
 
-    fireEvent.click(screen.getByText(/POS Directo/i));
+    fireEvent.click(screen.getByText(/POS \(1\)/i));
 
     expect(screen.getByText("#101")).toBeDefined();
     expect(screen.queryByText("#102")).toBeNull();
   });
 
-  it("filters only Kittn Pickup orders when clicking on Kittn Pickup filter", () => {
-    render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
+  it("shows tip amount and Propina button when user is Admin", () => {
+    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
 
-    fireEvent.click(screen.getByText(/Kittn Pickup/i));
-
-    expect(screen.queryByText("#101")).toBeNull();
-    expect(screen.getByText("#102")).toBeDefined();
+    expect(screen.getByText("+$25.00 propina")).toBeDefined();
+    expect(screen.getAllByRole("button", { name: /Propina/i }).length).toBeGreaterThanOrEqual(1);
   });
 
-  it("shows tip amount and Propina button for paid order when user is Admin", () => {
-    render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
-
-    expect(screen.getByText("+$35.00 propina")).toBeDefined();
-    expect(screen.getByRole("button", { name: /Propina/i })).toBeDefined();
-  });
-
-  it("hides tip amount and Propina button for paid order when user is Waiter", () => {
+  it("hides tip amount and Propina button when user is Waiter", () => {
     vi.mocked(useOptionalUser).mockReturnValue({
       profile: null,
       role: "WAITER",
@@ -155,7 +145,7 @@ describe("OrdersPOS component", () => {
       isAuthenticated: true,
     });
 
-    render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
+    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
 
     expect(screen.queryByText(/propina/i)).toBeNull();
     expect(screen.queryByRole("button", { name: /Propina/i })).toBeNull();

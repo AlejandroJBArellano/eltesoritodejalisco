@@ -2,6 +2,7 @@ import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
+import { useOptionalUser } from "@/components/UserProvider";
 import { Ban, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, ShoppingBag, Undo2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -9,6 +10,9 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
     onClickCancel: (orderId: string) => void;
     cancelArmedId: string | null
 }) {
+    const user = useOptionalUser();
+    const isWaiter = user?.isWaiter ?? false;
+
     const { refreshOrders, availableMenuItems, orders } = usePOSData();
     const [sourceFilter, setSourceFilter] = useState<"ALL" | "POS" | "PICKUP_APP">("ALL");
 
@@ -167,7 +171,7 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
                                         <span className="font-black text-sm text-text-light tabular-nums">
                                             ${order.total.toFixed(2)}
                                         </span>
-                                        {tipAmt > 0 && (
+                                        {!isWaiter && tipAmt > 0 && (
                                             <span className="text-[10px] font-bold text-blue-400/80">
                                                 +${tipAmt.toFixed(2)} propina
                                             </span>
@@ -226,7 +230,7 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
                                                 Editar
                                             </button>
                                         )}
-                                        {order.status === "PAID" && (
+                                        {order.status === "PAID" && !isWaiter && (
                                             <button
                                                 type="button"
                                                 onClick={() => {

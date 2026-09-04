@@ -2,6 +2,7 @@ import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
+import { useOptionalUser } from "@/components/UserProvider";
 import { Ban, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, ShoppingBag, Undo2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -9,6 +10,9 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
     onClickCancel: (orderId: string) => void;
     cancelArmedId: string | null
 }) {
+    const user = useOptionalUser();
+    const isWaiter = user?.isWaiter ?? false;
+
     const { refreshOrders, availableMenuItems, orders } = usePOSData();
     const [sourceFilter, setSourceFilter] = useState<"ALL" | "POS" | "PICKUP_APP">("ALL");
 
@@ -149,7 +153,7 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
                                 <span className="font-black text-sm text-text-light tabular-nums">
                                     ${order.total.toFixed(2)}
                                 </span>
-                                {tipAmt > 0 && (
+                                {!isWaiter && tipAmt > 0 && (
                                     <p className="text-[10px] font-bold text-blue-400/80 leading-none mt-0.5">
                                         +${tipAmt.toFixed(2)} propina
                                     </p>
@@ -208,20 +212,22 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
                                         <Edit3 className="h-3.5 w-3.5" />
                                         Editar
                                     </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setEditingTipOrder(order);
-                                            setEditTipType("FIXED");
-                                            setEditTipInput(
-                                                order.payments?.[0]?.tipAmount?.toString() || "0",
-                                            );
-                                        }}
-                                        className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
-                                    >
-                                        <HandCoins className="h-3.5 w-3.5" />
-                                        Propina
-                                    </button>
+                                    {!isWaiter && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingTipOrder(order);
+                                                setEditTipType("FIXED");
+                                                setEditTipInput(
+                                                    order.payments?.[0]?.tipAmount?.toString() || "0",
+                                                );
+                                            }}
+                                            className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                                        >
+                                            <HandCoins className="h-3.5 w-3.5" />
+                                            Propina
+                                        </button>
+                                    )}
                                     {/* <button
                                         type="button"
                                         onClick={() => setBillingOrder(order)}
