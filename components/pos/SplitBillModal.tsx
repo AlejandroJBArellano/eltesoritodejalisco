@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { X, Scissors, AlertTriangle } from "lucide-react";
 import { OrderWithDetails } from "@/types";
+import { useOptionalUser } from "@/components/UserProvider";
 
 type SplitMode = "EQUAL" | "ITEMS";
 
@@ -47,6 +48,8 @@ export function SplitBillModal({
   onClose,
   isSubmitting,
 }: SplitBillModalProps) {
+  const user = useOptionalUser();
+  const isWaiter = user?.isWaiter ?? false;
   const [mode, setMode] = useState<SplitMode>("EQUAL");
   const [partCount, setPartCount] = useState(2);
   // For items with quantity === 1: maps itemId → person number (1-N)
@@ -546,7 +549,7 @@ export function SplitBillModal({
                         }
                         className="flex-1 text-sm font-black p-2 border border-border bg-white/5 rounded-xl focus:border-[#FFB7C5] outline-none text-center text-white transition-all placeholder:text-zinc-800"
                       />
-                      {tip > 0 && (
+                      {!isWaiter && tip > 0 && (
                         <span className="text-[10px] font-black text-blue-400/60 whitespace-nowrap">
                           +${tip.toFixed(2)}
                         </span>
@@ -585,7 +588,7 @@ export function SplitBillModal({
                 {tip > 0 && (
                   <div className="flex justify-between items-center pt-2 border-t border-border">
                     <span className="text-[10px] font-black text-zinc-600 uppercase">
-                      Total con propina
+                      {isWaiter ? "Total a pagar" : "Total con propina"}
                     </span>
                     <span className="font-black text-white tabular-nums">
                       ${total.toFixed(2)}
