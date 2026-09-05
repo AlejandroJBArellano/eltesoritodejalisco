@@ -1,4 +1,5 @@
 import { OrderWithDetails } from "@/types";
+import { formatServiceTicket } from "@/lib/utils/serviceType";
 
 interface KitchenTicketProps {
   order: OrderWithDetails;
@@ -49,7 +50,7 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
           <div className="flex justify-between">
             <span className="font-bold">SERVICIO:</span>
             <span className="font-black uppercase">
-              {order.table ? `MESA ${order.table}` : "PARA LLEVAR"}
+              {formatServiceTicket(order.table)}
             </span>
           </div>
           {order.source && (

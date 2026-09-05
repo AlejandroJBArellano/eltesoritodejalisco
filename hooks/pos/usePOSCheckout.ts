@@ -4,6 +4,7 @@ import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import type { SplitPayment } from "@/components/pos/SplitBillModal";
 import { useTenant } from "@/components/TenantProvider";
 import { Order } from "@/types/pos";
+import { formatServiceLabel } from "@/lib/utils/serviceType";
 import React, { useMemo, useState, createContext, useContext } from "react";
 
 type POSCheckoutValue = ReturnType<typeof usePOSCheckoutInternal>;
@@ -279,7 +280,7 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     let msg = `¡Gracias por tu visita a ${name}! 🌮🤩\n\n`;
     msg += `🧾 *Ticket #${checkoutOrder.orderNumber}*\n`;
     if (checkoutOrder.table) {
-      msg += `📍 Mesa: ${checkoutOrder.table}\n`;
+      msg += `📍 Servicio: ${formatServiceLabel(checkoutOrder.table)}\n`;
     }
     msg += `\n*Resumen de tu orden:*\n`;
     checkoutOrder.orderItems?.forEach((item) => {

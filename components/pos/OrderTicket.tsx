@@ -2,6 +2,7 @@ import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { useTenant } from "@/components/TenantProvider";
 import { useOptionalUser } from "@/components/UserProvider";
 import { OrderWithDetails } from "@/types";
+import { getServiceType } from "@/lib/utils/serviceType";
 
 interface OrderTicketProps {
   order: OrderWithDetails;
@@ -57,7 +58,17 @@ export function OrderTicket({ order }: OrderTicketProps) {
       <div className="mb-2">
         <p>FOLIO: #{order.orderNumber}</p>
         <p>FECHA: {formatDate(order.createdAt)}</p>
-        {order.table && <p>MESA: {order.table}</p>}
+        {order.table && (
+          <p>
+            {getServiceType(order.table) === "domicilio"
+              ? "SERVICIO: A DOMICILIO"
+              : getServiceType(order.table) === "para_llevar"
+                ? "SERVICIO: PARA LLEVAR"
+                : order.table.toLowerCase() === "comedor"
+                  ? "SERVICIO: COMEDOR"
+                  : `MESA: ${order.table}`}
+          </p>
+        )}
         {order.customer && <p>CLIENTE: {order.customer.name}</p>}
       </div>
 

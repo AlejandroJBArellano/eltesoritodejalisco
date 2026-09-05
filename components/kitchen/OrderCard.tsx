@@ -8,11 +8,14 @@ import { OrderStatus, type OrderWithDetails } from "@/types";
 import {
   AlertTriangle,
   ArrowRight,
+  Bike,
   Check,
   CheckCircle2,
   Clock,
+  ShoppingBag,
   Utensils,
 } from "lucide-react";
+import { formatServiceLabel, getServiceType } from "@/lib/utils/serviceType";
 
 interface OrderCardProps {
   order: OrderWithDetails;
@@ -144,10 +147,18 @@ export const OrderCard = memo(function OrderCard({
             #{order.orderNumber}
           </h3>
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-            {order.table && (
+            {getServiceType(order.table) === "domicilio" ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-secondary uppercase tracking-wider">
+                <Bike className="h-3.5 w-3.5 text-secondary" /> A Domicilio
+              </span>
+            ) : getServiceType(order.table) === "para_llevar" ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-text-light/70 uppercase tracking-wider">
+                <ShoppingBag className="h-3.5 w-3.5 text-text-light/50" /> Para Llevar
+              </span>
+            ) : (
               <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-400 uppercase tracking-wider">
-                <Utensils className="h-3.5 w-3.5 text-amber-500" /> Mesa:{" "}
-                {order.table}
+                <Utensils className="h-3.5 w-3.5 text-amber-500" />{" "}
+                {formatServiceLabel(order.table)}
               </span>
             )}
             {order.payments && order.payments.length > 0 && (

@@ -3,8 +3,9 @@ import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { useOptionalUser } from "@/components/UserProvider";
-import { Ban, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, ShoppingBag, Undo2 } from "lucide-react";
+import { Ban, Bike, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, ShoppingBag, Undo2, Utensils } from "lucide-react";
 import { useMemo, useState } from "react";
+import { formatServiceLabel, getServiceType } from "@/lib/utils/serviceType";
 
 export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
     onClickCancel: (orderId: string) => void;
@@ -140,9 +141,22 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
                                 </td>
                                 <td className="py-3.5 px-3">
                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                        <span className="rounded-full bg-card-light border border-border px-2.5 py-1 text-[10px] font-black text-text-light/70 uppercase tracking-wider">
-                                            {order.table || "Para Llevar"}
-                                        </span>
+                                        {getServiceType(order.table) === "domicilio" ? (
+                                            <span className="rounded-full bg-secondary/15 border border-secondary/30 px-2.5 py-1 text-[10px] font-black text-secondary uppercase tracking-wider flex items-center gap-1">
+                                                <Bike className="h-2.5 w-2.5" />
+                                                {formatServiceLabel(order.table)}
+                                            </span>
+                                        ) : getServiceType(order.table) === "para_llevar" ? (
+                                            <span className="rounded-full bg-card-light border border-border px-2.5 py-1 text-[10px] font-black text-text-light/70 uppercase tracking-wider flex items-center gap-1">
+                                                <ShoppingBag className="h-2.5 w-2.5" />
+                                                {formatServiceLabel(order.table)}
+                                            </span>
+                                        ) : (
+                                            <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 text-[10px] font-black text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                                                <Utensils className="h-2.5 w-2.5" />
+                                                {formatServiceLabel(order.table)}
+                                            </span>
+                                        )}
                                         {order.source === "PICKUP_APP" && (
                                             <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1">
                                                 <ShoppingBag className="h-2.5 w-2.5" />
