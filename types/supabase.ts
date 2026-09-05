@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          operationName?: string
-          query?: string
-          variables?: Json
-          extensions?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       attendance: {
@@ -177,6 +152,7 @@ export type Database = {
         Row: {
           caja_efectivo: number | null
           caja_tarjeta: number | null
+          comision_tarjeta: number | null
           created_at: string | null
           created_by: string | null
           cut_date: string
@@ -197,6 +173,7 @@ export type Database = {
         Insert: {
           caja_efectivo?: number | null
           caja_tarjeta?: number | null
+          comision_tarjeta?: number | null
           created_at?: string | null
           created_by?: string | null
           cut_date: string
@@ -217,6 +194,7 @@ export type Database = {
         Update: {
           caja_efectivo?: number | null
           caja_tarjeta?: number | null
+          comision_tarjeta?: number | null
           created_at?: string | null
           created_by?: string | null
           cut_date?: string
@@ -1203,6 +1181,7 @@ export type Database = {
           stripe_charges_enabled: boolean | null
           stripe_details_submitted: boolean | null
           system_name: string
+          terminal_commission_rate: number | null
           ticket_footer_text: string | null
           updated_at: string | null
         }
@@ -1227,6 +1206,7 @@ export type Database = {
           stripe_charges_enabled?: boolean | null
           stripe_details_submitted?: boolean | null
           system_name?: string
+          terminal_commission_rate?: number | null
           ticket_footer_text?: string | null
           updated_at?: string | null
         }
@@ -1251,6 +1231,7 @@ export type Database = {
           stripe_charges_enabled?: boolean | null
           stripe_details_submitted?: boolean | null
           system_name?: string
+          terminal_commission_rate?: number | null
           ticket_footer_text?: string | null
           updated_at?: string | null
         }
@@ -1326,57 +1307,42 @@ export type Database = {
     Functions: {
       create_order_with_items: {
         Args: {
-          p_tenant_id: string
           p_customer_id: string
+          p_items: Json
+          p_notes: string
+          p_pickup_time?: string
           p_source: string
           p_table: string
-          p_notes: string
-          p_items: Json
-          p_pickup_time?: string
+          p_tenant_id: string
         }
         Returns: Json
       }
       fn_deduct_inventory_for_order: {
-        Args: {
-          p_order_id: string
-        }
+        Args: { p_order_id: string }
         Returns: undefined
       }
       fn_reverse_inventory_for_order: {
-        Args: {
-          p_order_id: string
-        }
+        Args: { p_order_id: string }
         Returns: undefined
       }
       generar_corte_extemporaneo: {
-        Args: {
-          p_cut_date: string
-          p_user_id: string
-          p_tenant_id: string
-        }
+        Args: { p_cut_date: string; p_tenant_id: string; p_user_id: string }
         Returns: {
           corte_id: string
-          total_ventas: number
           total_ordenes: number
+          total_ventas: number
         }[]
       }
       get_dashboard_stats: {
-        Args: {
-          p_tenant_id: string
-        }
+        Args: { p_tenant_id: string }
         Returns: {
           active_orders: number
+          customers_count: number
           sales_today: number
           tips_today: number
-          customers_count: number
         }[]
       }
-      get_user_tenants: {
-        Args: {
-          user_id: string
-        }
-        Returns: string[]
-      }
+      get_user_tenants: { Args: { user_id: string }; Returns: string[] }
     }
     Enums: {
       OrderStatus:
@@ -1396,21 +1362,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -1428,14 +1398,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -1451,14 +1423,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -1474,14 +1448,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -1489,22 +1465,21 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       OrderStatus: [
