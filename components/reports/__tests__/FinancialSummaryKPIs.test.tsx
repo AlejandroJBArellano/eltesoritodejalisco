@@ -63,5 +63,30 @@ describe("FinancialSummaryKPIs Component", () => {
     );
 
     expect(screen.getByText("-$1,000.00")).toBeInTheDocument();
+    expect(screen.getByText("Menos gastos operativos")).toBeInTheDocument();
+  });
+
+  it("renders commission note under net utility when totalCardCommissions > 0", () => {
+    render(
+      <FinancialSummaryKPIs
+        summary={{
+          totalSales: 10000,
+          totalOrders: 50,
+          averageTicket: 200,
+          totalTips: 500,
+          averageCompletionTimeMinutes: 6,
+          totalExpenses: 2000,
+          totalUncollected: 0,
+          totalCardCommissions: 162.4,
+          terminalCommissionRate: 4.06,
+        }}
+        newCustomersCount={5}
+        netUtility={7837.6}
+      />,
+    );
+
+    expect(
+      screen.getByText(/Menos gastos y comisiones \(-\$162\.40\)/i),
+    ).toBeInTheDocument();
   });
 });

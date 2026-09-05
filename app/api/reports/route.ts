@@ -71,10 +71,10 @@ export async function GET(request: NextRequest) {
       completedOrders as unknown as RawReportOrder[],
     );
 
-    // 2. Propinas Totales (Payments)
+    // 2. Propinas Totales y Comisiones de Tarjeta (Payments)
     let paymentsQuery = supabase
       .from("payments")
-      .select("tip_amount")
+      .select("amount, tip_amount, method")
       .eq("tenant_id", tenant.id)
       .gte("created_at", startDate.toISOString());
     if (endDate) {
@@ -89,6 +89,14 @@ export async function GET(request: NextRequest) {
       (sum, p) => sum + Number(p.tip_amount || 0),
       0,
     );
+
+    const terminalRate = Number(tenant.terminal_commission_rate || 0);
+    const totalCardProcessed = (payments || []).reduce((sum, p) => {
+      const isCard = p.method === "CARD" || p.method === "TRANSFER";
+      if (!isCard) return sum;
+      return sum + Number(p.amount || 0) + Number(p.tip_amount || 0);
+    }, 0);
+    const totalCardCommissions = (totalCardProcessed * terminalRate) / 100;
 
     // 3. Customer Insights
     const { data: customers, error: custError } = await supabase
@@ -175,6 +183,8 @@ export async function GET(request: NextRequest) {
         averageCompletionTimeMinutes: salesMetrics.averageCompletionTimeMinutes,
         totalExpenses,
         totalUncollected,
+        totalCardCommissions,
+        terminalCommissionRate: terminalRate,
       },
       salesByDay: salesMetrics.salesByDay,
       ordersByDay: salesMetrics.ordersByDay,

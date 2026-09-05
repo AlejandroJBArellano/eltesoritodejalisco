@@ -129,7 +129,11 @@ export function useReportsData(options: UseReportsDataOptions = {}) {
 
   const netUtility = useMemo(() => {
     if (!data?.summary) return 0;
-    return data.summary.totalSales - (data.summary.totalExpenses || 0);
+    return (
+      data.summary.totalSales -
+      (data.summary.totalExpenses || 0) -
+      (data.summary.totalCardCommissions || 0)
+    );
   }, [data]);
 
   return {

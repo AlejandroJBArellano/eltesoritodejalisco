@@ -16,6 +16,8 @@ export type ReportData = {
     averageCompletionTimeMinutes: number;
     totalExpenses: number;
     totalUncollected: number;
+    totalCardCommissions?: number;
+    terminalCommissionRate?: number;
   };
   salesByDay: Record<string, number>;
   ordersByDay?: Record<string, number>;

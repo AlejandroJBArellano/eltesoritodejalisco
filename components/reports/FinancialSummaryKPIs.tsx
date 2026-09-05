@@ -99,7 +99,9 @@ export function FinancialSummaryKPIs(props: FinancialSummaryKPIsProps = {}) {
             {formatCurrency(netUtility)}
           </p>
           <p className="mt-1 text-xs text-text-light/40 font-medium">
-            Ventas brutas menos gastos
+            {summary?.totalCardCommissions && summary.totalCardCommissions > 0
+              ? `Menos gastos y comisiones (-$${summary.totalCardCommissions.toFixed(2)})`
+              : "Menos gastos operativos"}
           </p>
         </div>
 
