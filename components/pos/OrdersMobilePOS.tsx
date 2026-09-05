@@ -15,18 +15,36 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
     const isWaiter = user?.isWaiter ?? false;
 
     const { refreshOrders, availableMenuItems, orders } = usePOSData();
+    const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING" | "PAID">("ALL");
     const [sourceFilter, setSourceFilter] = useState<"ALL" | "POS" | "PICKUP_APP">("ALL");
+
+    const pendingCount = useMemo(() => orders.filter((o) => o.status !== "PAID").length, [orders]);
+    const paidCount = useMemo(() => orders.filter((o) => o.status === "PAID").length, [orders]);
+    const pickupCount = useMemo(() => orders.filter((o) => o.source === "PICKUP_APP").length, [orders]);
+    const posCount = useMemo(() => orders.filter((o) => o.source !== "PICKUP_APP").length, [orders]);
 
     const filteredOrders = useMemo(() => {
         return orders.filter((o) => {
+            if (statusFilter === "PENDING" && o.status === "PAID") return false;
+            if (statusFilter === "PAID" && o.status !== "PAID") return false;
+
             if (sourceFilter === "POS") return o.source !== "PICKUP_APP";
             if (sourceFilter === "PICKUP_APP") return o.source === "PICKUP_APP";
             return true;
         });
-    }, [orders, sourceFilter]);
+    }, [orders, statusFilter, sourceFilter]);
 
-    const pickupCount = useMemo(() => orders.filter((o) => o.source === "PICKUP_APP").length, [orders]);
-    const posCount = useMemo(() => orders.filter((o) => o.source !== "PICKUP_APP").length, [orders]);
+    const emptyMessage = useMemo(() => {
+        let statusLabel = "órdenes";
+        if (statusFilter === "PENDING") statusLabel = "órdenes pendientes";
+        if (statusFilter === "PAID") statusLabel = "órdenes pagadas";
+
+        let sourceLabel = "";
+        if (sourceFilter === "PICKUP_APP") sourceLabel = " de Kittn Pickup";
+        if (sourceFilter === "POS") sourceLabel = " de POS";
+
+        return `No hay ${statusLabel}${sourceLabel}`;
+    }, [statusFilter, sourceFilter]);
 
     const { isSubmittingCart, setEditingOrder, openModifyModal } = usePOSCart(availableMenuItems, refreshOrders);
     const {
@@ -45,8 +63,61 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
     } = usePOSCheckout(refreshOrders);
 
     return (
-        <div className="md:hidden space-y-4 pt-4">
-            {/* Filter Buttons */}
+        <div className="md:hidden space-y-3 pt-4">
+            {/* Pestañas de Estado: Todas / Pendientes / Pagadas */}
+            <div className="flex items-center gap-1 bg-dark/40 p-1 rounded-xl border border-border overflow-x-auto">
+                <button
+                    type="button"
+                    onClick={() => setStatusFilter("ALL")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                        statusFilter === "ALL"
+                            ? "bg-card text-text-light border border-border/80 shadow-sm"
+                            : "text-text-light/50 hover:text-text-light"
+                    }`}
+                >
+                    Todas ({orders.length})
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setStatusFilter("PENDING")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
+                        statusFilter === "PENDING"
+                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm"
+                            : "text-text-light/50 hover:text-amber-400"
+                    }`}
+                >
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+                    <span>Pendientes</span>
+                    <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
+                        statusFilter === "PENDING"
+                            ? "bg-amber-500/30 text-amber-200"
+                            : "bg-card-light/60 text-text-light/60"
+                    }`}>
+                        {pendingCount}
+                    </span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setStatusFilter("PAID")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
+                        statusFilter === "PAID"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
+                            : "text-text-light/50 hover:text-emerald-400"
+                    }`}
+                >
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                    <span>Pagadas</span>
+                    <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
+                        statusFilter === "PAID"
+                            ? "bg-emerald-500/30 text-emerald-200"
+                            : "bg-card-light/60 text-text-light/60"
+                    }`}>
+                        {paidCount}
+                    </span>
+                </button>
+            </div>
+
+            {/* Filtro de Origen: Todos / POS / Pickup */}
             <div className="flex items-center gap-1 bg-dark/40 p-1 rounded-xl border border-border overflow-x-auto">
                 <button
                     type="button"
@@ -57,7 +128,7 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
                             : "text-text-light/50 hover:text-text-light"
                     }`}
                 >
-                    Todas ({orders.length})
+                    Todos ({orders.length})
                 </button>
                 <button
                     type="button"
@@ -87,7 +158,7 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
             {filteredOrders.length === 0 ? (
                 <div className="py-12 text-center bg-card/40 rounded-2xl border border-dashed border-border p-6">
                     <p className="text-xs font-extrabold uppercase tracking-widest text-text-light/40">
-                        No hay órdenes {sourceFilter === "PICKUP_APP" ? "de Kittn Pickup" : sourceFilter === "POS" ? "de POS" : ""}
+                        {emptyMessage}
                     </p>
                 </div>
             ) : (
