@@ -37,6 +37,7 @@ describe("usePOSCart Hook", () => {
 
     expect(result.current.formState.customerId).toBe("");
     expect(result.current.formState.source).toBe("Otro");
+    expect(result.current.formState.serviceType).toBe("COMEDOR");
     expect(result.current.formState.items.length).toBe(0);
   });
 
@@ -233,5 +234,63 @@ describe("usePOSCart Hook", () => {
 
     // Expected: 2*20 + 1*35 = 75
     expect(result.current.cartTotal).toBe(75);
+  });
+
+  it("should update serviceType when handleServiceTypeChange is called", () => {
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
+    expect(result.current.formState.serviceType).toBe("COMEDOR");
+
+    act(() => {
+      result.current.handleServiceTypeChange("PARA_LLEVAR");
+    });
+    expect(result.current.formState.serviceType).toBe("PARA_LLEVAR");
+
+    act(() => {
+      result.current.handleServiceTypeChange("DOMICILIO");
+    });
+    expect(result.current.formState.serviceType).toBe("DOMICILIO");
+
+    act(() => {
+      result.current.handleServiceTypeChange("COMEDOR");
+    });
+    expect(result.current.formState.serviceType).toBe("COMEDOR");
+  });
+
+  it("should send properly resolved table on checkout submit", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        order: { id: "order-1", orderNumber: "1001", table: "Mesa 3" },
+      }),
+    });
+    global.fetch = mockFetch;
+
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
+    // Add 1 item
+    act(() => {
+      result.current.handleGridItemClick(mockMenuItems[0]);
+      result.current.handleFormChange("table", "3");
+    });
+
+    const setCheckoutOrder = vi.fn();
+    const fakeEvent = { preventDefault: vi.fn() } as unknown as React.FormEvent<HTMLFormElement>;
+
+    await act(async () => {
+      await result.current.handleCheckoutSubmit(fakeEvent, setCheckoutOrder);
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/orders",
+      expect.objectContaining({
+        method: "POST",
+        body: expect.stringContaining('"table":"Mesa 3"'),
+      }),
+    );
   });
 });

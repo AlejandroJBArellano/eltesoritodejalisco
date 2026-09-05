@@ -10,11 +10,14 @@ import {
   MixedFlavor,
   MIXED_ORDER_TOTAL,
   MIXED_ORDER_FLAVORS,
+  OrderServiceType,
 } from "@/types/pos";
+import { resolveTableValue } from "@/lib/utils/serviceType";
 
 const emptyForm: OrderFormState = {
   customerId: "",
   source: "Otro",
+  serviceType: "COMEDOR",
   table: "",
   notes: "",
   items: [],
@@ -137,8 +140,15 @@ function usePOSCartInternal(
     }
   }, [availableMenuItems]);
 
-  const handleFormChange = (field: keyof OrderFormState, value: string) => {
+  const handleFormChange = <K extends keyof OrderFormState>(
+    field: K,
+    value: OrderFormState[K],
+  ) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleServiceTypeChange = (serviceType: OrderServiceType) => {
+    setFormState((prev) => ({ ...prev, serviceType }));
   };
 
   const handleGridItemClick = (menuItem: MenuItem) => {
@@ -259,10 +269,14 @@ function usePOSCartInternal(
     try {
       setIsSubmittingCart(true);
       setCartError(null);
+      const resolvedTable = resolveTableValue(
+        formState.serviceType,
+        formState.table,
+      );
       const payload = {
         customerId: formState.customerId || undefined,
         source: formState.source,
-        table: formState.table || undefined,
+        table: resolvedTable || undefined,
         notes: formState.notes || undefined,
         orderItems: formState.items.map((item) => ({
           menuItemId: item.menuItemId,
@@ -458,6 +472,7 @@ function usePOSCartInternal(
     cartError,
     setCartError,
     handleFormChange,
+    handleServiceTypeChange,
     handleGridItemClick,
     handleQuantityChange,
     handleItemNoteChange,

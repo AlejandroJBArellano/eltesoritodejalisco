@@ -1,7 +1,7 @@
 import { isMixedOrderItem, usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
-import { Customer, MenuItem, OrderFormState } from "@/types/pos";
+import { Customer, MenuItem, OrderFormState, OrderServiceType } from "@/types/pos";
 import {
   AlertTriangle,
   Bike,
@@ -12,6 +12,7 @@ import {
   Plus,
   Printer,
   ShoppingBag,
+  Utensils,
 } from "lucide-react";
 import { useState } from "react";
 import { sourceOptions } from "../menu/types";
@@ -19,6 +20,7 @@ import { sourceOptions } from "../menu/types";
 export interface POSCartSidebarProps {
   formState: OrderFormState;
   handleFormChange: (field: keyof OrderFormState, value: string) => void;
+  handleServiceTypeChange?: (serviceType: OrderServiceType) => void;
   customers: Customer[];
   sourceOptions: string[];
   formErrors: Record<string, string>;
@@ -43,6 +45,7 @@ export function POSCartSidebar() {
     formErrors,
     cartError,
     handleFormChange,
+    handleServiceTypeChange,
     handleQuantityChange,
     handleItemNoteChange,
     handleClearCart,
@@ -72,30 +75,76 @@ export function POSCartSidebar() {
     <div className="space-y-6 lg:sticky lg:top-24">
       {/* Detalles Adicionales de la Orden */}
       <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
-        <div className="flex items-center justify-between border-b border-border pb-3">
-          <h2 className="text-xs font-black text-text-light/50 tracking-widest uppercase flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-secondary"></span>
-            Detalles Adicionales
-          </h2>
-          <button
-            type="button"
-            onClick={() =>
-              handleFormChange(
-                "table",
-                formState.table === "Domicilio" ? "" : "Domicilio",
-              )
-            }
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all border ${formState.table === "Domicilio"
-              ? "bg-secondary/20 border-secondary text-secondary"
-              : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
-              }`}
-          >
-            <Bike className="h-3.5 w-3.5" />
-            DOMICILIO
-          </button>
+        <div className="border-b border-border pb-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-black text-text-light/50 tracking-widest uppercase flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-secondary"></span>
+              Tipo de Servicio
+            </h2>
+          </div>
+
+          {/* Selector de servicio: Comedor, Para Llevar, Domicilio */}
+          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Tipo de servicio">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={formState.serviceType === "COMEDOR"}
+              onClick={() => handleServiceTypeChange("COMEDOR")}
+              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${formState.serviceType === "COMEDOR"
+                  ? "bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/10"
+                  : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
+                }`}
+            >
+              <Utensils className="h-3.5 w-3.5 shrink-0" />
+              <span>COMEDOR</span>
+            </button>
+
+            <button
+              type="button"
+              role="radio"
+              aria-checked={formState.serviceType === "PARA_LLEVAR"}
+              onClick={() => handleServiceTypeChange("PARA_LLEVAR")}
+              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${formState.serviceType === "PARA_LLEVAR"
+                  ? "bg-primary/20 border-primary text-primary shadow-sm shadow-primary/10"
+                  : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
+                }`}
+            >
+              <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
+              <span>LLEVAR</span>
+            </button>
+
+            <button
+              type="button"
+              role="radio"
+              aria-checked={formState.serviceType === "DOMICILIO"}
+              onClick={() => handleServiceTypeChange("DOMICILIO")}
+              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${formState.serviceType === "DOMICILIO"
+                  ? "bg-secondary/20 border-secondary text-secondary shadow-sm shadow-secondary/10"
+                  : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
+                }`}
+            >
+              <Bike className="h-3.5 w-3.5 shrink-0" />
+              <span>DOMICILIO</span>
+            </button>
+          </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className={`grid gap-4 ${formState.serviceType === "COMEDOR" ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
+          {formState.serviceType === "COMEDOR" && (
+            <div>
+              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
+                Mesa (Opcional)
+              </label>
+              <input
+                type="text"
+                value={formState.table}
+                onChange={(e) => handleFormChange("table", e.target.value)}
+                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none focus:border-amber-400 transition-colors placeholder:text-text-light/30 font-medium"
+                placeholder="Ej. 4, Terraza..."
+              />
+            </div>
+          )}
+
           <div>
             <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
               Cliente
@@ -143,7 +192,7 @@ export function POSCartSidebar() {
               value={formState.notes}
               onChange={(e) => handleFormChange("notes", e.target.value)}
               className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
-              placeholder="Mesa 4, sin chile..."
+              placeholder="Sin cebolla, salsa aparte..."
             />
           </div>
         </div>
@@ -238,7 +287,7 @@ export function POSCartSidebar() {
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-2 min-w-[55px] justify-end">
+                    <div className="flex items-center gap-2 min-w-13.75 justify-end">
                       <p className="font-black text-xs text-text-light tabular-nums">
                         $
                         {(
