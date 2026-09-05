@@ -17,7 +17,9 @@ export async function login(formData: FormData) {
   });
 
   if (error) {
-    return redirect("/login?error=Invalid login credentials");
+    return redirect(
+      `/login?error=${encodeURIComponent("Correo o contraseña incorrectos")}`,
+    );
   }
 
   revalidatePath("/", "layout");
