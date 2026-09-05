@@ -24,11 +24,15 @@ export type OrderItemDraft = {
   notes: string;
 };
 
+import type { OrderServiceType } from "@/lib/utils/serviceType";
+export type { OrderServiceType };
+
 export type Order = OrderWithDetails;
 
 export type OrderFormState = {
   customerId: string;
   source: string;
+  serviceType: OrderServiceType;
   table: string;
   notes: string;
   items: OrderItemDraft[];
