@@ -12,6 +12,7 @@ const mockCut: DailyCut = {
   propinas_tarjeta: 40,
   caja_efectivo: 1260,
   caja_tarjeta: 232,
+  comision_tarjeta: 0,
   utilidad_real: 1300,
   total_gastos: 250,
   utilidad_final: 1050,
@@ -51,5 +52,17 @@ describe("DailyCutDetailModal Component", () => {
     const closeBtn = screen.getByText("Cerrar");
     fireEvent.click(closeBtn);
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("renders commission and net card amount when comision_tarjeta > 0", () => {
+    const cutWithCommission: DailyCut = {
+      ...mockCut,
+      caja_tarjeta: 1000,
+      comision_tarjeta: 40.6,
+    };
+
+    render(<DailyCutDetailModal cut={cutWithCommission} onClose={vi.fn()} />);
+
+    expect(screen.getByText(/Comisión: -\$40\.60 · Neto: \$959\.40/i)).toBeDefined();
   });
 });

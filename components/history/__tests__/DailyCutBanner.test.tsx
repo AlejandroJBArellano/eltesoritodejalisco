@@ -10,6 +10,8 @@ const mockTotals: DailyCutSummaryTotals = {
   propinasTarjeta: 50,
   cajaEfectivo: 1050,
   cajaTarjeta: 210,
+  comisionTarjeta: 0,
+  cajaTarjetaNeta: 210,
   utilidadReal: 1100,
   utilidadFinal: 800,
   ordersAtTable: 3,
@@ -180,5 +182,24 @@ describe("DailyCutBanner Component", () => {
 
     expect(screen.getByText("Ocultar Archivo")).toBeDefined();
     expect(screen.getByText("Algo salió mal")).toBeDefined();
+  });
+
+  it("displays commission deduction and net amount when todayTotals has comisionTarjeta > 0", () => {
+    const totalsWithCommission: DailyCutSummaryTotals = {
+      ...mockTotals,
+      cajaTarjeta: 1000,
+      comisionTarjeta: 40.6,
+      cajaTarjetaNeta: 959.4,
+    };
+
+    render(
+      <DailyCutBanner
+        todayTotals={totalsWithCommission}
+        todayOrdersCount={5}
+        todayExpenses={300}
+      />,
+    );
+
+    expect(screen.getByText(/Comisión: -\$40\.60 · Neto: \$959\.40/i)).toBeDefined();
   });
 });

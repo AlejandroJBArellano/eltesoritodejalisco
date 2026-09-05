@@ -44,6 +44,8 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
     propinasTarjeta: 0,
     cajaEfectivo: 0,
     cajaTarjeta: 0,
+    comisionTarjeta: 0,
+    cajaTarjetaNeta: 0,
     utilidadReal: 0,
     utilidadFinal: 0,
     ordersAtTable: 0,
@@ -278,6 +280,11 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
               <span className="text-blue-400 text-xl font-mono font-black">
                 ${todayTotals.cajaTarjeta.toFixed(2)}
               </span>
+              {todayTotals.comisionTarjeta > 0 && (
+                <span className="text-[10px] text-blue-300/70 font-mono block mt-1">
+                  Comisión: -${todayTotals.comisionTarjeta.toFixed(2)} · Neto: ${todayTotals.cajaTarjetaNeta.toFixed(2)}
+                </span>
+              )}
             </div>
           </div>
 
@@ -314,7 +321,9 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
                 ${todayTotals.utilidadFinal.toFixed(2)}
               </span>
               <span className="text-text-light/40 text-[9px] mt-0.5 block uppercase tracking-wider">
-                (Utilidad Real - Gastos)
+                {todayTotals.comisionTarjeta > 0
+                  ? "(Menos gastos y comisión)"
+                  : "(Menos gastos)"}
               </span>
             </div>
           </div>

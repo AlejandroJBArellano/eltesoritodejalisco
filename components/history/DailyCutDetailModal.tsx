@@ -90,6 +90,14 @@ export function DailyCutDetailModal({
             <span className="text-blue-400 text-lg font-mono font-bold">
               ${Number(cut.caja_tarjeta).toFixed(2)}
             </span>
+            {Number(cut.comision_tarjeta || 0) > 0 && (
+              <span className="text-[10px] text-blue-300/70 font-mono block mt-1">
+                Comisión: -${Number(cut.comision_tarjeta).toFixed(2)} · Neto: $
+                {(
+                  Number(cut.caja_tarjeta) - Number(cut.comision_tarjeta)
+                ).toFixed(2)}
+              </span>
+            )}
           </div>
           <div className="bg-dark/40 p-3 rounded-xl border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">

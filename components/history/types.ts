@@ -31,6 +31,7 @@ export interface DailyCut {
   propinas_tarjeta: number;
   caja_efectivo: number;
   caja_tarjeta: number;
+  comision_tarjeta?: number | null;
   utilidad_real: number;
   total_gastos: number;
   utilidad_final: number;
@@ -58,6 +59,8 @@ export interface DailyCutSummaryTotals {
   propinasTarjeta: number;
   cajaEfectivo: number;
   cajaTarjeta: number;
+  comisionTarjeta: number;
+  cajaTarjetaNeta: number;
   utilidadReal: number;
   utilidadFinal: number;
   ordersAtTable: number;

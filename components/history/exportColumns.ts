@@ -114,6 +114,10 @@ export const DAILY_CUTS_EXPORT_COLUMNS: ExportColumn<DailyCut>[] = [
     accessor: (c) => `-$${Number(c.total_gastos || 0).toFixed(2)}`,
   },
   {
+    header: "Comisión",
+    accessor: (c) => `-$${Number(c.comision_tarjeta || 0).toFixed(2)}`,
+  },
+  {
     header: "Utilidad Final",
     accessor: (c) => `$${Number(c.utilidad_final || 0).toFixed(2)}`,
   },

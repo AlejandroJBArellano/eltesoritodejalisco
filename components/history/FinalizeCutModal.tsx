@@ -23,6 +23,7 @@ export interface FinalizeCutModalProps {
   onManualTipsTarjetaChange?: (val: string) => void;
   isCalculatingTips?: boolean;
   tipBreakdown?: TipBreakdownItem[];
+  terminalCommissionRate?: number;
 }
 
 export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
@@ -40,6 +41,8 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
     propinasTarjeta: 0,
     cajaEfectivo: 0,
     cajaTarjeta: 0,
+    comisionTarjeta: 0,
+    cajaTarjetaNeta: 0,
     utilidadReal: 0,
     utilidadFinal: 0,
     ordersAtTable: 0,
@@ -48,6 +51,9 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
   };
   const todayOrdersCount = props.todayOrdersCount ?? context?.todayOrders.length ?? 0;
   const todayExpenses = props.todayExpenses ?? context?.todayExpenses ?? 0;
+  const terminalCommissionRate = props.terminalCommissionRate !== undefined
+    ? props.terminalCommissionRate
+    : (context?.terminalCommissionRate ?? 0);
 
   const manualCash = props.manualCash !== undefined ? props.manualCash : (context?.manualCash ?? "");
   const manualCard = props.manualCard !== undefined ? props.manualCard : (context?.manualCard ?? "");
@@ -61,6 +67,10 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
 
   const isCalculatingTips = props.isCalculatingTips !== undefined ? props.isCalculatingTips : (context?.isCalculatingTips ?? false);
   const tipBreakdown = props.tipBreakdown ?? context?.tipBreakdown ?? [];
+
+  const currentCard = manualCard !== "" ? Number(manualCard) : todayTotals.cajaTarjeta;
+  const currentCommission = (currentCard * terminalCommissionRate) / 100;
+  const currentNetCard = Math.max(0, currentCard - currentCommission);
 
   if (!isOpen) return null;
 
@@ -142,6 +152,22 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
               />
             </div>
           </div>
+
+          {terminalCommissionRate > 0 && (
+            <div className="flex justify-between items-center bg-blue-500/10 border border-blue-500/20 p-2.5 rounded-lg text-xs">
+              <div className="flex flex-col">
+                <span className="text-blue-300 font-bold">
+                  Comisión ({terminalCommissionRate.toFixed(2)}%)
+                </span>
+                <span className="text-[10px] text-blue-300/70 font-mono">
+                  Neto: ${currentNetCard.toFixed(2)}
+                </span>
+              </div>
+              <span className="text-blue-300 font-mono font-black">
+                -${currentCommission.toFixed(2)}
+              </span>
+            </div>
+          )}
 
           <div className="flex justify-between border-t border-border pt-2 text-text-light/60">
             <span>Órdenes completadas</span>

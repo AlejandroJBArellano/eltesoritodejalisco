@@ -10,6 +10,8 @@ const mockTotals: DailyCutSummaryTotals = {
   propinasTarjeta: 50,
   cajaEfectivo: 1000,
   cajaTarjeta: 790,
+  comisionTarjeta: 0,
+  cajaTarjetaNeta: 790,
   utilidadReal: 1600,
   utilidadFinal: 1400,
   ordersAtTable: 5,
@@ -134,5 +136,29 @@ describe("FinalizeCutModal Component", () => {
     );
 
     expect(screen.getByText("Calculando...")).toBeDefined();
+  });
+
+  it("displays terminal commission deduction and net card amount when terminalCommissionRate > 0", () => {
+    render(
+      <FinalizeCutModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onConfirm={vi.fn()}
+        isFinalizing={false}
+        todayTotals={mockTotals}
+        todayOrdersCount={6}
+        todayExpenses={200}
+        manualCash="1000"
+        manualCard="1000"
+        manualTipsEfectivo="50"
+        manualTipsTarjeta="50"
+        terminalCommissionRate={4}
+      />,
+    );
+
+    // Rate 4% on $1,000 card = $40.00 commission, $960.00 net
+    expect(screen.getByText(/Comisión \(4.00%\)/i)).toBeDefined();
+    expect(screen.getByText("-$40.00")).toBeDefined();
+    expect(screen.getByText(/Neto: \$960.00/i)).toBeDefined();
   });
 });

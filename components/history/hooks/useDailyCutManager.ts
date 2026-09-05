@@ -30,6 +30,7 @@ export function useDailyCutManager({
   const [manualCard, setManualCard] = useState<string>("");
   const [manualTipsEfectivo, setManualTipsEfectivo] = useState<string>("");
   const [manualTipsTarjeta, setManualTipsTarjeta] = useState<string>("");
+  const [terminalCommissionRate, setTerminalCommissionRate] = useState<number>(0);
 
   // Tips breakdown calculation state
   const [tipBreakdown, setTipBreakdown] = useState<TipBreakdownItem[]>([]);
@@ -136,8 +137,10 @@ export function useDailyCutManager({
       }
     });
 
+    const comisionTarjeta = (cajaTarjeta * terminalCommissionRate) / 100;
+    const cajaTarjetaNeta = Math.max(0, cajaTarjeta - comisionTarjeta);
     const utilidadReal = ventaNeta + propinasEfectivo + propinasTarjeta;
-    const utilidadFinal = utilidadReal - todayExpenses;
+    const utilidadFinal = utilidadReal - todayExpenses - comisionTarjeta;
 
     const ordersAtTable = todayOrders.filter(
       (o) => o.table && o.table !== "Domicilio",
@@ -157,13 +160,15 @@ export function useDailyCutManager({
       propinasTarjeta,
       cajaEfectivo,
       cajaTarjeta,
+      comisionTarjeta,
+      cajaTarjetaNeta,
       utilidadReal,
       utilidadFinal,
       ordersAtTable,
       ordersDelivery,
       averageTicket,
     };
-  }, [todayOrders, todayExpenses]);
+  }, [todayOrders, todayExpenses, terminalCommissionRate]);
 
   const fetchTodayExpenses = useCallback(async () => {
     try {
@@ -171,6 +176,10 @@ export function useDailyCutManager({
       if (!tenantRes.ok) return;
       const { tenant } = await tenantRes.json();
       if (!tenant) return;
+
+      if (tenant.terminal_commission_rate != null) {
+        setTerminalCommissionRate(Number(tenant.terminal_commission_rate) || 0);
+      }
 
       const supabase = createClient();
       const mxDateStr = new Intl.DateTimeFormat("en-CA", {
@@ -323,6 +332,8 @@ export function useDailyCutManager({
         manualTipsTarjeta !== ""
           ? Number(manualTipsTarjeta)
           : todayTotals.propinasTarjeta;
+      const comisionTarjetaFinal =
+        (cardFinal * terminalCommissionRate) / 100;
 
       const response = await fetch("/api/daily-cuts", {
         method: "POST",
@@ -335,6 +346,7 @@ export function useDailyCutManager({
           propinas_tarjeta: tipsTarjetaFinal,
           caja_efectivo: cashFinal,
           caja_tarjeta: cardFinal,
+          comision_tarjeta: comisionTarjetaFinal,
           utilidad_real:
             todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal,
           total_gastos: todayExpenses,
@@ -342,7 +354,8 @@ export function useDailyCutManager({
             todayTotals.ventaNeta +
             tipsEfectivoFinal +
             tipsTarjetaFinal -
-            todayExpenses,
+            todayExpenses -
+            comisionTarjetaFinal,
           total_orders: todayOrders.length,
           expenses_detail: expensesDetail,
         }),
@@ -471,6 +484,7 @@ export function useDailyCutManager({
     openFinalizeModal,
     handleFinalizarDia,
     handleGeneratePendingCut,
+    terminalCommissionRate,
     refetchExpenses: fetchTodayExpenses,
   };
 }

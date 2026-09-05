@@ -58,6 +58,7 @@ export interface HistoryContextValue {
   openFinalizeModal: () => void;
   handleFinalizarDia: () => Promise<void>;
   handleGeneratePendingCut: () => Promise<void>;
+  terminalCommissionRate: number;
 
   // Archive & Billing State
   showCutsArchive: boolean;
@@ -164,6 +165,7 @@ export function HistoryProvider({
     openFinalizeModal: cutManagerHook.openFinalizeModal,
     handleFinalizarDia: cutManagerHook.handleFinalizarDia,
     handleGeneratePendingCut: cutManagerHook.handleGeneratePendingCut,
+    terminalCommissionRate: cutManagerHook.terminalCommissionRate,
 
     showCutsArchive,
     setShowCutsArchive,

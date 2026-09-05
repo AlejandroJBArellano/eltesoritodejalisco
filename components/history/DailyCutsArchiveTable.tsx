@@ -111,6 +111,7 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
                   />
                   <th className="py-3 px-3 text-right">IVA</th>
                   <th className="py-3 px-3 text-right">Gastos</th>
+                  <th className="py-3 px-3 text-right">Comisión</th>
                   <TableHeaderSortCell
                     field="utilidad_final"
                     label="Utilidad Final"
@@ -156,6 +157,11 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
                       </td>
                       <td className="py-3.5 px-3 text-right font-mono text-red-400">
                         -${Number(cut.total_gastos).toFixed(2)}
+                      </td>
+                      <td className="py-3.5 px-3 text-right font-mono text-blue-400/80">
+                        {Number(cut.comision_tarjeta || 0) > 0
+                          ? `-$${Number(cut.comision_tarjeta).toFixed(2)}`
+                          : "$0.00"}
                       </td>
                       <td
                         className={`py-3.5 px-3 text-right font-mono font-black ${

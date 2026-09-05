@@ -222,4 +222,31 @@ describe("useDailyCutManager", () => {
     expect(result.current.historySuccess).toContain("Corte de día finalizado con éxito");
     expect(onCutFinalized).toHaveBeenCalled();
   });
+
+  it("calculates terminal commission and deducts it from utilidadFinal when tenant has terminal_commission_rate", async () => {
+    global.fetch = vi.fn().mockImplementation(async (url: string) => {
+      if (url === "/api/tenant") {
+        return {
+          ok: true,
+          json: async () => ({
+            tenant: { id: "tenant-123", terminal_commission_rate: 5 },
+          }),
+        };
+      }
+      return { ok: false };
+    });
+
+    const { result } = renderHook(() =>
+      useDailyCutManager({ orders: mockTodayOrders }),
+    );
+
+    await act(async () => {
+      await result.current.refetchExpenses();
+    });
+
+    expect(result.current.terminalCommissionRate).toBe(5);
+    // Caja Tarjeta = 262. 5% commission = 13.1
+    expect(result.current.todayTotals.comisionTarjeta).toBeCloseTo(13.1, 1);
+    expect(result.current.todayTotals.cajaTarjetaNeta).toBeCloseTo(248.9, 1);
+  });
 });

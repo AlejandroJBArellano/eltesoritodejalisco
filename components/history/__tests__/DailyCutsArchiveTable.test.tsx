@@ -13,6 +13,7 @@ const mockCuts: DailyCut[] = [
     propinas_tarjeta: 50,
     caja_efectivo: 1000,
     caja_tarjeta: 260,
+    comision_tarjeta: 0,
     utilidad_real: 1100,
     total_gastos: 200,
     utilidad_final: 900,
@@ -88,6 +89,7 @@ describe("DailyCutsArchiveTable Component", () => {
       />,
     );
 
+    expect(screen.getByText("Comisión")).toBeDefined();
     expect(screen.getByText("$1000.00")).toBeDefined();
     expect(screen.getByText("$1160.00")).toBeDefined(); // Venta Bruta
     expect(screen.getByText("$900.00")).toBeDefined(); // Utilidad final

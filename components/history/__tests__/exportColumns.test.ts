@@ -65,6 +65,7 @@ describe("exportColumns in components/history", () => {
       propinas_tarjeta: 50,
       caja_efectivo: 1100,
       caja_tarjeta: 210,
+      comision_tarjeta: 0,
       utilidad_real: 1150,
       total_gastos: 300,
       utilidad_final: 850,
@@ -92,6 +93,11 @@ describe("exportColumns in components/history", () => {
     it("formats Gastos correctly", () => {
       const col = DAILY_CUTS_EXPORT_COLUMNS.find((c) => c.header === "Gastos");
       expect(col?.accessor!(cut)).toBe("-$300.00");
+    });
+
+    it("formats Comisión correctly", () => {
+      const col = DAILY_CUTS_EXPORT_COLUMNS.find((c) => c.header === "Comisión");
+      expect(col?.accessor!({ ...cut, comision_tarjeta: 40.6 })).toBe("-$40.60");
     });
 
     it("formats Utilidad Final correctly", () => {
