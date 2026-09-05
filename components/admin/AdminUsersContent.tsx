@@ -603,20 +603,23 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
 
           <div>
             <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
-              Contraseña de Acceso *
+              Contraseña de Acceso (Opcional)
             </label>
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light/40" />
               <input
                 type="password"
                 name="password"
-                required
                 minLength={6}
                 className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500"
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 6 caracteres o vacío si usará Google"
               />
             </div>
+            <p className="text-[11px] text-text-light/40 mt-1">
+              Si iniciará sesión con Google, puedes dejar este campo vacío.
+            </p>
           </div>
+
 
           <div>
             <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">

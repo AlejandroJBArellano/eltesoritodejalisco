@@ -13,65 +13,105 @@ export async function createUser(formData: FormData) {
     }
 
     const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const fullName = formData.get("fullName") as string;
+    const rawPassword = formData.get("password") as string;
+    const fullName = (formData.get("full_name") ||
+      formData.get("fullName") ||
+      "") as string;
     const role = formData.get("role") as string;
 
-    if (!email || !password || !fullName || !role) {
+    if (!email || !fullName || !role) {
       return { error: "Faltan datos requeridos" };
     }
 
+    const cleanEmail = email.trim().toLowerCase();
     const tenant = await getTenantContext();
     const adminClient = createAdminClient();
 
-    // Crear el usuario en auth
+    // 1. Verificar si ya existe perfil para este correo en este restaurante
+    const { data: existingProfile } = await adminClient
+      .from("profiles")
+      .select("id")
+      .eq("tenant_id", tenant.id)
+      .ilike("email", cleanEmail)
+      .maybeSingle();
+
+    if (existingProfile) {
+      return { error: "El correo ya está registrado en este restaurante" };
+    }
+
+    // 2. Si no se especificó contraseña, generamos una clave temporal segura (útil si iniciará con Google)
+    const password = rawPassword?.trim() || crypto.randomUUID();
+    let userId: string | null = null;
+
+    // 3. Crear el usuario en auth o vincular si ya existe
     const { data: newUser, error: createError } =
       await adminClient.auth.admin.createUser({
-        email,
+        email: cleanEmail,
         password,
         email_confirm: true,
         user_metadata: {
           full_name: fullName,
           role: role,
-          tenant_id: tenant.id, // pass tenant_id so handle_new_user trigger knows where to assign them
+          tenant_id: tenant.id,
         },
       });
 
     if (createError) {
-      if (createError.message.includes("already existing")) {
-        return { error: "El correo ya está registrado" };
+      const isAlreadyRegistered =
+        createError.message.toLowerCase().includes("already existing") ||
+        createError.message.toLowerCase().includes("already been registered") ||
+        createError.status === 422;
+
+      if (isAlreadyRegistered) {
+        // El usuario ya existe en Supabase Auth a nivel global
+        const { data: authData } = await adminClient.auth.admin.listUsers();
+        const existingAuthUser = authData?.users?.find(
+          (u) => u.email?.toLowerCase() === cleanEmail,
+        );
+
+        if (existingAuthUser) {
+          userId = existingAuthUser.id;
+        } else {
+          return { error: "El correo ya está registrado en la plataforma" };
+        }
+      } else {
+        console.error("Error al crear usuario en Auth:", createError);
+        return { error: createError.message };
       }
-      console.error(createError);
-      return { error: createError.message };
+    } else if (newUser?.user) {
+      userId = newUser.user.id;
     }
 
-    // El trigger en la BD podría estar creando el profile vacío. Nosotros lo actualizamos.
-    // O si no hay trigger, lo insertamos. Primero intentamos update, si no afecta, insert.
-    if (newUser.user) {
-      const { error: upsertError } = await adminClient.from("profiles").upsert({
-        id: newUser.user.id,
-        email: email,
-        full_name: fullName,
-        role: role,
-        tenant_id: tenant.id,
-      });
+    if (!userId) {
+      return { error: "No se pudo registrar el usuario" };
+    }
 
-      if (upsertError) {
-        console.error("Error upserting profile:", upsertError);
-        // Si hay error al crear el perfil, borramos el usuario por seguridad
-        await adminClient.auth.admin.deleteUser(newUser.user.id);
-        return { error: "Error al crear el perfil en la base de datos" };
-      }
+    // 4. Crear o actualizar perfil en profiles para este tenant
+    const { error: upsertError } = await adminClient.from("profiles").upsert({
+      id: userId,
+      email: cleanEmail,
+      full_name: fullName,
+      role: role,
+      tenant_id: tenant.id,
+    });
 
-      // Also create/upsert in the users table to keep it in sync
+    if (upsertError) {
+      console.error("Error al registrar perfil:", upsertError);
+      return { error: "Error al crear el perfil en la base de datos" };
+    }
+
+    // 5. Sincronizar en la tabla users local
+    try {
       await adminClient.from("users").upsert({
-        id: newUser.user.id,
-        email: email,
+        id: userId,
+        email: cleanEmail,
         name: fullName,
-        role: role,
+        role: role as any,
         tenant_id: tenant.id,
         password: "MANAGED_BY_SUPABASE",
       });
+    } catch (usersErr) {
+      console.error("Error al sincronizar tabla users:", usersErr);
     }
 
     revalidatePath("/admin/users");
@@ -81,6 +121,7 @@ export async function createUser(formData: FormData) {
     return { error: "Ocurrió un error inesperado." };
   }
 }
+
 
 export async function updateUserRole(id: string, newRole: string) {
   try {
