@@ -11,6 +11,7 @@ import { SettingsFiscalSection } from "./settings/SettingsFiscalSection";
 import { SettingsLoyaltySection } from "./settings/SettingsLoyaltySection";
 import { SettingsPickupSection } from "./settings/SettingsPickupSection";
 import { SettingsStripeSection } from "./settings/SettingsStripeSection";
+import { SettingsTerminalSection } from "./settings/SettingsTerminalSection";
 import { SettingsBrandingSection } from "./settings/SettingsBrandingSection";
 import { getContrastColor } from "./settings/types";
 
@@ -38,6 +39,7 @@ function SettingsFormContent() {
         {/* Left Column: Core Configurations */}
         <div className="lg:col-span-2 space-y-8">
           <SettingsGeneralSection />
+          <SettingsTerminalSection />
           <SettingsFiscalSection />
           <SettingsLoyaltySection />
           <div className="space-y-4">

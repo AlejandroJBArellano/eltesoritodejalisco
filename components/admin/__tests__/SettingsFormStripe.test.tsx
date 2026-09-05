@@ -25,6 +25,7 @@ const mockBaseTenant: TenantContextType = {
   loyalty_enabled: true,
   loyalty_ratio: 10,
   commission_rate: 8,
+  terminal_commission_rate: 0,
   stripe_account_id: null,
   stripe_charges_enabled: false,
   stripe_details_submitted: false,

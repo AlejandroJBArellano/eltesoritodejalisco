@@ -24,6 +24,8 @@ interface SettingsContextValue {
   setLoyaltyEnabled: (val: boolean) => void;
   loyaltyRatio: number;
   setLoyaltyRatio: (val: number) => void;
+  terminalCommissionRate: string;
+  setTerminalCommissionRate: (val: string) => void;
   isDragging: boolean;
   setIsDragging: (val: boolean) => void;
   connectingStripe: boolean;
@@ -73,6 +75,12 @@ export function SettingsProvider({
   );
   const [loyaltyRatio, setLoyaltyRatio] = useState<number>(
     initialTenant.loyalty_ratio || 10,
+  );
+  const [terminalCommissionRate, setTerminalCommissionRate] = useState<string>(
+    initialTenant.terminal_commission_rate !== null &&
+      initialTenant.terminal_commission_rate !== undefined
+      ? String(initialTenant.terminal_commission_rate)
+      : "0",
   );
 
   const [isDragging, setIsDragging] = useState(false);
@@ -244,6 +252,8 @@ export function SettingsProvider({
     setLoyaltyEnabled,
     loyaltyRatio,
     setLoyaltyRatio,
+    terminalCommissionRate,
+    setTerminalCommissionRate,
     isDragging,
     setIsDragging,
     connectingStripe,

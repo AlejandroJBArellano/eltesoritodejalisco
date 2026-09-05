@@ -32,6 +32,11 @@ export async function updateTenantSettings(
     const darkBgColor = formData.get("darkBgColor") as string;
     const loyaltyEnabled = formData.get("loyaltyEnabled") === "true";
     const loyaltyRatio = parseInt(formData.get("loyaltyRatio") as string, 10) || 10;
+    const rawTerminalCommission = formData.get("terminalCommissionRate") as string;
+    const parsedTerminalCommission = parseFloat(rawTerminalCommission);
+    const terminalCommissionRate = Number.isFinite(parsedTerminalCommission)
+      ? Math.max(0, Math.min(100, parsedTerminalCommission))
+      : 0;
     const googleReviewsUrl = formData.get("googleReviewsUrl") as string;
     const ticketFooterText = formData.get("ticketFooterText") as string;
 
@@ -86,6 +91,7 @@ export async function updateTenantSettings(
         logo_url: logoUrl ? logoUrl.trim() : null,
         loyalty_enabled: loyaltyEnabled,
         loyalty_ratio: loyaltyRatio,
+        terminal_commission_rate: terminalCommissionRate,
         google_reviews_url: googleReviewsUrl ? googleReviewsUrl.trim() : null,
         ticket_footer_text: ticketFooterText ? ticketFooterText.trim() : null,
         updated_at: new Date().toISOString(),
