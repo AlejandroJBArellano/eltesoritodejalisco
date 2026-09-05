@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { PaymentMethod } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import { usePendingCut } from "@/hooks/usePendingCut";
+import { getServiceType } from "@/lib/utils/serviceType";
 import type {
   DailyCutSummaryTotals,
   ExpenseDetailItem,
@@ -143,10 +144,10 @@ export function useDailyCutManager({
     const utilidadFinal = utilidadReal - todayExpenses - comisionTarjeta;
 
     const ordersAtTable = todayOrders.filter(
-      (o) => o.table && o.table !== "Domicilio",
+      (o) => getServiceType(o.table) === "comedor",
     ).length;
     const ordersDelivery = todayOrders.filter(
-      (o) => o.table === "Domicilio",
+      (o) => getServiceType(o.table) === "domicilio",
     ).length;
     const averageTicket =
       todayOrders.length > 0
