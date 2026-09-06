@@ -11,6 +11,21 @@ export interface DailyTicketRow {
   averageTicket: number;
 }
 
+export interface WeekdayOccurrence {
+  date: string;
+  label: string;
+  sales: number;
+  orders: number;
+  averageTicket: number;
+}
+
+export interface WeekdayHistoricalBaseline {
+  averageTicket: number;
+  averageSales: number;
+  averageOrders: number;
+  totalOccurrences: number;
+}
+
 export interface WeekdaySalesRow {
   dayIndex: number;
   name: string;
@@ -22,6 +37,8 @@ export interface WeekdaySalesRow {
   averageTicket: number;
   percentageOfSales: number;
   isBestDay: boolean;
+  historicalBaseline: WeekdayHistoricalBaseline;
+  occurrences: WeekdayOccurrence[];
 }
 
 export interface MonthlySalesRow {
@@ -119,12 +136,11 @@ export function aggregatePerformanceData(
   const typedPeriodOrders = periodOrders || [];
   const typedHistoricalOrders = historicalOrders || [];
 
-  // --- 1. Daily Ticket & Period KPIs ---
+  // --- 1. Daily Ticket & Period KPIs Trackers ---
   const dailyMap: Record<string, { sales: number; orders: number }> = {};
   let totalPeriodSales = 0;
   let totalPeriodOrders = 0;
 
-  // Track unique calendar dates by weekday to compute average per day occurrence
   const weekdayDatesSets: Record<number, Set<string>> = {
     0: new Set(),
     1: new Set(),
@@ -145,6 +161,19 @@ export function aggregatePerformanceData(
     6: { sales: 0, orders: 0 },
   };
 
+  const weekdayOccurrencesMap: Record<
+    number,
+    Record<string, { sales: number; orders: number }>
+  > = {
+    0: {},
+    1: {},
+    2: {},
+    3: {},
+    4: {},
+    5: {},
+    6: {},
+  };
+
   typedPeriodOrders.forEach((order) => {
     if (!order.created_at) return;
     const amount = Number(order.total || 0);
@@ -163,10 +192,16 @@ export function aggregatePerformanceData(
     totalPeriodSales += amount;
     totalPeriodOrders += 1;
 
-    // Weekday
+    // Weekday in period
     weekdayTotals[dayOfWeekIndex].sales += amount;
     weekdayTotals[dayOfWeekIndex].orders += 1;
     weekdayDatesSets[dayOfWeekIndex].add(dateStr);
+
+    if (!weekdayOccurrencesMap[dayOfWeekIndex][dateStr]) {
+      weekdayOccurrencesMap[dayOfWeekIndex][dateStr] = { sales: 0, orders: 0 };
+    }
+    weekdayOccurrencesMap[dayOfWeekIndex][dateStr].sales += amount;
+    weekdayOccurrencesMap[dayOfWeekIndex][dateStr].orders += 1;
   });
 
   const periodAverageTicket =
@@ -195,14 +230,65 @@ export function aggregatePerformanceData(
       };
     });
 
-  // --- 2. Weekday Sales ---
+  // --- 2. Historical Processing (Months & Weekday Baselines) ---
+  const monthlyRows = generateLast12Months(baseDate);
+  const monthMap: Record<string, MonthlySalesRow> = {};
+  monthlyRows.forEach((m) => {
+    monthMap[m.monthKey] = m;
+  });
+
+  const historicalDatesSets: Record<number, Set<string>> = {
+    0: new Set(),
+    1: new Set(),
+    2: new Set(),
+    3: new Set(),
+    4: new Set(),
+    5: new Set(),
+    6: new Set(),
+  };
+
+  const historicalWeekdayTotals: Record<
+    number,
+    { sales: number; orders: number }
+  > = {
+    0: { sales: 0, orders: 0 },
+    1: { sales: 0, orders: 0 },
+    2: { sales: 0, orders: 0 },
+    3: { sales: 0, orders: 0 },
+    4: { sales: 0, orders: 0 },
+    5: { sales: 0, orders: 0 },
+    6: { sales: 0, orders: 0 },
+  };
+
+  typedHistoricalOrders.forEach((order) => {
+    if (!order.created_at) return;
+    const amount = Number(order.total || 0);
+    const parsed = getMexicoHourAndDay(order.created_at);
+    if (!parsed) return;
+
+    const { dateStr, dayOfWeekIndex } = parsed;
+
+    // Weekday historical totals
+    historicalWeekdayTotals[dayOfWeekIndex].sales += amount;
+    historicalWeekdayTotals[dayOfWeekIndex].orders += 1;
+    historicalDatesSets[dayOfWeekIndex].add(dateStr);
+
+    // Monthly historical totals
+    const monthKey = dateStr.substring(0, 7); // YYYY-MM
+    if (monthMap[monthKey]) {
+      monthMap[monthKey].totalSales += amount;
+      monthMap[monthKey].totalOrders += 1;
+    }
+  });
+
+  // --- 3. Weekday Sales & Baselines ---
   let maxWeekdaySales = 0;
   let bestDayIndex = -1;
 
   const weekdayRowsPre = DAYS_OF_WEEK.map((day) => {
     const totals = weekdayTotals[day.index];
-    const occurrences = Math.max(weekdayDatesSets[day.index].size, 1);
-    const avgSales = Math.round((totals.sales / occurrences) * 100) / 100;
+    const occurrencesCount = Math.max(weekdayDatesSets[day.index].size, 1);
+    const avgSales = Math.round((totals.sales / occurrencesCount) * 100) / 100;
     const avgTicket =
       totals.orders > 0
         ? Math.round((totals.sales / totals.orders) * 100) / 100
@@ -217,17 +303,60 @@ export function aggregatePerformanceData(
       bestDayIndex = day.index;
     }
 
+    // Historical baseline for this weekday
+    const histOccurrences = Math.max(historicalDatesSets[day.index].size, 1);
+    const histSales = historicalWeekdayTotals[day.index].sales;
+    const histOrders = historicalWeekdayTotals[day.index].orders;
+    const histAvgSales = Math.round((histSales / histOccurrences) * 100) / 100;
+    const histAvgOrders = Math.round((histOrders / histOccurrences) * 10) / 10;
+    const histAvgTicket =
+      histOrders > 0
+        ? Math.round((histSales / histOrders) * 100) / 100
+        : 0;
+
+    // Period occurrences sorted chronologically
+    const occurrences: WeekdayOccurrence[] = Object.keys(
+      weekdayOccurrencesMap[day.index],
+    )
+      .sort((a, b) => a.localeCompare(b))
+      .map((date) => {
+        const { sales, orders } = weekdayOccurrencesMap[day.index][date];
+        const occAvgTicket =
+          orders > 0 ? Math.round((sales / orders) * 100) / 100 : 0;
+        const labelDate = new Date(`${date}T12:00:00-06:00`);
+        const label = labelDate.toLocaleDateString("es-MX", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+          timeZone: MEX_TIMEZONE,
+        });
+        return {
+          date,
+          label,
+          sales: Math.round(sales * 100) / 100,
+          orders,
+          averageTicket: occAvgTicket,
+        };
+      });
+
     return {
       dayIndex: day.index,
       name: day.name,
       shortName: day.short,
       totalSales: Math.round(totals.sales * 100) / 100,
       totalOrders: totals.orders,
-      dayCount: occurrences,
+      dayCount: occurrencesCount,
       averageSales: avgSales,
       averageTicket: avgTicket,
       percentageOfSales: percentage,
       isBestDay: false,
+      historicalBaseline: {
+        averageTicket: histAvgTicket,
+        averageSales: histAvgSales,
+        averageOrders: histAvgOrders,
+        totalOccurrences: histOccurrences,
+      },
+      occurrences,
     };
   });
 
@@ -247,25 +376,7 @@ export function aggregatePerformanceData(
         }
       : null;
 
-  // --- 3. Monthly Sales (Last 12 Months) ---
-  const monthlyRows = generateLast12Months(baseDate);
-  const monthMap: Record<string, MonthlySalesRow> = {};
-  monthlyRows.forEach((m) => {
-    monthMap[m.monthKey] = m;
-  });
-
-  typedHistoricalOrders.forEach((order) => {
-    if (!order.created_at) return;
-    const amount = Number(order.total || 0);
-    const parsed = getMexicoHourAndDay(order.created_at);
-    if (!parsed) return;
-    const monthKey = parsed.dateStr.substring(0, 7); // YYYY-MM
-    if (monthMap[monthKey]) {
-      monthMap[monthKey].totalSales += amount;
-      monthMap[monthKey].totalOrders += 1;
-    }
-  });
-
+  // --- 4. Monthly Rows Processing ---
   let recordSales = 0;
   let recordMonthKey = "";
 

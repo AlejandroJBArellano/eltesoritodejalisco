@@ -157,6 +157,23 @@ describe("performanceAnalytics Service", () => {
       expect(tuesday?.averageTicket).toBe(300);
       expect(tuesday?.isBestDay).toBe(true);
 
+      // Historical baseline for Tuesday
+      expect(tuesday?.historicalBaseline).toEqual({
+        averageTicket: 300,
+        averageSales: 450,
+        averageOrders: 1.5,
+        totalOccurrences: 2,
+      });
+
+      // Period occurrences for Tuesday (Sep 1 and Sep 8)
+      expect(tuesday?.occurrences).toHaveLength(2);
+      expect(tuesday?.occurrences[0].date).toBe("2026-09-01");
+      expect(tuesday?.occurrences[0].sales).toBe(500);
+      expect(tuesday?.occurrences[0].orders).toBe(2);
+      expect(tuesday?.occurrences[0].averageTicket).toBe(250);
+      expect(tuesday?.occurrences[1].date).toBe("2026-09-08");
+      expect(tuesday?.occurrences[1].sales).toBe(400);
+
       // Best day in KPIs
       expect(result.kpis.bestWeekday).toEqual({
         name: "Martes",
