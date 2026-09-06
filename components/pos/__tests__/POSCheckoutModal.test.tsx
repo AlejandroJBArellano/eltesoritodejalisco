@@ -318,7 +318,7 @@ describe("POSCheckoutModal Component", () => {
 
     render(<POSCheckoutModal />);
 
-    const creditBtn = screen.getByRole("button", { name: /A Crédito \/ Cuenta/i });
+    const creditBtn = screen.getByRole("button", { name: /A Crédito/i });
     fireEvent.click(creditBtn);
 
     expect(
@@ -341,7 +341,7 @@ describe("POSCheckoutModal Component", () => {
 
     render(<POSCheckoutModal />);
 
-    const creditBtn = screen.getByRole("button", { name: /A Crédito \/ Cuenta/i });
+    const creditBtn = screen.getByRole("button", { name: /A Crédito/i });
     fireEvent.click(creditBtn);
 
     expect(screen.getByText("Confirmar Venta a Crédito")).toBeInTheDocument();
@@ -382,7 +382,7 @@ describe("POSCheckoutModal Component", () => {
 
     render(<POSCheckoutModal />);
 
-    const creditBtn = screen.getByRole("button", { name: /A Crédito \/ Cuenta/i });
+    const creditBtn = screen.getByRole("button", { name: /A Crédito/i });
     fireEvent.click(creditBtn);
 
     expect(screen.getByText(/Autorización de Gerencia Requerida/i)).toBeInTheDocument();
@@ -435,7 +435,7 @@ describe("POSCheckoutModal Component", () => {
 
     render(<POSCheckoutModal />);
 
-    const creditBtn = screen.getByRole("button", { name: /A Crédito \/ Cuenta/i });
+    const creditBtn = screen.getByRole("button", { name: /A Crédito/i });
     fireEvent.click(creditBtn);
 
     const pinInput = screen.getByPlaceholderText(/Ingresa PIN de 4 dígitos/i);

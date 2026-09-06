@@ -1,7 +1,7 @@
+import { useOptionalUser } from "@/components/UserProvider";
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
-import { useOptionalUser } from "@/components/UserProvider";
 import {
   AlertCircle,
   AlertTriangle,
@@ -324,7 +324,7 @@ export function POSCheckoutModal() {
               disabled={isSubmittingCheckout}
               className="w-full bg-amber-500/10 text-amber-400 border border-amber-500/30 py-2.5 rounded-xl font-black text-xs hover:bg-amber-500/20 hover:border-amber-500/40 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
             >
-              <UserCheck className="h-3.5 w-3.5" /> A Crédito / Cuenta
+              <UserCheck className="h-3.5 w-3.5" /> A Crédito
             </button>
 
             {/* Prompt de Autorización de Crédito / PIN */}
