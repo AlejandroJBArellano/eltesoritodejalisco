@@ -1,5 +1,6 @@
 "use server";
 
+import { type UserRole } from "@/types";
 import { getProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext } from "@/lib/tenant";
@@ -106,7 +107,7 @@ export async function createUser(formData: FormData) {
         id: userId,
         email: cleanEmail,
         name: fullName,
-        role: role as any,
+        role: role as UserRole,
         tenant_id: tenant.id,
         password: "MANAGED_BY_SUPABASE",
       });

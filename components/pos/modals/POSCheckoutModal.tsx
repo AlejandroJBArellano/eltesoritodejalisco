@@ -36,7 +36,6 @@ export function POSCheckoutModal() {
   const {
     isSubmittingCheckout,
     checkoutError,
-    setCheckoutError,
     checkoutOrder,
     setCheckoutOrder,
     paymentMethod,
