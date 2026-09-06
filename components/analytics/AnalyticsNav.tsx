@@ -2,9 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart3, Clock } from "lucide-react";
+import { ArrowLeft, BarChart3, Clock, TrendingUp } from "lucide-react";
 
-export type AnalyticsActiveTab = "sales" | "hourly";
+export type AnalyticsActiveTab = "sales" | "hourly" | "performance";
 
 export interface AnalyticsNavProps {
   activeTab: AnalyticsActiveTab;
@@ -23,7 +23,7 @@ export function AnalyticsNav({ activeTab }: AnalyticsNavProps) {
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 bg-dark/40 p-1 rounded-xl border border-border">
+      <div className="flex flex-wrap items-center gap-2 bg-dark/40 p-1 rounded-xl border border-border">
         <Link
           href="/analytics/sales"
           className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${
@@ -45,6 +45,17 @@ export function AnalyticsNav({ activeTab }: AnalyticsNavProps) {
         >
           <Clock className="h-4 w-4" />
           Horas Pico & Calor
+        </Link>
+        <Link
+          href="/analytics/performance"
+          className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${
+            activeTab === "performance"
+              ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+              : "text-text-light/60 hover:text-white"
+          }`}
+        >
+          <TrendingUp className="h-4 w-4" />
+          Rendimiento
         </Link>
       </div>
     </div>

@@ -18,6 +18,9 @@ describe("AnalyticsNav Component", () => {
 
     const hourlyLink = screen.getByRole("link", { name: /Horas Pico & Calor/i });
     expect(hourlyLink).toHaveAttribute("href", "/analytics/hourly");
+
+    const perfLink = screen.getByRole("link", { name: /Rendimiento/i });
+    expect(perfLink).toHaveAttribute("href", "/analytics/performance");
   });
 
   it("highlights active hourly tab", () => {
@@ -25,5 +28,12 @@ describe("AnalyticsNav Component", () => {
 
     const hourlyLink = screen.getByRole("link", { name: /Horas Pico & Calor/i });
     expect(hourlyLink.className).toContain("bg-amber-500");
+  });
+
+  it("highlights active performance tab", () => {
+    render(<AnalyticsNav activeTab="performance" />);
+
+    const perfLink = screen.getByRole("link", { name: /Rendimiento/i });
+    expect(perfLink.className).toContain("bg-emerald-600");
   });
 });
