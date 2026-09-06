@@ -1,5 +1,5 @@
 import { OrderWithDetails } from "@/types";
-import { formatServiceTicket } from "@/lib/utils/serviceType";
+import { formatServiceTicket, getServiceType } from "@/lib/utils/serviceType";
 
 interface KitchenTicketProps {
   order: OrderWithDetails;
@@ -36,6 +36,8 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
   const orderDate = formatDate(order.createdAt);
   const orderTime = formatTime(order.createdAt);
   const printTime = formatTime(new Date());
+  const serviceType = getServiceType(order.table);
+  const serviceTicketLabel = formatServiceTicket(order.table);
 
   return (
     <div className="kitchen-ticket bg-white p-3 w-[80mm] mx-auto text-black font-mono border border-gray-300 shadow-sm text-sm antialiased select-none">
@@ -46,13 +48,39 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
         <p className="text-3xl font-black my-1">#{order.orderNumber}</p>
         <div className="border-b border-dashed border-black my-2"></div>
 
-        <div className="text-left space-y-1 text-xs">
-          <div className="flex justify-between">
-            <span className="font-bold">SERVICIO:</span>
-            <span className="font-black uppercase">
-              {formatServiceTicket(order.table)}
-            </span>
+        {/* Bloque visual distintivo de servicio / mesa */}
+        {serviceType === "para_llevar" ? (
+          <div className="my-2 p-2 bg-black text-white text-center rounded-sm">
+            <p className="text-xl font-black tracking-widest uppercase">
+              &gt;&gt;&gt; PARA LLEVAR &lt;&lt;&lt;
+            </p>
           </div>
+        ) : serviceType === "domicilio" ? (
+          <div className="my-2 p-2 border-4 border-dashed border-black text-center rounded-sm">
+            <p className="text-xl font-black tracking-widest uppercase">
+              *** A DOMICILIO ***
+            </p>
+          </div>
+        ) : (
+          <div className="my-2 p-2 border-4 border-black text-center rounded-sm">
+            <p className="text-2xl font-black tracking-wider uppercase">
+              {serviceTicketLabel}
+            </p>
+          </div>
+        )}
+
+        {/* Identificación de cliente */}
+        {order.customer?.name && (
+          <div className="my-2 p-1.5 border-2 border-black text-center bg-gray-50 rounded-sm">
+            <p className="text-[10px] font-bold text-gray-700 tracking-wider">CLIENTE:</p>
+            <p className="text-base font-black uppercase tracking-wide">
+              {order.customer.name}
+            </p>
+          </div>
+        )}
+
+        {/* Metadatos adicionales */}
+        <div className="text-left space-y-1 text-xs mt-2">
           {order.source && (
             <div className="flex justify-between">
               <span className="font-bold">ORIGEN:</span>

@@ -121,4 +121,51 @@ describe("KitchenTicket Component", () => {
     expect(screen.getByText("NOTAS GENERALES:")).toBeInTheDocument();
     expect(screen.getByText(/Entregar caliente/i)).toBeInTheDocument();
   });
+
+  it("should render customer name when present", () => {
+    const orderWithCustomer: OrderWithDetails = {
+      ...mockOrder,
+      customer: {
+        id: "cust-1",
+        name: "Carlos Santana",
+        loyaltyPoints: 10,
+        totalSpend: 500,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    };
+
+    render(<KitchenTicket order={orderWithCustomer} />);
+
+    expect(screen.getByText("CLIENTE:")).toBeInTheDocument();
+    expect(screen.getByText("Carlos Santana")).toBeInTheDocument();
+  });
+
+  it("should not render customer section when customer is absent", () => {
+    render(<KitchenTicket order={mockOrder} />);
+
+    expect(screen.queryByText("CLIENTE:")).not.toBeInTheDocument();
+  });
+
+  it("should render inverted block for Para Llevar orders", () => {
+    const takeoutOrder: OrderWithDetails = {
+      ...mockOrder,
+      table: "Para Llevar",
+    };
+
+    render(<KitchenTicket order={takeoutOrder} />);
+
+    expect(screen.getByText(">>> PARA LLEVAR <<<")).toBeInTheDocument();
+  });
+
+  it("should render dashed block for A Domicilio orders", () => {
+    const deliveryOrder: OrderWithDetails = {
+      ...mockOrder,
+      table: "A Domicilio",
+    };
+
+    render(<KitchenTicket order={deliveryOrder} />);
+
+    expect(screen.getByText("*** A DOMICILIO ***")).toBeInTheDocument();
+  });
 });
