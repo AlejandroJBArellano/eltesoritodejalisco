@@ -8,11 +8,19 @@ export interface AccountNoteItem {
   id: string;
   orderNumber: string;
   createdAt: string | Date;
+  operationalDate?: string;
   total: number;
   totalPaid: number;
   remainingBalance: number;
   notes?: string | null;
+  table?: string | null;
   items?: Array<{ quantity: number; name: string; unitPrice: number }>;
+  payments?: Array<{
+    id?: string;
+    amount: number;
+    method: string;
+    createdAt: string | Date;
+  }>;
 }
 
 export interface CustomerAccountTicketProps {

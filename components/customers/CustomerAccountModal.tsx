@@ -11,13 +11,12 @@ import {
   Calendar,
   ChevronDown,
   ChevronUp,
-  CreditCard,
   DollarSign,
   FileText,
   Printer,
   RefreshCw,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 export interface CustomerAccountModalProps {
   isOpen: boolean;
@@ -52,7 +51,7 @@ export function CustomerAccountModal({
   const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
   const [isAbonoOpen, setIsAbonoOpen] = useState(false);
 
-  const fetchStatement = async () => {
+  const fetchStatement = useCallback(async () => {
     if (!customer?.id) return;
     try {
       setIsLoading(true);
@@ -85,14 +84,14 @@ export function CustomerAccountModal({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [customer?.id]);
 
   useEffect(() => {
     if (isOpen && customer?.id) {
       setActiveTab("resumen");
-      fetchStatement();
+      void fetchStatement();
     }
-  }, [isOpen, customer?.id]);
+  }, [isOpen, customer?.id, fetchStatement]);
 
   if (!isOpen || !customer) return null;
 
@@ -108,8 +107,8 @@ export function CustomerAccountModal({
     });
   };
 
-  const handleAbonoSuccess = (appliedAmount: number) => {
-    fetchStatement();
+  const handleAbonoSuccess = () => {
+    void fetchStatement();
     onAbonoSuccess?.();
   };
 

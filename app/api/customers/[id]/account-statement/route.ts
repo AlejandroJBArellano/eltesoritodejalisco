@@ -141,7 +141,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const { id: customerId } = await params;
     const body = await request.json();
-    const { amount, method, receivedAmount, change, notes } = body;
+    const { amount, method, receivedAmount, change } = body;
 
     const paymentAmount = Number(amount);
     if (!paymentAmount || paymentAmount <= 0) {
