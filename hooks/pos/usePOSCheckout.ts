@@ -275,6 +275,40 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     }
   };
 
+  const handleCreditPayment = async (orderToProcess?: Order) => {
+    const order = orderToProcess || checkoutOrder;
+    if (!order) return;
+
+    try {
+      setIsSubmitting(true);
+      setCheckoutError(null);
+      const customerName = order.customer?.name || "Cliente";
+      const creditNote = order.notes
+        ? `${order.notes} [CRÉDITO: ${customerName}]`
+        : `[CRÉDITO: ${customerName}]`;
+
+      const response = await fetch(`/api/orders/${order.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "UNCOLLECTED",
+          notes: creditNote,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Error al marcar orden a crédito");
+
+      await refreshOrders();
+      if (!orderToProcess) setCheckoutOrder(null);
+    } catch (error) {
+      setCheckoutError(
+        error instanceof Error ? error.message : "Error al procesar crédito",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const generateWhatsAppMessage = () => {
     if (!checkoutOrder) return "";
     let msg = `¡Gracias por tu visita a ${name}! 🌮🤩\n\n`;
@@ -347,5 +381,6 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     handleUpdateTip,
     handleUndoPayment,
     handleFailedPayment,
+    handleCreditPayment,
   };
 }

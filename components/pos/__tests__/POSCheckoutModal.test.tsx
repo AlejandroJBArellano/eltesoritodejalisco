@@ -90,6 +90,7 @@ describe("POSCheckoutModal Component", () => {
     setShowSplitBill: vi.fn(),
     handleProcessPayment: vi.fn(),
     handleFailedPayment: vi.fn(),
+    handleCreditPayment: vi.fn(),
   };
 
   beforeEach(() => {
@@ -301,5 +302,151 @@ describe("POSCheckoutModal Component", () => {
     expect(screen.queryByText(/Incluye.*propina/i)).toBeNull();
     // Still shows the combined total to pay so the waiter knows what to charge the customer
     expect(screen.getByText("$136.00")).toBeInTheDocument();
+  });
+
+  it("should show warning if trying to send to credit without an assigned customer", () => {
+    const orderWithoutCustomer = {
+      ...mockOrder,
+      customer: undefined,
+      customerId: undefined,
+    };
+
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      checkoutOrder: orderWithoutCustomer,
+    } as unknown as ReturnType<typeof usePOSCheckout>);
+
+    render(<POSCheckoutModal />);
+
+    const creditBtn = screen.getByRole("button", { name: /A Crédito \/ Cuenta/i });
+    fireEvent.click(creditBtn);
+
+    expect(
+      screen.getByText(/Para enviar a crédito, asigna primero un cliente/i)
+    ).toBeInTheDocument();
+  });
+
+  it("should allow admin to confirm credit payment directly", () => {
+    const orderWithCustomer = {
+      ...mockOrder,
+      customer: { id: "c-1", name: "Raúl González" },
+    };
+
+    const handleCreditPaymentMock = vi.fn();
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      checkoutOrder: orderWithCustomer,
+      handleCreditPayment: handleCreditPaymentMock,
+    } as unknown as ReturnType<typeof usePOSCheckout>);
+
+    render(<POSCheckoutModal />);
+
+    const creditBtn = screen.getByRole("button", { name: /A Crédito \/ Cuenta/i });
+    fireEvent.click(creditBtn);
+
+    expect(screen.getByText("Confirmar Venta a Crédito")).toBeInTheDocument();
+    expect(screen.getByText(/Raúl González/i)).toBeInTheDocument();
+
+    const confirmBtn = screen.getByRole("button", { name: /Confirmar Crédito/i });
+    fireEvent.click(confirmBtn);
+
+    expect(handleCreditPaymentMock).toHaveBeenCalled();
+  });
+
+  it("should require manager PIN for waiter and authorize credit upon valid PIN", async () => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "WAITER",
+      isAdmin: false,
+      isWaiter: true,
+      isChef: false,
+      isAuthenticated: true,
+    });
+
+    const orderWithCustomer = {
+      ...mockOrder,
+      customer: { id: "c-1", name: "Raúl González" },
+    };
+
+    const handleCreditPaymentMock = vi.fn();
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      checkoutOrder: orderWithCustomer,
+      handleCreditPayment: handleCreditPaymentMock,
+    } as unknown as ReturnType<typeof usePOSCheckout>);
+
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ valid: true }),
+    });
+
+    render(<POSCheckoutModal />);
+
+    const creditBtn = screen.getByRole("button", { name: /A Crédito \/ Cuenta/i });
+    fireEvent.click(creditBtn);
+
+    expect(screen.getByText(/Autorización de Gerencia Requerida/i)).toBeInTheDocument();
+
+    const pinInput = screen.getByPlaceholderText(/Ingresa PIN de 4 dígitos/i);
+    fireEvent.change(pinInput, { target: { value: "1234" } });
+
+    const confirmBtn = screen.getByRole("button", { name: /Confirmar Crédito/i });
+    fireEvent.click(confirmBtn);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/auth/verify-pin",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ pin: "1234" }),
+      })
+    );
+
+    await vi.waitFor(() => {
+      expect(handleCreditPaymentMock).toHaveBeenCalled();
+    });
+  });
+
+  it("should show error when waiter enters invalid PIN", async () => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "WAITER",
+      isAdmin: false,
+      isWaiter: true,
+      isChef: false,
+      isAuthenticated: true,
+    });
+
+    const orderWithCustomer = {
+      ...mockOrder,
+      customer: { id: "c-1", name: "Raúl González" },
+    };
+
+    const handleCreditPaymentMock = vi.fn();
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      checkoutOrder: orderWithCustomer,
+      handleCreditPayment: handleCreditPaymentMock,
+    } as unknown as ReturnType<typeof usePOSCheckout>);
+
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ valid: false, error: "PIN de autorización incorrecto" }),
+    });
+
+    render(<POSCheckoutModal />);
+
+    const creditBtn = screen.getByRole("button", { name: /A Crédito \/ Cuenta/i });
+    fireEvent.click(creditBtn);
+
+    const pinInput = screen.getByPlaceholderText(/Ingresa PIN de 4 dígitos/i);
+    fireEvent.change(pinInput, { target: { value: "9999" } });
+
+    const confirmBtn = screen.getByRole("button", { name: /Confirmar Crédito/i });
+    fireEvent.click(confirmBtn);
+
+    expect(
+      await screen.findByText("PIN de autorización incorrecto")
+    ).toBeInTheDocument();
+    expect(handleCreditPaymentMock).not.toHaveBeenCalled();
   });
 });

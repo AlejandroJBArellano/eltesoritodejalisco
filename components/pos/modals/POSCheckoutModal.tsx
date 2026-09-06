@@ -9,9 +9,10 @@ import {
   DollarSign,
   Landmark,
   Scissors,
+  UserCheck,
   X,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
 const PAYMENT_METHODS = [
   { value: "CASH", label: "Efectivo", icon: DollarSign },
@@ -35,6 +36,7 @@ export function POSCheckoutModal() {
   const {
     isSubmittingCheckout,
     checkoutError,
+    setCheckoutError,
     checkoutOrder,
     setCheckoutOrder,
     paymentMethod,
@@ -52,7 +54,13 @@ export function POSCheckoutModal() {
     setShowSplitBill,
     handleProcessPayment,
     handleFailedPayment,
+    handleCreditPayment,
   } = usePOSCheckout(refreshOrders);
+
+  const [showCreditPrompt, setShowCreditPrompt] = useState(false);
+  const [managerPin, setManagerPin] = useState("");
+  const [creditAuthError, setCreditAuthError] = useState<string | null>(null);
+  const [isVerifyingPin, setIsVerifyingPin] = useState(false);
 
   if (!checkoutOrder) return null;
 
@@ -300,6 +308,121 @@ export function POSCheckoutModal() {
             >
               <Scissors className="h-3.5 w-3.5" /> Dividir Cuenta
             </button>
+
+            {/* Botón A Crédito */}
+            <button
+              type="button"
+              onClick={() => {
+                setCreditAuthError(null);
+                setManagerPin("");
+                const hasCustomer = Boolean(checkoutOrder.customer || checkoutOrder.customerId);
+                if (!hasCustomer) {
+                  setCreditAuthError("Para enviar a crédito, asigna primero un cliente regresando a editar.");
+                  return;
+                }
+                setShowCreditPrompt(true);
+              }}
+              disabled={isSubmittingCheckout}
+              className="w-full bg-amber-500/10 text-amber-400 border border-amber-500/30 py-2.5 rounded-xl font-black text-xs hover:bg-amber-500/20 hover:border-amber-500/40 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
+            >
+              <UserCheck className="h-3.5 w-3.5" /> A Crédito / Cuenta
+            </button>
+
+            {/* Prompt de Autorización de Crédito / PIN */}
+            {showCreditPrompt && (
+              <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-black text-amber-400 uppercase tracking-wide">
+                      {isWaiter ? "Autorización de Gerencia Requerida" : "Confirmar Venta a Crédito"}
+                    </p>
+                    <p className="text-[11px] font-bold text-text-light/70 mt-0.5">
+                      Cliente: <span className="text-amber-400">{checkoutOrder.customer?.name || "Asignado"}</span> — ${checkoutOrder.total.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+
+                {isWaiter && (
+                  <div className="space-y-1">
+                    <input
+                      type="password"
+                      maxLength={6}
+                      value={managerPin}
+                      disabled={isVerifyingPin || isSubmittingCheckout}
+                      onChange={(e) => {
+                        setCreditAuthError(null);
+                        setManagerPin(e.target.value);
+                      }}
+                      placeholder="Ingresa PIN de 4 dígitos"
+                      className="w-full text-center text-lg tracking-widest font-black p-2 border border-border bg-dark/60 rounded-xl focus:border-amber-400 outline-none text-text-light"
+                      autoFocus
+                    />
+                  </div>
+                )}
+
+                {creditAuthError && (
+                  <p className="text-[10px] font-bold text-red-400 text-center">
+                    {creditAuthError}
+                  </p>
+                )}
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={isVerifyingPin || isSubmittingCheckout}
+                    onClick={() => {
+                      setShowCreditPrompt(false);
+                      setCreditAuthError(null);
+                      setManagerPin("");
+                    }}
+                    className="flex-1 py-2 text-[10px] rounded-xl font-black uppercase border border-border bg-white/5 text-text-light/60 hover:bg-white/10 hover:text-text-light transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isVerifyingPin || isSubmittingCheckout || (isWaiter && !managerPin.trim())}
+                    onClick={async () => {
+                      if (isWaiter) {
+                        try {
+                          setIsVerifyingPin(true);
+                          setCreditAuthError(null);
+                          const res = await fetch("/api/auth/verify-pin", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ pin: managerPin.trim() }),
+                          });
+                          const data = await res.json();
+                          if (!res.ok || !data.valid) {
+                            setCreditAuthError(data.error || "PIN incorrecto");
+                            return;
+                          }
+                          setShowCreditPrompt(false);
+                          handleCreditPayment();
+                        } catch {
+                          setCreditAuthError("Error al verificar PIN");
+                        } finally {
+                          setIsVerifyingPin(false);
+                        }
+                      } else {
+                        setShowCreditPrompt(false);
+                        handleCreditPayment();
+                      }
+                    }}
+                    className="flex-1 py-2 text-[10px] rounded-xl font-black uppercase border border-amber-500/50 bg-amber-500 text-black hover:brightness-110 transition-all disabled:opacity-50"
+                  >
+                    {isVerifyingPin ? "Verificando..." : "Confirmar Crédito"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {creditAuthError && !showCreditPrompt && (
+              <div className="rounded-xl bg-red-500/10 p-2.5 border border-red-500/20 text-xs font-bold text-red-400 text-center">
+                {creditAuthError}
+              </div>
+            )}
 
             <button
               type="button"
