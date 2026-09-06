@@ -110,6 +110,8 @@ export interface Customer {
   birthday?: Date;
   loyaltyPoints: number;
   totalSpend: number;
+  debt_balance?: number;
+  pending_orders_count?: number;
   createdAt: Date;
   updatedAt: Date;
 }

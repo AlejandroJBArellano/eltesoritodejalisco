@@ -15,12 +15,17 @@ interface RouteParams {
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const { status } = await request.json();
+    const { status, notes } = await request.json();
 
     const updateData: {
       status: string;
       completed_at?: string;
+      notes?: string;
     } = { status };
+
+    if (notes !== undefined) {
+      updateData.notes = notes;
+    }
 
     // If order is completed or uncollected, set completion timestamp
     if (
