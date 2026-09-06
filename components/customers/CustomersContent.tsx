@@ -18,12 +18,14 @@ import {
   Mail,
   Phone,
   Plus,
+  ReceiptText,
   RefreshCw,
   Trash2,
   User,
   Users,
 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
+import { CustomerAccountModal } from "@/components/customers/CustomerAccountModal";
 
 type Customer = {
   id: string;
@@ -33,6 +35,8 @@ type Customer = {
   birthday?: string | null;
   loyalty_points: number;
   total_spend: number;
+  debt_balance?: number;
+  pending_orders_count?: number;
   createdAt?: string;
 };
 
@@ -45,6 +49,10 @@ const CUSTOMER_EXPORT_COLUMNS: ExportColumn<Customer>[] = [
   {
     header: "Gasto Total",
     accessor: (c) => `$${Number(c.total_spend || 0).toFixed(2)}`,
+  },
+  {
+    header: "Saldo Deudor",
+    accessor: (c) => `$${Number(c.debt_balance || 0).toFixed(2)}`,
   },
 ];
 
@@ -79,13 +87,15 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [accountCustomer, setAccountCustomer] = useState<Customer | null>(null);
   const [formState, setFormState] = useState<CustomerFormState>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Table Filters, Sort & Pagination State
   const [searchQuery, setSearchQuery] = useState("");
+  const [onlyDebtors, setOnlyDebtors] = useState(false);
 
-  type SortField = "name" | "loyalty_points" | "total_spend" | "birthday";
+  type SortField = "name" | "loyalty_points" | "total_spend" | "birthday" | "debt_balance";
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
@@ -109,6 +119,22 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
         (acc, customer) => acc + Number(customer.total_spend || 0),
         0,
       ),
+    [customers],
+  );
+
+  const totalDebtSum = useMemo(
+    () =>
+      customers.reduce(
+        (acc, customer) => acc + Number(customer.debt_balance || 0),
+        0,
+      ),
+    [customers],
+  );
+
+  const debtorCustomersCount = useMemo(
+    () =>
+      customers.filter((customer) => Number(customer.debt_balance || 0) > 0)
+        .length,
     [customers],
   );
 
@@ -256,6 +282,9 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
   // Filtered & Sorted Customers
   const filteredCustomers = useMemo(() => {
     return customers.filter((c) => {
+      if (onlyDebtors && Number(c.debt_balance || 0) <= 0) {
+        return false;
+      }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchName = c.name.toLowerCase().includes(q);
@@ -265,7 +294,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
       }
       return true;
     });
-  }, [customers, searchQuery]);
+  }, [customers, searchQuery, onlyDebtors]);
 
   const sortedCustomers = useMemo(() => {
     return [...filteredCustomers].sort((a, b) => {
@@ -276,6 +305,8 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
         comp = a.loyalty_points - b.loyalty_points;
       } else if (sortField === "total_spend") {
         comp = a.total_spend - b.total_spend;
+      } else if (sortField === "debt_balance") {
+        comp = Number(a.debt_balance || 0) - Number(b.debt_balance || 0);
       } else if (sortField === "birthday") {
         comp = (a.birthday || "").localeCompare(b.birthday || "");
       }
@@ -327,7 +358,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
         )}
 
         {/* Tarjetas de Métricas de CRM */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
@@ -339,6 +370,23 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
             </div>
             <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
               <Users className="h-5 w-5" />
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
+                Total por Cobrar
+              </p>
+              <p className={`mt-1 text-2xl font-black ${totalDebtSum > 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                ${totalDebtSum.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-[10px] font-bold text-text-light/40 mt-0.5">
+                {debtorCustomersCount} {debtorCustomersCount === 1 ? "con deuda" : "con deuda"}
+              </p>
+            </div>
+            <div className={`rounded-xl p-3 ${totalDebtSum > 0 ? "bg-amber-500/10 text-amber-400" : "bg-emerald-500/10 text-emerald-400"}`}>
+              <ReceiptText className="h-5 w-5" />
             </div>
           </div>
 
@@ -395,7 +443,27 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
               Directorio de Clientes ({filteredCustomers.length})
             </h2>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setOnlyDebtors(!onlyDebtors);
+                  setCurrentPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 border cursor-pointer ${
+                  onlyDebtors
+                    ? "bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm"
+                    : "bg-white/5 border-border text-text-light/60 hover:text-text-light hover:bg-white/10"
+                }`}
+              >
+                <ReceiptText className="h-3.5 w-3.5" />
+                Solo con Deuda
+                {debtorCustomersCount > 0 && (
+                  <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-amber-400 text-black">
+                    {debtorCustomersCount}
+                  </span>
+                )}
+              </button>
               <TableSearchInput
                 value={searchQuery}
                 onChange={(v) => {
@@ -450,6 +518,13 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                   <TableHeaderSortCell
                     field="total_spend"
                     label="Gasto Total"
+                    currentSortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHeaderSortCell
+                    field="debt_balance"
+                    label="Saldo Deudor"
                     currentSortField={sortField}
                     sortDirection={sortDirection}
                     onSort={handleSort}
@@ -512,8 +587,33 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                     <td className="py-3 px-4 font-black text-emerald-400">
                       ${Number(c.total_spend || 0).toFixed(2)}
                     </td>
+                    <td className="py-3 px-4">
+                      {Number(c.debt_balance || 0) > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => setAccountCustomer(c)}
+                          className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 font-black text-amber-400 hover:bg-amber-500/20 transition-all cursor-pointer"
+                          title="Ver estado de cuenta"
+                        >
+                          ${Number(c.debt_balance).toFixed(2)}
+                        </button>
+                      ) : (
+                        <span className="text-emerald-400/70 font-bold text-xs">
+                          Al corriente
+                        </span>
+                      )}
+                    </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setAccountCustomer(c)}
+                          className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-2 text-amber-400 hover:bg-amber-500/20 transition-all duration-200 cursor-pointer"
+                          title="Estado de Cuenta"
+                          data-testid={`account-statement-btn-${c.id}`}
+                        >
+                          <ReceiptText className="h-4 w-4" />
+                        </button>
                         <button
                           onClick={() => openEditCustomerModal(c)}
                           className="rounded-lg bg-white/5 border border-border p-2 text-text-light/80 hover:text-white hover:bg-white/10 transition-all duration-200 cursor-pointer"
@@ -547,7 +647,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                 {paginatedCustomers.length === 0 && (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="py-8 text-center text-xs text-text-light/40 italic"
                     >
                       No se encontraron clientes.
@@ -670,6 +770,16 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
           </div>
         </form>
       </Modal>
+
+      {/* Modal de Estado de Cuenta */}
+      {accountCustomer && (
+        <CustomerAccountModal
+          isOpen={Boolean(accountCustomer)}
+          onClose={() => setAccountCustomer(null)}
+          customer={accountCustomer}
+          onAbonoSuccess={fetchCustomers}
+        />
+      )}
     </div>
   );
 }
