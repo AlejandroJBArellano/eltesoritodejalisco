@@ -48,6 +48,7 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
     ordersAtTable: 0,
     ordersDelivery: 0,
     averageTicket: 0,
+    creditoOtorgadoHoy: 0,
   };
   const todayOrdersCount = props.todayOrdersCount ?? context?.todayOrders.length ?? 0;
   const todayExpenses = props.todayExpenses ?? context?.todayExpenses ?? 0;
@@ -105,6 +106,17 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
               ${todayTotals.ventaNeta.toFixed(2)}
             </span>
           </div>
+
+          {todayTotals.creditoOtorgadoHoy > 0 && (
+            <div className="flex justify-between items-center bg-violet-500/10 p-2.5 rounded-lg border border-violet-500/20">
+              <span className="text-violet-300 font-bold">
+                Crédito otorgado hoy
+              </span>
+              <span className="text-violet-300 font-mono font-black">
+                ${todayTotals.creditoOtorgadoHoy.toFixed(2)}
+              </span>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div>

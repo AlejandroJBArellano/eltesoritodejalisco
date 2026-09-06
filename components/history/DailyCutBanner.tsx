@@ -6,6 +6,7 @@ import {
   BarChart3,
   CheckCircle2,
   Clock,
+  CreditCard,
   Folder,
   Home,
   Receipt,
@@ -51,6 +52,7 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
     ordersAtTable: 0,
     ordersDelivery: 0,
     averageTicket: 0,
+    creditoOtorgadoHoy: 0,
   };
   const todayOrdersCount = props.todayOrdersCount ?? context?.todayOrders.length ?? 0;
   const todayExpenses = props.todayExpenses ?? context?.todayExpenses ?? 0;
@@ -326,6 +328,30 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
                   : "(Menos gastos)"}
               </span>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* CRÉDITOS OTORGADOS HOY (INFORMATIVO) */}
+      {!finalizeSuccess && todayTotals.creditoOtorgadoHoy > 0 && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-violet-500/30 bg-violet-500/10 p-4 text-xs">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-violet-500/20 text-violet-300 flex items-center justify-center shrink-0">
+              <CreditCard className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="font-black text-violet-300 uppercase tracking-wider text-xs block">
+                Créditos Otorgados Hoy (Cuentas por Cobrar)
+              </span>
+              <span className="text-text-light/60 text-[11px]">
+                Ventas pendientes de cobro · No computan en caja hasta que el cliente liquide o abone
+              </span>
+            </div>
+          </div>
+          <div className="text-right sm:self-center">
+            <span className="text-violet-300 text-xl font-black font-mono">
+              ${todayTotals.creditoOtorgadoHoy.toFixed(2)}
+            </span>
           </div>
         </div>
       )}

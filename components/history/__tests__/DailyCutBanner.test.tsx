@@ -17,6 +17,7 @@ const mockTotals: DailyCutSummaryTotals = {
   ordersAtTable: 3,
   ordersDelivery: 2,
   averageTicket: 232,
+  creditoOtorgadoHoy: 0,
 };
 
 describe("DailyCutBanner Component", () => {
@@ -201,5 +202,23 @@ describe("DailyCutBanner Component", () => {
     );
 
     expect(screen.getByText(/Comisión: -\$40\.60 · Neto: \$959\.40/i)).toBeDefined();
+  });
+
+  it("renders Créditos Otorgados Hoy callout when creditoOtorgadoHoy > 0", () => {
+    const totalsWithCredit: DailyCutSummaryTotals = {
+      ...mockTotals,
+      creditoOtorgadoHoy: 750,
+    };
+
+    render(
+      <DailyCutBanner
+        todayTotals={totalsWithCredit}
+        todayOrdersCount={5}
+        todayExpenses={300}
+      />,
+    );
+
+    expect(screen.getByText("Créditos Otorgados Hoy (Cuentas por Cobrar)")).toBeDefined();
+    expect(screen.getByText("$750.00")).toBeDefined();
   });
 });

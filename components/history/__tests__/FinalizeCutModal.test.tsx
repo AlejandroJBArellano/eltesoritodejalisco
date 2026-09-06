@@ -17,6 +17,7 @@ const mockTotals: DailyCutSummaryTotals = {
   ordersAtTable: 5,
   ordersDelivery: 1,
   averageTicket: 290,
+  creditoOtorgadoHoy: 0,
 };
 
 describe("FinalizeCutModal Component", () => {
@@ -160,5 +161,24 @@ describe("FinalizeCutModal Component", () => {
     expect(screen.getByText(/Comisión \(4.00%\)/i)).toBeDefined();
     expect(screen.getByText("-$40.00")).toBeDefined();
     expect(screen.getByText(/Neto: \$960.00/i)).toBeDefined();
+  });
+
+  it("renders Crédito otorgado hoy row when creditoOtorgadoHoy > 0", () => {
+    const totalsWithCredit: DailyCutSummaryTotals = {
+      ...mockTotals,
+      creditoOtorgadoHoy: 450,
+    };
+
+    render(
+      <FinalizeCutModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onConfirm={vi.fn()}
+        todayTotals={totalsWithCredit}
+      />,
+    );
+
+    expect(screen.getByText("Crédito otorgado hoy")).toBeDefined();
+    expect(screen.getByText("$450.00")).toBeDefined();
   });
 });
