@@ -23,7 +23,11 @@ export interface HistoryChartsProps {
 
 export function HistoryCharts(props: HistoryChartsProps = {}) {
   const context = useHistoryContextNullable();
-  const orders = props.orders ?? context?.orders ?? [];
+  const contextOrders = context?.orders;
+  const orders: Order[] = useMemo(
+    () => props.orders ?? contextOrders ?? [],
+    [props.orders, contextOrders],
+  );
 
   const [hoveredDayIndex, setHoveredDayIndex] = useState<number | null>(null);
   const [hoveredSliceIndex, setHoveredSliceIndex] = useState<number | null>(
@@ -133,42 +137,47 @@ export function HistoryCharts(props: HistoryChartsProps = {}) {
   const outerR = 68;
   const innerR = 44;
 
-  let accumulatedAngle = -Math.PI / 2; // Start from top
-  const donutSlices = chartsData.salesMix.map((slice, i) => {
-    const angle =
-      donutTotal > 0 ? (slice.value / donutTotal) * (2 * Math.PI) : 0;
-    const startAngle = accumulatedAngle;
-    const endAngle = accumulatedAngle + angle;
-    accumulatedAngle = endAngle;
+  const donutSlices = useMemo(() => {
+    let accumulatedAngle = -Math.PI / 2; // Start from top
+    const slices = [];
+    for (let i = 0; i < chartsData.salesMix.length; i++) {
+      const slice = chartsData.salesMix[i];
+      const angle =
+        donutTotal > 0 ? (slice.value / donutTotal) * (2 * Math.PI) : 0;
+      const startAngle = accumulatedAngle;
+      const endAngle = accumulatedAngle + angle;
+      accumulatedAngle = endAngle;
 
-    const x1Outer = center + outerR * Math.cos(startAngle);
-    const y1Outer = center + outerR * Math.sin(startAngle);
-    const x2Outer = center + outerR * Math.cos(endAngle);
-    const y2Outer = center + outerR * Math.sin(endAngle);
+      const x1Outer = center + outerR * Math.cos(startAngle);
+      const y1Outer = center + outerR * Math.sin(startAngle);
+      const x2Outer = center + outerR * Math.cos(endAngle);
+      const y2Outer = center + outerR * Math.sin(endAngle);
 
-    const x1Inner = center + innerR * Math.cos(endAngle);
-    const y1Inner = center + innerR * Math.sin(endAngle);
-    const x2Inner = center + innerR * Math.cos(startAngle);
-    const y2Inner = center + innerR * Math.sin(startAngle);
+      const x1Inner = center + innerR * Math.cos(endAngle);
+      const y1Inner = center + innerR * Math.sin(endAngle);
+      const x2Inner = center + innerR * Math.cos(startAngle);
+      const y2Inner = center + innerR * Math.sin(startAngle);
 
-    const largeArcFlag = angle > Math.PI ? 1 : 0;
+      const largeArcFlag = angle > Math.PI ? 1 : 0;
 
-    const pathD =
-      chartsData.salesMix.length === 1
-        ? `M ${center} ${center - outerR} A ${outerR} ${outerR} 0 1 1 ${center} ${center + outerR
-        } A ${outerR} ${outerR} 0 1 1 ${center} ${center - outerR
-        } M ${center} ${center - innerR} A ${innerR} ${innerR} 0 1 0 ${center} ${center + innerR
-        } A ${innerR} ${innerR} 0 1 0 ${center} ${center - innerR} Z`
-        : `M ${x1Outer} ${y1Outer} A ${outerR} ${outerR} 0 ${largeArcFlag} 1 ${x2Outer} ${y2Outer} L ${x1Inner} ${y1Inner} A ${innerR} ${innerR} 0 ${largeArcFlag} 0 ${x2Inner} ${y2Inner} Z`;
+      const pathD =
+        chartsData.salesMix.length === 1
+          ? `M ${center} ${center - outerR} A ${outerR} ${outerR} 0 1 1 ${center} ${center + outerR
+          } A ${outerR} ${outerR} 0 1 1 ${center} ${center - outerR
+          } M ${center} ${center - innerR} A ${innerR} ${innerR} 0 1 0 ${center} ${center + innerR
+          } A ${innerR} ${innerR} 0 1 0 ${center} ${center - innerR} Z`
+          : `M ${x1Outer} ${y1Outer} A ${outerR} ${outerR} 0 ${largeArcFlag} 1 ${x2Outer} ${y2Outer} L ${x1Inner} ${y1Inner} A ${innerR} ${innerR} 0 ${largeArcFlag} 0 ${x2Inner} ${y2Inner} Z`;
 
-    return {
-      ...slice,
-      color: COLORS[i % COLORS.length],
-      pathD,
-      percentage:
-        donutTotal > 0 ? Math.round((slice.value / donutTotal) * 100) : 0,
-    };
-  });
+      slices.push({
+        ...slice,
+        color: COLORS[i % COLORS.length],
+        pathD,
+        percentage:
+          donutTotal > 0 ? Math.round((slice.value / donutTotal) * 100) : 0,
+      });
+    }
+    return slices;
+  }, [chartsData.salesMix, donutTotal, center, outerR, innerR]);
 
   return (
     <section className="space-y-4">

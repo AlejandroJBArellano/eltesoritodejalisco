@@ -371,6 +371,6 @@ describe("useDailyCutManager", () => {
     });
 
     expect(capturedBody).not.toBeNull();
-    expect(capturedBody?.notes).toContain("[Crédito otorgado hoy: $232.00]");
+    expect((capturedBody as unknown as { notes?: string })?.notes).toContain("[Crédito otorgado hoy: $232.00]");
   });
 });

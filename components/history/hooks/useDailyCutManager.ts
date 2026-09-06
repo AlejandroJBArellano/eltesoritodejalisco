@@ -459,6 +459,7 @@ export function useDailyCutManager({
     todayOrders.length,
     tipTotalHours,
     tipBreakdown,
+    terminalCommissionRate,
     onCutFinalized,
   ]);
 
