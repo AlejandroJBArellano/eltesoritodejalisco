@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Award, BarChart3, Sparkles } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import type { WeekdaySalesRow } from "@/lib/services/performanceAnalytics";
+import { WeekdayContextualComparison } from "./WeekdayContextualComparison";
 
-export type WeekdayMetric = "total" | "average";
+export type WeekdayMetric = "ticket" | "average" | "total";
 
 export interface WeekdaySalesChartProps {
   data: WeekdaySalesRow[];
@@ -13,8 +14,7 @@ export interface WeekdaySalesChartProps {
 export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
   const [metric, setMetric] = useState<WeekdayMetric>("average");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-  const isAvg = metric === "average";
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
   const svgWidth = 600;
   const svgHeight = 260;
@@ -26,12 +26,20 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
   const innerWidth = svgWidth - paddingLeft - paddingRight;
   const innerHeight = svgHeight - paddingTop - paddingBottom;
 
-  const values = data.map((d) => (isAvg ? d.averageSales : d.totalSales));
+  const getMetricValue = (d: WeekdaySalesRow) => {
+    if (metric === "ticket") return d.averageTicket;
+    if (metric === "average") return d.averageSales;
+    return d.totalSales;
+  };
+
+  const values = data.map(getMetricValue);
   const rawMax = Math.max(...values, 0);
   const maxVal = rawMax > 0 ? Math.ceil(rawMax * 1.15) : 100;
   const yTicks = [0, maxVal * 0.25, maxVal * 0.5, maxVal * 0.75, maxVal];
 
   const bestDay = data.find((d) => d.isBestDay);
+  const selectedDay =
+    selectedDayIndex !== null ? data.find((d) => d.dayIndex === selectedDayIndex) : null;
 
   return (
     <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border flex flex-col justify-between">
@@ -40,20 +48,31 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
           <div>
             <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-amber-500"></span>
-              Ventas por Día de la Semana
+              Rendimiento por Día de la Semana
             </h2>
             <p className="text-xs text-text-light/60 mt-1 font-medium">
-              Identifica los días de mayor impacto comercial.
+              Compara ticket promedio, ventas y patrones. Haz clic en un día para ver su comparativa contextual.
             </p>
           </div>
 
           {/* Metric Toggle */}
-          <div className="flex items-center gap-1 bg-dark/60 p-1 rounded-xl border border-border self-start sm:self-auto">
+          <div className="flex flex-wrap items-center gap-1 bg-dark/60 p-1 rounded-xl border border-border self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setMetric("ticket")}
+              className={`px-2.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${
+                metric === "ticket"
+                  ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/20"
+                  : "text-text-light/60 hover:text-white"
+              }`}
+            >
+              Ticket Promedio
+            </button>
             <button
               type="button"
               onClick={() => setMetric("average")}
-              className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${
-                isAvg
+              className={`px-2.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${
+                metric === "average"
                   ? "bg-amber-500 text-black shadow-md shadow-amber-500/20"
                   : "text-text-light/60 hover:text-white"
               }`}
@@ -63,8 +82,8 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
             <button
               type="button"
               onClick={() => setMetric("total")}
-              className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${
-                !isAvg
+              className={`px-2.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${
+                metric === "total"
                   ? "bg-amber-500 text-black shadow-md shadow-amber-500/20"
                   : "text-text-light/60 hover:text-white"
               }`}
@@ -74,16 +93,26 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
           </div>
         </div>
 
-        {bestDay && bestDay.totalSales > 0 && (
-          <div className="mb-4 inline-flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 text-xs font-bold text-amber-400">
-            <Sparkles className="h-3.5 w-3.5" />
-            Día más fuerte: <span className="text-white font-black">{bestDay.name}</span> (
-            {isAvg
-              ? `$${bestDay.averageSales.toLocaleString("es-MX", { minimumFractionDigits: 2 })} prom.`
-              : `$${bestDay.totalSales.toLocaleString("es-MX", { minimumFractionDigits: 2 })} total`}
-            )
-          </div>
-        )}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          {bestDay && bestDay.totalSales > 0 && (
+            <div className="inline-flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 text-xs font-bold text-amber-400">
+              <Sparkles className="h-3.5 w-3.5" />
+              Día más fuerte en ventas: <span className="text-white font-black">{bestDay.name}</span> (
+              ${bestDay.averageSales.toLocaleString("es-MX", { minimumFractionDigits: 2 })} prom.)
+            </div>
+          )}
+
+          {selectedDayIndex !== null && (
+            <button
+              type="button"
+              onClick={() => setSelectedDayIndex(null)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-dark/60 border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition-all active:scale-95"
+            >
+              <X className="h-3.5 w-3.5" />
+              Limpiar Selección
+            </button>
+          )}
+        </div>
 
         {data.length > 0 && rawMax > 0 ? (
           <div
@@ -124,7 +153,7 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
 
               {/* Bars */}
               {data.map((day, index) => {
-                const val = isAvg ? day.averageSales : day.totalSales;
+                const val = getMetricValue(day);
                 const slotWidth = innerWidth / data.length;
                 const barWidth = Math.min(Math.max(slotWidth * 0.55, 16), 44);
                 const xCenter = paddingLeft + (index + 0.5) * slotWidth;
@@ -132,19 +161,26 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
                 const barHeight = Math.max((val / maxVal) * innerHeight, 3);
                 const barY = paddingTop + innerHeight - barHeight;
                 const isHovered = hoveredIndex === index;
+                const isSelected = selectedDayIndex === day.dayIndex;
 
-                const fillColor = day.isBestDay
-                  ? isHovered
-                    ? "#FBBF24"
-                    : "#F59E0B"
-                  : isHovered
-                    ? "#60A5FA"
-                    : "#3B82F6";
+                let fillColor = "#3B82F6";
+                if (isSelected) {
+                  fillColor = "#F59E0B";
+                } else if (metric === "ticket") {
+                  fillColor = isHovered ? "#34D399" : "#10B981";
+                } else if (day.isBestDay) {
+                  fillColor = isHovered ? "#FBBF24" : "#F59E0B";
+                } else {
+                  fillColor = isHovered ? "#60A5FA" : "#3B82F6";
+                }
 
                 return (
                   <g
                     key={day.dayIndex}
                     className="cursor-pointer"
+                    onClick={() =>
+                      setSelectedDayIndex(isSelected ? null : day.dayIndex)
+                    }
                     onMouseEnter={() => setHoveredIndex(index)}
                     onMouseLeave={() => setHoveredIndex(null)}
                   >
@@ -155,11 +191,13 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
                       height={barHeight}
                       rx={6}
                       fill={fillColor}
+                      stroke={isSelected ? "#FDE68A" : "none"}
+                      strokeWidth={isSelected ? 2 : 0}
                       className="transition-all duration-150"
                     />
 
-                    {/* Best day star badge */}
-                    {day.isBestDay && (
+                    {/* Best day star badge (in sales mode) */}
+                    {day.isBestDay && metric !== "ticket" && (
                       <circle
                         cx={xCenter}
                         cy={barY - 8}
@@ -173,9 +211,17 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
                       x={xCenter}
                       y={svgHeight - 14}
                       textAnchor="middle"
-                      fill={day.isBestDay ? "#F59E0B" : isHovered ? "#FFFFFF" : "#888888"}
+                      fill={
+                        isSelected
+                          ? "#F59E0B"
+                          : day.isBestDay && metric !== "ticket"
+                            ? "#F59E0B"
+                            : isHovered
+                              ? "#FFFFFF"
+                              : "#888888"
+                      }
                       fontSize="11"
-                      fontWeight={day.isBestDay ? "900" : "700"}
+                      fontWeight={isSelected || day.isBestDay ? "900" : "700"}
                     >
                       {day.shortName}
                     </text>
@@ -184,7 +230,7 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
               })}
             </svg>
 
-            {/* Tooltip */}
+            {/* Floating Tooltip */}
             {hoveredIndex !== null && data[hoveredIndex] && (
               <div
                 style={{
@@ -202,13 +248,19 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
                   <span className="text-xs font-black text-white">
                     {data[hoveredIndex].name}
                   </span>
-                  {data[hoveredIndex].isBestDay && (
+                  {data[hoveredIndex].isBestDay && metric !== "ticket" && (
                     <span className="text-[10px] font-black uppercase text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded">
-                      Mejor Día ⚡
+                      Líder Ventas ⚡
                     </span>
                   )}
                 </div>
                 <div className="space-y-1 text-[11px] text-text-light font-medium">
+                  <div className="flex justify-between gap-4">
+                    <span>Ticket promedio:</span>
+                    <span className="font-bold text-emerald-400">
+                      ${data[hoveredIndex].averageTicket.toFixed(2)}
+                    </span>
+                  </div>
                   <div className="flex justify-between gap-4">
                     <span>Promedio / día:</span>
                     <span className="font-black text-white">
@@ -228,18 +280,15 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
                     </span>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <span>Ticket promedio:</span>
-                    <span className="font-bold text-emerald-400">
-                      ${data[hoveredIndex].averageTicket.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-4">
                     <span>% de la semana:</span>
                     <span className="font-bold text-amber-400">
                       {data[hoveredIndex].percentageOfSales}%
                     </span>
                   </div>
                 </div>
+                <p className="mt-2 text-[10px] text-amber-400/80 font-bold border-t border-border pt-1">
+                  Haz clic para ver comparativa contextual
+                </p>
               </div>
             )}
           </div>
@@ -247,6 +296,14 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
           <p className="py-16 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest">
             Sin ventas registradas en el período.
           </p>
+        )}
+
+        {/* Panel de comparativa contextual cuando se selecciona un día */}
+        {selectedDay && (
+          <WeekdayContextualComparison
+            day={selectedDay}
+            onClose={() => setSelectedDayIndex(null)}
+          />
         )}
       </div>
     </section>

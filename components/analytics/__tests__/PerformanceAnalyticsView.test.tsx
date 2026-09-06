@@ -51,6 +51,13 @@ const mockPerformanceData: PerformanceAnalyticsResult = {
       averageTicket: 300,
       percentageOfSales: 10.9,
       isBestDay: false,
+      historicalBaseline: {
+        averageTicket: 300,
+        averageSales: 3000,
+        averageOrders: 10,
+        totalOccurrences: 1,
+      },
+      occurrences: [],
     },
     {
       dayIndex: 1,
@@ -63,6 +70,13 @@ const mockPerformanceData: PerformanceAnalyticsResult = {
       averageTicket: 266.67,
       percentageOfSales: 43.6,
       isBestDay: false,
+      historicalBaseline: {
+        averageTicket: 266.67,
+        averageSales: 12000,
+        averageOrders: 45,
+        totalOccurrences: 1,
+      },
+      occurrences: [],
     },
     {
       dayIndex: 2,
@@ -75,6 +89,13 @@ const mockPerformanceData: PerformanceAnalyticsResult = {
       averageTicket: 278.89,
       percentageOfSales: 45.5,
       isBestDay: true,
+      historicalBaseline: {
+        averageTicket: 278.89,
+        averageSales: 12550,
+        averageOrders: 45,
+        totalOccurrences: 1,
+      },
+      occurrences: [],
     },
     {
       dayIndex: 3,
@@ -87,6 +108,13 @@ const mockPerformanceData: PerformanceAnalyticsResult = {
       averageTicket: 0,
       percentageOfSales: 0,
       isBestDay: false,
+      historicalBaseline: {
+        averageTicket: 0,
+        averageSales: 0,
+        averageOrders: 0,
+        totalOccurrences: 1,
+      },
+      occurrences: [],
     },
     {
       dayIndex: 4,
@@ -99,6 +127,13 @@ const mockPerformanceData: PerformanceAnalyticsResult = {
       averageTicket: 0,
       percentageOfSales: 0,
       isBestDay: false,
+      historicalBaseline: {
+        averageTicket: 0,
+        averageSales: 0,
+        averageOrders: 0,
+        totalOccurrences: 1,
+      },
+      occurrences: [],
     },
     {
       dayIndex: 5,
@@ -111,6 +146,13 @@ const mockPerformanceData: PerformanceAnalyticsResult = {
       averageTicket: 0,
       percentageOfSales: 0,
       isBestDay: false,
+      historicalBaseline: {
+        averageTicket: 0,
+        averageSales: 0,
+        averageOrders: 0,
+        totalOccurrences: 1,
+      },
+      occurrences: [],
     },
     {
       dayIndex: 6,
@@ -123,6 +165,13 @@ const mockPerformanceData: PerformanceAnalyticsResult = {
       averageTicket: 0,
       percentageOfSales: 0,
       isBestDay: false,
+      historicalBaseline: {
+        averageTicket: 0,
+        averageSales: 0,
+        averageOrders: 0,
+        totalOccurrences: 1,
+      },
+      occurrences: [],
     },
   ],
   monthlySales: [
@@ -208,7 +257,7 @@ describe("PerformanceAnalyticsView Component", () => {
     await waitFor(() => {
       expect(screen.getByText("Analítica de Rendimiento")).toBeInTheDocument();
       expect(screen.getByText("Evolución del Ticket Promedio")).toBeInTheDocument();
-      expect(screen.getByText("Ventas por Día de la Semana")).toBeInTheDocument();
+      expect(screen.getByText("Rendimiento por Día de la Semana")).toBeInTheDocument();
       expect(screen.getByText("Ventas Mensuales (Últimos 12 Meses)")).toBeInTheDocument();
     });
 
