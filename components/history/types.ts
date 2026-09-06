@@ -66,4 +66,5 @@ export interface DailyCutSummaryTotals {
   ordersAtTable: number;
   ordersDelivery: number;
   averageTicket: number;
+  creditoOtorgadoHoy: number;
 }

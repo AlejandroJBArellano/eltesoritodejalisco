@@ -249,4 +249,128 @@ describe("useDailyCutManager", () => {
     expect(result.current.todayTotals.comisionTarjeta).toBeCloseTo(13.1, 1);
     expect(result.current.todayTotals.cajaTarjetaNeta).toBeCloseTo(248.9, 1);
   });
+
+  it("excludes uncollected credit orders from caja and ventaNeta, tracking them in creditoOtorgadoHoy", () => {
+    const ordersWithCredit: OrderWithDetails[] = [
+      ...mockTodayOrders,
+      {
+        id: "ord-credit-1",
+        orderNumber: "104",
+        source: "POS",
+        status: OrderStatus.UNCOLLECTED,
+        table: "Mesa 3",
+        notes: "[CRÉDITO: Carlos Gomez]",
+        subtotal: 500,
+        tax: 80,
+        total: 580,
+        createdAt: new Date(`${mxToday}T14:30:00`),
+        updatedAt: new Date(),
+        orderItems: [],
+        payments: [],
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useDailyCutManager({ orders: ordersWithCredit }),
+    );
+
+    // Venta Neta should only come from ord-1 ($100) and ord-2 ($200) = $300
+    // Credit order ($580) should NOT be added to caja or ventaNeta
+    const totals = result.current.todayTotals;
+    expect(totals.cajaEfectivo).toBe(136); // only ord-1
+    expect(totals.cajaTarjeta).toBe(262); // only ord-2
+    expect(totals.ventaNeta).toBeCloseTo(300, 1);
+    expect(totals.ivaAcumulado).toBeCloseTo(48, 1);
+    expect(totals.creditoOtorgadoHoy).toBe(580);
+  });
+
+  it("includes abonos made today for orders created on a previous day into today's caja and ventaNeta", () => {
+    const yesterdayDate = "2026-09-01";
+    const ordersWithPreviousAbono: OrderWithDetails[] = [
+      ...mockTodayOrders,
+      {
+        id: "ord-old-credit",
+        orderNumber: "099",
+        source: "POS",
+        status: OrderStatus.UNCOLLECTED,
+        table: "Mesa 1",
+        notes: "[CRÉDITO: Ana Lopez]",
+        subtotal: 400,
+        tax: 64,
+        total: 464,
+        createdAt: new Date(`${yesterdayDate}T10:00:00`),
+        updatedAt: new Date(),
+        orderItems: [],
+        payments: [
+          {
+            id: "p-abono-today",
+            orderId: "ord-old-credit",
+            method: PaymentMethod.CASH,
+            amount: 232, // $200 neta + $32 iva
+            tipAmount: 0,
+            createdAt: new Date(`${mxToday}T11:00:00`),
+          },
+        ],
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useDailyCutManager({ orders: ordersWithPreviousAbono }),
+    );
+
+    const totals = result.current.todayTotals;
+    // Caja efectivo was 136 + 232 = 368
+    expect(totals.cajaEfectivo).toBe(368);
+    // Venta Neta was 300 + 200 = 500
+    expect(totals.ventaNeta).toBeCloseTo(500, 1);
+    expect(totals.ivaAcumulado).toBeCloseTo(80, 1);
+    // Older order credit was NOT granted today, so creditoOtorgadoHoy remains 0
+    expect(totals.creditoOtorgadoHoy).toBe(0);
+  });
+
+  it("includes credit granted note in daily cut payload when creditoOtorgadoHoy > 0", async () => {
+    let capturedBody: Record<string, unknown> | null = null;
+    global.fetch = vi.fn().mockImplementation(async (url: string, init?: RequestInit) => {
+      if (url === "/api/tenant") {
+        return { ok: true, json: async () => ({ tenant: { id: "tenant-123" } }) };
+      }
+      if (url === "/api/daily-cuts") {
+        if (init?.body) {
+          capturedBody = JSON.parse(init.body as string);
+        }
+        return { ok: true, json: async () => ({ success: true }) };
+      }
+      return { ok: false };
+    });
+
+    const ordersWithCredit: OrderWithDetails[] = [
+      ...mockTodayOrders,
+      {
+        id: "ord-credit-2",
+        orderNumber: "105",
+        source: "POS",
+        status: OrderStatus.UNCOLLECTED,
+        table: "Barra",
+        notes: "[CRÉDITO: Mario Bros]",
+        subtotal: 200,
+        tax: 32,
+        total: 232,
+        createdAt: new Date(`${mxToday}T15:00:00`),
+        updatedAt: new Date(),
+        orderItems: [],
+        payments: [],
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useDailyCutManager({ orders: ordersWithCredit }),
+    );
+
+    await act(async () => {
+      await result.current.handleFinalizarDia();
+    });
+
+    expect(capturedBody).not.toBeNull();
+    expect(capturedBody?.notes).toContain("[Crédito otorgado hoy: $232.00]");
+  });
 });

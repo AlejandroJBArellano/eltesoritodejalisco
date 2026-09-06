@@ -109,32 +109,80 @@ export function useDailyCutManager({
     let cajaEfectivo = 0;
     let cajaTarjeta = 0;
 
-    todayOrders.forEach((order) => {
-      const subtotalFiscal = order.total / 1.16;
-      const ivaFiscal = order.total - subtotalFiscal;
+    const processedPaymentIds = new Set<string>();
 
-      ventaNeta += subtotalFiscal;
-      ivaAcumulado += ivaFiscal;
+    // 1. Dinero efectivamente cobrado hoy (base efectivo)
+    orders.forEach((order) => {
+      const orderDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date(order.createdAt));
 
       if (order.payments && order.payments.length > 0) {
         order.payments.forEach((payment) => {
-          const tipAmount = payment.tipAmount || 0;
-          const paymentMethod = payment.method;
-          const totalPago = Number(payment.amount || 0) + Number(tipAmount);
+          if (payment.id && processedPaymentIds.has(payment.id)) return;
+          if (payment.id) processedPaymentIds.add(payment.id);
 
-          if (paymentMethod === PaymentMethod.CASH) {
-            propinasEfectivo += tipAmount;
-            cajaEfectivo += totalPago;
-          } else if (
-            paymentMethod === PaymentMethod.CARD ||
-            paymentMethod === PaymentMethod.TRANSFER
-          ) {
-            propinasTarjeta += tipAmount;
-            cajaTarjeta += totalPago;
-          } else {
-            cajaEfectivo += totalPago;
+          const paymentDate = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "America/Mexico_City",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          }).format(new Date(payment.createdAt));
+
+          if (paymentDate === todayDateStr) {
+            const amount = Number(payment.amount || 0);
+            const tipAmount = Number(payment.tipAmount || 0);
+            const paymentMethod = payment.method;
+            const totalPago = amount + tipAmount;
+
+            const subtotalFiscal = amount / 1.16;
+            const ivaFiscal = amount - subtotalFiscal;
+
+            ventaNeta += subtotalFiscal;
+            ivaAcumulado += ivaFiscal;
+
+            if (paymentMethod === PaymentMethod.CASH) {
+              propinasEfectivo += tipAmount;
+              cajaEfectivo += totalPago;
+            } else if (
+              paymentMethod === PaymentMethod.CARD ||
+              paymentMethod === PaymentMethod.TRANSFER
+            ) {
+              propinasTarjeta += tipAmount;
+              cajaTarjeta += totalPago;
+            } else {
+              cajaEfectivo += totalPago;
+            }
           }
         });
+      } else if (
+        (order.status === "PAID" || order.status === "DELIVERED") &&
+        orderDate === todayDateStr
+      ) {
+        // Fallback para órdenes legacy/mocks sin desglose de pagos explícito
+        const amount = Number(order.total || 0);
+        const subtotalFiscal = amount / 1.16;
+        const ivaFiscal = amount - subtotalFiscal;
+
+        ventaNeta += subtotalFiscal;
+        ivaAcumulado += ivaFiscal;
+        cajaEfectivo += amount;
+      }
+    });
+
+    // 2. Créditos otorgados hoy (saldo deudor pendiente de órdenes creadas hoy a crédito)
+    let creditoOtorgadoHoy = 0;
+    todayOrders.forEach((order) => {
+      if (order.status === "UNCOLLECTED") {
+        const totalPaid = (order.payments || []).reduce(
+          (sum, p) => sum + Number(p.amount || 0),
+          0,
+        );
+        const remainingDebt = Math.max(0, Number(order.total || 0) - totalPaid);
+        creditoOtorgadoHoy += remainingDebt;
       }
     });
 
@@ -168,8 +216,9 @@ export function useDailyCutManager({
       ordersAtTable,
       ordersDelivery,
       averageTicket,
+      creditoOtorgadoHoy,
     };
-  }, [todayOrders, todayExpenses, terminalCommissionRate]);
+  }, [orders, todayOrders, todayExpenses, terminalCommissionRate, todayDateStr]);
 
   const fetchTodayExpenses = useCallback(async () => {
     try {
@@ -336,6 +385,11 @@ export function useDailyCutManager({
       const comisionTarjetaFinal =
         (cardFinal * terminalCommissionRate) / 100;
 
+      let cutNotes: string | null = null;
+      if (todayTotals.creditoOtorgadoHoy > 0) {
+        cutNotes = `[Crédito otorgado hoy: $${todayTotals.creditoOtorgadoHoy.toFixed(2)}]`;
+      }
+
       const response = await fetch("/api/daily-cuts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -358,6 +412,7 @@ export function useDailyCutManager({
             todayExpenses -
             comisionTarjetaFinal,
           total_orders: todayOrders.length,
+          notes: cutNotes,
           expenses_detail: expensesDetail,
         }),
       });
