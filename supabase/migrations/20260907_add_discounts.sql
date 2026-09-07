@@ -14,6 +14,9 @@ ALTER TABLE public.order_items
   ADD COLUMN IF NOT EXISTS discount_reason text DEFAULT NULL;
 
 -- 3. Actualizar función create_order_with_items con soporte para descuentos por ítem y por orden
+-- Eliminar sobrecarga anterior para evitar conflicto de resolución de funciones en PostgREST (PGRST203)
+DROP FUNCTION IF EXISTS public.create_order_with_items(uuid, text, text, text, text, jsonb, timestamp with time zone);
+
 CREATE OR REPLACE FUNCTION public.create_order_with_items(
     p_tenant_id uuid,
     p_customer_id text,
