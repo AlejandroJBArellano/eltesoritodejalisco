@@ -41,9 +41,8 @@ export async function GET() {
     const isAdmin = role === "ADMIN" || role === "MANAGER";
 
     if (isAdmin) {
-      // If admin, fetch all attendance records for today, and also all users
-      // so we can build a list of who hasn't checked in
-      const [attendanceRes, usersRes] = await Promise.all([
+      // If admin, fetch all attendance records for today, all users, and today's shifts
+      const [attendanceRes, usersRes, shiftsRes] = await Promise.all([
         supabase
           .from("attendance")
           .select("id, user_id, check_in, check_out, status, date")
@@ -53,28 +52,47 @@ export async function GET() {
           .from("users")
           .select("id, name, role")
           .eq("tenant_id", tenant.id)
-          .neq("role", "ADMIN"), // Maybe admins don't track attendance? Let's exclude or include depending. Let's include everyone just in case.
+          .neq("role", "ADMIN"),
+        supabase
+          .from("employee_shifts")
+          .select("*")
+          .eq("tenant_id", tenant.id)
+          .eq("date", todayDate)
+          .order("start_time", { ascending: true }),
       ]);
 
       return NextResponse.json({
         isAdmin: true,
         attendances: attendanceRes.data || [],
         users: usersRes.data || [],
+        shifts: shiftsRes.data || [],
+        toleranceMinutes: tenant.attendance_tolerance_minutes ?? 10,
       });
     } else {
-      // Normal employee: fetch only their attendance for today
-      const { data: attendances } = await supabase
-        .from("attendance")
-        .select("id, user_id, check_in, check_out, status, date")
-        .eq("user_id", user.id)
-        .eq("tenant_id", tenant.id)
-        .eq("date", todayDate)
-        .order("created_at", { ascending: false });
+      // Normal employee: fetch only their attendance and their shift for today
+      const [attendanceRes, shiftsRes] = await Promise.all([
+        supabase
+          .from("attendance")
+          .select("id, user_id, check_in, check_out, status, date")
+          .eq("user_id", user.id)
+          .eq("tenant_id", tenant.id)
+          .eq("date", todayDate)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("employee_shifts")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("tenant_id", tenant.id)
+          .eq("date", todayDate)
+          .order("start_time", { ascending: true }),
+      ]);
 
       return NextResponse.json({
         isAdmin: false,
-        attendances: attendances || [],
+        attendances: attendanceRes.data || [],
         users: [],
+        shifts: shiftsRes.data || [],
+        toleranceMinutes: tenant.attendance_tolerance_minutes ?? 10,
       });
     }
   } catch (error) {

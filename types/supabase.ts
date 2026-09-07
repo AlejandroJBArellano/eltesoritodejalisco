@@ -266,6 +266,60 @@ export type Database = {
           },
         ]
       }
+      employee_shifts: {
+        Row: {
+          area: string | null
+          created_at: string | null
+          date: string
+          end_time: string
+          id: string
+          notes: string | null
+          start_time: string
+          tenant_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          area?: string | null
+          created_at?: string | null
+          date: string
+          end_time: string
+          id?: string
+          notes?: string | null
+          start_time: string
+          tenant_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          area?: string | null
+          created_at?: string | null
+          date?: string
+          end_time?: string
+          id?: string
+          notes?: string | null
+          start_time?: string
+          tenant_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_employee_shifts_tenants"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_employee_shifts_users"
+            columns: ["user_id", "tenant_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id", "tenant_id"]
+          },
+        ]
+      }
       expense_categories: {
         Row: {
           color: string | null
@@ -1188,6 +1242,7 @@ export type Database = {
       }
       tenants: {
         Row: {
+          attendance_tolerance_minutes: number | null
           commission_rate: number | null
           created_at: string | null
           custom_domain: string | null
@@ -1213,6 +1268,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          attendance_tolerance_minutes?: number | null
           commission_rate?: number | null
           created_at?: string | null
           custom_domain?: string | null
@@ -1238,6 +1294,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          attendance_tolerance_minutes?: number | null
           commission_rate?: number | null
           created_at?: string | null
           custom_domain?: string | null
