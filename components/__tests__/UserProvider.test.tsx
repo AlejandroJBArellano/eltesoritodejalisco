@@ -15,6 +15,7 @@ const mockAdminProfile: UserProfile = {
   role: "ADMIN",
   tenant_id: "t-1",
   updated_at: "2026-01-01",
+  pin: "1234",
 };
 
 const mockWaiterProfile: UserProfile = {
@@ -24,6 +25,7 @@ const mockWaiterProfile: UserProfile = {
   role: "WAITER",
   tenant_id: "t-1",
   updated_at: "2026-01-01",
+  pin: null,
 };
 
 const mockChefProfile: UserProfile = {
@@ -33,6 +35,7 @@ const mockChefProfile: UserProfile = {
   role: "CHEF",
   tenant_id: "t-1",
   updated_at: "2026-01-01",
+  pin: null,
 };
 
 describe("UserProvider and useUser Hook", () => {

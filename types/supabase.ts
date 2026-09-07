@@ -960,6 +960,7 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          pin: string | null
           role: string | null
           tenant_id: string
           updated_at: string | null
@@ -968,6 +969,7 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          pin?: string | null
           role?: string | null
           tenant_id: string
           updated_at?: string | null
@@ -976,6 +978,7 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          pin?: string | null
           role?: string | null
           tenant_id?: string
           updated_at?: string | null
@@ -1328,6 +1331,7 @@ export type Database = {
           id: string
           name: string
           password: string
+          pin: string | null
           role: Database["public"]["Enums"]["UserRole"]
           tenant_id: string
           updated_at: string
@@ -1338,6 +1342,7 @@ export type Database = {
           id: string
           name: string
           password: string
+          pin?: string | null
           role?: Database["public"]["Enums"]["UserRole"]
           tenant_id: string
           updated_at: string
@@ -1348,6 +1353,7 @@ export type Database = {
           id?: string
           name?: string
           password?: string
+          pin?: string | null
           role?: Database["public"]["Enums"]["UserRole"]
           tenant_id?: string
           updated_at?: string

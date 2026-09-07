@@ -13,6 +13,7 @@ const mockAdminProfile: UserProfile = {
   role: "ADMIN",
   tenant_id: "t-1",
   updated_at: "2026-01-01",
+  pin: "1234",
 };
 
 const mockTenant: TenantContextType = {
