@@ -3,9 +3,14 @@
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import type { SplitPayment } from "@/components/pos/SplitBillModal";
 import { useTenant } from "@/components/TenantProvider";
-import { Order } from "@/types/pos";
+import {
+  calculateItemDiscount,
+  calculateOrderDiscountTotals,
+  DbDiscountFields,
+} from "@/lib/utils/discounts";
 import { formatServiceLabel } from "@/lib/utils/serviceType";
-import React, { useMemo, useState, createContext, useContext } from "react";
+import { Order } from "@/types/pos";
+import React, { createContext, useContext, useMemo, useState } from "react";
 
 type POSCheckoutValue = ReturnType<typeof usePOSCheckoutInternal>;
 const POSCheckoutContext = createContext<POSCheckoutValue | null>(null);
@@ -366,7 +371,17 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
       const itemName = item.menuItem?.name || "Producto";
       const itemPrice = item.unitPrice || 0;
       const gross = itemPrice * quantity;
-      const itemDiscount = Number(item.discountAmount) || 0;
+      const rawItem = item as unknown as DbDiscountFields;
+      const itemDiscount =
+        Number(item.discountAmount ?? rawItem.discount_amount) ||
+        calculateItemDiscount({
+          unitPrice: itemPrice,
+          quantity,
+          discountType: item.discountType || rawItem.discount_type || null,
+          discountValue: item.discountValue ?? rawItem.discount_value,
+          discountScope: item.discountScope || rawItem.discount_scope || null,
+        }).discountAmount ||
+        0;
       if (itemDiscount > 0) {
         msg += `▪ ${quantity}x ${itemName} - $${(gross - itemDiscount).toFixed(2)} (Desc: -$${itemDiscount.toFixed(2)})\n`;
       } else {
@@ -374,9 +389,32 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
       }
     });
 
-    const orderDiscountTotal = Number(checkoutOrder.discountAmount) || 0;
+    const rawCheckout = checkoutOrder as unknown as DbDiscountFields;
+
+    const itemsInput = checkoutOrder.orderItems.map((it) => {
+      const rawIt = it as unknown as DbDiscountFields;
+      return {
+        unitPrice: it.unitPrice || 0,
+        quantity: it.quantity || 1,
+        discountType: it.discountType || rawIt.discount_type || null,
+        discountValue: it.discountValue ?? rawIt.discount_value ?? null,
+        discountScope: it.discountScope || rawIt.discount_scope || "ROW",
+      };
+    });
+
+    const calculatedTotals = calculateOrderDiscountTotals({
+      items: itemsInput,
+      orderDiscountType: checkoutOrder.discountType || rawCheckout.discount_type || null,
+      orderDiscountValue: checkoutOrder.discountValue ?? rawCheckout.discount_value ?? null,
+    });
+
+    const orderDiscountTotal =
+      Number(checkoutOrder.discountAmount ?? rawCheckout.discount_amount) ||
+      calculatedTotals.orderDiscount ||
+      0;
     if (orderDiscountTotal > 0) {
-      msg += `\n*Descuento en orden: -$${orderDiscountTotal.toFixed(2)}${checkoutOrder.discountReason ? ` (${checkoutOrder.discountReason})` : ""}*\n`;
+      const reason = checkoutOrder.discountReason || rawCheckout.discount_reason;
+      msg += `\n*Descuento en orden: -$${orderDiscountTotal.toFixed(2)}${reason ? ` (${reason})` : ""}*\n`;
     }
 
     const tipAmount = getOrderTipAmount(checkoutOrder);

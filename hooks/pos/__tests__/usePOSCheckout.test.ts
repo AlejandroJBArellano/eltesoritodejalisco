@@ -188,4 +188,38 @@ describe("usePOSCheckout Hook", () => {
     expect(decoded).toContain("Descuento en orden: -$10.00 (Cortesía)");
     expect(decoded).toContain("Total Pagado: $70.00");
   });
+
+  it("should calculate discounts on the fly in generateWhatsAppMessage when discountAmount is missing or 0", () => {
+    const { result } = renderHook(() => usePOSCheckout(mockRefreshOrders));
+
+    act(() => {
+      result.current.setCheckoutOrder({
+        ...mockOrder,
+        total: 81,
+        discountType: "PERCENT",
+        discountValue: 10,
+        discountReason: "Amigo",
+        discountAmount: undefined,
+        orderItems: [
+          {
+            ...mockOrder.orderItems[0],
+            unitPrice: 50,
+            quantity: 2,
+            discountType: "FIXED",
+            discountValue: 10,
+            discountAmount: undefined,
+          },
+        ],
+      });
+    });
+
+    const encoded = result.current.generateWhatsAppMessage();
+    const decoded = decodeURIComponent(encoded);
+
+    // Item: 100 gross - 10 discount = 90
+    expect(decoded).toContain("Desc: -$10.00");
+    // Order: 90 net * 10% = 9 discount
+    expect(decoded).toContain("Descuento en orden: -$9.00 (Amigo)");
+    expect(decoded).toContain("Total Pagado: $81.00");
+  });
 });

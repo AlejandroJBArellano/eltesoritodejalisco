@@ -1,8 +1,14 @@
 import { getOrderTipAmount } from "@/components/pos/paymentUtils";
 import { useTenant } from "@/components/TenantProvider";
 import { useOptionalUser } from "@/components/UserProvider";
-import { OrderWithDetails } from "@/types";
+import {
+  calculateItemDiscount,
+  calculateOrderDiscountTotals,
+  formatDiscountBadge,
+  DbDiscountFields,
+} from "@/lib/utils/discounts";
 import { getServiceType } from "@/lib/utils/serviceType";
+import { OrderWithDetails } from "@/types";
 
 interface OrderTicketProps {
   order: OrderWithDetails;
@@ -42,15 +48,58 @@ export function OrderTicket({ order }: OrderTicketProps) {
   const tipAmount = getOrderTipAmount(order);
   const finalTotal = total + tipAmount;
 
+  const rawOrderFields = order as unknown as DbDiscountFields;
+
   const itemsDiscountTotal =
-    order.orderItems?.reduce(
-      (sum, item) => sum + (Number(item.discountAmount) || 0),
-      0,
-    ) || 0;
-  const orderDiscountTotal = Number(order.discountAmount) || 0;
+    (order.orderItems || []).reduce((sum, item) => {
+      const rawItem = item as unknown as DbDiscountFields;
+      const explicitAmt = Number(item.discountAmount ?? rawItem.discount_amount);
+      if (explicitAmt > 0) return sum + explicitAmt;
+      const type = (item.discountType ?? rawItem.discount_type) as ("PERCENT" | "FIXED" | null | undefined);
+      const val = item.discountValue ?? rawItem.discount_value;
+      if (type && val) {
+        return (
+          sum +
+          calculateItemDiscount({
+            unitPrice: item.unitPrice,
+            quantity: item.quantity,
+            discountType: type,
+            discountValue: val,
+            discountScope: (item.discountScope ?? rawItem.discount_scope) as ("ROW" | "UNIT" | null | undefined),
+          }).discountAmount
+        );
+      }
+      return sum;
+    }, 0);
+
+  const rawOrderDiscountVal = Number(order.discountAmount ?? rawOrderFields.discount_amount) || 0;
+  const orderDiscountType = (order.discountType ?? rawOrderFields.discount_type) as ("PERCENT" | "FIXED" | null | undefined);
+  const orderDiscountValue = order.discountValue ?? rawOrderFields.discount_value;
+  const orderDiscountReason = order.discountReason ?? rawOrderFields.discount_reason;
+
+  const orderDiscountTotal =
+    rawOrderDiscountVal > 0
+      ? rawOrderDiscountVal
+      : orderDiscountType && orderDiscountValue
+        ? calculateOrderDiscountTotals({
+          items: (order.orderItems || []).map((it) => {
+            const rawIt = it as unknown as DbDiscountFields;
+            return {
+              unitPrice: it.unitPrice,
+              quantity: it.quantity,
+              discountType: (it.discountType ?? rawIt.discount_type) as ("PERCENT" | "FIXED" | null | undefined),
+              discountValue: it.discountValue ?? rawIt.discount_value,
+              discountScope: (it.discountScope ?? rawIt.discount_scope) as ("ROW" | "UNIT" | null | undefined),
+            };
+          }),
+          orderDiscountType,
+          orderDiscountValue,
+        }).orderDiscount
+        : 0;
+
   const totalDiscounts = itemsDiscountTotal + orderDiscountTotal;
   const subtotalGross =
-    order.orderItems?.reduce(
+    (order.orderItems || []).reduce(
       (sum, item) => sum + item.quantity * item.unitPrice,
       0,
     ) || total + totalDiscounts;
@@ -97,18 +146,38 @@ export function OrderTicket({ order }: OrderTicketProps) {
         </thead>
         <tbody>
           {order.orderItems.map((item) => {
+            const rawItem = item as unknown as DbDiscountFields;
             const gross = item.quantity * item.unitPrice;
-            const itemDiscount = Number(item.discountAmount) || 0;
+            const explicitItemDiscount = Number(item.discountAmount ?? rawItem.discount_amount) || 0;
+            const itemDiscountType = (item.discountType ?? rawItem.discount_type) as ("PERCENT" | "FIXED" | null | undefined);
+            const itemDiscountValue = item.discountValue ?? rawItem.discount_value;
+            const itemDiscountReason = item.discountReason ?? rawItem.discount_reason;
+            const itemDiscount =
+              explicitItemDiscount > 0
+                ? explicitItemDiscount
+                : itemDiscountType && itemDiscountValue
+                  ? calculateItemDiscount({
+                    unitPrice: item.unitPrice,
+                    quantity: item.quantity,
+                    discountType: itemDiscountType,
+                    discountValue: itemDiscountValue,
+                    discountScope: (item.discountScope ?? rawItem.discount_scope) as ("ROW" | "UNIT" | null | undefined),
+                  }).discountAmount
+                  : 0;
             const net = Math.max(0, gross - itemDiscount);
             return (
               <tr key={item.id} className="align-top">
                 <td className="pr-2">{item.quantity}</td>
                 <td className="whitespace-normal wrap-break-word">
-                  <div>{item.menuItem.name}</div>
+                  <div>{item.menuItem?.name || "Producto"}</div>
                   {itemDiscount > 0 && (
                     <div className="text-[11px] text-gray-600">
                       Desc: -${itemDiscount.toFixed(2)}
-                      {item.discountReason ? ` (${item.discountReason})` : ""}
+                      {itemDiscountReason
+                        ? ` (${itemDiscountReason})`
+                        : itemDiscountType && itemDiscountValue
+                          ? ` (${formatDiscountBadge(itemDiscountType, itemDiscountValue, null)})`
+                          : ""}
                     </div>
                   )}
                 </td>
@@ -144,8 +213,12 @@ export function OrderTicket({ order }: OrderTicketProps) {
             {orderDiscountTotal > 0 && (
               <p className="text-sm">
                 DESC. ORDEN
-                {order.discountReason ? ` (${order.discountReason})` : ""}: -$
-                {orderDiscountTotal.toFixed(2)}
+                {orderDiscountReason
+                  ? ` (${orderDiscountReason})`
+                  : orderDiscountType && orderDiscountValue
+                    ? ` (${formatDiscountBadge(orderDiscountType, orderDiscountValue, null)})`
+                    : ""}
+                : -${orderDiscountTotal.toFixed(2)}
               </p>
             )}
           </>
@@ -156,9 +229,8 @@ export function OrderTicket({ order }: OrderTicketProps) {
 
         {tipAmount > 0 && (
           <p
-            className={`font-bold text-md text-gray-700 ${
-              isWaiter ? "hidden print:block" : ""
-            }`}
+            className={`font-bold text-md text-gray-700 ${isWaiter ? "hidden print:block" : ""
+              }`}
           >
             PROPINA: ${tipAmount.toFixed(2)}
           </p>

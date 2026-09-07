@@ -231,4 +231,72 @@ describe("OrderTicket Component", () => {
     expect(screen.getByText("DESC. ORDEN (Cortesía): -$10.00")).toBeInTheDocument();
     expect(screen.getByText("TOTAL VENTA: $80.00")).toBeInTheDocument();
   });
+
+  it("should calculate and display percentage item and order discounts when discountAmount is not provided", () => {
+    const discountedOrder: OrderWithDetails = {
+      ...mockOrder,
+      subtotal: 100,
+      total: 81,
+      discountType: "PERCENT",
+      discountValue: 10,
+      discountAmount: undefined,
+      discountReason: "Cortesía",
+      orderItems: [
+        {
+          ...mockOrder.orderItems[0],
+          unitPrice: 100,
+          quantity: 1,
+          discountType: "PERCENT",
+          discountValue: 10,
+          discountAmount: undefined,
+          discountReason: "Promoción",
+        },
+      ],
+      payments: [],
+    };
+
+    render(<OrderTicket order={discountedOrder} />);
+
+    // Item: 100 * 10% = 10 discount -> gross 100, net 90
+    expect(screen.getByText("Desc: -$10.00 (Promoción)")).toBeInTheDocument();
+    expect(screen.getByText("SUBTOTAL BRUTO: $100.00")).toBeInTheDocument();
+    expect(screen.getByText("DESCUENTOS PROD.: -$10.00")).toBeInTheDocument();
+    // Order: net 90 * 10% = 9 discount
+    expect(screen.getByText("DESC. ORDEN (Cortesía): -$9.00")).toBeInTheDocument();
+    expect(screen.getByText("TOTAL VENTA: $81.00")).toBeInTheDocument();
+  });
+
+  it("should display discounts when attributes are in snake_case directly from Supabase", () => {
+    const snakeCaseOrder = {
+      ...mockOrder,
+      discount_type: "FIXED",
+      discount_value: 15,
+      discount_reason: "Descuento VIP",
+      discountType: undefined,
+      discountValue: undefined,
+      discountAmount: undefined,
+      discountReason: undefined,
+      orderItems: [
+        {
+          ...mockOrder.orderItems[0],
+          unitPrice: 100,
+          quantity: 1,
+          discount_type: "FIXED",
+          discount_value: 5,
+          discount_reason: "Promo Producto",
+          discountType: undefined,
+          discountValue: undefined,
+          discountAmount: undefined,
+          discountReason: undefined,
+        },
+      ],
+    } as unknown as OrderWithDetails;
+
+    render(<OrderTicket order={snakeCaseOrder} />);
+
+    expect(screen.getByText("Desc: -$5.00 (Promo Producto)")).toBeInTheDocument();
+    expect(screen.getByText("SUBTOTAL BRUTO: $100.00")).toBeInTheDocument();
+    expect(screen.getByText("DESCUENTOS PROD.: -$5.00")).toBeInTheDocument();
+    expect(screen.getByText("DESC. ORDEN (Descuento VIP): -$15.00")).toBeInTheDocument();
+  });
 });
