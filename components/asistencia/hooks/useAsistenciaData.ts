@@ -6,12 +6,15 @@ import {
   type AttendanceAction,
   type AttendanceRecord,
   type AttendanceUserOption,
+  type EmployeeShift,
 } from "../types";
 
 export function useAsistenciaData(initialCustomTime?: string) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<AttendanceUserOption[]>([]);
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
+  const [shifts, setShifts] = useState<EmployeeShift[]>([]);
+  const [toleranceMinutes, setToleranceMinutes] = useState<number>(10);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +37,10 @@ export function useAsistenciaData(initialCustomTime?: string) {
       setIsAdmin(Boolean(data.isAdmin));
       setUsers(data.users || []);
       setAttendances(data.attendances || []);
+      setShifts(data.shifts || []);
+      if (typeof data.toleranceMinutes === "number") {
+        setToleranceMinutes(data.toleranceMinutes);
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Error al cargar asistencia",
@@ -121,10 +128,22 @@ export function useAsistenciaData(initialCustomTime?: string) {
 
   const activeEmployeeAttendance = attendances.find((a) => a.status === "ACTIVE");
 
+  const getUserTodayShift = useCallback(
+    (userId?: string) => {
+      if (!userId) return shifts[0];
+      return shifts.find((s) => s.user_id === userId);
+    },
+    [shifts],
+  );
+
+  const todayShift = shifts.length > 0 ? shifts[0] : undefined;
+
   return {
     isAdmin,
     users,
     attendances,
+    shifts,
+    toleranceMinutes,
     isLoading,
     isSubmitting,
     error,
@@ -137,5 +156,7 @@ export function useAsistenciaData(initialCustomTime?: string) {
     getFinishedAttendances,
     getEmployeeHours,
     activeEmployeeAttendance,
+    getUserTodayShift,
+    todayShift,
   };
 }

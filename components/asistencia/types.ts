@@ -39,3 +39,5 @@ export type AttendanceSortField =
 export type SortDirection = "asc" | "desc";
 
 export const ATTENDANCE_TIMEZONE = "America/Mexico_City";
+
+export type { EmployeeShift, PunctualityResult } from "./shiftUtils";
