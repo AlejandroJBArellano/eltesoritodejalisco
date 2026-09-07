@@ -9,13 +9,23 @@ import {
   ChevronUp,
   Loader2,
   Minus,
+  Percent,
   Plus,
   Printer,
   ShoppingBag,
+  Tag,
   Utensils,
 } from "lucide-react";
 import { useState } from "react";
 import { sourceOptions } from "../menu/types";
+import {
+  POSDiscountModal,
+  DiscountData,
+} from "./modals/POSDiscountModal";
+import {
+  calculateItemDiscount,
+  formatDiscountBadge,
+} from "@/lib/utils/discounts";
 
 export interface POSCartSidebarProps {
   formState: OrderFormState;
@@ -44,6 +54,7 @@ export function POSCartSidebar() {
     formState,
     formErrors,
     cartError,
+    cartTotals,
     handleFormChange,
     handleServiceTypeChange,
     handleQuantityChange,
@@ -51,13 +62,94 @@ export function POSCartSidebar() {
     handleClearCart,
     clearCartArmed,
     isSubmittingCart,
+    handleApplyItemDiscount,
+    handleRemoveItemDiscount,
+    handleApplyOrderDiscount,
+    handleRemoveOrderDiscount,
   } = usePOSCart(availableMenuItems, refreshOrders);
+
+  const safeTotals = cartTotals || {
+    subtotalGross: 0,
+    itemsDiscount: 0,
+    subtotalNet: 0,
+    orderDiscount: 0,
+    totalDiscount: 0,
+    total: 0,
+  };
 
   const {
     isSubmittingCheckout,
   } = usePOSCheckout(refreshOrders);
   // Track which cart items have the note input expanded
   const [expandedNotes, setExpandedNotes] = useState<Set<number>>(new Set());
+
+  // Modal de Descuentos
+  const [discountModal, setDiscountModal] = useState<{
+    isOpen: boolean;
+    isItem: boolean;
+    itemIndex?: number;
+    title: string;
+    subtitle?: string;
+    itemQuantity?: number;
+    initialDiscount?: DiscountData;
+  }>({
+    isOpen: false,
+    isItem: false,
+    title: "",
+  });
+
+  const openItemDiscount = (index: number) => {
+    const item = formState.items[index];
+    const product = availableMenuItems.find((m) => m.id === item.menuItemId);
+    setDiscountModal({
+      isOpen: true,
+      isItem: true,
+      itemIndex: index,
+      title: product?.name ? `Descuento: ${product.name}` : "Descuento en Producto",
+      subtitle: `$${(product?.price || 0).toFixed(2)} c/u`,
+      itemQuantity: Number(item.quantity) || 1,
+      initialDiscount: {
+        discountType: item.discountType || null,
+        discountValue:
+          item.discountValue != null ? Number(item.discountValue) : null,
+        discountScope: item.discountScope || "ROW",
+        discountReason: item.discountReason || null,
+      },
+    });
+  };
+
+  const openOrderDiscount = () => {
+    setDiscountModal({
+      isOpen: true,
+      isItem: false,
+      title: "Descuento a la Orden",
+      subtitle: `Subtotal neto: $${safeTotals.subtotalNet.toFixed(2)}`,
+      initialDiscount: {
+        discountType: formState.discountType || null,
+        discountValue:
+          formState.discountValue != null
+            ? Number(formState.discountValue)
+            : null,
+        discountReason: formState.discountReason || null,
+      },
+    });
+  };
+
+  const handleApplyDiscountModal = (discount: DiscountData) => {
+    if (discountModal.isItem && discountModal.itemIndex !== undefined) {
+      handleApplyItemDiscount(discountModal.itemIndex, discount);
+    } else {
+      handleApplyOrderDiscount(discount);
+    }
+  };
+
+  const handleRemoveDiscountModal = () => {
+    if (discountModal.isItem && discountModal.itemIndex !== undefined) {
+      handleRemoveItemDiscount(discountModal.itemIndex);
+    } else {
+      handleRemoveOrderDiscount();
+    }
+  };
 
   const toggleNote = (index: number) => {
     setExpandedNotes((prev) => {
@@ -89,7 +181,7 @@ export function POSCartSidebar() {
               type="button"
               role="radio"
               aria-checked={formState.serviceType === "COMEDOR"}
-              onClick={() => handleServiceTypeChange("COMEDOR")}
+              onClick={() => handleServiceTypeChange?.("COMEDOR")}
               className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${formState.serviceType === "COMEDOR"
                   ? "bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/10"
                   : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
@@ -103,7 +195,7 @@ export function POSCartSidebar() {
               type="button"
               role="radio"
               aria-checked={formState.serviceType === "PARA_LLEVAR"}
-              onClick={() => handleServiceTypeChange("PARA_LLEVAR")}
+              onClick={() => handleServiceTypeChange?.("PARA_LLEVAR")}
               className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${formState.serviceType === "PARA_LLEVAR"
                   ? "bg-primary/20 border-primary text-primary shadow-sm shadow-primary/10"
                   : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
@@ -117,7 +209,7 @@ export function POSCartSidebar() {
               type="button"
               role="radio"
               aria-checked={formState.serviceType === "DOMICILIO"}
-              onClick={() => handleServiceTypeChange("DOMICILIO")}
+              onClick={() => handleServiceTypeChange?.("DOMICILIO")}
               className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${formState.serviceType === "DOMICILIO"
                   ? "bg-secondary/20 border-secondary text-secondary shadow-sm shadow-secondary/10"
                   : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
@@ -246,6 +338,16 @@ export function POSCartSidebar() {
               );
               const isMixed = product && isMixedOrderItem(product.name);
               const noteExpanded = expandedNotes.has(index);
+
+              const { discountAmount, finalPrice } = calculateItemDiscount({
+                unitPrice: product?.price || 0,
+                quantity: Number(item.quantity) || 1,
+                discountType: item.discountType,
+                discountValue: item.discountValue,
+                discountScope: item.discountScope,
+              });
+              const hasItemDiscount = discountAmount > 0;
+
               return (
                 <div
                   key={index}
@@ -262,8 +364,27 @@ export function POSCartSidebar() {
                         </p>
                       ) : (
                         <p className="text-[10px] font-bold text-text-light/50 mt-0.5">
-                          ${product?.price.toFixed(2)} c/u
+                          ${(product?.price || 0).toFixed(2)} c/u
                         </p>
+                      )}
+
+                      {/* Badge de descuento en el ítem */}
+                      {hasItemDiscount && (
+                        <div className="mt-1">
+                          <button
+                            type="button"
+                            onClick={() => openItemDiscount(index)}
+                            className="inline-flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors cursor-pointer"
+                            title="Editar descuento de este producto"
+                          >
+                            <Tag className="h-2.5 w-2.5" />
+                            {formatDiscountBadge(
+                              item.discountType,
+                              item.discountValue,
+                              item.discountReason,
+                            )}
+                          </button>
+                        </div>
                       )}
                     </div>
 
@@ -287,18 +408,43 @@ export function POSCartSidebar() {
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-2 min-w-13.75 justify-end">
-                      <p className="font-black text-xs text-text-light tabular-nums">
-                        $
-                        {(
-                          (product?.price || 0) * Number(item.quantity)
-                        ).toFixed(2)}
-                      </p>
+                    <div className="flex items-center gap-2 min-w-16 justify-end">
+                      <div className="text-right">
+                        {hasItemDiscount ? (
+                          <div>
+                            <span className="text-[10px] font-bold line-through text-text-light/40 mr-1 block">
+                              ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
+                            </span>
+                            <span className="font-black text-xs text-emerald-400 tabular-nums">
+                              ${finalPrice.toFixed(2)}
+                            </span>
+                          </div>
+                        ) : (
+                          <p className="font-black text-xs text-text-light tabular-nums">
+                            ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Botón de descuento por ítem */}
+                      <button
+                        type="button"
+                        onClick={() => openItemDiscount(index)}
+                        className={`p-1 rounded transition-colors ${
+                          hasItemDiscount
+                            ? "text-emerald-400 hover:text-emerald-300"
+                            : "text-text-light/30 hover:text-primary"
+                        }`}
+                        title={hasItemDiscount ? "Editar descuento" : "Descuento en producto"}
+                      >
+                        <Percent className="h-3.5 w-3.5" />
+                      </button>
+
                       {!isMixed && (
                         <button
                           type="button"
                           onClick={() => toggleNote(index)}
-                          className="text-text-light/30 hover:text-text-light/70 transition-colors"
+                          className="text-text-light/30 hover:text-text-light/70 transition-colors p-1"
                           title="Agregar nota"
                         >
                           {noteExpanded ? (
@@ -334,30 +480,75 @@ export function POSCartSidebar() {
 
         {/* Total y Acción */}
         {formState.items.length > 0 && (
-          <div className="pt-4 border-t border-border space-y-4">
+          <div className="pt-4 border-t border-border space-y-3.5">
+            {/* Desglose de Descuentos si existen */}
+            {safeTotals.totalDiscount > 0 && (
+              <div className="space-y-1.5 text-xs bg-white/5 p-3 rounded-xl border border-border">
+                <div className="flex justify-between text-text-light/60 font-medium">
+                  <span>Subtotal bruto</span>
+                  <span>${safeTotals.subtotalGross.toFixed(2)}</span>
+                </div>
+                {safeTotals.itemsDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-400/90 font-bold">
+                    <span>Descuentos en productos</span>
+                    <span>-${safeTotals.itemsDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                {safeTotals.orderDiscount > 0 && (
+                  <div className="flex justify-between items-center text-emerald-400 font-black">
+                    <span className="flex items-center gap-1">
+                      Descuento orden{" "}
+                      {formatDiscountBadge(
+                        formState.discountType,
+                        formState.discountValue,
+                        formState.discountReason,
+                      )}
+                    </span>
+                    <span>-${safeTotals.orderDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Botón para Descuento a Nivel Orden */}
             <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={openOrderDiscount}
+                className={`text-[11px] font-black uppercase tracking-wider py-1.5 px-3 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer ${
+                  formState.discountType
+                    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/25"
+                    : "bg-white/5 border-border/40 text-text-light/60 hover:text-text-light hover:border-primary/40 hover:bg-primary/10"
+                }`}
+              >
+                <Tag className="h-3 w-3" />
+                {formState.discountType ? "Editar Descuento Orden" : "+ Descuento Orden"}
+              </button>
+
+              {formState.discountType && (
+                <button
+                  type="button"
+                  onClick={handleRemoveOrderDiscount}
+                  className="text-[10px] font-black text-red-400/70 hover:text-red-400 uppercase tracking-wider cursor-pointer"
+                >
+                  Quitar
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
               <span className="text-xs font-bold text-text-light/50 uppercase tracking-widest">
                 Total a Pagar
               </span>
               <span className="text-3xl font-black text-text-light tracking-tight tabular-nums">
-                $
-                {formState.items
-                  .reduce((total, item) => {
-                    const product = availableMenuItems.find(
-                      (m) => m.id === item.menuItemId,
-                    );
-                    return (
-                      total + (product?.price || 0) * Number(item.quantity)
-                    );
-                  }, 0)
-                  .toFixed(2)}
+                ${safeTotals.total.toFixed(2)}
               </span>
             </div>
 
             <button
               type="submit"
               disabled={isSubmittingCart || isSubmittingCheckout}
-              className="w-full rounded-xl bg-primary py-3.5 text-black font-black text-sm hover:brightness-105 active:scale-[0.98] transition-all uppercase tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full rounded-xl bg-primary py-3.5 text-black font-black text-sm hover:brightness-105 active:scale-[0.98] transition-all uppercase tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               {isSubmittingCart || isSubmittingCheckout ? (
                 <>
@@ -374,6 +565,19 @@ export function POSCartSidebar() {
           </div>
         )}
       </section>
+
+      {/* Modal de Descuento (Reutilizable para Ítem y Orden) */}
+      <POSDiscountModal
+        isOpen={discountModal.isOpen}
+        onClose={() => setDiscountModal((prev) => ({ ...prev, isOpen: false }))}
+        title={discountModal.title}
+        subtitle={discountModal.subtitle}
+        isItem={discountModal.isItem}
+        itemQuantity={discountModal.itemQuantity}
+        initialDiscount={discountModal.initialDiscount}
+        onApply={handleApplyDiscountModal}
+        onRemove={handleRemoveDiscountModal}
+      />
     </div>
   );
 }

@@ -90,6 +90,7 @@ describe("POSCheckoutModal Component", () => {
     setUnusualTipInfo: vi.fn(),
     setShowSplitBill: vi.fn(),
     handleProcessPayment: vi.fn(),
+    handleCourtesyPayment: vi.fn(),
     handleFailedPayment: vi.fn(),
     handleCreditPayment: vi.fn(),
   };
@@ -493,5 +494,92 @@ describe("POSCheckoutModal Component", () => {
         body: JSON.stringify({ customerId: "cust-9" }),
       }),
     );
+  });
+
+  it("renders discount breakdown when order has item or order discounts", () => {
+    const discountedOrder: Order = {
+      ...mockOrder,
+      subtotal: 100,
+      total: 70,
+      discountType: "FIXED",
+      discountValue: 10,
+      discountAmount: 10,
+      discountReason: "Promoción",
+      orderItems: [
+        {
+          id: "item-1",
+          orderId: "order-123",
+          menuItemId: "menu-1",
+          quantity: 1,
+          unitPrice: 100,
+          discountType: "FIXED",
+          discountValue: 20,
+          discountAmount: 20,
+          discountScope: "ROW",
+          discountReason: "Cortesía",
+          status: OrderStatus.PENDING,
+          createdAt: new Date(),
+        },
+      ],
+    };
+
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      checkoutOrder: discountedOrder,
+    } as unknown as ReturnType<typeof usePOSCheckout>);
+
+    render(<POSCheckoutModal />);
+
+    expect(screen.getByText(/Subtotal bruto/i)).toBeInTheDocument();
+    expect(screen.getByText("$100.00")).toBeInTheDocument();
+    expect(screen.getByText(/Descuentos en productos/i)).toBeInTheDocument();
+    expect(screen.getByText("-$20.00")).toBeInTheDocument();
+    expect(screen.getByText(/Descuento orden -\$10\.00/i)).toBeInTheDocument();
+    expect(screen.getByText("-$10.00")).toBeInTheDocument();
+    expect(screen.getByText("$70.00")).toBeInTheDocument();
+    expect(screen.getByText(/Editar Descuento/i)).toBeInTheDocument();
+  });
+
+  it("opens order discount modal when clicking '+ Descuento Orden'", () => {
+    render(<POSCheckoutModal />);
+
+    const discountBtn = screen.getByText(/\+ Descuento Orden/i);
+    fireEvent.click(discountBtn);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText(/Descuento en Orden #1050/i)).toBeInTheDocument();
+  });
+
+  it("renders prominent 'Registrar Cortesía ($0.00)' button when order total is 0 and handles payment", () => {
+    const freeOrder: Order = {
+      ...mockOrder,
+      subtotal: 100,
+      total: 0,
+      discountType: "PERCENT",
+      discountValue: 100,
+      discountAmount: 100,
+      discountReason: "Cortesía",
+    };
+
+    const handleCourtesyPaymentMock = vi.fn();
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      checkoutOrder: freeOrder,
+      tipAmountCalculated: 0,
+      handleCourtesyPayment: handleCourtesyPaymentMock,
+    } as unknown as ReturnType<typeof usePOSCheckout>);
+
+    render(<POSCheckoutModal />);
+
+    expect(screen.getByText(/Orden 100% Bonificada \/ Cortesía/i)).toBeInTheDocument();
+    const courtesyBtn = screen.getByRole("button", { name: /Registrar Cortesía \(\$0\.00\)/i });
+    expect(courtesyBtn).toBeInTheDocument();
+
+    // Ensure payment method options and cash inputs are NOT rendered
+    expect(screen.queryByText(/Método de Pago/i)).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/Monto recibido/i)).not.toBeInTheDocument();
+
+    fireEvent.click(courtesyBtn);
+    expect(handleCourtesyPaymentMock).toHaveBeenCalled();
   });
 });

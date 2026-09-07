@@ -59,6 +59,19 @@ describe("POSModifyOrderModal Component", () => {
     setModifyTable: vi.fn(),
     modifyCustomerId: "cust-1",
     setModifyCustomerId: vi.fn(),
+    modifyOrderTotals: {
+      subtotalGross: 240,
+      itemsDiscount: 0,
+      subtotalNet: 240,
+      orderDiscount: 0,
+      totalDiscount: 0,
+      total: 240,
+    },
+    modifyOrderDiscount: null,
+    handleApplyModifyItemDiscount: vi.fn(),
+    handleRemoveModifyItemDiscount: vi.fn(),
+    handleApplyModifyOrderDiscount: vi.fn(),
+    handleRemoveModifyOrderDiscount: vi.fn(),
     handleModifyQuantityChange: vi.fn(),
     handleModifyRemoveItem: vi.fn(),
     handleSaveModifiedOrder: vi.fn(),
@@ -112,7 +125,7 @@ describe("POSModifyOrderModal Component", () => {
   it("triggers remove item when trash icon is clicked", () => {
     render(<POSModifyOrderModal />);
 
-    const trashButton = screen.getAllByRole("button")[3];
+    const trashButton = screen.getByLabelText("Eliminar producto");
     fireEvent.click(trashButton);
     expect(defaultCartValue.handleModifyRemoveItem).toHaveBeenCalledWith(0);
   });
@@ -146,5 +159,54 @@ describe("POSModifyOrderModal Component", () => {
     render(<POSModifyOrderModal />);
 
     expect(screen.getByText(/No quedan productos en la orden/i)).toBeInTheDocument();
+  });
+
+  it("renders discount breakdown when discounts are present", () => {
+    vi.mocked(usePOSCart).mockReturnValue({
+      ...defaultCartValue,
+      modifyOrderTotals: {
+        subtotalGross: 240,
+        itemsDiscount: 40,
+        subtotalNet: 200,
+        orderDiscount: 20,
+        totalDiscount: 60,
+        total: 180,
+      },
+      modifyOrderDiscount: {
+        discountType: "FIXED",
+        discountValue: 20,
+        discountReason: "Promoción",
+      },
+    } as unknown as ReturnType<typeof usePOSCart>);
+
+    render(<POSModifyOrderModal />);
+
+    expect(screen.getByText(/Subtotal bruto/i)).toBeInTheDocument();
+    expect(screen.getByText(/Descuentos en productos/i)).toBeInTheDocument();
+    expect(screen.getByText("-$40.00")).toBeInTheDocument();
+    expect(screen.getByText(/Descuento orden -\$20\.00/i)).toBeInTheDocument();
+    expect(screen.getByText("-$20.00")).toBeInTheDocument();
+    expect(screen.getByText("$180.00")).toBeInTheDocument();
+    expect(screen.getByText(/Editar Descuento Orden/i)).toBeInTheDocument();
+  });
+
+  it("opens discount modal when clicking item discount button", () => {
+    render(<POSModifyOrderModal />);
+
+    const discountBtn = screen.getByLabelText("Descuento de producto");
+    fireEvent.click(discountBtn);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText(/Descuento: COCA COLA/i)).toBeInTheDocument();
+  });
+
+  it("opens order discount modal when clicking '+ Descuento Orden' button", () => {
+    render(<POSModifyOrderModal />);
+
+    const orderDiscountBtn = screen.getByText(/\+ Descuento Orden/i);
+    fireEvent.click(orderDiscountBtn);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText(/Descuento en Orden #260906-002/i)).toBeInTheDocument();
   });
 });

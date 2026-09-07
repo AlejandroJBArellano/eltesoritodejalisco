@@ -64,6 +64,14 @@ describe("POSCartSidebar Component", () => {
       formState: defaultFormState,
       formErrors: {},
       cartError: null,
+      cartTotals: {
+        subtotalGross: 0,
+        itemsDiscount: 0,
+        subtotalNet: 0,
+        orderDiscount: 0,
+        totalDiscount: 0,
+        total: 0,
+      },
       handleFormChange: mockHandleFormChange,
       handleServiceTypeChange: mockHandleServiceTypeChange,
       handleQuantityChange: mockHandleQuantityChange,
@@ -71,6 +79,10 @@ describe("POSCartSidebar Component", () => {
       handleClearCart: mockHandleClearCart,
       clearCartArmed: false,
       isSubmittingCart: false,
+      handleApplyItemDiscount: vi.fn(),
+      handleRemoveItemDiscount: vi.fn(),
+      handleApplyOrderDiscount: vi.fn(),
+      handleRemoveOrderDiscount: vi.fn(),
     } as unknown as ReturnType<typeof usePOSCart>);
   });
 
@@ -140,9 +152,7 @@ describe("POSCartSidebar Component", () => {
     render(<POSCartSidebar />);
     expect(screen.getByText("El carrito está vacío")).toBeInTheDocument();
     expect(screen.queryByText("GUARDAR E IMPRIMIR")).not.toBeInTheDocument();
-  });
-
-  it("renders items in cart, allows quantity updates, and toggles item notes", () => {
+  });  it("renders items in cart, allows quantity updates, and toggles item notes", () => {
     vi.mocked(usePOSCart).mockReturnValue({
       formState: {
         ...defaultFormState,
@@ -152,6 +162,14 @@ describe("POSCartSidebar Component", () => {
       },
       formErrors: {},
       cartError: null,
+      cartTotals: {
+        subtotalGross: 50,
+        itemsDiscount: 0,
+        subtotalNet: 50,
+        orderDiscount: 0,
+        totalDiscount: 0,
+        total: 50,
+      },
       handleFormChange: mockHandleFormChange,
       handleServiceTypeChange: mockHandleServiceTypeChange,
       handleQuantityChange: mockHandleQuantityChange,
@@ -159,6 +177,10 @@ describe("POSCartSidebar Component", () => {
       handleClearCart: mockHandleClearCart,
       clearCartArmed: false,
       isSubmittingCart: false,
+      handleApplyItemDiscount: vi.fn(),
+      handleRemoveItemDiscount: vi.fn(),
+      handleApplyOrderDiscount: vi.fn(),
+      handleRemoveOrderDiscount: vi.fn(),
     } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSCartSidebar />);
@@ -203,6 +225,14 @@ describe("POSCartSidebar Component", () => {
       },
       formErrors: {},
       cartError: null,
+      cartTotals: {
+        subtotalGross: 25,
+        itemsDiscount: 0,
+        subtotalNet: 25,
+        orderDiscount: 0,
+        totalDiscount: 0,
+        total: 25,
+      },
       handleFormChange: mockHandleFormChange,
       handleServiceTypeChange: mockHandleServiceTypeChange,
       handleQuantityChange: mockHandleQuantityChange,
@@ -210,6 +240,10 @@ describe("POSCartSidebar Component", () => {
       handleClearCart: mockHandleClearCart,
       clearCartArmed: true,
       isSubmittingCart: false,
+      handleApplyItemDiscount: vi.fn(),
+      handleRemoveItemDiscount: vi.fn(),
+      handleApplyOrderDiscount: vi.fn(),
+      handleRemoveOrderDiscount: vi.fn(),
     } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSCartSidebar />);
@@ -224,6 +258,14 @@ describe("POSCartSidebar Component", () => {
       formState: defaultFormState,
       formErrors: { items: "Agrega al menos un producto" },
       cartError: "Error al procesar la orden",
+      cartTotals: {
+        subtotalGross: 0,
+        itemsDiscount: 0,
+        subtotalNet: 0,
+        orderDiscount: 0,
+        totalDiscount: 0,
+        total: 0,
+      },
       handleFormChange: mockHandleFormChange,
       handleServiceTypeChange: mockHandleServiceTypeChange,
       handleQuantityChange: mockHandleQuantityChange,
@@ -231,6 +273,10 @@ describe("POSCartSidebar Component", () => {
       handleClearCart: mockHandleClearCart,
       clearCartArmed: false,
       isSubmittingCart: false,
+      handleApplyItemDiscount: vi.fn(),
+      handleRemoveItemDiscount: vi.fn(),
+      handleApplyOrderDiscount: vi.fn(),
+      handleRemoveOrderDiscount: vi.fn(),
     } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSCartSidebar />);
@@ -245,6 +291,14 @@ describe("POSCartSidebar Component", () => {
       },
       formErrors: {},
       cartError: null,
+      cartTotals: {
+        subtotalGross: 25,
+        itemsDiscount: 0,
+        subtotalNet: 25,
+        orderDiscount: 0,
+        totalDiscount: 0,
+        total: 25,
+      },
       handleFormChange: mockHandleFormChange,
       handleServiceTypeChange: mockHandleServiceTypeChange,
       handleQuantityChange: mockHandleQuantityChange,
@@ -252,10 +306,78 @@ describe("POSCartSidebar Component", () => {
       handleClearCart: mockHandleClearCart,
       clearCartArmed: false,
       isSubmittingCart: true,
+      handleApplyItemDiscount: vi.fn(),
+      handleRemoveItemDiscount: vi.fn(),
+      handleApplyOrderDiscount: vi.fn(),
+      handleRemoveOrderDiscount: vi.fn(),
     } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSCartSidebar />);
-    const submitBtn = screen.getByRole("button", { name: /guardando/i });
+    const submitBtn = screen.getByRole("button", { name: /guardando\.\.\./i });
     expect(submitBtn).toBeDisabled();
+  });
+
+  it("renders item discount and order discount breakdowns correctly", () => {
+    const handleRemoveOrderDiscount = vi.fn();
+
+    vi.mocked(usePOSCart).mockReturnValue({
+      formState: {
+        ...defaultFormState,
+        discountType: "PERCENT",
+        discountValue: 10,
+        discountReason: "Promoción",
+        items: [
+          {
+            menuItemId: "item-1",
+            quantity: "2",
+            notes: "",
+            discountType: "FIXED",
+            discountValue: 10,
+            discountScope: "ROW",
+            discountReason: "Cortesía",
+          },
+        ],
+      },
+      formErrors: {},
+      cartError: null,
+      cartTotals: {
+        subtotalGross: 50,
+        itemsDiscount: 10,
+        subtotalNet: 40,
+        orderDiscount: 4,
+        totalDiscount: 14,
+        total: 36,
+      },
+      handleFormChange: mockHandleFormChange,
+      handleServiceTypeChange: mockHandleServiceTypeChange,
+      handleQuantityChange: mockHandleQuantityChange,
+      handleItemNoteChange: mockHandleItemNoteChange,
+      handleClearCart: mockHandleClearCart,
+      clearCartArmed: false,
+      isSubmittingCart: false,
+      handleApplyItemDiscount: vi.fn(),
+      handleRemoveItemDiscount: vi.fn(),
+      handleApplyOrderDiscount: vi.fn(),
+      handleRemoveOrderDiscount,
+    } as unknown as ReturnType<typeof usePOSCart>);
+
+    render(<POSCartSidebar />);
+
+    // Item badge
+    expect(screen.getByText("-$10.00 (Cortesía)")).toBeInTheDocument();
+    // Crossed gross price and net price
+    expect(screen.getByText("$40.00")).toBeInTheDocument();
+
+    // Order discount breakdown in footer
+    expect(screen.getByText("Subtotal bruto")).toBeInTheDocument();
+    expect(screen.getByText("Descuentos en productos")).toBeInTheDocument();
+    expect(screen.getByText("-$10.00")).toBeInTheDocument();
+    expect(screen.getByText("-$4.00")).toBeInTheDocument();
+    expect(screen.getByText("$36.00")).toBeInTheDocument();
+
+    // Quitar order discount button
+    const quitarBtn = screen.getByRole("button", { name: "Quitar" });
+    fireEvent.click(quitarBtn);
+    expect(handleRemoveOrderDiscount).toHaveBeenCalled();
   });
 });
