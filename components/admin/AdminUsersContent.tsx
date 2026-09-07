@@ -4,6 +4,7 @@ import {
   createUser,
   deleteUser,
   updateUserRole,
+  updateUserPin,
 } from "@/app/admin/users/actions";
 import { PageHeader } from "@/components/PageHeader";
 import {
@@ -34,6 +35,7 @@ type Profile = {
   full_name: string;
   role: string;
   created_at: string;
+  pin?: string | null;
 };
 
 export const ROLE_PERMISSIONS: Record<
@@ -134,6 +136,12 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFormRole, setSelectedFormRole] = useState<string>("WAITER");
   const [isPending, startTransition] = useTransition();
+
+  // Modal para editar PIN de usuario Admin / Manager
+  const [editingPinUser, setEditingPinUser] = useState<Profile | null>(null);
+  const [newPin, setNewPin] = useState("");
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [isUpdatingPin, setIsUpdatingPin] = useState(false);
 
   // Table Filters, Sort & Pagination State
   const [searchQuery, setSearchQuery] = useState("");
@@ -507,26 +515,44 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                         })}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <button
-                          onClick={() =>
-                            handleDelete(p.id, p.full_name || p.email)
-                          }
-                          className={`rounded-lg border p-2 transition-all text-xs font-black ${deleteArmedId === p.id
-                            ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
-                            : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
-                            }`}
-                          title={
-                            deleteArmedId === p.id
-                              ? "Confirmar eliminación"
-                              : "Eliminar Usuario"
-                          }
-                        >
-                          {deleteArmedId === p.id ? (
-                            "¿Seguro?"
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
+                        <div className="flex items-center justify-end gap-1.5">
+                          {(p.role === "ADMIN" || p.role === "MANAGER") && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingPinUser(p);
+                                setNewPin(p.pin || "1234");
+                                setPinError(null);
+                              }}
+                              className="rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 px-2 py-1.5 text-xs font-black flex items-center gap-1 transition-all"
+                              title="Configurar PIN de Autorización"
+                            >
+                              <ShieldCheck className="h-3.5 w-3.5" />
+                              <span className="font-mono">{p.pin || "1234"}</span>
+                            </button>
                           )}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDelete(p.id, p.full_name || p.email)
+                            }
+                            className={`rounded-lg border p-2 transition-all text-xs font-black ${deleteArmedId === p.id
+                              ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
+                              : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                              }`}
+                            title={
+                              deleteArmedId === p.id
+                                ? "Confirmar eliminación"
+                                : "Eliminar Usuario"
+                            }
+                          >
+                            {deleteArmedId === p.id ? (
+                              "¿Seguro?"
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -638,6 +664,29 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             </select>
           </div>
 
+          {(selectedFormRole === "ADMIN" || selectedFormRole === "MANAGER") && (
+            <div>
+              <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
+                PIN de Autorización (4 a 6 dígitos)
+              </label>
+              <div className="relative">
+                <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400" />
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  name="pin"
+                  defaultValue="1234"
+                  maxLength={6}
+                  className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
+                  placeholder="1234"
+                />
+              </div>
+              <p className="text-[11px] text-text-light/40 mt-1">
+                PIN individual para autorizar descuentos, cancelaciones y reaperturas a meseros.
+              </p>
+            </div>
+          )}
+
           {/* Resumen dinámico del rol seleccionado */}
           <div
             className={`p-4 rounded-xl border ${currentRoleInfo.badgeBg} ${currentRoleInfo.badgeBorder} space-y-2`}
@@ -670,6 +719,93 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           </div>
         </form>
       </Modal>
+
+      {/* MODAL CONFIGURAR PIN DE USUARIO */}
+      {editingPinUser && (
+        <Modal
+          isOpen={!!editingPinUser}
+          onClose={() => setEditingPinUser(null)}
+          title={`PIN de Autorización - ${editingPinUser.full_name || editingPinUser.email}`}
+          subtitle="Configura el PIN personal para autorizar acciones de meseros en el POS"
+          icon={<ShieldCheck className="h-5 w-5 text-amber-400" />}
+          maxWidth="sm"
+        >
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const clean = newPin.trim();
+              if (!clean || !/^\d{4,6}$/.test(clean)) {
+                setPinError("El PIN debe contener entre 4 y 6 dígitos numéricos");
+                return;
+              }
+              setIsUpdatingPin(true);
+              setPinError(null);
+              try {
+                const res = await updateUserPin(editingPinUser.id, clean);
+                if (res?.error) {
+                  setPinError(res.error);
+                } else {
+                  setProfiles((prev) =>
+                    prev.map((u) =>
+                      u.id === editingPinUser.id ? { ...u, pin: clean } : u
+                    )
+                  );
+                  setSuccessMsg(`PIN actualizado para ${editingPinUser.full_name || editingPinUser.email}`);
+                  setEditingPinUser(null);
+                }
+              } catch {
+                setPinError("Error al actualizar el PIN");
+              } finally {
+                setIsUpdatingPin(false);
+              }
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
+                Nuevo PIN (4 a 6 dígitos)
+              </label>
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={6}
+                value={newPin}
+                onChange={(e) => {
+                  setPinError(null);
+                  setNewPin(e.target.value.replace(/\D/g, ""));
+                }}
+                className="w-full rounded-xl border border-border bg-dark/60 text-center text-2xl tracking-[0.3em] font-black p-3 text-text-light outline-none focus:border-amber-400"
+                placeholder="••••"
+                autoFocus
+              />
+            </div>
+
+            {pinError && (
+              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold text-center">
+                {pinError}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setEditingPinUser(null)}
+                disabled={isUpdatingPin}
+                className="rounded-xl border border-border px-4 py-2 text-xs font-bold text-text-light/70 hover:bg-white/5"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdatingPin || !newPin.trim()}
+                className="rounded-xl bg-amber-500 px-5 py-2 text-xs font-black text-black hover:brightness-105 disabled:opacity-50"
+              >
+                {isUpdatingPin ? "Guardando..." : "Guardar PIN"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }

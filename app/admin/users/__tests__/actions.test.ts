@@ -49,7 +49,7 @@ describe("Admin Users Server Actions", () => {
           deleteUser: vi.fn(),
         },
       },
-      from: vi.fn().mockImplementation((table: string) => ({
+      from: vi.fn().mockImplementation((_table: string) => ({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             ilike: vi.fn().mockReturnValue({

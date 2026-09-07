@@ -88,11 +88,16 @@ export async function createUser(formData: FormData) {
     }
 
     // 4. Crear o actualizar perfil en profiles para este tenant
+    const rawPin = (formData.get("pin") as string)?.trim();
+    const pin =
+      rawPin || (role === "ADMIN" || role === "MANAGER" ? "1234" : null);
+
     const { error: upsertError } = await adminClient.from("profiles").upsert({
       id: userId,
       email: cleanEmail,
       full_name: fullName,
       role: role,
+      pin: pin,
       tenant_id: tenant.id,
     });
 
@@ -108,6 +113,7 @@ export async function createUser(formData: FormData) {
         email: cleanEmail,
         name: fullName,
         role: role as UserRole,
+        pin: pin,
         tenant_id: tenant.id,
         password: "MANAGED_BY_SUPABASE",
       });
@@ -204,3 +210,49 @@ export async function deleteUser(id: string) {
     return { error: "Ocurrió un error inesperado." };
   }
 }
+
+export async function updateUserPin(id: string, pin: string) {
+  try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return { error: "No autorizado" };
+    }
+
+    const cleanPin = pin?.trim();
+    if (!cleanPin || !/^\d{4,6}$/.test(cleanPin)) {
+      return { error: "El PIN debe contener entre 4 y 6 dígitos numéricos" };
+    }
+
+    const tenant = await getTenantContext();
+    const adminClient = createAdminClient();
+
+    const { error: profileError } = await adminClient
+      .from("profiles")
+      .update({ pin: cleanPin })
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
+
+    if (profileError) {
+      console.error("Error al actualizar PIN de perfil:", profileError);
+      return { error: "Error al actualizar el PIN" };
+    }
+
+    // Sincronizar en tabla users si existe
+    try {
+      await adminClient
+        .from("users")
+        .update({ pin: cleanPin })
+        .eq("id", id)
+        .eq("tenant_id", tenant.id);
+    } catch (usersErr) {
+      console.error("Error al sincronizar PIN en users:", usersErr);
+    }
+
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (err) {
+    console.error(err);
+    return { error: "Ocurrió un error inesperado." };
+  }
+}
+
