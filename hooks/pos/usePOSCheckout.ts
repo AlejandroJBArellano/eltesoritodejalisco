@@ -217,7 +217,7 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     }
   };
 
-  const handleUpdateTip = async () => {
+  const handleUpdateTip = async (pin?: string) => {
     if (!editingTipOrder) return;
 
     const percentage = (editTipAmountCalculated / editingTipOrder.total) * 100;
@@ -240,9 +240,13 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
         body: JSON.stringify({
           orderId: editingTipOrder.id,
           tipAmount: editTipAmountCalculated,
+          pin,
         }),
       });
-      if (!response.ok) throw new Error("Error al actualizar propina");
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.error || "Error al actualizar propina");
+      }
       await refreshOrders();
       setEditingTipOrder(null);
     } catch (error) {
@@ -254,8 +258,11 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     }
   };
 
-  const handleUndoPayment = async (orderId: string) => {
-    // Caller is responsible for confirming via inline UI before calling this
+  const handleUndoPayment = async (
+    orderId: string,
+    pin?: string,
+    reason?: string,
+  ) => {
     try {
       setIsSubmitting(true);
       setCheckoutError(null);
@@ -263,11 +270,15 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          reason: "Corrección post-cobro (3 min window)",
+          reason: reason || "Corrección post-cobro (3 min window)",
+          pin,
         }),
       });
 
-      if (!response.ok) throw new Error("Error al deshacer el pago");
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.error || "Error al deshacer el pago");
+      }
 
       await refreshOrders();
     } catch (error) {

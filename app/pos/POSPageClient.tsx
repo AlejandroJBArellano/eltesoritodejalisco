@@ -21,6 +21,8 @@ import { OrderTicket } from "@/components/pos/OrderTicket";
 import { SplitBillModal } from "@/components/pos/SplitBillModal";
 
 import { toPng } from "html-to-image";
+import { useOptionalUser } from "@/components/UserProvider";
+import { POSManagerAuthModal } from "@/components/pos/modals/POSManagerAuthModal";
 import {
   Download,
   MessageCircle,
@@ -74,6 +76,7 @@ function POSPageContent() {
     handleCancelOrder,
     totalCartItems,
     cartTotal,
+    isSubmittingCart,
   } = usePOSCart();
 
   const {
@@ -96,6 +99,10 @@ function POSPageContent() {
     setBillingOrder,
     handleSplitPayment,
   } = usePOSCheckout();
+
+  const user = useOptionalUser();
+  const isWaiter = user?.isWaiter ?? false;
+  const [orderIdToCancel, setOrderIdToCancel] = useState<string | null>(null);
 
   // Two-step cancel order: stores the orderId being armed for cancel
   const [cancelArmedId, setCancelArmedId] = useState<string | null>(null);
@@ -147,13 +154,17 @@ function POSPageContent() {
     cancelArmTimerRef.current = setTimeout(() => setCancelArmedId(null), 3000);
   };
 
-  const handleCancelConfirm = async (orderId: string) => {
+  const handleCancelConfirm = async (orderId: string, pin?: string) => {
     if (cancelArmTimerRef.current) clearTimeout(cancelArmTimerRef.current);
     setCancelArmedId(null);
-    await handleCancelOrder(orderId);
+    await handleCancelOrder(orderId, pin);
   };
 
   const onClickCancel = (orderId: string) => {
+    if (isWaiter) {
+      setOrderIdToCancel(orderId);
+      return;
+    }
     if (cancelArmedId === orderId) {
       handleCancelConfirm(orderId);
     } else {
@@ -329,6 +340,26 @@ function POSPageContent() {
       {totalCartItems > 0 && activeTab === "menu" && (
         <FloatingMobileBarPOS totalCartItems={totalCartItems} cartTotal={cartTotal} setActiveTab={setActiveTab} />
       )}
+
+      {/* Modal de Autorización de Gerencia para Cancelar Orden */}
+      <POSManagerAuthModal
+        isOpen={!!orderIdToCancel}
+        onClose={() => setOrderIdToCancel(null)}
+        title="Autorizar Cancelación de Orden"
+        description="Se cancelará la orden por completo y se revertirá el inventario correspondiente. Ingresa el PIN de Gerencia."
+        reasonPresets={[
+          "Error de captura",
+          "Cliente canceló",
+          "Orden duplicada",
+          "Mesa se retiró",
+        ]}
+        onAuthorize={async ({ pin }) => {
+          if (orderIdToCancel) {
+            await handleCancelConfirm(orderIdToCancel, pin);
+          }
+        }}
+        isSubmitting={isSubmittingCart}
+      />
     </div>
   );
 }

@@ -1,8 +1,15 @@
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
+import { useOptionalUser } from "@/components/UserProvider";
 import { HandCoins, X } from "lucide-react";
+import { useState } from "react";
+import { POSManagerAuthModal } from "./POSManagerAuthModal";
 
 export function POSTipModal() {
+  const user = useOptionalUser();
+  const isWaiter = user?.isWaiter ?? false;
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   const { refreshOrders } = usePOSData()
 
   const {
@@ -19,6 +26,14 @@ export function POSTipModal() {
 
   if (!editingTipOrder) return null;
 
+  const onUpdateTipClick = async () => {
+    if (isWaiter) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    await handleUpdateTip();
+  };
+
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print">
       <div className="bg-card rounded-2xl max-w-md w-full p-6 shadow-2xl border border-border space-y-6">
@@ -29,6 +44,7 @@ export function POSTipModal() {
           </h3>
           <button
             type="button"
+            aria-label="Cerrar modal"
             onClick={() => setEditingTipOrder(null)}
             className="text-text-light/40 hover:text-text-light transition-colors"
           >
@@ -121,7 +137,7 @@ export function POSTipModal() {
           <div className="flex flex-col gap-2.5 pt-2">
             <button
               type="button"
-              onClick={handleUpdateTip}
+              onClick={onUpdateTipClick}
               disabled={isSubmittingCheckout}
               className="w-full bg-primary text-black py-3.5 rounded-xl font-black text-sm hover:brightness-105 shadow-lg shadow-primary/10 disabled:opacity-30 transition-all uppercase tracking-wider"
             >
@@ -137,6 +153,22 @@ export function POSTipModal() {
           </div>
         </div>
       </div>
+
+      <POSManagerAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        title="Autorizar Edición de Propina"
+        description={`Modificar la propina de la orden #${editingTipOrder.orderNumber} requiere PIN de Gerencia.`}
+        reasonPresets={[
+          "Error de captura",
+          "Cliente cambió monto",
+          "Propina omitida en cobro",
+        ]}
+        onAuthorize={async ({ pin }) => {
+          await handleUpdateTip(pin);
+        }}
+        isSubmitting={isSubmittingCheckout}
+      />
     </div>
   );
 }

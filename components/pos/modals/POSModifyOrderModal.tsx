@@ -1,17 +1,22 @@
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSData } from "@/hooks/pos/usePOSData";
+import { useOptionalUser } from "@/components/UserProvider";
 import { Minus, Percent, Plus, Tag, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   POSDiscountModal,
   DiscountData,
 } from "./POSDiscountModal";
+import { POSManagerAuthModal } from "./POSManagerAuthModal";
 import {
   calculateItemDiscount,
   formatDiscountBadge,
 } from "@/lib/utils/discounts";
 
 export function POSModifyOrderModal() {
+  const user = useOptionalUser();
+  const isWaiter = user?.isWaiter ?? false;
+
   const {
     availableMenuItems,
     customers,
@@ -38,6 +43,8 @@ export function POSModifyOrderModal() {
     isSubmittingCart,
   } = usePOSCart(availableMenuItems, refreshOrders);
 
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   // Modal de Descuento en Modificación
   const [discountModal, setDiscountModal] = useState<{
     isOpen: boolean;
@@ -52,6 +59,24 @@ export function POSModifyOrderModal() {
     isItem: false,
     title: "",
   });
+
+  const hasItemReductions = useMemo(() => {
+    if (!modifyingOrder?.orderItems) return false;
+    const originalItems = modifyingOrder.orderItems;
+    const currentItemMap = new Map(modifyItems.map((item) => [item.id, item.quantity]));
+
+    // Check if any original item was removed
+    const hasDeleted = originalItems.some((orig: { id: string; quantity: number }) => !currentItemMap.has(orig.id));
+    if (hasDeleted) return true;
+
+    // Check if any original item's quantity decreased
+    const hasDecreased = originalItems.some((orig: { id: string; quantity: number }) => {
+      const currentQty = currentItemMap.get(orig.id) ?? 0;
+      return currentQty < Number(orig.quantity);
+    });
+
+    return hasDecreased;
+  }, [modifyingOrder, modifyItems]);
 
   if (!modifyingOrder) return null;
 
@@ -97,6 +122,14 @@ export function POSModifyOrderModal() {
         discountReason: modifyOrderDiscount?.discountReason || null,
       },
     });
+  };
+
+  const handleSaveClick = async () => {
+    if (isWaiter && hasItemReductions) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    await handleSaveModifiedOrder();
   };
 
   const handleApplyDiscountModal = (discount: DiscountData) => {
@@ -357,7 +390,7 @@ export function POSModifyOrderModal() {
           </button>
           <button
             type="button"
-            onClick={handleSaveModifiedOrder}
+            onClick={handleSaveClick}
             disabled={isSubmittingCart || modifyItems.length === 0}
             className="w-full bg-primary text-black py-3 rounded-xl font-black hover:brightness-105 transition-all uppercase text-xs tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50 cursor-pointer"
           >
@@ -377,6 +410,24 @@ export function POSModifyOrderModal() {
         initialDiscount={discountModal.initialDiscount}
         onApply={handleApplyDiscountModal}
         onRemove={handleRemoveDiscountModal}
+      />
+
+      {/* Modal de Autorización de Gerencia para Reducción / Eliminación de Productos */}
+      <POSManagerAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        title="Autorizar Cancelación de Productos"
+        description="Se detectó la eliminación o reducción de productos en la comanda activa. Ingresa el PIN de Gerencia para autorizar los cambios."
+        reasonPresets={[
+          "Error de captura",
+          "Cliente canceló platillo",
+          "Platillo insatisfactorio",
+          "Sin ingredientes disponibles",
+        ]}
+        onAuthorize={async ({ pin }) => {
+          await handleSaveModifiedOrder(pin);
+        }}
+        isSubmitting={isSubmittingCart}
       />
     </div>
   );

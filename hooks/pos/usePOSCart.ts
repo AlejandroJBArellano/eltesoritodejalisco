@@ -559,7 +559,7 @@ function usePOSCartInternal(
     setModifyItems((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  const handleSaveModifiedOrder = async () => {
+  const handleSaveModifiedOrder = async (pin?: string) => {
     if (!modifyingOrder) return;
     if (modifyItems.length === 0) {
       setCartError("La orden debe tener al menos un producto.");
@@ -585,6 +585,7 @@ function usePOSCartInternal(
           discountType: modifyOrderDiscount.discountType || null,
           discountValue: modifyOrderDiscount.discountValue || null,
           discountReason: modifyOrderDiscount.discountReason || null,
+          pin,
         }),
       });
       const data = await response.json();
@@ -609,14 +610,14 @@ function usePOSCartInternal(
     }
   };
 
-  const handleCancelOrder = async (orderId: string) => {
-    // cancelOrderArmed state is managed in the UI (page.tsx) via a separate per-row mechanism
-    // This function is called only after the UI has done its two-step confirm
+  const handleCancelOrder = async (orderId: string, pin?: string) => {
     try {
       setIsSubmittingCart(true);
       setCartError(null);
       const response = await fetch(`/api/orders/${orderId}`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin }),
       });
       if (!response.ok) {
         const data = await response.json();

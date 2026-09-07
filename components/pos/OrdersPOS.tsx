@@ -6,6 +6,8 @@ import { useOptionalUser } from "@/components/UserProvider";
 import { Ban, Bike, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, ShoppingBag, Undo2, Utensils } from "lucide-react";
 import { useMemo, useState } from "react";
 import { formatServiceLabel, getServiceType } from "@/lib/utils/serviceType";
+import { POSManagerAuthModal } from "./modals/POSManagerAuthModal";
+import type { Order } from "@/types";
 
 export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
     onClickCancel: (orderId: string) => void;
@@ -13,6 +15,7 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
 }) {
     const user = useOptionalUser();
     const isWaiter = user?.isWaiter ?? false;
+    const [undoOrder, setUndoOrder] = useState<Order | null>(null);
 
     const { refreshOrders, availableMenuItems, orders } = usePOSData();
     const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING" | "PAID">("ALL");
@@ -320,7 +323,7 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
                                                 Editar
                                             </button>
                                         )}
-                                        {order.status === "PAID" && !isWaiter && (
+                                        {order.status === "PAID" && (
                                             <button
                                                 type="button"
                                                 onClick={() => {
@@ -340,7 +343,13 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
                                         {order.status === "PAID" && isUndoable && (
                                             <button
                                                 type="button"
-                                                onClick={() => handleUndoPayment(order.id)}
+                                                onClick={() => {
+                                                    if (isWaiter) {
+                                                        setUndoOrder(order);
+                                                    } else {
+                                                        handleUndoPayment(order.id);
+                                                    }
+                                                }}
                                                 className="rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95"
                                                 title="Revertir pago (ventana de 3 min)"
                                             >
@@ -409,6 +418,29 @@ export default function OrdersPOS({ onClickCancel, cancelArmedId }: {
             </tbody>
         </table>
       </div>
+
+      <POSManagerAuthModal
+        isOpen={!!undoOrder}
+        onClose={() => setUndoOrder(null)}
+        title="Autorizar Reapertura de Cuenta"
+        description={
+          undoOrder
+            ? `Reabrir la orden #${undoOrder.orderNumber} revertirá el cobro y la dejará como pendiente. Requiere PIN de Gerencia.`
+            : ""
+        }
+        reasonPresets={[
+          "Error de cobro",
+          "Cambio de forma de pago",
+          "Cliente solicitó producto extra",
+          "Cancelación de cuenta",
+        ]}
+        onAuthorize={async ({ pin, reason }) => {
+          if (undoOrder) {
+            await handleUndoPayment(undoOrder.id, pin, reason);
+          }
+        }}
+        isSubmitting={isSubmittingCheckout}
+      />
     </div>
   );
 }

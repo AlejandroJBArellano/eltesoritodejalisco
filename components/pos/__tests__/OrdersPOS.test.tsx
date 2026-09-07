@@ -201,7 +201,7 @@ describe("OrdersPOS component", () => {
     expect(screen.getByRole("button", { name: /Propina/i })).toBeDefined();
   });
 
-  it("hides tip amount and Propina button for paid order when user is Waiter", () => {
+  it("shows Propina button for paid order when user is Waiter and prompts authorization on undo", () => {
     vi.mocked(useOptionalUser).mockReturnValue({
       profile: null,
       role: "WAITER",
@@ -213,7 +213,12 @@ describe("OrdersPOS component", () => {
 
     render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
 
-    expect(screen.queryByText(/propina/i)).toBeNull();
-    expect(screen.queryByRole("button", { name: /Propina/i })).toBeNull();
+    expect(screen.queryByText("+$35.00 propina")).toBeNull();
+    expect(screen.getByRole("button", { name: /Propina/i })).toBeDefined();
+
+    // Clicking Deshacer should prompt authorization modal for waiter
+    const undoButton = screen.getByRole("button", { name: /Deshacer/i });
+    fireEvent.click(undoButton);
+    expect(screen.getByText(/Autorizar Reapertura de Cuenta/i)).toBeDefined();
   });
 });

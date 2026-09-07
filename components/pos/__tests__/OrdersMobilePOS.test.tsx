@@ -199,7 +199,7 @@ describe("OrdersMobileFunction component", () => {
     expect(screen.getAllByRole("button", { name: /Propina/i }).length).toBeGreaterThanOrEqual(1);
   });
 
-  it("hides tip amount and Propina button when user is Waiter", () => {
+  it("shows Propina button when user is Waiter and prompts authorization on undo", () => {
     vi.mocked(useOptionalUser).mockReturnValue({
       profile: null,
       role: "WAITER",
@@ -211,7 +211,13 @@ describe("OrdersMobileFunction component", () => {
 
     render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
 
-    expect(screen.queryByText(/propina/i)).toBeNull();
-    expect(screen.queryByRole("button", { name: /Propina/i })).toBeNull();
+    expect(screen.queryByText("+$25.00 propina")).toBeNull();
+    expect(screen.getAllByRole("button", { name: /Propina/i }).length).toBeGreaterThanOrEqual(1);
+
+    const undoButton = screen.queryByRole("button", { name: /Deshacer Pago/i });
+    if (undoButton) {
+      fireEvent.click(undoButton);
+      expect(screen.getByText(/Autorizar Reapertura de Cuenta/i)).toBeDefined();
+    }
   });
 });

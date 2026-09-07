@@ -6,6 +6,8 @@ import { useOptionalUser } from "@/components/UserProvider";
 import { Ban, Bike, ChefHat, DollarSign, Edit3, HandCoins, Plus, Printer, ShoppingBag, Undo2, Utensils } from "lucide-react";
 import { useMemo, useState } from "react";
 import { formatServiceLabel, getServiceType } from "@/lib/utils/serviceType";
+import { POSManagerAuthModal } from "./modals/POSManagerAuthModal";
+import type { Order } from "@/types";
 
 export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
     onClickCancel: (orderId: string) => void;
@@ -13,6 +15,7 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
 }) {
     const user = useOptionalUser();
     const isWaiter = user?.isWaiter ?? false;
+    const [undoOrder, setUndoOrder] = useState<Order | null>(null);
 
     const { refreshOrders, availableMenuItems, orders } = usePOSData();
     const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING" | "PAID">("ALL");
@@ -297,22 +300,20 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
                                         <Edit3 className="h-3.5 w-3.5" />
                                         Editar
                                     </button>
-                                    {!isWaiter && (
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setEditingTipOrder(order);
-                                                setEditTipType("FIXED");
-                                                setEditTipInput(
-                                                    order.payments?.[0]?.tipAmount?.toString() || "0",
-                                                );
-                                            }}
-                                            className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
-                                        >
-                                            <HandCoins className="h-3.5 w-3.5" />
-                                            Propina
-                                        </button>
-                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setEditingTipOrder(order);
+                                            setEditTipType("FIXED");
+                                            setEditTipInput(
+                                                order.payments?.[0]?.tipAmount?.toString() || "0",
+                                            );
+                                        }}
+                                        className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                                    >
+                                        <HandCoins className="h-3.5 w-3.5" />
+                                        Propina
+                                    </button>
                                     {/* <button
                                         type="button"
                                         onClick={() => setBillingOrder(order)}
@@ -359,7 +360,13 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
                             {order.status === "PAID" && isUndoable && (
                                 <button
                                     type="button"
-                                    onClick={() => handleUndoPayment(order.id)}
+                                    onClick={() => {
+                                        if (isWaiter) {
+                                            setUndoOrder(order);
+                                        } else {
+                                            handleUndoPayment(order.id);
+                                        }
+                                    }}
                                     className="col-span-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                 >
                                     <Undo2 className="h-3.5 w-3.5" />
@@ -371,6 +378,29 @@ export default function OrdersMobileFunction({ onClickCancel, cancelArmedId }: {
                 );
             })
         )}
+
+      <POSManagerAuthModal
+        isOpen={!!undoOrder}
+        onClose={() => setUndoOrder(null)}
+        title="Autorizar Reapertura de Cuenta"
+        description={
+          undoOrder
+            ? `Reabrir la orden #${undoOrder.orderNumber} revertirá el cobro y la dejará como pendiente. Requiere PIN de Gerencia.`
+            : ""
+        }
+        reasonPresets={[
+          "Error de cobro",
+          "Cambio de forma de pago",
+          "Cliente solicitó producto extra",
+          "Cancelación de cuenta",
+        ]}
+        onAuthorize={async ({ pin, reason }) => {
+          if (undoOrder) {
+            await handleUndoPayment(undoOrder.id, pin, reason);
+          }
+        }}
+        isSubmitting={isSubmittingCheckout}
+      />
     </div>
   );
 }
