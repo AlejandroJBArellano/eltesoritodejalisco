@@ -86,9 +86,11 @@ function usePOSCartInternal(
     { menuItemId: "", quantity: "1", notes: "" },
   ]);
 
-  // Modify Order State (edit/remove existing items)
+  // Modify Order State (edit/remove existing items, table and customer)
   const [modifyingOrder, setModifyingOrder] = useState<Order | null>(null);
   const [modifyItems, setModifyItems] = useState<ModifyItem[]>([]);
+  const [modifyTable, setModifyTable] = useState<string>("");
+  const [modifyCustomerId, setModifyCustomerId] = useState<string>("");
   const [isSubmittingCart, setIsSubmittingCart] = useState(false);
 
   // Two-step clear cart: null = idle, true = armed (waiting for confirm click)
@@ -382,6 +384,8 @@ function usePOSCartInternal(
 
   const openModifyModal = (order: Order) => {
     setModifyingOrder(order);
+    setModifyTable(order.table || "");
+    setModifyCustomerId(order.customerId || order.customer?.id || "");
     setModifyItems(
       (order.orderItems || []).map((item) => ({
         id: item.id,
@@ -426,6 +430,8 @@ function usePOSCartInternal(
             id: item.id,
             quantity: item.quantity,
           })),
+          table: modifyTable || undefined,
+          customerId: modifyCustomerId || null,
         }),
       });
       const data = await response.json();
@@ -434,6 +440,8 @@ function usePOSCartInternal(
       await refreshOrders();
       setModifyingOrder(null);
       setModifyItems([]);
+      setModifyTable("");
+      setModifyCustomerId("");
     } catch (error) {
       setCartError(
         error instanceof Error ? error.message : "Error al modificar orden",
@@ -497,6 +505,10 @@ function usePOSCartInternal(
     setModifyingOrder,
     modifyItems,
     setModifyItems,
+    modifyTable,
+    setModifyTable,
+    modifyCustomerId,
+    setModifyCustomerId,
     isSubmittingCart,
     handleCheckoutSubmit,
     handleAddItems,

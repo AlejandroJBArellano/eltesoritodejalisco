@@ -63,6 +63,7 @@ const mockOrder: Order = {
 describe("POSCheckoutModal Component", () => {
   const defaultDataValue = {
     availableMenuItems: [],
+    customers: [],
     refreshOrders: vi.fn(),
   };
 
@@ -345,7 +346,7 @@ describe("POSCheckoutModal Component", () => {
     fireEvent.click(creditBtn);
 
     expect(screen.getByText("Confirmar Venta a Crédito")).toBeInTheDocument();
-    expect(screen.getByText(/Raúl González/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Raúl González/i).length).toBeGreaterThan(0);
 
     const confirmBtn = screen.getByRole("button", { name: /Confirmar Crédito/i });
     fireEvent.click(confirmBtn);
@@ -448,5 +449,49 @@ describe("POSCheckoutModal Component", () => {
       await screen.findByText("PIN de autorización incorrecto")
     ).toBeInTheDocument();
     expect(handleCreditPaymentMock).not.toHaveBeenCalled();
+  });
+
+  it("should allow assigning a customer to the order directly from checkout modal", async () => {
+    const orderWithoutCustomer = {
+      ...mockOrder,
+      customer: undefined,
+      customerId: undefined,
+    };
+
+    const setCheckoutOrderMock = vi.fn();
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...defaultCheckoutValue,
+      checkoutOrder: orderWithoutCustomer,
+      setCheckoutOrder: setCheckoutOrderMock,
+    } as unknown as ReturnType<typeof usePOSCheckout>);
+
+    vi.mocked(usePOSData).mockReturnValue({
+      ...defaultDataValue,
+      customers: [{ id: "cust-9", name: "Esteban Quito" }],
+      refreshOrders: vi.fn().mockResolvedValue([]),
+    } as unknown as ReturnType<typeof usePOSData>);
+
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        order: { ...orderWithoutCustomer, customerId: "cust-9" },
+      }),
+    });
+
+    render(<POSCheckoutModal />);
+
+    const select = screen.getByRole("combobox", { name: /seleccionar cliente/i });
+    fireEvent.change(select, { target: { value: "cust-9" } });
+
+    const assignBtn = screen.getByRole("button", { name: /asignar/i });
+    fireEvent.click(assignBtn);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      `/api/orders/${orderWithoutCustomer.id}`,
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ customerId: "cust-9" }),
+      }),
+    );
   });
 });

@@ -68,7 +68,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { items } = body;
+    const { items, customerId, table } = body;
 
     if (!items || !Array.isArray(items)) {
       return NextResponse.json(
@@ -147,14 +147,22 @@ export async function PUT(
     const newTax = newSubtotal * TAX_RATE;
     const newTotal = newSubtotal + newTax;
 
+    const updatePayload: Record<string, unknown> = {
+      subtotal: newSubtotal,
+      tax: newTax,
+      total: newTotal,
+      updated_at: getCurrentCDMXDate(),
+    };
+    if (customerId !== undefined) {
+      updatePayload.customer_id = customerId || null;
+    }
+    if (table !== undefined) {
+      updatePayload.table = table || null;
+    }
+
     const { data: updatedOrder, error: updateOrderError } = await supabase
       .from("orders")
-      .update({
-        subtotal: newSubtotal,
-        tax: newTax,
-        total: newTotal,
-        updated_at: getCurrentCDMXDate(),
-      })
+      .update(updatePayload)
       .eq("id", id)
       .eq("tenant_id", tenant.id)
       .select(
@@ -188,12 +196,7 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { orderItems } = body;
-
-    // Validate request body
-    if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
-      return NextResponse.json({ error: "No items to add" }, { status: 400 });
-    }
+    const { orderItems, customerId, table } = body;
 
     const tenant = await getTenantContext();
     const supabase = await createClient();
@@ -208,6 +211,41 @@ export async function PATCH(
 
     if (fetchError || !order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // If no orderItems provided, allow updating metadata (customerId, table)
+    if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
+      if (customerId === undefined && table === undefined) {
+        return NextResponse.json({ error: "No items or updates provided" }, { status: 400 });
+      }
+
+      const updatePayload: Record<string, unknown> = {
+        updated_at: getCurrentCDMXDate(),
+      };
+      if (customerId !== undefined) {
+        updatePayload.customer_id = customerId || null;
+      }
+      if (table !== undefined) {
+        updatePayload.table = table || null;
+      }
+
+      const { data: updatedOrder, error: updateOrderError } = await supabase
+        .from("orders")
+        .update(updatePayload)
+        .eq("id", id)
+        .eq("tenant_id", tenant.id)
+        .select(`
+          *,
+          order_items (
+            *,
+            menu_items (*)
+          ),
+          customer:customers (*)
+        `)
+        .single();
+
+      if (updateOrderError) throw updateOrderError;
+      return NextResponse.json({ order: updatedOrder });
     }
 
     let additionalSubtotal = 0;

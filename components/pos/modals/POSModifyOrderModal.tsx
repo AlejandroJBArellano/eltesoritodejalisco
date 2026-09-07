@@ -5,6 +5,7 @@ import { Minus, Plus, Trash2, X } from "lucide-react";
 export function POSModifyOrderModal() {
   const {
     availableMenuItems,
+    customers,
     refreshOrders,
   } = usePOSData();
 
@@ -12,6 +13,10 @@ export function POSModifyOrderModal() {
     modifyingOrder,
     setModifyingOrder,
     modifyItems,
+    modifyTable,
+    setModifyTable,
+    modifyCustomerId,
+    setModifyCustomerId,
     handleModifyQuantityChange,
     handleModifyRemoveItem,
     handleSaveModifiedOrder,
@@ -34,6 +39,40 @@ export function POSModifyOrderModal() {
           >
             <X className="h-5 w-5" />
           </button>
+        </div>
+
+        {/* Mesa y Cliente */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-dark/30 p-3.5 rounded-xl border border-border">
+          <div>
+            <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
+              Mesa / Servicio
+            </label>
+            <input
+              type="text"
+              value={modifyTable}
+              onChange={(e) => setModifyTable(e.target.value)}
+              placeholder="Ej. Mesa 4, Para Llevar..."
+              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none focus:border-amber-400 transition-colors placeholder:text-text-light/30 font-medium"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
+              Cliente
+            </label>
+            <select
+              aria-label="Cliente"
+              value={modifyCustomerId}
+              onChange={(e) => setModifyCustomerId(e.target.value)}
+              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors"
+            >
+              <option value="">General (Sin cliente)</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="space-y-3">

@@ -26,6 +26,7 @@ export function POSCheckoutModal() {
 
   const {
     availableMenuItems,
+    customers,
     refreshOrders,
   } = usePOSData();
 
@@ -60,6 +61,39 @@ export function POSCheckoutModal() {
   const [managerPin, setManagerPin] = useState("");
   const [creditAuthError, setCreditAuthError] = useState<string | null>(null);
   const [isVerifyingPin, setIsVerifyingPin] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [isAssigningCustomer, setIsAssigningCustomer] = useState(false);
+
+  const handleAssignCustomer = async () => {
+    if (!checkoutOrder || !selectedCustomerId) return;
+    try {
+      setIsAssigningCustomer(true);
+      setCreditAuthError(null);
+      const res = await fetch(`/api/orders/${checkoutOrder.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customerId: selectedCustomerId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Error al asignar cliente");
+
+      const assignedCustomer = customers.find((c) => c.id === selectedCustomerId);
+      const updatedOrder = {
+        ...checkoutOrder,
+        customerId: selectedCustomerId,
+        customer: assignedCustomer || data.order?.customer,
+      };
+
+      setCheckoutOrder(updatedOrder);
+      await refreshOrders();
+    } catch (err) {
+      setCreditAuthError(
+        err instanceof Error ? err.message : "Error al asignar cliente",
+      );
+    } finally {
+      setIsAssigningCustomer(false);
+    }
+  };
 
   if (!checkoutOrder) return null;
 
@@ -155,6 +189,11 @@ export function POSCheckoutModal() {
               <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/10 text-blue-400 border border-blue-500/25 uppercase tracking-wider">
                 Incluye ${tipAmountCalculated.toFixed(2)} de propina
               </span>
+            )}
+            {checkoutOrder.customer?.name && (
+              <p className="text-xs font-bold text-amber-400/90 pt-1">
+                Cliente: <span className="text-white font-extrabold">{checkoutOrder.customer.name}</span>
+              </p>
             )}
           </div>
 
@@ -309,23 +348,59 @@ export function POSCheckoutModal() {
             </button>
 
             {/* Botón A Crédito */}
-            <button
-              type="button"
-              onClick={() => {
-                setCreditAuthError(null);
-                setManagerPin("");
-                const hasCustomer = Boolean(checkoutOrder.customer || checkoutOrder.customerId);
-                if (!hasCustomer) {
-                  setCreditAuthError("Para enviar a crédito, asigna primero un cliente regresando a editar.");
-                  return;
-                }
-                setShowCreditPrompt(true);
-              }}
-              disabled={isSubmittingCheckout}
-              className="w-full bg-amber-500/10 text-amber-400 border border-amber-500/30 py-2.5 rounded-xl font-black text-xs hover:bg-amber-500/20 hover:border-amber-500/40 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
-            >
-              <UserCheck className="h-3.5 w-3.5" /> A Crédito
-            </button>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setCreditAuthError(null);
+                  setManagerPin("");
+                  const hasCustomer = Boolean(checkoutOrder.customer || checkoutOrder.customerId);
+                  if (!hasCustomer) {
+                    setCreditAuthError("Para enviar a crédito, asigna primero un cliente seleccionándolo aquí abajo o regresando a editar.");
+                    return;
+                  }
+                  setShowCreditPrompt(true);
+                }}
+                disabled={isSubmittingCheckout}
+                className="w-full bg-amber-500/10 text-amber-400 border border-amber-500/30 py-2.5 rounded-xl font-black text-xs hover:bg-amber-500/20 hover:border-amber-500/40 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
+              >
+                <UserCheck className="h-3.5 w-3.5" /> A Crédito
+              </button>
+
+              {/* Asignación rápida de cliente si la comanda no tiene uno */}
+              {!Boolean(checkoutOrder.customer || checkoutOrder.customerId) && (
+                <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 space-y-2">
+                  <p className="text-[11px] font-extrabold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <UserCheck className="h-3.5 w-3.5 text-amber-400" />
+                    Asignar cliente a la comanda
+                  </p>
+                  <div className="flex gap-2">
+                    <select
+                      aria-label="Seleccionar cliente"
+                      value={selectedCustomerId}
+                      onChange={(e) => setSelectedCustomerId(e.target.value)}
+                      disabled={isAssigningCustomer || isSubmittingCheckout}
+                      className="flex-1 rounded-xl border border-border bg-dark/60 px-3 py-2 text-xs text-text-light outline-none focus:border-amber-400"
+                    >
+                      <option value="">Selecciona un cliente...</option>
+                      {customers.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      disabled={!selectedCustomerId || isAssigningCustomer || isSubmittingCheckout}
+                      onClick={handleAssignCustomer}
+                      className="rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs px-3.5 py-2 uppercase tracking-wider disabled:opacity-50 transition-all cursor-pointer shadow-sm"
+                    >
+                      {isAssigningCustomer ? "..." : "Asignar"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Prompt de Autorización de Crédito / PIN */}
             {showCreditPrompt && (
