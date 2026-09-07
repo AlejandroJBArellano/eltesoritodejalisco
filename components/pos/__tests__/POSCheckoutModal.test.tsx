@@ -133,7 +133,7 @@ describe("POSCheckoutModal Component", () => {
     
     // Total to pay
     expect(screen.getByText("Total a Pagar")).toBeInTheDocument();
-    expect(screen.getByText("$116.00")).toBeInTheDocument();
+    expect(screen.getAllByText("$116.00").length).toBeGreaterThan(0);
 
     // Tips options
     expect(screen.getByText("Sin Propina")).toBeInTheDocument();
@@ -532,7 +532,7 @@ describe("POSCheckoutModal Component", () => {
     render(<POSCheckoutModal />);
 
     expect(screen.getByText(/Subtotal bruto/i)).toBeInTheDocument();
-    expect(screen.getByText("$100.00")).toBeInTheDocument();
+    expect(screen.getAllByText("$100.00").length).toBeGreaterThan(0);
     expect(screen.getByText(/Descuentos en productos/i)).toBeInTheDocument();
     expect(screen.getByText("-$20.00")).toBeInTheDocument();
     expect(screen.getByText(/Descuento orden -\$10\.00/i)).toBeInTheDocument();

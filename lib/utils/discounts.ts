@@ -1,6 +1,14 @@
 export type DiscountType = "PERCENT" | "FIXED";
 export type DiscountScope = "ROW" | "UNIT";
 
+export interface DbDiscountFields {
+  discount_type?: DiscountType | null;
+  discount_value?: number | null;
+  discount_amount?: number | null;
+  discount_reason?: string | null;
+  discount_scope?: DiscountScope | null;
+}
+
 export interface ItemDiscountInput {
   unitPrice: number;
   quantity: number;
