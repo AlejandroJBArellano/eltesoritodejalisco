@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo, useTransition } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { TableSearchInput } from "@/components/ui/DataTableControls";
-import { useMenuItems } from "../hooks/useMenuItems";
 import { useMenuCategories } from "../hooks/useMenuCategories";
 
 export function MenuFilters() {
@@ -12,7 +11,6 @@ export function MenuFilters() {
   const rawSearchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const { items } = useMenuItems();
   const { menuCategories } = useMenuCategories();
 
   const searchQuery = rawSearchParams.get("q") || "";
@@ -29,13 +27,12 @@ export function MenuFilters() {
   }, [searchQuery]);
 
   const categories = useMemo(() => {
-    const set = new Set<string>();
-    menuCategories.forEach((c) => set.add(c.name));
-    items.forEach((i) => {
-      if (i.category) set.add(i.category);
-    });
-    return Array.from(set).sort();
-  }, [menuCategories, items]);
+    return menuCategories
+      .filter((c) => c.is_active !== false)
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((c) => c.name);
+  }, [menuCategories]);
 
   const updateSearchParam = (updates: Record<string, string | number | null>) => {
     const params = new URLSearchParams(rawSearchParams.toString());
@@ -94,6 +91,7 @@ export function MenuFilters() {
               {cat}
             </option>
           ))}
+          <option value="uncategorized">Sin categoría / Otros</option>
         </select>
       </div>
 

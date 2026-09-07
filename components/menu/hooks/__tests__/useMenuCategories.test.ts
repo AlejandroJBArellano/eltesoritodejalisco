@@ -77,6 +77,49 @@ describe("useMenuCategories Hook", () => {
     expect(result.current.deleteArmedCategoryId).toBe(null);
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(mockRefresh).toHaveBeenCalledTimes(1);
+    expect(result.current.menuCategories.find((c) => c.id === "cat-1")).toBeUndefined();
+  });
+
+  it("should create category and update local state immediately", async () => {
+    const newCategory: MenuCategory = {
+      id: "cat-3",
+      name: "POSTRES",
+      sort_order: 30,
+      show_in_pickup: true,
+      is_active: true,
+    };
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ category: newCategory }),
+    });
+    global.fetch = mockFetch;
+
+    const { result } = renderHook(() => useMenuCategories(mockCategories));
+
+    act(() => {
+      result.current.openCategoryModal();
+    });
+
+    act(() => {
+      result.current.setCategoryForm({
+        name: "Postres",
+        nameEn: "",
+        showInPickup: true,
+      });
+    });
+
+    const mockSuccess = vi.fn();
+    const fakeEvent = { preventDefault: vi.fn() } as unknown as React.SubmitEvent<HTMLFormElement>;
+
+    await act(async () => {
+      await result.current.handleCategorySubmit(fakeEvent, mockSuccess);
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockRefresh).toHaveBeenCalledTimes(1);
+    expect(mockSuccess).toHaveBeenCalledWith("POSTRES");
+    expect(result.current.menuCategories).toHaveLength(3);
+    expect(result.current.menuCategories.find((c) => c.id === "cat-3")).toEqual(newCategory);
   });
 
   it("should reorder categories optimistically and submit to API", async () => {

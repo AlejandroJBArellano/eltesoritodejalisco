@@ -10,16 +10,18 @@ import {
 } from "@/components/menu/types";
 import { Database } from "@/types/supabase";
 
+export const dynamic = "force-dynamic";
+
 type DbMenuItem = Database["public"]["Tables"]["menu_items"]["Row"];
 type DbMenuCategory = Database["public"]["Tables"]["menu_categories"]["Row"];
 type DbIngredient = Database["public"]["Tables"]["ingredients"]["Row"];
 
-async function getMenuDropdownItems(): Promise<{ id: string; name: string; price: number }[]> {
+async function getMenuDropdownItems(): Promise<{ id: string; name: string; price: number; category?: string | null }[]> {
   const tenant = await getTenantContext();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("menu_items")
-    .select("id, name, price")
+    .select("id, name, price, category")
     .eq("tenant_id", tenant.id)
     .order("name", { ascending: true });
 
@@ -32,6 +34,7 @@ async function getMenuDropdownItems(): Promise<{ id: string; name: string; price
     id: item.id,
     name: item.name,
     price: item.price,
+    category: item.category,
   }));
 }
 
@@ -130,8 +133,10 @@ async function getFilteredMenuItems(params: {
   if (params.q.trim()) {
     query = query.or(`name.ilike.%${params.q.trim()}%,description.ilike.%${params.q.trim()}%,category.ilike.%${params.q.trim()}%`);
   }
-  if (params.category !== "all") {
-    query = query.eq("category", params.category);
+  if (params.category === "uncategorized") {
+    query = query.or("category.is.null,category.eq.");
+  } else if (params.category !== "all") {
+    query = query.ilike("category", params.category.trim());
   }
   if (params.availability === "available") {
     query = query.eq("is_available", true);

@@ -195,7 +195,7 @@ export async function PUT(request: NextRequest) {
       const { error: cascadeError } = await supabase
         .from("menu_items")
         .update({ category: newName })
-        .eq("category", existing.name)
+        .ilike("category", existing.name)
         .eq("tenant_id", tenant.id);
 
       if (cascadeError) {
@@ -254,7 +254,7 @@ export async function DELETE(request: NextRequest) {
       const { count } = await supabase
         .from("menu_items")
         .select("id", { count: "exact", head: true })
-        .eq("category", existing.name)
+        .ilike("category", existing.name)
         .eq("tenant_id", tenant.id);
 
       if (count && count > 0) {

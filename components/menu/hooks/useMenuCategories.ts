@@ -83,6 +83,16 @@ function useMenuCategoriesInner(initialCategories: MenuCategory[]) {
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Error al guardar");
 
+      if (data.category) {
+        setMenuCategories((prev) => {
+          if (isEditing) {
+            return prev.map((c) => (c.id === data.category.id ? data.category : c));
+          } else {
+            return [...prev, data.category];
+          }
+        });
+      }
+
       router.refresh();
       onSuccess(data.category?.name); // caller can re-fetch menu items if needed
       setIsCategoryModalOpen(false);
@@ -114,6 +124,7 @@ function useMenuCategoriesInner(initialCategories: MenuCategory[]) {
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "No se pudo eliminar");
 
+      setMenuCategories((prev) => prev.filter((c) => c.id !== categoryId));
       router.refresh();
       setErrorMessage(null);
     } catch (error) {

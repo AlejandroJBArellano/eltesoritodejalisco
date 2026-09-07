@@ -53,7 +53,6 @@ export function MenuContent(props: MenuContentProps) {
 }
 
 function MenuContentInner({
-  items,
   paginatedItems,
   totalPages,
   totalItems,
@@ -148,13 +147,12 @@ function MenuContentInner({
   };
 
   const dbCategories = useMemo(() => {
-    const set = new Set<string>();
-    menuCategories.forEach((c) => set.add(c.name));
-    items.forEach((i) => {
-      if (i.category) set.add(i.category);
-    });
-    return Array.from(set).sort();
-  }, [menuCategories, items]);
+    return menuCategories
+      .filter((c) => c.is_active !== false)
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((c) => c.name);
+  }, [menuCategories]);
 
   const activeErrors = errorMessage || categoryErrorMessage;
 
