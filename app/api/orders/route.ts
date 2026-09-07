@@ -89,7 +89,17 @@ export async function POST(request: NextRequest) {
   try {
     const body: CreateOrderRequest & { pickupTime?: string } =
       await request.json();
-    const { customerId, source, table, notes, orderItems, pickupTime } = body;
+    const {
+      customerId,
+      source,
+      table,
+      notes,
+      orderItems,
+      pickupTime,
+      discountType,
+      discountValue,
+      discountReason,
+    } = body;
 
     if (!source) {
       return NextResponse.json(
@@ -122,8 +132,15 @@ export async function POST(request: NextRequest) {
           menu_item_id: i.menuItemId,
           quantity: Number(i.quantity),
           notes: i.notes || null,
+          discount_type: i.discountType || null,
+          discount_value: i.discountValue ? Number(i.discountValue) : null,
+          discount_scope: i.discountScope || "ROW",
+          discount_reason: i.discountReason || null,
         })),
         p_pickup_time: pickupTime ? new Date(pickupTime).toISOString() : null,
+        p_discount_type: discountType || null,
+        p_discount_value: discountValue ? Number(discountValue) : null,
+        p_discount_reason: discountReason || null,
       },
     );
 

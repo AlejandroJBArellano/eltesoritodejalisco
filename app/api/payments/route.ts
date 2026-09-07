@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     // Standard single-payment flow
     const { method, amount, receivedAmount, change, tipAmount } = body;
 
-    if (!method || !amount) {
+    if (!method || amount == null || isNaN(Number(amount))) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },

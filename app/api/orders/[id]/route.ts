@@ -4,6 +4,10 @@ import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
 import { deductInventoryForOrder } from "@/lib/services/inventory";
+import {
+  calculateItemDiscount,
+  calculateOrderDiscountTotals,
+} from "@/lib/utils/discounts";
 
 const TAX_RATE = 0;
 
@@ -57,9 +61,9 @@ export async function GET(
 /**
  * PUT /api/orders/:id
  * Replace the full item list of an existing order.
- * Accepts { items: [{ id: string, quantity: number }] }.
+ * Accepts { items: [{ id: string, quantity: number, discountType?, discountValue?, discountScope?, discountReason? }] }.
  * Items missing from the list (or with quantity ≤ 0) are deleted.
- * Order totals are recalculated automatically.
+ * Order totals and discounts are recalculated automatically.
  */
 export async function PUT(
   request: NextRequest,
@@ -68,7 +72,14 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { items, customerId, table } = body;
+    const {
+      items,
+      customerId,
+      table,
+      discountType,
+      discountValue,
+      discountReason,
+    } = body;
 
     if (!items || !Array.isArray(items)) {
       return NextResponse.json(
@@ -101,10 +112,13 @@ export async function PUT(
     // Fetch current order items
     const { data: currentItems } = await supabase
       .from("order_items")
-      .select("id")
+      .select("id, unit_price, quantity")
       .eq("order_id", id);
 
-    const currentIds = (currentItems || []).map((i: { id: string }) => i.id);
+    const currentMap = new Map(
+      (currentItems || []).map((ci) => [ci.id, ci]),
+    );
+    const currentIds = Array.from(currentMap.keys());
 
     // Delete items that are no longer in the list
     const idsToDelete = currentIds.filter(
@@ -118,14 +132,39 @@ export async function PUT(
       if (deleteError) throw deleteError;
     }
 
-    // Update quantities for items that remain in parallel
+    // Update quantities and discounts for items that remain
     const updatePromises = itemsToKeep.map(
-      (item: { id: string; quantity: number }) =>
-        supabase
+      (item: {
+        id: string;
+        quantity: number;
+        discountType?: string | null;
+        discountValue?: number | null;
+        discountScope?: "ROW" | "UNIT" | null;
+        discountReason?: string | null;
+      }) => {
+        const existing = currentMap.get(item.id);
+        const unitPrice = existing?.unit_price ?? 0;
+        const discountCalc = calculateItemDiscount({
+          unitPrice,
+          quantity: item.quantity,
+          discountType: (item.discountType as "PERCENT" | "FIXED") || null,
+          discountValue: item.discountValue,
+          discountScope: item.discountScope,
+        });
+
+        return supabase
           .from("order_items")
-          .update({ quantity: item.quantity })
+          .update({
+            quantity: item.quantity,
+            discount_type: item.discountType ?? null,
+            discount_value: item.discountValue ?? null,
+            discount_amount: discountCalc.discountAmount,
+            discount_scope: item.discountScope ?? "ROW",
+            discount_reason: item.discountReason ?? null,
+          })
           .eq("id", item.id)
-          .eq("order_id", id),
+          .eq("order_id", id);
+      },
     );
 
     const updateResults = await Promise.all(updatePromises);
@@ -136,21 +175,36 @@ export async function PUT(
     // Recalculate order totals from what's left in the database
     const { data: remainingItems } = await supabase
       .from("order_items")
-      .select("unit_price, quantity")
+      .select("unit_price, quantity, discount_type, discount_value, discount_scope")
       .eq("order_id", id);
 
-    const newSubtotal = (remainingItems || []).reduce(
-      (sum: number, item: { unit_price: number; quantity: number }) =>
-        sum + item.unit_price * item.quantity,
-      0,
-    );
-    const newTax = newSubtotal * TAX_RATE;
-    const newTotal = newSubtotal + newTax;
+    const activeOrderDiscountType =
+      discountType !== undefined ? discountType : order.discount_type;
+    const activeOrderDiscountValue =
+      discountValue !== undefined ? discountValue : order.discount_value;
+    const activeOrderDiscountReason =
+      discountReason !== undefined ? discountReason : order.discount_reason;
+
+    const totals = calculateOrderDiscountTotals({
+      items: (remainingItems || []).map((ri) => ({
+        unitPrice: ri.unit_price,
+        quantity: ri.quantity,
+        discountType: (ri.discount_type as "PERCENT" | "FIXED") || null,
+        discountValue: ri.discount_value,
+        discountScope: (ri.discount_scope as "ROW" | "UNIT") || null,
+      })),
+      orderDiscountType: (activeOrderDiscountType as "PERCENT" | "FIXED") || null,
+      orderDiscountValue: activeOrderDiscountValue,
+    });
 
     const updatePayload: Record<string, unknown> = {
-      subtotal: newSubtotal,
-      tax: newTax,
-      total: newTotal,
+      subtotal: totals.subtotalGross,
+      tax: 0,
+      discount_type: activeOrderDiscountType || null,
+      discount_value: activeOrderDiscountValue || null,
+      discount_amount: totals.orderDiscount,
+      discount_reason: activeOrderDiscountReason || null,
+      total: totals.total,
       updated_at: getCurrentCDMXDate(),
     };
     if (customerId !== undefined) {
@@ -196,7 +250,14 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { orderItems, customerId, table } = body;
+    const {
+      orderItems,
+      customerId,
+      table,
+      discountType,
+      discountValue,
+      discountReason,
+    } = body;
 
     const tenant = await getTenantContext();
     const supabase = await createClient();
@@ -213,9 +274,15 @@ export async function PATCH(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // If no orderItems provided, allow updating metadata (customerId, table)
+    // If no orderItems provided, allow updating metadata or order discount
     if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
-      if (customerId === undefined && table === undefined) {
+      if (
+        customerId === undefined &&
+        table === undefined &&
+        discountType === undefined &&
+        discountValue === undefined &&
+        discountReason === undefined
+      ) {
         return NextResponse.json({ error: "No items or updates provided" }, { status: 400 });
       }
 
@@ -227,6 +294,43 @@ export async function PATCH(
       }
       if (table !== undefined) {
         updatePayload.table = table || null;
+      }
+
+      if (
+        discountType !== undefined ||
+        discountValue !== undefined ||
+        discountReason !== undefined
+      ) {
+        const activeOrderDiscountType =
+          discountType !== undefined ? discountType : order.discount_type;
+        const activeOrderDiscountValue =
+          discountValue !== undefined ? discountValue : order.discount_value;
+        const activeOrderDiscountReason =
+          discountReason !== undefined ? discountReason : order.discount_reason;
+
+        const { data: existingItems } = await supabase
+          .from("order_items")
+          .select("unit_price, quantity, discount_type, discount_value, discount_scope")
+          .eq("order_id", id);
+
+        const totals = calculateOrderDiscountTotals({
+          items: (existingItems || []).map((ri) => ({
+            unitPrice: ri.unit_price,
+            quantity: ri.quantity,
+            discountType: (ri.discount_type as "PERCENT" | "FIXED") || null,
+            discountValue: ri.discount_value,
+            discountScope: (ri.discount_scope as "ROW" | "UNIT") || null,
+          })),
+          orderDiscountType: (activeOrderDiscountType as "PERCENT" | "FIXED") || null,
+          orderDiscountValue: activeOrderDiscountValue,
+        });
+
+        updatePayload.subtotal = totals.subtotalGross;
+        updatePayload.discount_type = activeOrderDiscountType || null;
+        updatePayload.discount_value = activeOrderDiscountValue || null;
+        updatePayload.discount_amount = totals.orderDiscount;
+        updatePayload.discount_reason = activeOrderDiscountReason || null;
+        updatePayload.total = totals.total;
       }
 
       const { data: updatedOrder, error: updateOrderError } = await supabase
