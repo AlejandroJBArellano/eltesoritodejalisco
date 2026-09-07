@@ -123,4 +123,15 @@ describe("CustomersContent Component", () => {
       }),
     );
   });
+
+  it("should open WhatsApp modal when clicking WhatsApp action button", () => {
+    render(<CustomersContent initialCustomers={mockCustomers} />);
+
+    const waBtn = screen.getByTestId("whatsapp-btn-cust-1");
+    fireEvent.click(waBtn);
+
+    expect(screen.getByText("Acciones Rápidas WhatsApp")).toBeInTheDocument();
+    expect(screen.getByText(/Cliente: Juan Pérez/i)).toBeInTheDocument();
+  });
 });
+

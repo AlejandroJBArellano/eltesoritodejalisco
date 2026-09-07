@@ -16,6 +16,7 @@ import {
   Edit3,
   Gift,
   Mail,
+  MessageCircle,
   Phone,
   Plus,
   ReceiptText,
@@ -26,6 +27,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { CustomerAccountModal } from "@/components/customers/CustomerAccountModal";
+import { CustomerWhatsAppModal } from "@/components/customers/CustomerWhatsAppModal";
 
 type Customer = {
   id: string;
@@ -88,6 +90,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [accountCustomer, setAccountCustomer] = useState<Customer | null>(null);
+  const [whatsappCustomer, setWhatsappCustomer] = useState<Customer | null>(null);
   const [formState, setFormState] = useState<CustomerFormState>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
@@ -607,6 +610,15 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
+                          onClick={() => setWhatsappCustomer(c)}
+                          className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-2 text-emerald-400 hover:bg-emerald-500/20 transition-all duration-200 cursor-pointer"
+                          title="Enviar WhatsApp"
+                          data-testid={`whatsapp-btn-${c.id}`}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => setAccountCustomer(c)}
                           className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-2 text-amber-400 hover:bg-amber-500/20 transition-all duration-200 cursor-pointer"
                           title="Estado de Cuenta"
@@ -778,6 +790,16 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
           onClose={() => setAccountCustomer(null)}
           customer={accountCustomer}
           onAbonoSuccess={fetchCustomers}
+        />
+      )}
+
+      {/* Modal de Acciones Rápidas WhatsApp */}
+      {whatsappCustomer && (
+        <CustomerWhatsAppModal
+          isOpen={Boolean(whatsappCustomer)}
+          onClose={() => setWhatsappCustomer(null)}
+          customer={whatsappCustomer}
+          onCustomerUpdated={fetchCustomers}
         />
       )}
     </div>
