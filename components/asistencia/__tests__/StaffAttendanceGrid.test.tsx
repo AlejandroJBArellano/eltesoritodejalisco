@@ -24,6 +24,10 @@ describe("StaffAttendanceGrid Component", () => {
       getFinishedAttendances: vi.fn().mockReturnValue([]),
       getEmployeeHours: vi.fn().mockReturnValue(0),
       activeEmployeeAttendance: undefined,
+      shifts: [],
+      toleranceMinutes: 10,
+      getUserTodayShift: vi.fn().mockReturnValue(undefined),
+      todayShift: undefined,
     });
 
     render(<StaffAttendanceGrid />);

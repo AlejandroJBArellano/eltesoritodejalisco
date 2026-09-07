@@ -26,6 +26,10 @@ describe("AsistenciaContent Component", () => {
     expect(
       screen.getByRole("button", { name: /registrar entrada/i }),
     ).toBeInTheDocument();
+
+    // Switch to Mis Turnos tab
+    const misTurnosBtn = screen.getByRole("button", { name: /mis turnos/i });
+    expect(misTurnosBtn).toBeInTheDocument();
   });
 
   it("renders admin view when user is admin", async () => {

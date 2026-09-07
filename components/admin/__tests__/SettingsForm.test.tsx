@@ -32,6 +32,7 @@ const mockTenant: TenantContextType = {
   stripe_details_submitted: false,
   google_reviews_url: "https://maps.app.goo.gl/example",
   ticket_footer_text: "@elsol_restaurante",
+  attendance_tolerance_minutes: 10,
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-01T00:00:00Z",
 };

@@ -31,6 +31,7 @@ const mockBaseTenant: TenantContextType = {
   stripe_details_submitted: false,
   google_reviews_url: null,
   ticket_footer_text: null,
+  attendance_tolerance_minutes: 10,
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-01T00:00:00Z",
 };
