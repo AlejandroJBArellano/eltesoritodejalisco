@@ -6,15 +6,13 @@ import { mapOrderData } from "@/lib/mappers/orders";
 import type { DbOrderPayload } from "@/lib/mappers/orders";
 import { createClient } from "@/lib/supabase/client";
 
-const CATEGORY_ORDER = [
-  "ANTOJITOS",
-  "TACOS",
-  "PLATILLOS FUERTES",
-  "BEBIDAS",
-  "EXTRAS",
-  "POSTRES",
-  "OTROS",
-];
+/** Raw menu category shape from API. */
+interface DbMenuCategory {
+  id: string;
+  name: string;
+  sort_order?: number | null;
+  is_active?: boolean | null;
+}
 
 /** Raw menu item shape from the API (snake_case). */
 interface DbMenuItem {
@@ -85,6 +83,9 @@ function usePOSDataInternal(tenantId?: string) {
   // Debounce refs to batch rapid realtime events
   const fetchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const menuDebounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const categoriesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [categories, setCategories] = useState<string[]>([]);
 
   const availableMenuItems = useMemo(
     () => menuItems.filter((item) => item.isAvailable),
@@ -97,7 +98,7 @@ function usePOSDataInternal(tenantId?: string) {
   const filteredMenuItems = useMemo(() => {
     return availableMenuItems.filter((m) => {
       // 1. Category Filter (Case-insensitive matching)
-      if (activeCategory && activeCategory !== "OTROS") {
+      if (activeCategory && activeCategory.toUpperCase().trim() !== "OTROS") {
         if (
           !m.category ||
           m.category.toUpperCase().trim() !==
@@ -105,11 +106,14 @@ function usePOSDataInternal(tenantId?: string) {
         ) {
           return false;
         }
-      } else if (activeCategory === "OTROS") {
-        if (
-          m.category &&
-          CATEGORY_ORDER.includes(m.category.toUpperCase().trim())
-        ) {
+      } else if (activeCategory.toUpperCase().trim() === "OTROS") {
+        const normalizedItemCategory = m.category?.toUpperCase().trim();
+        const registeredCategoryNames = new Set(
+          categories
+            .filter((c) => c.toUpperCase().trim() !== "OTROS")
+            .map((c) => c.toUpperCase().trim()),
+        );
+        if (normalizedItemCategory && registeredCategoryNames.has(normalizedItemCategory)) {
           return false;
         }
       }
@@ -121,9 +125,24 @@ function usePOSDataInternal(tenantId?: string) {
 
       return true;
     });
-  }, [availableMenuItems, searchQuery, activeCategory]);
+  }, [availableMenuItems, searchQuery, activeCategory, categories]);
 
-  const categories = CATEGORY_ORDER;
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await fetch("/api/menu-categories");
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Error al cargar categorías");
+      const activeCats: string[] = (data.categories || [])
+        .filter((c: DbMenuCategory) => c.is_active !== false)
+        .sort((a: DbMenuCategory, b: DbMenuCategory) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        .map((c: DbMenuCategory) => c.name);
+
+      const hasOtros = activeCats.some((c) => c.toUpperCase().trim() === "OTROS");
+      setCategories(hasOtros ? activeCats : [...activeCats, "OTROS"]);
+    } catch (err) {
+      console.error("[POS] Error fetching categories:", err);
+    }
+  }, []);
 
   const fetchMenu = useCallback(async () => {
     const response = await fetch("/api/menu");
@@ -179,9 +198,10 @@ function usePOSDataInternal(tenantId?: string) {
         setMenuLoading(true);
         setCustomersLoading(true);
         setOrdersLoading(true);
-        // Menu and customers gate the main UI; orders are non-blocking
+        // Menu, categories and customers gate the main UI; orders are non-blocking
         await Promise.all([
           fetchMenu().finally(() => setMenuLoading(false)),
+          fetchCategories(),
           fetchCustomers().finally(() => setCustomersLoading(false)),
           fetchOrders().finally(() => setOrdersLoading(false)),
         ]);
@@ -190,10 +210,10 @@ function usePOSDataInternal(tenantId?: string) {
       }
     }
     load();
-  }, [fetchOrders, fetchMenu, fetchCustomers]);
+  }, [fetchOrders, fetchMenu, fetchCategories, fetchCustomers]);
 
-  // Realtime subscription: any INSERT/UPDATE/DELETE on orders for this tenant
-  // triggers a debounced refetch, so the POS stays in sync without manual refresh.
+  // Realtime subscription: any INSERT/UPDATE/DELETE on orders, ingredients,
+  // menu_items or menu_categories for this tenant triggers a debounced refetch.
   useEffect(() => {
     if (!tenantId) return;
 
@@ -204,9 +224,15 @@ function usePOSDataInternal(tenantId?: string) {
     };
 
     const debouncedFetchMenu = (payload: unknown) => {
-      console.log("[POS Realtime] Ingredient update event:", payload);
+      console.log("[POS Realtime] Menu/Ingredient update event:", payload);
       if (menuDebounceRef.current) clearTimeout(menuDebounceRef.current);
       menuDebounceRef.current = setTimeout(() => fetchMenu(), 500);
+    };
+
+    const debouncedFetchCategories = (payload: unknown) => {
+      console.log("[POS Realtime] Category update event:", payload);
+      if (categoriesDebounceRef.current) clearTimeout(categoriesDebounceRef.current);
+      categoriesDebounceRef.current = setTimeout(() => fetchCategories(), 300);
     };
 
     const channel = supabase
@@ -230,6 +256,26 @@ function usePOSDataInternal(tenantId?: string) {
         },
         debouncedFetchMenu,
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "menu_categories",
+          filter: `tenant_id=eq.${tenantId}`,
+        },
+        debouncedFetchCategories,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "menu_items",
+          filter: `tenant_id=eq.${tenantId}`,
+        },
+        debouncedFetchMenu,
+      )
       .subscribe((status, err) => {
         console.log(`[POS Realtime] Subscription status for tenant ${tenantId}:`, status, err);
       });
@@ -238,8 +284,9 @@ function usePOSDataInternal(tenantId?: string) {
       supabase.removeChannel(channel);
       if (fetchDebounceRef.current) clearTimeout(fetchDebounceRef.current);
       if (menuDebounceRef.current)  clearTimeout(menuDebounceRef.current);
+      if (categoriesDebounceRef.current) clearTimeout(categoriesDebounceRef.current);
     };
-  }, [tenantId, supabase, fetchOrders, fetchMenu]);
+  }, [tenantId, supabase, fetchOrders, fetchMenu, fetchCategories]);
 
 
   // Today metrics summary

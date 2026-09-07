@@ -185,4 +185,32 @@ describe("POSMenuGrid Component", () => {
     fireEvent.change(searchInput, { target: { value: "Birria" } });
     expect(setSearchQuery).toHaveBeenCalledWith("Birria");
   });
+
+  it("should render dynamic category tabs and change active category when clicked", () => {
+    const setActiveCategory = vi.fn();
+    vi.mocked(usePOSData).mockReturnValue({
+      ...defaultDataValue,
+      categories: ["TACOS", "CAFETERÍA", "OTROS"],
+      activeCategory: "",
+      setActiveCategory,
+    } as unknown as ReturnType<typeof usePOSData>);
+
+    render(<POSMenuGrid />);
+
+    const todosTab = screen.getByRole("button", { name: /Todos/i });
+    const tacosTab = screen.getByRole("button", { name: /Tacos/i });
+    const cafTab = screen.getByRole("button", { name: /CAFETERÍA/i });
+    const otrosTab = screen.getByRole("button", { name: /Otros/i });
+
+    expect(todosTab).toBeInTheDocument();
+    expect(tacosTab).toBeInTheDocument();
+    expect(cafTab).toBeInTheDocument();
+    expect(otrosTab).toBeInTheDocument();
+
+    fireEvent.click(cafTab);
+    expect(setActiveCategory).toHaveBeenCalledWith("CAFETERÍA");
+
+    fireEvent.click(todosTab);
+    expect(setActiveCategory).toHaveBeenCalledWith("");
+  });
 });

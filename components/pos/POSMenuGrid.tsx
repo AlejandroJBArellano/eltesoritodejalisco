@@ -44,6 +44,12 @@ const CATEGORY_CONFIG: Record<
     badgeBg: "bg-orange-500/10 text-orange-400 border-orange-500/20",
     text: "#FB923C",
   },
+  COMIDA: {
+    label: "Comida",
+    color: "#FFB7CE",
+    badgeBg: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+    text: "#FB7185",
+  },
   OTROS: {
     label: "Otros",
     color: "#E0E0E0",
@@ -51,6 +57,32 @@ const CATEGORY_CONFIG: Record<
     text: "#E4E4E7",
   },
 };
+
+const CUSTOM_PALETTES = [
+  { badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20", color: "#22D3EE" },
+  { badgeBg: "bg-violet-500/10 text-violet-400 border-violet-500/20", color: "#A78BFA" },
+  { badgeBg: "bg-pink-500/10 text-pink-400 border-pink-500/20", color: "#F472B6" },
+  { badgeBg: "bg-lime-500/10 text-lime-400 border-lime-500/20", color: "#A3E635" },
+  { badgeBg: "bg-teal-500/10 text-teal-400 border-teal-500/20", color: "#2DD4BF" },
+  { badgeBg: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20", color: "#818CF8" },
+];
+
+export function getCategoryConfig(cat: string, index = 0) {
+  const normalizedKey = cat.toUpperCase().trim();
+  if (CATEGORY_CONFIG[normalizedKey]) {
+    return {
+      ...CATEGORY_CONFIG[normalizedKey],
+      label: normalizedKey === "OTROS" ? "Otros" : (CATEGORY_CONFIG[normalizedKey].label || cat),
+    };
+  }
+  const palette = CUSTOM_PALETTES[Math.abs(index) % CUSTOM_PALETTES.length];
+  return {
+    label: cat,
+    color: palette.color,
+    badgeBg: palette.badgeBg,
+    text: palette.color,
+  };
+}
 
 /** Derive stock status for a menu item */
 function getStockStatus(item: MenuItem): "out" | "low" | "ok" | "untracked" {
@@ -114,9 +146,10 @@ export function POSMenuGrid() {
         >
           Todos
         </button>
-        {categories.map((cat) => {
-          const config = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG.OTROS;
-          const isActive = activeCategory === cat;
+        {categories.map((cat, index) => {
+          const config = getCategoryConfig(cat, index);
+          const isActive =
+            activeCategory.toUpperCase().trim() === cat.toUpperCase().trim();
           return (
             <button
               key={cat}
