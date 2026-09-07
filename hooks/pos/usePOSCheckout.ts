@@ -144,6 +144,39 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     }
   };
 
+  const handleCourtesyPayment = async () => {
+    if (!checkoutOrder) return;
+    try {
+      setIsSubmitting(true);
+      setCheckoutError(null);
+      const response = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: checkoutOrder.id,
+          method: "OTHER",
+          amount: 0,
+          receivedAmount: 0,
+          change: 0,
+          tipAmount: 0,
+        }),
+      });
+      if (!response.ok) throw new Error("Error al registrar cortesía");
+      const updatedOrders = await refreshOrders();
+      const updatedOrder =
+        updatedOrders?.find((o: Order) => o.id === checkoutOrder.id) ||
+        checkoutOrder;
+      setCheckoutOrder(updatedOrder);
+      setShowTicket(true);
+    } catch (error) {
+      setCheckoutError(
+        error instanceof Error ? error.message : "Error al registrar cortesía",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSplitPayment = async (splits: SplitPayment[]) => {
     if (!checkoutOrder) return;
 
@@ -321,8 +354,19 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
       const quantity = item.quantity || 1;
       const itemName = item.menuItem?.name || "Producto";
       const itemPrice = item.unitPrice || 0;
-      msg += `▪ ${quantity}x ${itemName} - $${(itemPrice * quantity).toFixed(2)}\n`;
+      const gross = itemPrice * quantity;
+      const itemDiscount = Number(item.discountAmount) || 0;
+      if (itemDiscount > 0) {
+        msg += `▪ ${quantity}x ${itemName} - $${(gross - itemDiscount).toFixed(2)} (Desc: -$${itemDiscount.toFixed(2)})\n`;
+      } else {
+        msg += `▪ ${quantity}x ${itemName} - $${gross.toFixed(2)}\n`;
+      }
     });
+
+    const orderDiscountTotal = Number(checkoutOrder.discountAmount) || 0;
+    if (orderDiscountTotal > 0) {
+      msg += `\n*Descuento en orden: -$${orderDiscountTotal.toFixed(2)}${checkoutOrder.discountReason ? ` (${checkoutOrder.discountReason})` : ""}*\n`;
+    }
 
     const tipAmount = getOrderTipAmount(checkoutOrder);
     msg += `\n*Total Pagado: $${(checkoutOrder.total + tipAmount).toFixed(2)}*\n`;
@@ -377,6 +421,7 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     setBillingOrder,
 
     handleProcessPayment,
+    handleCourtesyPayment,
     handleSplitPayment,
     handleUpdateTip,
     handleUndoPayment,

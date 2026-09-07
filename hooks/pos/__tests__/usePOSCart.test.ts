@@ -293,4 +293,61 @@ describe("usePOSCart Hook", () => {
       }),
     );
   });
+
+  it("should apply item discount and calculate cart totals correctly", () => {
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
+    // Add 2x Gringa (35 each = 70 gross)
+    act(() => {
+      result.current.handleGridItemClick(mockMenuItems[1]);
+      result.current.handleQuantityChange(0, 1);
+    });
+
+    expect(result.current.cartTotals.subtotalGross).toBe(70);
+    expect(result.current.cartTotals.total).toBe(70);
+
+    // Apply fixed discount of $10 to item 0
+    act(() => {
+      result.current.handleApplyItemDiscount(0, {
+        discountType: "FIXED",
+        discountValue: 10,
+        discountScope: "ROW",
+        discountReason: "Promoción",
+      });
+    });
+
+    expect(result.current.formState.items[0].discountAmount).toBe(10);
+    expect(result.current.cartTotals.itemsDiscount).toBe(10);
+    expect(result.current.cartTotals.total).toBe(60);
+
+    // Apply 10% discount on order
+    act(() => {
+      result.current.handleApplyOrderDiscount({
+        discountType: "PERCENT",
+        discountValue: 10,
+        discountReason: "Cortesía",
+      });
+    });
+
+    // Subtotal net before order discount is 60. 10% of 60 = 6. Total = 54.
+    expect(result.current.cartTotals.orderDiscount).toBe(6);
+    expect(result.current.cartTotals.totalDiscount).toBe(16);
+    expect(result.current.cartTotals.total).toBe(54);
+
+    // Remove order discount
+    act(() => {
+      result.current.handleRemoveOrderDiscount();
+    });
+    expect(result.current.cartTotals.orderDiscount).toBe(0);
+    expect(result.current.cartTotals.total).toBe(60);
+
+    // Remove item discount
+    act(() => {
+      result.current.handleRemoveItemDiscount(0);
+    });
+    expect(result.current.cartTotals.itemsDiscount).toBe(0);
+    expect(result.current.cartTotals.total).toBe(70);
+  });
 });

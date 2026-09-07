@@ -121,4 +121,71 @@ describe("usePOSCheckout Hook", () => {
       percentage: 35,
     });
   });
+
+  it("should process courtesy payment with method OTHER and amount 0", async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+
+    const { result } = renderHook(() => usePOSCheckout(mockRefreshOrders));
+
+    act(() => {
+      result.current.setCheckoutOrder({
+        ...mockOrder,
+        total: 0,
+        discountType: "PERCENT",
+        discountValue: 100,
+        discountAmount: 100,
+      });
+    });
+
+    await act(async () => {
+      await result.current.handleCourtesyPayment();
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/payments",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          orderId: "order-1",
+          method: "OTHER",
+          amount: 0,
+          receivedAmount: 0,
+          change: 0,
+          tipAmount: 0,
+        }),
+      }),
+    );
+    expect(result.current.showTicket).toBe(true);
+  });
+
+  it("should format discounts in generateWhatsAppMessage correctly", () => {
+    const { result } = renderHook(() => usePOSCheckout(mockRefreshOrders));
+
+    act(() => {
+      result.current.setCheckoutOrder({
+        ...mockOrder,
+        total: 70,
+        discountAmount: 10,
+        discountReason: "Cortesía",
+        orderItems: [
+          {
+            ...mockOrder.orderItems[0],
+            unitPrice: 50,
+            quantity: 2,
+            discountAmount: 20,
+          },
+        ],
+      });
+    });
+
+    const encoded = result.current.generateWhatsAppMessage();
+    const decoded = decodeURIComponent(encoded);
+
+    expect(decoded).toContain("Desc: -$20.00");
+    expect(decoded).toContain("Descuento en orden: -$10.00 (Cortesía)");
+    expect(decoded).toContain("Total Pagado: $70.00");
+  });
 });

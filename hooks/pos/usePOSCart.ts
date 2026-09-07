@@ -13,6 +13,11 @@ import {
   OrderServiceType,
 } from "@/types/pos";
 import { resolveTableValue } from "@/lib/utils/serviceType";
+import {
+  calculateItemDiscount,
+  calculateOrderDiscountTotals,
+} from "@/lib/utils/discounts";
+import type { DiscountData } from "@/components/pos/modals/POSDiscountModal";
 
 const emptyForm: OrderFormState = {
   customerId: "",
@@ -21,6 +26,9 @@ const emptyForm: OrderFormState = {
   table: "",
   notes: "",
   items: [],
+  discountType: null,
+  discountValue: null,
+  discountReason: null,
 };
 
 const MIXED_ORDER_KEYWORD = "orden mixta";
@@ -91,6 +99,11 @@ function usePOSCartInternal(
   const [modifyItems, setModifyItems] = useState<ModifyItem[]>([]);
   const [modifyTable, setModifyTable] = useState<string>("");
   const [modifyCustomerId, setModifyCustomerId] = useState<string>("");
+  const [modifyOrderDiscount, setModifyOrderDiscount] = useState<DiscountData>({
+    discountType: null,
+    discountValue: null,
+    discountReason: null,
+  });
   const [isSubmittingCart, setIsSubmittingCart] = useState(false);
 
   // Two-step clear cart: null = idle, true = armed (waiting for confirm click)
@@ -104,14 +117,38 @@ function usePOSCartInternal(
     [formState.items],
   );
 
-  const cartTotal = useMemo(
-    () =>
-      formState.items.reduce((total, item) => {
+  const cartTotals = useMemo(() => {
+    return calculateOrderDiscountTotals({
+      items: formState.items.map((item) => {
         const product = availableMenuItems.find((m) => m.id === item.menuItemId);
-        return total + (product?.price || 0) * Number(item.quantity);
-      }, 0),
-    [formState.items, availableMenuItems],
-  );
+        return {
+          unitPrice: product?.price || 0,
+          quantity: Number(item.quantity) || 0,
+          discountType: item.discountType,
+          discountValue: item.discountValue,
+          discountScope: item.discountScope,
+        };
+      }),
+      orderDiscountType: formState.discountType,
+      orderDiscountValue: formState.discountValue,
+    });
+  }, [formState.items, formState.discountType, formState.discountValue, availableMenuItems]);
+
+  const cartTotal = cartTotals.total;
+
+  const modifyOrderTotals = useMemo(() => {
+    return calculateOrderDiscountTotals({
+      items: modifyItems.map((item) => ({
+        unitPrice: item.unitPrice,
+        quantity: item.quantity,
+        discountType: item.discountType,
+        discountValue: item.discountValue,
+        discountScope: item.discountScope,
+      })),
+      orderDiscountType: modifyOrderDiscount.discountType,
+      orderDiscountValue: modifyOrderDiscount.discountValue,
+    });
+  }, [modifyItems, modifyOrderDiscount]);
 
   // Initializing default empty cart
   useEffect(() => {
@@ -229,6 +266,98 @@ function usePOSCartInternal(
     });
   };
 
+  const handleApplyItemDiscount = (index: number, discount: DiscountData) => {
+    setFormState((prev) => {
+      const nextItems = [...prev.items];
+      const product = availableMenuItems.find((m) => m.id === nextItems[index].menuItemId);
+      const { discountAmount } = calculateItemDiscount({
+        unitPrice: product?.price || 0,
+        quantity: Number(nextItems[index].quantity) || 0,
+        discountType: discount.discountType,
+        discountValue: discount.discountValue,
+        discountScope: discount.discountScope,
+      });
+      nextItems[index] = {
+        ...nextItems[index],
+        discountType: discount.discountType,
+        discountValue: discount.discountValue,
+        discountAmount,
+        discountScope: discount.discountScope,
+        discountReason: discount.discountReason,
+      };
+      return { ...prev, items: nextItems };
+    });
+  };
+
+  const handleRemoveItemDiscount = (index: number) => {
+    handleApplyItemDiscount(index, {
+      discountType: null,
+      discountValue: null,
+      discountScope: null,
+      discountReason: null,
+    });
+  };
+
+  const handleApplyOrderDiscount = (discount: DiscountData) => {
+    setFormState((prev) => ({
+      ...prev,
+      discountType: discount.discountType,
+      discountValue: discount.discountValue,
+      discountReason: discount.discountReason,
+    }));
+  };
+
+  const handleRemoveOrderDiscount = () => {
+    handleApplyOrderDiscount({
+      discountType: null,
+      discountValue: null,
+      discountReason: null,
+    });
+  };
+
+  const handleApplyModifyItemDiscount = (index: number, discount: DiscountData) => {
+    setModifyItems((prev) => {
+      const next = [...prev];
+      const { discountAmount } = calculateItemDiscount({
+        unitPrice: next[index].unitPrice,
+        quantity: next[index].quantity,
+        discountType: discount.discountType,
+        discountValue: discount.discountValue,
+        discountScope: discount.discountScope,
+      });
+      next[index] = {
+        ...next[index],
+        discountType: discount.discountType,
+        discountValue: discount.discountValue,
+        discountAmount,
+        discountScope: discount.discountScope,
+        discountReason: discount.discountReason,
+      };
+      return next;
+    });
+  };
+
+  const handleRemoveModifyItemDiscount = (index: number) => {
+    handleApplyModifyItemDiscount(index, {
+      discountType: null,
+      discountValue: null,
+      discountScope: null,
+      discountReason: null,
+    });
+  };
+
+  const handleApplyModifyOrderDiscount = (discount: DiscountData) => {
+    setModifyOrderDiscount(discount);
+  };
+
+  const handleRemoveModifyOrderDiscount = () => {
+    setModifyOrderDiscount({
+      discountType: null,
+      discountValue: null,
+      discountReason: null,
+    });
+  };
+
   /**
    * Two-step clear cart.
    * First call: arms the confirmation (sets clearCartArmed = true).
@@ -280,10 +409,17 @@ function usePOSCartInternal(
         source: formState.source,
         table: resolvedTable || undefined,
         notes: formState.notes || undefined,
+        discountType: formState.discountType || undefined,
+        discountValue: formState.discountValue || undefined,
+        discountReason: formState.discountReason || undefined,
         orderItems: formState.items.map((item) => ({
           menuItemId: item.menuItemId,
           quantity: Number(item.quantity),
           notes: item.notes || undefined,
+          discountType: item.discountType || undefined,
+          discountValue: item.discountValue || undefined,
+          discountScope: item.discountScope || undefined,
+          discountReason: item.discountReason || undefined,
         })),
       };
 
@@ -386,6 +522,11 @@ function usePOSCartInternal(
     setModifyingOrder(order);
     setModifyTable(order.table || "");
     setModifyCustomerId(order.customerId || order.customer?.id || "");
+    setModifyOrderDiscount({
+      discountType: order.discountType || null,
+      discountValue: order.discountValue != null ? order.discountValue : null,
+      discountReason: order.discountReason || null,
+    });
     setModifyItems(
       (order.orderItems || []).map((item) => ({
         id: item.id,
@@ -393,6 +534,11 @@ function usePOSCartInternal(
         quantity: Number(item.quantity),
         unitPrice: item.unitPrice,
         menuItemName: item.menuItem?.name || "Producto",
+        discountType: item.discountType || null,
+        discountValue: item.discountValue != null ? item.discountValue : null,
+        discountAmount: item.discountAmount || 0,
+        discountScope: item.discountScope || "ROW",
+        discountReason: item.discountReason || null,
       })),
     );
   };
@@ -429,9 +575,16 @@ function usePOSCartInternal(
           items: modifyItems.map((item) => ({
             id: item.id,
             quantity: item.quantity,
+            discountType: item.discountType || null,
+            discountValue: item.discountValue || null,
+            discountScope: item.discountScope || "ROW",
+            discountReason: item.discountReason || null,
           })),
           table: modifyTable || undefined,
           customerId: modifyCustomerId || null,
+          discountType: modifyOrderDiscount.discountType || null,
+          discountValue: modifyOrderDiscount.discountValue || null,
+          discountReason: modifyOrderDiscount.discountReason || null,
         }),
       });
       const data = await response.json();
@@ -442,6 +595,11 @@ function usePOSCartInternal(
       setModifyItems([]);
       setModifyTable("");
       setModifyCustomerId("");
+      setModifyOrderDiscount({
+        discountType: null,
+        discountValue: null,
+        discountReason: null,
+      });
     } catch (error) {
       setCartError(
         error instanceof Error ? error.message : "Error al modificar orden",
@@ -488,6 +646,11 @@ function usePOSCartInternal(
     clearCartArmed,
     totalCartItems,
     cartTotal,
+    cartTotals,
+    handleApplyItemDiscount,
+    handleRemoveItemDiscount,
+    handleApplyOrderDiscount,
+    handleRemoveOrderDiscount,
 
     // Mixed Order
     mixedOrderMenuItem,
@@ -509,6 +672,12 @@ function usePOSCartInternal(
     setModifyTable,
     modifyCustomerId,
     setModifyCustomerId,
+    modifyOrderDiscount,
+    modifyOrderTotals,
+    handleApplyModifyItemDiscount,
+    handleRemoveModifyItemDiscount,
+    handleApplyModifyOrderDiscount,
+    handleRemoveModifyOrderDiscount,
     isSubmittingCart,
     handleCheckoutSubmit,
     handleAddItems,
