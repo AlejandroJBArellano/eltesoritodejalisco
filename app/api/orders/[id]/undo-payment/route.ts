@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
-import { getProfile } from "@/lib/auth";
+import { getProfile, verifyManagerPin } from "@/lib/auth";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -9,18 +9,42 @@ interface RouteParams {
 
 /**
  * POST /api/orders/[id]/undo-payment
- * Reverts payment, resets order status to PENDING, and reverses inventory
+ * Reverts payment, resets order status to PENDING, and records adjustment.
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const profile = await getProfile();
-    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    if (!profile) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
-    const { id } = await params;
-    const { reason } = await request.json();
 
     const tenant = await getTenantContext();
+    const { id } = await params;
+    const body = await request.json().catch(() => ({}));
+    const { reason, pin } = body;
+
+    let authorizedByName = profile.full_name || profile.role || "Admin";
+
+    // Si el usuario es mesero, requiere validación de PIN de Administrador/Gerente
+    if (profile.role === "WAITER") {
+      if (!pin) {
+        return NextResponse.json(
+          { error: "Se requiere PIN de Gerencia para autorizar la reapertura" },
+          { status: 403 }
+        );
+      }
+      const manager = await verifyManagerPin(tenant.id, String(pin).trim());
+      if (!manager) {
+        return NextResponse.json(
+          { error: "PIN de autorización incorrecto" },
+          { status: 401 }
+        );
+      }
+      authorizedByName = manager.full_name || manager.role;
+    } else if (profile.role !== "ADMIN" && profile.role !== "MANAGER") {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
+
     const supabase = await createClient();
 
     // 1. Get order details before any changes
@@ -32,7 +56,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (fetchError || !order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
     }
 
     const previousStatus = order.status;
@@ -43,13 +67,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .delete()
       .eq("order_id", id)
       .eq("tenant_id", tenant.id);
-    // Note: The order ownership is already validated above with tenant_id check,
-    // so filtering by order_id alone is safe here.
 
     if (paymentDeleteError) throw paymentDeleteError;
 
-    // 3. Update order status back to PENDING (or previous status if preferred)
-    // We'll use PENDING to allow editing
+    // 3. Update order status back to PENDING
     const { data: updatedOrder, error: orderUpdateError } = await supabase
       .from("orders")
       .update({
@@ -66,10 +87,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     if (orderUpdateError) throw orderUpdateError;
 
-    // 4. Inventory is NOT reversed on undo-payment because items were consumed
-    //    at order creation (inventory is only reversed if the order is CANCELLED).
+    // 4. Log the adjustment with authorized manager
+    const formattedReason = reason
+      ? `${reason} (Autorizado por ${authorizedByName})`
+      : `Reapertura de cuenta (Autorizado por ${authorizedByName})`;
 
-    // 5. Log the adjustment
     const { error: logError } = await supabase
       .from("order_adjustments")
       .insert({
@@ -77,7 +99,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         tenant_id: tenant.id,
         previous_status: previousStatus,
         new_status: "PENDING",
-        reason: reason || "Undo Payment (3 min window)",
+        reason: formattedReason,
       });
 
     if (logError) {
@@ -88,8 +110,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     console.error("Error undoing payment:", error);
     return NextResponse.json(
-      { error: "Failed to undo payment" },
-      { status: 500 },
+      { error: "Error al deshacer pago" },
+      { status: 500 }
     );
   }
 }

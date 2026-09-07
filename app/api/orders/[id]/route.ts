@@ -3,7 +3,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
-import { deductInventoryForOrder } from "@/lib/services/inventory";
+import { getProfile, verifyManagerPin } from "@/lib/auth";
+import {
+  deductInventoryForOrder,
+  reverseInventoryForOrder,
+} from "@/lib/services/inventory";
 import {
   calculateItemDiscount,
   calculateOrderDiscountTotals,
@@ -77,6 +81,7 @@ export async function PUT(
       discountType,
       discountValue,
       discountReason,
+      pin,
     } = body;
 
     if (!items || !Array.isArray(items)) {
@@ -122,6 +127,31 @@ export async function PUT(
     const idsToDelete = currentIds.filter(
       (cid: string) => !keepIds.includes(cid),
     );
+
+    const hasRemovedItems = idsToDelete.length > 0;
+    const hasReducedQuantity = itemsToKeep.some((item) => {
+      const existing = currentMap.get(item.id);
+      return existing && item.quantity < existing.quantity;
+    });
+
+    if (hasRemovedItems || hasReducedQuantity) {
+      const profile = await getProfile();
+      if (profile?.role === "WAITER") {
+        if (!pin) {
+          return NextResponse.json(
+            { error: "Se requiere PIN de Gerencia para eliminar o reducir productos" },
+            { status: 403 },
+          );
+        }
+        const manager = await verifyManagerPin(tenant.id, String(pin).trim());
+        if (!manager) {
+          return NextResponse.json(
+            { error: "PIN de autorización incorrecto" },
+            { status: 401 },
+          );
+        }
+      }
+    }
     if (idsToDelete.length > 0) {
       const { error: deleteError } = await supabase
         .from("order_items")
@@ -475,13 +505,41 @@ export async function PATCH(
  * Permanently delete a specific order (and its items via cascade).
  */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id } = await params;
+    const profile = await getProfile();
+    if (!profile) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
+    const { id } = await params;
     const tenant = await getTenantContext();
+    const body = await request.json().catch(() => ({}));
+    const { pin } = body;
+
+    if (profile.role === "WAITER") {
+      if (!pin) {
+        return NextResponse.json(
+          { error: "Se requiere PIN de Gerencia para cancelar la orden" },
+          { status: 403 },
+        );
+      }
+      const manager = await verifyManagerPin(tenant.id, String(pin).trim());
+      if (!manager) {
+        return NextResponse.json(
+          { error: "PIN de autorización incorrecto" },
+          { status: 401 },
+        );
+      }
+    } else if (profile.role !== "ADMIN" && profile.role !== "MANAGER") {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
+
+    // Revert inventory before deleting order
+    await reverseInventoryForOrder(id);
+
     const supabase = await createClient();
     const { error } = await supabase
       .from("orders")

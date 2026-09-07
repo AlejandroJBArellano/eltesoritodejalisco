@@ -1,7 +1,7 @@
-// TesoritoOS - Payments API
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
+import { getProfile, verifyManagerPin } from "@/lib/auth";
 
 type PaymentInput = {
   amount: number;
@@ -188,6 +188,25 @@ export async function PATCH(request: NextRequest) {
     }
 
     const tenant = await getTenantContext();
+    const profile = await getProfile();
+
+    if (profile?.role === "WAITER") {
+      const { pin } = body;
+      if (!pin) {
+        return NextResponse.json(
+          { error: "Se requiere PIN de Gerencia para editar la propina" },
+          { status: 403 },
+        );
+      }
+      const manager = await verifyManagerPin(tenant.id, String(pin).trim());
+      if (!manager) {
+        return NextResponse.json(
+          { error: "PIN de autorización incorrecto" },
+          { status: 401 },
+        );
+      }
+    }
+
     const supabase = await createClient();
 
     const { data: payments, error: paymentError } = await supabase

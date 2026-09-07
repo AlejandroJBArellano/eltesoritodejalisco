@@ -28,3 +28,20 @@ export async function getProfile() {
 }
 
 export type UserRole = "ADMIN" | "MANAGER" | "WAITER" | "CHEF";
+
+export async function verifyManagerPin(tenantId: string, pin: string) {
+  if (!pin || !pin.trim()) return null;
+  const { createAdminClient } = await import("./supabase/admin");
+  const adminClient = createAdminClient();
+  const { data: manager, error } = await adminClient
+    .from("profiles")
+    .select("id, full_name, role")
+    .eq("tenant_id", tenantId)
+    .in("role", ["ADMIN", "MANAGER"])
+    .eq("pin", pin.trim())
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !manager) return null;
+  return manager;
+}
