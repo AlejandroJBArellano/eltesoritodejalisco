@@ -83,6 +83,10 @@ export interface Order {
   closeStatus?: "OPEN" | "CLOSED" | "ARCHIVED";
   operationalDate?: string;
   pickupTime?: Date | null;
+  discountType?: "PERCENT" | "FIXED" | null;
+  discountValue?: number | null;
+  discountAmount?: number;
+  discountReason?: string | null;
 }
 
 export interface OrderItem {
@@ -96,6 +100,11 @@ export interface OrderItem {
   preparationTimeSeconds?: number | null;
   createdAt: Date;
   menuItem?: MenuItem;
+  discountType?: "PERCENT" | "FIXED" | null;
+  discountValue?: number | null;
+  discountAmount?: number;
+  discountScope?: "ROW" | "UNIT" | null;
+  discountReason?: string | null;
 }
 
 // ============================================
@@ -225,10 +234,17 @@ export interface CreateOrderRequest {
   source: string;
   table?: string;
   notes?: string;
+  discountType?: "PERCENT" | "FIXED" | null;
+  discountValue?: number | null;
+  discountReason?: string | null;
   orderItems: {
     menuItemId: string;
     quantity: number;
     notes?: string;
+    discountType?: "PERCENT" | "FIXED" | null;
+    discountValue?: number | null;
+    discountScope?: "ROW" | "UNIT" | null;
+    discountReason?: string | null;
   }[];
 }
 

@@ -620,6 +620,11 @@ export type Database = {
       order_items: {
         Row: {
           created_at: string
+          discount_amount: number | null
+          discount_reason: string | null
+          discount_scope: string | null
+          discount_type: string | null
+          discount_value: number | null
           id: string
           inventory_deducted: boolean
           menu_item_id: string
@@ -633,6 +638,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          discount_amount?: number | null
+          discount_reason?: string | null
+          discount_scope?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
           id: string
           inventory_deducted?: boolean
           menu_item_id: string
@@ -646,6 +656,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          discount_amount?: number | null
+          discount_reason?: string | null
+          discount_scope?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
           id?: string
           inventory_deducted?: boolean
           menu_item_id?: string
@@ -688,6 +703,10 @@ export type Database = {
           corte_id: string | null
           created_at: string
           customer_id: string | null
+          discount_amount: number | null
+          discount_reason: string | null
+          discount_type: string | null
+          discount_value: number | null
           estado_cierre: string | null
           id: string
           notes: string | null
@@ -709,6 +728,10 @@ export type Database = {
           corte_id?: string | null
           created_at?: string
           customer_id?: string | null
+          discount_amount?: number | null
+          discount_reason?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
           estado_cierre?: string | null
           id: string
           notes?: string | null
@@ -730,6 +753,10 @@ export type Database = {
           corte_id?: string | null
           created_at?: string
           customer_id?: string | null
+          discount_amount?: number | null
+          discount_reason?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
           estado_cierre?: string | null
           id?: string
           notes?: string | null
@@ -1305,18 +1332,34 @@ export type Database = {
       }
     }
     Functions: {
-      create_order_with_items: {
-        Args: {
-          p_customer_id: string
-          p_items: Json
-          p_notes: string
-          p_pickup_time?: string
-          p_source: string
-          p_table: string
-          p_tenant_id: string
-        }
-        Returns: Json
-      }
+      create_order_with_items:
+        | {
+            Args: {
+              p_customer_id: string
+              p_items: Json
+              p_notes: string
+              p_pickup_time?: string
+              p_source: string
+              p_table: string
+              p_tenant_id: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_customer_id: string
+              p_discount_reason?: string
+              p_discount_type?: string
+              p_discount_value?: number
+              p_items: Json
+              p_notes: string
+              p_pickup_time?: string
+              p_source: string
+              p_table: string
+              p_tenant_id: string
+            }
+            Returns: Json
+          }
       fn_deduct_inventory_for_order: {
         Args: { p_order_id: string }
         Returns: undefined

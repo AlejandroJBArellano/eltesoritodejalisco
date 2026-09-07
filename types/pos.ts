@@ -22,6 +22,10 @@ export type OrderItemDraft = {
   menuItemId: string;
   quantity: string;
   notes: string;
+  discountType?: "PERCENT" | "FIXED" | null;
+  discountValue?: number | null;
+  discountScope?: "ROW" | "UNIT" | null;
+  discountReason?: string | null;
 };
 
 import type { OrderServiceType } from "@/lib/utils/serviceType";
@@ -36,6 +40,9 @@ export type OrderFormState = {
   table: string;
   notes: string;
   items: OrderItemDraft[];
+  discountType?: "PERCENT" | "FIXED" | null;
+  discountValue?: number | null;
+  discountReason?: string | null;
 };
 
 export type ModifyItem = {
@@ -44,6 +51,12 @@ export type ModifyItem = {
   quantity: number;
   unitPrice: number;
   menuItemName: string;
+  notes?: string;
+  discountType?: "PERCENT" | "FIXED" | null;
+  discountValue?: number | null;
+  discountAmount?: number;
+  discountScope?: "ROW" | "UNIT" | null;
+  discountReason?: string | null;
 };
 
 export const MIXED_ORDER_TOTAL = 3;

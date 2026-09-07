@@ -59,7 +59,10 @@ export interface DbOrderPayload {
   corte_id?: string | null;
   estado_cierre?: string | null;
   operational_date?: string;
-  pickup_time?: string | null;
+  discount_type?: string | null;
+  discount_value?: number | null;
+  discount_amount?: number | null;
+  discount_reason?: string | null;
   order_items?: Array<{
     id: string;
     order_id: string;
@@ -67,6 +70,11 @@ export interface DbOrderPayload {
     quantity: number;
     unit_price: number;
     notes?: string;
+    discount_type?: string | null;
+    discount_value?: number | null;
+    discount_amount?: number | null;
+    discount_scope?: string | null;
+    discount_reason?: string | null;
     status?: OrderStatus | string;
     tiempo_preparacion_segundos?: number | null;
     created_at?: string;
@@ -114,6 +122,10 @@ export const mapOrderData = (dbOrder: DbOrderPayload): OrderWithDetails => {
     subtotal: dbOrder.subtotal ?? 0,
     tax: dbOrder.tax ?? 0,
     total: dbOrder.total ?? 0,
+    discountType: (dbOrder.discount_type as "PERCENT" | "FIXED") || null,
+    discountValue: dbOrder.discount_value ?? null,
+    discountAmount: dbOrder.discount_amount ?? 0,
+    discountReason: dbOrder.discount_reason ?? null,
     createdAt,
     updatedAt,
     completedAt,
@@ -136,6 +148,11 @@ export const mapOrderData = (dbOrder: DbOrderPayload): OrderWithDetails => {
           quantity: item.quantity,
           unitPrice: item.unit_price,
           notes: item.notes,
+          discountType: (item.discount_type as "PERCENT" | "FIXED") || null,
+          discountValue: item.discount_value ?? null,
+          discountAmount: item.discount_amount ?? 0,
+          discountScope: (item.discount_scope as "ROW" | "UNIT") || null,
+          discountReason: item.discount_reason ?? null,
           status: item.status as OrderStatus | undefined,
           preparationTimeSeconds: item.tiempo_preparacion_segundos ?? null,
           createdAt: safeParseDate(item.created_at),
