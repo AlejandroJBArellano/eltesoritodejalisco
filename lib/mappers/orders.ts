@@ -59,6 +59,7 @@ export interface DbOrderPayload {
   corte_id?: string | null;
   estado_cierre?: string | null;
   operational_date?: string;
+  pickup_time?: string | null;
   discount_type?: string | null;
   discount_value?: number | null;
   discount_amount?: number | null;

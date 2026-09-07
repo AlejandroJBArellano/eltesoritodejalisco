@@ -9,8 +9,6 @@ import {
   calculateOrderDiscountTotals,
 } from "@/lib/utils/discounts";
 
-const TAX_RATE = 0;
-
 /**
  * GET /api/orders/:id
  * Fetch details of a single order.

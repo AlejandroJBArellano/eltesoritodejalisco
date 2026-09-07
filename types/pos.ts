@@ -24,6 +24,7 @@ export type OrderItemDraft = {
   notes: string;
   discountType?: "PERCENT" | "FIXED" | null;
   discountValue?: number | null;
+  discountAmount?: number | null;
   discountScope?: "ROW" | "UNIT" | null;
   discountReason?: string | null;
 };

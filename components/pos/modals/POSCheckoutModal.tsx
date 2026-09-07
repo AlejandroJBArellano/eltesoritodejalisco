@@ -16,6 +16,7 @@ import {
 import React, { useState } from "react";
 import { POSDiscountModal, DiscountData } from "./POSDiscountModal";
 import { formatDiscountBadge } from "@/lib/utils/discounts";
+import type { Order } from "@/types/pos";
 
 const PAYMENT_METHODS = [
   { value: "CASH", label: "Efectivo", icon: DollarSign },

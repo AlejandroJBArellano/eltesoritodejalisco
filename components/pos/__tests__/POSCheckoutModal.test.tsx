@@ -507,6 +507,7 @@ describe("POSCheckoutModal Component", () => {
       discountReason: "Promoción",
       orderItems: [
         {
+          ...mockOrder.orderItems[0],
           id: "item-1",
           orderId: "order-123",
           menuItemId: "menu-1",
