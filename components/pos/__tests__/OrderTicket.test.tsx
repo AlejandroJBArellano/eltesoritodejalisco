@@ -199,4 +199,36 @@ describe("OrderTicket Component", () => {
     expect(tipElement).toHaveClass("hidden");
     expect(tipElement).toHaveClass("print:block");
   });
+
+  it("should display item and order discounts breakdown correctly", () => {
+    const discountedOrder: OrderWithDetails = {
+      ...mockOrder,
+      subtotal: 100,
+      total: 80,
+      discountType: "FIXED",
+      discountValue: 10,
+      discountAmount: 10,
+      discountReason: "Cortesía",
+      orderItems: [
+        {
+          ...mockOrder.orderItems[0],
+          unitPrice: 100,
+          quantity: 1,
+          discountType: "FIXED",
+          discountValue: 10,
+          discountAmount: 10,
+          discountReason: "Promoción",
+        },
+      ],
+      payments: [],
+    };
+
+    render(<OrderTicket order={discountedOrder} />);
+
+    expect(screen.getByText("Desc: -$10.00 (Promoción)")).toBeInTheDocument();
+    expect(screen.getByText("SUBTOTAL BRUTO: $100.00")).toBeInTheDocument();
+    expect(screen.getByText("DESCUENTOS PROD.: -$10.00")).toBeInTheDocument();
+    expect(screen.getByText("DESC. ORDEN (Cortesía): -$10.00")).toBeInTheDocument();
+    expect(screen.getByText("TOTAL VENTA: $80.00")).toBeInTheDocument();
+  });
 });

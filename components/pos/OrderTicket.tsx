@@ -42,6 +42,19 @@ export function OrderTicket({ order }: OrderTicketProps) {
   const tipAmount = getOrderTipAmount(order);
   const finalTotal = total + tipAmount;
 
+  const itemsDiscountTotal =
+    order.orderItems?.reduce(
+      (sum, item) => sum + (Number(item.discountAmount) || 0),
+      0,
+    ) || 0;
+  const orderDiscountTotal = Number(order.discountAmount) || 0;
+  const totalDiscounts = itemsDiscountTotal + orderDiscountTotal;
+  const subtotalGross =
+    order.orderItems?.reduce(
+      (sum, item) => sum + item.quantity * item.unitPrice,
+      0,
+    ) || total + totalDiscounts;
+
   const pickupUrl = `https://${slug || tenantId}.trykittn.com`;
   const reviewsUrl = google_reviews_url?.trim() || null;
 
@@ -83,21 +96,60 @@ export function OrderTicket({ order }: OrderTicketProps) {
           </tr>
         </thead>
         <tbody>
-          {order.orderItems.map((item) => (
-            <tr key={item.id} className="align-top">
-              <td className="pr-2">{item.quantity}</td>
-              <td className="whitespace-normal wrap-break-word">{item.menuItem.name}</td>
-              <td className="text-right pl-2">
-                ${(item.quantity * item.unitPrice).toFixed(2)}
-              </td>
-            </tr>
-          ))}
+          {order.orderItems.map((item) => {
+            const gross = item.quantity * item.unitPrice;
+            const itemDiscount = Number(item.discountAmount) || 0;
+            const net = Math.max(0, gross - itemDiscount);
+            return (
+              <tr key={item.id} className="align-top">
+                <td className="pr-2">{item.quantity}</td>
+                <td className="whitespace-normal wrap-break-word">
+                  <div>{item.menuItem.name}</div>
+                  {itemDiscount > 0 && (
+                    <div className="text-[11px] text-gray-600">
+                      Desc: -${itemDiscount.toFixed(2)}
+                      {item.discountReason ? ` (${item.discountReason})` : ""}
+                    </div>
+                  )}
+                </td>
+                <td className="text-right pl-2">
+                  {itemDiscount > 0 ? (
+                    <div>
+                      <span className="line-through text-xs text-gray-500 block">
+                        ${gross.toFixed(2)}
+                      </span>
+                      <span>${net.toFixed(2)}</span>
+                    </div>
+                  ) : (
+                    `$${gross.toFixed(2)}`
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
       <div className="border-b border-dashed my-2"></div>
 
       <div className="text-right space-y-1">
+        {totalDiscounts > 0 && (
+          <>
+            <p className="text-sm">SUBTOTAL BRUTO: ${subtotalGross.toFixed(2)}</p>
+            {itemsDiscountTotal > 0 && (
+              <p className="text-sm">
+                DESCUENTOS PROD.: -${itemsDiscountTotal.toFixed(2)}
+              </p>
+            )}
+            {orderDiscountTotal > 0 && (
+              <p className="text-sm">
+                DESC. ORDEN
+                {order.discountReason ? ` (${order.discountReason})` : ""}: -$
+                {orderDiscountTotal.toFixed(2)}
+              </p>
+            )}
+          </>
+        )}
         <p className="text-sm">SUBTOTAL: ${subtotal.toFixed(2)}</p>
         <p className="text-sm">IVA (16%): ${iva.toFixed(2)}</p>
         <p className="font-bold text-md">TOTAL VENTA: ${total.toFixed(2)}</p>
