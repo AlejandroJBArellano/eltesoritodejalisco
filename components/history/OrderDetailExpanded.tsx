@@ -84,9 +84,13 @@ function getActionBadgeConfig(actionType: string): ActionBadgeConfig {
 
 function formatLogMessage(log: OrderAuditLog): string {
   const details = log.details || {};
-  const authorizedSuffix = details.authorizedBy
-    ? ` (Autorizado con PIN)`
-    : "";
+  const isAuthorizedWithPin = Boolean(
+    details.authorizedBy &&
+      String(details.authorizedBy).trim() !== "" &&
+      String(details.authorizedBy).trim().toLowerCase() !==
+        String(log.user_name || "").trim().toLowerCase(),
+  );
+  const authorizedSuffix = isAuthorizedWithPin ? ` (Autorizado con PIN)` : "";
 
   switch (log.action_type) {
     case "CREATED": {
@@ -102,7 +106,15 @@ function formatLogMessage(log: OrderAuditLog): string {
       return `${log.user_name} agregó${summary}`;
     }
     case "ITEMS_REMOVED": {
-      const summary = details.summary ? `: ${details.summary}` : "";
+      let rawSummary = String(details.summary || "").trim();
+      if (rawSummary) {
+        rawSummary = rawSummary.replace(/\s*eliminado\(s\)/gi, "").trim();
+      }
+      const summary = rawSummary
+        ? `: ${rawSummary}`
+        : details.itemsCount
+          ? `: ${details.itemsCount} producto(s)`
+          : "";
       return `${log.user_name} eliminó${summary}${authorizedSuffix}`;
     }
     case "CANCELLED": {

@@ -29,8 +29,14 @@ export function getPushNotificationCopy(
   userName: string,
   details?: Record<string, unknown> | null,
 ): { title: string; body: string } {
-  const authorizedSuffix = details?.authorizedBy
-    ? ` (Autorizado por ${details.authorizedBy})`
+  const isAuthorized = Boolean(
+    details?.authorizedBy &&
+      String(details.authorizedBy).trim() !== "" &&
+      String(details.authorizedBy).trim().toLowerCase() !==
+        userName.trim().toLowerCase(),
+  );
+  const authorizedSuffix = isAuthorized
+    ? ` (Autorizado por ${details?.authorizedBy})`
     : "";
 
   switch (actionType) {

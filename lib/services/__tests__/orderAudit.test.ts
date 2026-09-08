@@ -87,6 +87,16 @@ describe("lib/services/orderAudit", () => {
       expect(copy.body).toContain("(Autorizado por Gerente)");
     });
 
+    it("omits authorization suffix if authorizedBy matches userName", () => {
+      const copy = getPushNotificationCopy("ITEMS_REMOVED", "Alejandro Arellano", {
+        summary: "papulince x4",
+        authorizedBy: "Alejandro Arellano",
+      });
+      expect(copy.title).toBe("Alerta: Productos eliminados");
+      expect(copy.body).toBe("Alejandro Arellano eliminó productos en la orden. papulince x4");
+      expect(copy.body).not.toContain("Autorizado por");
+    });
+
     it("provides fallback copy for unknown action type", () => {
       const copy = getPushNotificationCopy("UNKNOWN_ACTION", "Carlos");
       expect(copy.title).toBe("Modificación de comanda");

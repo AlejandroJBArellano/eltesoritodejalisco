@@ -370,4 +370,52 @@ describe("OrderDetailExpanded Component", () => {
     fetchSpy.mockRestore();
     consoleErrorSpy.mockRestore();
   });
+
+  it("does not show '(Autorizado con PIN)' when user is Admin or same user as authorizedBy", () => {
+    const adminLogs: OrderAuditLog[] = [
+      {
+        id: "log-admin-1",
+        order_id: "ord-1",
+        tenant_id: "tenant-1",
+        user_id: "u-admin",
+        user_name: "Alejandro Arellano",
+        action_type: "ITEMS_REMOVED",
+        details: {
+          summary: "papulince x4",
+          // Mismo usuario guardado previamente en base de datos
+          authorizedBy: "Alejandro Arellano",
+        },
+        created_at: "2026-09-08T17:03:00Z",
+      },
+      {
+        id: "log-admin-2",
+        order_id: "ord-1",
+        tenant_id: "tenant-1",
+        user_id: "u-admin",
+        user_name: "Alejandro Arellano",
+        action_type: "ITEMS_REMOVED",
+        details: {
+          summary: "1 producto(s) eliminado(s)",
+        },
+        created_at: "2026-09-08T17:04:00Z",
+      },
+    ];
+
+    render(
+      <OrderDetailExpanded
+        order={mockOrder}
+        onBillOrder={vi.fn()}
+        initialAuditLogs={adminLogs}
+      />,
+    );
+
+    // Debe mostrar los productos exactos
+    expect(screen.getByText(/Alejandro Arellano eliminó: papulince x4/)).toBeDefined();
+    // No debe contener el sufijo de PIN
+    expect(screen.queryByText(/papulince x4 \(Autorizado con PIN\)/)).toBeNull();
+
+    // Debe limpiar el sufijo redundante 'eliminado(s)' del resumen antiguo
+    expect(screen.getByText(/Alejandro Arellano eliminó: 1 producto\(s\)$/)).toBeDefined();
+    expect(screen.queryByText(/1 producto\(s\) eliminado\(s\)/)).toBeNull();
+  });
 });
