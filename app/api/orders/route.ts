@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
 import { getProfile } from "@/lib/auth";
 import { reverseInventoryForOrder } from "@/lib/services/inventory";
+import { logOrderAction } from "@/lib/services/orderAudit";
 
 /**
  * GET /api/orders
@@ -146,6 +147,21 @@ export async function POST(request: NextRequest) {
 
     if (rpcError) throw rpcError;
 
+    const profile = await getProfile();
+    await logOrderAction({
+      orderId: fullOrder.id,
+      tenantId: tenant.id,
+      user: profile,
+      actionType: "CREATED",
+      details: {
+        orderNumber: fullOrder.order_number,
+        table: table || null,
+        source,
+        itemsCount: orderItems.length,
+        total: fullOrder.total,
+      },
+    });
+
     return NextResponse.json({ order: fullOrder }, { status: 201 });
   } catch (error) {
     console.error("Error creating order:", error);
@@ -177,6 +193,15 @@ export async function DELETE(request: NextRequest) {
 
     const tenant = await getTenantContext();
     const supabase = await createClient();
+
+    await logOrderAction({
+      orderId: id,
+      tenantId: tenant.id,
+      user: profile,
+      actionType: "CANCELLED",
+      details: { reason: "Orden cancelada vía panel de administración" },
+      notifyCritical: true,
+    });
 
     // Revert inventory before deleting order
     await reverseInventoryForOrder(id);

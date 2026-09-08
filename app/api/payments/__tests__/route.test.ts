@@ -18,6 +18,10 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
 }));
 
+vi.mock("@/lib/services/orderAudit", () => ({
+  logOrderAction: vi.fn().mockResolvedValue({ success: true }),
+}));
+
 describe("POST /api/payments", () => {
   const mockTenant = { id: "tenant-123" };
 

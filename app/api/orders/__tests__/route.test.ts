@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { GET, POST } from "../route";
+import { GET, POST, DELETE } from "../route";
 import { NextRequest } from "next/server";
 import { getProfile } from "@/lib/auth";
 import { getTenantContext } from "@/lib/tenant";
 import { createClient } from "@/lib/supabase/server";
+import { logOrderAction } from "@/lib/services/orderAudit";
 
 vi.mock("@/lib/auth", () => ({
   getProfile: vi.fn(),
@@ -15,6 +16,10 @@ vi.mock("@/lib/tenant", () => ({
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
+}));
+
+vi.mock("@/lib/services/orderAudit", () => ({
+  logOrderAction: vi.fn().mockResolvedValue({ success: true }),
 }));
 
 describe("GET /api/orders", () => {
@@ -138,24 +143,54 @@ describe("POST /api/orders", () => {
     expect(response.status).toBe(201);
     expect(body.order).toBeDefined();
 
-    expect(mockRpc).toHaveBeenCalledWith(
-      "create_order_with_items",
+    expect(logOrderAction).toHaveBeenCalledWith(
       expect.objectContaining({
-        p_tenant_id: "tenant-123",
-        p_discount_type: "FIXED",
-        p_discount_value: 5,
-        p_discount_reason: "Promoción",
-        p_items: [
-          {
-            menu_item_id: "item-1",
-            quantity: 1,
-            notes: null,
-            discount_type: "PERCENT",
-            discount_value: 10,
-            discount_scope: "ROW",
-            discount_reason: "Cortesía",
-          },
-        ],
+        orderId: "new-order-1",
+        actionType: "CREATED",
+      }),
+    );
+  });
+});
+
+describe("DELETE /api/orders", () => {
+  const mockTenant = { id: "tenant-123" };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getTenantContext).mockResolvedValue(mockTenant as any);
+  });
+
+  it("deletes an order and registers CANCELLED audit action", async () => {
+    vi.mocked(getProfile).mockResolvedValue({
+      role: "ADMIN",
+      tenant_id: "tenant-123",
+    } as any);
+
+    const mockDeleteEq = vi.fn().mockResolvedValue({ error: null });
+    const mockDelete = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: mockDeleteEq }) });
+
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn().mockReturnValue({
+        delete: mockDelete,
+      }),
+    } as any);
+
+    const request = new NextRequest("http://localhost:3000/api/orders", {
+      method: "DELETE",
+      body: JSON.stringify({ id: "order-to-cancel" }),
+    });
+
+    const response = await DELETE(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+
+    expect(logOrderAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderId: "order-to-cancel",
+        actionType: "CANCELLED",
+        notifyCritical: true,
       }),
     );
   });

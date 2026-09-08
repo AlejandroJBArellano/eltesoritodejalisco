@@ -12,6 +12,7 @@ import {
   calculateItemDiscount,
   calculateOrderDiscountTotals,
 } from "@/lib/utils/discounts";
+import { logOrderAction } from "@/lib/services/orderAudit";
 
 /**
  * GET /api/orders/:id
@@ -134,8 +135,10 @@ export async function PUT(
       return existing && item.quantity < existing.quantity;
     });
 
+    const profile = await getProfile();
+    let manager = null;
+
     if (hasRemovedItems || hasReducedQuantity) {
-      const profile = await getProfile();
       if (profile?.role === "WAITER") {
         if (!pin) {
           return NextResponse.json(
@@ -143,13 +146,15 @@ export async function PUT(
             { status: 403 },
           );
         }
-        const manager = await verifyManagerPin(tenant.id, String(pin).trim());
+        manager = await verifyManagerPin(tenant.id, String(pin).trim());
         if (!manager) {
           return NextResponse.json(
             { error: "PIN de autorización incorrecto" },
             { status: 401 },
           );
         }
+      } else if (pin) {
+        manager = await verifyManagerPin(tenant.id, String(pin).trim());
       }
     }
     if (idsToDelete.length > 0) {
@@ -260,6 +265,53 @@ export async function PUT(
       .single();
 
     if (updateOrderError) throw updateOrderError;
+
+    const authorizedByName = manager
+      ? manager.full_name || manager.role
+      : profile?.full_name || profile?.role || "Usuario";
+
+    if (hasRemovedItems || hasReducedQuantity) {
+      const removedSummaries: string[] = [];
+      if (idsToDelete.length > 0) {
+        removedSummaries.push(`${idsToDelete.length} producto(s) eliminado(s)`);
+      }
+      if (hasReducedQuantity) {
+        removedSummaries.push("cantidades reducidas");
+      }
+
+      await logOrderAction({
+        orderId: id,
+        tenantId: tenant.id,
+        user: profile,
+        actionType: "ITEMS_REMOVED",
+        details: {
+          summary: removedSummaries.join(", "),
+          authorizedBy: authorizedByName,
+          removedItemIds: idsToDelete,
+        },
+        notifyCritical: true,
+      });
+    }
+
+    const discountChanged =
+      (discountType !== undefined || discountValue !== undefined || discountReason !== undefined) &&
+      (activeOrderDiscountType !== order.discount_type || activeOrderDiscountValue !== order.discount_value);
+
+    if (discountChanged) {
+      await logOrderAction({
+        orderId: id,
+        tenantId: tenant.id,
+        user: profile,
+        actionType: "DISCOUNT_APPLIED",
+        details: {
+          discountType: activeOrderDiscountType,
+          discountValue: activeOrderDiscountValue,
+          discountReason: activeOrderDiscountReason,
+          authorizedBy: authorizedByName,
+        },
+        notifyCritical: true,
+      });
+    }
 
     return NextResponse.json({ order: updatedOrder });
   } catch (error) {
@@ -377,6 +429,27 @@ export async function PATCH(
         .single();
 
       if (updateOrderError) throw updateOrderError;
+
+      if (
+        discountType !== undefined ||
+        discountValue !== undefined ||
+        discountReason !== undefined
+      ) {
+        const profile = await getProfile();
+        await logOrderAction({
+          orderId: id,
+          tenantId: tenant.id,
+          user: profile,
+          actionType: "DISCOUNT_APPLIED",
+          details: {
+            discountType: updatePayload.discount_type,
+            discountValue: updatePayload.discount_value,
+            discountReason: updatePayload.discount_reason,
+          },
+          notifyCritical: true,
+        });
+      }
+
       return NextResponse.json({ order: updatedOrder });
     }
 
@@ -490,6 +563,23 @@ export async function PATCH(
 
     if (updateError) throw updateError;
 
+    const profile = await getProfile();
+    const addedItemsSummary = newItemsData.map((item) => {
+      const menuItem = menuItemMap.get(item.menu_item_id);
+      return `${menuItem?.name || "Producto"} x${item.quantity}`;
+    });
+
+    await logOrderAction({
+      orderId: id,
+      tenantId: tenant.id,
+      user: profile,
+      actionType: "ITEMS_ADDED",
+      details: {
+        summary: addedItemsSummary.join(", "),
+        itemsCount: newItemsData.length,
+      },
+    });
+
     return NextResponse.json({ order: updatedOrder });
   } catch (error) {
     console.error("Error updating order:", error);
@@ -519,6 +609,7 @@ export async function DELETE(
     const body = await request.json().catch(() => ({}));
     const { pin } = body;
 
+    let manager = null;
     if (profile.role === "WAITER") {
       if (!pin) {
         return NextResponse.json(
@@ -526,7 +617,7 @@ export async function DELETE(
           { status: 403 },
         );
       }
-      const manager = await verifyManagerPin(tenant.id, String(pin).trim());
+      manager = await verifyManagerPin(tenant.id, String(pin).trim());
       if (!manager) {
         return NextResponse.json(
           { error: "PIN de autorización incorrecto" },
@@ -535,7 +626,25 @@ export async function DELETE(
       }
     } else if (profile.role !== "ADMIN" && profile.role !== "MANAGER") {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    } else if (pin) {
+      manager = await verifyManagerPin(tenant.id, String(pin).trim());
     }
+
+    const authorizedByName = manager
+      ? manager.full_name || manager.role
+      : profile.full_name || profile.role;
+
+    await logOrderAction({
+      orderId: id,
+      tenantId: tenant.id,
+      user: profile,
+      actionType: "CANCELLED",
+      details: {
+        reason: body.reason || "Orden cancelada",
+        authorizedBy: authorizedByName,
+      },
+      notifyCritical: true,
+    });
 
     // Revert inventory before deleting order
     await reverseInventoryForOrder(id);

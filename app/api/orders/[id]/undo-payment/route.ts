@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
 import { getProfile, verifyManagerPin } from "@/lib/auth";
+import { logOrderAction } from "@/lib/services/orderAudit";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -105,6 +106,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (logError) {
       console.error("Error logging order adjustment:", logError);
     }
+
+    await logOrderAction({
+      orderId: id,
+      tenantId: tenant.id,
+      user: profile,
+      actionType: "REOPENED",
+      details: {
+        reason: formattedReason,
+        authorizedBy: authorizedByName,
+        previousStatus,
+      },
+      notifyCritical: true,
+    });
 
     return NextResponse.json({ order: updatedOrder, success: true });
   } catch (error) {

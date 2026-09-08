@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
 import { getProfile, verifyManagerPin } from "@/lib/auth";
+import { logOrderAction } from "@/lib/services/orderAudit";
 
 type PaymentInput = {
   amount: number;
@@ -157,6 +158,18 @@ export async function POST(request: NextRequest) {
         throw orderError;
       }
 
+      const profile = await getProfile();
+      await logOrderAction({
+        orderId,
+        tenantId: tenant.id,
+        user: profile,
+        actionType: "PAID",
+        details: {
+          splitCount: splits.length,
+          totalAmount: splits.reduce((sum: number, s: { amount?: number }) => sum + Number(s.amount || 0), 0),
+        },
+      });
+
       return NextResponse.json({ success: true }, { status: 201 });
     }
 
@@ -196,6 +209,19 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError) throw orderError;
+
+    const profile = await getProfile();
+    await logOrderAction({
+      orderId,
+      tenantId: tenant.id,
+      user: profile,
+      actionType: "PAID",
+      details: {
+        method,
+        amount: Number(amount),
+        tipAmount: Number(tipAmount || 0),
+      },
+    });
 
     return NextResponse.json({ payment, order }, { status: 201 });
   } catch (error) {
