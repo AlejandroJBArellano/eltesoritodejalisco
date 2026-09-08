@@ -43,10 +43,11 @@ export function CategoryModal() {
           <input
             type="text"
             value={categoryForm.name}
-            onChange={(e) =>
-              setCategoryForm((p) => ({ ...p, name: e.target.value }))
-            }
-            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#66] outline-none focus:border-primary"
+            onChange={(e) => {
+              const val = e.target.value;
+              setCategoryForm((p) => ({ ...p, name: val }));
+            }}
+            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#666666] outline-none focus:border-primary"
             placeholder="Ej. ANTOJITOS"
           />
           {categoryErrors.name && (
@@ -56,17 +57,18 @@ export function CategoryModal() {
           )}
         </div>
         <div>
-          <label className="text-xs font-extrabold text-text-light/40 uppercase tracking-wider block mb-1 flex items-center gap-1.5">
+          <label className="text-xs font-extrabold text-text-light/40 uppercase tracking-wider mb-1 flex items-center gap-1.5">
             <Globe className="h-3 w-3 text-blue-400" />
             Nombre en Inglés (EN)
           </label>
           <input
             type="text"
             value={categoryForm.nameEn}
-            onChange={(e) =>
-              setCategoryForm((p) => ({ ...p, nameEn: e.target.value }))
-            }
-            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#44] outline-none focus:border-blue-500"
+            onChange={(e) => {
+              const val = e.target.value;
+              setCategoryForm((p) => ({ ...p, nameEn: val }));
+            }}
+            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-[#444] outline-none focus:border-blue-500"
             placeholder="e.g. Snacks"
           />
         </div>
@@ -75,9 +77,10 @@ export function CategoryModal() {
             type="checkbox"
             id="showInPickup"
             checked={categoryForm.showInPickup}
-            onChange={(e) =>
-              setCategoryForm((p) => ({ ...p, showInPickup: e.target.checked }))
-            }
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setCategoryForm((p) => ({ ...p, showInPickup: checked }));
+            }}
             className="h-4 w-4 rounded border-border bg-dark/40 text-amber-500 focus:ring-amber-500"
           />
           <label
