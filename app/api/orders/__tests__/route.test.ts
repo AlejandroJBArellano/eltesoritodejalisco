@@ -150,6 +150,55 @@ describe("POST /api/orders", () => {
       }),
     );
   });
+
+  it("includes detailed items summary when RPC returns order items with menu item names", async () => {
+    const mockRpc = vi.fn().mockResolvedValue({
+      data: {
+        id: "new-order-2",
+        order_number: "260908-002",
+        total: 1505,
+        order_items: [
+          { quantity: 1, menu_items: { name: "Producto" } },
+          { quantity: 4, menu_items: { name: "papulince" } },
+          { quantity: 8, menu_items: { name: "Coca Cola" } },
+        ],
+      },
+      error: null,
+    });
+
+    vi.mocked(createClient).mockResolvedValue({
+      rpc: mockRpc,
+    } as any);
+
+    const payload = {
+      source: "POS",
+      table: "Comedor",
+      orderItems: [
+        { menuItemId: "item-1", quantity: 1 },
+        { menuItemId: "item-2", quantity: 4 },
+        { menuItemId: "item-3", quantity: 8 },
+      ],
+    };
+
+    const request = new NextRequest("http://localhost:3000/api/orders", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(201);
+
+    expect(logOrderAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderId: "new-order-2",
+        actionType: "CREATED",
+        details: expect.objectContaining({
+          summary: "Producto x1, papulince x4, Coca Cola x8",
+          itemsCount: 3,
+        }),
+      }),
+    );
+  });
 });
 
 describe("DELETE /api/orders", () => {

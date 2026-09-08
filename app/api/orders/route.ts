@@ -148,12 +148,23 @@ export async function POST(request: NextRequest) {
     if (rpcError) throw rpcError;
 
     const profile = await getProfile();
+    const createdItems = Array.isArray(fullOrder?.order_items)
+      ? fullOrder.order_items
+      : [];
+    const itemsSummary = createdItems
+      .map((item: any) => {
+        const name = item?.menu_items?.name || "Producto";
+        return `${name} x${item.quantity || 1}`;
+      })
+      .join(", ");
+
     await logOrderAction({
       orderId: fullOrder.id,
       tenantId: tenant.id,
       user: profile,
       actionType: "CREATED",
       details: {
+        summary: itemsSummary || undefined,
         orderNumber: fullOrder.order_number,
         table: table || null,
         source,
