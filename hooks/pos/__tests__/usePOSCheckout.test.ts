@@ -161,6 +161,43 @@ describe("usePOSCheckout Hook", () => {
     expect(result.current.showTicket).toBe(true);
   });
 
+  it("should process courtesy payment including pin when provided", async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+
+    const { result } = renderHook(() => usePOSCheckout(mockRefreshOrders));
+
+    act(() => {
+      result.current.setCheckoutOrder({
+        ...mockOrder,
+        total: 0,
+      });
+    });
+
+    await act(async () => {
+      await result.current.handleCourtesyPayment("9988");
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/payments",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          orderId: "order-1",
+          method: "OTHER",
+          amount: 0,
+          receivedAmount: 0,
+          change: 0,
+          tipAmount: 0,
+          pin: "9988",
+        }),
+      }),
+    );
+    expect(result.current.showTicket).toBe(true);
+  });
+
   it("should format discounts in generateWhatsAppMessage correctly", () => {
     const { result } = renderHook(() => usePOSCheckout(mockRefreshOrders));
 

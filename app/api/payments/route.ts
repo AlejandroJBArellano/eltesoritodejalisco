@@ -83,6 +83,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const isCourtesy =
+      body.splits && Array.isArray(body.splits)
+        ? body.splits.reduce(
+            (sum: number, s: { amount?: number }) =>
+              sum + Number(s.amount || 0),
+            0,
+          ) === 0
+        : Number(body.amount ?? 0) === 0;
+
+    if (isCourtesy) {
+      const profile = await getProfile();
+      if (profile?.role === "WAITER") {
+        const { pin } = body;
+        if (!pin) {
+          return NextResponse.json(
+            { error: "Se requiere PIN de Gerencia para registrar cortesías" },
+            { status: 403 },
+          );
+        }
+        const manager = await verifyManagerPin(tenant.id, String(pin).trim());
+        if (!manager) {
+          return NextResponse.json(
+            { error: "PIN de autorización incorrecto" },
+            { status: 403 },
+          );
+        }
+      }
+    }
+
     // Split-bill flow: array of individual payments for a single order
     if (body.splits && Array.isArray(body.splits)) {
       const { splits } = body as {

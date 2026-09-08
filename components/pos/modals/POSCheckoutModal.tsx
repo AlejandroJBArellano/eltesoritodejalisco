@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { POSDiscountModal, DiscountData } from "./POSDiscountModal";
+import { POSManagerAuthModal } from "./POSManagerAuthModal";
 import {
   calculateItemDiscount,
   calculateOrderDiscountTotals,
@@ -35,6 +36,7 @@ const PAYMENT_METHODS = [
 export function POSCheckoutModal() {
   const user = useOptionalUser();
   const isWaiter = user?.isWaiter ?? false;
+  const [isCourtesyAuthModalOpen, setIsCourtesyAuthModalOpen] = useState(false);
 
   const {
     availableMenuItems,
@@ -249,6 +251,10 @@ export function POSCheckoutModal() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (checkoutOrder.total === 0 && tipAmountCalculated === 0) {
+      if (isWaiter) {
+        setIsCourtesyAuthModalOpen(true);
+        return;
+      }
       handleCourtesyPayment();
       return;
     }
@@ -351,7 +357,7 @@ export function POSCheckoutModal() {
               </div>
 
               {/* Lista de productos */}
-              <div className="rounded-xl border border-border/60 bg-dark/30 p-2.5 max-h-[180px] md:max-h-[220px] overflow-y-auto custom-scrollbar divide-y divide-border/30">
+              <div className="rounded-xl border border-border/60 bg-dark/30 p-2.5 max-h-45 md:max-h-55 overflow-y-auto custom-scrollbar divide-y divide-border/30">
                 {checkoutOrder.orderItems && checkoutOrder.orderItems.length > 0 ? (
                   checkoutOrder.orderItems.map((item, idx) => (
                     <div key={item.id || idx} className="py-2 first:pt-1 last:pb-1 space-y-0.5">
@@ -690,7 +696,13 @@ export function POSCheckoutModal() {
                   <button
                     type="button"
                     disabled={isSubmittingCheckout}
-                    onClick={() => handleCourtesyPayment()}
+                    onClick={() => {
+                      if (isWaiter) {
+                        setIsCourtesyAuthModalOpen(true);
+                      } else {
+                        handleCourtesyPayment();
+                      }
+                    }}
                     className="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 py-3.5 rounded-xl font-black text-base transition-all uppercase tracking-wider shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isSubmittingCheckout ? "Procesando..." : "Registrar Cortesía ($0.00)"}
@@ -894,6 +906,25 @@ export function POSCheckoutModal() {
         }}
         onApply={handleApplyOrderDiscount}
         onRemove={handleRemoveOrderDiscount}
+      />
+
+      {/* Modal de Autorización de Gerencia para Cortesía */}
+      <POSManagerAuthModal
+        isOpen={isCourtesyAuthModalOpen}
+        onClose={() => setIsCourtesyAuthModalOpen(false)}
+        title="Autorización de Gerencia"
+        description="Ingresa el PIN de gerencia para autorizar la cortesía ($0.00)"
+        reasonPresets={[
+          "Cortesía autorizada",
+          "Consumo interno",
+          "Cortesía de la casa",
+          "Promoción especial",
+        ]}
+        onAuthorize={async ({ pin }) => {
+          setIsCourtesyAuthModalOpen(false);
+          await handleCourtesyPayment(pin);
+        }}
+        isSubmitting={isSubmittingCheckout}
       />
     </div>
   );

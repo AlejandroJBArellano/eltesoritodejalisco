@@ -27,6 +27,17 @@ vi.mock("../POSDiscountModal", () => ({
   POSDiscountModal: vi.fn(() => <div data-testid="discount-modal" />),
 }));
 
+vi.mock("../POSManagerAuthModal", () => ({
+  POSManagerAuthModal: vi.fn(({ isOpen, onAuthorize, onClose }: any) =>
+    isOpen ? (
+      <div data-testid="pos-manager-auth-modal">
+        <button onClick={() => onAuthorize({ pin: "1234" })}>Autorizar</button>
+        <button onClick={onClose}>Cancelar</button>
+      </div>
+    ) : null,
+  ),
+}));
+
 describe("POSCheckoutModal", () => {
   const mockSetCheckoutOrder = vi.fn();
   const mockSetPaymentMethod = vi.fn();
@@ -301,5 +312,87 @@ describe("POSCheckoutModal", () => {
 
     render(<POSCheckoutModal />);
     expect(screen.getByText(/Sin productos registrados/i)).toBeDefined();
+  });
+
+  it("handles courtesy payment directly when user is not a waiter", () => {
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...baseCheckoutState,
+      checkoutOrder: {
+        ...baseOrder,
+        total: 0,
+      },
+      tipAmountCalculated: 0,
+    } as any);
+
+    render(<POSCheckoutModal />);
+
+    const courtesyBtn = screen.getByRole("button", { name: /Registrar Cortesía \(\$0\.00\)/i });
+    fireEvent.click(courtesyBtn);
+
+    expect(mockHandleCourtesyPayment).toHaveBeenCalled();
+  });
+
+  it("requires manager auth modal when user is a waiter and requests courtesy payment", () => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "WAITER",
+      isAdmin: false,
+      isWaiter: true,
+      isChef: false,
+      isAuthenticated: true,
+    });
+
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...baseCheckoutState,
+      checkoutOrder: {
+        ...baseOrder,
+        total: 0,
+      },
+      tipAmountCalculated: 0,
+    } as any);
+
+    render(<POSCheckoutModal />);
+
+    const courtesyBtn = screen.getByRole("button", { name: /Registrar Cortesía \(\$0\.00\)/i });
+    fireEvent.click(courtesyBtn);
+
+    // Should NOT call courtesy payment directly
+    expect(mockHandleCourtesyPayment).not.toHaveBeenCalled();
+
+    // Manager auth modal should be open
+    expect(screen.getByTestId("pos-manager-auth-modal")).toBeDefined();
+
+    // Authorizing with PIN should invoke courtesy payment with pin
+    const authBtn = screen.getByRole("button", { name: "Autorizar" });
+    fireEvent.click(authBtn);
+
+    expect(mockHandleCourtesyPayment).toHaveBeenCalledWith("1234");
+  });
+
+  it("requires manager auth modal on submit when user is a waiter and order total is 0", () => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "WAITER",
+      isAdmin: false,
+      isWaiter: true,
+      isChef: false,
+      isAuthenticated: true,
+    });
+
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...baseCheckoutState,
+      checkoutOrder: {
+        ...baseOrder,
+        total: 0,
+      },
+      tipAmountCalculated: 0,
+    } as any);
+
+    const { container } = render(<POSCheckoutModal />);
+    const form = container.querySelector("form")!;
+    fireEvent.submit(form);
+
+    expect(mockHandleCourtesyPayment).not.toHaveBeenCalled();
+    expect(screen.getByTestId("pos-manager-auth-modal")).toBeDefined();
   });
 });

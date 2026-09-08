@@ -149,7 +149,7 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     }
   };
 
-  const handleCourtesyPayment = async () => {
+  const handleCourtesyPayment = async (pin?: string) => {
     if (!checkoutOrder) return;
     try {
       setIsSubmitting(true);
@@ -164,9 +164,13 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
           receivedAmount: 0,
           change: 0,
           tipAmount: 0,
+          ...(pin ? { pin } : {}),
         }),
       });
-      if (!response.ok) throw new Error("Error al registrar cortesía");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || "Error al registrar cortesía");
+      }
       const updatedOrders = await refreshOrders();
       const updatedOrder =
         updatedOrders?.find((o: Order) => o.id === checkoutOrder.id) ||
