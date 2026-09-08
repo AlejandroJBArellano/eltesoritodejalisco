@@ -6,6 +6,7 @@ import { getCurrentCDMXDate } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
 import { getTenantContext } from "@/lib/tenant";
+import type { Tables, TablesUpdate } from "@/types/supabase";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
 const phoneRegex = /^[0-9+\-()\s]{7,20}$/;
@@ -114,13 +115,63 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient();
+
+    // Comprobar si ya existe un cliente con el mismo teléfono o correo en este tenant
+    let existingCustomer: Tables<"customers"> | null = null;
+
+    if (phone && phone.trim()) {
+      const { data: byPhone } = await supabase
+        .from("customers")
+        .select("*")
+        .eq("tenant_id", tenant.id)
+        .eq("phone", phone.trim())
+        .maybeSingle();
+      if (byPhone) existingCustomer = byPhone;
+    }
+
+    if (!existingCustomer && email && email.trim()) {
+      const { data: byEmail } = await supabase
+        .from("customers")
+        .select("*")
+        .eq("tenant_id", tenant.id)
+        .eq("email", email.trim().toLowerCase())
+        .maybeSingle();
+      if (byEmail) existingCustomer = byEmail;
+    }
+
+    if (existingCustomer) {
+      // Actualizar datos si se proporcionaron nuevos valores
+      const updatePayload: TablesUpdate<"customers"> = {
+        name: name.trim() || existingCustomer.name,
+        updated_at: getCurrentCDMXDate(),
+      };
+      if (phone) updatePayload.phone = phone.trim();
+      if (email) updatePayload.email = email.trim().toLowerCase();
+      if (parsedBirthday) updatePayload.birthday = parsedBirthday;
+
+      const { data: updated, error: updateError } = await supabase
+        .from("customers")
+        .update(updatePayload)
+        .eq("id", existingCustomer.id)
+        .eq("tenant_id", tenant.id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      return NextResponse.json(
+        { customer: updated, isExisting: true },
+        { status: 200 }
+      );
+    }
+
     const { data: customer, error } = await supabase
       .from("customers")
       .insert({
         id: crypto.randomUUID(),
-        name,
-        phone: phone || null,
-        email: email || null,
+        name: name.trim(),
+        phone: phone ? phone.trim() : null,
+        email: email ? email.trim().toLowerCase() : null,
         birthday: parsedBirthday,
         updated_at: getCurrentCDMXDate(),
         tenant_id: tenant.id,
@@ -130,7 +181,7 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    return NextResponse.json({ customer }, { status: 201 });
+    return NextResponse.json({ customer, isExisting: false }, { status: 201 });
   } catch (error) {
     console.error("Error creating customer:", error);
     return NextResponse.json(

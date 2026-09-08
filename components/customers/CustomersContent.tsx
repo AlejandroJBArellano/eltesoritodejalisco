@@ -24,10 +24,13 @@ import {
   Trash2,
   User,
   Users,
+  QrCode,
 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { CustomerAccountModal } from "@/components/customers/CustomerAccountModal";
 import { CustomerWhatsAppModal } from "@/components/customers/CustomerWhatsAppModal";
+import { CustomerQRModal } from "@/components/customers/CustomerQRModal";
+import { useTenant } from "@/components/TenantProvider";
 
 type Customer = {
   id: string;
@@ -89,10 +92,13 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [accountCustomer, setAccountCustomer] = useState<Customer | null>(null);
   const [whatsappCustomer, setWhatsappCustomer] = useState<Customer | null>(null);
   const [formState, setFormState] = useState<CustomerFormState>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const tenant = useTenant();
 
   // Table Filters, Sort & Pagination State
   const [searchQuery, setSearchQuery] = useState("");
@@ -343,13 +349,22 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
         subtitle="Gestión de fidelización, puntos y directorio de clientes"
         badgeColor="bg-emerald-500"
         actions={
-          <button
-            onClick={openNewCustomerModal}
-            className="rounded-xl bg-emerald-500 px-4 py-2 text-xs font-black text-black hover:brightness-105 active:scale-95 transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20 outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-          >
-            <Plus className="h-4 w-4" />
-            Nuevo Cliente
-          </button>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setIsQRModalOpen(true)}
+              className="rounded-xl border border-border bg-card px-4 py-2 text-xs font-bold text-text-light hover:bg-white/5 active:scale-95 transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            >
+              <QrCode className="h-4 w-4 text-emerald-400" />
+              QR de Registro
+            </button>
+            <button
+              onClick={openNewCustomerModal}
+              className="rounded-xl bg-emerald-500 px-4 py-2 text-xs font-black text-black hover:brightness-105 active:scale-95 transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20 outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            >
+              <Plus className="h-4 w-4" />
+              Nuevo Cliente
+            </button>
+          </div>
         }
       />
 
@@ -802,6 +817,14 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
           onCustomerUpdated={fetchCustomers}
         />
       )}
+
+      {/* Modal de Código QR de Auto-Registro */}
+      <CustomerQRModal
+        isOpen={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+        tenantSlug={tenant?.slug || ""}
+        tenantName={tenant?.name || ""}
+      />
     </div>
   );
 }
