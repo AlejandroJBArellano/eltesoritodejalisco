@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "tailwind:fix": "tailwind-lint --config ./app/globals.css --fix \"components/**/*.tsx\" \"app/**/*.tsx\"",
     "db:types": "npx -y supabase gen types typescript --db-url \"$DIRECT_URL\" > types/supabase.ts",
     "test": "vitest run",
     "test:watch": "vitest",

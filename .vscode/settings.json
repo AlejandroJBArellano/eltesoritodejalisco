@@ -1,3 +1,20 @@
 {
-  "prisma.pinToPrisma6": true
+  "prisma.pinToPrisma6": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "css.validate": false,
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "tailwindCSS.lint.invalidApply": "error",
+  "tailwindCSS.lint.invalidScreen": "error",
+  "tailwindCSS.lint.invalidVariant": "error",
+  "tailwindCSS.lint.invalidConfigPath": "error",
+  "tailwindCSS.lint.invalidTailwindDirective": "error",
+  "tailwindCSS.lint.recommendedVariantOrder": "warning"
 }
