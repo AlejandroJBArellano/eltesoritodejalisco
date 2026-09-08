@@ -113,10 +113,17 @@ export async function PUT(
     );
     const keepIds = itemsToKeep.map((i: { id: string }) => i.id);
 
-    // Fetch current order items
+    // Fetch current order items with menu item names
     const { data: currentItems } = await supabase
       .from("order_items")
-      .select("id, unit_price, quantity")
+      .select(`
+        id,
+        unit_price,
+        quantity,
+        menu_items (
+          name
+        )
+      `)
       .eq("order_id", id);
 
     const currentMap = new Map(
@@ -268,16 +275,43 @@ export async function PUT(
 
     const authorizedByName = manager
       ? manager.full_name || manager.role
-      : profile?.full_name || profile?.role || "Usuario";
+      : null;
 
     if (hasRemovedItems || hasReducedQuantity) {
+      const getItemName = (item: unknown): string => {
+        const row = item as { menu_items?: { name?: string } | { name?: string }[] | null } | undefined;
+        if (!row?.menu_items) return "Producto";
+        if (Array.isArray(row.menu_items)) {
+          return row.menu_items[0]?.name || "Producto";
+        }
+        return row.menu_items.name || "Producto";
+      };
+
       const removedSummaries: string[] = [];
-      if (idsToDelete.length > 0) {
-        removedSummaries.push(`${idsToDelete.length} producto(s) eliminado(s)`);
+
+      for (const delId of idsToDelete) {
+        const existing = currentMap.get(delId);
+        if (existing) {
+          const name = getItemName(existing);
+          removedSummaries.push(`${name} x${existing.quantity}`);
+        }
       }
-      if (hasReducedQuantity) {
-        removedSummaries.push("cantidades reducidas");
+
+      for (const item of itemsToKeep) {
+        const existing = currentMap.get(item.id);
+        if (existing && item.quantity < existing.quantity) {
+          const name = getItemName(existing);
+          const diff = existing.quantity - item.quantity;
+          removedSummaries.push(`${name} (-${diff})`);
+        }
       }
+
+      const summaryText =
+        removedSummaries.length > 0
+          ? removedSummaries.join(", ")
+          : idsToDelete.length > 0
+            ? `${idsToDelete.length} producto(s)`
+            : "productos";
 
       await logOrderAction({
         orderId: id,
@@ -285,8 +319,8 @@ export async function PUT(
         user: profile,
         actionType: "ITEMS_REMOVED",
         details: {
-          summary: removedSummaries.join(", "),
-          authorizedBy: authorizedByName,
+          summary: summaryText,
+          ...(authorizedByName ? { authorizedBy: authorizedByName } : {}),
           removedItemIds: idsToDelete,
         },
         notifyCritical: true,
@@ -307,7 +341,7 @@ export async function PUT(
           discountType: activeOrderDiscountType,
           discountValue: activeOrderDiscountValue,
           discountReason: activeOrderDiscountReason,
-          authorizedBy: authorizedByName,
+          ...(authorizedByName ? { authorizedBy: authorizedByName } : {}),
         },
         notifyCritical: true,
       });
@@ -632,7 +666,7 @@ export async function DELETE(
 
     const authorizedByName = manager
       ? manager.full_name || manager.role
-      : profile.full_name || profile.role;
+      : null;
 
     await logOrderAction({
       orderId: id,
@@ -641,7 +675,7 @@ export async function DELETE(
       actionType: "CANCELLED",
       details: {
         reason: body.reason || "Orden cancelada",
-        authorizedBy: authorizedByName,
+        ...(authorizedByName ? { authorizedBy: authorizedByName } : {}),
       },
       notifyCritical: true,
     });
