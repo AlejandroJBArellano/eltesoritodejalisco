@@ -214,6 +214,26 @@ export interface OrderWithDetails extends Order {
   payments?: Payment[];
 }
 
+export type OrderAuditActionType =
+  | "CREATED"
+  | "ITEMS_ADDED"
+  | "ITEMS_REMOVED"
+  | "DISCOUNT_APPLIED"
+  | "CANCELLED"
+  | "REOPENED"
+  | "PAID";
+
+export interface OrderAuditLog {
+  id: string;
+  order_id: string;
+  tenant_id: string;
+  user_id: string | null;
+  user_name: string;
+  action_type: OrderAuditActionType | string;
+  details: Record<string, unknown> | null;
+  created_at: string;
+}
+
 export interface BatchedMenuItem {
   menuItemId: string;
   menuItemName: string;
