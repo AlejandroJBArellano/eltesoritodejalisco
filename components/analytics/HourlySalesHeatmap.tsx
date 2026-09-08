@@ -115,7 +115,7 @@ export function HourlySalesHeatmap({
 
       {/* Grid Container */}
       <div className="overflow-x-auto pb-2 -mx-2 px-2">
-        <div className="min-w-[760px]">
+        <div className="min-w-190">
           {/* Header Row: Hours */}
           <div className="flex items-center mb-2">
             <div className="w-12 shrink-0 text-xs font-bold text-text-light/40"></div>

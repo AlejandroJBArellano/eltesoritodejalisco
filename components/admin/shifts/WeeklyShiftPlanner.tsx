@@ -299,7 +299,7 @@ export function WeeklyShiftPlanner({
 
           <div className="flex items-center gap-2 ml-2">
             <Calendar className="h-4 w-4 text-primary" />
-            <span className="text-xs font-black uppercase tracking-wider text-zinc-200 capitalize">
+            <span className="text-xs font-black uppercase tracking-wider text-zinc-200">
               {format(weekStart, "d MMM", { locale: es })} -{" "}
               {format(weekEnd, "d MMM yyyy", { locale: es })}
             </span>
@@ -404,10 +404,10 @@ export function WeeklyShiftPlanner({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[900px]">
+            <table className="w-full text-left border-collapse min-w-225">
               <thead>
                 <tr className="border-b border-zinc-800 bg-zinc-900/30 text-[11px] font-black uppercase tracking-wider text-zinc-400">
-                  <th className="p-3.5 min-w-[170px] sticky left-0 bg-zinc-950 z-10 border-r border-zinc-800/80">
+                  <th className="p-3.5 min-w-42.5 sticky left-0 bg-zinc-950 z-10 border-r border-zinc-800/80">
                     Colaborador
                   </th>
                   {daysOfWeek.map((day) => {
@@ -415,7 +415,7 @@ export function WeeklyShiftPlanner({
                     return (
                       <th
                         key={day.toISOString()}
-                        className={`p-3 text-center min-w-[130px] border-r border-zinc-800/40 last:border-r-0 ${
+                        className={`p-3 text-center min-w-32.5 border-r border-zinc-800/40 last:border-r-0 ${
                           isToday ? "bg-primary/10 text-primary" : ""
                         }`}
                       >
@@ -468,7 +468,7 @@ export function WeeklyShiftPlanner({
                               isToday ? "bg-primary/5" : ""
                             }`}
                           >
-                            <div className="min-h-[75px] flex flex-col justify-between group">
+                            <div className="min-h-18.75 flex flex-col justify-between group">
                               <div className="space-y-1.5">
                                 {userDayShifts.map((s) => (
                                   <div

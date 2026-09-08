@@ -43,7 +43,7 @@ export function AdminStaffPerformanceTab(props: AdminStaffPerformanceTabProps) {
           </thead>
           <tbody className="divide-y divide-border">
             {metrics.map((collab) => (
-              <tr key={collab.userId} className="hover:bg-white/[0.02]">
+              <tr key={collab.userId} className="hover:bg-white/2">
                 <td className="py-3 px-4 text-white font-bold">
                   {collab.name}
                 </td>

@@ -254,7 +254,7 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
                           <span
                             className={`h-2 w-2 rounded-full shrink-0 ${cfg.dot}`}
                           />
-                          <span className="font-bold text-text-light truncate max-w-[180px]">
+                          <span className="font-bold text-text-light truncate max-w-45">
                             {ing.name}
                           </span>
                         </div>

@@ -217,7 +217,7 @@ export function SplitBillModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[60] no-print">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-60 no-print">
       <div className="bg-card rounded-[2.5rem] max-w-lg w-full p-8 shadow-2xl border border-border max-h-[92vh] overflow-y-auto custom-scrollbar">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">

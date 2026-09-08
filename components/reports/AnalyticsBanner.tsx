@@ -6,7 +6,7 @@ import { BarChart3, Clock, Sparkles, ArrowRight } from "lucide-react";
 
 export function AnalyticsBanner() {
   return (
-    <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-900/30 via-dark/60 to-amber-900/20 border border-purple-500/20 p-6 sm:p-8 shadow-sm">
+    <section className="relative overflow-hidden rounded-2xl bg-linear-to-r from-purple-900/30 via-dark/60 to-amber-900/20 border border-purple-500/20 p-6 sm:p-8 shadow-sm">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2 max-w-2xl">
           <div className="inline-flex items-center gap-2 rounded-full bg-purple-500/10 px-3 py-1 text-xs font-black text-purple-400 uppercase tracking-widest border border-purple-500/20">

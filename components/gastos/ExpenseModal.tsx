@@ -200,7 +200,7 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
               <span className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
                 ¿Facturado?
               </span>
-              <div className="flex h-[42px] items-center">
+              <div className="flex h-10.5 items-center">
                 <label className="relative inline-flex cursor-pointer items-center">
                   <input
                     type="checkbox"
@@ -209,7 +209,7 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
                     onChange={(e) => setHasInvoice(e.target.checked)}
                     aria-label="¿Facturado?"
                   />
-                  <div className="peer h-6 w-11 rounded-full bg-white/10 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-white/20 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-500 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
+                  <div className="peer h-6 w-11 rounded-full bg-white/10 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-white/20 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-500 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
                   <span className="ml-2.5 text-xs font-black uppercase text-text-light/70">
                     {hasInvoice ? "Sí" : "No"}
                   </span>

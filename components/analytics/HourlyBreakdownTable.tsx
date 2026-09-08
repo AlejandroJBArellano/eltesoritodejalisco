@@ -89,7 +89,7 @@ export function HourlyBreakdownTable({
               const isPeak = row.isPeakSales || row.isPeakOrders;
               const rowClass = isPeak
                 ? "bg-amber-500/5 hover:bg-amber-500/10"
-                : "hover:bg-white/[0.02]";
+                : "hover:bg-white/2";
 
               return (
                 <tr

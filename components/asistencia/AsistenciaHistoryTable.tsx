@@ -100,7 +100,7 @@ export function AsistenciaHistoryTable() {
               {paginatedAttendances.map((rec) => (
                 <tr
                   key={rec.id}
-                  className="hover:bg-white/[0.02] transition-colors"
+                  className="hover:bg-white/2 transition-colors"
                 >
                   <td className="py-3.5 px-3">
                     <span className="font-bold text-text-light uppercase">

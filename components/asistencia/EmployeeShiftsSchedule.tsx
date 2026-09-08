@@ -108,7 +108,7 @@ export function EmployeeShiftsSchedule({
             <ChevronRight className="h-4 w-4" />
           </button>
 
-          <span className="text-xs font-bold text-text-light/70 uppercase ml-2 capitalize">
+          <span className="text-xs font-bold text-text-light/70 uppercase ml-2">
             {format(weekStart, "d MMM", { locale: es })} -{" "}
             {format(weekEnd, "d MMM yyyy", { locale: es })}
           </span>

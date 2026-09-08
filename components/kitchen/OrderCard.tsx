@@ -190,7 +190,7 @@ export const OrderCard = memo(function OrderCard({
             <div className="flex items-center gap-1.5 mt-1 text-xs text-text-light/90">
               <User className="h-3.5 w-3.5 text-text-light/60 shrink-0" />
               <span className="font-semibold text-text-light/70">Cliente:</span>
-              <span className="font-bold text-white truncate max-w-[170px]">
+              <span className="font-bold text-white truncate max-w-42.5">
                 {order.customer.name}
               </span>
             </div>

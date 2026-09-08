@@ -161,7 +161,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
             {paginatedExecutions.map((exec) => (
               <tr
                 key={exec.id}
-                className="hover:bg-white/[0.02] transition-colors"
+                className="hover:bg-white/2 transition-colors"
               >
                 <td className="py-3 px-4 text-white font-bold">
                   {exec.task?.name || "Desconocida"}
