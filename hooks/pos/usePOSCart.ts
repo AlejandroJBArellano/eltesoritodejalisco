@@ -89,10 +89,19 @@ function usePOSCartInternal(
     useState<Record<MixedFlavor, number>>(emptyFlavorCounts());
 
   // Edit Order State (add items)
-  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
-  const [additionalItems, setAdditionalItems] = useState<OrderItemDraft[]>([
-    { menuItemId: "", quantity: "1", notes: "" },
-  ]);
+  const [editingOrder, setEditingOrderState] = useState<Order | null>(null);
+  const [additionalItems, setAdditionalItems] = useState<OrderItemDraft[]>([]);
+  const [addItemsSuccessNotification, setAddItemsSuccessNotification] = useState<{
+    order: Order;
+    orderNumber: string;
+  } | null>(null);
+
+  const setEditingOrder = React.useCallback((order: Order | null) => {
+    setEditingOrderState(order);
+    if (order) {
+      setAdditionalItems([]);
+    }
+  }, []);
 
   // Modify Order State (edit/remove existing items, table and customer)
   const [modifyingOrder, setModifyingOrder] = useState<Order | null>(null);
@@ -445,8 +454,61 @@ function usePOSCartInternal(
     }
   };
 
-  const handleAddItems = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const quickAddAdditionalItem = (menuItem: MenuItem) => {
+    setAdditionalItems((prev) => {
+      const existingIndex = prev.findIndex(
+        (item) => item.menuItemId === menuItem.id && (!item.notes || item.notes === ""),
+      );
+      if (existingIndex >= 0) {
+        const nextItems = [...prev];
+        const currentQty = Number(nextItems[existingIndex].quantity) || 0;
+        nextItems[existingIndex] = {
+          ...nextItems[existingIndex],
+          quantity: (currentQty + 1).toString(),
+        };
+        return nextItems;
+      }
+      return [
+        ...prev,
+        { menuItemId: menuItem.id, quantity: "1", notes: "" },
+      ];
+    });
+  };
+
+  const updateAdditionalItemQty = (index: number, delta: number) => {
+    setAdditionalItems((prev) => {
+      if (index < 0 || index >= prev.length) return prev;
+      const currentQty = Number(prev[index].quantity) || 0;
+      const newQty = currentQty + delta;
+      if (newQty <= 0) {
+        return prev.filter((_, idx) => idx !== index);
+      }
+      const nextItems = [...prev];
+      nextItems[index] = {
+        ...nextItems[index],
+        quantity: newQty.toString(),
+      };
+      return nextItems;
+    });
+  };
+
+  const setAdditionalItemNotes = (index: number, notes: string) => {
+    setAdditionalItems((prev) => {
+      if (index < 0 || index >= prev.length) return prev;
+      const nextItems = [...prev];
+      nextItems[index] = {
+        ...nextItems[index],
+        notes,
+      };
+      return nextItems;
+    });
+  };
+
+  const handleAddItems = async (
+    e?: React.FormEvent,
+    onSuccess?: (order: Order) => void,
+  ) => {
+    if (e) e.preventDefault();
     if (!editingOrder) return;
 
     const validItems = additionalItems.filter(
@@ -477,15 +539,17 @@ function usePOSCartInternal(
       if (!response.ok)
         throw new Error(data?.error || "Error al agregar productos");
 
+      const savedOrder = editingOrder;
       await refreshOrders();
       setEditingOrder(null);
-      setAdditionalItems([
-        {
-          menuItemId: availableMenuItems[0]?.id || "",
-          quantity: "1",
-          notes: "",
-        },
-      ]);
+      setAdditionalItems([]);
+      setAddItemsSuccessNotification({
+        order: savedOrder,
+        orderNumber: savedOrder.orderNumber,
+      });
+      if (onSuccess) {
+        onSuccess(savedOrder);
+      }
     } catch (error) {
       setCartError(
         error instanceof Error ? error.message : "Error al actualizar orden",
@@ -665,6 +729,11 @@ function usePOSCartInternal(
     setAdditionalItems,
     editingOrder,
     setEditingOrder,
+    quickAddAdditionalItem,
+    updateAdditionalItemQty,
+    setAdditionalItemNotes,
+    addItemsSuccessNotification,
+    setAddItemsSuccessNotification,
     modifyingOrder,
     setModifyingOrder,
     modifyItems,

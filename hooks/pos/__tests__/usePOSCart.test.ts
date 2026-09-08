@@ -350,4 +350,130 @@ describe("usePOSCart Hook", () => {
     expect(result.current.cartTotals.itemsDiscount).toBe(0);
     expect(result.current.cartTotals.total).toBe(70);
   });
+
+  it("should handle quickAddAdditionalItem, updateAdditionalItemQty, and setAdditionalItemNotes", () => {
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
+    // Initial state
+    expect(result.current.additionalItems).toEqual([]);
+
+    // Quick add 1x Taco Pastor
+    act(() => {
+      result.current.quickAddAdditionalItem(mockMenuItems[0]);
+    });
+    expect(result.current.additionalItems).toEqual([
+      { menuItemId: "1", quantity: "1", notes: "" },
+    ]);
+
+    // Quick add Taco Pastor again -> quantity should increment to 2
+    act(() => {
+      result.current.quickAddAdditionalItem(mockMenuItems[0]);
+    });
+    expect(result.current.additionalItems).toEqual([
+      { menuItemId: "1", quantity: "2", notes: "" },
+    ]);
+
+    // Quick add Gringa -> appends new row
+    act(() => {
+      result.current.quickAddAdditionalItem(mockMenuItems[1]);
+    });
+    expect(result.current.additionalItems).toHaveLength(2);
+    expect(result.current.additionalItems[1].menuItemId).toBe("2");
+
+    // Set notes on Taco Pastor
+    act(() => {
+      result.current.setAdditionalItemNotes(0, "Sin cebolla");
+    });
+    expect(result.current.additionalItems[0].notes).toBe("Sin cebolla");
+
+    // Adding Taco Pastor again when notes are present adds as separate item (not merging)
+    act(() => {
+      result.current.quickAddAdditionalItem(mockMenuItems[0]);
+    });
+    expect(result.current.additionalItems).toHaveLength(3);
+
+    // Update quantity with delta +1
+    act(() => {
+      result.current.updateAdditionalItemQty(1, 1);
+    });
+    expect(result.current.additionalItems[1].quantity).toBe("2");
+
+    // Update quantity with delta -1
+    act(() => {
+      result.current.updateAdditionalItemQty(1, -1);
+    });
+    expect(result.current.additionalItems[1].quantity).toBe("1");
+
+    // Update quantity with delta -1 again -> reaches 0 and removes item
+    act(() => {
+      result.current.updateAdditionalItemQty(1, -1);
+    });
+    expect(result.current.additionalItems).toHaveLength(2);
+
+    // Calling with out of bounds index does nothing
+    act(() => {
+      result.current.updateAdditionalItemQty(99, 1);
+      result.current.setAdditionalItemNotes(99, "test");
+    });
+    expect(result.current.additionalItems).toHaveLength(2);
+  });
+
+  it("should reset additionalItems when setEditingOrder is called with an order", () => {
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
+    act(() => {
+      result.current.quickAddAdditionalItem(mockMenuItems[0]);
+    });
+    expect(result.current.additionalItems).toHaveLength(1);
+
+    const dummyOrder = { id: "order-99", orderNumber: "1099" } as Order;
+    act(() => {
+      result.current.setEditingOrder(dummyOrder);
+    });
+    expect(result.current.editingOrder).toBe(dummyOrder);
+    expect(result.current.additionalItems).toEqual([]);
+  });
+
+  it("should handleAddItems successfully and trigger notification and callback", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+    global.fetch = mockFetch;
+
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
+    const dummyOrder = { id: "order-123", orderNumber: "1123" } as Order;
+    act(() => {
+      result.current.setEditingOrder(dummyOrder);
+      result.current.quickAddAdditionalItem(mockMenuItems[0]);
+    });
+
+    const onSuccess = vi.fn();
+    await act(async () => {
+      await result.current.handleAddItems(undefined, onSuccess);
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/orders/order-123",
+      expect.objectContaining({
+        method: "PATCH",
+        body: expect.stringContaining('"menuItemId":"1"'),
+      }),
+    );
+    expect(mockRefreshOrders).toHaveBeenCalled();
+    expect(result.current.editingOrder).toBeNull();
+    expect(result.current.additionalItems).toEqual([]);
+    expect(result.current.addItemsSuccessNotification).toEqual({
+      order: dummyOrder,
+      orderNumber: "1123",
+    });
+    expect(onSuccess).toHaveBeenCalledWith(dummyOrder);
+  });
 });

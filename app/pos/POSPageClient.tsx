@@ -3,7 +3,7 @@
 import { POSCartProvider, usePOSCart } from "@/hooks/pos/usePOSCart";
 import { POSCheckoutProvider, usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { POSDataProvider, usePOSData } from "@/hooks/pos/usePOSData";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { POSCartSidebar } from "@/components/pos/POSCartSidebar";
 import { POSMenuGrid } from "@/components/pos/POSMenuGrid";
@@ -24,10 +24,12 @@ import { toPng } from "html-to-image";
 import { useOptionalUser } from "@/components/UserProvider";
 import { POSManagerAuthModal } from "@/components/pos/modals/POSManagerAuthModal";
 import {
+  ChefHat,
   Download,
   MessageCircle,
   Printer,
-  Receipt
+  Receipt,
+  X,
 } from "lucide-react";
 import ErrorPOS from "../../components/pos/ErrorPOS";
 import FloatingMobileBarPOS from "../../components/pos/FloatingMobileBarPOS";
@@ -77,7 +79,18 @@ function POSPageContent() {
     totalCartItems,
     cartTotal,
     isSubmittingCart,
+    addItemsSuccessNotification,
+    setAddItemsSuccessNotification,
   } = usePOSCart();
+
+  useEffect(() => {
+    if (addItemsSuccessNotification) {
+      const timer = setTimeout(() => {
+        setAddItemsSuccessNotification(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [addItemsSuccessNotification, setAddItemsSuccessNotification]);
 
   const {
     isSubmittingCheckout,
@@ -237,6 +250,41 @@ function POSPageContent() {
           </>
         )}
       </section>
+
+      {/* Toast de Éxito al Agregar Productos con Acción Rápida Imprimir Comanda */}
+      {addItemsSuccessNotification && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-card border border-emerald-500/30 text-text-light px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md animate-in slide-in-from-top-2 no-print"
+        >
+          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse" />
+          <span className="text-xs font-bold text-text-light">
+            Productos agregados a la Orden #{addItemsSuccessNotification.orderNumber}
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setCheckoutOrder(addItemsSuccessNotification.order);
+              setShowKitchenTicket(true);
+              setShowTicket(false);
+              setAddItemsSuccessNotification(null);
+            }}
+            className="rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+          >
+            <ChefHat className="h-3.5 w-3.5" />
+            Imprimir Comanda
+          </button>
+          <button
+            type="button"
+            onClick={() => setAddItemsSuccessNotification(null)}
+            className="text-text-light/40 hover:text-text-light p-1 rounded-lg hover:bg-white/10 transition-colors"
+            aria-label="Cerrar notificación"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* ALL MODALS */}
       {editingOrder && <POSAddItemsModal />}
