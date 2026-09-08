@@ -31,6 +31,7 @@ import { CustomerAccountModal } from "@/components/customers/CustomerAccountModa
 import { CustomerWhatsAppModal } from "@/components/customers/CustomerWhatsAppModal";
 import { CustomerQRModal } from "@/components/customers/CustomerQRModal";
 import { useTenant } from "@/components/TenantProvider";
+import { useOptionalUser } from "@/components/UserProvider";
 
 type Customer = {
   id: string;
@@ -99,6 +100,8 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const tenant = useTenant();
+  const user = useOptionalUser();
+  const isWaiter = user?.isWaiter ?? false;
 
   // Table Filters, Sort & Pagination State
   const [searchQuery, setSearchQuery] = useState("");
@@ -259,6 +262,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
   };
 
   const handleDelete = async (customerId: string) => {
+    if (isWaiter) return;
     if (deleteArmedId !== customerId) {
       setDeleteArmedId(customerId);
       setTimeout(() => setDeleteArmedId(null), 3000);
@@ -648,25 +652,27 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                         >
                           <Edit3 className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(c.id)}
-                          className={`rounded-lg border p-2 transition-all text-xs font-black ${
-                            deleteArmedId === c.id
-                              ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
-                              : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
-                          }`}
-                          title={
-                            deleteArmedId === c.id
-                              ? "Confirmar eliminación"
-                              : "Eliminar Cliente"
-                          }
-                        >
-                          {deleteArmedId === c.id ? (
-                            "¿Seguro?"
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                        </button>
+                        {!isWaiter && (
+                          <button
+                            onClick={() => handleDelete(c.id)}
+                            className={`rounded-lg border p-2 transition-all text-xs font-black ${
+                              deleteArmedId === c.id
+                                ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
+                                : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                            }`}
+                            title={
+                              deleteArmedId === c.id
+                                ? "Confirmar eliminación"
+                                : "Eliminar Cliente"
+                            }
+                          >
+                            {deleteArmedId === c.id ? (
+                              "¿Seguro?"
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

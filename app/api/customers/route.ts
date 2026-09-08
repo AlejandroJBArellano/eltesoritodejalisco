@@ -267,6 +267,12 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const profile = await getProfile();
+    if (profile?.role === "WAITER") {
+      return NextResponse.json(
+        { error: "No tienes permisos para eliminar clientes" },
+        { status: 403 },
+      );
+    }
     if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }

@@ -4,6 +4,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CustomersContent } from "../CustomersContent";
 import * as exportLib from "@/lib/export";
+import { useOptionalUser } from "@/components/UserProvider";
 
 const mockTenant = {
   id: "tenant-abc",
@@ -13,6 +14,10 @@ const mockTenant = {
 
 vi.mock("@/components/TenantProvider", () => ({
   useTenant: () => mockTenant,
+}));
+
+vi.mock("@/components/UserProvider", () => ({
+  useOptionalUser: vi.fn(),
 }));
 
 describe("CustomersContent Component", () => {
@@ -43,6 +48,14 @@ describe("CustomersContent Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "ADMIN",
+      isAdmin: true,
+      isWaiter: false,
+      isChef: false,
+      isAuthenticated: true,
+    });
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ customers: mockCustomers }),
@@ -132,6 +145,27 @@ describe("CustomersContent Component", () => {
 
     expect(screen.getByText("Acciones Rápidas WhatsApp")).toBeInTheDocument();
     expect(screen.getByText(/Cliente: Juan Pérez/i)).toBeInTheDocument();
+  });
+
+  it("should hide delete customer button when user is a waiter", () => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "WAITER",
+      isAdmin: false,
+      isWaiter: true,
+      isChef: false,
+      isAuthenticated: true,
+    });
+
+    render(<CustomersContent initialCustomers={mockCustomers} />);
+
+    expect(screen.queryByTitle("Eliminar Cliente")).not.toBeInTheDocument();
+  });
+
+  it("should render delete customer button when user is admin or not waiter", () => {
+    render(<CustomersContent initialCustomers={mockCustomers} />);
+
+    expect(screen.getAllByTitle("Eliminar Cliente").length).toBe(2);
   });
 });
 
