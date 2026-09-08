@@ -9,8 +9,8 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "tailwind:fix": "tailwind-lint --config ./app/globals.css --fix \"components/**/*.tsx\" \"app/**/*.tsx\"",
-    "db:types": "npx -y supabase gen types typescript --db-url \"$DIRECT_URL\" > types/supabase.ts",
+    "tailwind:fix": "npx tailwind-lint --config ./app/globals.css --fix \"components/**/*.tsx\" \"app/**/*.tsx\"",
+    "db:types": "node --env-file=.env -e 'require(\"child_process\").execSync(`npx -y supabase gen types typescript --db-url \"${process.env.DIRECT_URL}\" > types/supabase.ts`, { stdio: \"inherit\" })'",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
