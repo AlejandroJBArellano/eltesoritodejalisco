@@ -398,16 +398,6 @@ export async function getExecutionsForDate(dateStr: string) {
   const tenant = await getTenantContext();
   const supabase = await createClient();
 
-  // Enforce "mes en curso" (current month) constraint
-  const targetDate = new Date(dateStr + "T12:00:00"); // Use noon to avoid timezone shift issues
-  const now = new Date();
-  if (
-    targetDate.getMonth() !== now.getMonth() ||
-    targetDate.getFullYear() !== now.getFullYear()
-  ) {
-    throw new Error("Solo se permite consultar registros del mes en curso.");
-  }
-
   const startOfDay = `${dateStr}T00:00:00.000Z`;
   const endOfDay = `${dateStr}T23:59:59.999Z`;
 
@@ -417,7 +407,7 @@ export async function getExecutionsForDate(dateStr: string) {
       `
       *,
       task:primordial_tasks(*),
-      user:profiles(full_name)
+      user:profiles(id, full_name)
     `,
     )
     .eq("tenant_id", tenant.id)
@@ -429,6 +419,20 @@ export async function getExecutionsForDate(dateStr: string) {
   return data;
 }
 
+export async function getDayTasksAudit(dateStr: string) {
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    throw new Error("Unauthorized");
+  }
+
+  const [executions, primordialTasks] = await Promise.all([
+    getExecutionsForDate(dateStr),
+    getPrimordialTasks(),
+  ]);
+
+  return { executions, primordialTasks };
+}
+
 export async function getStaffPerformanceMetrics(dateStr: string) {
   const profile = await getProfile();
   if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
@@ -437,16 +441,6 @@ export async function getStaffPerformanceMetrics(dateStr: string) {
 
   const tenant = await getTenantContext();
   const supabase = await createClient();
-
-  // Enforce current month limit
-  const targetDate = new Date(dateStr + "T12:00:00");
-  const now = new Date();
-  if (
-    targetDate.getMonth() !== now.getMonth() ||
-    targetDate.getFullYear() !== now.getFullYear()
-  ) {
-    throw new Error("Solo se permite consultar registros del mes en curso.");
-  }
 
   const startOfDay = `${dateStr}T00:00:00.000Z`;
   const endOfDay = `${dateStr}T23:59:59.999Z`;
