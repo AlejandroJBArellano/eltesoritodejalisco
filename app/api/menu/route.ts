@@ -1,11 +1,12 @@
 // TesoritoOS - Menu Management API
-// Handles menu items CRUD with Supabase Admin Storage integration
+// Handles menu items CRUD with AWS S3 image storage
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
 import { getProfile } from "@/lib/auth";
+import { uploadMenuItemImage } from "@/lib/s3";
 
 /**
  * GET /api/menu
@@ -62,41 +63,6 @@ export async function GET() {
 export const dynamic = "force-dynamic";
 
 /**
- * Helper to upload image using Admin Client (bypassing RLS on storage.objects)
- */
-async function uploadImageToStorage(imageFile: File): Promise<string> {
-  const supabaseAdmin = createAdminClient();
-
-  // Attempt to create bucket if it doesn't exist yet
-  try {
-    await supabaseAdmin.storage.createBucket("menu-items", { public: true });
-  } catch {
-    // Bucket already exists or cannot be recreated
-  }
-
-  const fileExt = imageFile.name.split(".").pop() || "jpg";
-  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-  const filePath = `${fileName}`;
-
-  const { error: uploadError } = await supabaseAdmin.storage
-    .from("menu-items")
-    .upload(filePath, imageFile, { upsert: true });
-
-  if (uploadError) {
-    console.error("Storage upload error:", uploadError);
-    throw new Error(
-      `Error al subir imagen a almacenamiento: ${uploadError.message}`,
-    );
-  }
-
-  const {
-    data: { publicUrl },
-  } = supabaseAdmin.storage.from("menu-items").getPublicUrl(filePath);
-
-  return publicUrl;
-}
-
-/**
  * POST /api/menu
  * Create a new menu item with image upload
  */
@@ -135,11 +101,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
+
     if (imageFile && imageFile.size > 0) {
-      imageUrl = await uploadImageToStorage(imageFile);
+      imageUrl = await uploadMenuItemImage(imageFile, tenant.id);
     }
 
-    const tenant = await getTenantContext();
     const supabaseAdmin = createAdminClient();
     const id = crypto.randomUUID();
 
@@ -185,6 +152,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ item }, { status: 201 });
   } catch (error) {
     console.error("Error creating menu item:", error);
+    const isValidationError =
+      error instanceof Error &&
+      (error.message.includes("Formato de imagen no soportado") ||
+        error.message.includes("La imagen excede el tamaño"));
     return NextResponse.json(
       {
         error:
@@ -192,7 +163,7 @@ export async function POST(request: NextRequest) {
             ? error.message
             : "No se pudo crear el producto",
       },
-      { status: 500 },
+      { status: isValidationError ? 400 : 500 },
     );
   }
 }
@@ -239,11 +210,12 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const tenant = await getTenantContext();
+
     if (imageFile && imageFile.size > 0) {
-      imageUrl = await uploadImageToStorage(imageFile);
+      imageUrl = await uploadMenuItemImage(imageFile, tenant.id);
     }
 
-    const tenant = await getTenantContext();
     const supabaseAdmin = createAdminClient();
 
     // Fetch existing product to check if it has a stripe_product_id
@@ -285,22 +257,36 @@ export async function PUT(request: NextRequest) {
       throw new Error(`Error en Stripe: ${(stripeErr as Error).message}`);
     }
 
+    const updateData: Record<string, unknown> = {
+      name,
+      description: description || null,
+      price: parsedPrice,
+      category: category || null,
+      is_available: isAvailable,
+      stripe_product_id: stripeProductId,
+      ingredient_id: ingredientId,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (imageUrl !== null) {
+      updateData.image_url = imageUrl;
+    }
+
+    if (translations !== undefined) {
+      updateData.translations = translations;
+    }
+
+    if (showInDineIn !== null && showInDineIn !== undefined) {
+      updateData.show_in_dine_in = showInDineIn === "true";
+    }
+
+    if (showInTakeaway !== null && showInTakeaway !== undefined) {
+      updateData.show_in_takeaway = showInTakeaway === "true";
+    }
+
     const { data: item, error: updateError } = await supabaseAdmin
       .from("menu_items")
-      .update({
-        name,
-        description: description || null,
-        price: parsedPrice,
-        category: category || null,
-        image_url: imageUrl || null,
-        is_available: isAvailable,
-        stripe_product_id: stripeProductId,
-        ingredient_id: ingredientId,
-        ...(translations !== undefined ? { translations } : {}),
-        ...(showInDineIn !== null ? { show_in_dine_in: showInDineIn === "true" } : {}),
-        ...(showInTakeaway !== null ? { show_in_takeaway: showInTakeaway === "true" } : {}),
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq("id", id)
       .eq("tenant_id", tenant.id)
       .select()
@@ -311,6 +297,10 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ item });
   } catch (error) {
     console.error("Error updating menu item:", error);
+    const isValidationError =
+      error instanceof Error &&
+      (error.message.includes("Formato de imagen no soportado") ||
+        error.message.includes("La imagen excede el tamaño"));
     return NextResponse.json(
       {
         error:
@@ -318,7 +308,7 @@ export async function PUT(request: NextRequest) {
             ? error.message
             : "No se pudo actualizar el producto",
       },
-      { status: 500 },
+      { status: isValidationError ? 400 : 500 },
     );
   }
 }
