@@ -295,7 +295,7 @@ export function DailySummaryTicket({
               <tbody>
                 {tipBreakdown.map((item, idx) => (
                   <tr key={idx} className="border-b border-dotted border-gray-300">
-                    <td className="py-0.5 font-bold truncate max-w-[90px]">
+                    <td className="py-0.5 font-bold truncate max-w-22.5">
                       {item.employee_name}
                     </td>
                     <td className="py-0.5 text-center">
@@ -338,10 +338,10 @@ export function DailySummaryTicket({
                   return (
                     <tr key={order.id} className="border-b border-dotted border-gray-300">
                       <td className="py-0.5 font-bold">#{order.orderNumber}</td>
-                      <td className="py-0.5 truncate max-w-[70px] uppercase">
+                      <td className="py-0.5 truncate max-w-17.5 uppercase">
                         {serviceLabel}
                       </td>
-                      <td className="py-0.5 truncate max-w-[60px] uppercase">
+                      <td className="py-0.5 truncate max-w-15 uppercase">
                         {paymentLabel}
                       </td>
                       <td className="py-0.5 text-right font-mono">
