@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, ShieldAlert } from "lucide-react";
+import { ArrowLeft, Printer, ShieldAlert } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { FacturacionModal } from "@/components/pos/FacturacionModal";
 import { useOptionalUser } from "@/components/UserProvider";
@@ -14,10 +14,22 @@ import { FinalizeCutModal } from "./FinalizeCutModal";
 import { HistoryCharts } from "./HistoryCharts";
 import { OrdersFilterBar } from "./OrdersFilterBar";
 import { OrdersHistoryTable } from "./OrdersHistoryTable";
+import { DailySummaryTicket } from "./DailySummaryTicket";
 
 function HistoryMainView() {
-  const { showCutsArchive, billingOrder, setBillingOrder, isLoadingOrders } =
-    useHistoryContext();
+  const {
+    showCutsArchive,
+    billingOrder,
+    setBillingOrder,
+    isLoadingOrders,
+    showDailySummaryTicket,
+    dailySummaryTicketCut,
+    closeDailySummaryTicket,
+    todayTotals,
+    todayOrders,
+    todayExpenses,
+    tipBreakdown,
+  } = useHistoryContext();
 
   if (isLoadingOrders) {
     return (
@@ -63,6 +75,40 @@ function HistoryMainView() {
           order={billingOrder}
           onClose={() => setBillingOrder(null)}
         />
+      )}
+
+      {/* MODAL / CONTENEDOR DE IMPRESIÓN DE TICKET CONGLOMERADO */}
+      {showDailySummaryTicket && (
+        <div
+          data-testid="summary-ticket-modal"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto print-modal-container"
+        >
+          <div className="max-w-md w-full py-8 space-y-6">
+            <div className="flex justify-center gap-3 no-print flex-wrap">
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="bg-success text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Printer className="h-4 w-4" /> Imprimir Ticket
+              </button>
+              <button
+                type="button"
+                onClick={closeDailySummaryTicket}
+                className="bg-white/10 text-text-light px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+            <DailySummaryTicket
+              cut={dailySummaryTicketCut}
+              todayTotals={todayTotals}
+              orders={todayOrders}
+              expenses={todayExpenses}
+              tipBreakdown={tipBreakdown}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

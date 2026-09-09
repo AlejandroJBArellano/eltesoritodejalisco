@@ -65,4 +65,19 @@ describe("DailyCutDetailModal Component", () => {
 
     expect(screen.getByText(/Comisión: -\$40\.60 · Neto: \$959\.40/i)).toBeDefined();
   });
+
+  it("handles reprint ticket click", () => {
+    const onPrintCut = vi.fn();
+    render(
+      <DailyCutDetailModal
+        cut={mockCut}
+        onClose={vi.fn()}
+        onPrintCut={onPrintCut}
+      />,
+    );
+
+    const reprintBtn = screen.getByText("Reimprimir Ticket");
+    fireEvent.click(reprintBtn);
+    expect(onPrintCut).toHaveBeenCalledWith(mockCut);
+  });
 });

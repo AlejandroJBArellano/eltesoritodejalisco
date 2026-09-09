@@ -1,18 +1,24 @@
 "use client";
 
 import React from "react";
-import { Receipt, X } from "lucide-react";
+import { Printer, Receipt, X } from "lucide-react";
+import { useHistoryContextNullable } from "./HistoryContext";
 import type { DailyCut } from "./types";
 
 export interface DailyCutDetailModalProps {
   cut: DailyCut | null;
   onClose: () => void;
+  onPrintCut?: (cut: DailyCut) => void;
 }
 
 export function DailyCutDetailModal({
   cut,
   onClose,
+  onPrintCut: customOnPrintCut,
 }: DailyCutDetailModalProps) {
+  const context = useHistoryContextNullable();
+  const onPrintCut = customOnPrintCut ?? ((c: DailyCut) => context?.openDailySummaryTicket(c));
+
   if (!cut) return null;
 
   return (
@@ -161,13 +167,23 @@ export function DailyCutDetailModal({
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={onClose}
-          className="w-full bg-white/5 text-text-light/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider cursor-pointer"
-        >
-          Cerrar
-        </button>
+        <div className="flex gap-3 pt-1">
+          <button
+            type="button"
+            onClick={() => onPrintCut(cut)}
+            className="w-full bg-blue-600/20 text-blue-300 border border-blue-500/30 py-3 rounded-xl font-black hover:bg-blue-600/30 transition-colors uppercase text-xs tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <Printer className="h-4 w-4" />
+            Reimprimir Ticket
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full bg-white/5 text-text-light/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider cursor-pointer"
+          >
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   );

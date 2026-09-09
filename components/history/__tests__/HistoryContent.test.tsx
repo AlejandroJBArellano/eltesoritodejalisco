@@ -151,4 +151,37 @@ describe("HistoryContent Component", () => {
 
     expect(screen.getByText("Cargando historial y datos...")).toBeDefined();
   });
+
+  it("opens, prints and closes daily summary ticket modal", async () => {
+    const printSpy = vi.spyOn(window, "print").mockImplementation(() => {});
+
+    render(<HistoryContent />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Historial de Ventas")).toBeDefined();
+    });
+
+    const printSummaryBtn = screen.getByText("Imprimir Resumen");
+    fireEvent.click(printSummaryBtn);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("summary-ticket-modal")).toBeDefined();
+      expect(screen.getByTestId("daily-summary-ticket")).toBeDefined();
+    });
+
+    // Click Imprimir Ticket
+    const printTicketBtn = screen.getByRole("button", { name: /Imprimir Ticket/i });
+    fireEvent.click(printTicketBtn);
+    expect(printSpy).toHaveBeenCalled();
+
+    // Click Cerrar
+    const closeBtn = screen.getByRole("button", { name: /^Cerrar$/i });
+    fireEvent.click(closeBtn);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("summary-ticket-modal")).toBeNull();
+    });
+
+    printSpy.mockRestore();
+  });
 });

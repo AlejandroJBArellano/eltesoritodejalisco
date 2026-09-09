@@ -78,6 +78,22 @@ describe("DailyCutBanner Component", () => {
     expect(onFinalizeDayClick).toHaveBeenCalled();
   });
 
+  it("handles print summary click", () => {
+    const onPrintSummaryClick = vi.fn();
+    render(
+      <DailyCutBanner
+        todayTotals={mockTotals}
+        todayOrdersCount={5}
+        todayExpenses={300}
+        onPrintSummaryClick={onPrintSummaryClick}
+      />,
+    );
+
+    const printBtn = screen.getByText("Imprimir Resumen");
+    fireEvent.click(printBtn);
+    expect(onPrintSummaryClick).toHaveBeenCalledTimes(1);
+  });
+
   it("shows pending cut alert when hasPendingCut is true", () => {
     const onGeneratePendingCut = vi.fn();
     render(

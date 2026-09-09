@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CheckCircle2, X } from "lucide-react";
+import { CheckCircle2, Printer, X } from "lucide-react";
 import { useHistoryContextNullable } from "./HistoryContext";
 import type { DailyCutSummaryTotals, TipBreakdownItem } from "./types";
 
@@ -9,6 +9,7 @@ export interface FinalizeCutModalProps {
   isOpen?: boolean;
   onClose?: () => void;
   onConfirm?: () => void;
+  onPrintClosingTicket?: () => void;
   isFinalizing?: boolean;
   todayTotals?: DailyCutSummaryTotals;
   todayOrdersCount?: number;
@@ -32,6 +33,7 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
   const isOpen = props.isOpen !== undefined ? props.isOpen : (context?.showFinalizeModal ?? false);
   const onClose = props.onClose ?? (() => context?.setShowFinalizeModal(false));
   const onConfirm = props.onConfirm ?? (() => context?.handleFinalizarDia());
+  const onPrintClosingTicket = props.onPrintClosingTicket ?? (() => context?.openDailySummaryTicket());
   const isFinalizing = props.isFinalizing !== undefined ? props.isFinalizing : (context?.isFinalizing ?? false);
 
   const todayTotals = props.todayTotals ?? context?.todayTotals ?? {
@@ -229,6 +231,17 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
               No hay registros de asistencia finalizados hoy.
             </p>
           ) : null}
+        </div>
+
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={() => onPrintClosingTicket()}
+            className="w-full bg-blue-600/20 text-blue-300 border border-blue-500/30 py-2.5 rounded-xl font-black hover:bg-blue-600/30 transition-all uppercase text-xs tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Printer className="h-4 w-4" />
+            Imprimir Ticket de Cierre
+          </button>
         </div>
 
         <div className="flex gap-3 pt-2">

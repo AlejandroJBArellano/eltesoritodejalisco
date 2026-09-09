@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useMemo, useState, useCallback } from "react";
 import { useHistoryOrders } from "./hooks/useHistoryOrders";
 import { useDailyCutManager } from "./hooks/useDailyCutManager";
-import type { DailyCutSummaryTotals, Order, OrderFilters, OrderSortField, TipBreakdownItem } from "./types";
+import type { DailyCut, DailyCutSummaryTotals, Order, OrderFilters, OrderSortField, TipBreakdownItem } from "./types";
 
 export interface HistoryContextValue {
   // Orders State
@@ -66,6 +66,14 @@ export interface HistoryContextValue {
   toggleCutsArchive: () => void;
   billingOrder: Order | null;
   setBillingOrder: (order: Order | null) => void;
+
+  // Summary Ticket State
+  showDailySummaryTicket: boolean;
+  setShowDailySummaryTicket: (show: boolean) => void;
+  dailySummaryTicketCut: DailyCut | null;
+  setDailySummaryTicketCut: (cut: DailyCut | null) => void;
+  openDailySummaryTicket: (cut?: DailyCut | null) => void;
+  closeDailySummaryTicket: () => void;
 }
 
 const HistoryContext = createContext<HistoryContextValue | null>(null);
@@ -95,6 +103,18 @@ export function HistoryProvider({
 }: HistoryProviderProps) {
   const [showCutsArchive, setShowCutsArchive] = useState(false);
   const [billingOrder, setBillingOrder] = useState<Order | null>(null);
+  const [showDailySummaryTicket, setShowDailySummaryTicket] = useState(false);
+  const [dailySummaryTicketCut, setDailySummaryTicketCut] = useState<DailyCut | null>(null);
+
+  const openDailySummaryTicket = useCallback((cut?: DailyCut | null) => {
+    setDailySummaryTicketCut(cut ?? null);
+    setShowDailySummaryTicket(true);
+  }, []);
+
+  const closeDailySummaryTicket = useCallback(() => {
+    setShowDailySummaryTicket(false);
+    setDailySummaryTicketCut(null);
+  }, []);
 
   const ordersHook = useHistoryOrders({
     initialOrders,
@@ -172,12 +192,23 @@ export function HistoryProvider({
     toggleCutsArchive,
     billingOrder,
     setBillingOrder,
+
+    showDailySummaryTicket,
+    setShowDailySummaryTicket,
+    dailySummaryTicketCut,
+    setDailySummaryTicketCut,
+    openDailySummaryTicket,
+    closeDailySummaryTicket,
   }), [
     ordersHook,
     cutManagerHook,
     showCutsArchive,
     toggleCutsArchive,
     billingOrder,
+    showDailySummaryTicket,
+    dailySummaryTicketCut,
+    openDailySummaryTicket,
+    closeDailySummaryTicket,
   ]);
 
   return (

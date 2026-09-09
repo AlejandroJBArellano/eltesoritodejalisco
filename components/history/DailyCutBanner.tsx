@@ -9,6 +9,7 @@ import {
   CreditCard,
   Folder,
   Home,
+  Printer,
   Receipt,
   TrendingUp,
   X,
@@ -33,6 +34,7 @@ export interface DailyCutBannerProps {
   onToggleCutsArchive?: () => void;
   onGeneratePendingCut?: () => void;
   onDismissError?: () => void;
+  onPrintSummaryClick?: () => void;
 }
 
 export function DailyCutBanner(props: DailyCutBannerProps = {}) {
@@ -70,6 +72,7 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
   const onToggleCutsArchive = props.onToggleCutsArchive ?? context?.toggleCutsArchive ?? (() => {});
   const onGeneratePendingCut = props.onGeneratePendingCut ?? context?.handleGeneratePendingCut ?? (() => {});
   const onDismissError = props.onDismissError ?? (() => context?.setHistoryError(null));
+  const onPrintSummaryClick = props.onPrintSummaryClick ?? (() => context?.openDailySummaryTicket());
 
   return (
     <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-6">
@@ -145,8 +148,17 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
         <div className="flex items-center gap-2.5 flex-wrap">
           <button
             type="button"
+            onClick={() => onPrintSummaryClick()}
+            className="rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wider border border-border bg-white/5 text-text-light/70 hover:bg-white/10 transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <Printer className="h-4 w-4 text-text-light/70" />
+            Imprimir Resumen
+          </button>
+
+          <button
+            type="button"
             onClick={onToggleCutsArchive}
-            className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wider border transition-all flex items-center gap-1.5 ${
+            className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wider border transition-all flex items-center gap-1.5 cursor-pointer ${
               showCutsArchive
                 ? "bg-blue-500/20 text-blue-300 border-blue-500/40"
                 : "bg-white/5 text-text-light/70 border-border hover:bg-white/10"
@@ -160,7 +172,7 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
             <button
               type="button"
               onClick={onFinalizeDayClick}
-              className="rounded-xl bg-success px-4 py-2 text-xs font-black text-white hover:brightness-110 transition-all uppercase tracking-wider shadow-lg shadow-success/20 flex items-center gap-1.5"
+              className="rounded-xl bg-success px-4 py-2 text-xs font-black text-white hover:brightness-110 transition-all uppercase tracking-wider shadow-lg shadow-success/20 flex items-center gap-1.5 cursor-pointer"
             >
               <CheckCircle2 className="h-4 w-4" />
               Finalizar Día

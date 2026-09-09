@@ -113,6 +113,23 @@ describe("FinalizeCutModal Component", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it("handles print closing ticket click", () => {
+    const onPrintClosingTicket = vi.fn();
+    render(
+      <FinalizeCutModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onConfirm={vi.fn()}
+        onPrintClosingTicket={onPrintClosingTicket}
+        todayTotals={mockTotals}
+      />,
+    );
+
+    const printBtn = screen.getByText("Imprimir Ticket de Cierre");
+    fireEvent.click(printBtn);
+    expect(onPrintClosingTicket).toHaveBeenCalledTimes(1);
+  });
+
   it("displays calculating tips message when isCalculatingTips is true", () => {
     render(
       <FinalizeCutModal
