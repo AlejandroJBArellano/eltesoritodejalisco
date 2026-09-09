@@ -163,4 +163,101 @@ describe("AdminTareasContext and Provider", () => {
     expect(screen.getByText(/Catálogo de Tareas Primordiales/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /nueva categoría/i })).toBeInTheDocument();
   });
+
+  it("calculates unifiedExecutions with NOT_DONE virtual rows and filters by compliance and collaborator", () => {
+    const activeTaskWithNoExec: PrimordialTask = {
+      id: "task-2",
+      name: "Cierre de Gas",
+      category_id: "cat-1",
+      frequency_type: "CLOSING",
+      requires_photo: false,
+      timeout_minutes: 15,
+      is_active: true,
+      created_at: "2026-01-01",
+      updated_at: "2026-01-01",
+    };
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <AdminTareasProvider
+        initialCategories={mockCategories}
+        initialTasks={[...mockTasks, activeTaskWithNoExec]}
+        initialExecutions={mockExecutions}
+      >
+        {children}
+      </AdminTareasProvider>
+    );
+
+    const { result } = renderHook(() => useAdminTareasContext(), { wrapper });
+
+    // Should contain 2 unified executions: exec-1 (COMPLETED) and not-done-task-2 (NOT_DONE)
+    expect(result.current.unifiedExecutions).toHaveLength(2);
+    const virtualRow = result.current.unifiedExecutions.find(
+      (e) => e.task_id === "task-2",
+    );
+    expect(virtualRow).toBeDefined();
+    expect(virtualRow?.status).toBe("NOT_DONE");
+
+    // Collaborators list derived
+    expect(result.current.collaborators).toHaveLength(1);
+
+    // Compliance filter: COMPLETADAS
+    act(() => {
+      result.current.setExecComplianceFilter("COMPLETED");
+    });
+    expect(result.current.sortedExecutions).toHaveLength(1);
+    expect(result.current.sortedExecutions[0].id).toBe("exec-1");
+
+    // Compliance filter: NO REALIZADAS
+    act(() => {
+      result.current.setExecComplianceFilter("NOT_DONE");
+    });
+    expect(result.current.sortedExecutions).toHaveLength(1);
+    expect(result.current.sortedExecutions[0].status).toBe("NOT_DONE");
+
+    // Reset compliance filter
+    act(() => {
+      result.current.setExecComplianceFilter("ALL");
+    });
+    expect(result.current.sortedExecutions).toHaveLength(2);
+
+    // Collaborator filter: u-1
+    act(() => {
+      result.current.setExecUserFilter("u-1");
+    });
+    expect(result.current.sortedExecutions).toHaveLength(1);
+    expect(result.current.sortedExecutions[0].user_id).toBe("u-1");
+
+    // Collaborator filter: UNASSIGNED
+    act(() => {
+      result.current.setExecUserFilter("UNASSIGNED");
+    });
+    expect(result.current.sortedExecutions).toHaveLength(1);
+    expect(result.current.sortedExecutions[0].status).toBe("NOT_DONE");
+  });
+
+  it("loads executions for a past date without month restriction error", async () => {
+    const { getExecutionsForDate, getStaffPerformanceMetrics } = await import(
+      "@/lib/actions/tasks"
+    );
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <AdminTareasProvider
+        initialCategories={mockCategories}
+        initialTasks={mockTasks}
+        initialExecutions={mockExecutions}
+      >
+        {children}
+      </AdminTareasProvider>
+    );
+
+    const { result } = renderHook(() => useAdminTareasContext(), { wrapper });
+
+    await act(async () => {
+      result.current.setSelectedDate("2025-01-15");
+    });
+
+    expect(result.current.errorMsg).toBeNull();
+    expect(getExecutionsForDate).toHaveBeenCalledWith("2025-01-15");
+    expect(getStaffPerformanceMetrics).toHaveBeenCalledWith("2025-01-15");
+  });
 });

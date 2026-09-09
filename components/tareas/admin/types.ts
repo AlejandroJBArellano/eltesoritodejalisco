@@ -10,6 +10,12 @@ export interface StaffPerformanceMetric {
 }
 
 export type ExecSortField = "task" | "user" | "status" | "duration";
+export type ExecComplianceFilter = "ALL" | "COMPLETED" | "NOT_DONE";
+
+export interface CollaboratorOption {
+  id: string;
+  name: string;
+}
 export type TaskSortField = "name" | "category" | "frequency";
 export type SortDir = "asc" | "desc";
 

@@ -27,6 +27,8 @@ import type {
   AdminTareasTab,
   StaffPerformanceMetric,
   ExecSortField,
+  ExecComplianceFilter,
+  CollaboratorOption,
   TaskSortField,
   SortDir,
   TaskFormData,
@@ -59,6 +61,11 @@ export interface AdminTareasContextValue {
   setExecSearch: (v: string) => void;
   execStatusFilter: string;
   setExecStatusFilter: (v: string) => void;
+  execUserFilter: string;
+  setExecUserFilter: (v: string) => void;
+  execComplianceFilter: ExecComplianceFilter;
+  setExecComplianceFilter: (v: ExecComplianceFilter) => void;
+  collaborators: CollaboratorOption[];
   execSortField: ExecSortField;
   setExecSortField: (f: ExecSortField) => void;
   execSortDir: SortDir;
@@ -67,6 +74,7 @@ export interface AdminTareasContextValue {
   setExecPage: (p: number) => void;
   execPageSize: number;
   setExecPageSize: (s: number) => void;
+  unifiedExecutions: TaskExecution[];
   sortedExecutions: TaskExecution[];
   paginatedExecutions: TaskExecution[];
   execTotalPages: number;
@@ -187,6 +195,9 @@ export function AdminTareasProvider({
   // Table Controls - Executions
   const [execSearch, setExecSearch] = useState("");
   const [execStatusFilter, setExecStatusFilter] = useState("ALL");
+  const [execUserFilter, setExecUserFilter] = useState("ALL");
+  const [execComplianceFilter, setExecComplianceFilter] =
+    useState<ExecComplianceFilter>("ALL");
   const [execSortField, setExecSortField] = useState<ExecSortField>("task");
   const [execSortDir, setExecSortDir] = useState<SortDir>("asc");
   const [execPage, setExecPage] = useState(1);
@@ -212,20 +223,6 @@ export function AdminTareasProvider({
     const loadData = async () => {
       setErrorMsg(null);
       try {
-        const dateObj = new Date(selectedDate + "T12:00:00");
-        const now = new Date();
-        if (
-          dateObj.getMonth() !== now.getMonth() ||
-          dateObj.getFullYear() !== now.getFullYear()
-        ) {
-          setErrorMsg(
-            "⚠️ Solo se permite consultar registros del mes en curso.",
-          );
-          setExecutions([]);
-          setMetrics([]);
-          return;
-        }
-
         setLoading("data");
         const [execData, metricsData] = await Promise.all([
           getExecutionsForDate(selectedDate),
@@ -386,20 +383,110 @@ export function AdminTareasProvider({
     }
   };
 
+  // Collaborators derived from metrics and executions
+  const collaborators = useMemo<CollaboratorOption[]>(() => {
+    const map = new Map<string, string>();
+    metrics.forEach((m) => {
+      if (m.userId && m.name) {
+        map.set(m.userId, m.name);
+      }
+    });
+    executions.forEach((e) => {
+      const id = e.user_id || e.user?.id;
+      const name = e.user?.full_name;
+      if (id) {
+        map.set(id, name || id);
+      } else if (name) {
+        map.set(name, name);
+      }
+    });
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [metrics, executions]);
+
+  // Unified Executions: Real task_executions + computed virtual NOT_DONE executions
+  const unifiedExecutions = useMemo<TaskExecution[]>(() => {
+    const activeTasks = tasks.filter((t) => t.is_active !== false);
+    const executionsByTaskId = new Map<string, TaskExecution[]>();
+
+    executions.forEach((e) => {
+      const list = executionsByTaskId.get(e.task_id) || [];
+      list.push(e);
+      executionsByTaskId.set(e.task_id, list);
+    });
+
+    const notDoneVirtualExecutions: TaskExecution[] = [];
+
+    activeTasks.forEach((task) => {
+      const taskExecs = executionsByTaskId.get(task.id);
+      if (!taskExecs || taskExecs.length === 0) {
+        notDoneVirtualExecutions.push({
+          id: `not-done-${task.id}`,
+          task_id: task.id,
+          status: "NOT_DONE",
+          paused_seconds: 0,
+          created_at: selectedDate
+            ? `${selectedDate}T00:00:00.000Z`
+            : new Date().toISOString(),
+          updated_at: selectedDate
+            ? `${selectedDate}T00:00:00.000Z`
+            : new Date().toISOString(),
+          task,
+        });
+      }
+    });
+
+    return [...executions, ...notDoneVirtualExecutions];
+  }, [executions, tasks, selectedDate]);
+
   // Filtered & Sorted Executions
   const filteredExecutions = useMemo(() => {
-    return executions.filter((exec) => {
+    return unifiedExecutions.filter((exec) => {
+      // 1. Search text
       if (execSearch.trim()) {
         const q = execSearch.toLowerCase();
         const tName = (exec.task?.name || "").toLowerCase();
         const uName = (exec.user?.full_name || "").toLowerCase();
         if (!tName.includes(q) && !uName.includes(q)) return false;
       }
-      if (execStatusFilter !== "ALL" && exec.status !== execStatusFilter)
+
+      // 2. Compliance filter
+      if (execComplianceFilter === "COMPLETED") {
+        if (exec.status !== "COMPLETED" && exec.status !== "APPROVED") {
+          return false;
+        }
+      } else if (execComplianceFilter === "NOT_DONE") {
+        if (exec.status === "COMPLETED" || exec.status === "APPROVED") {
+          return false;
+        }
+      }
+
+      // 3. Status filter
+      if (execStatusFilter !== "ALL" && exec.status !== execStatusFilter) {
         return false;
+      }
+
+      // 4. Collaborator filter
+      if (execUserFilter !== "ALL") {
+        const uId = exec.user_id || exec.user?.id;
+        const uName = exec.user?.full_name;
+        if (execUserFilter === "UNASSIGNED") {
+          if (uId || uName) return false;
+        } else {
+          if (uId !== execUserFilter && uName !== execUserFilter) {
+            return false;
+          }
+        }
+      }
+
       return true;
     });
-  }, [executions, execSearch, execStatusFilter]);
+  }, [
+    unifiedExecutions,
+    execSearch,
+    execComplianceFilter,
+    execStatusFilter,
+    execUserFilter,
+  ]);
 
   const sortedExecutions = useMemo(() => {
     return [...filteredExecutions].sort((a, b) => {
@@ -418,7 +505,14 @@ export function AdminTareasProvider({
 
   useEffect(() => {
     setExecPage(1);
-  }, [execSearch, execStatusFilter, execSortField, execSortDir]);
+  }, [
+    execSearch,
+    execStatusFilter,
+    execComplianceFilter,
+    execUserFilter,
+    execSortField,
+    execSortDir,
+  ]);
 
   const execTotalPages = Math.ceil(sortedExecutions.length / execPageSize) || 1;
   const paginatedExecutions = useMemo(() => {
@@ -483,6 +577,11 @@ export function AdminTareasProvider({
     setExecSearch,
     execStatusFilter,
     setExecStatusFilter,
+    execUserFilter,
+    setExecUserFilter,
+    execComplianceFilter,
+    setExecComplianceFilter,
+    collaborators,
     execSortField,
     setExecSortField,
     execSortDir,
@@ -491,6 +590,7 @@ export function AdminTareasProvider({
     setExecPage,
     execPageSize,
     setExecPageSize,
+    unifiedExecutions,
     sortedExecutions,
     paginatedExecutions,
     execTotalPages,

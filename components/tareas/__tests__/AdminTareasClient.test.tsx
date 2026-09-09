@@ -92,7 +92,7 @@ describe("AdminTareasClient Component", () => {
 
     expect(screen.getByText(/Ejecución de Tareas/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Exportar/i })).toBeInTheDocument();
-    expect(screen.getByText("Carlos")).toBeInTheDocument();
+    expect(screen.getAllByText("Carlos").length).toBeGreaterThanOrEqual(1);
   });
 
   it("should trigger export for executions in history tab", async () => {
@@ -112,7 +112,7 @@ describe("AdminTareasClient Component", () => {
 
     expect(exportCSVSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        filename: expect.stringContaining("ejecucion_tareas_"),
+        filename: expect.stringMatching(/reporte_tareas_|ejecucion_tareas_/),
         data: expect.arrayContaining([
           expect.objectContaining({ id: "exec-1" }),
         ]),

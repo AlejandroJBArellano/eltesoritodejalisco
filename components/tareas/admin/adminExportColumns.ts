@@ -3,10 +3,35 @@ import type { PrimordialTask, TaskExecution } from "@/types";
 import type { StaffPerformanceMetric } from "./types";
 
 export const EXECUTIONS_EXPORT_COLUMNS: ExportColumn<TaskExecution>[] = [
+  {
+    header: "Fecha",
+    accessor: (e) => (e.created_at ? e.created_at.split("T")[0] : "N/A"),
+  },
   { header: "Tarea", accessor: (e) => e.task?.name || e.task_id },
+  {
+    header: "Categoría",
+    accessor: (e) => e.task?.category?.name || "Sin Categoría",
+  },
   {
     header: "Colaborador",
     accessor: (e) => e.user?.full_name || "Sin Asignar",
+  },
+  {
+    header: "Estado",
+    accessor: (e) => {
+      switch (e.status) {
+        case "APPROVED":
+          return "Aprobada";
+        case "COMPLETED":
+          return "Listo para Aprobar";
+        case "IN_PROGRESS":
+          return "En Progreso";
+        case "NOT_DONE":
+          return "No Realizada";
+        default:
+          return e.status || "Desconocido";
+      }
+    },
   },
   {
     header: "Hora Inicio",
@@ -29,16 +54,20 @@ export const EXECUTIONS_EXPORT_COLUMNS: ExportColumn<TaskExecution>[] = [
   {
     header: "Duración (min)",
     accessor: (e) => {
+      if (e.status === "NOT_DONE") return "N/A";
+      if (e.net_duration_minutes !== undefined && e.net_duration_minutes !== null) {
+        return e.net_duration_minutes;
+      }
       if (!e.start_time || !e.end_time) return "N/A";
       const diffMs =
         new Date(e.end_time).getTime() - new Date(e.start_time).getTime();
       return Math.round(diffMs / 60000);
     },
   },
-  { header: "Estado", key: "status" },
   {
     header: "Aprobada",
-    accessor: (e) => (e.approved_at ? "Sí" : "Pendiente"),
+    accessor: (e) =>
+      e.approved_at ? "Sí" : e.status === "NOT_DONE" ? "No" : "Pendiente",
   },
 ];
 

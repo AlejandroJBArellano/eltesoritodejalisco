@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/DataTableControls";
 import { EXECUTIONS_EXPORT_COLUMNS } from "./adminExportColumns";
 import { useOptionalAdminTareasContext } from "./AdminTareasContext";
-import type { ExecSortField, SortDir } from "./types";
+import type { ExecComplianceFilter, CollaboratorOption, ExecSortField, SortDir } from "./types";
 
 export interface AdminTaskHistoryTabProps {
   selectedDate?: string;
@@ -22,6 +22,11 @@ export interface AdminTaskHistoryTabProps {
   onSearchChange?: (v: string) => void;
   statusFilter?: string;
   onStatusFilterChange?: (v: string) => void;
+  userFilter?: string;
+  onUserFilterChange?: (v: string) => void;
+  complianceFilter?: ExecComplianceFilter;
+  onComplianceFilterChange?: (v: ExecComplianceFilter) => void;
+  collaborators?: CollaboratorOption[];
   sortField?: ExecSortField;
   sortDir?: SortDir;
   onSort?: (field: ExecSortField) => void;
@@ -50,6 +55,18 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
     props.statusFilter ?? context?.execStatusFilter ?? "ALL";
   const onStatusFilterChange =
     props.onStatusFilterChange ?? context?.setExecStatusFilter ?? (() => {});
+  const userFilter =
+    props.userFilter ?? context?.execUserFilter ?? "ALL";
+  const onUserFilterChange =
+    props.onUserFilterChange ?? context?.setExecUserFilter ?? (() => {});
+  const complianceFilter =
+    props.complianceFilter ?? context?.execComplianceFilter ?? "ALL";
+  const onComplianceFilterChange =
+    props.onComplianceFilterChange ??
+    context?.setExecComplianceFilter ??
+    (() => {});
+  const collaborators =
+    props.collaborators ?? context?.collaborators ?? [];
   const sortField = props.sortField ?? context?.execSortField ?? "task";
   const sortDir = props.sortDir ?? context?.execSortDir ?? "asc";
   const onSort =
@@ -86,37 +103,94 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
           <ExportButton
             data={sortedExecutions}
             columns={EXECUTIONS_EXPORT_COLUMNS}
-            filename={() => `ejecucion_tareas_${selectedDate}`}
-            sheetName="Ejecución de Tareas"
+            filename={() => `reporte_tareas_${selectedDate || "historico"}`}
+            sheetName="Reporte de Tareas"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
-        <div>
-          <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
-            Buscar Ejecución
-          </label>
-          <TableSearchInput
-            value={search}
-            onChange={onSearchChange}
-            placeholder="Buscar por tarea o colaborador..."
-          />
-        </div>
-        <div>
-          <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
-            Estado
-          </label>
-          <select
-            value={statusFilter}
-            onChange={(e) => onStatusFilterChange(e.target.value)}
-            className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
+      <div className="flex flex-col gap-3 bg-dark/40 p-4 rounded-xl border border-border">
+        <div className="flex items-center gap-1.5 bg-dark/60 p-1 rounded-xl border border-border w-fit">
+          <button
+            type="button"
+            onClick={() => onComplianceFilterChange("ALL")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+              complianceFilter === "ALL"
+                ? "bg-primary text-black shadow-md"
+                : "text-gray-400 hover:text-white"
+            }`}
           >
-            <option value="ALL">Todos los Estados</option>
-            <option value="COMPLETED">Listo para Aprobar</option>
-            <option value="APPROVED">Aprobado</option>
-            <option value="IN_PROGRESS">En Progreso</option>
-          </select>
+            Todas
+          </button>
+          <button
+            type="button"
+            onClick={() => onComplianceFilterChange("COMPLETED")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+              complianceFilter === "COMPLETED"
+                ? "bg-primary text-black shadow-md"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            Completadas
+          </button>
+          <button
+            type="button"
+            onClick={() => onComplianceFilterChange("NOT_DONE")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+              complianceFilter === "NOT_DONE"
+                ? "bg-primary text-black shadow-md"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            No Realizadas
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
+              Buscar Ejecución
+            </label>
+            <TableSearchInput
+              value={search}
+              onChange={onSearchChange}
+              placeholder="Buscar por tarea o colaborador..."
+            />
+          </div>
+          <div>
+            <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
+              Colaborador
+            </label>
+            <select
+              value={userFilter}
+              onChange={(e) => onUserFilterChange(e.target.value)}
+              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
+            >
+              <option value="ALL">Todos los Colaboradores</option>
+              <option value="UNASSIGNED">Sin Asignar</option>
+              {collaborators.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
+              Estado
+            </label>
+            <select
+              value={statusFilter}
+              onChange={(e) => onStatusFilterChange(e.target.value)}
+              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
+            >
+              <option value="ALL">Todos los Estados</option>
+              <option value="COMPLETED">Listo para Aprobar</option>
+              <option value="APPROVED">Aprobado</option>
+              <option value="IN_PROGRESS">En Progreso</option>
+              <option value="NOT_DONE">No Realizada</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -167,7 +241,9 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
                   {exec.task?.name || "Desconocida"}
                 </td>
                 <td className="py-3 px-4 text-gray-400">
-                  {exec.user?.full_name || "Desconocido"}
+                  {exec.status === "NOT_DONE"
+                    ? "Sin Asignar"
+                    : exec.user?.full_name || "Sin Asignar"}
                 </td>
                 <td className="py-3 px-4">
                   <span
@@ -178,7 +254,9 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
                           ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
                           : exec.status === "IN_PROGRESS"
                             ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
-                            : "bg-gray-500/10 text-gray-400 border border-gray-500/20"
+                            : exec.status === "NOT_DONE"
+                              ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                              : "bg-gray-500/10 text-gray-400 border border-gray-500/20"
                     }`}
                   >
                     {exec.status === "COMPLETED"
@@ -187,7 +265,9 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
                         ? "Aprobado"
                         : exec.status === "IN_PROGRESS"
                           ? "En Progreso"
-                          : exec.status}
+                          : exec.status === "NOT_DONE"
+                            ? "No Realizada"
+                            : exec.status}
                   </span>
                 </td>
                 <td className="py-3 px-4 font-mono text-xs text-gray-400">
@@ -199,9 +279,11 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
                     : "-"}
                 </td>
                 <td className="py-3 px-4 font-bold text-white">
-                  {exec.net_duration_minutes !== undefined
-                    ? `${exec.net_duration_minutes} min`
-                    : "-"}
+                  {exec.status === "NOT_DONE"
+                    ? "-"
+                    : exec.net_duration_minutes !== undefined
+                      ? `${exec.net_duration_minutes} min`
+                      : "-"}
                 </td>
                 <td className="py-3 px-4">
                   {exec.photo_url ? (

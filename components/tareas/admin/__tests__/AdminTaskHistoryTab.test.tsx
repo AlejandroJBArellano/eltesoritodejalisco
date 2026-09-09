@@ -125,4 +125,80 @@ describe("AdminTaskHistoryTab Component", () => {
     fireEvent.change(statusSelect, { target: { value: "COMPLETED" } });
     expect(onStatusFilterMock).toHaveBeenCalledWith("COMPLETED");
   });
+
+  it("handles compliance switch and collaborator dropdown interactions", () => {
+    const onComplianceFilterMock = vi.fn();
+    const onUserFilterMock = vi.fn();
+
+    const mockCollaborators = [
+      { id: "u-1", name: "María López" },
+      { id: "u-2", name: "José Torres" },
+    ];
+
+    render(
+      <AdminTaskHistoryTab
+        selectedDate="2026-09-03"
+        paginatedExecutions={mockExecutions}
+        sortedExecutions={mockExecutions}
+        collaborators={mockCollaborators}
+        complianceFilter="ALL"
+        onComplianceFilterChange={onComplianceFilterMock}
+        userFilter="ALL"
+        onUserFilterChange={onUserFilterMock}
+      />,
+    );
+
+    // Compliance switch buttons
+    const completedBtn = screen.getByRole("button", { name: "Completadas" });
+    fireEvent.click(completedBtn);
+    expect(onComplianceFilterMock).toHaveBeenCalledWith("COMPLETED");
+
+    const notDoneBtn = screen.getByRole("button", { name: "No Realizadas" });
+    fireEvent.click(notDoneBtn);
+    expect(onComplianceFilterMock).toHaveBeenCalledWith("NOT_DONE");
+
+    const allBtn = screen.getByRole("button", { name: "Todas" });
+    fireEvent.click(allBtn);
+    expect(onComplianceFilterMock).toHaveBeenCalledWith("ALL");
+
+    // Collaborator select
+    const userSelect = screen.getByDisplayValue("Todos los Colaboradores");
+    fireEvent.change(userSelect, { target: { value: "u-1" } });
+    expect(onUserFilterMock).toHaveBeenCalledWith("u-1");
+  });
+
+  it("renders NOT_DONE virtual task executions with badge, Sin Asignar, and dash values", () => {
+    const notDoneExec: TaskExecution = {
+      id: "not-done-task-99",
+      task_id: "t-99",
+      status: "NOT_DONE",
+      paused_seconds: 0,
+      created_at: "2026-09-03T00:00:00Z",
+      updated_at: "2026-09-03T00:00:00Z",
+      task: {
+        id: "t-99",
+        name: "Desinfección de Mesas",
+        frequency_type: "DAILY",
+        requires_photo: false,
+        timeout_minutes: 15,
+        is_active: true,
+        created_at: "2026-01-01",
+        updated_at: "2026-01-01",
+      },
+    };
+
+    render(
+      <AdminTaskHistoryTab
+        selectedDate="2026-09-03"
+        paginatedExecutions={[notDoneExec]}
+        sortedExecutions={[notDoneExec]}
+      />,
+    );
+
+    expect(screen.getByText("Desinfección de Mesas")).toBeInTheDocument();
+    expect(screen.getAllByText("No Realizada").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Sin Asignar").length).toBeGreaterThanOrEqual(1);
+    // Verify no approve button is rendered for NOT_DONE
+    expect(screen.queryByRole("button", { name: /aprobar/i })).not.toBeInTheDocument();
+  });
 });
