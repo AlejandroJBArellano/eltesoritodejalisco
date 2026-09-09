@@ -172,7 +172,7 @@ export async function PUT(
       if (deleteError) throw deleteError;
     }
 
-    // Update quantities and discounts for items that remain
+    // Update quantities, discounts and notes for items that remain
     const updatePromises = itemsToKeep.map(
       (item: {
         id: string;
@@ -181,6 +181,7 @@ export async function PUT(
         discountValue?: number | null;
         discountScope?: "ROW" | "UNIT" | null;
         discountReason?: string | null;
+        notes?: string | null;
       }) => {
         const existing = currentMap.get(item.id);
         const unitPrice = existing?.unit_price ?? 0;
@@ -201,6 +202,9 @@ export async function PUT(
             discount_amount: discountCalc.discountAmount,
             discount_scope: item.discountScope ?? "ROW",
             discount_reason: item.discountReason ?? null,
+            ...(item.notes !== undefined
+              ? { notes: item.notes ? item.notes.trim() || null : null }
+              : {}),
           })
           .eq("id", item.id)
           .eq("order_id", id);

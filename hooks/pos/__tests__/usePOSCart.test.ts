@@ -476,4 +476,178 @@ describe("usePOSCart Hook", () => {
     });
     expect(onSuccess).toHaveBeenCalledWith(dummyOrder);
   });
+
+  it("should initialize modifyItems with notes in openModifyModal and update with handleModifyNotesChange", () => {
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
+    const dummyOrder: Order = {
+      id: "order-999",
+      orderNumber: "999",
+      source: "POS",
+      status: "PENDING" as any,
+      subtotal: 40,
+      tax: 0,
+      total: 40,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      table: "Mesa 5",
+      customerId: "cust-1",
+      orderItems: [
+        {
+          id: "item-10",
+          orderId: "order-999",
+          menuItemId: "1",
+          quantity: 2,
+          unitPrice: 20,
+          notes: "Sin verdura",
+          createdAt: new Date(),
+          menuItem: mockMenuItems[0] as any,
+        },
+      ],
+    };
+
+    act(() => {
+      result.current.openModifyModal(dummyOrder);
+    });
+
+    expect(result.current.modifyingOrder).toBe(dummyOrder);
+    expect(result.current.modifyTable).toBe("Mesa 5");
+    expect(result.current.modifyCustomerId).toBe("cust-1");
+    expect(result.current.modifyItems.length).toBe(1);
+    expect(result.current.modifyItems[0].notes).toBe("Sin verdura");
+    expect(result.current.hasUnsavedModifyChanges).toBe(false);
+
+    // Update note
+    act(() => {
+      result.current.handleModifyNotesChange(0, "Con extra salsa");
+    });
+
+    expect(result.current.modifyItems[0].notes).toBe("Con extra salsa");
+    expect(result.current.hasUnsavedModifyChanges).toBe(true);
+  });
+
+  it("should detect unsaved changes across table, customer, and items in usePOSCart", () => {
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
+    const dummyOrder: Order = {
+      id: "order-888",
+      orderNumber: "888",
+      source: "POS",
+      status: "PENDING" as any,
+      subtotal: 20,
+      tax: 0,
+      total: 20,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      table: "Mesa 1",
+      customerId: "cust-1",
+      orderItems: [
+        {
+          id: "item-1",
+          orderId: "order-888",
+          menuItemId: "1",
+          quantity: 1,
+          unitPrice: 20,
+          notes: "",
+          createdAt: new Date(),
+          menuItem: mockMenuItems[0] as any,
+        },
+      ],
+    };
+
+    act(() => {
+      result.current.openModifyModal(dummyOrder);
+    });
+    expect(result.current.hasUnsavedModifyChanges).toBe(false);
+
+    // Change table
+    act(() => {
+      result.current.setModifyTable("Mesa 2");
+    });
+    expect(result.current.hasUnsavedModifyChanges).toBe(true);
+
+    // Revert table
+    act(() => {
+      result.current.setModifyTable("Mesa 1");
+    });
+    expect(result.current.hasUnsavedModifyChanges).toBe(false);
+
+    // Change customer
+    act(() => {
+      result.current.setModifyCustomerId("cust-2");
+    });
+    expect(result.current.hasUnsavedModifyChanges).toBe(true);
+
+    // Revert customer
+    act(() => {
+      result.current.setModifyCustomerId("cust-1");
+    });
+    expect(result.current.hasUnsavedModifyChanges).toBe(false);
+
+    // Change quantity
+    act(() => {
+      result.current.handleModifyQuantityChange(0, 1);
+    });
+    expect(result.current.hasUnsavedModifyChanges).toBe(true);
+  });
+
+  it("should send notes in PUT payload when calling handleSaveModifiedOrder", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+    global.fetch = mockFetch;
+
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+
+    const dummyOrder: Order = {
+      id: "order-777",
+      orderNumber: "777",
+      source: "POS",
+      status: "PENDING" as any,
+      subtotal: 20,
+      tax: 0,
+      total: 20,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      orderItems: [
+        {
+          id: "item-1",
+          orderId: "order-777",
+          menuItemId: "1",
+          quantity: 1,
+          unitPrice: 20,
+          notes: "Bien dorado",
+          createdAt: new Date(),
+          menuItem: mockMenuItems[0] as any,
+        },
+      ],
+    };
+
+    act(() => {
+      result.current.openModifyModal(dummyOrder);
+    });
+
+    let success = false;
+    await act(async () => {
+      success = await result.current.handleSaveModifiedOrder("9999");
+    });
+
+    expect(success).toBe(true);
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/orders/order-777",
+      expect.objectContaining({
+        method: "PUT",
+        body: expect.stringContaining('"notes":"Bien dorado"'),
+      }),
+    );
+    expect(mockRefreshOrders).toHaveBeenCalled();
+    expect(result.current.modifyingOrder).toBeNull();
+  });
 });

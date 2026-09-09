@@ -598,6 +598,7 @@ function usePOSCartInternal(
         quantity: Number(item.quantity),
         unitPrice: item.unitPrice,
         menuItemName: item.menuItem?.name || "Producto",
+        notes: item.notes || "",
         discountType: item.discountType || null,
         discountValue: item.discountValue != null ? item.discountValue : null,
         discountAmount: item.discountAmount || 0,
@@ -606,6 +607,85 @@ function usePOSCartInternal(
       })),
     );
   };
+
+  const handleModifyNotesChange = (index: number, notes: string) => {
+    setModifyItems((prev) => {
+      const next = [...prev];
+      if (next[index]) {
+        next[index] = { ...next[index], notes };
+      }
+      return next;
+    });
+  };
+
+  const hasUnsavedModifyChanges = useMemo(() => {
+    if (!modifyingOrder) return false;
+
+    // Table comparison
+    if ((modifyTable || "") !== (modifyingOrder.table || "")) return true;
+
+    // Customer comparison
+    const origCustomerId =
+      modifyingOrder.customerId || modifyingOrder.customer?.id || "";
+    if ((modifyCustomerId || "") !== origCustomerId) return true;
+
+    // Order discount comparison
+    const origOrderDiscType = modifyingOrder.discountType || null;
+    const currentOrderDiscType = modifyOrderDiscount.discountType || null;
+    if (origOrderDiscType !== currentOrderDiscType) return true;
+
+    const origOrderDiscVal =
+      modifyingOrder.discountValue != null
+        ? Number(modifyingOrder.discountValue)
+        : null;
+    const currentOrderDiscVal =
+      modifyOrderDiscount.discountValue != null
+        ? Number(modifyOrderDiscount.discountValue)
+        : null;
+    if (origOrderDiscVal !== currentOrderDiscVal) return true;
+
+    const origOrderDiscReason = modifyingOrder.discountReason || null;
+    const currentOrderDiscReason = modifyOrderDiscount.discountReason || null;
+    if (origOrderDiscReason !== currentOrderDiscReason) return true;
+
+    // Items comparison
+    const origItems = modifyingOrder.orderItems || [];
+    if (modifyItems.length !== origItems.length) return true;
+
+    const origItemMap = new Map(origItems.map((item) => [item.id, item]));
+    for (const item of modifyItems) {
+      const orig = origItemMap.get(item.id);
+      if (!orig) return true;
+      if (item.quantity !== Number(orig.quantity)) return true;
+      if ((item.notes || "") !== (orig.notes || "")) return true;
+
+      const origItemDiscType = orig.discountType || null;
+      const currentItemDiscType = item.discountType || null;
+      if (origItemDiscType !== currentItemDiscType) return true;
+
+      const origItemDiscVal =
+        orig.discountValue != null ? Number(orig.discountValue) : null;
+      const currentItemDiscVal =
+        item.discountValue != null ? Number(item.discountValue) : null;
+      if (origItemDiscVal !== currentItemDiscVal) return true;
+
+      const origItemScope = orig.discountScope || "ROW";
+      const currentItemScope = item.discountScope || "ROW";
+      if (origItemScope !== currentItemScope) return true;
+
+      const origItemReason = orig.discountReason || null;
+      const currentItemReason = item.discountReason || null;
+      if (origItemReason !== currentItemReason) return true;
+    }
+
+    return false;
+  }, [
+    modifyingOrder,
+    modifyItems,
+    modifyTable,
+    modifyCustomerId,
+    modifyOrderDiscount,
+  ]);
 
   const handleModifyQuantityChange = (index: number, delta: number) => {
     setModifyItems((prev) => {
@@ -623,11 +703,11 @@ function usePOSCartInternal(
     setModifyItems((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  const handleSaveModifiedOrder = async (pin?: string) => {
-    if (!modifyingOrder) return;
+  const handleSaveModifiedOrder = async (pin?: string): Promise<boolean> => {
+    if (!modifyingOrder) return false;
     if (modifyItems.length === 0) {
       setCartError("La orden debe tener al menos un producto.");
-      return;
+      return false;
     }
     try {
       setIsSubmittingCart(true);
@@ -639,6 +719,7 @@ function usePOSCartInternal(
           items: modifyItems.map((item) => ({
             id: item.id,
             quantity: item.quantity,
+            notes: item.notes ? item.notes.trim() || null : null,
             discountType: item.discountType || null,
             discountValue: item.discountValue || null,
             discountScope: item.discountScope || "ROW",
@@ -665,10 +746,12 @@ function usePOSCartInternal(
         discountValue: null,
         discountReason: null,
       });
+      return true;
     } catch (error) {
       setCartError(
         error instanceof Error ? error.message : "Error al modificar orden",
       );
+      return false;
     } finally {
       setIsSubmittingCart(false);
     }
@@ -744,6 +827,7 @@ function usePOSCartInternal(
     setModifyCustomerId,
     modifyOrderDiscount,
     modifyOrderTotals,
+    hasUnsavedModifyChanges,
     handleApplyModifyItemDiscount,
     handleRemoveModifyItemDiscount,
     handleApplyModifyOrderDiscount,
@@ -756,6 +840,7 @@ function usePOSCartInternal(
     removeAdditionalItemRow,
     openModifyModal,
     handleModifyQuantityChange,
+    handleModifyNotesChange,
     handleModifyRemoveItem,
     handleSaveModifiedOrder,
     handleCancelOrder,
