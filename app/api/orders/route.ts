@@ -152,9 +152,11 @@ export async function POST(request: NextRequest) {
       ? fullOrder.order_items
       : [];
     const itemsSummary = createdItems
-      .map((item: any) => {
-        const name = item?.menu_items?.name || "Producto";
-        return `${name} x${item.quantity || 1}`;
+      .map((item: Record<string, unknown>) => {
+        const menuItem = item?.menu_items as { name?: string } | undefined;
+        const name = menuItem?.name || "Producto";
+        const qty = (item.quantity as number | undefined) || 1;
+        return `${name} x${qty}`;
       })
       .join(", ");
 

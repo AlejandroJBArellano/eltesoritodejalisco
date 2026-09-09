@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { OrderWithDetails, PaymentMethod } from "@/types";
+import type { PaymentMethod } from "@/types";
 import { mapOrderData, type DbOrderPayload } from "@/lib/mappers/orders";
 import { getOrderPaymentMethods } from "@/components/pos/paymentUtils";
 import type { Order, OrderFilters, OrderSortField } from "../types";
