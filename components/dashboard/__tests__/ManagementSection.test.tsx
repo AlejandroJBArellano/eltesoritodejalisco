@@ -103,4 +103,22 @@ describe("ManagementSection Component", () => {
     expect(screen.getByText("Online")).toBeInTheDocument();
     expect(screen.getByText("Configuración")).toBeInTheDocument();
   });
+
+  it("renders Inventario module card when isInventory is true", () => {
+    render(
+      <ManagementSection
+        isAdmin={false}
+        isWaiter={false}
+        isInventory={true}
+        tenant={{ slug: "almacen-tacos", stripe_charges_enabled: false }}
+      />,
+    );
+
+    expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
+    expect(screen.getByText("Inventario")).toBeInTheDocument();
+    expect(screen.queryByText("Kittn Pickup")).not.toBeInTheDocument();
+    expect(screen.queryByText("Clientes")).not.toBeInTheDocument();
+    expect(screen.queryByText("Gestión de Menú")).not.toBeInTheDocument();
+    expect(screen.queryByText("Usuarios")).not.toBeInTheDocument();
+  });
 });

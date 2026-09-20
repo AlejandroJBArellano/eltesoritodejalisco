@@ -25,6 +25,7 @@ export interface ManagementTenantInfo {
 export interface ManagementSectionProps {
   isAdmin?: boolean;
   isWaiter?: boolean;
+  isInventory?: boolean;
   tenant?: ManagementTenantInfo;
 }
 
@@ -34,11 +35,12 @@ export function ManagementSection(props?: ManagementSectionProps) {
 
   const isAdmin = props?.isAdmin ?? user?.isAdmin ?? false;
   const isWaiter = props?.isWaiter ?? user?.isWaiter ?? false;
+  const isInventory = props?.isInventory ?? user?.isInventory ?? false;
   const tenant =
     props?.tenant ??
     tenantContext ?? { slug: "", stripe_charges_enabled: false };
 
-  if (!isAdmin && !isWaiter) return null;
+  if (!isAdmin && !isWaiter && !isInventory) return null;
 
   const isStripeEnabled = Boolean(tenant.stripe_charges_enabled);
   const slug = tenant.slug || "";
@@ -46,37 +48,41 @@ export function ManagementSection(props?: ManagementSectionProps) {
   return (
     <CollapsibleSection title="Gestión y Clientes" dotColorClass="bg-success">
       <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-3">
-        <ModuleCard
-          title="Kittn Pickup"
-          description={
-            isStripeEnabled
-              ? "Portal de pedidos para clientes en línea."
-              : "Activar tienda online y cobros con Stripe."
-          }
-          href={
-            isStripeEnabled
-              ? `https://${slug}.trykittn.com`
-              : "/admin/settings#pickup"
-          }
-          target={isStripeEnabled ? "_blank" : undefined}
-          icon={ShoppingBag}
-          badge={isStripeEnabled ? "Online" : "Inactivo"}
-          themeClass={
-            isStripeEnabled
-              ? "bg-emerald-500/10 text-emerald-400"
-              : "bg-zinc-800 text-text-light/50"
-          }
-          hoverColor={isStripeEnabled ? "#10b981" : "var(--color-primary)"}
-        />
-        <ModuleCard
-          title="Clientes"
-          description="Lealtad y fuentes de visita."
-          href="/customers"
-          icon={Users}
-          badge="CRM"
-          themeClass="bg-success/10 text-success"
-          hoverColor="var(--color-success)"
-        />
+        {(isAdmin || isWaiter) && (
+          <ModuleCard
+            title="Kittn Pickup"
+            description={
+              isStripeEnabled
+                ? "Portal de pedidos para clientes en línea."
+                : "Activar tienda online y cobros con Stripe."
+            }
+            href={
+              isStripeEnabled
+                ? `https://${slug}.trykittn.com`
+                : "/admin/settings#pickup"
+            }
+            target={isStripeEnabled ? "_blank" : undefined}
+            icon={ShoppingBag}
+            badge={isStripeEnabled ? "Online" : "Inactivo"}
+            themeClass={
+              isStripeEnabled
+                ? "bg-emerald-500/10 text-emerald-400"
+                : "bg-zinc-800 text-text-light/50"
+            }
+            hoverColor={isStripeEnabled ? "#10b981" : "var(--color-primary)"}
+          />
+        )}
+        {(isAdmin || isWaiter) && (
+          <ModuleCard
+            title="Clientes"
+            description="Lealtad y fuentes de visita."
+            href="/customers"
+            icon={Users}
+            badge="CRM"
+            themeClass="bg-success/10 text-success"
+            hoverColor="var(--color-success)"
+          />
+        )}
         {isAdmin && (
           <ModuleCard
             title="Gestión de Menú"
@@ -87,7 +93,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
             hoverColor="var(--color-primary)"
           />
         )}
-        {isAdmin && (
+        {(isAdmin || isInventory) && (
           <ModuleCard
             title="Inventario"
             description="Control de stock, alertas de bajo inventario y ajustes."

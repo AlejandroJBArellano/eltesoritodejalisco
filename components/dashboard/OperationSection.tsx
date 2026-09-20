@@ -9,19 +9,22 @@ import { useOptionalUser } from "@/components/UserProvider";
 export interface OperationSectionProps {
   isAdmin?: boolean;
   isWaiter?: boolean;
+  isInventory?: boolean;
 }
 
 export function OperationSection(props?: OperationSectionProps) {
   const user = useOptionalUser();
   const isAdmin = props?.isAdmin ?? user?.isAdmin ?? false;
   const isWaiter = props?.isWaiter ?? user?.isWaiter ?? false;
+  const isInventory = props?.isInventory ?? user?.isInventory ?? false;
 
-  const canAccessPOSAndTasks = isAdmin || isWaiter;
+  const canAccessPOS = isAdmin || isWaiter;
+  const canAccessTasks = isAdmin || isWaiter || isInventory;
 
   return (
     <CollapsibleSection title="Operación Diaria" dotColorClass="bg-primary">
       <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-3">
-        {canAccessPOSAndTasks && (
+        {canAccessPOS && (
           <ModuleCard
             title="Punto de Venta"
             description="Crear órdenes y procesar pagos."
@@ -41,7 +44,7 @@ export function OperationSection(props?: OperationSectionProps) {
           themeClass="bg-primary/10 text-primary"
           hoverColor="var(--color-primary)"
         />
-        {canAccessPOSAndTasks && (
+        {canAccessTasks && (
           <ModuleCard
             title="Tareas Diarias"
             description="Checklist de tareas primordiales y operación diaria."

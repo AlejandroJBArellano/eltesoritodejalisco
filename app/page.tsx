@@ -26,6 +26,7 @@ export default async function Home() {
   }
 
   const isAdmin = profile.role === "ADMIN" || profile.role === "MANAGER";
+  const isInventory = profile.role === "INVENTORY";
 
   const tenant = await getTenantContext();
   let lowStockAlerts: LowStockIngredient[] = [];
@@ -36,11 +37,13 @@ export default async function Home() {
     tipsToday: 0,
   };
 
-  if (isAdmin) {
+  if (isAdmin || isInventory) {
     const supabase = await createClient();
 
     const [statsResult, ingredientsResult] = await Promise.all([
-      supabase.rpc("get_dashboard_stats", { p_tenant_id: tenant.id }),
+      isAdmin
+        ? supabase.rpc("get_dashboard_stats", { p_tenant_id: tenant.id })
+        : Promise.resolve({ data: null, error: null }),
       supabase
         .from("ingredients")
         .select("id, name, current_stock, minimum_stock, unit")
@@ -53,7 +56,12 @@ export default async function Home() {
       (ing) => ing.current_stock <= ing.minimum_stock,
     );
 
-    if (!statsResult.error && statsResult.data && statsResult.data.length > 0) {
+    if (
+      isAdmin &&
+      !statsResult.error &&
+      statsResult.data &&
+      statsResult.data.length > 0
+    ) {
       const s = statsResult.data[0];
       stats.activeOrdersCount = Number(s.active_orders || 0);
       stats.salesToday = Number(s.sales_today || 0);
@@ -65,7 +73,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen">
       <main className="mx-auto max-w-7xl px-4 py-6 sm:py-12 sm:px-6 lg:px-8 space-y-6">
-        {isAdmin && <InventoryAlertBanner alerts={lowStockAlerts} />}
+        {(isAdmin || isInventory) && <InventoryAlertBanner alerts={lowStockAlerts} />}
 
         {isAdmin && <DailyStatsSection stats={stats} />}
 
