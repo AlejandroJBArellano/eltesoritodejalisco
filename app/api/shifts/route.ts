@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext } from "@/lib/tenant";
+import { getTenantCollaborators, sanitizeRole } from "@/lib/users";
 import { NextResponse } from "next/server";
 import type { Database } from "@/types/supabase";
 
@@ -73,15 +75,11 @@ export async function GET(request: Request) {
 
     query = query.order("date", { ascending: true }).order("start_time", { ascending: true });
 
-    const [shiftsRes, usersRes] = await Promise.all([
+    const [shiftsRes, collaborators] = await Promise.all([
       query,
       isAdmin
-        ? supabase
-            .from("users")
-            .select("id, name, email, role")
-            .eq("tenant_id", tenant.id)
-            .order("name", { ascending: true })
-        : Promise.resolve({ data: null, error: null }),
+        ? getTenantCollaborators(tenant.id)
+        : Promise.resolve([]),
     ]);
 
     if (shiftsRes.error) {
@@ -91,7 +89,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       shifts: shiftsRes.data || [],
-      users: usersRes.data || [],
+      users: collaborators || [],
       toleranceMinutes: tenant.attendance_tolerance_minutes ?? 10,
     });
   } catch (error) {
@@ -153,9 +151,38 @@ export async function POST(request: Request) {
     const formattedStart = formatTime(start_time);
     const formattedEnd = formatTime(end_time);
 
+    // Ensure target collaborator exists in public.users to satisfy fk_employee_shifts_users
+    const adminSupabase = createAdminClient();
+    const { data: existingDbUser } = await adminSupabase
+      .from("users")
+      .select("id")
+      .eq("id", user_id)
+      .eq("tenant_id", tenant.id)
+      .maybeSingle();
+
+    if (!existingDbUser) {
+      const { data: profileToSync } = await adminSupabase
+        .from("profiles")
+        .select("id, full_name, email, role")
+        .eq("id", user_id)
+        .eq("tenant_id", tenant.id)
+        .maybeSingle();
+
+      if (profileToSync) {
+        await adminSupabase.from("users").upsert({
+          id: profileToSync.id,
+          tenant_id: tenant.id,
+          name: profileToSync.full_name || "Colaborador",
+          email: profileToSync.email || `${profileToSync.id}@birria.local`,
+          role: sanitizeRole(profileToSync.role),
+          password: "MANAGED_BY_SUPABASE",
+        }, { onConflict: "id,tenant_id" });
+      }
+    }
+
     if (id) {
       // Update existing shift
-      const { data: updated, error: updateError } = await supabase
+      const { data: updated, error: updateError } = await adminSupabase
         .from("employee_shifts")
         .update({
           user_id,
@@ -189,7 +216,7 @@ export async function POST(request: Request) {
         notes: notes || null,
       };
 
-      const { data: created, error: insertError } = await supabase
+      const { data: created, error: insertError } = await adminSupabase
         .from("employee_shifts")
         .insert(insertData)
         .select()
@@ -252,7 +279,8 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "ID de turno requerido" }, { status: 400 });
     }
 
-    const { error: deleteError } = await supabase
+    const adminSupabase = createAdminClient();
+    const { error: deleteError } = await adminSupabase
       .from("employee_shifts")
       .delete()
       .eq("id", id)

@@ -5,6 +5,8 @@ import { AdminHorariosContent } from "@/components/admin/AdminHorariosContent";
 import { getTenantContext } from "@/lib/tenant";
 import type { ShiftUserOption } from "@/components/admin/shifts/ShiftModal";
 
+import { getTenantCollaborators } from "@/lib/users";
+
 export interface DbBusinessHours {
   id: string;
   day_of_week: number;
@@ -32,29 +34,22 @@ async function getPageData(): Promise<{
   const tenant = await getTenantContext();
   const supabase = createAdminClient();
 
-  const [hoursRes, usersRes] = await Promise.all([
+  const [hoursRes, users] = await Promise.all([
     supabase
       .from("business_hours")
       .select("*")
       .eq("tenant_id", tenant.id)
       .order("day_of_week", { ascending: true }),
-    supabase
-      .from("users")
-      .select("id, name, role")
-      .eq("tenant_id", tenant.id)
-      .order("name", { ascending: true }),
+    getTenantCollaborators(tenant.id),
   ]);
 
   if (hoursRes.error) {
     console.error("Error fetching business hours:", hoursRes.error);
   }
-  if (usersRes.error) {
-    console.error("Error fetching users:", usersRes.error);
-  }
 
   return {
     hours: hoursRes.data || [],
-    users: (usersRes.data as ShiftUserOption[]) || [],
+    users: users || [],
     toleranceMinutes: tenant.attendance_tolerance_minutes ?? 10,
   };
 }
