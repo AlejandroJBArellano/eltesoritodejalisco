@@ -513,119 +513,6 @@ export type Database = {
           },
         ]
       }
-      menu_categories: {
-        Row: {
-          created_at: string | null
-          id: string
-          is_active: boolean | null
-          name: string
-          show_in_pickup: boolean | null
-          sort_order: number | null
-          tenant_id: string
-          translations: Json | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          name: string
-          show_in_pickup?: boolean | null
-          sort_order?: number | null
-          tenant_id: string
-          translations?: Json | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          name?: string
-          show_in_pickup?: boolean | null
-          sort_order?: number | null
-          tenant_id?: string
-          translations?: Json | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "menu_categories_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      menu_items: {
-        Row: {
-          category: string | null
-          created_at: string
-          description: string | null
-          id: string
-          image_url: string | null
-          ingredient_id: string | null
-          is_available: boolean
-          name: string
-          price: number
-          show_in_dine_in: boolean | null
-          show_in_takeaway: boolean | null
-          stripe_product_id: string | null
-          tenant_id: string
-          translations: Json | null
-          updated_at: string
-        }
-        Insert: {
-          category?: string | null
-          created_at?: string
-          description?: string | null
-          id: string
-          image_url?: string | null
-          ingredient_id?: string | null
-          is_available?: boolean
-          name: string
-          price: number
-          show_in_dine_in?: boolean | null
-          show_in_takeaway?: boolean | null
-          stripe_product_id?: string | null
-          tenant_id: string
-          translations?: Json | null
-          updated_at: string
-        }
-        Update: {
-          category?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          ingredient_id?: string | null
-          is_available?: boolean
-          name?: string
-          price?: number
-          show_in_dine_in?: boolean | null
-          show_in_takeaway?: boolean | null
-          stripe_product_id?: string | null
-          tenant_id?: string
-          translations?: Json | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "menu_items_ingredient_id_fkey"
-            columns: ["ingredient_id"]
-            isOneToOne: false
-            referencedRelation: "ingredients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "menu_items_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       loyalty_campaign_recipients: {
         Row: {
           campaign_id: string
@@ -747,14 +634,120 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "loyalty_campaigns_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "loyalty_campaigns_tenant_id_fkey"
+            columns: ["tenant_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          show_in_pickup: boolean | null
+          sort_order: number | null
+          tenant_id: string
+          translations: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          show_in_pickup?: boolean | null
+          sort_order?: number | null
+          tenant_id: string
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          show_in_pickup?: boolean | null
+          sort_order?: number | null
+          tenant_id?: string
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_categories_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_items: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          ingredient_id: string | null
+          is_available: boolean
+          name: string
+          price: number
+          show_in_dine_in: boolean | null
+          show_in_takeaway: boolean | null
+          stripe_product_id: string | null
+          tenant_id: string
+          translations: Json | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id: string
+          image_url?: string | null
+          ingredient_id?: string | null
+          is_available?: boolean
+          name: string
+          price: number
+          show_in_dine_in?: boolean | null
+          show_in_takeaway?: boolean | null
+          stripe_product_id?: string | null
+          tenant_id: string
+          translations?: Json | null
+          updated_at: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          ingredient_id?: string | null
+          is_available?: boolean
+          name?: string
+          price?: number
+          show_in_dine_in?: boolean | null
+          show_in_takeaway?: boolean | null
+          stripe_product_id?: string | null
+          tenant_id?: string
+          translations?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_ingredient_id_fkey"
+            columns: ["ingredient_id"]
+            isOneToOne: false
+            referencedRelation: "ingredients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "loyalty_campaigns_tenant_id_fkey"
+            foreignKeyName: "menu_items_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
