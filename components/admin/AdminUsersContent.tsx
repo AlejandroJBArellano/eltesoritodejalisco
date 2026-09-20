@@ -3,8 +3,8 @@
 import {
   createUser,
   deleteUser,
-  updateUserRole,
   updateUserPin,
+  updateUserRole,
 } from "@/app/admin/users/actions";
 import { getTenantRoles } from "@/app/admin/users/roles-actions";
 import { PageHeader } from "@/components/PageHeader";
@@ -14,24 +14,21 @@ import {
   TableSearchInput,
 } from "@/components/ui/DataTableControls";
 import { Modal } from "@/components/ui/Modal";
-import { AdminRolesTab } from "./AdminRolesTab";
 import { type RoleData } from "@/lib/permissions";
 import {
   AlertTriangle,
   CheckCircle2,
-  ChefHat,
   Lock,
   Mail,
-  Package,
-  Receipt,
   RefreshCw,
   ShieldCheck,
   Trash2,
   User,
   UserPlus,
-  Users,
+  Users
 } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { AdminRolesTab } from "./AdminRolesTab";
 
 export type Profile = {
   id: string;
@@ -463,11 +460,10 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           <button
             type="button"
             onClick={() => setActiveTab("team")}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
-              activeTab === "team"
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${activeTab === "team"
                 ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
                 : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
-            }`}
+              }`}
           >
             <Users className="h-4 w-4" />
             <span>Equipo de Trabajo ({profiles.length})</span>
@@ -476,11 +472,10 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           <button
             type="button"
             onClick={() => setActiveTab("roles")}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
-              activeTab === "roles"
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${activeTab === "roles"
                 ? "bg-primary/15 text-primary border border-primary/30"
                 : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
-            }`}
+              }`}
           >
             <ShieldCheck className="h-4 w-4" />
             <span>Roles y Permisos</span>
@@ -506,79 +501,6 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 <span>{successMsg}</span>
               </div>
             )}
-
-            {/* Tarjetas de Métricas Rápidas */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
-                    Total Usuarios
-                  </p>
-                  <p className="mt-1 text-2xl font-black text-text-light">
-                    {profiles.length}
-                  </p>
-                </div>
-                <div className="rounded-xl bg-primary/10 p-3 text-primary">
-                  <Users className="h-5 w-5" />
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
-                    Administración
-                  </p>
-                  <p className="mt-1 text-2xl font-black text-blue-400">
-                    {totalAdmins}
-                  </p>
-                </div>
-                <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
-                    Meseros / Piso
-                  </p>
-                  <p className="mt-1 text-2xl font-black text-amber-400">
-                    {totalWaiters}
-                  </p>
-                </div>
-                <div className="rounded-xl bg-amber-500/10 p-3 text-amber-400">
-                  <Receipt className="h-5 w-5" />
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
-                    Cocina / KDS
-                  </p>
-                  <p className="mt-1 text-2xl font-black text-purple-400">
-                    {totalChefs}
-                  </p>
-                </div>
-                <div className="rounded-xl bg-purple-500/10 p-3 text-purple-400">
-                  <ChefHat className="h-5 w-5" />
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
-                    Almacén / Stock
-                  </p>
-                  <p className="mt-1 text-2xl font-black text-teal-400">
-                    {totalInventory}
-                  </p>
-                </div>
-                <div className="rounded-xl bg-teal-500/10 p-3 text-teal-400">
-                  <Package className="h-5 w-5" />
-                </div>
-              </div>
-            </div>
 
             {/* TABLA DE USUARIOS */}
             <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
@@ -967,27 +889,27 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             selectedFormRole === "MANAGER" ||
             availableRoles.find((r) => r.id === selectedFormRole)?.system_slug === "ADMIN" ||
             availableRoles.find((r) => r.id === selectedFormRole)?.system_slug === "MANAGER") && (
-            <div>
-              <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
-                PIN de Autorización (4 a 6 dígitos)
-              </label>
-              <div className="relative">
-                <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400" />
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  name="pin"
-                  defaultValue="1234"
-                  maxLength={6}
-                  className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
-                  placeholder="1234"
-                />
+              <div>
+                <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
+                  PIN de Autorización (4 a 6 dígitos)
+                </label>
+                <div className="relative">
+                  <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400" />
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    name="pin"
+                    defaultValue="1234"
+                    maxLength={6}
+                    className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
+                    placeholder="1234"
+                  />
+                </div>
+                <p className="text-[11px] text-text-light/40 mt-1">
+                  PIN individual para autorizar descuentos, cancelaciones y reaperturas a meseros.
+                </p>
               </div>
-              <p className="text-[11px] text-text-light/40 mt-1">
-                PIN individual para autorizar descuentos, cancelaciones y reaperturas a meseros.
-              </p>
-            </div>
-          )}
+            )}
 
           {/* Resumen dinámico del rol seleccionado */}
           <div
