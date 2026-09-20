@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import {
   TableHeaderSortCell,
@@ -354,6 +355,13 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
         badgeColor="bg-emerald-500"
         actions={
           <div className="flex items-center gap-2.5">
+            <Link
+              href="/customers/campanas"
+              className="rounded-xl border border-border bg-card px-4 py-2 text-xs font-bold text-text-light hover:bg-white/5 active:scale-95 transition-all duration-200 uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            >
+              <Mail className="h-4 w-4 text-emerald-400" />
+              Campañas
+            </Link>
             <button
               onClick={() => setIsQRModalOpen(true)}
               className="rounded-xl border border-border bg-card px-4 py-2 text-xs font-bold text-text-light hover:bg-white/5 active:scale-95 transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"

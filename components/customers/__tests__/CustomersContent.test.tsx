@@ -167,5 +167,14 @@ describe("CustomersContent Component", () => {
 
     expect(screen.getAllByTitle("Eliminar Cliente").length).toBe(2);
   });
+
+  it("should render Campañas navigation button with correct href", () => {
+    render(<CustomersContent initialCustomers={mockCustomers} />);
+
+    const campanasLink = screen.getByRole("link", { name: /Campañas/i });
+    expect(campanasLink).toBeInTheDocument();
+    expect(campanasLink).toHaveAttribute("href", "/customers/campanas");
+  });
 });
+
 
