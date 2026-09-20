@@ -73,7 +73,12 @@ export async function PATCH(
 ) {
   try {
     const profile = await getProfile();
-    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    if (
+      !profile ||
+      (profile.role !== "ADMIN" &&
+        profile.role !== "MANAGER" &&
+        profile.role !== "INVENTORY")
+    ) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 

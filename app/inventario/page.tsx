@@ -19,7 +19,11 @@ export const metadata = {
 export default async function InventarioPage() {
   const profile = await getProfile();
   if (!profile) redirect("/login");
-  if (profile.role !== "ADMIN" && profile.role !== "MANAGER") {
+  if (
+    profile.role !== "ADMIN" &&
+    profile.role !== "MANAGER" &&
+    profile.role !== "INVENTORY"
+  ) {
     redirect("/");
   }
 

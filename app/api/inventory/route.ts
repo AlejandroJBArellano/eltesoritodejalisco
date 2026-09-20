@@ -64,7 +64,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const profile = await getProfile();
-    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    if (
+      !profile ||
+      (profile.role !== "ADMIN" &&
+        profile.role !== "MANAGER" &&
+        profile.role !== "INVENTORY")
+    ) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
     const tenant = await getTenantContext();

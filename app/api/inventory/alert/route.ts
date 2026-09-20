@@ -23,7 +23,12 @@ export async function POST(request: NextRequest) {
 
     if (!isInternal) {
       const profile = await getProfile();
-      if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      if (
+        !profile ||
+        (profile.role !== "ADMIN" &&
+          profile.role !== "MANAGER" &&
+          profile.role !== "INVENTORY")
+      ) {
         return NextResponse.json({ error: "No autorizado" }, { status: 403 });
       }
     }
@@ -81,7 +86,7 @@ export async function POST(request: NextRequest) {
         url: "/inventario",
         tag: `low-stock-${Date.now()}`,
       },
-      ["ADMIN", "MANAGER"],
+      ["ADMIN", "MANAGER", "INVENTORY"],
     ).catch((err) => {
       console.error("[Push Notification Error] Failed to send low stock push:", err);
     });

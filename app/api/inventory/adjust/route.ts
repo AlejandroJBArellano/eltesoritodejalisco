@@ -14,7 +14,12 @@ import { getProfile } from "@/lib/auth";
 export async function PATCH(request: NextRequest) {
   try {
     const profile = await getProfile();
-    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    if (
+      !profile ||
+      (profile.role !== "ADMIN" &&
+        profile.role !== "MANAGER" &&
+        profile.role !== "INVENTORY")
+    ) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
     const body = await request.json();
