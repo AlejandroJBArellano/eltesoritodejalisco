@@ -92,40 +92,57 @@ function usePOSDataInternal(tenantId?: string) {
     [menuItems],
   );
 
+  const menuItemMap = useMemo(() => {
+    const map = new Map<string, MenuItem>();
+    for (let i = 0; i < menuItems.length; i++) {
+      map.set(menuItems[i].id, menuItems[i]);
+    }
+    return map;
+  }, [menuItems]);
+
   const [activeCategory, setActiveCategory] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  const registeredCategoriesSet = useMemo(() => {
+    const set = new Set<string>();
+    for (let i = 0; i < categories.length; i++) {
+      const cat = categories[i].toUpperCase().trim();
+      if (cat !== "OTROS") {
+        set.add(cat);
+      }
+    }
+    return set;
+  }, [categories]);
+
   const filteredMenuItems = useMemo(() => {
+    const normActiveCategory = activeCategory.toUpperCase().trim();
+    const isOtros = normActiveCategory === "OTROS";
+    const normSearch = searchQuery.toLowerCase().trim();
+
     return availableMenuItems.filter((m) => {
       // 1. Category Filter (Case-insensitive matching)
-      if (activeCategory && activeCategory.toUpperCase().trim() !== "OTROS") {
+      if (normActiveCategory && !isOtros) {
         if (
           !m.category ||
-          m.category.toUpperCase().trim() !==
-            activeCategory.toUpperCase().trim()
+          m.category.toUpperCase().trim() !== normActiveCategory
         ) {
           return false;
         }
-      } else if (activeCategory.toUpperCase().trim() === "OTROS") {
+      } else if (isOtros) {
         const normalizedItemCategory = m.category?.toUpperCase().trim();
-        const registeredCategoryNames = new Set(
-          categories
-            .filter((c) => c.toUpperCase().trim() !== "OTROS")
-            .map((c) => c.toUpperCase().trim()),
-        );
-        if (normalizedItemCategory && registeredCategoryNames.has(normalizedItemCategory)) {
+        if (normalizedItemCategory && registeredCategoriesSet.has(normalizedItemCategory)) {
           return false;
         }
       }
 
       // 2. Search Query Filter
-      if (searchQuery) {
-        return m.name.toLowerCase().includes(searchQuery.toLowerCase().trim());
+      if (normSearch) {
+        return m.name.toLowerCase().includes(normSearch);
       }
 
       return true;
     });
-  }, [availableMenuItems, searchQuery, activeCategory, categories]);
+  }, [availableMenuItems, searchQuery, activeCategory, registeredCategoriesSet]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -289,23 +306,28 @@ function usePOSDataInternal(tenantId?: string) {
   }, [tenantId, supabase, fetchOrders, fetchMenu, fetchCategories]);
 
 
-  // Today metrics summary
+  // Today metrics summary — single pass O(N) loop
   const todayStats = useMemo(() => {
     const todayDateStr = getTodayDateStr();
+    let count = 0;
+    let salesTotal = 0;
+    let paidCount = 0;
 
-    const todayOrders = orders.filter(
-      (o) => getOrderDateStr(o.createdAt) === todayDateStr,
-    );
+    for (let i = 0; i < orders.length; i++) {
+      const o = orders[i];
+      if (getOrderDateStr(o.createdAt) === todayDateStr) {
+        count++;
+        if (o.status === "PAID" || o.status === "DELIVERED") {
+          salesTotal += o.total;
+          paidCount++;
+        }
+      }
+    }
 
-    const paidOrders = todayOrders.filter(
-      (o) => o.status === "PAID" || o.status === "DELIVERED",
-    );
-    const salesTotal = paidOrders.reduce((acc, o) => acc + o.total, 0);
-    const avgTicket =
-      paidOrders.length > 0 ? salesTotal / paidOrders.length : 0;
+    const avgTicket = paidCount > 0 ? salesTotal / paidCount : 0;
 
     return {
-      count: todayOrders.length,
+      count,
       sales: salesTotal,
       avgTicket,
     };
@@ -327,6 +349,7 @@ function usePOSDataInternal(tenantId?: string) {
   return {
     menuItems,
     availableMenuItems,
+    menuItemMap,
     customers,
     orders,
     categories,
