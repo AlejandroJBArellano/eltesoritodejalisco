@@ -156,6 +156,7 @@ export enum UserRole {
   MANAGER = "MANAGER",
   WAITER = "WAITER",
   CHEF = "CHEF",
+  INVENTORY = "INVENTORY",
 }
 
 export interface User {

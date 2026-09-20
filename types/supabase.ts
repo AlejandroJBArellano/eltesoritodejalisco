@@ -1624,7 +1624,7 @@ export type Database = {
         | "CANCELLED"
         | "UNCOLLECTED"
       PaymentMethod: "CASH" | "CARD" | "TRANSFER" | "OTHER"
-      UserRole: "ADMIN" | "MANAGER" | "WAITER" | "CHEF"
+      UserRole: "ADMIN" | "MANAGER" | "WAITER" | "CHEF" | "INVENTORY"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1762,7 +1762,7 @@ export const Constants = {
         "UNCOLLECTED",
       ],
       PaymentMethod: ["CASH", "CARD", "TRANSFER", "OTHER"],
-      UserRole: ["ADMIN", "MANAGER", "WAITER", "CHEF"],
+      UserRole: ["ADMIN", "MANAGER", "WAITER", "CHEF", "INVENTORY"],
     },
   },
 } as const

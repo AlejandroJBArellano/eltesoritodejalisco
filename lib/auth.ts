@@ -27,7 +27,7 @@ export async function getProfile() {
   return profile;
 }
 
-export type UserRole = "ADMIN" | "MANAGER" | "WAITER" | "CHEF";
+export type UserRole = "ADMIN" | "MANAGER" | "WAITER" | "CHEF" | "INVENTORY";
 
 export async function verifyManagerPin(tenantId: string, pin: string) {
   if (!pin || !pin.trim()) return null;
