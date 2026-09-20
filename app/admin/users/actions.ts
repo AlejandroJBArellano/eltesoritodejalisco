@@ -18,9 +18,10 @@ export async function createUser(formData: FormData) {
     const fullName = (formData.get("full_name") ||
       formData.get("fullName") ||
       "") as string;
-    const role = formData.get("role") as string;
+    const rawRole = (formData.get("role") as string)?.trim() || "";
+    const rawRoleId = (formData.get("role_id") as string)?.trim() || "";
 
-    if (!email || !fullName || !role) {
+    if (!email || !fullName || (!rawRole && !rawRoleId)) {
       return { error: "Faltan datos requeridos" };
     }
 
@@ -40,11 +41,43 @@ export async function createUser(formData: FormData) {
       return { error: "El correo ya está registrado en este restaurante" };
     }
 
-    // 2. Si no se especificó contraseña, generamos una clave temporal segura (útil si iniciará con Google)
+    // 2. Resolver role_id y nombre de rol si existe en tabla roles
+    let resolvedRole = rawRole;
+    let resolvedRoleId: string | null = rawRoleId || null;
+
+    try {
+      if (rawRoleId) {
+        const { data: r } = await adminClient
+          .from("roles")
+          .select("id, name, system_slug")
+          .eq("id", rawRoleId)
+          .eq("tenant_id", tenant.id)
+          .maybeSingle();
+        if (r) {
+          resolvedRoleId = r.id;
+          resolvedRole = r.system_slug || r.name;
+        }
+      } else if (rawRole) {
+        const { data: r } = await adminClient
+          .from("roles")
+          .select("id, name, system_slug")
+          .eq("tenant_id", tenant.id)
+          .ilike("name", rawRole)
+          .maybeSingle();
+        if (r) {
+          resolvedRoleId = r.id;
+          resolvedRole = r.system_slug || r.name;
+        }
+      }
+    } catch {
+      // Continuar con valores por defecto
+    }
+
+    // 3. Si no se especificó contraseña, generamos una clave temporal segura
     const password = rawPassword?.trim() || crypto.randomUUID();
     let userId: string | null = null;
 
-    // 3. Crear el usuario en auth o vincular si ya existe
+    // 4. Crear el usuario en auth o vincular si ya existe
     const { data: newUser, error: createError } =
       await adminClient.auth.admin.createUser({
         email: cleanEmail,
@@ -52,7 +85,8 @@ export async function createUser(formData: FormData) {
         email_confirm: true,
         user_metadata: {
           full_name: fullName,
-          role: role,
+          role: resolvedRole,
+          role_id: resolvedRoleId,
           tenant_id: tenant.id,
         },
       });
@@ -87,32 +121,37 @@ export async function createUser(formData: FormData) {
       return { error: "No se pudo registrar el usuario" };
     }
 
-    // 4. Crear o actualizar perfil en profiles para este tenant
+    // 5. Crear o actualizar perfil en profiles para este tenant
     const rawPin = (formData.get("pin") as string)?.trim();
     const pin =
-      rawPin || (role === "ADMIN" || role === "MANAGER" ? "1234" : null);
+      rawPin || (resolvedRole === "ADMIN" || resolvedRole === "MANAGER" ? "1234" : null);
 
-    const { error: upsertError } = await adminClient.from("profiles").upsert({
+    const profileUpsert: any = {
       id: userId,
       email: cleanEmail,
       full_name: fullName,
-      role: role,
+      role: resolvedRole,
       pin: pin,
       tenant_id: tenant.id,
-    });
+    };
+    if (resolvedRoleId) {
+      profileUpsert.role_id = resolvedRoleId;
+    }
+
+    const { error: upsertError } = await adminClient.from("profiles").upsert(profileUpsert);
 
     if (upsertError) {
       console.error("Error al registrar perfil:", upsertError);
       return { error: "Error al crear el perfil en la base de datos" };
     }
 
-    // 5. Sincronizar en la tabla users local
+    // 6. Sincronizar en la tabla users local
     try {
       await adminClient.from("users").upsert({
         id: userId,
         email: cleanEmail,
         name: fullName,
-        role: role as UserRole,
+        role: resolvedRole as UserRole,
         pin: pin,
         tenant_id: tenant.id,
         password: "MANAGED_BY_SUPABASE",
@@ -129,7 +168,6 @@ export async function createUser(formData: FormData) {
   }
 }
 
-
 export async function updateUserRole(id: string, newRole: string) {
   try {
     const profile = await getProfile();
@@ -140,10 +178,35 @@ export async function updateUserRole(id: string, newRole: string) {
     const tenant = await getTenantContext();
     const adminClient = createAdminClient();
 
+    // Resolver role_id si coincide con algún rol registrado
+    let resolvedRole = newRole;
+    let resolvedRoleId: string | null = null;
+
+    try {
+      const { data: roleRecord } = await adminClient
+        .from("roles")
+        .select("id, name, system_slug")
+        .eq("tenant_id", tenant.id)
+        .ilike("name", newRole)
+        .maybeSingle();
+
+      if (roleRecord) {
+        resolvedRoleId = roleRecord.id;
+        resolvedRole = roleRecord.system_slug || roleRecord.name;
+      }
+    } catch {
+      // Continuar
+    }
+
     // Actualizamos perfil
+    const updatePayload: any = { role: resolvedRole };
+    if (resolvedRoleId) {
+      updatePayload.role_id = resolvedRoleId;
+    }
+
     const { error: updateError } = await adminClient
       .from("profiles")
-      .update({ role: newRole })
+      .update(updatePayload)
       .eq("id", id)
       .eq("tenant_id", tenant.id);
 
@@ -154,20 +217,67 @@ export async function updateUserRole(id: string, newRole: string) {
     // Actualizamos tabla users si existe
     await adminClient
       .from("users")
-      .update({ role: newRole })
+      .update({ role: resolvedRole })
       .eq("id", id)
       .eq("tenant_id", tenant.id);
 
     // Opcional: actualizar user_metadata
-    await adminClient.auth.admin.updateUserById(id, {
-      user_metadata: { role: newRole },
-    });
+    try {
+      await adminClient.auth.admin.updateUserById(id, {
+        user_metadata: { role: resolvedRole, role_id: resolvedRoleId },
+      });
+    } catch {
+      // Ignorar si auth admin falla
+    }
 
     revalidatePath("/admin/users");
     return { success: true };
   } catch (err) {
     console.error(err);
     return { error: "Ocurrió un error inesperado." };
+  }
+}
+
+export async function updateUserPin(id: string, pin: string) {
+  try {
+    const profile = await getProfile();
+    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+      return { error: "No autorizado" };
+    }
+
+    const trimmed = pin?.trim();
+    if (!trimmed || !/^\d{4,6}$/.test(trimmed)) {
+      return { error: "El PIN debe contener entre 4 y 6 dígitos numéricos" };
+    }
+
+    const tenant = await getTenantContext();
+    const adminClient = createAdminClient();
+
+    const { error: profileError } = await adminClient
+      .from("profiles")
+      .update({ pin: trimmed })
+      .eq("id", id)
+      .eq("tenant_id", tenant.id);
+
+    if (profileError) {
+      return { error: "Error al actualizar el PIN en el perfil" };
+    }
+
+    try {
+      await adminClient
+        .from("users")
+        .update({ pin: trimmed })
+        .eq("id", id)
+        .eq("tenant_id", tenant.id);
+    } catch {
+      // Ignorar si tabla users no existe o no tiene el registro
+    }
+
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (err) {
+    console.error(err);
+    return { error: "Ocurrió un error inesperado al actualizar el PIN." };
   }
 }
 
@@ -185,7 +295,7 @@ export async function deleteUser(id: string) {
     const tenant = await getTenantContext();
     const adminClient = createAdminClient();
 
-    // En lugar de borrar la identidad global de Auth, simplemente removemos sus perfiles en este tenant
+    // 1. Eliminar perfil de profiles
     const { error: deleteProfileError } = await adminClient
       .from("profiles")
       .delete()
@@ -193,66 +303,39 @@ export async function deleteUser(id: string) {
       .eq("tenant_id", tenant.id);
 
     if (deleteProfileError) {
-      return { error: "Error al eliminar el perfil del usuario" };
+      console.error("Error al eliminar perfil:", deleteProfileError);
+      return { error: "Error al eliminar el perfil del restaurante." };
     }
 
-    // Eliminar también de la tabla public.users
-    await adminClient
-      .from("users")
-      .delete()
-      .eq("id", id)
-      .eq("tenant_id", tenant.id);
-
-    revalidatePath("/admin/users");
-    return { success: true };
-  } catch (err) {
-    console.error(err);
-    return { error: "Ocurrió un error inesperado." };
-  }
-}
-
-export async function updateUserPin(id: string, pin: string) {
-  try {
-    const profile = await getProfile();
-    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
-      return { error: "No autorizado" };
-    }
-
-    const cleanPin = pin?.trim();
-    if (!cleanPin || !/^\d{4,6}$/.test(cleanPin)) {
-      return { error: "El PIN debe contener entre 4 y 6 dígitos numéricos" };
-    }
-
-    const tenant = await getTenantContext();
-    const adminClient = createAdminClient();
-
-    const { error: profileError } = await adminClient
-      .from("profiles")
-      .update({ pin: cleanPin })
-      .eq("id", id)
-      .eq("tenant_id", tenant.id);
-
-    if (profileError) {
-      console.error("Error al actualizar PIN de perfil:", profileError);
-      return { error: "Error al actualizar el PIN" };
-    }
-
-    // Sincronizar en tabla users si existe
+    // 2. Eliminar de la tabla users local si existe
     try {
       await adminClient
         .from("users")
-        .update({ pin: cleanPin })
+        .delete()
         .eq("id", id)
         .eq("tenant_id", tenant.id);
     } catch (usersErr) {
-      console.error("Error al sincronizar PIN en users:", usersErr);
+      console.error("Error al eliminar de tabla users:", usersErr);
+    }
+
+    // 3. Opcional: verificar si el usuario pertenece a otros tenants antes de borrarlo de Auth global
+    const { data: otherProfiles } = await adminClient
+      .from("profiles")
+      .select("id")
+      .eq("id", id);
+
+    if (!otherProfiles || otherProfiles.length === 0) {
+      try {
+        await adminClient.auth.admin.deleteUser(id);
+      } catch (authErr) {
+        console.warn("No se pudo eliminar de Auth global:", authErr);
+      }
     }
 
     revalidatePath("/admin/users");
     return { success: true };
   } catch (err) {
     console.error(err);
-    return { error: "Ocurrió un error inesperado." };
+    return { error: "Ocurrió un error inesperado al eliminar el usuario." };
   }
 }
-
