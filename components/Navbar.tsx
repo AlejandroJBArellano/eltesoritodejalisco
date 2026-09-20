@@ -94,12 +94,11 @@ export default function Navbar() {
             href="/"
             className="flex items-center gap-2.5 text-xl font-black tracking-tighter shrink-0 group"
           >
-            <svg className="w-7 h-7 text-primary transition-transform group-hover:scale-105" fill="none" viewBox="0 0 160 100" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M 40,72 C 30,72 24,46 31,24 C 36,8 46,32 55,52" />
-              <path d="M 120,72 C 130,72 136,46 129,24 C 124,8 114,32 105,52" />
-              <path d="M 55,52 Q 80,44 105,52" />
-              <path d="M 60,49 L 63,28 L 71,38 L 80,16 L 89,38 L 97,28 L 100,49" />
-            </svg>
+            <img
+              src="/logo-icon-orange.svg"
+              alt="Logo"
+              className="w-7 h-7 object-contain transition-transform group-hover:scale-105"
+            />
             <div className="flex items-center">
               <span className="text-white">{prefix.toUpperCase()}</span>
               {suffix && (
