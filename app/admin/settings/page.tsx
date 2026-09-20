@@ -1,4 +1,5 @@
 import { getProfile } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
 import { getTenantContext, invalidateTenantCache } from "@/lib/tenant";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe";
@@ -14,8 +15,12 @@ export default async function SettingsPage() {
     redirect("/login");
   }
 
-  const isAdmin = profile.role === "ADMIN" || profile.role === "MANAGER";
-  if (!isAdmin) {
+  const canManage =
+    profile.role === "ADMIN" ||
+    profile.role === "MANAGER" ||
+    hasPermission(profile, "settings.manage_restaurant");
+
+  if (!canManage) {
     redirect("/");
   }
 

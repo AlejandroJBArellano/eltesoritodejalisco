@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { updateTenantSettings } from "@/app/admin/settings/actions";
 import type { TenantContextType } from "@/lib/tenant";
 import type { ColorPreset } from "./types";
@@ -87,6 +88,13 @@ export function SettingsProvider({
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  let router: ReturnType<typeof useRouter> | null = null;
+  try {
+    router = useRouter();
+  } catch {
+    // In testing environments without AppRouter context
+  }
 
   const pickupUrl =
     typeof window !== "undefined" && window.location.hostname.endsWith(".localhost")
@@ -224,6 +232,7 @@ export function SettingsProvider({
         setError(res.error);
       } else {
         setSuccess(true);
+        router?.refresh();
         setTimeout(() => setSuccess(false), 5000);
       }
     } catch {

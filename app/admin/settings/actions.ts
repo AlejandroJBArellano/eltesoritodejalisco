@@ -1,10 +1,10 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
 import { getTenantContext, invalidateTenantCache } from "@/lib/tenant";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getProfile } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
 
 export interface UpdateSettingsState {
   success?: boolean;
@@ -16,11 +16,17 @@ export async function updateTenantSettings(
 ): Promise<UpdateSettingsState> {
   try {
     const profile = await getProfile();
-    if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
+    const canManage =
+      profile &&
+      (profile.role === "ADMIN" ||
+        profile.role === "MANAGER" ||
+        hasPermission(profile, "settings.manage_restaurant"));
+
+    if (!canManage) {
       return { error: "No autorizado" };
     }
     const tenant = await getTenantContext();
-    const supabase = await createClient();
+    const adminClient = createAdminClient();
 
     const name = formData.get("name") as string;
     const systemName = formData.get("systemName") as string;
@@ -31,7 +37,12 @@ export async function updateTenantSettings(
     const secondaryColor = formData.get("secondaryColor") as string;
     const darkBgColor = formData.get("darkBgColor") as string;
     const loyaltyEnabled = formData.get("loyaltyEnabled") === "true";
-    const loyaltyRatio = parseInt(formData.get("loyaltyRatio") as string, 10) || 10;
+    const rawLoyaltyRatio = formData.get("loyaltyRatio") as string;
+    const parsedLoyaltyRatio = parseInt(rawLoyaltyRatio, 10);
+    const loyaltyRatio =
+      !isNaN(parsedLoyaltyRatio) && parsedLoyaltyRatio > 0
+        ? parsedLoyaltyRatio
+        : 10;
     const rawTerminalCommission = formData.get("terminalCommissionRate") as string;
     const parsedTerminalCommission = parseFloat(rawTerminalCommission);
     const terminalCommissionRate = Number.isFinite(parsedTerminalCommission)
@@ -44,9 +55,12 @@ export async function updateTenantSettings(
     const logoFile = formData.get("logoFile") as File | null;
     let logoUrl = formData.get("logoUrl") as string;
 
-    if (logoFile && logoFile.size > 0) {
-      const adminClient = createAdminClient();
-
+    if (
+      logoFile &&
+      logoFile.size > 0 &&
+      typeof logoFile.name === "string" &&
+      logoFile.name.length > 0
+    ) {
       // Ensure the "logos" bucket exists and is public
       try {
         await adminClient.storage.createBucket("logos", { public: true });
@@ -77,7 +91,7 @@ export async function updateTenantSettings(
       return { error: "El nombre del restaurante es obligatorio" };
     }
 
-    const { error } = await supabase
+    const { error } = await adminClient
       .from("tenants")
       .update({
         name: name.trim(),
@@ -105,9 +119,11 @@ export async function updateTenantSettings(
 
     // Invalidate in-memory tenant cache
     invalidateTenantCache(tenant.slug);
+    invalidateTenantCache();
 
     // Force revalidation of all server-rendered layouts and components
     revalidatePath("/", "layout");
+    revalidatePath("/admin/settings");
 
     return { success: true };
   } catch (error) {

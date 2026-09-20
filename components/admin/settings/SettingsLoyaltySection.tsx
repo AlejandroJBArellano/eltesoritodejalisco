@@ -44,7 +44,7 @@ export function SettingsLoyaltySection() {
         </button>
       </div>
 
-      {loyaltyEnabled && (
+      {loyaltyEnabled ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 animate-in fade-in duration-200">
           <div>
             <label className="text-xs font-bold text-text-light/60 uppercase tracking-wider block mb-1.5">
@@ -69,6 +69,8 @@ export function SettingsLoyaltySection() {
             </p>
           </div>
         </div>
+      ) : (
+        <input type="hidden" name="loyaltyRatio" value={loyaltyRatio} />
       )}
     </div>
   );
