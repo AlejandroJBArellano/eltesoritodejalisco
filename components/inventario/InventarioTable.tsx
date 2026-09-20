@@ -5,12 +5,16 @@ import {
   SlidersHorizontal,
   Search,
   X,
+  LayoutGrid,
+  Table as TableIcon,
 } from "lucide-react";
 import type { Ingredient } from "@/types";
-import { AjusteStockModal } from "./AjusteStockModal";
 import { ExportButton, type ExportColumn } from "@/components/ui/DataTableControls";
+import { IngredientTouchCard, type InventoryActionType } from "./IngredientTouchCard";
+import { InventoryActionDrawer } from "./InventoryActionDrawer";
 
 type FilterType = "all" | "low" | "out";
+export type InventoryViewMode = "table" | "cards";
 
 function getStatus(ing: Ingredient): "out" | "low" | "ok" {
   if (ing.currentStock <= 0) return "out";
@@ -67,7 +71,13 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
     useState<Ingredient[]>(initialIngredients);
   const [filter, setFilter] = useState<FilterType>("all");
   const [search, setSearch] = useState("");
-  const [adjustTarget, setAdjustTarget] = useState<Ingredient | null>(null);
+  const [viewMode, setViewMode] = useState<InventoryViewMode>(() =>
+    typeof window !== "undefined" && window.innerWidth < 768 ? "cards" : "table"
+  );
+  const [activeAction, setActiveAction] = useState<{
+    ingredient: Ingredient;
+    action: InventoryActionType;
+  } | null>(null);
 
   const filtered = ingredients.filter((ing) => {
     const status = getStatus(ing);
@@ -85,7 +95,14 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
     setIngredients((prev) =>
       prev.map((i) => (i.id === updated.id ? updated : i)),
     );
-    setAdjustTarget(null);
+    setActiveAction(null);
+  };
+
+  const handleOpenAction = (
+    action: InventoryActionType,
+    ingredient: Ingredient
+  ) => {
+    setActiveAction({ ingredient, action });
   };
 
   return (
@@ -138,11 +155,12 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
         </div>
       </div>
 
-      {/* Table card */}
+      {/* Main Container */}
       <div className="rounded-2xl bg-card border border-border shadow-sm overflow-hidden">
-        {/* Controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-5 py-4 border-b border-border">
-          <div className="flex items-center gap-2">
+        {/* Controls Bar */}
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 px-5 py-4 border-b border-border">
+          {/* Status Filters */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 custom-scrollbar">
             {(
               [
                 { key: "all", label: "Todos" },
@@ -154,7 +172,7 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
                 key={f.key}
                 type="button"
                 onClick={() => setFilter(f.key)}
-                className={`px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border transition-all ${
+                className={`px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border whitespace-nowrap transition-all ${
                   filter === f.key
                     ? "bg-primary/15 border-primary/30 text-primary"
                     : "bg-white/5 border-border text-text-light/50 hover:text-text-light"
@@ -175,9 +193,10 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
             ))}
           </div>
 
-          {/* Actions: Search & Export */}
-          <div className="flex items-center gap-2.5 w-full sm:w-auto">
-            <div className="relative w-full sm:w-56">
+          {/* Actions: Search, View Mode Toggle & Export */}
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full lg:w-auto">
+            {/* Search Input */}
+            <div className="relative flex-1 sm:w-56">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-light/30" />
               <input
                 type="text"
@@ -190,12 +209,47 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
                 <button
                   type="button"
                   onClick={() => setSearch("")}
+                  aria-label="Limpiar búsqueda"
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-text-light/30 hover:text-text-light transition-colors"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
               )}
             </div>
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center p-1 rounded-xl bg-white/5 border border-border">
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                aria-label="Vista Tabla"
+                title="Vista Tabla"
+                className={`p-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  viewMode === "table"
+                    ? "bg-primary/20 text-primary shadow-xs"
+                    : "text-text-light/40 hover:text-text-light"
+                }`}
+              >
+                <TableIcon className="h-4 w-4" />
+                <span className="hidden md:inline text-[11px]">Tabla</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("cards")}
+                aria-label="Vista Tarjetas"
+                title="Vista Tarjetas"
+                className={`p-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  viewMode === "cards"
+                    ? "bg-primary/20 text-primary shadow-xs"
+                    : "text-text-light/40 hover:text-text-light"
+                }`}
+              >
+                <LayoutGrid className="h-4 w-4" />
+                <span className="hidden md:inline text-[11px]">Tarjetas</span>
+              </button>
+            </div>
+
+            {/* Export */}
             <ExportButton
               data={filtered}
               columns={INVENTORY_EXPORT_COLUMNS}
@@ -205,43 +259,51 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="px-5 py-3 text-left text-[10px] font-black uppercase tracking-wider text-text-light/40">
-                  Ingrediente
-                </th>
-                <th className="px-3 py-3 text-center text-[10px] font-black uppercase tracking-wider text-text-light/40 hidden sm:table-cell">
-                  Unidad
-                </th>
-                <th className="px-3 py-3 text-right text-[10px] font-black uppercase tracking-wider text-text-light/40">
-                  Stock Actual
-                </th>
-                <th className="px-3 py-3 text-right text-[10px] font-black uppercase tracking-wider text-text-light/40 hidden md:table-cell">
-                  Mínimo
-                </th>
-                <th className="px-3 py-3 text-center text-[10px] font-black uppercase tracking-wider text-text-light/40">
-                  Estado
-                </th>
-                <th className="px-5 py-3 text-right text-[10px] font-black uppercase tracking-wider text-text-light/40">
-                  Ajustar
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filtered.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-5 py-16 text-center text-text-light/30 font-medium"
-                  >
-                    No hay ingredientes que coincidan con el filtro.
-                  </td>
+        {/* Content View: Table or Cards */}
+        {filtered.length === 0 ? (
+          <div className="px-5 py-16 text-center text-text-light/40 font-medium">
+            No hay ingredientes que coincidan con el filtro.
+          </div>
+        ) : viewMode === "cards" ? (
+          <div
+            data-testid="inventory-cards-grid"
+            className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+            {filtered.map((ing) => (
+              <IngredientTouchCard
+                key={ing.id}
+                ingredient={ing}
+                onAction={handleOpenAction}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-5 py-3 text-left text-[10px] font-black uppercase tracking-wider text-text-light/40">
+                    Ingrediente
+                  </th>
+                  <th className="px-3 py-3 text-center text-[10px] font-black uppercase tracking-wider text-text-light/40 hidden sm:table-cell">
+                    Unidad
+                  </th>
+                  <th className="px-3 py-3 text-right text-[10px] font-black uppercase tracking-wider text-text-light/40">
+                    Stock Actual
+                  </th>
+                  <th className="px-3 py-3 text-right text-[10px] font-black uppercase tracking-wider text-text-light/40 hidden md:table-cell">
+                    Mínimo
+                  </th>
+                  <th className="px-3 py-3 text-center text-[10px] font-black uppercase tracking-wider text-text-light/40">
+                    Estado
+                  </th>
+                  <th className="px-5 py-3 text-right text-[10px] font-black uppercase tracking-wider text-text-light/40">
+                    Ajustar
+                  </th>
                 </tr>
-              ) : (
-                filtered.map((ing) => {
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filtered.map((ing) => {
                   const status = getStatus(ing);
                   const cfg = STATUS_CONFIG[status];
                   return (
@@ -289,8 +351,8 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
                       <td className="px-5 py-3.5 text-right">
                         <button
                           type="button"
-                          onClick={() => setAdjustTarget(ing)}
-                          className="inline-flex items-center gap-1.5 rounded-xl bg-primary/10 border border-primary/20 px-3 py-1.5 text-[11px] font-black text-primary hover:bg-primary/20 transition-all"
+                          onClick={() => handleOpenAction("AJUSTE", ing)}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-primary/10 border border-primary/20 px-3 py-1.5 text-[11px] font-black text-primary hover:bg-primary/20 active:scale-95 transition-all"
                         >
                           <SlidersHorizontal className="h-3 w-3" />
                           <span className="hidden sm:inline">Ajustar</span>
@@ -298,18 +360,20 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
                       </td>
                     </tr>
                   );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* Modal */}
-      {adjustTarget && (
-        <AjusteStockModal
-          ingredient={adjustTarget}
-          onClose={() => setAdjustTarget(null)}
+      {/* Action Drawer */}
+      {activeAction && (
+        <InventoryActionDrawer
+          isOpen={Boolean(activeAction)}
+          ingredient={activeAction.ingredient}
+          initialAction={activeAction.action}
+          onClose={() => setActiveAction(null)}
           onSuccess={handleAdjustSuccess}
         />
       )}
