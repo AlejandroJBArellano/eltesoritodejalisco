@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { InventoryActionDrawer } from "../InventoryActionDrawer";
 import type { Ingredient } from "@/types";
@@ -43,8 +43,7 @@ describe("InventoryActionDrawer Component", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("should switch between action tabs (Entrada, Merma, Ajustar)", async () => {
-    const user = userEvent.setup();
+  it("should switch between action tabs (Entrada, Merma, Ajustar)", () => {
     render(
       <InventoryActionDrawer
         isOpen={true}
@@ -56,20 +55,20 @@ describe("InventoryActionDrawer Component", () => {
     );
 
     // Click Merma mode
-    await user.click(screen.getByRole("button", { name: "Merma" }));
+    fireEvent.click(screen.getByRole("button", { name: "Merma" }));
     expect(screen.getByText("Motivo de la merma")).toBeInTheDocument();
 
     // Click suggestion chips
-    await user.click(screen.getByRole("button", { name: "Caducado" }));
+    fireEvent.click(screen.getByRole("button", { name: "Caducado" }));
     const reasonInput = screen.getByPlaceholderText(/Ej. Se cayó al servir/i) as HTMLInputElement;
     expect(reasonInput.value).toBe("Caducado");
 
     // Click Ajustar mode
-    await user.click(screen.getByRole("button", { name: "Ajustar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ajustar" }));
     expect(screen.getByTestId("keypad-display")).toHaveTextContent("10");
 
     // Click Entrada mode
-    await user.click(screen.getByRole("button", { name: "Entrada" }));
+    fireEvent.click(screen.getByRole("button", { name: "Entrada" }));
     expect(screen.getByTestId("keypad-display")).toHaveTextContent("0");
   });
 
