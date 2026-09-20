@@ -19,6 +19,7 @@ import {
   ChefHat,
   Lock,
   Mail,
+  Package,
   Receipt,
   RefreshCw,
   ShieldCheck,
@@ -117,6 +118,25 @@ export const ROLE_PERMISSIONS: Record<
       "Sin acceso a Punto de Venta (POS)",
       "Sin acceso a ventas ni clientes",
       "Sin acceso a configuración del sistema",
+    ],
+  },
+  INVENTORY: {
+    title: "Inventario / Almacén (INVENTORY)",
+    subtitle: "Control de stock, registro de entradas, mermas y catálogo de insumos",
+    color: "text-teal-400",
+    badgeBg: "bg-teal-500/10",
+    badgeBorder: "border-teal-500/20",
+    permissions: [
+      "Acceso completo al módulo de inventario (/inventario)",
+      "Ajustes de existencias, entradas y mermas",
+      "Recepción y despacho de alertas de stock",
+      "Marcaje de asistencia de personal",
+      "Checklist de tareas operativas",
+    ],
+    restrictions: [
+      "Sin acceso a Punto de Venta (POS)",
+      "Sin acceso a reportes financieros",
+      "Sin acceso a administración de usuarios",
     ],
   },
 };
@@ -226,6 +246,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
   ).length;
   const totalWaiters = profiles.filter((p) => p.role === "WAITER").length;
   const totalChefs = profiles.filter((p) => p.role === "CHEF").length;
+  const totalInventory = profiles.filter((p) => p.role === "INVENTORY").length;
 
   const currentRoleInfo =
     ROLE_PERMISSIONS[selectedFormRole] || ROLE_PERMISSIONS.WAITER;
@@ -309,7 +330,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
         )}
 
         {/* Tarjetas de Métricas Rápidas */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
@@ -365,6 +386,20 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
               <ChefHat className="h-5 w-5" />
             </div>
           </div>
+
+          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
+                Almacén / Stock
+              </p>
+              <p className="mt-1 text-2xl font-black text-teal-400">
+                {totalInventory}
+              </p>
+            </div>
+            <div className="rounded-xl bg-teal-500/10 p-3 text-teal-400">
+              <Package className="h-5 w-5" />
+            </div>
+          </div>
         </div>
 
         {/* TABLA DE USUARIOS */}
@@ -418,6 +453,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 <option value="MANAGER">Gerente</option>
                 <option value="WAITER">Mesero</option>
                 <option value="CHEF">Cocinero / Chef</option>
+                <option value="INVENTORY">Inventario / Almacén</option>
               </select>
             </div>
           </div>
@@ -504,6 +540,9 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                           </option>
                           <option value="CHEF" className="bg-card text-text-light">
                             Cocinero / Chef
+                          </option>
+                          <option value="INVENTORY" className="bg-card text-text-light">
+                            Inventario / Almacén
                           </option>
                         </select>
                       </td>
@@ -659,6 +698,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             >
               <option value="WAITER">Mesero (WAITER)</option>
               <option value="CHEF">Cocinero / Chef (CHEF)</option>
+              <option value="INVENTORY">Inventario / Almacén (INVENTORY)</option>
               <option value="MANAGER">Gerente (MANAGER)</option>
               <option value="ADMIN">Administrador (ADMIN)</option>
             </select>

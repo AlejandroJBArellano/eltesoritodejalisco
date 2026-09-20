@@ -36,6 +36,14 @@ const mockProfiles: Profile[] = [
     created_at: "2026-01-03T00:00:00Z",
     pin: null,
   },
+  {
+    id: "usr-4",
+    email: "almacen@test.com",
+    full_name: "Almacen User",
+    role: "INVENTORY",
+    created_at: "2026-01-04T00:00:00Z",
+    pin: null,
+  },
 ];
 
 describe("AdminUsersContent Component", () => {
@@ -49,6 +57,10 @@ describe("AdminUsersContent Component", () => {
     expect(screen.getByText("Admin User")).toBeDefined();
     expect(screen.getByText("Manager User")).toBeDefined();
     expect(screen.getByText("Waiter User")).toBeDefined();
+    expect(screen.getByText("Almacen User")).toBeDefined();
+
+    // Stats metrics
+    expect(screen.getByText("Almacén / Stock")).toBeDefined();
 
     // PIN badges for admin and manager
     expect(screen.getByText("1234")).toBeDefined();
@@ -57,6 +69,22 @@ describe("AdminUsersContent Component", () => {
     // Only 2 PIN configure buttons should exist
     const pinButtons = screen.getAllByTitle("Configurar PIN de Autorización");
     expect(pinButtons).toHaveLength(2);
+  });
+
+  it("allows changing user role to INVENTORY", async () => {
+    vi.mocked(actions.updateUserRole).mockResolvedValue({ success: true } as any);
+
+    render(<AdminUsersContent initialProfiles={mockProfiles} />);
+
+    const roleSelects = screen.getAllByRole("combobox");
+    // Change first user role
+    const userRoleSelect = roleSelects.find((s) => (s as HTMLSelectElement).value === "WAITER");
+    expect(userRoleSelect).toBeDefined();
+
+    if (userRoleSelect) {
+      fireEvent.change(userRoleSelect, { target: { value: "INVENTORY" } });
+      expect(actions.updateUserRole).toHaveBeenCalledWith("usr-3", "INVENTORY");
+    }
   });
 
   it("opens PIN edit modal, validates length and calls updateUserPin on submit", async () => {
