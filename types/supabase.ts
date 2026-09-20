@@ -1139,6 +1139,7 @@ export type Database = {
           id: string
           pin: string | null
           role: string | null
+          role_id: string | null
           tenant_id: string
           updated_at: string | null
         }
@@ -1148,6 +1149,7 @@ export type Database = {
           id: string
           pin?: string | null
           role?: string | null
+          role_id?: string | null
           tenant_id: string
           updated_at?: string | null
         }
@@ -1157,10 +1159,18 @@ export type Database = {
           id?: string
           pin?: string | null
           role?: string | null
+          role_id?: string | null
           tenant_id?: string
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -1256,6 +1266,50 @@ export type Database = {
           },
           {
             foreignKeyName: "recipe_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_system: boolean
+          name: string
+          permissions: Json
+          system_slug: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name: string
+          permissions?: Json
+          system_slug?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name?: string
+          permissions?: Json
+          system_slug?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
