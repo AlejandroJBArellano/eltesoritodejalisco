@@ -1,7 +1,8 @@
 import type { Database } from "@/types/supabase";
 
 export type AttendanceRow = Database["public"]["Tables"]["attendance"]["Row"];
-export type UserRow = Database["public"]["Tables"]["users"]["Row"];
+export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+export type UserRow = ProfileRow;
 
 export type AttendanceStatus = "ACTIVE" | "FINISHED";
 

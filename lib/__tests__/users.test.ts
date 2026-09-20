@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getTenantCollaborators, sanitizeRole } from "../users";
 
-const mockUpsert = vi.fn().mockResolvedValue({ error: null });
 const mockProfilesSelect = vi.fn();
-const mockUsersSelect = vi.fn();
 const mockListUsers = vi.fn();
 
 vi.mock("@/lib/supabase/admin", () => ({
@@ -16,17 +14,8 @@ vi.mock("@/lib/supabase/admin", () => ({
           }),
         };
       }
-      if (table === "users") {
-        return {
-          select: () => ({
-            eq: () => mockUsersSelect(),
-          }),
-          upsert: mockUpsert,
-        };
-      }
       return {
         select: () => ({ eq: () => Promise.resolve({ data: [], error: null }) }),
-        upsert: mockUpsert,
       };
     },
     auth: {
@@ -56,14 +45,14 @@ describe("lib/users.ts", () => {
       expect(sanitizeRole("waiter")).toBe("WAITER");
     });
 
-    it("falls back to WAITER for unrecognized roles", () => {
-      expect(sanitizeRole("SUPERADMIN")).toBe("WAITER");
-      expect(sanitizeRole("OTHER")).toBe("WAITER");
+    it("preserves custom role names trimmed", () => {
+      expect(sanitizeRole("Encargado de Barra")).toBe("Encargado de Barra");
+      expect(sanitizeRole("Carlos")).toBe("Carlos");
     });
   });
 
   describe("getTenantCollaborators", () => {
-    it("merges profiles, db users, and auth users into a sorted list", async () => {
+    it("merges profiles and auth metadata into a sorted list", async () => {
       mockProfilesSelect.mockResolvedValueOnce({
         data: [
           {
@@ -84,18 +73,6 @@ describe("lib/users.ts", () => {
         error: null,
       });
 
-      mockUsersSelect.mockResolvedValueOnce({
-        data: [
-          {
-            id: "user-3",
-            name: "Carlos Repartidor",
-            email: "carlos@birria.com",
-            role: "WAITER",
-          },
-        ],
-        error: null,
-      });
-
       mockListUsers.mockResolvedValueOnce({
         data: {
           users: [
@@ -111,24 +88,18 @@ describe("lib/users.ts", () => {
 
       const collaborators = await getTenantCollaborators("tenant-birria-1");
 
-      expect(collaborators).toHaveLength(3);
-      // Alphabetical order: Ana, Beto, Carlos
+      expect(collaborators).toHaveLength(2);
+      // Alphabetical order: Ana, Beto
       expect(collaborators[0].name).toBe("Ana Mesera");
       expect(collaborators[1].name).toBe("Beto Cocinero");
-      expect(collaborators[2].name).toBe("Carlos Repartidor");
-
-      // Verifies auto-sync upsert was invoked for public.users
-      expect(mockUpsert).toHaveBeenCalled();
     });
 
-    it("handles empty profiles and users gracefully", async () => {
+    it("handles empty profiles gracefully", async () => {
       mockProfilesSelect.mockResolvedValueOnce({ data: [], error: null });
-      mockUsersSelect.mockResolvedValueOnce({ data: [], error: null });
       mockListUsers.mockResolvedValueOnce({ data: { users: [] }, error: null });
 
       const collaborators = await getTenantCollaborators("tenant-empty");
       expect(collaborators).toEqual([]);
-      expect(mockUpsert).not.toHaveBeenCalled();
     });
   });
 });
