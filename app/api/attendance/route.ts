@@ -21,7 +21,7 @@ export async function GET() {
 
     const todayDate = format(new Date(), "yyyy-MM-dd", { timeZone: TZ });
 
-    // Check profiles table first (used by getProfile() in dashboard)
+    // Check profiles table for user role
     const { data: profileData } = await supabase
       .from("profiles")
       .select("role")
@@ -29,28 +29,20 @@ export async function GET() {
       .eq("tenant_id", tenant.id)
       .maybeSingle();
 
-    const { data: dbUser } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .eq("tenant_id", tenant.id)
-      .maybeSingle();
-
-    const role =
-      profileData?.role || dbUser?.role || (user.user_metadata?.role as string);
+    const role = profileData?.role || (user.user_metadata?.role as string);
     const isAdmin = role === "ADMIN" || role === "MANAGER";
 
     if (isAdmin) {
-      // If admin, fetch all attendance records for today, all users, and today's shifts
-      const [attendanceRes, usersRes, shiftsRes] = await Promise.all([
+      // If admin, fetch all attendance records for today, non-admin collaborators from profiles, and today's shifts
+      const [attendanceRes, profilesRes, shiftsRes] = await Promise.all([
         supabase
           .from("attendance")
           .select("id, user_id, check_in, check_out, status, date")
           .eq("tenant_id", tenant.id)
           .eq("date", todayDate),
         supabase
-          .from("users")
-          .select("id, name, role")
+          .from("profiles")
+          .select("id, full_name, role")
           .eq("tenant_id", tenant.id)
           .neq("role", "ADMIN"),
         supabase
@@ -61,10 +53,16 @@ export async function GET() {
           .order("start_time", { ascending: true }),
       ]);
 
+      const formattedUsers = (profilesRes.data || []).map((p) => ({
+        id: p.id,
+        name: p.full_name || "Colaborador",
+        role: p.role || "WAITER",
+      }));
+
       return NextResponse.json({
         isAdmin: true,
         attendances: attendanceRes.data || [],
-        users: usersRes.data || [],
+        users: formattedUsers,
         shifts: shiftsRes.data || [],
         toleranceMinutes: tenant.attendance_tolerance_minutes ?? 10,
       });
@@ -118,19 +116,20 @@ export async function POST(request: Request) {
     }
 
     const { action, targetUserId, timestamp } = await request.json();
-
     const todayDate = format(new Date(), "yyyy-MM-dd", { timeZone: TZ });
 
     // Verify admin status if trying to act on someone else
     let actualUserId = user.id;
     if (targetUserId && targetUserId !== user.id) {
-      const { data: dbUser } = await supabase
-        .from("users")
+      const { data: profile } = await supabase
+        .from("profiles")
         .select("role")
         .eq("id", user.id)
         .eq("tenant_id", tenant.id)
-        .single();
-      if (dbUser?.role !== "ADMIN" && dbUser?.role !== "MANAGER") {
+        .maybeSingle();
+
+      const role = profile?.role || (user.user_metadata?.role as string);
+      if (role !== "ADMIN" && role !== "MANAGER") {
         return NextResponse.json(
           { error: "No tienes permisos de administrador" },
           { status: 403 },
@@ -144,89 +143,46 @@ export async function POST(request: Request) {
       ? new Date(timestamp).toISOString()
       : new Date().toISOString();
 
-    if (action === "CHECK_IN") {
-      // Resolve target user ID in `users` table
-      let dbUserId = actualUserId;
-      const { data: targetDbUser } = await supabase
-        .from("users")
-        .select("id")
-        .eq("id", actualUserId)
-        .eq("tenant_id", tenant.id)
-        .maybeSingle();
+    // Verify target profile exists in profiles table
+    let profileId = actualUserId;
+    const { data: targetProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", actualUserId)
+      .eq("tenant_id", tenant.id)
+      .maybeSingle();
 
-      if (!targetDbUser) {
-        // Find by email from auth user if user.id does not match users.id
-        const { data: userByEmail, error: emailSearchError } = await supabase
-          .from("users")
+    if (!targetProfile) {
+      // Try to find by email if user.id does not directly match
+      if (user.email) {
+        const { data: profileByEmail } = await supabase
+          .from("profiles")
           .select("id")
-          .eq("email", user.email)
+          .ilike("email", user.email)
           .eq("tenant_id", tenant.id)
           .maybeSingle();
 
-        if (emailSearchError) {
-          console.error(
-            "[Attendance API] Error searching user by email:",
-            emailSearchError,
-          );
-        }
-
-        if (userByEmail) {
-          dbUserId = userByEmail.id;
-        } else if (user.email) {
-          const nowIso = new Date().toISOString();
-          // Auto-register user in `users` table if missing
-          const { data: newUser, error: autoCreateError } = await supabase
-            .from("users")
-            .insert({
-              id: user.id,
-              email: user.email,
-              name: user.user_metadata?.name || user.email.split("@")[0],
-              role: user.user_metadata?.role || "ADMIN",
-              password: "MANAGED_BY_SUPABASE",
-              tenant_id: tenant.id,
-              created_at: nowIso,
-              updated_at: nowIso,
-            })
-            .select("id")
-            .single();
-
-          if (autoCreateError) {
-            console.error(
-              "[Attendance API] autoCreateError detail:",
-              autoCreateError,
-            );
-          }
-
-          if (!autoCreateError && newUser) {
-            dbUserId = newUser.id;
-          } else {
-            return NextResponse.json(
-              {
-                error: `No se pudo registrar automáticamente al usuario: ${autoCreateError?.message || "Error desconocido"}`,
-              },
-              { status: 500 },
-            );
-          }
+        if (profileByEmail) {
+          profileId = profileByEmail.id;
         } else {
-          console.error(
-            "[Attendance API] User has no email in auth context:",
-            user,
-          );
           return NextResponse.json(
-            {
-              error:
-                "No se encontró el registro de usuario en la base de datos.",
-            },
+            { error: "No se encontró el perfil del colaborador en este restaurante." },
             { status: 400 },
           );
         }
+      } else {
+        return NextResponse.json(
+          { error: "No se encontró el perfil del colaborador." },
+          { status: 400 },
+        );
       }
+    }
 
-      // Create a new record
+    if (action === "CHECK_IN") {
       const { data, error } = await supabase
         .from("attendance")
         .insert({
-          user_id: dbUserId,
+          user_id: profileId,
           tenant_id: tenant.id,
           date: todayDate,
           check_in: actionTime,
@@ -238,33 +194,11 @@ export async function POST(request: Request) {
       if (error) throw error;
       return NextResponse.json(data);
     } else if (action === "CHECK_OUT") {
-      // Resolve target user ID in `users` table
-      let dbUserId = actualUserId;
-      const { data: targetDbUser } = await supabase
-        .from("users")
-        .select("id")
-        .eq("id", actualUserId)
-        .eq("tenant_id", tenant.id)
-        .maybeSingle();
-
-      if (!targetDbUser) {
-        const { data: userByEmail } = await supabase
-          .from("users")
-          .select("id")
-          .eq("email", user.email)
-          .eq("tenant_id", tenant.id)
-          .maybeSingle();
-
-        if (userByEmail) {
-          dbUserId = userByEmail.id;
-        }
-      }
-
       // Find active record
       const { data: activeRecords, error: fetchError } = await supabase
         .from("attendance")
         .select("id")
-        .eq("user_id", dbUserId)
+        .eq("user_id", profileId)
         .eq("tenant_id", tenant.id)
         .eq("date", todayDate)
         .eq("status", "ACTIVE")

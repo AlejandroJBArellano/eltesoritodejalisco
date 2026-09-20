@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const tenant = await getTenantContext();
     const adminSupabase = createAdminClient();
 
-    // 1. Primary check: profiles table (used by getProfile() in dashboard)
+    // 1. Check profile role
     const { data: profileData } = await adminSupabase
       .from("profiles")
       .select("id, role")
@@ -26,46 +26,8 @@ export async function GET(request: NextRequest) {
       .eq("tenant_id", tenant.id)
       .maybeSingle();
 
-    // 2. Secondary check: users table
-    const { data: dbUserById } = await adminSupabase
-      .from("users")
-      .select("id, name, email, role")
-      .eq("id", user.id)
-      .eq("tenant_id", tenant.id)
-      .maybeSingle();
-
-    let dbUserByEmail = null;
-    if (!dbUserById && user.email) {
-      const { data: byEmail } = await adminSupabase
-        .from("users")
-        .select("id, name, email, role")
-        .eq("email", user.email)
-        .eq("tenant_id", tenant.id)
-        .maybeSingle();
-      dbUserByEmail = byEmail;
-    }
-
-    // Prioritize profileData.role (from profiles table)
-    const role =
-      profileData?.role ||
-      dbUserById?.role ||
-      dbUserByEmail?.role ||
-      (user.user_metadata?.role as string);
-
+    const role = profileData?.role || (user.user_metadata?.role as string);
     const isAdmin = role === "ADMIN" || role === "MANAGER" || !role;
-
-    // Sync users table role if profileData has ADMIN but users table has obsolete role
-    if (
-      profileData?.role === "ADMIN" &&
-      dbUserById &&
-      dbUserById.role !== "ADMIN"
-    ) {
-      await adminSupabase
-        .from("users")
-        .update({ role: "ADMIN" })
-        .eq("id", user.id)
-        .eq("tenant_id", tenant.id);
-    }
 
     if (!isAdmin) {
       console.warn("[ATTENDANCE_HISTORY] Permission DENIED for role:", role);
@@ -110,21 +72,31 @@ export async function GET(request: NextRequest) {
       throw attError;
     }
 
-    // Fetch all users to map user info reliably
-    const { data: allUsers } = await adminSupabase
-      .from("users")
-      .select("id, name, email, role")
+    // Fetch all profiles to map user info reliably
+    const { data: allProfiles } = await adminSupabase
+      .from("profiles")
+      .select("id, full_name, email, role")
       .eq("tenant_id", tenant.id);
 
-    const usersMap = new Map((allUsers || []).map((u) => [u.id, u]));
+    const profilesMap = new Map(
+      (allProfiles || []).map((p) => [
+        p.id,
+        {
+          id: p.id,
+          name: p.full_name || "Colaborador",
+          email: p.email || "",
+          role: p.role || "WAITER",
+        },
+      ]),
+    );
 
-    // Combine attendance records with user info
+    // Combine attendance records with user info (attached as .users for frontend compatibility)
     const enrichedAttendances = (attendanceList || []).map((att) => {
-      const u = usersMap.get(att.user_id);
+      const u = profilesMap.get(att.user_id);
       return {
         ...att,
         users: u
-          ? { id: u.id, name: u.name, email: u.email, role: u.role }
+          ? u
           : { id: att.user_id, name: "Empleado", email: "", role: "STAFF" },
       };
     });

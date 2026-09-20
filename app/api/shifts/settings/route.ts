@@ -23,14 +23,7 @@ export async function PUT(request: Request) {
       .eq("tenant_id", tenant.id)
       .maybeSingle();
 
-    const { data: dbUser } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .eq("tenant_id", tenant.id)
-      .maybeSingle();
-
-    const role = profile?.role || dbUser?.role || (user.user_metadata?.role as string);
+    const role = profile?.role || (user.user_metadata?.role as string);
     const isAdmin = role === "ADMIN" || role === "MANAGER";
 
     if (!isAdmin) {

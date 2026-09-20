@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext } from "@/lib/tenant";
-import { getTenantCollaborators, sanitizeRole } from "@/lib/users";
+import { getTenantCollaborators } from "@/lib/users";
 import { NextResponse } from "next/server";
 import type { Database } from "@/types/supabase";
 
@@ -33,14 +33,7 @@ export async function GET(request: Request) {
       .eq("tenant_id", tenant.id)
       .maybeSingle();
 
-    const { data: dbUser } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .eq("tenant_id", tenant.id)
-      .maybeSingle();
-
-    const role = profile?.role || dbUser?.role || (user.user_metadata?.role as string);
+    const role = profile?.role || (user.user_metadata?.role as string);
     const isAdmin = role === "ADMIN" || role === "MANAGER";
 
     let query = supabase
@@ -119,14 +112,7 @@ export async function POST(request: Request) {
       .eq("tenant_id", tenant.id)
       .maybeSingle();
 
-    const { data: dbUser } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .eq("tenant_id", tenant.id)
-      .maybeSingle();
-
-    const role = profile?.role || dbUser?.role || (user.user_metadata?.role as string);
+    const role = profile?.role || (user.user_metadata?.role as string);
     const isAdmin = role === "ADMIN" || role === "MANAGER";
 
     if (!isAdmin) {
@@ -151,34 +137,7 @@ export async function POST(request: Request) {
     const formattedStart = formatTime(start_time);
     const formattedEnd = formatTime(end_time);
 
-    // Ensure target collaborator exists in public.users to satisfy fk_employee_shifts_users
     const adminSupabase = createAdminClient();
-    const { data: existingDbUser } = await adminSupabase
-      .from("users")
-      .select("id")
-      .eq("id", user_id)
-      .eq("tenant_id", tenant.id)
-      .maybeSingle();
-
-    if (!existingDbUser) {
-      const { data: profileToSync } = await adminSupabase
-        .from("profiles")
-        .select("id, full_name, email, role")
-        .eq("id", user_id)
-        .eq("tenant_id", tenant.id)
-        .maybeSingle();
-
-      if (profileToSync) {
-        await adminSupabase.from("users").upsert({
-          id: profileToSync.id,
-          tenant_id: tenant.id,
-          name: profileToSync.full_name || "Colaborador",
-          email: profileToSync.email || `${profileToSync.id}@birria.local`,
-          role: sanitizeRole(profileToSync.role),
-          password: "MANAGED_BY_SUPABASE",
-        }, { onConflict: "id,tenant_id" });
-      }
-    }
 
     if (id) {
       // Update existing shift
@@ -255,14 +214,7 @@ export async function DELETE(request: Request) {
       .eq("tenant_id", tenant.id)
       .maybeSingle();
 
-    const { data: dbUser } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .eq("tenant_id", tenant.id)
-      .maybeSingle();
-
-    const role = profile?.role || dbUser?.role || (user.user_metadata?.role as string);
+    const role = profile?.role || (user.user_metadata?.role as string);
     const isAdmin = role === "ADMIN" || role === "MANAGER";
 
     if (!isAdmin) {

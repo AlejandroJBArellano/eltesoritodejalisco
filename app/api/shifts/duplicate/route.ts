@@ -26,14 +26,7 @@ export async function POST(request: Request) {
       .eq("tenant_id", tenant.id)
       .maybeSingle();
 
-    const { data: dbUser } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .eq("tenant_id", tenant.id)
-      .maybeSingle();
-
-    const role = profile?.role || dbUser?.role || (user.user_metadata?.role as string);
+    const role = profile?.role || (user.user_metadata?.role as string);
     const isAdmin = role === "ADMIN" || role === "MANAGER";
 
     if (!isAdmin) {
@@ -100,8 +93,7 @@ export async function POST(request: Request) {
       };
     });
 
-    // 3. Optional: Delete existing shifts in target week to avoid duplicates, or just insert
-    // Let's delete existing target week shifts so it's a clean copy
+    // 3. Delete existing shifts in target week to avoid duplicates
     await supabase
       .from("employee_shifts")
       .delete()
