@@ -38,6 +38,7 @@ export type Profile = {
   email: string;
   full_name: string;
   role: string;
+  role_id?: string | null;
   created_at: string;
   pin?: string | null;
 };
@@ -144,12 +145,46 @@ export const ROLE_PERMISSIONS: Record<
   },
 };
 
-export function getRoleBadgeConfig(role: string, customRoles: RoleData[] = []) {
-  if (ROLE_PERMISSIONS[role]) return ROLE_PERMISSIONS[role];
+export function getRoleBadgeConfig(
+  role: string,
+  customRoles: RoleData[] = [],
+  roleId?: string | null,
+) {
+  if (roleId) {
+    const custom = customRoles.find((r) => r.id === roleId);
+    if (custom) {
+      if (custom.is_system && custom.system_slug && ROLE_PERMISSIONS[custom.system_slug]) {
+        return ROLE_PERMISSIONS[custom.system_slug];
+      }
+      return {
+        title: `${custom.name} (Personalizado)`,
+        subtitle: custom.description || "Rol personalizado del restaurante",
+        color: "text-primary",
+        badgeBg: "bg-primary/10",
+        badgeBorder: "border-primary/20",
+        permissions: Array.isArray(custom.permissions)
+          ? (custom.permissions as string[]).includes("*")
+            ? ["Acceso total"]
+            : (custom.permissions as string[])
+          : [],
+        restrictions: [],
+      };
+    }
+  }
+
+  const upper = (role || "").toUpperCase();
+  if (ROLE_PERMISSIONS[upper]) return ROLE_PERMISSIONS[upper];
+
   const custom = customRoles.find(
-    (r) => r.name.toLowerCase() === role.toLowerCase() || r.id === role,
+    (r) =>
+      r.name.toLowerCase() === (role || "").toLowerCase() ||
+      r.id === role ||
+      r.system_slug === upper,
   );
   if (custom) {
+    if (custom.is_system && custom.system_slug && ROLE_PERMISSIONS[custom.system_slug]) {
+      return ROLE_PERMISSIONS[custom.system_slug];
+    }
     return {
       title: `${custom.name} (Personalizado)`,
       subtitle: custom.description || "Rol personalizado del restaurante",
@@ -317,14 +352,35 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
   };
 
   // Stats calculation
-  const totalAdmins = profiles.filter(
-    (p) => p.role === "ADMIN" || p.role === "MANAGER",
-  ).length;
-  const totalWaiters = profiles.filter((p) => p.role === "WAITER").length;
-  const totalChefs = profiles.filter((p) => p.role === "CHEF").length;
-  const totalInventory = profiles.filter((p) => p.role === "INVENTORY").length;
+  const totalAdmins = profiles.filter((p) => {
+    if (p.role === "ADMIN" || p.role === "MANAGER") return true;
+    const r = availableRoles.find((ar) => ar.id === p.role_id);
+    return r?.system_slug === "ADMIN" || r?.system_slug === "MANAGER";
+  }).length;
 
-  const currentRoleInfo = getRoleBadgeConfig(selectedFormRole, availableRoles);
+  const totalWaiters = profiles.filter((p) => {
+    if (p.role === "WAITER") return true;
+    const r = availableRoles.find((ar) => ar.id === p.role_id);
+    return r?.system_slug === "WAITER";
+  }).length;
+
+  const totalChefs = profiles.filter((p) => {
+    if (p.role === "CHEF") return true;
+    const r = availableRoles.find((ar) => ar.id === p.role_id);
+    return r?.system_slug === "CHEF";
+  }).length;
+
+  const totalInventory = profiles.filter((p) => {
+    if (p.role === "INVENTORY") return true;
+    const r = availableRoles.find((ar) => ar.id === p.role_id);
+    return r?.system_slug === "INVENTORY";
+  }).length;
+
+  const currentRoleInfo = getRoleBadgeConfig(
+    selectedFormRole,
+    availableRoles,
+    availableRoles.find((r) => r.id === selectedFormRole || r.name === selectedFormRole)?.id,
+  );
 
   // Filtered & Sorted Profiles
   const filteredProfiles = useMemo(() => {
@@ -335,10 +391,20 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
         const matchEmail = (p.email || "").toLowerCase().includes(q);
         if (!matchName && !matchEmail) return false;
       }
-      if (roleFilter !== "ALL" && p.role !== roleFilter) return false;
+      if (roleFilter !== "ALL") {
+        if (p.role_id && p.role_id === roleFilter) return true;
+        if (p.role === roleFilter) return true;
+        const matchedRole = availableRoles.find((r) => r.id === p.role_id);
+        if (matchedRole) {
+          if (matchedRole.id === roleFilter) return true;
+          if (matchedRole.system_slug === roleFilter) return true;
+          if (matchedRole.name.toLowerCase() === roleFilter.toLowerCase()) return true;
+        }
+        return false;
+      }
       return true;
     });
-  }, [profiles, searchQuery, roleFilter]);
+  }, [profiles, searchQuery, roleFilter, availableRoles]);
 
   const sortedProfiles = useMemo(() => {
     return [...filteredProfiles].sort((a, b) => {
@@ -552,18 +618,24 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                     className="rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-blue-500"
                   >
                     <option value="ALL">Todos los roles</option>
-                    <option value="ADMIN">Administrador</option>
-                    <option value="MANAGER">Gerente</option>
-                    <option value="WAITER">Mesero</option>
-                    <option value="CHEF">Cocinero</option>
-                    <option value="INVENTORY">Inventario</option>
-                    {availableRoles
-                      .filter((r) => !r.is_system)
-                      .map((r) => (
-                        <option key={r.id} value={r.name}>
-                          {r.name}
-                        </option>
-                      ))}
+                    <optgroup label="Roles del Sistema">
+                      <option value="ADMIN">Administrador</option>
+                      <option value="MANAGER">Gerente</option>
+                      <option value="WAITER">Mesero</option>
+                      <option value="CHEF">Cocinero</option>
+                      <option value="INVENTORY">Inventario</option>
+                    </optgroup>
+                    {availableRoles.some((r) => !r.is_system) && (
+                      <optgroup label="Roles Personalizados">
+                        {availableRoles
+                          .filter((r) => !r.is_system)
+                          .map((r) => (
+                            <option key={r.id} value={r.id}>
+                              {r.name}
+                            </option>
+                          ))}
+                      </optgroup>
+                    )}
                   </select>
                 </div>
               </div>
@@ -605,7 +677,20 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                   </thead>
                   <tbody className="divide-y divide-border">
                     {paginatedProfiles.map((p) => {
-                      const roleConfig = getRoleBadgeConfig(p.role, availableRoles);
+                      const roleConfig = getRoleBadgeConfig(
+                        p.role,
+                        availableRoles,
+                        p.role_id,
+                      );
+                      const currentSelectValue =
+                        p.role_id ||
+                        availableRoles.find(
+                          (r) =>
+                            r.system_slug === p.role ||
+                            r.name.toLowerCase() === p.role.toLowerCase(),
+                        )?.id ||
+                        p.role;
+
                       return (
                         <tr
                           key={p.id}
@@ -628,41 +713,77 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                           </td>
                           <td className="py-3 px-4">
                             <select
-                              value={p.role}
+                              value={currentSelectValue}
                               onChange={(e) =>
                                 handleRoleChange(p.id, e.target.value)
                               }
                               className={`rounded-xl border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card ${roleConfig.badgeBg} ${roleConfig.color} ${roleConfig.badgeBorder}`}
                             >
-                              <option value="ADMIN" className="bg-card text-text-light">
-                                Administrador
-                              </option>
-                              <option
-                                value="MANAGER"
-                                className="bg-card text-text-light"
-                              >
-                                Gerente
-                              </option>
-                              <option value="WAITER" className="bg-card text-text-light">
-                                Mesero
-                              </option>
-                              <option value="CHEF" className="bg-card text-text-light">
-                                Cocinero / Chef
-                              </option>
-                              <option value="INVENTORY" className="bg-card text-text-light">
-                                Inventario / Almacén
-                              </option>
-                              {availableRoles
-                                .filter((r) => !r.is_system)
-                                .map((r) => (
+                              {availableRoles.length > 0 ? (
+                                <>
+                                  <optgroup label="Roles del Sistema">
+                                    {availableRoles
+                                      .filter((r) => r.is_system)
+                                      .map((r) => (
+                                        <option
+                                          key={r.id}
+                                          value={r.id}
+                                          className="bg-card text-text-light"
+                                        >
+                                          {r.name}
+                                        </option>
+                                      ))}
+                                  </optgroup>
+                                  {availableRoles.some((r) => !r.is_system) && (
+                                    <optgroup label="Roles Personalizados">
+                                      {availableRoles
+                                        .filter((r) => !r.is_system)
+                                        .map((r) => (
+                                          <option
+                                            key={r.id}
+                                            value={r.id}
+                                            className="bg-card text-text-light"
+                                          >
+                                            {r.name}
+                                          </option>
+                                        ))}
+                                    </optgroup>
+                                  )}
+                                </>
+                              ) : (
+                                <>
                                   <option
-                                    key={r.id}
-                                    value={r.name}
+                                    value="ADMIN"
                                     className="bg-card text-text-light"
                                   >
-                                    {r.name}
+                                    Administrador
                                   </option>
-                                ))}
+                                  <option
+                                    value="MANAGER"
+                                    className="bg-card text-text-light"
+                                  >
+                                    Gerente
+                                  </option>
+                                  <option
+                                    value="WAITER"
+                                    className="bg-card text-text-light"
+                                  >
+                                    Mesero
+                                  </option>
+                                  <option
+                                    value="CHEF"
+                                    className="bg-card text-text-light"
+                                  >
+                                    Cocinero / Chef
+                                  </option>
+                                  <option
+                                    value="INVENTORY"
+                                    className="bg-card text-text-light"
+                                  >
+                                    Inventario / Almacén
+                                  </option>
+                                </>
+                              )}
                             </select>
                           </td>
                           <td className="py-3 px-4 text-xs text-text-light/50">
@@ -828,16 +949,24 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                   {availableRoles
                     .filter((r) => !r.is_system)
                     .map((r) => (
-                      <option key={r.id} value={r.name}>
+                      <option key={r.id} value={r.id}>
                         {r.name}
                       </option>
                     ))}
                 </optgroup>
               )}
             </select>
+            <input
+              type="hidden"
+              name="role_id"
+              value={availableRoles.find((r) => r.id === selectedFormRole)?.id || ""}
+            />
           </div>
 
-          {(selectedFormRole === "ADMIN" || selectedFormRole === "MANAGER") && (
+          {(selectedFormRole === "ADMIN" ||
+            selectedFormRole === "MANAGER" ||
+            availableRoles.find((r) => r.id === selectedFormRole)?.system_slug === "ADMIN" ||
+            availableRoles.find((r) => r.id === selectedFormRole)?.system_slug === "MANAGER") && (
             <div>
               <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
                 PIN de Autorización (4 a 6 dígitos)

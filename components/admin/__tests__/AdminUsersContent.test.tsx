@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AdminUsersContent, type Profile } from "../AdminUsersContent";
 import * as actions from "@/app/admin/users/actions";
-import * as roleActions from "@/app/admin/users/roles-actions";
 
 vi.mock("@/app/admin/users/actions", () => ({
   createUser: vi.fn(),
@@ -110,19 +109,44 @@ describe("AdminUsersContent Component", () => {
     });
   });
 
-  it("allows changing user role to INVENTORY", async () => {
+  it("allows changing user role to custom role by ID", async () => {
     vi.mocked(actions.updateUserRole).mockResolvedValue({ success: true } as any);
 
     render(<AdminUsersContent initialProfiles={mockProfiles} />);
 
+    await waitFor(() => {
+      const options = screen.getAllByRole("option");
+      const customOpt = options.find((opt) => opt.textContent?.includes("Capitán de Meseros"));
+      expect(customOpt).toBeDefined();
+    });
+
     const roleSelects = screen.getAllByRole("combobox");
-    const userRoleSelect = roleSelects.find((s) => (s as HTMLSelectElement).value === "WAITER");
+    const userRoleSelect = roleSelects.find(
+      (s) => (s as HTMLSelectElement).value === "r-3" || (s as HTMLSelectElement).value === "WAITER",
+    );
     expect(userRoleSelect).toBeDefined();
 
     if (userRoleSelect) {
-      fireEvent.change(userRoleSelect, { target: { value: "INVENTORY" } });
-      expect(actions.updateUserRole).toHaveBeenCalledWith("usr-3", "INVENTORY");
+      fireEvent.change(userRoleSelect, { target: { value: "r-6" } });
+      expect(actions.updateUserRole).toHaveBeenCalledWith("usr-3", "r-6");
     }
+  });
+
+  it("renders custom role badge correctly when profile has role_id", () => {
+    const customProfiles: Profile[] = [
+      {
+        id: "usr-custom",
+        email: "carlos@test.com",
+        full_name: "Carlos Torres",
+        role: "Capitán de Meseros",
+        role_id: "r-6",
+        created_at: "2026-01-05T00:00:00Z",
+      },
+    ];
+
+    render(<AdminUsersContent initialProfiles={customProfiles} />);
+    expect(screen.getByText("Carlos Torres")).toBeDefined();
+    expect(screen.getByText("carlos@test.com")).toBeDefined();
   });
 
   it("opens PIN edit modal, validates length and calls updateUserPin on submit", async () => {
