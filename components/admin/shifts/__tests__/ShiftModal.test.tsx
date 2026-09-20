@@ -258,4 +258,30 @@ describe("ShiftModal Component", () => {
     fireEvent.click(closeBtn);
     expect(onCloseMock).toHaveBeenCalled();
   });
+
+  it("renders disabled select and alert when users list is empty", () => {
+    render(
+      <ShiftModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+        users={[]}
+      />
+    );
+
+    expect(
+      screen.getByText(/no hay colaboradores registrados/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/no hay opciones/i)
+    ).toBeInTheDocument();
+
+    // Try saving without collaborator
+    const saveBtn = screen.getByRole("button", { name: /guardar turno/i });
+    fireEvent.click(saveBtn);
+
+    expect(
+      screen.getByText("Debes seleccionar un colaborador")
+    ).toBeInTheDocument();
+  });
 });

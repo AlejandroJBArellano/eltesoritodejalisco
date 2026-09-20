@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { X, Clock, Trash2, Loader2, Save } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Clock, Trash2, Loader2, Save, AlertCircle } from "lucide-react";
 import type { EmployeeShift } from "@/components/asistencia/types";
 
 export interface ShiftUserOption {
   id: string;
   name: string;
   role?: string;
+  email?: string;
 }
 
 interface ShiftModalProps {
@@ -67,6 +68,29 @@ export function ShiftModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialShift) {
+      setUserId(initialShift.user_id);
+      setDate(initialShift.date);
+      setStartTime(initialShift.start_time ? initialShift.start_time.slice(0, 5) : "08:00");
+      setEndTime(initialShift.end_time ? initialShift.end_time.slice(0, 5) : "16:00");
+      setArea(initialShift.area || "");
+      setNotes(initialShift.notes || "");
+    } else {
+      const validUserId =
+        defaultUserId && users.some((u) => u.id === defaultUserId)
+          ? defaultUserId
+          : (users[0]?.id ?? "");
+      setUserId(validUserId);
+      setDate(defaultDate || new Date().toISOString().split("T")[0]);
+      setStartTime("08:00");
+      setEndTime("16:00");
+      setArea("");
+      setNotes("");
+    }
+    setError(null);
+  }, [isOpen, initialShift, defaultDate, defaultUserId, users]);
 
   if (!isOpen) return null;
 
@@ -159,18 +183,40 @@ export function ShiftModal({
             <label className="block text-[11px] font-black uppercase tracking-wider text-zinc-400 mb-1.5">
               Colaborador
             </label>
-            <select
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              disabled={Boolean(initialShift)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs font-bold text-zinc-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition disabled:opacity-50"
-            >
-              {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name} {u.role ? `(${u.role})` : ""}
-                </option>
-              ))}
-            </select>
+            {users.length === 0 ? (
+              <div className="space-y-2">
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-bold">No hay colaboradores registrados.</p>
+                    <p className="text-[11px] text-amber-400/80 mt-0.5">
+                      Registra colaboradores en el panel de usuarios para asignarles horarios.
+                    </p>
+                  </div>
+                </div>
+                <select
+                  disabled
+                  aria-label="Colaborador"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs font-bold text-zinc-500 opacity-50 outline-none cursor-not-allowed"
+                >
+                  <option value="">No hay opciones</option>
+                </select>
+              </div>
+            ) : (
+              <select
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                disabled={Boolean(initialShift)}
+                aria-label="Seleccionar colaborador"
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs font-bold text-zinc-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition disabled:opacity-50"
+              >
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} {u.role ? `(${u.role})` : ""}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Date selection */}

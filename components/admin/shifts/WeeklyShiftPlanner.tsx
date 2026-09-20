@@ -11,6 +11,7 @@ import {
   isSameDay,
 } from "date-fns";
 import { es } from "date-fns/locale";
+import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
@@ -24,6 +25,7 @@ import {
   AlertCircle,
   Settings,
   User,
+  Users,
 } from "lucide-react";
 import { toPng } from "html-to-image";
 import { ShiftModal, type ShiftUserOption } from "./ShiftModal";
@@ -399,8 +401,17 @@ export function WeeklyShiftPlanner({
             </span>
           </div>
         ) : users.length === 0 ? (
-          <div className="text-center py-16 text-zinc-500 text-xs font-bold uppercase tracking-wider">
-            No hay colaboradores registrados en este restaurante.
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center gap-3">
+            <Users className="h-8 w-8 text-zinc-600" />
+            <p className="text-zinc-400 text-xs font-bold uppercase tracking-wider">
+              No hay colaboradores registrados en este restaurante.
+            </p>
+            <Link
+              href="/admin/users"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-primary hover:border-primary/50 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" /> Registrar Colaboradores
+            </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -528,16 +539,18 @@ export function WeeklyShiftPlanner({
       </div>
 
       {/* Shift Modal for Create / Edit */}
-      <ShiftModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveShift}
-        onDelete={handleDeleteShift}
-        initialShift={editingShift}
-        defaultDate={modalDefaultDate}
-        defaultUserId={modalDefaultUserId}
-        users={users}
-      />
+      {isModalOpen && (
+        <ShiftModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveShift}
+          onDelete={handleDeleteShift}
+          initialShift={editingShift}
+          defaultDate={modalDefaultDate}
+          defaultUserId={modalDefaultUserId}
+          users={users}
+        />
+      )}
     </div>
   );
 }
