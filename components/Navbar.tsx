@@ -50,12 +50,18 @@ export default function Navbar() {
   const suffix = endsWithOS ? systemName.slice(-2) : "";
 
   const isWaiter = user?.isWaiter ?? false;
+  const isInventory = user?.isInventory ?? false;
 
-  const navLinks = [
-    { href: "/pos", label: "POS" },
-    { href: "/kitchen", label: "Cocina" },
-    ...(!isWaiter ? [{ href: "/history", label: "Historial" }] : []),
-  ];
+  const navLinks = isInventory
+    ? [
+        { href: "/inventario", label: "Inventario" },
+        { href: "/tareas", label: "Tareas" },
+      ]
+    : [
+        { href: "/pos", label: "POS" },
+        { href: "/kitchen", label: "Cocina" },
+        ...(!isWaiter ? [{ href: "/history", label: "Historial" }] : []),
+      ];
 
   return (
     <nav className="bg-dark border-b border-border text-white sticky top-0 z-40 no-print">

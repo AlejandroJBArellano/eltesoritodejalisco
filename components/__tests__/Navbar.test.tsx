@@ -151,12 +151,33 @@ describe("Navbar Component", () => {
       isAdmin: false,
       isWaiter: false,
       isChef: true,
+      isInventory: false,
       isAuthenticated: true,
     });
 
     render(<Navbar />);
     const prompt = screen.getByTestId("push-notification-prompt");
     expect(prompt).toHaveAttribute("data-role", "KITCHEN");
+  });
+
+  it("renders 'Inventario' and 'Tareas' links for INVENTORY role", () => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: { email: "almacen@test.com" } as any,
+      role: "INVENTORY",
+      isAdmin: false,
+      isWaiter: false,
+      isChef: false,
+      isInventory: true,
+      isAuthenticated: true,
+    });
+
+    render(<Navbar />);
+
+    expect(screen.getByText("Inventario")).toBeInTheDocument();
+    expect(screen.getByText("Tareas")).toBeInTheDocument();
+    expect(screen.queryByText("POS")).not.toBeInTheDocument();
+    expect(screen.queryByText("Cocina")).not.toBeInTheDocument();
+    expect(screen.queryByText("Historial")).not.toBeInTheDocument();
   });
 
   it("updates email on authStateChange and unsubscribes on unmount", () => {

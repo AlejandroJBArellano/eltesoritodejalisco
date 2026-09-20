@@ -38,6 +38,16 @@ const mockChefProfile: UserProfile = {
   pin: null,
 };
 
+const mockInventoryProfile: UserProfile = {
+  id: "u-inv",
+  email: "almacen@restaurante.com",
+  full_name: "Almacenista Pedro",
+  role: "INVENTORY",
+  tenant_id: "t-1",
+  updated_at: "2026-01-01",
+  pin: null,
+};
+
 describe("UserProvider and useUser Hook", () => {
   it("throws error when useUser is called outside UserProvider", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -64,6 +74,7 @@ describe("UserProvider and useUser Hook", () => {
     expect(result.current.isAdmin).toBe(true);
     expect(result.current.isWaiter).toBe(false);
     expect(result.current.isChef).toBe(false);
+    expect(result.current.isInventory).toBe(false);
     expect(result.current.isAuthenticated).toBe(true);
   });
 
@@ -78,6 +89,7 @@ describe("UserProvider and useUser Hook", () => {
     expect(result.current.isAdmin).toBe(false);
     expect(result.current.isWaiter).toBe(true);
     expect(result.current.isChef).toBe(false);
+    expect(result.current.isInventory).toBe(false);
   });
 
   it("provides correct context values for CHEF", () => {
@@ -91,6 +103,22 @@ describe("UserProvider and useUser Hook", () => {
     expect(result.current.isAdmin).toBe(false);
     expect(result.current.isWaiter).toBe(false);
     expect(result.current.isChef).toBe(true);
+    expect(result.current.isInventory).toBe(false);
+  });
+
+  it("provides correct context values for INVENTORY", () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <UserProvider initialProfile={mockInventoryProfile}>{children}</UserProvider>
+    );
+
+    const { result } = renderHook(() => useUser(), { wrapper });
+
+    expect(result.current.role).toBe("INVENTORY");
+    expect(result.current.isAdmin).toBe(false);
+    expect(result.current.isWaiter).toBe(false);
+    expect(result.current.isChef).toBe(false);
+    expect(result.current.isInventory).toBe(true);
+    expect(result.current.isAuthenticated).toBe(true);
   });
 
   it("handles null profile gracefully", () => {
@@ -105,6 +133,7 @@ describe("UserProvider and useUser Hook", () => {
     expect(result.current.isAdmin).toBe(false);
     expect(result.current.isWaiter).toBe(false);
     expect(result.current.isChef).toBe(false);
+    expect(result.current.isInventory).toBe(false);
     expect(result.current.isAuthenticated).toBe(false);
   });
 });

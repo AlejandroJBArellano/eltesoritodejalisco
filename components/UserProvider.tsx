@@ -12,6 +12,7 @@ export interface UserContextValue {
   isAdmin: boolean;
   isWaiter: boolean;
   isChef: boolean;
+  isInventory: boolean;
   isAuthenticated: boolean;
 }
 
@@ -28,6 +29,7 @@ export function UserProvider({ initialProfile, children }: UserProviderProps) {
     const isAdmin = role === "ADMIN" || role === "MANAGER";
     const isWaiter = role === "WAITER";
     const isChef = role === "CHEF";
+    const isInventory = role === "INVENTORY";
     const isAuthenticated = Boolean(initialProfile);
 
     return {
@@ -36,6 +38,7 @@ export function UserProvider({ initialProfile, children }: UserProviderProps) {
       isAdmin,
       isWaiter,
       isChef,
+      isInventory,
       isAuthenticated,
     };
   }, [initialProfile]);
