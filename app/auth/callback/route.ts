@@ -68,19 +68,6 @@ export async function GET(request: Request) {
                 .update({ id: user.id })
                 .eq("id", profileByEmail.id)
                 .eq("tenant_id", tenant.id);
-
-              try {
-                await adminClient
-                  .from("users")
-                  .update({ id: user.id })
-                  .eq("id", profileByEmail.id)
-                  .eq("tenant_id", tenant.id);
-              } catch (syncErr) {
-                console.error(
-                  "Error al sincronizar id en tabla users:",
-                  syncErr,
-                );
-              }
             }
             profile = { ...profileByEmail, id: user.id };
           }
@@ -105,14 +92,6 @@ export async function GET(request: Request) {
             .update({ full_name: googleName })
             .eq("id", user.id)
             .eq("tenant_id", tenant.id);
-
-          try {
-            await adminClient
-              .from("users")
-              .update({ name: googleName })
-              .eq("id", user.id)
-              .eq("tenant_id", tenant.id);
-          } catch {}
         }
 
         return NextResponse.redirect(`${baseUrl}${next}`);
@@ -126,4 +105,3 @@ export async function GET(request: Request) {
   const errorMsg = encodeURIComponent("No se pudo iniciar sesión con Google");
   return NextResponse.redirect(`${baseUrl}/login?error=${errorMsg}`);
 }
-

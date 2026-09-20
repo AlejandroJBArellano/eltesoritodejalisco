@@ -24,7 +24,6 @@ describe("GET /auth/callback", () => {
   const mockSelectFromProfiles = vi.fn();
 
   const mockAdminUpdateProfiles = vi.fn();
-  const mockAdminUpdateUsers = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -62,18 +61,9 @@ describe("GET /auth/callback", () => {
       }),
     };
 
-    const adminUsersBuilder = {
-      update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          eq: mockAdminUpdateUsers.mockResolvedValue({ error: null }),
-        }),
-      }),
-    };
-
     vi.mocked(createAdminClient).mockReturnValue({
       from: vi.fn().mockImplementation((table: string) => {
         if (table === "profiles") return adminProfilesBuilder;
-        if (table === "users") return adminUsersBuilder;
         return { update: vi.fn() };
       }),
     } as any);
@@ -188,7 +178,6 @@ describe("GET /auth/callback", () => {
 
     expect(mockSignOut).not.toHaveBeenCalled();
     expect(mockAdminUpdateProfiles).toHaveBeenCalled();
-    expect(mockAdminUpdateUsers).toHaveBeenCalled();
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("http://localhost:3000/");
   });

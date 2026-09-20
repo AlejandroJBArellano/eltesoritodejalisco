@@ -76,8 +76,8 @@ describe("AdminUsersContent Component", () => {
     expect(screen.getByText("Waiter User")).toBeDefined();
     expect(screen.getByText("Almacen User")).toBeDefined();
 
-    // Stats metrics
-    expect(screen.getByText("Almacén / Stock")).toBeDefined();
+    // Stats / filter role options
+    expect(screen.getAllByText("Inventario").length).toBeGreaterThan(0);
 
     // PIN badges for admin and manager
     expect(screen.getByText("1234")).toBeDefined();

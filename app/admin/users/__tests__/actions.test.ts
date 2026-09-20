@@ -190,22 +190,18 @@ describe("Admin Users Server Actions", () => {
     expect(mockFromUpdate).toHaveBeenCalled();
   });
 
-  it("applies safe fallback when direct role name update fails on profiles", async () => {
+  it("returns error when update fails on profiles", async () => {
     const customRoleId = "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d";
     mockFromSelect.mockResolvedValueOnce({
       data: { id: customRoleId, name: "Carlos", system_slug: null },
       error: null,
     });
 
-    // First update on profiles fails (e.g. enum constraint), second update on profiles (fallback) succeeds, third update on users table succeeds
-    mockFromUpdate
-      .mockResolvedValueOnce({ error: { message: 'invalid input value for enum UserRole: "Carlos"' } })
-      .mockResolvedValueOnce({ error: null })
-      .mockResolvedValueOnce({ error: null });
+    mockFromUpdate.mockResolvedValueOnce({ error: { message: "Database error" } });
 
     const res = await updateUserRole("user-1", customRoleId);
-    expect(res).toEqual({ success: true });
-    expect(mockFromUpdate).toHaveBeenCalledTimes(3);
+    expect(res).toEqual({ error: "Error al actualizar el rol" });
+    expect(mockFromUpdate).toHaveBeenCalledTimes(1);
   });
 
   it("prevents self-deletion in deleteUser", async () => {

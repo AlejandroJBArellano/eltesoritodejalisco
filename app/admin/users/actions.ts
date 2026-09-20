@@ -1,12 +1,9 @@
 "use server";
 
-import { type UserRole } from "@/types";
 import { getProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext } from "@/lib/tenant";
 import { revalidatePath } from "next/cache";
-
-import { sanitizeRole } from "@/lib/users";
 
 export async function createUser(formData: FormData) {
   try {
@@ -46,7 +43,6 @@ export async function createUser(formData: FormData) {
     // 2. Resolver role_id y nombre de rol si existe en tabla roles
     let resolvedRole = rawRole;
     let resolvedRoleId: string | null = rawRoleId || null;
-    let systemSlug: string | null = null;
 
     try {
       let roleRecord: any = null;
@@ -82,7 +78,6 @@ export async function createUser(formData: FormData) {
 
       if (roleRecord) {
         resolvedRoleId = roleRecord.id;
-        systemSlug = roleRecord.system_slug || null;
         resolvedRole = roleRecord.system_slug || roleRecord.name;
       }
     } catch (rErr) {
@@ -157,28 +152,8 @@ export async function createUser(formData: FormData) {
     const { error: upsertError } = await adminClient.from("profiles").upsert(profileUpsert);
 
     if (upsertError) {
-      console.warn("[createUser] Falló upsert inicial de profile, reintentando con fallback de rol de sistema:", upsertError);
-      profileUpsert.role = systemSlug || sanitizeRole(resolvedRole);
-      const retryUpsert = await adminClient.from("profiles").upsert(profileUpsert);
-      if (retryUpsert.error) {
-        console.error("[createUser] Error al registrar perfil:", retryUpsert.error);
-        return { error: "Error al crear el perfil en la base de datos" };
-      }
-    }
-
-    // 6. Sincronizar en la tabla users local
-    try {
-      await adminClient.from("users").upsert({
-        id: userId,
-        email: cleanEmail,
-        name: fullName,
-        role: sanitizeRole(systemSlug || resolvedRole),
-        pin: pin,
-        tenant_id: tenant.id,
-        password: "MANAGED_BY_SUPABASE",
-      });
-    } catch (usersErr) {
-      console.error("Error al sincronizar tabla users:", usersErr);
+      console.error("[createUser] Error al registrar perfil:", upsertError);
+      return { error: "Error al crear el perfil en la base de datos" };
     }
 
     revalidatePath("/admin/users");
@@ -212,7 +187,6 @@ export async function updateUserRole(id: string, newRole: string) {
     // 1. Resolver role_id y nombre de rol
     let resolvedRole = rawInput;
     let resolvedRoleId: string | null = null;
-    let systemSlug: string | null = null;
 
     try {
       let roleRecord: any = null;
@@ -238,7 +212,6 @@ export async function updateUserRole(id: string, newRole: string) {
 
       if (roleRecord) {
         resolvedRoleId = roleRecord.id;
-        systemSlug = roleRecord.system_slug || null;
         resolvedRole = roleRecord.system_slug || roleRecord.name;
       }
     } catch (roleErr) {
@@ -258,40 +231,11 @@ export async function updateUserRole(id: string, newRole: string) {
       .eq("tenant_id", tenant.id);
 
     if (updateError) {
-      console.warn(
-        "[updateUserRole] Falló actualización directa de profile.role, intentando con fallback seguro:",
-        updateError,
-      );
-      const fallbackRole = systemSlug || sanitizeRole(resolvedRole);
-      const fallbackPayload: any = { role: fallbackRole };
-      if (resolvedRoleId) {
-        fallbackPayload.role_id = resolvedRoleId;
-      }
-      const retryRes = await adminClient
-        .from("profiles")
-        .update(fallbackPayload)
-        .eq("id", id)
-        .eq("tenant_id", tenant.id);
-
-      if (retryRes.error) {
-        console.error("[updateUserRole] Error persistente al actualizar perfil:", retryRes.error);
-        return { error: "Error al actualizar el rol" };
-      }
+      console.error("[updateUserRole] Error al actualizar perfil:", updateError);
+      return { error: "Error al actualizar el rol" };
     }
 
-    // 3. Actualizamos tabla users si existe con valor sanitizado para enum
-    try {
-      const safeUserRole = sanitizeRole(systemSlug || resolvedRole);
-      await adminClient
-        .from("users")
-        .update({ role: safeUserRole })
-        .eq("id", id)
-        .eq("tenant_id", tenant.id);
-    } catch (usersErr) {
-      console.warn("[updateUserRole] Error actualizando tabla users:", usersErr);
-    }
-
-    // 4. Actualizar user_metadata en Auth
+    // 3. Actualizar user_metadata en Auth
     try {
       await adminClient.auth.admin.updateUserById(id, {
         user_metadata: { role: resolvedRole, role_id: resolvedRoleId },
@@ -333,16 +277,6 @@ export async function updateUserPin(id: string, pin: string) {
       return { error: "Error al actualizar el PIN en el perfil" };
     }
 
-    try {
-      await adminClient
-        .from("users")
-        .update({ pin: trimmed })
-        .eq("id", id)
-        .eq("tenant_id", tenant.id);
-    } catch {
-      // Ignorar si tabla users no existe o no tiene el registro
-    }
-
     revalidatePath("/admin/users");
     return { success: true };
   } catch (err) {
@@ -377,18 +311,7 @@ export async function deleteUser(id: string) {
       return { error: "Error al eliminar el perfil del restaurante." };
     }
 
-    // 2. Eliminar de la tabla users local si existe
-    try {
-      await adminClient
-        .from("users")
-        .delete()
-        .eq("id", id)
-        .eq("tenant_id", tenant.id);
-    } catch (usersErr) {
-      console.error("Error al eliminar de tabla users:", usersErr);
-    }
-
-    // 3. Opcional: verificar si el usuario pertenece a otros tenants antes de borrarlo de Auth global
+    // 2. Opcional: verificar si el usuario pertenece a otros tenants antes de borrarlo de Auth global
     const { data: otherProfiles } = await adminClient
       .from("profiles")
       .select("id")
