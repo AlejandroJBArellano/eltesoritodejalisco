@@ -52,10 +52,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_attendance_users"
+            foreignKeyName: "fk_attendance_profiles"
             columns: ["user_id", "tenant_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id", "tenant_id"]
           },
         ]
@@ -305,18 +305,18 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_employee_shifts_profiles"
+            columns: ["user_id", "tenant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id", "tenant_id"]
+          },
+          {
             foreignKeyName: "fk_employee_shifts_tenants"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_employee_shifts_users"
-            columns: ["user_id", "tenant_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id", "tenant_id"]
           },
         ]
       }
@@ -1555,50 +1555,6 @@ export type Database = {
         }
         Relationships: []
       }
-      users: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          name: string
-          password: string
-          pin: string | null
-          role: Database["public"]["Enums"]["UserRole"]
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id: string
-          name: string
-          password: string
-          pin?: string | null
-          role?: Database["public"]["Enums"]["UserRole"]
-          tenant_id: string
-          updated_at: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          name?: string
-          password?: string
-          pin?: string | null
-          role?: Database["public"]["Enums"]["UserRole"]
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "users_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       popular_menu_items: {
@@ -1678,7 +1634,6 @@ export type Database = {
         | "CANCELLED"
         | "UNCOLLECTED"
       PaymentMethod: "CASH" | "CARD" | "TRANSFER" | "OTHER"
-      UserRole: "ADMIN" | "MANAGER" | "WAITER" | "CHEF" | "INVENTORY"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1816,7 +1771,6 @@ export const Constants = {
         "UNCOLLECTED",
       ],
       PaymentMethod: ["CASH", "CARD", "TRANSFER", "OTHER"],
-      UserRole: ["ADMIN", "MANAGER", "WAITER", "CHEF", "INVENTORY"],
     },
   },
 } as const
