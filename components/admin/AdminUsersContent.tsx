@@ -6,6 +6,7 @@ import {
   updateUserRole,
   updateUserPin,
 } from "@/app/admin/users/actions";
+import { getTenantRoles } from "@/app/admin/users/roles-actions";
 import { PageHeader } from "@/components/PageHeader";
 import {
   TableHeaderSortCell,
@@ -13,6 +14,8 @@ import {
   TableSearchInput,
 } from "@/components/ui/DataTableControls";
 import { Modal } from "@/components/ui/Modal";
+import { AdminRolesTab } from "./AdminRolesTab";
+import { type RoleData } from "@/lib/permissions";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -28,9 +31,9 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
-type Profile = {
+export type Profile = {
   id: string;
   email: string;
   full_name: string;
@@ -141,12 +144,45 @@ export const ROLE_PERMISSIONS: Record<
   },
 };
 
+export function getRoleBadgeConfig(role: string, customRoles: RoleData[] = []) {
+  if (ROLE_PERMISSIONS[role]) return ROLE_PERMISSIONS[role];
+  const custom = customRoles.find(
+    (r) => r.name.toLowerCase() === role.toLowerCase() || r.id === role,
+  );
+  if (custom) {
+    return {
+      title: `${custom.name} (Personalizado)`,
+      subtitle: custom.description || "Rol personalizado del restaurante",
+      color: "text-primary",
+      badgeBg: "bg-primary/10",
+      badgeBorder: "border-primary/20",
+      permissions: Array.isArray(custom.permissions)
+        ? (custom.permissions as string[]).includes("*")
+          ? ["Acceso total"]
+          : (custom.permissions as string[])
+        : [],
+      restrictions: [],
+    };
+  }
+  return {
+    title: role,
+    subtitle: "Rol asignado",
+    color: "text-text-light/70",
+    badgeBg: "bg-white/5",
+    badgeBorder: "border-white/10",
+    permissions: [],
+    restrictions: [],
+  };
+}
+
 interface AdminUsersContentProps {
   initialProfiles: Profile[];
 }
 
 export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
+  const [activeTab, setActiveTab] = useState<"team" | "roles">("team");
   const [profiles, setProfiles] = useState<Profile[]>(initialProfiles);
+  const [availableRoles, setAvailableRoles] = useState<RoleData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -177,12 +213,18 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
   const fetchProfiles = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/admin/users/list");
+      const [res, rolesRes] = await Promise.all([
+        fetch("/api/admin/users/list"),
+        getTenantRoles(),
+      ]);
       if (res.ok) {
         const data = await res.json();
         setProfiles(data);
       } else {
         setErrorMsg("Error al obtener usuarios.");
+      }
+      if (rolesRes.data) {
+        setAvailableRoles(rolesRes.data);
       }
     } catch {
       setErrorMsg("Error desconocido.");
@@ -190,6 +232,12 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    getTenantRoles().then((res) => {
+      if (res.data) setAvailableRoles(res.data);
+    });
+  }, []);
 
   const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -240,6 +288,34 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
     }
   };
 
+  const handleSavePin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPinUser) return;
+
+    const trimmed = newPin.trim();
+    if (!/^\d{4,6}$/.test(trimmed)) {
+      setPinError("El PIN debe contener entre 4 y 6 dígitos numéricos");
+      return;
+    }
+
+    setIsUpdatingPin(true);
+    setPinError(null);
+    try {
+      const res = await updateUserPin(editingPinUser.id, trimmed);
+      if (res?.error) {
+        setPinError(res.error);
+      } else {
+        setSuccessMsg(`PIN actualizado para ${editingPinUser.full_name || editingPinUser.email}`);
+        setEditingPinUser(null);
+        fetchProfiles();
+      }
+    } catch {
+      setPinError("Error al guardar el PIN.");
+    } finally {
+      setIsUpdatingPin(false);
+    }
+  };
+
   // Stats calculation
   const totalAdmins = profiles.filter(
     (p) => p.role === "ADMIN" || p.role === "MANAGER",
@@ -248,8 +324,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
   const totalChefs = profiles.filter((p) => p.role === "CHEF").length;
   const totalInventory = profiles.filter((p) => p.role === "INVENTORY").length;
 
-  const currentRoleInfo =
-    ROLE_PERMISSIONS[selectedFormRole] || ROLE_PERMISSIONS.WAITER;
+  const currentRoleInfo = getRoleBadgeConfig(selectedFormRole, availableRoles);
 
   // Filtered & Sorted Profiles
   const filteredProfiles = useMemo(() => {
@@ -304,324 +379,370 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
         subtitle="Administra cuentas de acceso, asignación de roles y permisos"
         badgeColor="bg-blue-500"
         actions={
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="rounded-xl bg-blue-500 px-4 py-2 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-blue-500/20"
-          >
-            <UserPlus className="h-4 w-4" />
-            Nuevo Usuario
-          </button>
+          activeTab === "team" ? (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="rounded-xl bg-blue-500 px-4 py-2 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-blue-500/20"
+            >
+              <UserPlus className="h-4 w-4" />
+              Nuevo Usuario
+            </button>
+          ) : null
         }
       />
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-        {/* Mensajes de notificación */}
-        {errorMsg && (
-          <div className="flex items-center gap-3 rounded-2xl bg-red-500/10 border border-red-500/20 p-4 text-red-400 text-xs font-bold shadow-sm">
-            <AlertTriangle className="h-5 w-5 shrink-0" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
-        {successMsg && (
-          <div className="flex items-center gap-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-emerald-400 text-xs font-bold shadow-sm">
-            <CheckCircle2 className="h-5 w-5 shrink-0" />
-            <span>{successMsg}</span>
-          </div>
-        )}
+        {/* Pestañas de Navegación */}
+        <div className="flex items-center gap-2 border-b border-border pb-4">
+          <button
+            type="button"
+            onClick={() => setActiveTab("team")}
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+              activeTab === "team"
+                ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
+            }`}
+          >
+            <Users className="h-4 w-4" />
+            <span>Equipo de Trabajo ({profiles.length})</span>
+          </button>
 
-        {/* Tarjetas de Métricas Rápidas */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
-                Total Usuarios
-              </p>
-              <p className="mt-1 text-2xl font-black text-text-light">
-                {profiles.length}
-              </p>
-            </div>
-            <div className="rounded-xl bg-primary/10 p-3 text-primary">
-              <Users className="h-5 w-5" />
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
-                Administradores
-              </p>
-              <p className="mt-1 text-2xl font-black text-blue-400">
-                {totalAdmins}
-              </p>
-            </div>
-            <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
-                Meseros / POS
-              </p>
-              <p className="mt-1 text-2xl font-black text-amber-400">
-                {totalWaiters}
-              </p>
-            </div>
-            <div className="rounded-xl bg-amber-500/10 p-3 text-amber-400">
-              <Receipt className="h-5 w-5" />
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
-                Cocineros / KDS
-              </p>
-              <p className="mt-1 text-2xl font-black text-purple-400">
-                {totalChefs}
-              </p>
-            </div>
-            <div className="rounded-xl bg-purple-500/10 p-3 text-purple-400">
-              <ChefHat className="h-5 w-5" />
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
-                Almacén / Stock
-              </p>
-              <p className="mt-1 text-2xl font-black text-teal-400">
-                {totalInventory}
-              </p>
-            </div>
-            <div className="rounded-xl bg-teal-500/10 p-3 text-teal-400">
-              <Package className="h-5 w-5" />
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab("roles")}
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+              activeTab === "roles"
+                ? "bg-primary/15 text-primary border border-primary/30"
+                : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
+            }`}
+          >
+            <ShieldCheck className="h-4 w-4" />
+            <span>Roles y Permisos</span>
+          </button>
         </div>
 
-        {/* TABLA DE USUARIOS */}
-        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
-            <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-blue-500" />
-              Directorio de Usuarios ({filteredProfiles.length})
-            </h2>
-            <button
-              onClick={fetchProfiles}
-              className="text-xs text-text-light/60 hover:text-white flex items-center gap-1.5 font-bold"
-            >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`}
-              />
-              Actualizar Lista
-            </button>
-          </div>
+        {/* Tab 2: Roles y Permisos */}
+        {activeTab === "roles" && <AdminRolesTab />}
 
-          {/* Barra de Filtros */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
-            <div>
-              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
-                Buscar Usuario
-              </label>
-              <TableSearchInput
-                value={searchQuery}
-                onChange={(v) => {
-                  setSearchQuery(v);
-                  setCurrentPage(1);
-                }}
-                placeholder="Buscar por nombre o correo..."
-              />
+        {/* Tab 1: Equipo de Trabajo */}
+        {activeTab === "team" && (
+          <div className="space-y-6">
+            {/* Mensajes de notificación */}
+            {errorMsg && (
+              <div className="flex items-center gap-3 rounded-2xl bg-red-500/10 border border-red-500/20 p-4 text-red-400 text-xs font-bold shadow-sm">
+                <AlertTriangle className="h-5 w-5 shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+            {successMsg && (
+              <div className="flex items-center gap-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-emerald-400 text-xs font-bold shadow-sm">
+                <CheckCircle2 className="h-5 w-5 shrink-0" />
+                <span>{successMsg}</span>
+              </div>
+            )}
+
+            {/* Tarjetas de Métricas Rápidas */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
+                    Total Usuarios
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-text-light">
+                    {profiles.length}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-primary/10 p-3 text-primary">
+                  <Users className="h-5 w-5" />
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
+                    Administración
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-blue-400">
+                    {totalAdmins}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
+                    Meseros / Piso
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-amber-400">
+                    {totalWaiters}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-amber-500/10 p-3 text-amber-400">
+                  <Receipt className="h-5 w-5" />
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
+                    Cocina / KDS
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-purple-400">
+                    {totalChefs}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-purple-500/10 p-3 text-purple-400">
+                  <ChefHat className="h-5 w-5" />
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
+                    Almacén / Stock
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-teal-400">
+                    {totalInventory}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-teal-500/10 p-3 text-teal-400">
+                  <Package className="h-5 w-5" />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1">
-                Filtrar por Rol
-              </label>
-              <select
-                value={roleFilter}
-                onChange={(e) => {
-                  setRoleFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-blue-500"
-              >
-                <option value="ALL">Todos los Roles</option>
-                <option value="ADMIN">Administrador</option>
-                <option value="MANAGER">Gerente</option>
-                <option value="WAITER">Mesero</option>
-                <option value="CHEF">Cocinero / Chef</option>
-                <option value="INVENTORY">Inventario / Almacén</option>
-              </select>
-            </div>
-          </div>
+            {/* TABLA DE USUARIOS */}
+            <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
+              <div className="p-4 sm:p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-base font-black text-text-light">
+                    Colaboradores Activos
+                  </h2>
+                  <button
+                    onClick={fetchProfiles}
+                    disabled={isLoading}
+                    className="p-1.5 rounded-lg text-text-light/40 hover:text-text-light hover:bg-white/5 transition-all"
+                    title="Actualizar lista"
+                  >
+                    <RefreshCw
+                      className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                    />
+                  </button>
+                </div>
 
-          {/* Tabla de Usuarios */}
-          <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-dark/40 text-xs uppercase tracking-wider text-text-light/60 border-b border-border">
-                <tr>
-                  <TableHeaderSortCell
-                    field="full_name"
-                    label="Usuario / Nombre"
-                    currentSortField={sortField}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <TableSearchInput
+                    value={searchQuery}
+                    onChange={(v) => {
+                      setSearchQuery(v);
+                      setCurrentPage(1);
+                    }}
+                    placeholder="Buscar por nombre o correo..."
                   />
-                  <TableHeaderSortCell
-                    field="email"
-                    label="Correo Electrónico"
-                    currentSortField={sortField}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHeaderSortCell
-                    field="role"
-                    label="Rol Asignado"
-                    currentSortField={sortField}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHeaderSortCell
-                    field="created_at"
-                    label="Fecha Registro"
-                    currentSortField={sortField}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <th className="py-3 px-4 font-bold text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {paginatedProfiles.map((p) => {
-                  const roleConfig =
-                    ROLE_PERMISSIONS[p.role] || ROLE_PERMISSIONS.WAITER;
-                  return (
-                    <tr
-                      key={p.id}
-                      className="hover:bg-white/2 transition-colors"
-                    >
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black">
-                            {(p.full_name || p.email).charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-bold text-text-light">
-                              {p.full_name || "Sin Nombre"}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 font-mono text-xs text-text-light/70">
-                        {p.email}
-                      </td>
-                      <td className="py-3 px-4">
-                        <select
-                          value={p.role}
-                          onChange={(e) =>
-                            handleRoleChange(p.id, e.target.value)
-                          }
-                          className={`rounded-xl border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card ${roleConfig.badgeBg} ${roleConfig.color} ${roleConfig.badgeBorder}`}
-                        >
-                          <option value="ADMIN" className="bg-card text-text-light">
-                            Administrador
-                          </option>
-                          <option
-                            value="MANAGER"
-                            className="bg-card text-text-light"
-                          >
-                            Gerente
-                          </option>
-                          <option value="WAITER" className="bg-card text-text-light">
-                            Mesero
-                          </option>
-                          <option value="CHEF" className="bg-card text-text-light">
-                            Cocinero / Chef
-                          </option>
-                          <option value="INVENTORY" className="bg-card text-text-light">
-                            Inventario / Almacén
-                          </option>
-                        </select>
-                      </td>
-                      <td className="py-3 px-4 text-xs text-text-light/50">
-                        {new Date(p.created_at).toLocaleDateString("es-MX", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {(p.role === "ADMIN" || p.role === "MANAGER") && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setEditingPinUser(p);
-                                setNewPin(p.pin || "1234");
-                                setPinError(null);
-                              }}
-                              className="rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 px-2 py-1.5 text-xs font-black flex items-center gap-1 transition-all"
-                              title="Configurar PIN de Autorización"
-                            >
-                              <ShieldCheck className="h-3.5 w-3.5" />
-                              <span className="font-mono">{p.pin || "1234"}</span>
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDelete(p.id, p.full_name || p.email)
-                            }
-                            className={`rounded-lg border p-2 transition-all text-xs font-black ${deleteArmedId === p.id
-                              ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
-                              : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
-                              }`}
-                            title={
-                              deleteArmedId === p.id
-                                ? "Confirmar eliminación"
-                                : "Eliminar Usuario"
-                            }
-                          >
-                            {deleteArmedId === p.id ? (
-                              "¿Seguro?"
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
-                          </button>
-                        </div>
-                      </td>
+
+                  <select
+                    value={roleFilter}
+                    onChange={(e) => {
+                      setRoleFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-blue-500"
+                  >
+                    <option value="ALL">Todos los roles</option>
+                    <option value="ADMIN">Administrador</option>
+                    <option value="MANAGER">Gerente</option>
+                    <option value="WAITER">Mesero</option>
+                    <option value="CHEF">Cocinero</option>
+                    <option value="INVENTORY">Inventario</option>
+                    {availableRoles
+                      .filter((r) => !r.is_system)
+                      .map((r) => (
+                        <option key={r.id} value={r.name}>
+                          {r.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-dark/60 text-xs font-bold uppercase tracking-wider text-text-light/40 border-b border-border">
+                    <tr>
+                      <TableHeaderSortCell
+                        label="Colaborador"
+                        field="full_name"
+                        currentSortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                      <TableHeaderSortCell
+                        label="Correo Electrónico"
+                        field="email"
+                        currentSortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                      <TableHeaderSortCell
+                        label="Rol Asignado"
+                        field="role"
+                        currentSortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                      <TableHeaderSortCell
+                        label="Fecha Registro"
+                        field="created_at"
+                        currentSortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                      <th className="py-3 px-4 text-right">Acciones</th>
                     </tr>
-                  );
-                })}
-                {paginatedProfiles.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-8 text-center text-xs text-text-light/40 italic"
-                    >
-                      No se encontraron usuarios.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {paginatedProfiles.map((p) => {
+                      const roleConfig = getRoleBadgeConfig(p.role, availableRoles);
+                      return (
+                        <tr
+                          key={p.id}
+                          className="hover:bg-white/2 transition-colors"
+                        >
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-3">
+                              <div className="h-9 w-9 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black">
+                                {(p.full_name || p.email).charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-bold text-text-light">
+                                  {p.full_name || "Sin Nombre"}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 font-mono text-xs text-text-light/70">
+                            {p.email}
+                          </td>
+                          <td className="py-3 px-4">
+                            <select
+                              value={p.role}
+                              onChange={(e) =>
+                                handleRoleChange(p.id, e.target.value)
+                              }
+                              className={`rounded-xl border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card ${roleConfig.badgeBg} ${roleConfig.color} ${roleConfig.badgeBorder}`}
+                            >
+                              <option value="ADMIN" className="bg-card text-text-light">
+                                Administrador
+                              </option>
+                              <option
+                                value="MANAGER"
+                                className="bg-card text-text-light"
+                              >
+                                Gerente
+                              </option>
+                              <option value="WAITER" className="bg-card text-text-light">
+                                Mesero
+                              </option>
+                              <option value="CHEF" className="bg-card text-text-light">
+                                Cocinero / Chef
+                              </option>
+                              <option value="INVENTORY" className="bg-card text-text-light">
+                                Inventario / Almacén
+                              </option>
+                              {availableRoles
+                                .filter((r) => !r.is_system)
+                                .map((r) => (
+                                  <option
+                                    key={r.id}
+                                    value={r.name}
+                                    className="bg-card text-text-light"
+                                  >
+                                    {r.name}
+                                  </option>
+                                ))}
+                            </select>
+                          </td>
+                          <td className="py-3 px-4 text-xs text-text-light/50">
+                            {new Date(p.created_at).toLocaleDateString("es-MX", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {(p.role === "ADMIN" || p.role === "MANAGER") && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingPinUser(p);
+                                    setNewPin(p.pin || "1234");
+                                    setPinError(null);
+                                  }}
+                                  className="rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 px-2 py-1.5 text-xs font-black flex items-center gap-1 transition-all"
+                                  title="Configurar PIN de Autorización"
+                                >
+                                  <ShieldCheck className="h-3.5 w-3.5" />
+                                  <span className="font-mono">{p.pin || "1234"}</span>
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleDelete(p.id, p.full_name || p.email)
+                                }
+                                className={`rounded-lg border p-2 transition-all text-xs font-black ${deleteArmedId === p.id
+                                  ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
+                                  : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                                  }`}
+                                title={
+                                  deleteArmedId === p.id
+                                    ? "Confirmar eliminación"
+                                    : "Eliminar Usuario"
+                                }
+                              >
+                                {deleteArmedId === p.id ? (
+                                  "¿Seguro?"
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {paginatedProfiles.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="py-8 text-center text-xs text-text-light/40 italic"
+                        >
+                          No se encontraron usuarios.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
-          <TablePagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={sortedProfiles.length}
-            pageSize={pageSize}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={(size) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            }}
-          />
-        </section>
+              <TablePagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={sortedProfiles.length}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+              />
+            </section>
+          </div>
+        )}
       </main>
 
       {/* MODAL CREAR USUARIO */}
@@ -685,7 +806,6 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             </p>
           </div>
 
-
           <div>
             <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
               Rol Inicial Asignado
@@ -696,11 +816,24 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
               onChange={(e) => setSelectedFormRole(e.target.value)}
               className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-blue-500"
             >
-              <option value="WAITER">Mesero (WAITER)</option>
-              <option value="CHEF">Cocinero / Chef (CHEF)</option>
-              <option value="INVENTORY">Inventario / Almacén (INVENTORY)</option>
-              <option value="MANAGER">Gerente (MANAGER)</option>
-              <option value="ADMIN">Administrador (ADMIN)</option>
+              <optgroup label="Roles del Sistema">
+                <option value="WAITER">Mesero (WAITER)</option>
+                <option value="CHEF">Cocinero / Chef (CHEF)</option>
+                <option value="INVENTORY">Inventario / Almacén (INVENTORY)</option>
+                <option value="MANAGER">Gerente (MANAGER)</option>
+                <option value="ADMIN">Administrador (ADMIN)</option>
+              </optgroup>
+              {availableRoles.some((r) => !r.is_system) && (
+                <optgroup label="Roles Personalizados">
+                  {availableRoles
+                    .filter((r) => !r.is_system)
+                    .map((r) => (
+                      <option key={r.id} value={r.name}>
+                        {r.name}
+                      </option>
+                    ))}
+                </optgroup>
+              )}
             </select>
           </div>
 
@@ -752,100 +885,68 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-xl bg-blue-500 px-5 py-2.5 text-xs font-black text-black hover:brightness-105 disabled:opacity-50"
+              className="rounded-xl bg-blue-500 px-5 py-2.5 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider disabled:opacity-50"
             >
-              {isPending ? "Creando..." : "Crear Usuario"}
+              {isPending ? "Guardando..." : "Crear Usuario"}
             </button>
           </div>
         </form>
       </Modal>
 
-      {/* MODAL CONFIGURAR PIN DE USUARIO */}
-      {editingPinUser && (
-        <Modal
-          isOpen={!!editingPinUser}
-          onClose={() => setEditingPinUser(null)}
-          title={`PIN de Autorización - ${editingPinUser.full_name || editingPinUser.email}`}
-          subtitle="Configura el PIN personal para autorizar acciones de meseros en el POS"
-          icon={<ShieldCheck className="h-5 w-5 text-amber-400" />}
-          maxWidth="sm"
-        >
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const clean = newPin.trim();
-              if (!clean || !/^\d{4,6}$/.test(clean)) {
-                setPinError("El PIN debe contener entre 4 y 6 dígitos numéricos");
-                return;
-              }
-              setIsUpdatingPin(true);
-              setPinError(null);
-              try {
-                const res = await updateUserPin(editingPinUser.id, clean);
-                if (res?.error) {
-                  setPinError(res.error);
-                } else {
-                  setProfiles((prev) =>
-                    prev.map((u) =>
-                      u.id === editingPinUser.id ? { ...u, pin: clean } : u
-                    )
-                  );
-                  setSuccessMsg(`PIN actualizado para ${editingPinUser.full_name || editingPinUser.email}`);
-                  setEditingPinUser(null);
-                }
-              } catch {
-                setPinError("Error al actualizar el PIN");
-              } finally {
-                setIsUpdatingPin(false);
-              }
-            }}
-            className="space-y-4"
-          >
-            <div>
-              <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
-                Nuevo PIN (4 a 6 dígitos)
-              </label>
+      {/* MODAL EDITAR PIN */}
+      <Modal
+        isOpen={Boolean(editingPinUser)}
+        onClose={() => setEditingPinUser(null)}
+        title={`PIN de Autorización - ${editingPinUser?.full_name || editingPinUser?.email}`}
+        subtitle="Código numérico para autorizar acciones sensibles en comandas y cajas"
+        icon={<ShieldCheck className="h-5 w-5 text-amber-400" />}
+        maxWidth="md"
+      >
+        <form onSubmit={handleSavePin} className="space-y-4">
+          <div>
+            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
+              Nuevo PIN Numérico (4 a 6 dígitos)
+            </label>
+            <div className="relative">
+              <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400" />
               <input
                 type="password"
                 inputMode="numeric"
+                required
                 maxLength={6}
                 value={newPin}
-                onChange={(e) => {
-                  setPinError(null);
-                  setNewPin(e.target.value.replace(/\D/g, ""));
-                }}
-                className="w-full rounded-xl border border-border bg-dark/60 text-center text-2xl tracking-[0.3em] font-black p-3 text-text-light outline-none focus:border-amber-400"
+                onChange={(e) => setNewPin(e.target.value)}
+                className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-amber-400 font-mono tracking-widest text-center text-lg"
                 placeholder="••••"
                 autoFocus
               />
             </div>
-
             {pinError && (
-              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold text-center">
-                {pinError}
-              </div>
+              <p className="text-xs text-red-400 font-bold mt-1.5">{pinError}</p>
             )}
+            <p className="text-[11px] text-text-light/40 mt-2">
+              Este PIN debe ser recordado por el colaborador para autorizaciones presenciales.
+            </p>
+          </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-border">
-              <button
-                type="button"
-                onClick={() => setEditingPinUser(null)}
-                disabled={isUpdatingPin}
-                className="rounded-xl border border-border px-4 py-2 text-xs font-bold text-text-light/70 hover:bg-white/5"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isUpdatingPin || !newPin.trim()}
-                className="rounded-xl bg-amber-500 px-5 py-2 text-xs font-black text-black hover:brightness-105 disabled:opacity-50"
-              >
-                {isUpdatingPin ? "Guardando..." : "Guardar PIN"}
-              </button>
-            </div>
-          </form>
-        </Modal>
-      )}
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <button
+              type="button"
+              onClick={() => setEditingPinUser(null)}
+              className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-white/5"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isUpdatingPin}
+              className="rounded-xl bg-amber-400 px-5 py-2.5 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider disabled:opacity-50"
+            >
+              {isUpdatingPin ? "Guardando..." : "Guardar PIN"}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

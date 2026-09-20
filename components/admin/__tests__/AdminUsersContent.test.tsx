@@ -3,12 +3,30 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AdminUsersContent, type Profile } from "../AdminUsersContent";
 import * as actions from "@/app/admin/users/actions";
+import * as roleActions from "@/app/admin/users/roles-actions";
 
 vi.mock("@/app/admin/users/actions", () => ({
   createUser: vi.fn(),
   deleteUser: vi.fn(),
   updateUserRole: vi.fn(),
   updateUserPin: vi.fn(),
+}));
+
+vi.mock("@/app/admin/users/roles-actions", () => ({
+  getTenantRoles: vi.fn().mockResolvedValue({
+    data: [
+      { id: "r-1", name: "ADMIN", is_system: true, permissions: ["*"] },
+      { id: "r-2", name: "MANAGER", is_system: true, permissions: ["pos.view"] },
+      { id: "r-3", name: "WAITER", is_system: true, permissions: ["pos.view"] },
+      { id: "r-4", name: "CHEF", is_system: true, permissions: ["kitchen.view"] },
+      { id: "r-5", name: "INVENTORY", is_system: true, permissions: ["inventory.view"] },
+      { id: "r-6", name: "Capitán de Meseros", is_system: false, permissions: ["pos.view", "pos.apply_discount"] },
+    ],
+  }),
+  createCustomRole: vi.fn(),
+  updateCustomRole: vi.fn(),
+  duplicateRole: vi.fn(),
+  deleteCustomRole: vi.fn(),
 }));
 
 const mockProfiles: Profile[] = [
@@ -71,13 +89,33 @@ describe("AdminUsersContent Component", () => {
     expect(pinButtons).toHaveLength(2);
   });
 
+  it("allows switching between 'Equipo de Trabajo' and 'Roles y Permisos' tabs", async () => {
+    render(<AdminUsersContent initialProfiles={mockProfiles} />);
+
+    expect(screen.getByText(/Equipo de Trabajo/i)).toBeDefined();
+    const rolesTabBtn = screen.getByText("Roles y Permisos");
+    expect(rolesTabBtn).toBeDefined();
+
+    fireEvent.click(rolesTabBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText("Roles y Permisos Operativos")).toBeDefined();
+    });
+
+    const teamTabBtn = screen.getByText(/Equipo de Trabajo/i);
+    fireEvent.click(teamTabBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText("Colaboradores Activos")).toBeDefined();
+    });
+  });
+
   it("allows changing user role to INVENTORY", async () => {
     vi.mocked(actions.updateUserRole).mockResolvedValue({ success: true } as any);
 
     render(<AdminUsersContent initialProfiles={mockProfiles} />);
 
     const roleSelects = screen.getAllByRole("combobox");
-    // Change first user role
     const userRoleSelect = roleSelects.find((s) => (s as HTMLSelectElement).value === "WAITER");
     expect(userRoleSelect).toBeDefined();
 

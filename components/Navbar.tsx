@@ -52,16 +52,38 @@ export default function Navbar() {
   const isWaiter = user?.isWaiter ?? false;
   const isInventory = user?.isInventory ?? false;
 
-  const navLinks = isInventory
-    ? [
-        { href: "/inventario", label: "Inventario" },
-        { href: "/tareas", label: "Tareas" },
-      ]
-    : [
-        { href: "/pos", label: "POS" },
-        { href: "/kitchen", label: "Cocina" },
-        ...(!isWaiter ? [{ href: "/history", label: "Historial" }] : []),
-      ];
+  // Si cuenta con hasPermission y no es un rol simple estático
+  let navLinks: Array<{ href: string; label: string }> = [];
+
+  if (isInventory) {
+    navLinks = [
+      { href: "/inventario", label: "Inventario" },
+      { href: "/tareas", label: "Tareas" },
+    ];
+  } else if (user?.roleData && !user.roleData.is_system && user.hasPermission) {
+    // Para roles personalizados, construimos enlaces según sus permisos activos
+    if (user.hasPermission("pos.view")) {
+      navLinks.push({ href: "/pos", label: "POS" });
+    }
+    if (user.hasPermission("kitchen.view")) {
+      navLinks.push({ href: "/kitchen", label: "Cocina" });
+    }
+    if (user.hasPermission("inventory.view")) {
+      navLinks.push({ href: "/inventario", label: "Inventario" });
+    }
+    if (user.hasPermission("finance.view_reports") || user.isAdmin) {
+      navLinks.push({ href: "/history", label: "Historial" });
+    }
+    if (user.hasPermission("team.view")) {
+      navLinks.push({ href: "/tareas", label: "Tareas" });
+    }
+  } else {
+    navLinks = [
+      { href: "/pos", label: "POS" },
+      { href: "/kitchen", label: "Cocina" },
+      ...(!isWaiter ? [{ href: "/history", label: "Historial" }] : []),
+    ];
+  }
 
   return (
     <nav className="bg-dark border-b border-border text-white sticky top-0 z-40 no-print">
