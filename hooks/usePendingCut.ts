@@ -8,6 +8,28 @@ interface PendingCutResponse {
   pendingOrders: number;
 }
 
+let pendingCutInFlightPromise: Promise<PendingCutResponse> | null = null;
+
+async function fetchPendingCutDeduped(): Promise<PendingCutResponse> {
+  if (pendingCutInFlightPromise) {
+    return pendingCutInFlightPromise;
+  }
+
+  pendingCutInFlightPromise = (async () => {
+    try {
+      const response = await fetch("/api/cortes/pendiente-ayer");
+      if (!response.ok) {
+        throw new Error("No se pudo verificar el corte pendiente");
+      }
+      return (await response.json()) as PendingCutResponse;
+    } finally {
+      pendingCutInFlightPromise = null;
+    }
+  })();
+
+  return pendingCutInFlightPromise;
+}
+
 export function usePendingCut() {
   const [pendingDate, setPendingDate] = useState<string | null>(null);
   const [pendingOrders, setPendingOrders] = useState(0);
@@ -16,11 +38,7 @@ export function usePendingCut() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/cortes/pendiente-ayer");
-      if (!response.ok) {
-        throw new Error("No se pudo verificar el corte pendiente");
-      }
-      const data: PendingCutResponse = await response.json();
+      const data = await fetchPendingCutDeduped();
       setPendingDate(data?.pendingDate ?? null);
       setPendingOrders(data?.pendingOrders ?? 0);
     } catch (error) {

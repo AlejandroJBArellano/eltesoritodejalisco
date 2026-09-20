@@ -52,4 +52,36 @@ describe("usePendingCut Hook", () => {
     expect(result.current.pendingDate).toBeNull();
     expect(result.current.pendingOrders).toBe(0);
   });
+
+  it("should deduplicate concurrent in-flight requests", async () => {
+    let resolveFetch: ((value: Response) => void) | null = null;
+    const fetchPromise = new Promise<Response>((resolve) => {
+      resolveFetch = resolve;
+    });
+
+    const mockFetch = vi.fn().mockReturnValue(fetchPromise);
+    globalThis.fetch = mockFetch;
+
+    const { result: hook1 } = renderHook(() => usePendingCut());
+    const { result: hook2 } = renderHook(() => usePendingCut());
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveFetch!({
+        ok: true,
+        json: async () => ({
+          hasPendingCut: true,
+          pendingDate: "2026-07-25",
+          pendingOrders: 5,
+        }),
+      } as Response);
+      await new Promise((res) => setTimeout(res, 10));
+    });
+
+    expect(hook1.current.hasPendingCut).toBe(true);
+    expect(hook2.current.hasPendingCut).toBe(true);
+    expect(hook1.current.pendingOrders).toBe(5);
+    expect(hook2.current.pendingOrders).toBe(5);
+  });
 });
