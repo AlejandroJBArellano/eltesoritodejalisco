@@ -13,6 +13,7 @@ const mockAdminProfile: UserProfile = {
   email: "admin@restaurante.com",
   full_name: "Administrador General",
   role: "ADMIN",
+  role_id: null,
   tenant_id: "t-1",
   updated_at: "2026-01-01",
   pin: "1234",
@@ -23,6 +24,7 @@ const mockWaiterProfile: UserProfile = {
   email: "mesero@restaurante.com",
   full_name: "Mesero Juan",
   role: "WAITER",
+  role_id: null,
   tenant_id: "t-1",
   updated_at: "2026-01-01",
   pin: null,
@@ -33,6 +35,7 @@ const mockChefProfile: UserProfile = {
   email: "chef@restaurante.com",
   full_name: "Chef Mario",
   role: "CHEF",
+  role_id: null,
   tenant_id: "t-1",
   updated_at: "2026-01-01",
   pin: null,
@@ -43,9 +46,28 @@ const mockInventoryProfile: UserProfile = {
   email: "almacen@restaurante.com",
   full_name: "Almacenista Pedro",
   role: "INVENTORY",
+  role_id: null,
   tenant_id: "t-1",
   updated_at: "2026-01-01",
   pin: null,
+};
+
+const mockCustomProfile: UserProfile = {
+  id: "u-custom",
+  email: "capitan@restaurante.com",
+  full_name: "Capitán Carlos",
+  role: "Capitán de Meseros",
+  role_id: "role-capitan-1",
+  tenant_id: "t-1",
+  updated_at: "2026-01-01",
+  pin: null,
+  role_data: {
+    id: "role-capitan-1",
+    tenant_id: "t-1",
+    name: "Capitán de Meseros",
+    is_system: false,
+    permissions: ["pos.view", "pos.create_order", "pos.apply_discount"],
+  },
 };
 
 describe("UserProvider and useUser Hook", () => {
@@ -62,7 +84,7 @@ describe("UserProvider and useUser Hook", () => {
     expect(result.current).toBeNull();
   });
 
-  it("provides correct context values for ADMIN", () => {
+  it("provides correct context values and permission evaluation for ADMIN", () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <UserProvider initialProfile={mockAdminProfile}>{children}</UserProvider>
     );
@@ -76,6 +98,14 @@ describe("UserProvider and useUser Hook", () => {
     expect(result.current.isChef).toBe(false);
     expect(result.current.isInventory).toBe(false);
     expect(result.current.isAuthenticated).toBe(true);
+    expect(result.current.hasPermission?.("pos.create_order")).toBe(true);
+    expect(result.current.hasPermission?.("team.manage_roles")).toBe(true);
+    expect(
+      result.current.hasAnyPermission?.(["pos.create_order", "menu.manage"]),
+    ).toBe(true);
+    expect(
+      result.current.hasAllPermissions?.(["pos.create_order", "team.manage_roles"]),
+    ).toBe(true);
   });
 
   it("provides correct context values for WAITER", () => {
@@ -90,6 +120,8 @@ describe("UserProvider and useUser Hook", () => {
     expect(result.current.isWaiter).toBe(true);
     expect(result.current.isChef).toBe(false);
     expect(result.current.isInventory).toBe(false);
+    expect(result.current.hasPermission?.("pos.create_order")).toBe(true);
+    expect(result.current.hasPermission?.("team.manage_roles")).toBe(false);
   });
 
   it("provides correct context values for CHEF", () => {
@@ -104,6 +136,8 @@ describe("UserProvider and useUser Hook", () => {
     expect(result.current.isWaiter).toBe(false);
     expect(result.current.isChef).toBe(true);
     expect(result.current.isInventory).toBe(false);
+    expect(result.current.hasPermission?.("kitchen.view")).toBe(true);
+    expect(result.current.hasPermission?.("pos.create_order")).toBe(false);
   });
 
   it("provides correct context values for INVENTORY", () => {
@@ -119,6 +153,30 @@ describe("UserProvider and useUser Hook", () => {
     expect(result.current.isChef).toBe(false);
     expect(result.current.isInventory).toBe(true);
     expect(result.current.isAuthenticated).toBe(true);
+    expect(result.current.hasPermission?.("inventory.view")).toBe(true);
+    expect(result.current.hasPermission?.("kitchen.view")).toBe(false);
+  });
+
+  it("evaluates custom role permissions correctly", () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <UserProvider initialProfile={mockCustomProfile}>{children}</UserProvider>
+    );
+
+    const { result } = renderHook(() => useUser(), { wrapper });
+
+    expect(result.current.role).toBe("Capitán de Meseros");
+    expect(result.current.roleData?.name).toBe("Capitán de Meseros");
+    expect(result.current.hasPermission?.("pos.apply_discount")).toBe(true);
+    expect(result.current.hasPermission?.("pos.cancel_order")).toBe(false);
+    expect(
+      result.current.hasAnyPermission?.(["pos.cancel_order", "pos.apply_discount"]),
+    ).toBe(true);
+    expect(
+      result.current.hasAllPermissions?.(["pos.view", "pos.apply_discount"]),
+    ).toBe(true);
+    expect(
+      result.current.hasAllPermissions?.(["pos.view", "team.manage_roles"]),
+    ).toBe(false);
   });
 
   it("handles null profile gracefully", () => {
@@ -130,10 +188,13 @@ describe("UserProvider and useUser Hook", () => {
 
     expect(result.current.profile).toBeNull();
     expect(result.current.role).toBeNull();
+    expect(result.current.roleData).toBeNull();
+    expect(result.current.permissions).toEqual([]);
     expect(result.current.isAdmin).toBe(false);
     expect(result.current.isWaiter).toBe(false);
     expect(result.current.isChef).toBe(false);
     expect(result.current.isInventory).toBe(false);
     expect(result.current.isAuthenticated).toBe(false);
+    expect(result.current.hasPermission?.("pos.view")).toBe(false);
   });
 });

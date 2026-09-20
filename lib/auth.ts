@@ -19,10 +19,24 @@ export async function getProfile() {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("*")
+    .select("*, role_data:roles(*)")
     .eq("id", user.id)
     .eq("tenant_id", tenant.id)
-    .single();
+    .maybeSingle();
+
+  if (!profile) return null;
+
+  // Fallback si la relación de foreign key no se resolvió automáticamente
+  if (!profile.role_data && (profile as any).role_id) {
+    const { data: roleData } = await supabase
+      .from("roles")
+      .select("*")
+      .eq("id", (profile as any).role_id)
+      .maybeSingle();
+    if (roleData) {
+      (profile as any).role_data = roleData;
+    }
+  }
 
   return profile;
 }
@@ -35,13 +49,24 @@ export async function verifyManagerPin(tenantId: string, pin: string) {
   const adminClient = createAdminClient();
   const { data: manager, error } = await adminClient
     .from("profiles")
-    .select("id, full_name, role")
+    .select("id, full_name, role, role_id, role_data:roles(*)")
     .eq("tenant_id", tenantId)
-    .in("role", ["ADMIN", "MANAGER"])
     .eq("pin", pin.trim())
     .limit(1)
     .maybeSingle();
 
   if (error || !manager) return null;
+
+  // Validar autorización de manager por rol tradicional o por permisos granulares
+  const roleSlug = (manager.role || "").toUpperCase();
+  const perms = (manager.role_data as any)?.permissions || [];
+  const isManagerOrAdmin =
+    roleSlug === "ADMIN" ||
+    roleSlug === "MANAGER" ||
+    perms.includes("*") ||
+    perms.includes("pos.cancel_order") ||
+    perms.includes("pos.apply_discount");
+
+  if (!isManagerOrAdmin) return null;
   return manager;
 }

@@ -11,6 +11,7 @@ const mockAdminProfile: UserProfile = {
   email: "admin@test.com",
   full_name: "Admin User",
   role: "ADMIN",
+  role_id: null,
   tenant_id: "t-1",
   updated_at: "2026-01-01",
   pin: "1234",
