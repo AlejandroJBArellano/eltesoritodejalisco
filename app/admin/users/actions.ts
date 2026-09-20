@@ -6,6 +6,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext } from "@/lib/tenant";
 import { revalidatePath } from "next/cache";
 
+import { sanitizeRole } from "@/lib/users";
+
 export async function createUser(formData: FormData) {
   try {
     const profile = await getProfile();
@@ -44,33 +46,47 @@ export async function createUser(formData: FormData) {
     // 2. Resolver role_id y nombre de rol si existe en tabla roles
     let resolvedRole = rawRole;
     let resolvedRoleId: string | null = rawRoleId || null;
+    let systemSlug: string | null = null;
 
     try {
+      let roleRecord: any = null;
       if (rawRoleId) {
-        const { data: r } = await adminClient
+        const res = await adminClient
           .from("roles")
           .select("id, name, system_slug")
           .eq("id", rawRoleId)
           .eq("tenant_id", tenant.id)
           .maybeSingle();
-        if (r) {
-          resolvedRoleId = r.id;
-          resolvedRole = r.system_slug || r.name;
-        }
+        if (res?.error) console.error("[createUser] Error buscando rol por ID:", res.error);
+        roleRecord = res?.data;
       } else if (rawRole) {
-        const { data: r } = await adminClient
-          .from("roles")
-          .select("id, name, system_slug")
-          .eq("tenant_id", tenant.id)
-          .ilike("name", rawRole)
-          .maybeSingle();
-        if (r) {
-          resolvedRoleId = r.id;
-          resolvedRole = r.system_slug || r.name;
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawRole);
+        if (isUUID) {
+          const res = await adminClient
+            .from("roles")
+            .select("id, name, system_slug")
+            .eq("id", rawRole)
+            .eq("tenant_id", tenant.id)
+            .maybeSingle();
+          roleRecord = res?.data;
+        } else {
+          const res = await adminClient
+            .from("roles")
+            .select("id, name, system_slug")
+            .eq("tenant_id", tenant.id)
+            .or(`system_slug.eq.${rawRole.toUpperCase()},name.ilike.${rawRole}`)
+            .maybeSingle();
+          roleRecord = res?.data;
         }
       }
-    } catch {
-      // Continuar con valores por defecto
+
+      if (roleRecord) {
+        resolvedRoleId = roleRecord.id;
+        systemSlug = roleRecord.system_slug || null;
+        resolvedRole = roleRecord.system_slug || roleRecord.name;
+      }
+    } catch (rErr) {
+      console.error("[createUser] Error resolviendo rol:", rErr);
     }
 
     // 3. Si no se especificó contraseña, generamos una clave temporal segura
@@ -141,8 +157,13 @@ export async function createUser(formData: FormData) {
     const { error: upsertError } = await adminClient.from("profiles").upsert(profileUpsert);
 
     if (upsertError) {
-      console.error("Error al registrar perfil:", upsertError);
-      return { error: "Error al crear el perfil en la base de datos" };
+      console.warn("[createUser] Falló upsert inicial de profile, reintentando con fallback de rol de sistema:", upsertError);
+      profileUpsert.role = systemSlug || sanitizeRole(resolvedRole);
+      const retryUpsert = await adminClient.from("profiles").upsert(profileUpsert);
+      if (retryUpsert.error) {
+        console.error("[createUser] Error al registrar perfil:", retryUpsert.error);
+        return { error: "Error al crear el perfil en la base de datos" };
+      }
     }
 
     // 6. Sincronizar en la tabla users local
@@ -151,7 +172,7 @@ export async function createUser(formData: FormData) {
         id: userId,
         email: cleanEmail,
         name: fullName,
-        role: resolvedRole as UserRole,
+        role: sanitizeRole(systemSlug || resolvedRole),
         pin: pin,
         tenant_id: tenant.id,
         password: "MANAGED_BY_SUPABASE",
@@ -175,30 +196,56 @@ export async function updateUserRole(id: string, newRole: string) {
       return { error: "No autorizado" };
     }
 
+    const rawInput = (newRole || "").trim();
+    if (!rawInput) {
+      return { error: "El rol es requerido" };
+    }
+
     const tenant = await getTenantContext();
     const adminClient = createAdminClient();
 
-    // Resolver role_id si coincide con algún rol registrado
-    let resolvedRole = newRole;
+    const isUUID =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        rawInput,
+      );
+
+    // 1. Resolver role_id y nombre de rol
+    let resolvedRole = rawInput;
     let resolvedRoleId: string | null = null;
+    let systemSlug: string | null = null;
 
     try {
-      const { data: roleRecord } = await adminClient
-        .from("roles")
-        .select("id, name, system_slug")
-        .eq("tenant_id", tenant.id)
-        .ilike("name", newRole)
-        .maybeSingle();
+      let roleRecord: any = null;
+      if (isUUID) {
+        const res = await adminClient
+          .from("roles")
+          .select("id, name, system_slug")
+          .eq("tenant_id", tenant.id)
+          .eq("id", rawInput)
+          .maybeSingle();
+        if (res?.error) console.error("[updateUserRole] Error buscando rol por ID:", res.error);
+        roleRecord = res?.data;
+      } else {
+        const res = await adminClient
+          .from("roles")
+          .select("id, name, system_slug")
+          .eq("tenant_id", tenant.id)
+          .or(`system_slug.eq.${rawInput.toUpperCase()},name.ilike.${rawInput}`)
+          .maybeSingle();
+        if (res?.error) console.error("[updateUserRole] Error buscando rol por slug/name:", res.error);
+        roleRecord = res?.data;
+      }
 
       if (roleRecord) {
         resolvedRoleId = roleRecord.id;
+        systemSlug = roleRecord.system_slug || null;
         resolvedRole = roleRecord.system_slug || roleRecord.name;
       }
-    } catch {
-      // Continuar
+    } catch (roleErr) {
+      console.error("[updateUserRole] Error resolviendo rol:", roleErr);
     }
 
-    // Actualizamos perfil
+    // 2. Actualizamos perfil
     const updatePayload: any = { role: resolvedRole };
     if (resolvedRoleId) {
       updatePayload.role_id = resolvedRoleId;
@@ -211,29 +258,52 @@ export async function updateUserRole(id: string, newRole: string) {
       .eq("tenant_id", tenant.id);
 
     if (updateError) {
-      return { error: "Error al actualizar el rol" };
+      console.warn(
+        "[updateUserRole] Falló actualización directa de profile.role, intentando con fallback seguro:",
+        updateError,
+      );
+      const fallbackRole = systemSlug || sanitizeRole(resolvedRole);
+      const fallbackPayload: any = { role: fallbackRole };
+      if (resolvedRoleId) {
+        fallbackPayload.role_id = resolvedRoleId;
+      }
+      const retryRes = await adminClient
+        .from("profiles")
+        .update(fallbackPayload)
+        .eq("id", id)
+        .eq("tenant_id", tenant.id);
+
+      if (retryRes.error) {
+        console.error("[updateUserRole] Error persistente al actualizar perfil:", retryRes.error);
+        return { error: "Error al actualizar el rol" };
+      }
     }
 
-    // Actualizamos tabla users si existe
-    await adminClient
-      .from("users")
-      .update({ role: resolvedRole })
-      .eq("id", id)
-      .eq("tenant_id", tenant.id);
+    // 3. Actualizamos tabla users si existe con valor sanitizado para enum
+    try {
+      const safeUserRole = sanitizeRole(systemSlug || resolvedRole);
+      await adminClient
+        .from("users")
+        .update({ role: safeUserRole })
+        .eq("id", id)
+        .eq("tenant_id", tenant.id);
+    } catch (usersErr) {
+      console.warn("[updateUserRole] Error actualizando tabla users:", usersErr);
+    }
 
-    // Opcional: actualizar user_metadata
+    // 4. Actualizar user_metadata en Auth
     try {
       await adminClient.auth.admin.updateUserById(id, {
         user_metadata: { role: resolvedRole, role_id: resolvedRoleId },
       });
-    } catch {
-      // Ignorar si auth admin falla
+    } catch (authErr) {
+      console.warn("[updateUserRole] Error actualizando user_metadata en auth:", authErr);
     }
 
     revalidatePath("/admin/users");
     return { success: true };
   } catch (err) {
-    console.error(err);
+    console.error("[updateUserRole] Error inesperado:", err);
     return { error: "Ocurrió un error inesperado." };
   }
 }

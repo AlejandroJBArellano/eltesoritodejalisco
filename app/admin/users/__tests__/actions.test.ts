@@ -45,30 +45,32 @@ describe("Admin Users Server Actions", () => {
         admin: {
           createUser: mockCreateUser,
           listUsers: mockListUsers,
-          updateUserById: vi.fn(),
-          deleteUser: vi.fn(),
+          updateUserById: vi.fn().mockResolvedValue({ data: {}, error: null }),
+          deleteUser: vi.fn().mockResolvedValue({ data: {}, error: null }),
         },
       },
-      from: vi.fn().mockImplementation((_table: string) => ({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            ilike: vi.fn().mockReturnValue({
-              maybeSingle: mockFromSelect,
-            }),
-          }),
-        }),
-        upsert: mockFromUpsert.mockResolvedValue({ error: null }),
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: mockFromUpdate.mockResolvedValue({ error: null }),
-          }),
-        }),
-        delete: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: mockFromDelete.mockResolvedValue({ error: null }),
-          }),
-        }),
-      })),
+      from: vi.fn().mockImplementation((_table: string) => {
+        const queryBuilder: any = {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          or: vi.fn().mockReturnThis(),
+          ilike: vi.fn().mockReturnThis(),
+          maybeSingle: mockFromSelect,
+          single: mockFromSelect,
+          upsert: mockFromUpsert.mockResolvedValue({ error: null }),
+          update: vi.fn().mockImplementation(() => ({
+            eq: vi.fn().mockImplementation(() => ({
+              eq: mockFromUpdate.mockResolvedValue({ error: null }),
+            })),
+          })),
+          delete: vi.fn().mockImplementation(() => ({
+            eq: vi.fn().mockImplementation(() => ({
+              eq: mockFromDelete.mockResolvedValue({ error: null }),
+            })),
+          })),
+        };
+        return queryBuilder;
+      }),
     };
 
     vi.mocked(createAdminClient).mockReturnValue(mockAdminClient as any);
@@ -165,10 +167,45 @@ describe("Admin Users Server Actions", () => {
     expect(mockFromUpsert).toHaveBeenCalled();
   });
 
-  it("updates user role", async () => {
+  it("updates user role with system role slug", async () => {
+    mockFromSelect.mockResolvedValueOnce({
+      data: { id: "role-manager-id", name: "Gerente", system_slug: "MANAGER" },
+      error: null,
+    });
+
     const res = await updateUserRole("user-1", "MANAGER");
     expect(res).toEqual({ success: true });
     expect(mockFromUpdate).toHaveBeenCalled();
+  });
+
+  it("updates user role with custom role UUID and persists role_id", async () => {
+    const customRoleId = "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d";
+    mockFromSelect.mockResolvedValueOnce({
+      data: { id: customRoleId, name: "Carlos", system_slug: null },
+      error: null,
+    });
+
+    const res = await updateUserRole("user-1", customRoleId);
+    expect(res).toEqual({ success: true });
+    expect(mockFromUpdate).toHaveBeenCalled();
+  });
+
+  it("applies safe fallback when direct role name update fails on profiles", async () => {
+    const customRoleId = "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d";
+    mockFromSelect.mockResolvedValueOnce({
+      data: { id: customRoleId, name: "Carlos", system_slug: null },
+      error: null,
+    });
+
+    // First update on profiles fails (e.g. enum constraint), second update on profiles (fallback) succeeds, third update on users table succeeds
+    mockFromUpdate
+      .mockResolvedValueOnce({ error: { message: 'invalid input value for enum UserRole: "Carlos"' } })
+      .mockResolvedValueOnce({ error: null })
+      .mockResolvedValueOnce({ error: null });
+
+    const res = await updateUserRole("user-1", customRoleId);
+    expect(res).toEqual({ success: true });
+    expect(mockFromUpdate).toHaveBeenCalledTimes(3);
   });
 
   it("prevents self-deletion in deleteUser", async () => {
@@ -177,6 +214,7 @@ describe("Admin Users Server Actions", () => {
   });
 
   it("deletes user profile successfully for another user", async () => {
+    mockFromSelect.mockResolvedValueOnce({ data: [], error: null });
     const res = await deleteUser("other-user-id");
     expect(res).toEqual({ success: true });
     expect(mockFromDelete).toHaveBeenCalled();
