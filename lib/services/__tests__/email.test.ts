@@ -5,6 +5,8 @@ import {
   getTenantAdminUrl,
   sendNewOrderNotificationEmail,
   sendLowStockAlertEmail,
+  sendLoyaltyCampaignEmail,
+  LOYALTY_FROM,
 } from "../email";
 
 const { mockResendSend, mockSupabaseFrom } = vi.hoisted(() => {
@@ -240,6 +242,88 @@ describe("lib/services/email", () => {
           html: expect.stringContaining("background:#10B981"),
         }),
       );
+    });
+  });
+
+  describe("sendLoyaltyCampaignEmail", () => {
+    it("should return invalid_email when customer email is empty or invalid", async () => {
+      const result = await sendLoyaltyCampaignEmail({
+        tenant: {
+          id: "tenant-123",
+          name: "Taquería El Pastor",
+          slug: "taqueria-pastor",
+          system_name: "Taquería El Pastor",
+        },
+        customerName: "Carlos",
+        customerEmail: "no-email",
+        loyaltyPoints: 50,
+        subject: "Hola {nombre}",
+        messageContent: "Tienes {puntos} puntos en {restaurante}",
+      });
+
+      expect(result).toEqual({ success: false, reason: "invalid_email" });
+      expect(mockResendSend).not.toHaveBeenCalled();
+    });
+
+    it("should replace tags {nombre}, {puntos}, {restaurante} and send email with custom branding", async () => {
+      const result = await sendLoyaltyCampaignEmail({
+        tenant: {
+          id: "tenant-123",
+          name: "Taquería El Pastor",
+          slug: "taqueria-pastor",
+          system_name: "Taquería El Pastor",
+          primary_color: "#10B981",
+          logo_url: "https://example.com/logo.png",
+        },
+        customerName: "Carlos Gómez",
+        customerEmail: "carlos@example.com",
+        loyaltyPoints: 120,
+        subject: "¡Hola {nombre}, tienes una sorpresa en {restaurante}!",
+        messageContent: "Hola {nombre},\n\nTienes {puntos} puntos listos para canjear en {restaurante}.",
+        templateKey: "te_extranamos",
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.emailId).toBe("resend-msg-123");
+      expect(mockResendSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: `Taquería El Pastor <${LOYALTY_FROM}>`,
+          to: ["carlos@example.com"],
+          subject: "¡Hola Carlos Gómez, tienes una sorpresa en Taquería El Pastor!",
+          html: expect.stringContaining("Taquería El Pastor"),
+        }),
+      );
+
+      const html = mockResendSend.mock.calls[0][0].html;
+      expect(html).toContain("Carlos Gómez");
+      expect(html).toContain("120");
+      expect(html).toContain("background:#10B981");
+      expect(html).toContain("https://example.com/logo.png");
+      expect(html).toContain("¡Te Extrañamos!");
+    });
+
+    it("should handle resend API errors gracefully", async () => {
+      mockResendSend.mockResolvedValueOnce({
+        data: null,
+        error: { message: "Resend rate limit exceeded" },
+      });
+
+      const result = await sendLoyaltyCampaignEmail({
+        tenant: {
+          id: "tenant-123",
+          name: "Taquería El Pastor",
+          slug: "taqueria-pastor",
+          system_name: "Taquería El Pastor",
+        },
+        customerName: "Carlos Gómez",
+        customerEmail: "carlos@example.com",
+        loyaltyPoints: 10,
+        subject: "Aviso",
+        messageContent: "Mensaje de prueba",
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Resend rate limit exceeded");
     });
   });
 });

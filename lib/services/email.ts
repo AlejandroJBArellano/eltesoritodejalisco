@@ -5,6 +5,7 @@ import type { Tables } from "@/types/supabase";
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ALERT_FROM = "alerts@trykittn.com";
 const ORDERS_FROM = "orders@trykittn.com";
+export const LOYALTY_FROM = "remember@trykittn.com";
 
 export interface OrderItemEmailData {
   name: string;
@@ -726,3 +727,161 @@ export async function sendCustomerOrderConfirmationEmail(params: CustomerOrderEm
     return { success: false, error: err };
   }
 }
+
+export interface LoyaltyEmailParams {
+  tenant: TenantEmailInfo;
+  customerName: string;
+  customerEmail: string;
+  loyaltyPoints?: number;
+  subject: string;
+  messageContent: string;
+  templateKey?: "te_extranamos" | "canje_puntos" | "personalizado" | string;
+}
+
+/**
+ * Sends a personalized loyalty / re-engagement campaign email to a customer.
+ */
+export async function sendLoyaltyCampaignEmail(params: LoyaltyEmailParams) {
+  const {
+    tenant,
+    customerName,
+    customerEmail,
+    loyaltyPoints = 0,
+    subject,
+    messageContent,
+    templateKey = "te_extranamos",
+  } = params;
+
+  if (!customerEmail || !customerEmail.includes("@")) {
+    return { success: false, reason: "invalid_email" };
+  }
+
+  const tenantName = tenant.name || tenant.system_name || "Kittn";
+  const primaryColor = tenant.primary_color || "#10B981";
+  const primaryTextColor = getContrastTextColor(primaryColor);
+  const logoUrl = tenant.logo_url;
+  const menuUrl = getTenantPickupUrl(tenant.slug);
+
+  const replaceTags = (text: string) => {
+    return text
+      .replace(/\{nombre\}/gi, customerName || "Cliente")
+      .replace(/\{puntos\}/gi, String(loyaltyPoints))
+      .replace(/\{restaurante\}/gi, tenantName);
+  };
+
+  const finalSubject = replaceTags(subject);
+  const formattedContent = replaceTags(messageContent).replace(/\n/g, "<br />");
+
+  let badgeText = "Programa de Lealtad";
+  if (templateKey === "te_extranamos") {
+    badgeText = "👋 ¡Te Extrañamos!";
+  } else if (templateKey === "canje_puntos") {
+    badgeText = "🎁 Puntos de Lealtad";
+  } else {
+    badgeText = "✨ Promoción Especial";
+  }
+
+  const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${finalSubject}</title>
+</head>
+<body style="margin:0;padding:0;background:#0f0f11;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#f4f4f5;">
+  <div style="max-width:540px;margin:30px auto;background:#18181b;border-radius:24px;overflow:hidden;border:1px solid #27272a;box-shadow:0 10px 30px rgba(0,0,0,0.4);">
+    
+    <!-- Header with Branding -->
+    <div style="background:#202024;border-bottom:1px solid #2e2e33;padding:28px 24px;text-align:center;">
+      ${
+        logoUrl
+          ? `<img src="${logoUrl}" alt="${tenantName}" style="height:50px;max-width:140px;object-fit:contain;border-radius:12px;margin-bottom:16px;" />`
+          : ""
+      }
+      <div style="display:inline-block;margin-bottom:8px;">
+        <span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.08em;color:${primaryColor};background:${primaryColor}18;padding:4px 12px;border-radius:20px;border:1px solid ${primaryColor}44;">
+          ${badgeText}
+        </span>
+      </div>
+      <h1 style="margin:8px 0 4px;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.02em;">
+        ${tenantName}
+      </h1>
+      <p style="margin:0;font-size:13px;color:#a1a1aa;">
+        Hola, <strong style="color:#ffffff;">${customerName || "estimado cliente"}</strong>
+      </p>
+    </div>
+
+    <!-- Loyalty Points Badge Card (if points > 0) -->
+    ${
+      loyaltyPoints > 0
+        ? `
+    <div style="padding:20px 24px 0;">
+      <div style="background:#202024;border:1px solid #2e2e33;border-radius:16px;padding:16px 20px;text-align:center;">
+        <span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#f59e0b;display:block;margin-bottom:4px;">
+          ⭐ Tu Saldo Actual de Puntos
+        </span>
+        <div style="font-size:28px;font-weight:900;color:#fbbf24;letter-spacing:-0.02em;">
+          ${loyaltyPoints} <span style="font-size:14px;font-weight:700;color:#fcd34d;">puntos</span>
+        </div>
+        <p style="margin:4px 0 0;font-size:12px;color:#a1a1aa;">
+          Tienes puntos listos para canjear en tu próxima visita o pedido en línea.
+        </p>
+      </div>
+    </div>`
+        : ""
+    }
+
+    <!-- Main Message Body -->
+    <div style="padding:24px;font-size:14px;line-height:1.6;color:#e4e4e7;">
+      ${formattedContent}
+    </div>
+
+    <!-- Live Menu CTA -->
+    <div style="padding:0 24px 28px;text-align:center;">
+      <a href="${menuUrl}" target="_blank" style="display:block;background:${primaryColor};color:${primaryTextColor};text-decoration:none;font-weight:900;font-size:14px;padding:16px 24px;border-radius:16px;box-shadow:0 6px 20px ${primaryColor}40;letter-spacing:-0.01em;">
+        🍽️ Ver Menú y Ordenar en Línea →
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div style="background:#202024;border-top:1px solid #2e2e33;padding:18px 24px;text-align:center;">
+      <p style="margin:0 0 6px;font-size:11px;color:#71717a;">
+        Recibes este correo porque estás registrado en el programa de lealtad de <strong>${tenantName}</strong>.
+      </p>
+      <p style="margin:0;font-size:10px;color:#52525b;">
+        Enviado a través de KittnOS · <a href="mailto:${LOYALTY_FROM}" style="color:#71717a;text-decoration:none;">${LOYALTY_FROM}</a>
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
+`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `${tenantName} <${LOYALTY_FROM}>`,
+      to: [customerEmail],
+      subject: finalSubject,
+      html,
+    });
+
+    if (error) {
+      console.error("[Email Loyalty Campaign] Resend API error:", error);
+      return { success: false, error: error.message || error };
+    }
+
+    console.log(
+      `[Email Loyalty Campaign] Sent email to ${customerEmail} (ID: ${data?.id})`,
+    );
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error("[Email Loyalty Campaign] Unexpected error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
