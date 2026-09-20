@@ -10,6 +10,7 @@ type Profile = {
   email: string;
   full_name: string;
   role: string;
+  role_id?: string | null;
   created_at: string;
   pin?: string | null;
 };
@@ -49,6 +50,7 @@ async function getUsers(): Promise<Profile[]> {
         full_name:
           authUser.user_metadata?.name || dbProfile?.full_name || "Sin nombre",
         role: dbProfile?.role || authUser.user_metadata?.role || "WAITER",
+        role_id: dbProfile?.role_id || authUser.user_metadata?.role_id || null,
         created_at: authUser.created_at,
         pin: dbProfile?.pin || null,
       };

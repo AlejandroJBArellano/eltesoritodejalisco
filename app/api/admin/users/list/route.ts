@@ -50,8 +50,10 @@ export async function GET() {
             authUser.user_metadata?.name ||
             dbProfile?.full_name ||
             "Sin nombre",
-          role: dbProfile?.role || "WAITER",
+          role: dbProfile?.role || authUser.user_metadata?.role || "WAITER",
+          role_id: dbProfile?.role_id || authUser.user_metadata?.role_id || null,
           created_at: authUser.created_at,
+          pin: dbProfile?.pin || null,
         };
       });
 
