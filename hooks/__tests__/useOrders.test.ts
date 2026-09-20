@@ -149,5 +149,42 @@ describe("useOrders Hook utilities & timers", () => {
 
       globalFetch.mockRestore();
     });
+
+    it("should deduplicate document visibility listeners across multiple hook instances", async () => {
+      const addEventListenerSpy = vi.spyOn(document, "addEventListener");
+      const removeEventListenerSpy = vi.spyOn(document, "removeEventListener");
+
+      const globalFetch = vi.spyOn(global, "fetch").mockResolvedValue({
+        ok: true,
+        json: async () => ({ orders: [] }),
+      } as Response);
+
+      const hook1 = renderHook(() => useRealtimeOrders([], false, undefined, 0));
+      const hook2 = renderHook(() => useRealtimeOrders([], false, undefined, 0));
+
+      const visibilityListenersCount = addEventListenerSpy.mock.calls.filter(
+        ([event]) => event === "visibilitychange",
+      ).length;
+
+      expect(visibilityListenersCount).toBe(1);
+
+      hook1.unmount();
+      expect(
+        removeEventListenerSpy.mock.calls.filter(
+          ([event]) => event === "visibilitychange",
+        ).length,
+      ).toBe(0);
+
+      hook2.unmount();
+      expect(
+        removeEventListenerSpy.mock.calls.filter(
+          ([event]) => event === "visibilitychange",
+        ).length,
+      ).toBe(1);
+
+      addEventListenerSpy.mockRestore();
+      removeEventListenerSpy.mockRestore();
+      globalFetch.mockRestore();
+    });
   });
 });

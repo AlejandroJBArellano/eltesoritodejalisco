@@ -88,15 +88,7 @@ export function useRealtimeOrders(
 
   // Tab / Screen visibility change listener to refetch immediately when screen is unlocked or tab active
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        fetchOrders();
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
+    return subscribeToVisibility(fetchOrders);
   }, [fetchOrders]);
 
   useEffect(() => {
@@ -194,6 +186,38 @@ export function useRealtimeOrders(
   return { orders, loading, error, refetch: fetchOrders, setOrders };
 }
 
+// Centralized visibility change subscriber to deduplicate global document listeners
+const visibilityListeners = new Set<() => void>();
+let globalVisibilityListenerAttached = false;
+
+function handleGlobalVisibilityChange() {
+  if (typeof document !== "undefined" && document.visibilityState === "visible") {
+    visibilityListeners.forEach((listener) => listener());
+  }
+}
+
+function subscribeToVisibility(listener: () => void) {
+  visibilityListeners.add(listener);
+  if (!globalVisibilityListenerAttached && typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", handleGlobalVisibilityChange);
+    globalVisibilityListenerAttached = true;
+  }
+  return () => {
+    visibilityListeners.delete(listener);
+    if (
+      visibilityListeners.size === 0 &&
+      globalVisibilityListenerAttached &&
+      typeof document !== "undefined"
+    ) {
+      document.removeEventListener(
+        "visibilitychange",
+        handleGlobalVisibilityChange,
+      );
+      globalVisibilityListenerAttached = false;
+    }
+  };
+}
+
 // Shared singleton clock to coordinate timers, avoiding multiple intervals and enabling React's auto-batching.
 const clockListeners = new Set<(now: Date) => void>();
 let clockIntervalId: NodeJS.Timeout | null = null;
@@ -234,22 +258,14 @@ export function useOrderTimer(
 
   const [elapsedSeconds, setElapsedSeconds] = useState(() => {
     if (!startTimestamp) return 0;
-    const end = endTimestamp || new Date().getTime();
-    return Math.max(0, Math.floor((end - startTimestamp) / 1000));
+    if (endTimestamp != null) {
+      return Math.max(0, Math.floor((endTimestamp - startTimestamp) / 1000));
+    }
+    return Math.max(0, Math.floor((Date.now() - startTimestamp) / 1000));
   });
 
-  const [prevStart, setPrevStart] = useState(startTimestamp);
-  const [prevEnd, setPrevEnd] = useState(endTimestamp);
-
-  if (startTimestamp !== prevStart || endTimestamp !== prevEnd) {
-    setPrevStart(startTimestamp);
-    setPrevEnd(endTimestamp);
-    const end = endTimestamp || new Date().getTime();
-    setElapsedSeconds(Math.max(0, Math.floor((end - startTimestamp) / 1000)));
-  }
-
   useEffect(() => {
-    if (!startTimestamp || endTimestamp) return;
+    if (!startTimestamp || endTimestamp != null) return;
 
     const calculateElapsed = (currentDate: Date) => {
       const diffMs = Math.max(0, currentDate.getTime() - startTimestamp);
@@ -259,6 +275,11 @@ export function useOrderTimer(
     const unsubscribe = subscribeToClock(calculateElapsed);
     return unsubscribe;
   }, [startTimestamp, endTimestamp]);
+
+  if (endTimestamp != null) {
+    if (!startTimestamp) return 0;
+    return Math.max(0, Math.floor((endTimestamp - startTimestamp) / 1000));
+  }
 
   return elapsedSeconds;
 }
