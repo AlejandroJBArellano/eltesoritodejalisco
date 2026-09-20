@@ -126,10 +126,18 @@ function usePOSCartInternal(
     [formState.items],
   );
 
+  const availableMenuItemMap = useMemo(() => {
+    const map = new Map<string, MenuItem>();
+    for (let i = 0; i < availableMenuItems.length; i++) {
+      map.set(availableMenuItems[i].id, availableMenuItems[i]);
+    }
+    return map;
+  }, [availableMenuItems]);
+
   const cartTotals = useMemo(() => {
     return calculateOrderDiscountTotals({
       items: formState.items.map((item) => {
-        const product = availableMenuItems.find((m) => m.id === item.menuItemId);
+        const product = availableMenuItemMap.get(item.menuItemId);
         return {
           unitPrice: product?.price || 0,
           quantity: Number(item.quantity) || 0,
@@ -141,7 +149,7 @@ function usePOSCartInternal(
       orderDiscountType: formState.discountType,
       orderDiscountValue: formState.discountValue,
     });
-  }, [formState.items, formState.discountType, formState.discountValue, availableMenuItems]);
+  }, [formState.items, formState.discountType, formState.discountValue, availableMenuItemMap]);
 
   const cartTotal = cartTotals.total;
 
@@ -278,16 +286,18 @@ function usePOSCartInternal(
   const handleApplyItemDiscount = (index: number, discount: DiscountData) => {
     setFormState((prev) => {
       const nextItems = [...prev.items];
-      const product = availableMenuItems.find((m) => m.id === nextItems[index].menuItemId);
+      const targetItem = nextItems[index];
+      if (!targetItem) return prev;
+      const product = availableMenuItemMap.get(targetItem.menuItemId);
       const { discountAmount } = calculateItemDiscount({
         unitPrice: product?.price || 0,
-        quantity: Number(nextItems[index].quantity) || 0,
+        quantity: Number(targetItem.quantity) || 0,
         discountType: discount.discountType,
         discountValue: discount.discountValue,
         discountScope: discount.discountScope,
       });
       nextItems[index] = {
-        ...nextItems[index],
+        ...targetItem,
         discountType: discount.discountType,
         discountValue: discount.discountValue,
         discountAmount,

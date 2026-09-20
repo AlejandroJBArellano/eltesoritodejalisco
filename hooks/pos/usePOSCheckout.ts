@@ -72,34 +72,37 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
   // Facturacion State
   const [billingOrder, setBillingOrder] = useState<Order | null>(null);
 
+  const checkoutOrderTotal = checkoutOrder?.total ?? 0;
+  const editingTipOrderTotal = editingTipOrder?.total ?? 0;
+
   const tipAmountCalculated = useMemo(() => {
-    if (!checkoutOrder) return 0;
+    if (!checkoutOrderTotal) return 0;
     if (tipType === "PERCENTAGE") {
-      return (checkoutOrder.total * (Number(tipInput) || 0)) / 100;
+      return (checkoutOrderTotal * (Number(tipInput) || 0)) / 100;
     }
     if (tipType === "FIXED") {
       return Number(tipInput) || 0;
     }
     return 0;
-  }, [checkoutOrder, tipType, tipInput]);
+  }, [checkoutOrderTotal, tipType, tipInput]);
 
   const editTipAmountCalculated = useMemo(() => {
-    if (!editingTipOrder) return 0;
+    if (!editingTipOrderTotal) return 0;
     if (editTipType === "PERCENTAGE") {
-      return (editingTipOrder.total * (Number(editTipInput) || 0)) / 100;
+      return (editingTipOrderTotal * (Number(editTipInput) || 0)) / 100;
     }
     if (editTipType === "FIXED") {
       return Number(editTipInput) || 0;
     }
     return 0;
-  }, [editingTipOrder, editTipType, editTipInput]);
+  }, [editingTipOrderTotal, editTipType, editTipInput]);
 
   const change = useMemo(() => {
-    if (!checkoutOrder || !receivedAmount) return 0;
+    if (!checkoutOrderTotal || !receivedAmount) return 0;
     const diff =
-      Number(receivedAmount) - (checkoutOrder.total + tipAmountCalculated);
+      Number(receivedAmount) - (checkoutOrderTotal + tipAmountCalculated);
     return diff > 0 ? diff : 0;
-  }, [checkoutOrder, receivedAmount, tipAmountCalculated]);
+  }, [checkoutOrderTotal, receivedAmount, tipAmountCalculated]);
 
   const handleProcessPayment = async (forceConfirmed = false) => {
     if (!checkoutOrder) return;
