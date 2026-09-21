@@ -998,7 +998,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 maxLength={6}
                 value={newPin}
                 onChange={(e) => setNewPin(e.target.value)}
-                className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-amber-400 font-mono tracking-widest text-center text-lg"
+                className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-amber-400 font-mono tracking-widest text-center"
                 placeholder="••••"
                 autoFocus
               />
