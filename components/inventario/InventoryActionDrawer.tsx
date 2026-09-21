@@ -206,11 +206,11 @@ export function InventoryActionDrawer({
       aria-labelledby="drawer-title"
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md transition-opacity duration-200"
     >
-      <div className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl bg-card border border-border shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in slide-in-from-bottom-6 duration-200">
+      <div className="w-full max-w-lg rounded-t-2xl sm:rounded-xl bg-card border border-border shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in slide-in-from-bottom-6 duration-200">
         {/* Header con Insumo y Cerrar */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-white/2">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-secondary/30">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
               <Package className="h-5 w-5" />
             </span>
             <div>
@@ -229,7 +229,7 @@ export function InventoryActionDrawer({
             type="button"
             onClick={onClose}
             aria-label="Cerrar modal"
-            className="h-9 w-9 flex items-center justify-center rounded-xl text-text-light/40 hover:text-text-light hover:bg-white/10 active:scale-95 transition-all"
+            className="h-9 w-9 flex items-center justify-center rounded-lg text-text-light/40 hover:text-text-light hover:bg-card-light active:scale-95 transition-all"
           >
             <X className="h-4 w-4" />
           </button>
@@ -237,13 +237,13 @@ export function InventoryActionDrawer({
 
         <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 custom-scrollbar">
           {/* Selector de Modo de Acción */}
-          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-white/4 border border-border">
+          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-lg bg-secondary border border-border">
             <button
               type="button"
               onClick={() => handleActionChange("ENTRADA")}
-              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
                 action === "ENTRADA"
-                  ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 shadow-sm"
+                  ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 shadow-xs"
                   : "text-text-light/50 hover:text-text-light"
               }`}
             >
@@ -253,9 +253,9 @@ export function InventoryActionDrawer({
             <button
               type="button"
               onClick={() => handleActionChange("MERMA")}
-              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
                 action === "MERMA"
-                  ? "bg-red-500/20 border border-red-500/30 text-red-400 shadow-sm"
+                  ? "bg-red-500/20 border border-red-500/30 text-red-400 shadow-xs"
                   : "text-text-light/50 hover:text-text-light"
               }`}
             >
@@ -265,9 +265,9 @@ export function InventoryActionDrawer({
             <button
               type="button"
               onClick={() => handleActionChange("AJUSTE")}
-              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
                 action === "AJUSTE"
-                  ? "bg-primary/20 border border-primary/30 text-primary shadow-sm"
+                  ? "bg-primary/20 border border-primary/30 text-primary shadow-xs"
                   : "text-text-light/50 hover:text-text-light"
               }`}
             >
@@ -277,12 +277,12 @@ export function InventoryActionDrawer({
           </div>
 
           {/* Banner de Previsualización de Stock */}
-          <div className="rounded-2xl p-4 bg-white/3 border border-border space-y-2">
+          <div className="rounded-lg p-4 bg-secondary border border-border space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-text-light/50 font-bold uppercase tracking-wider">
                 Stock actual
               </span>
-              <span className="font-bold text-text-light tabular-nums">
+              <span className="font-bold text-text-light tabular-nums font-mono">
                 {Number(ingredient.currentStock).toFixed(2)} {ingredient.unit}
               </span>
             </div>
@@ -294,7 +294,7 @@ export function InventoryActionDrawer({
               <div className="flex items-center gap-2">
                 {calculatedAdjustment !== 0 && (
                   <span
-                    className={`text-xs font-black px-2 py-0.5 rounded-md ${
+                    className={`text-xs font-black px-2 py-0.5 rounded-md font-mono tabular-nums ${
                       calculatedAdjustment > 0
                         ? "bg-emerald-500/20 text-emerald-400"
                         : "bg-red-500/20 text-red-400"
@@ -306,7 +306,7 @@ export function InventoryActionDrawer({
                   </span>
                 )}
                 <span
-                  className={`text-xl font-black tabular-nums ${
+                  className={`text-xl font-black tabular-nums font-mono ${
                     isNegativeStock
                       ? "text-red-400"
                       : action === "ENTRADA"
@@ -317,7 +317,7 @@ export function InventoryActionDrawer({
                   }`}
                 >
                   {projectedStock.toFixed(2)}{" "}
-                  <span className="text-xs font-bold text-text-light/50">
+                  <span className="text-xs font-bold text-text-light/50 font-sans">
                     {ingredient.unit}
                   </span>
                 </span>
@@ -325,7 +325,7 @@ export function InventoryActionDrawer({
             </div>
 
             {isNegativeStock && (
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-xs font-bold">
+              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-red-500/10 border border-red-500/25 text-red-400 text-xs font-bold">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
                 <span>Alerta: El ajuste resultará en stock negativo</span>
               </div>
@@ -353,7 +353,7 @@ export function InventoryActionDrawer({
                   setError(null);
                 }}
                 placeholder="Ej. Se cayó al servir, producto caducado..."
-                className="w-full h-11 rounded-xl border border-border bg-white/5 px-4 text-xs text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/30"
+                className="w-full h-11 rounded-lg border border-border bg-secondary px-4 text-xs text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/30"
               />
 
               {/* Chips de sugerencias */}
@@ -366,7 +366,7 @@ export function InventoryActionDrawer({
                       setReason(sug);
                       setError(null);
                     }}
-                    className="text-[10px] font-bold text-text-light/60 bg-white/5 border border-border px-2.5 py-1 rounded-lg hover:text-text-light hover:bg-white/10 active:scale-95 transition-all"
+                    className="text-[10px] font-bold text-text-light/60 bg-secondary border border-border px-2.5 py-1 rounded-md hover:text-text-light hover:bg-card-light active:scale-95 transition-all"
                   >
                     {sug}
                   </button>
@@ -393,10 +393,10 @@ export function InventoryActionDrawer({
               </button>
             </div>
 
-            <div className="flex items-center justify-between h-14 rounded-2xl border border-border bg-black/40 px-4">
+            <div className="flex items-center justify-between h-14 rounded-lg border border-border bg-secondary px-4">
               <span
                 data-testid="keypad-display"
-                className="text-2xl sm:text-3xl font-black text-text-light tabular-nums tracking-wider"
+                className="text-2xl sm:text-3xl font-black text-text-light tabular-nums font-mono tracking-wider"
               >
                 {amountStr}
               </span>
@@ -413,9 +413,9 @@ export function InventoryActionDrawer({
                 key={preset}
                 type="button"
                 onClick={() => handleQuickAdd(preset)}
-                className="py-2.5 rounded-xl bg-white/5 border border-border text-xs font-black text-text-light hover:bg-white/10 hover:border-primary/40 active:scale-95 transition-all"
+                className="py-2.5 rounded-lg bg-secondary border border-border text-xs font-black text-text-light hover:bg-card-light hover:border-primary/40 active:scale-95 transition-all font-mono tabular-nums"
               >
-                +{preset} {ingredient.unit}
+                +{preset} <span className="font-sans">{ingredient.unit}</span>
               </button>
             ))}
           </div>
@@ -428,7 +428,7 @@ export function InventoryActionDrawer({
                   key={key}
                   type="button"
                   onClick={() => handleDigit(key)}
-                  className="h-12 rounded-2xl bg-white/5 border border-border text-lg font-black text-text-light hover:bg-white/10 hover:border-border/80 active:scale-95 active:bg-primary/20 transition-all flex items-center justify-center select-none"
+                  className="h-12 rounded-lg bg-secondary border border-border text-lg font-black text-text-light hover:bg-card-light hover:border-border/80 active:scale-95 active:bg-primary/20 transition-all flex items-center justify-center select-none font-mono tabular-nums"
                 >
                   {key}
                 </button>
@@ -438,25 +438,25 @@ export function InventoryActionDrawer({
               type="button"
               onClick={handleBackspace}
               aria-label="Borrar último dígito"
-              className="h-12 rounded-2xl bg-white/5 border border-border text-base font-black text-text-light/70 hover:text-text-light hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center select-none"
+              className="h-12 rounded-lg bg-secondary border border-border text-base font-black text-text-light/70 hover:text-text-light hover:bg-card-light active:scale-95 transition-all flex items-center justify-center select-none"
             >
               <Delete className="h-5 w-5" />
             </button>
           </div>
 
           {error && (
-            <p className="text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
+            <p className="text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2.5">
               {error}
             </p>
           )}
         </div>
 
         {/* Botones de Acción Final */}
-        <div className="p-4 sm:p-6 bg-white/2 border-t border-border flex gap-3">
+        <div className="p-4 sm:p-6 bg-secondary/30 border-t border-border flex gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 h-12 rounded-2xl border border-border bg-white/5 text-xs font-black text-text-light/60 uppercase tracking-wider hover:text-text-light hover:bg-white/10 active:scale-95 transition-all"
+            className="flex-1 h-12 rounded-lg border border-border bg-secondary text-xs font-black text-text-light/60 uppercase tracking-wider hover:text-text-light hover:bg-card-light active:scale-95 transition-all"
           >
             Cancelar
           </button>
@@ -464,12 +464,12 @@ export function InventoryActionDrawer({
             type="button"
             onClick={() => handleSubmit()}
             disabled={isPending}
-            className={`flex-1 h-12 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`flex-1 h-12 rounded-lg text-xs font-black uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
               action === "ENTRADA"
-                ? "bg-emerald-500 text-black hover:bg-emerald-400 shadow-emerald-500/20"
+                ? "bg-emerald-500 text-background hover:bg-emerald-400 shadow-emerald-500/20"
                 : action === "MERMA"
                   ? "bg-red-500 text-white hover:bg-red-400 shadow-red-500/20"
-                  : "bg-primary text-black hover:brightness-110 shadow-primary/20"
+                  : "bg-primary text-background hover:brightness-110 shadow-primary/20"
             }`}
           >
             {isPending ? (

@@ -20,20 +20,20 @@ function getStatus(ing: Ingredient): "out" | "low" | "ok" {
 const STATUS_CONFIG = {
   out: {
     label: "Agotado",
-    dot: "bg-red-500",
-    badge: "bg-red-500/10 border-red-500/25 text-red-400",
-    bar: "bg-red-500",
+    dot: "bg-rose-500",
+    badge: "bg-rose-500/10 border-rose-500/25 text-rose-300",
+    bar: "bg-rose-500",
   },
   low: {
     label: "Stock Bajo",
     dot: "bg-amber-500 animate-pulse",
-    badge: "bg-amber-500/10 border-amber-500/25 text-amber-400",
+    badge: "bg-amber-500/10 border-amber-500/25 text-amber-300",
     bar: "bg-amber-500",
   },
   ok: {
     label: "Normal",
     dot: "bg-emerald-500",
-    badge: "bg-emerald-500/10 border-emerald-500/25 text-emerald-400",
+    badge: "bg-emerald-500/10 border-emerald-500/25 text-emerald-300",
     bar: "bg-emerald-500",
   },
 } as const;
@@ -56,7 +56,7 @@ export function IngredientTouchCard({
   return (
     <div
       data-testid={`ingredient-card-${ingredient.id}`}
-      className="group relative rounded-2xl bg-card border border-border p-4 sm:p-5 flex flex-col justify-between gap-4 transition-all duration-200 hover:border-border/80 hover:shadow-lg hover:shadow-black/20"
+      className="group relative rounded-xl bg-card border border-border p-4 sm:p-5 flex flex-col justify-between gap-3.5 transition-all duration-150 hover:border-border/80 hover:bg-card/95 shadow-xs"
     >
       {/* Encabezado: Nombre y Badge de Estado */}
       <div className="flex items-start justify-between gap-2.5">
@@ -68,11 +68,11 @@ export function IngredientTouchCard({
             {ingredient.name}
           </h3>
           <div className="flex items-center gap-2 mt-1">
-            <span className="inline-flex items-center text-[10px] font-black uppercase tracking-wider text-text-light/50 bg-white/5 border border-border px-2 py-0.5 rounded-md">
+            <span className="inline-flex items-center text-[10px] font-mono font-bold uppercase tracking-wider text-text-light/50 bg-white/5 border border-border px-1.5 py-0.5 rounded">
               {ingredient.unit}
             </span>
             {ingredient.costPerUnit !== undefined && (
-              <span className="text-[11px] text-text-light/40 font-medium">
+              <span className="text-[11px] text-text-light/40 font-mono">
                 ${ingredient.costPerUnit.toFixed(2)} /{" "}
                 {ingredient.unit.toLowerCase()}
               </span>
@@ -81,22 +81,22 @@ export function IngredientTouchCard({
         </div>
 
         <span
-          className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black border uppercase tracking-wider ${cfg.badge}`}
+          className={`shrink-0 inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-semibold border uppercase tracking-wider ${cfg.badge}`}
         >
           <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
-          {cfg.label}
+          <span>{cfg.label}</span>
         </span>
       </div>
 
       {/* Métrica Central de Stock */}
       <div className="space-y-2">
         <div className="flex items-baseline justify-between">
-          <span className="text-[10px] font-black uppercase tracking-wider text-text-light/40">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/40">
             Stock Disponible
           </span>
-          <span className="text-[11px] text-text-light/50 font-medium">
+          <span className="text-[11px] text-text-light/50 font-normal">
             Mínimo:{" "}
-            <span className="font-bold text-text-light/70">
+            <span className="font-mono font-bold text-text-light/70">
               {ingredient.minimumStock} {ingredient.unit}
             </span>
           </span>
@@ -104,9 +104,9 @@ export function IngredientTouchCard({
 
         <div className="flex items-baseline gap-2">
           <span
-            className={`text-3xl sm:text-4xl font-black tabular-nums tracking-tight ${
+            className={`text-2xl sm:text-3xl font-mono font-bold tabular-nums tracking-tight ${
               status === "out"
-                ? "text-red-400"
+                ? "text-rose-400"
                 : status === "low"
                   ? "text-amber-400"
                   : "text-text-light"
@@ -114,7 +114,7 @@ export function IngredientTouchCard({
           >
             {Number(ingredient.currentStock).toFixed(2)}
           </span>
-          <span className="text-xs sm:text-sm font-bold text-text-light/40 uppercase">
+          <span className="text-xs font-semibold text-text-light/40 uppercase">
             {ingredient.unit}
           </span>
         </div>
@@ -133,7 +133,7 @@ export function IngredientTouchCard({
         <button
           type="button"
           onClick={() => onAction("ENTRADA", ingredient)}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-2.5 text-xs font-black text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all shadow-sm"
+          className="flex items-center justify-center gap-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 px-2 py-2 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all cursor-pointer shadow-xs"
         >
           <Plus className="h-3.5 w-3.5" />
           <span>Entrada</span>
@@ -142,7 +142,7 @@ export function IngredientTouchCard({
         <button
           type="button"
           onClick={() => onAction("MERMA", ingredient)}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-red-500/10 border border-red-500/25 px-2.5 py-2.5 text-xs font-black text-red-400 hover:bg-red-500/20 active:scale-95 transition-all shadow-sm"
+          className="flex items-center justify-center gap-1.5 rounded-lg bg-rose-500/10 border border-rose-500/25 px-2 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 active:scale-95 transition-all cursor-pointer shadow-xs"
         >
           <Minus className="h-3.5 w-3.5" />
           <span>Merma</span>
@@ -151,7 +151,7 @@ export function IngredientTouchCard({
         <button
           type="button"
           onClick={() => onAction("AJUSTE", ingredient)}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-white/5 border border-border px-2.5 py-2.5 text-xs font-black text-text-light/70 hover:text-text-light hover:bg-white/10 active:scale-95 transition-all shadow-sm"
+          className="flex items-center justify-center gap-1.5 rounded-lg bg-white/5 border border-border px-2 py-2 text-xs font-semibold text-text-light/70 hover:text-text-light hover:bg-white/10 active:scale-95 transition-all cursor-pointer shadow-xs"
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
           <span>Ajustar</span>

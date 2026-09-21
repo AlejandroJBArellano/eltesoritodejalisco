@@ -116,27 +116,27 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
   return (
     <>
       {/* Summary strip */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-6">
-        <div className="rounded-2xl bg-card border border-border p-4 sm:p-6">
-          <p className="text-[10px] font-black uppercase tracking-wider text-text-light/50 mb-1">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        <div className="rounded-xl bg-card border border-border p-4">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1">
             Total Ingredientes
           </p>
-          <p className="text-3xl font-black text-text-light tabular-nums">
+          <p className="text-2xl sm:text-3xl font-mono font-bold text-text-light tabular-nums">
             {ingredients.length}
           </p>
         </div>
         <div
-          className={`rounded-2xl border p-4 sm:p-6 ${
+          className={`rounded-xl border p-4 ${
             lowCount > 0
-              ? "bg-amber-500/5 border-amber-500/20"
+              ? "bg-amber-500/10 border-amber-500/30"
               : "bg-card border-border"
           }`}
         >
-          <p className="text-[10px] font-black uppercase tracking-wider text-text-light/50 mb-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1">
             Stock Bajo
           </p>
           <p
-            className={`text-3xl font-black tabular-nums ${
+            className={`text-2xl sm:text-3xl font-mono font-bold tabular-nums ${
               lowCount > 0 ? "text-amber-400" : "text-text-light"
             }`}
           >
@@ -144,17 +144,17 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
           </p>
         </div>
         <div
-          className={`rounded-2xl border p-4 sm:p-6 ${
+          className={`rounded-xl border p-4 ${
             outCount > 0
-              ? "bg-red-500/5 border-red-500/20"
+              ? "bg-red-500/10 border-red-500/30"
               : "bg-card border-border"
           }`}
         >
-          <p className="text-[10px] font-black uppercase tracking-wider text-text-light/50 mb-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1">
             Agotados
           </p>
           <p
-            className={`text-3xl font-black tabular-nums ${
+            className={`text-2xl sm:text-3xl font-mono font-bold tabular-nums ${
               outCount > 0 ? "text-red-400" : "text-text-light"
             }`}
           >
@@ -164,11 +164,11 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
       </div>
 
       {/* Main Container */}
-      <div className="rounded-2xl bg-card border border-border shadow-sm overflow-hidden">
+      <div className="rounded-xl bg-card border border-border shadow-xs overflow-hidden">
         {/* Controls Bar */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 px-5 py-4 border-b border-border">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 px-4 py-3.5 border-b border-border">
           {/* Status Filters */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 custom-scrollbar">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 custom-scrollbar">
             {(
               [
                 { key: "all", label: "Todos" },
@@ -180,20 +180,20 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
                 key={f.key}
                 type="button"
                 onClick={() => setFilter(f.key)}
-                className={`px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border whitespace-nowrap transition-all ${
+                className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border whitespace-nowrap transition-all cursor-pointer ${
                   filter === f.key
-                    ? "bg-primary/15 border-primary/30 text-primary"
+                    ? "bg-primary/20 border-primary/40 text-primary"
                     : "bg-white/5 border-border text-text-light/50 hover:text-text-light"
                 }`}
               >
                 {f.label}
                 {f.key === "low" && lowCount > 0 && (
-                  <span className="ml-1.5 rounded-full bg-amber-500/20 text-amber-400 px-1.5 py-0.5 text-[9px]">
+                  <span className="ml-1.5 rounded-md bg-amber-500/20 text-amber-300 font-mono px-1.5 py-0.2 text-[10px]">
                     {lowCount}
                   </span>
                 )}
                 {f.key === "out" && outCount > 0 && (
-                  <span className="ml-1.5 rounded-full bg-red-500/20 text-red-400 px-1.5 py-0.5 text-[9px]">
+                  <span className="ml-1.5 rounded-md bg-red-500/20 text-red-300 font-mono px-1.5 py-0.2 text-[10px]">
                     {outCount}
                   </span>
                 )}
@@ -211,7 +211,7 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar ingrediente..."
-                className="w-full rounded-xl border border-border bg-white/5 pl-8 pr-8 py-2 text-xs text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/30"
+                className="w-full rounded-lg border border-border bg-white/5 pl-8 pr-8 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/30"
               />
               {search && (
                 <button
@@ -226,13 +226,13 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
             </div>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center p-1 rounded-xl bg-white/5 border border-border">
+            <div className="flex items-center p-0.5 rounded-lg bg-white/5 border border-border">
               <button
                 type="button"
                 onClick={() => setViewMode("table")}
                 aria-label="Vista Tabla"
                 title="Vista Tabla"
-                className={`p-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                className={`p-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   viewMode === "table"
                     ? "bg-primary/20 text-primary shadow-xs"
                     : "text-text-light/40 hover:text-text-light"
@@ -246,7 +246,7 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
                 onClick={() => setViewMode("cards")}
                 aria-label="Vista Tarjetas"
                 title="Vista Tarjetas"
-                className={`p-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                className={`p-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   viewMode === "cards"
                     ? "bg-primary/20 text-primary shadow-xs"
                     : "text-text-light/40 hover:text-text-light"

@@ -72,19 +72,19 @@ export function AjusteStockModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-card border border-border shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl bg-card border border-border shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
               <Package className="h-5 w-5 text-primary" />
             </span>
             <div>
               <h2 className="text-sm font-black text-text-light uppercase tracking-wide">
                 Ajustar Stock
               </h2>
-              <p className="text-xs text-text-light/50 font-medium">
+              <p className="text-xs text-text-light/60 font-medium">
                 {ingredient.name}
               </p>
             </div>
@@ -92,18 +92,18 @@ export function AjusteStockModal({
           <button
             type="button"
             onClick={onClose}
-            className="h-8 w-8 flex items-center justify-center rounded-lg text-text-light/40 hover:text-text-light hover:bg-white/10 transition-colors"
+            className="h-8 w-8 flex items-center justify-center rounded-lg text-text-light/60 hover:text-text-light hover:bg-white/5 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Stock actual */}
-        <div className="px-6 py-4 bg-white/3 border-b border-border flex items-center justify-between">
-          <span className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
+        <div className="px-6 py-4 bg-background/50 border-b border-border flex items-center justify-between">
+          <span className="text-xs font-bold text-text-light/60 uppercase tracking-wider">
             Stock Actual
           </span>
-          <span className="text-2xl font-black text-text-light tabular-nums">
+          <span className="text-2xl font-black text-text-light font-mono tabular-nums">
             {ingredient.currentStock}
             <span className="text-sm font-bold text-text-light/40 ml-1">
               {ingredient.unit}
@@ -114,7 +114,7 @@ export function AjusteStockModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Razón */}
           <div className="space-y-2">
-            <label className="text-[11px] font-black uppercase tracking-wider text-text-light/50">
+            <label className="text-[11px] font-black uppercase tracking-wider text-text-light/60">
               Razón del ajuste
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -123,10 +123,10 @@ export function AjusteStockModal({
                   key={r.value}
                   type="button"
                   onClick={() => handleRazonChange(r.value)}
-                  className={`rounded-xl px-3 py-2.5 text-left text-xs font-bold border transition-all ${
+                  className={`rounded-lg px-3 py-2 text-left text-xs font-bold border transition-all active:scale-[0.98] ${
                     razon === r.value
                       ? "bg-primary/15 border-primary/40 text-text-light"
-                      : "bg-white/5 border-border text-text-light/60 hover:border-border/40 hover:text-text-light"
+                      : "bg-background border-border text-text-light/70 hover:border-border/80 hover:text-text-light"
                   }`}
                 >
                   {r.label}
@@ -138,17 +138,17 @@ export function AjusteStockModal({
           {/* Signo manual (solo para razones neutras) */}
           {razonConfig?.positive === null && (
             <div className="space-y-2">
-              <label className="text-[11px] font-black uppercase tracking-wider text-text-light/50">
+              <label className="text-[11px] font-black uppercase tracking-wider text-text-light/60">
                 Tipo de ajuste
               </label>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setSigno(1)}
-                  className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-black border transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-xs font-black border transition-all active:scale-[0.98] ${
                     signo === 1
                       ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
-                      : "bg-white/5 border-border text-text-light/60 hover:text-text-light"
+                      : "bg-background border-border text-text-light/70 hover:text-text-light"
                   }`}
                 >
                   <Plus className="h-3.5 w-3.5" /> Entrada
@@ -156,10 +156,10 @@ export function AjusteStockModal({
                 <button
                   type="button"
                   onClick={() => setSigno(-1)}
-                  className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-black border transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-xs font-black border transition-all active:scale-[0.98] ${
                     signo === -1
-                      ? "bg-red-500/15 border-red-500/40 text-red-400"
-                      : "bg-white/5 border-border text-text-light/60 hover:text-text-light"
+                      ? "bg-rose-500/15 border-rose-500/40 text-rose-400"
+                      : "bg-background border-border text-text-light/70 hover:text-text-light"
                   }`}
                 >
                   <Minus className="h-3.5 w-3.5" /> Salida
@@ -170,7 +170,7 @@ export function AjusteStockModal({
 
           {/* Cantidad */}
           <div className="space-y-2">
-            <label className="text-[11px] font-black uppercase tracking-wider text-text-light/50">
+            <label className="text-[11px] font-black uppercase tracking-wider text-text-light/60">
               Cantidad ({ingredient.unit})
             </label>
             <div className="flex items-center gap-3">
@@ -179,7 +179,7 @@ export function AjusteStockModal({
                 onClick={() =>
                   setCantidad((p) => String(Math.max(0, (Number(p) || 0) - 1)))
                 }
-                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-xl bg-white/5 border border-border text-text-light hover:bg-white/10 transition-colors"
+                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-secondary border border-border text-text-light hover:bg-secondary/80 active:scale-[0.98] transition-all"
               >
                 <Minus className="h-4 w-4" />
               </button>
@@ -190,12 +190,12 @@ export function AjusteStockModal({
                 value={cantidad}
                 onChange={(e) => setCantidad(e.target.value)}
                 placeholder="0"
-                className="flex-1 h-10 rounded-xl border border-border bg-white/5 px-4 text-center text-lg font-black text-text-light outline-none focus:border-primary transition-all tabular-nums"
+                className="flex-1 h-10 rounded-lg border border-border bg-background px-4 text-center text-lg font-mono font-black text-text-light outline-none focus:border-primary transition-all tabular-nums"
               />
               <button
                 type="button"
                 onClick={() => setCantidad((p) => String((Number(p) || 0) + 1))}
-                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-xl bg-white/5 border border-border text-text-light hover:bg-white/10 transition-colors"
+                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-secondary border border-border text-text-light hover:bg-secondary/80 active:scale-[0.98] transition-all"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -205,9 +205,9 @@ export function AjusteStockModal({
           {/* Preview resultado */}
           {Number(cantidad) > 0 && (
             <div
-              className={`rounded-xl p-3.5 border flex items-center justify-between ${
+              className={`rounded-lg p-3.5 border flex items-center justify-between ${
                 newStock < 0
-                  ? "bg-red-500/10 border-red-500/20"
+                  ? "bg-rose-500/10 border-rose-500/20"
                   : "bg-emerald-500/10 border-emerald-500/20"
               }`}
             >
@@ -215,8 +215,8 @@ export function AjusteStockModal({
                 Nuevo stock
               </span>
               <span
-                className={`text-xl font-black tabular-nums ${
-                  newStock < 0 ? "text-red-400" : "text-emerald-400"
+                className={`text-xl font-mono font-black tabular-nums ${
+                  newStock < 0 ? "text-rose-400" : "text-emerald-400"
                 }`}
               >
                 {newStock.toFixed(2)}{" "}
@@ -228,7 +228,7 @@ export function AjusteStockModal({
           )}
 
           {error && (
-            <p className="text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
+            <p className="text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg px-4 py-2.5">
               {error}
             </p>
           )}
@@ -238,14 +238,14 @@ export function AjusteStockModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 h-11 rounded-xl border border-border bg-white/5 text-xs font-black text-text-light/60 uppercase tracking-wider hover:text-text-light hover:bg-white/10 transition-all"
+              className="flex-1 h-10 rounded-lg border border-border bg-secondary text-xs font-black text-text-light/70 uppercase tracking-wider hover:text-text-light hover:bg-secondary/80 active:scale-[0.98] transition-all"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isPending || !cantidad || Number(cantidad) <= 0}
-              className="flex-1 h-11 rounded-xl bg-primary text-black text-xs font-black uppercase tracking-wider hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+              className="flex-1 h-10 rounded-lg bg-primary text-background text-xs font-black uppercase tracking-wider hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
             >
               {isPending ? (
                 <>
