@@ -325,7 +325,7 @@ export function POSModifyOrderModal() {
                       </div>
 
                       {/* Controles de cantidad táctiles */}
-                      <div className="flex items-center gap-1 bg-secondary rounded-lg p-0.5 border border-border shrink-0">
+                      <div className="flex items-center gap-1 bg-dark/40 rounded-lg p-0.5 border border-border shrink-0">
                         <button
                           type="button"
                           onClick={() => handleModifyQuantityChange(index, -1)}
@@ -407,7 +407,7 @@ export function POSModifyOrderModal() {
                       }
                       placeholder="Nota (ej. Sin cebolla)..."
                       aria-label={`Nota para ${item.menuItemName}`}
-                      className="w-full rounded-md border border-border bg-secondary px-2.5 py-1 text-[11px] text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/25 font-normal"
+                      className="w-full rounded-md border border-border bg-dark/40 px-2.5 py-1 text-[11px] text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/25 font-normal"
                     />
                   </div>
                 );
@@ -419,13 +419,13 @@ export function POSModifyOrderModal() {
         {/* =========================================================================
             COLUMNA DERECHA: Servicio, Descuentos y Totales (40% en escritorio)
         ========================================================================= */}
-        <div className="w-full md:w-[40%] flex flex-col md:h-full md:justify-between bg-secondary/30 border-t md:border-t-0 md:border-l border-border p-4 sm:p-5 md:overflow-y-auto custom-scrollbar space-y-6 md:space-y-0">
+        <div className="w-full md:w-[40%] flex flex-col md:h-full md:justify-between bg-dark/40 border-t md:border-t-0 md:border-l border-border p-4 sm:p-5 md:overflow-y-auto custom-scrollbar space-y-6 md:space-y-0">
           {/* Bloque Superior: Datos de Servicio */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold text-text-light uppercase tracking-wider hidden md:block">
               Datos de Servicio
             </h3>
-            <div className="space-y-3 bg-secondary p-3.5 rounded-lg border border-border">
+            <div className="space-y-3 bg-dark/40 p-3.5 rounded-lg border border-border">
               <div>
                 <label className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider block mb-1.5">
                   Mesa / Servicio
@@ -462,7 +462,7 @@ export function POSModifyOrderModal() {
           {/* Bloque Intermedio: Descuento Global y Desglose Financiero */}
           <div className="border-t border-border pt-4 space-y-3">
             {safeTotals.totalDiscount > 0 && (
-              <div className="space-y-1 text-xs bg-secondary p-2.5 rounded-lg border border-border font-mono">
+              <div className="space-y-1 text-xs bg-dark/40 p-2.5 rounded-lg border border-border font-mono">
                 <div className="flex justify-between text-text-light/60">
                   <span>Subtotal bruto</span>
                   <span className="tabular-nums">

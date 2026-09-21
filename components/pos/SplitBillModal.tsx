@@ -227,7 +227,7 @@ export function SplitBillModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-text-light/50 hover:text-text-light transition-colors p-1 rounded-md hover:bg-secondary cursor-pointer"
+            className="text-text-light/50 hover:text-text-light transition-colors p-1 rounded-md hover:bg-dark/40 cursor-pointer"
             aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
@@ -235,7 +235,7 @@ export function SplitBillModal({
         </div>
 
         {/* Total */}
-        <div className="text-center bg-secondary py-4 rounded-lg border border-border mb-6">
+        <div className="text-center bg-dark/40 py-4 rounded-lg border border-border mb-6">
           <p className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider">
             Total a dividir
           </p>
@@ -245,7 +245,7 @@ export function SplitBillModal({
         </div>
 
         {/* Mode selector */}
-        <div className="flex gap-2 p-1 bg-secondary rounded-lg mb-6">
+        <div className="flex gap-2 p-1 bg-dark/40 rounded-lg mb-6">
           <button
             type="button"
             onClick={() => setMode("EQUAL")}
@@ -280,7 +280,7 @@ export function SplitBillModal({
               type="button"
               onClick={() => handlePartCountChange(partCount - 1)}
               disabled={partCount <= 2}
-              className="w-10 h-10 rounded-lg bg-secondary text-text-light font-bold text-lg hover:bg-secondary/80 disabled:opacity-30 transition-all cursor-pointer"
+              className="w-10 h-10 rounded-lg bg-dark/40 text-text-light font-bold text-lg hover:bg-dark/40 disabled:opacity-30 transition-all cursor-pointer"
             >
               −
             </button>
@@ -291,7 +291,7 @@ export function SplitBillModal({
               type="button"
               onClick={() => handlePartCountChange(partCount + 1)}
               disabled={partCount >= 8}
-              className="w-10 h-10 rounded-lg bg-secondary text-text-light font-bold text-lg hover:bg-secondary/80 disabled:opacity-30 transition-all cursor-pointer"
+              className="w-10 h-10 rounded-lg bg-dark/40 text-text-light font-bold text-lg hover:bg-dark/40 disabled:opacity-30 transition-all cursor-pointer"
             >
               +
             </button>
@@ -323,7 +323,7 @@ export function SplitBillModal({
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 bg-secondary/50 p-3 rounded-lg border border-border"
+                  className="flex items-center gap-3 bg-dark/40 p-3 rounded-lg border border-border"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-text-light text-xs truncate">
@@ -374,7 +374,7 @@ export function SplitBillModal({
                                   },
                                 );
                               }}
-                              className={`w-10 h-8 text-center text-xs font-mono font-bold rounded-lg border bg-secondary text-text-light outline-none transition-all tabular-nums ${
+                              className={`w-10 h-8 text-center text-xs font-mono font-bold rounded-lg border bg-dark/40 text-text-light outline-none transition-all tabular-nums ${
                                 isExact
                                   ? "border-emerald-500 text-emerald-400"
                                   : "border-border focus:border-primary"
@@ -415,7 +415,7 @@ export function SplitBillModal({
                             className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                               singleAssignments[item.id] === n
                                 ? "bg-emerald-500 text-background shadow-xs"
-                                : "bg-secondary text-text-light/60 hover:bg-secondary/80 hover:text-text-light"
+                                : "bg-dark/40 text-text-light/60 hover:bg-dark/40 hover:text-text-light"
                             }`}
                           >
                             {n}
@@ -446,7 +446,7 @@ export function SplitBillModal({
             return (
               <div
                 key={i}
-                className="bg-secondary/40 rounded-xl p-4 border border-border space-y-3"
+                className="bg-dark/40 rounded-xl p-4 border border-border space-y-3"
               >
                 {/* Part header */}
                 <div className="flex justify-between items-center">
@@ -468,7 +468,7 @@ export function SplitBillModal({
                       className={`py-2 text-[10px] rounded-lg font-bold uppercase border transition-all cursor-pointer ${
                         part.paymentMethod === m.value
                           ? "border-primary bg-primary/20 text-primary shadow-xs"
-                          : "border-border text-text-light/60 bg-secondary hover:text-text-light"
+                          : "border-border text-text-light/60 bg-white/5 hover:text-text-light"
                       }`}
                     >
                       {m.label}
@@ -488,7 +488,7 @@ export function SplitBillModal({
                       className={`flex-1 py-1 text-[10px] rounded-md font-bold uppercase border transition-all cursor-pointer ${
                         part.tipType === "NONE"
                           ? "border-primary bg-primary/20 text-primary"
-                          : "border-border text-text-light/50 bg-secondary hover:text-text-light"
+                          : "border-border text-text-light/50 bg-white/5 hover:text-text-light"
                       }`}
                     >
                       Sin Propina
@@ -499,7 +499,7 @@ export function SplitBillModal({
                       className={`flex-1 py-1 text-[10px] rounded-md font-bold uppercase border transition-all cursor-pointer ${
                         part.tipType === "PERCENTAGE"
                           ? "border-primary bg-primary/20 text-primary"
-                          : "border-border text-text-light/50 bg-secondary hover:text-text-light"
+                          : "border-border text-text-light/50 bg-white/5 hover:text-text-light"
                       }`}
                     >
                       %
@@ -510,7 +510,7 @@ export function SplitBillModal({
                       className={`flex-1 py-1 text-[10px] rounded-md font-bold uppercase border transition-all cursor-pointer ${
                         part.tipType === "FIXED"
                           ? "border-primary bg-primary/20 text-primary"
-                          : "border-border text-text-light/50 bg-secondary hover:text-text-light"
+                          : "border-border text-text-light/50 bg-white/5 hover:text-text-light"
                       }`}
                     >
                       $ Fijo
@@ -527,7 +527,7 @@ export function SplitBillModal({
                           className={`flex-1 py-1 text-[10px] rounded-md font-bold uppercase border transition-all cursor-pointer ${
                             part.tipInput === pct
                               ? "border-emerald-500/40 bg-emerald-500/20 text-emerald-300"
-                              : "border-border text-text-light/50 bg-secondary hover:text-text-light"
+                              : "border-border text-text-light/50 bg-white/5 hover:text-text-light"
                           }`}
                         >
                           {pct}%
@@ -547,7 +547,7 @@ export function SplitBillModal({
                         placeholder={
                           part.tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"
                         }
-                        className="flex-1 text-xs font-mono font-bold p-2 border border-border bg-secondary rounded-lg focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
+                        className="flex-1 text-xs font-mono font-bold p-2 border border-border bg-dark/40 rounded-lg focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
                       />
                       {!isWaiter && tip > 0 && (
                         <span className="text-[10px] font-mono font-bold text-blue-400 whitespace-nowrap tabular-nums">
@@ -568,11 +568,11 @@ export function SplitBillModal({
                         updatePart(i, "receivedAmount", e.target.value)
                       }
                       placeholder="Efectivo recibido..."
-                      className="w-full text-sm font-mono font-bold p-2.5 border border-border bg-secondary rounded-lg focus:border-emerald-400 outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
+                      className="w-full text-sm font-mono font-bold p-2.5 border border-border bg-dark/40 rounded-lg focus:border-emerald-400 outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
                     />
                     {part.receivedAmount &&
                       Number(part.receivedAmount) >= total && (
-                        <div className="flex justify-between items-center bg-secondary p-2 rounded-lg border border-border">
+                        <div className="flex justify-between items-center bg-dark/40 p-2 rounded-lg border border-border">
                           <span className="font-bold text-text-light/50 text-[10px] uppercase">
                             Cambio
                           </span>
@@ -613,7 +613,7 @@ export function SplitBillModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full bg-secondary text-text-light/60 py-2 rounded-lg font-bold text-xs hover:bg-secondary/80 hover:text-text-light transition-all uppercase tracking-wider cursor-pointer"
+            className="w-full bg-dark/40 text-text-light/60 py-2 rounded-lg font-bold text-xs hover:bg-dark/40 hover:text-text-light transition-all uppercase tracking-wider cursor-pointer"
           >
             Cancelar
           </button>

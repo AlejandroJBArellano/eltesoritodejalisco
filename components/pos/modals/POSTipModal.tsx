@@ -46,14 +46,14 @@ export function POSTipModal() {
             type="button"
             aria-label="Cerrar modal"
             onClick={() => setEditingTipOrder(null)}
-            className="text-text-light/50 hover:text-text-light transition-colors p-1 rounded-md hover:bg-secondary cursor-pointer"
+            className="text-text-light/50 hover:text-text-light transition-colors p-1 rounded-md hover:bg-dark/40 cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="space-y-5">
-          <div className="text-center bg-secondary py-4 rounded-lg border border-border space-y-1">
+          <div className="text-center bg-dark/40 py-4 rounded-lg border border-border space-y-1">
             <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider font-mono tabular-nums">
               Total de la orden: ${editingTipOrder.total.toFixed(2)}
             </p>
@@ -76,7 +76,7 @@ export function POSTipModal() {
                 className={`flex-1 py-2 text-[10px] rounded-lg font-bold uppercase border transition-all cursor-pointer ${
                   editTipType === "NONE"
                     ? "bg-primary/20 border-primary text-primary"
-                    : "border-border text-text-light/60 bg-secondary hover:text-text-light"
+                    : "border-border text-text-light/60 bg-white/5 hover:text-text-light hover:bg-white/10"
                 }`}
               >
                 Sin Propina
@@ -87,7 +87,7 @@ export function POSTipModal() {
                 className={`flex-1 py-2 text-[10px] rounded-lg font-bold uppercase border transition-all cursor-pointer ${
                   editTipType === "PERCENTAGE"
                     ? "bg-primary/20 border-primary text-primary"
-                    : "border-border text-text-light/60 bg-secondary hover:text-text-light"
+                    : "border-border text-text-light/60 bg-white/5 hover:text-text-light hover:bg-white/10"
                 }`}
               >
                 %
@@ -98,7 +98,7 @@ export function POSTipModal() {
                 className={`flex-1 py-2 text-[10px] rounded-lg font-bold uppercase border transition-all cursor-pointer ${
                   editTipType === "FIXED"
                     ? "bg-primary/20 border-primary text-primary"
-                    : "border-border text-text-light/60 bg-secondary hover:text-text-light"
+                    : "border-border text-text-light/60 bg-white/5 hover:text-text-light hover:bg-white/10"
                 }`}
               >
                 $ Fijo
@@ -117,7 +117,7 @@ export function POSTipModal() {
                   className={`py-2 text-xs rounded-lg font-bold uppercase border transition-all cursor-pointer ${
                     editTipType === "PERCENTAGE" && editTipInput === pct
                       ? "bg-primary text-background border-primary"
-                      : "border-border text-text-light/60 bg-secondary hover:text-text-light"
+                      : "border-border text-text-light/60 bg-white/5 hover:text-text-light hover:bg-white/10"
                   }`}
                 >
                   {pct}%
@@ -133,7 +133,7 @@ export function POSTipModal() {
                 placeholder={
                   editTipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"
                 }
-                className="w-full text-base font-bold font-mono p-2.5 border border-border bg-secondary rounded-lg focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
+                className="w-full text-base font-bold font-mono p-2.5 border border-border bg-dark/40 rounded-lg focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
               />
             )}
           </div>
@@ -150,7 +150,7 @@ export function POSTipModal() {
             <button
               type="button"
               onClick={() => setEditingTipOrder(null)}
-              className="w-full bg-secondary text-text-light/60 py-2 rounded-lg font-bold text-xs hover:bg-secondary/80 hover:text-text-light transition-all uppercase tracking-wider border border-border cursor-pointer"
+              className="w-full bg-dark/40 text-text-light/60 py-2 rounded-lg font-bold text-xs hover:bg-dark/40 hover:text-text-light transition-all uppercase tracking-wider border border-border cursor-pointer"
             >
               Cancelar
             </button>

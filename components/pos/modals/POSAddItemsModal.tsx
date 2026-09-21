@@ -228,7 +228,7 @@ export function POSAddItemsModal() {
           </div>
 
           {/* Buscador Rápido con AutoFocus */}
-          <div className="p-3 border-b border-border bg-secondary/30 shrink-0">
+          <div className="p-3 border-b border-border bg-dark/40 shrink-0">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light/40" />
               <input
@@ -237,7 +237,7 @@ export function POSAddItemsModal() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar producto..."
-                className="w-full rounded-lg border border-border bg-secondary pl-9 pr-9 py-2 text-xs text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/30"
+                className="w-full rounded-lg border border-border bg-dark/40 pl-9 pr-9 py-2 text-xs text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/30"
               />
               {searchQuery && (
                 <button
@@ -382,7 +382,7 @@ export function POSAddItemsModal() {
         ========================================================================= */}
         <form
           onSubmit={(e) => handleAddItems?.(e)}
-          className={`w-full md:w-[40%] flex-col h-full bg-secondary/30 ${
+          className={`w-full md:w-[40%] flex-col h-full bg-dark/40 ${
             showMobileTray ? "flex" : "hidden md:flex"
           }`}
         >
@@ -447,7 +447,7 @@ export function POSAddItemsModal() {
 
                   {/* Controles de Cantidad y Eliminar */}
                   <div className="flex items-center justify-between gap-2 pt-1">
-                    <div className="flex items-center gap-1 bg-secondary rounded-lg p-0.5 border border-border">
+                    <div className="flex items-center gap-1 bg-dark/40 rounded-lg p-0.5 border border-border">
                       <button
                         type="button"
                         onClick={() => handleDecrement(item.index)}
@@ -501,7 +501,7 @@ export function POSAddItemsModal() {
                       handleNotesChange(item.index, e.target.value)
                     }
                     placeholder="Nota (ej. Sin cebolla)..."
-                    className="w-full rounded-md border border-border bg-secondary px-2.5 py-1 text-[11px] text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/25 font-normal"
+                    className="w-full rounded-md border border-border bg-dark/40 px-2.5 py-1 text-[11px] text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/25 font-normal"
                     aria-label="Nota de producto"
                   />
                 </div>

@@ -284,7 +284,7 @@ export function POSDiscountModal({
                 onChange={(e) => setValue(e.target.value)}
                 placeholder={type === "PERCENT" ? "Ej. 15" : "Ej. 50.00"}
                 autoFocus
-                className="w-full text-xl font-mono font-bold p-3 border border-border bg-secondary rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-center text-text-light transition-all placeholder:text-text-light/20"
+                className="w-full text-xl font-mono font-bold p-3 border border-border bg-dark/40 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-center text-text-light transition-all placeholder:text-text-light/20"
               />
               <span className="absolute right-4 text-sm font-bold text-text-light/40">
                 {type === "PERCENT" ? "%" : "$"}
@@ -294,7 +294,7 @@ export function POSDiscountModal({
 
           {/* Selector de alcance si es ítem con cantidad > 1 y descuento fijo */}
           {isItem && itemQuantity > 1 && type === "FIXED" && (
-            <div className="space-y-1.5 p-3 rounded-lg bg-secondary border border-border">
+            <div className="space-y-1.5 p-3 rounded-lg bg-dark/40 border border-border">
               <label className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider block">
                 Aplicación del monto fijo ({itemQuantity} unidades)
               </label>
@@ -372,7 +372,7 @@ export function POSDiscountModal({
                 onChange={(e) => setCustomReason(e.target.value)}
                 placeholder="Escribe el motivo..."
                 maxLength={40}
-                className="w-full text-xs font-medium p-2.5 mt-2 border border-border bg-secondary rounded-lg focus:border-primary outline-none text-text-light transition-all placeholder:text-text-light/30"
+                className="w-full text-xs font-medium p-2.5 mt-2 border border-border bg-dark/40 rounded-lg focus:border-primary outline-none text-text-light transition-all placeholder:text-text-light/30"
               />
             )}
           </div>
@@ -401,7 +401,7 @@ export function POSDiscountModal({
                   setManagerPin(e.target.value);
                 }}
                 placeholder="PIN de 4 dígitos"
-                className="w-full text-center text-lg tracking-widest font-mono font-bold p-2.5 border border-amber-500/30 bg-secondary rounded-lg focus:border-amber-400 outline-none text-text-light"
+                className="w-full text-center text-lg tracking-widest font-mono font-bold p-2.5 border border-amber-500/30 bg-dark/40 rounded-lg focus:border-amber-400 outline-none text-text-light"
               />
               {pinError && (
                 <p className="text-[10px] font-bold text-red-400 text-center">

@@ -102,7 +102,7 @@ export default function OrdersMobileFunction({
   return (
     <div className="md:hidden space-y-3 pt-4">
       {/* Pestañas de Estado: Todas / Pendientes / Pagadas */}
-      <div className="flex items-center gap-1 bg-secondary/60 p-1 rounded-xl border border-border overflow-x-auto">
+      <div className="flex items-center gap-1 bg-dark/40 p-1 rounded-xl border border-border overflow-x-auto">
         <button
           type="button"
           onClick={() => setStatusFilter("ALL")}
@@ -129,7 +129,7 @@ export default function OrdersMobileFunction({
             className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
               statusFilter === "PENDING"
                 ? "bg-amber-500/30 text-amber-200"
-                : "bg-secondary text-text-light/60"
+                : "bg-dark/40 text-text-light/60"
             }`}
           >
             {pendingCount}
@@ -150,7 +150,7 @@ export default function OrdersMobileFunction({
             className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
               statusFilter === "PAID"
                 ? "bg-emerald-500/30 text-emerald-200"
-                : "bg-secondary text-text-light/60"
+                : "bg-dark/40 text-text-light/60"
             }`}
           >
             {paidCount}
@@ -159,7 +159,7 @@ export default function OrdersMobileFunction({
       </div>
 
       {/* Filtro de Origen: Todos / POS / Pickup */}
-      <div className="flex items-center gap-1 bg-secondary/60 p-1 rounded-xl border border-border overflow-x-auto">
+      <div className="flex items-center gap-1 bg-dark/40 p-1 rounded-xl border border-border overflow-x-auto">
         <button
           type="button"
           onClick={() => setSourceFilter("ALL")}
@@ -233,7 +233,7 @@ export default function OrdersMobileFunction({
                 </div>
                 <div className="flex items-center gap-1.5 flex-wrap justify-end">
                   {getServiceType(order.table) === "domicilio" ? (
-                    <span className="rounded-md bg-secondary border border-border px-2 py-0.5 text-[10px] font-bold text-text-light/80 uppercase tracking-wider flex items-center gap-1">
+                    <span className="rounded-md bg-dark/40 border border-border px-2 py-0.5 text-[10px] font-bold text-text-light/80 uppercase tracking-wider flex items-center gap-1">
                       <Bike className="h-2.5 w-2.5" />
                       {formatServiceLabel(order.table)}
                     </span>
@@ -271,7 +271,7 @@ export default function OrdersMobileFunction({
               </div>
 
               {/* Detalle de Total */}
-              <div className="flex justify-between items-center bg-secondary p-2.5 rounded-lg border border-border font-mono">
+              <div className="flex justify-between items-center bg-dark/40 p-2.5 rounded-lg border border-border font-mono">
                 <span className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider">
                   Total
                 </span>
@@ -316,7 +316,7 @@ export default function OrdersMobileFunction({
                     setShowKitchenTicket(true);
                     setShowTicket(false);
                   }}
-                  className="rounded-lg bg-secondary hover:bg-secondary/80 text-text-light border border-border py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
+                  className="rounded-lg bg-dark/40 hover:bg-dark/40 text-text-light border border-border py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
                 >
                   <ChefHat className="h-3.5 w-3.5" />
                   Comanda
@@ -326,7 +326,7 @@ export default function OrdersMobileFunction({
                     <button
                       type="button"
                       onClick={() => setEditingOrder(order)}
-                      className="rounded-lg bg-secondary hover:bg-secondary/80 text-text-light border border-border py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
+                      className="rounded-lg bg-dark/40 hover:bg-dark/40 text-text-light border border-border py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       Agregar
@@ -334,7 +334,7 @@ export default function OrdersMobileFunction({
                     <button
                       type="button"
                       onClick={() => openModifyModal(order)}
-                      className="rounded-lg bg-secondary hover:bg-secondary/80 text-text-light border border-border py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
+                      className="rounded-lg bg-dark/40 hover:bg-dark/40 text-text-light border border-border py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
                     >
                       <Edit3 className="h-3.5 w-3.5" />
                       Editar
@@ -348,7 +348,7 @@ export default function OrdersMobileFunction({
                           order.payments?.[0]?.tipAmount?.toString() || "0",
                         );
                       }}
-                      className="rounded-lg bg-secondary hover:bg-secondary/80 text-text-light border border-border py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
+                      className="rounded-lg bg-dark/40 hover:bg-dark/40 text-text-light border border-border py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
                     >
                       <HandCoins className="h-3.5 w-3.5" />
                       Propina
@@ -362,7 +362,7 @@ export default function OrdersMobileFunction({
                     setShowTicket(true);
                     setShowKitchenTicket(false);
                   }}
-                  className="rounded-lg bg-secondary hover:bg-secondary/80 text-text-light border border-border py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
+                  className="rounded-lg bg-dark/40 hover:bg-dark/40 text-text-light border border-border py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
                 >
                   <Printer className="h-3.5 w-3.5" />
                   Ticket

@@ -369,7 +369,7 @@ export function POSCheckoutModal() {
               </div>
 
               {/* Lista de productos */}
-              <div className="rounded-lg border border-border bg-secondary/40 p-2.5 max-h-45 md:max-h-55 overflow-y-auto custom-scrollbar divide-y divide-border/30">
+              <div className="rounded-lg border border-border bg-dark/40 p-2.5 max-h-45 md:max-h-55 overflow-y-auto custom-scrollbar divide-y divide-border/30">
                 {checkoutOrder.orderItems &&
                 checkoutOrder.orderItems.length > 0 ? (
                   checkoutOrder.orderItems.map((item, idx) => (
@@ -441,7 +441,7 @@ export function POSCheckoutModal() {
               </div>
 
               {/* Desglose Financiero */}
-              <div className="space-y-1.5 text-xs bg-secondary/50 p-3 rounded-lg border border-border font-mono">
+              <div className="space-y-1.5 text-xs bg-dark/40 p-3 rounded-lg border border-border font-mono">
                 <div className="flex justify-between text-text-light/60">
                   <span>Subtotal bruto</span>
                   <span className="tabular-nums">
@@ -585,7 +585,7 @@ export function POSCheckoutModal() {
                         value={selectedCustomerId}
                         onChange={(e) => setSelectedCustomerId(e.target.value)}
                         disabled={isAssigningCustomer || isSubmittingCheckout}
-                        className="flex-1 rounded-lg border border-border bg-secondary px-2.5 py-1.5 text-xs text-text-light outline-none focus:border-amber-400 cursor-pointer"
+                        className="flex-1 rounded-lg border border-border bg-dark/40 px-2.5 py-1.5 text-xs text-text-light outline-none focus:border-amber-400 cursor-pointer"
                       >
                         <option value="">Selecciona un cliente...</option>
                         {customers.map((c) => (
@@ -647,7 +647,7 @@ export function POSCheckoutModal() {
                           setManagerPin(e.target.value);
                         }}
                         placeholder="Ingresa PIN de 4 dígitos"
-                        className="w-full text-center text-base tracking-widest font-mono font-bold p-2 border border-border bg-secondary rounded-lg focus:border-amber-400 outline-none text-text-light"
+                        className="w-full text-center text-base tracking-widest font-mono font-bold p-2 border border-border bg-dark/40 rounded-lg focus:border-amber-400 outline-none text-text-light"
                         autoFocus
                       />
                     </div>
@@ -737,7 +737,7 @@ export function POSCheckoutModal() {
           <div className="order-1 md:order-2 md:col-span-7 flex flex-col justify-between space-y-4">
             <div className="space-y-4">
               {/* Tarjeta de Total a Pagar */}
-              <div className="text-center bg-secondary/50 py-4 sm:py-5 rounded-xl border border-border shadow-inner space-y-1">
+              <div className="text-center bg-dark/40 py-4 sm:py-5 rounded-xl border border-border shadow-inner space-y-1">
                 <p className="text-text-light/40 text-[10px] font-bold uppercase tracking-wider">
                   Total a Pagar
                 </p>
@@ -863,7 +863,7 @@ export function POSCheckoutModal() {
                             ? "% Ej. 10"
                             : "$ Monto propina"
                         }
-                        className="w-full text-base font-mono font-bold p-2.5 border border-border bg-secondary rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-center text-text-light transition-all placeholder:text-text-light/30 disabled:opacity-50"
+                        className="w-full text-base font-mono font-bold p-2.5 border border-border bg-dark/40 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-center text-text-light transition-all placeholder:text-text-light/30 disabled:opacity-50"
                       />
                     )}
                   </div>
@@ -904,7 +904,7 @@ export function POSCheckoutModal() {
                         value={receivedAmount}
                         disabled={isSubmittingCheckout}
                         onChange={(e) => setReceivedAmount(e.target.value)}
-                        className="w-full text-2xl sm:text-3xl font-mono font-bold p-3 border border-border bg-secondary rounded-lg focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-center text-text-light transition-all placeholder:text-text-light/20 disabled:opacity-50"
+                        className="w-full text-2xl sm:text-3xl font-mono font-bold p-3 border border-border bg-dark/40 rounded-lg focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-center text-text-light transition-all placeholder:text-text-light/20 disabled:opacity-50"
                         placeholder="Monto recibido ($)..."
                         autoFocus
                       />
@@ -934,7 +934,7 @@ export function POSCheckoutModal() {
                         ))}
                       </div>
 
-                      <div className="flex justify-between items-center bg-secondary p-3 rounded-lg border border-border">
+                      <div className="flex justify-between items-center bg-dark/40 p-3 rounded-lg border border-border">
                         <span className="font-bold text-text-light/40 text-xs uppercase tracking-wider">
                           Cambio a Entregar
                         </span>

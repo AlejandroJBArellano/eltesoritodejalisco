@@ -26,7 +26,7 @@ export default function TabSelectorPOS({
         onClick={() => setActiveTab("cart")}
         className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border relative cursor-pointer active:scale-95 ${
           activeTab === "cart"
-            ? "bg-secondary text-background border-secondary shadow-xs"
+            ? "bg-primary text-background border-primary shadow-xs"
             : "bg-transparent text-text-light/60 border-transparent hover:text-text-light"
         }`}
       >
@@ -35,7 +35,7 @@ export default function TabSelectorPOS({
           <span
             className={`rounded-full text-[10px] font-mono font-bold h-4.5 min-w-4.5 px-1 flex items-center justify-center transition-colors ${
               activeTab === "cart"
-                ? "bg-card text-text-light"
+                ? "bg-background text-text-light"
                 : "bg-primary text-background"
             }`}
           >

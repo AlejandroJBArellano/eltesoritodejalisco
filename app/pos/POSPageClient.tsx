@@ -341,7 +341,7 @@ function POSPageContent() {
                   setWhatsappNumber("");
                   setShowWhatsAppModal(false);
                 }}
-                className="bg-secondary text-text-light border border-border px-5 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider hover:bg-border/60 active:scale-95 transition-all cursor-pointer"
+                className="bg-dark/40 text-text-light border border-border px-5 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
               >
                 Cerrar
               </button>

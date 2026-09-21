@@ -106,7 +106,7 @@ export default function OrdersPOS({
       {/* Filter Buttons */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Status Tabs: Pendientes / Pagadas / Todas */}
-        <div className="flex items-center gap-1.5 bg-secondary p-1 rounded-xl border border-border">
+        <div className="flex items-center gap-1.5 bg-dark/40 p-1 rounded-xl border border-border">
           <button
             type="button"
             onClick={() => setStatusFilter("ALL")}
@@ -166,7 +166,7 @@ export default function OrdersPOS({
         </div>
 
         {/* Source Filter: Todos / POS Directo / Kittn Pickup */}
-        <div className="flex items-center gap-1.5 bg-secondary p-1 rounded-xl border border-border">
+        <div className="flex items-center gap-1.5 bg-dark/40 p-1 rounded-xl border border-border">
           <button
             type="button"
             onClick={() => setSourceFilter("ALL")}
@@ -264,7 +264,7 @@ export default function OrdersPOS({
                     <td className="py-3.5 px-3">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {getServiceType(order.table) === "domicilio" ? (
-                          <span className="rounded-full bg-secondary/15 border border-secondary/30 px-2.5 py-1 text-[10px] font-black text-secondary uppercase tracking-wider flex items-center gap-1">
+                          <span className="rounded-full bg-dark/40 border border-secondary/30 px-2.5 py-1 text-[10px] font-black text-secondary uppercase tracking-wider flex items-center gap-1">
                             <Bike className="h-2.5 w-2.5" />
                             {formatServiceLabel(order.table)}
                           </span>

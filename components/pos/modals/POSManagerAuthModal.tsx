@@ -149,7 +149,7 @@ export function POSManagerAuthModal({
                 setPin(e.target.value.replace(/\D/g, ""));
               }}
               placeholder="••••"
-              className="w-full text-center text-2xl tracking-[0.4em] font-mono font-bold p-3 border border-border bg-secondary rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-text-light transition-all placeholder:tracking-normal placeholder:text-text-light/20"
+              className="w-full text-center text-2xl tracking-[0.4em] font-mono font-bold p-3 border border-border bg-dark/40 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-text-light transition-all placeholder:tracking-normal placeholder:text-text-light/20"
             />
           </div>
 
@@ -204,7 +204,7 @@ export function POSManagerAuthModal({
                   disabled={isBusy}
                   onChange={(e) => setCustomReason(e.target.value)}
                   placeholder="Especifica el motivo..."
-                  className="w-full text-xs font-medium p-2 border border-border bg-secondary rounded-lg focus:border-primary outline-none text-text-light placeholder:text-text-light/30"
+                  className="w-full text-xs font-medium p-2 border border-border bg-dark/40 rounded-lg focus:border-primary outline-none text-text-light placeholder:text-text-light/30"
                 />
               )}
             </div>

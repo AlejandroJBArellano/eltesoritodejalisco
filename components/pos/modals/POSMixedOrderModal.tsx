@@ -25,7 +25,7 @@ export function POSMixedOrderModal() {
           <button
             type="button"
             onClick={() => setMixedOrderMenuItem(null)}
-            className="text-text-light/50 hover:text-text-light transition-colors p-1 rounded-md hover:bg-secondary cursor-pointer"
+            className="text-text-light/50 hover:text-text-light transition-colors p-1 rounded-md hover:bg-dark/40 cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -39,17 +39,17 @@ export function POSMixedOrderModal() {
           {MIXED_ORDER_FLAVORS.map((flavor) => (
             <div
               key={flavor}
-              className="flex items-center justify-between bg-secondary/50 px-4 py-2.5 rounded-lg border border-border"
+              className="flex items-center justify-between bg-dark/40 px-4 py-2.5 rounded-lg border border-border"
             >
               <span className="font-bold text-xs text-text-light uppercase tracking-wider">
                 {flavor}
               </span>
-              <div className="flex items-center gap-1.5 bg-secondary rounded-lg p-1 border border-border">
+              <div className="flex items-center gap-1.5 bg-dark/40 rounded-lg p-1 border border-border">
                 <button
                   type="button"
                   onClick={() => handleMixedFlavorChange(flavor, -1)}
                   disabled={mixedFlavorCounts[flavor] === 0}
-                  className="h-6 w-6 rounded-md bg-secondary hover:bg-red-500/20 text-text-light flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-30 cursor-pointer"
+                  className="h-6 w-6 rounded-md bg-dark/40 hover:bg-red-500/20 text-text-light flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-30 cursor-pointer"
                 >
                   <Minus className="h-3 w-3" />
                 </button>
@@ -65,7 +65,7 @@ export function POSMixedOrderModal() {
                       0,
                     ) >= MIXED_ORDER_TOTAL
                   }
-                  className="h-6 w-6 rounded-md bg-secondary hover:bg-emerald-500/20 text-text-light flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-30 cursor-pointer"
+                  className="h-6 w-6 rounded-md bg-dark/40 hover:bg-emerald-500/20 text-text-light flex items-center justify-center font-bold text-xs transition-colors disabled:opacity-30 cursor-pointer"
                 >
                   <Plus className="h-3 w-3" />
                 </button>
@@ -99,7 +99,7 @@ export function POSMixedOrderModal() {
           <button
             type="button"
             onClick={() => setMixedOrderMenuItem(null)}
-            className="w-full bg-secondary text-text-light/60 py-2.5 rounded-lg font-bold hover:bg-secondary/80 hover:text-text-light transition-colors uppercase text-xs tracking-wider cursor-pointer"
+            className="w-full bg-dark/40 text-text-light/60 py-2.5 rounded-lg font-bold hover:bg-dark/40 hover:text-text-light transition-colors uppercase text-xs tracking-wider cursor-pointer"
           >
             Cancelar
           </button>

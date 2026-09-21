@@ -22,7 +22,7 @@ export default function WhatsAppTicketPOS({
           <button
             type="button"
             onClick={() => onClickClose()}
-            className="text-text-light/50 hover:text-text-light transition-colors p-1 rounded-md hover:bg-secondary cursor-pointer"
+            className="text-text-light/50 hover:text-text-light transition-colors p-1 rounded-md hover:bg-dark/40 cursor-pointer"
             aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
@@ -40,7 +40,7 @@ export default function WhatsAppTicketPOS({
           onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ""))}
           placeholder="3312345678"
           autoFocus
-          className="w-full text-2xl font-bold font-mono p-3 border border-border bg-secondary rounded-lg focus:border-emerald-400 outline-none text-center text-text-light tracking-[0.2em] transition-colors placeholder:text-text-light/20 tabular-nums"
+          className="w-full text-2xl font-bold font-mono p-3 border border-border bg-dark/40 rounded-lg focus:border-emerald-400 outline-none text-center text-text-light tracking-[0.2em] transition-colors placeholder:text-text-light/20 tabular-nums"
         />
 
         <button
