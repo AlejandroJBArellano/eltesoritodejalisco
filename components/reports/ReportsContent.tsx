@@ -31,7 +31,7 @@ function ReportsView() {
   if (errorMessage) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
-        <div className="rounded-2xl bg-card p-8 shadow-sm border border-red-500/20 max-w-md">
+        <div className="rounded-xl bg-card p-8 shadow-sm border border-red-500/20 max-w-md">
           <AlertTriangle className="mx-auto h-12 w-12 text-red-400 mb-4" />
           <h2 className="text-lg font-black text-text-light uppercase tracking-tight mb-2">
             Error al Cargar Datos
@@ -40,7 +40,7 @@ function ReportsView() {
           <button
             type="button"
             onClick={refreshData}
-            className="rounded-xl bg-primary px-6 py-2.5 text-xs font-black text-white uppercase tracking-wider hover:bg-primary/90 transition-all"
+            className="rounded-lg bg-primary px-6 py-2.5 text-xs font-black text-background uppercase tracking-wider hover:bg-primary-hover transition-all"
           >
             Reintentar
           </button>
@@ -89,8 +89,8 @@ export function ReportsContent() {
   if (user?.isWaiter) {
     return (
       <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
-        <div className="bg-card p-8 rounded-2xl shadow-xl border border-red-500/20 max-w-md w-full text-center space-y-4">
-          <div className="rounded-2xl bg-red-500/10 p-4 text-red-400 w-16 h-16 mx-auto flex items-center justify-center">
+        <div className="bg-card p-8 rounded-xl shadow-xl border border-red-500/20 max-w-md w-full text-center space-y-4">
+          <div className="rounded-xl bg-red-500/10 p-4 text-red-400 w-16 h-16 mx-auto flex items-center justify-center">
             <ShieldAlert className="h-8 w-8" />
           </div>
           <h1 className="text-2xl font-black text-text-light tracking-tight uppercase">
@@ -103,7 +103,7 @@ export function ReportsContent() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 w-full py-3 bg-[#E0E0E0] text-black rounded-xl font-black text-sm uppercase tracking-wider hover:bg-white transition-all shadow-md"
+            className="inline-flex items-center justify-center gap-2 w-full py-3 bg-primary text-background rounded-lg font-black text-sm uppercase tracking-wider hover:bg-primary-hover transition-all shadow-md"
           >
             <ArrowLeft className="h-4 w-4" /> Volver al Dashboard
           </Link>

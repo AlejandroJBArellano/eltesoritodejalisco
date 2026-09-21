@@ -30,9 +30,9 @@ export function ReportsPeriodFilter(props: ReportsPeriodFilterProps = {}) {
   const onApplyCustomDates =
     props.onApplyCustomDates ?? context?.handleApplyCustomDates ?? (() => {});
   return (
-    <section className="rounded-2xl bg-card p-6 shadow-sm border border-border">
+    <section className="rounded-xl bg-card p-6 shadow-sm border border-border">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xs font-extrabold text-text-light/50 uppercase tracking-widest flex items-center gap-2">
+        <h2 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2">
           <Calendar className="h-4 w-4 text-primary" /> Filtro de Período y
           Fechas
         </h2>
@@ -44,10 +44,10 @@ export function ReportsPeriodFilter(props: ReportsPeriodFilterProps = {}) {
             type="button"
             key={p}
             onClick={() => onPeriodChange(p)}
-            className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
+            className={`rounded-lg px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none cursor-pointer ${
               period === p
-                ? "bg-primary text-black shadow-md shadow-primary/20 scale-[1.02]"
-                : "bg-dark/40 text-text-light/60 hover:bg-white/10 hover:text-white border border-border"
+                ? "bg-primary text-background shadow-md shadow-primary/20 scale-[1.02]"
+                : "bg-secondary text-text-light/60 hover:bg-border/60 hover:text-text-light border border-border"
             }`}
           >
             {PERIOD_LABELS[p]}
@@ -70,7 +70,7 @@ export function ReportsPeriodFilter(props: ReportsPeriodFilterProps = {}) {
               type="date"
               value={customStartDate}
               onChange={(e) => onCustomStartDateChange(e.target.value)}
-              className="rounded-xl border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -85,14 +85,14 @@ export function ReportsPeriodFilter(props: ReportsPeriodFilterProps = {}) {
               type="date"
               value={customEndDate}
               onChange={(e) => onCustomEndDateChange(e.target.value)}
-              className="rounded-xl border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
           <button
             type="button"
             onClick={onApplyCustomDates}
             disabled={!customStartDate}
-            className="rounded-xl bg-success px-5 py-2 text-xs font-black text-white uppercase tracking-wider hover:bg-success/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+            className="rounded-lg bg-emerald-500 px-5 py-2 text-xs font-black text-background uppercase tracking-wider hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none cursor-pointer"
           >
             Aplicar Rango
           </button>

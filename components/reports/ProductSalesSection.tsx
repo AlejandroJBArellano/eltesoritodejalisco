@@ -25,7 +25,7 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
   return (
     <div className="grid gap-8 lg:grid-cols-3">
       {/* Detailed Product Sales Table */}
-      <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border lg:col-span-2">
+      <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border lg:col-span-2">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
           <div>
             <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
@@ -47,7 +47,7 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-border text-xs font-black text-text-light/40 uppercase tracking-wider">
+              <tr className="border-b border-border text-xs font-black text-text-light/60 uppercase tracking-wider bg-secondary">
                 <th scope="col" className="py-3 px-3">
                   Rank
                 </th>
@@ -75,29 +75,29 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
               {enrichedProductSales.map((product) => (
                 <tr
                   key={product.id}
-                  className="hover:bg-white/5 transition-colors"
+                  className="hover:bg-secondary/40 transition-colors"
                 >
-                  <td className="py-3.5 px-3 font-mono text-xs font-bold text-text-light/50">
+                  <td className="py-3.5 px-3 font-mono text-xs font-bold text-text-light/50 tabular-nums">
                     #{product.rank}
                   </td>
                   <td className="py-3.5 px-3 font-bold text-text-light uppercase text-xs">
                     {product.name}
                   </td>
                   <td className="py-3.5 px-3">
-                    <span className="inline-flex items-center rounded-lg bg-dark/60 px-2 py-0.5 text-[11px] font-bold text-text-light/70 border border-border">
+                    <span className="inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-[11px] font-bold text-text-light/70 border border-border">
                       {product.category || "General"}
                     </span>
                   </td>
-                  <td className="py-3.5 px-3 text-right font-bold text-text-light text-xs">
+                  <td className="py-3.5 px-3 text-right font-bold text-text-light text-xs font-mono tabular-nums">
                     {product.quantity}
                   </td>
-                  <td className="py-3.5 px-3 text-right text-xs font-medium text-text-light/70">
+                  <td className="py-3.5 px-3 text-right text-xs font-medium text-text-light/70 font-mono tabular-nums">
                     ${(product.averageUnitPrice || 0).toFixed(2)}
                   </td>
-                  <td className="py-3.5 px-3 text-right font-black text-emerald-400 text-xs">
+                  <td className="py-3.5 px-3 text-right font-black text-emerald-400 text-xs font-mono tabular-nums">
                     ${product.revenue.toFixed(2)}
                   </td>
-                  <td className="py-3.5 px-3 text-right font-mono text-xs font-bold text-text-light/60">
+                  <td className="py-3.5 px-3 text-right font-mono text-xs font-bold text-text-light/60 tabular-nums">
                     {(product.percentageOfTotal || 0).toFixed(1)}%
                   </td>
                 </tr>
@@ -118,7 +118,7 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
       </section>
 
       {/* Top 5 Products Leaderboard */}
-      <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
+      <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border">
         <div className="mb-6 flex items-center justify-between border-b border-border pb-3">
           <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
             <Award className="h-5 w-5 text-amber-400" />
@@ -135,12 +135,12 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
                   ? "bg-slate-400/20 text-slate-300 border-slate-400/30"
                   : index === 2
                     ? "bg-amber-700/20 text-amber-500 border-amber-700/30"
-                    : "bg-white/5 text-text-light/60 border-border";
+                    : "bg-secondary text-text-light/60 border-border";
 
             return (
               <div
                 key={index}
-                className="flex items-center justify-between p-3 rounded-xl bg-dark/40 border border-border"
+                className="flex items-center justify-between p-3 rounded-xl bg-secondary border border-border"
               >
                 <div className="flex items-center gap-3">
                   <span
@@ -153,10 +153,10 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
                   </span>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-black text-text-light">
+                  <p className="text-sm font-black text-text-light font-mono tabular-nums">
                     {item.quantity} vendidos
                   </p>
-                  <p className="text-xs font-bold text-emerald-400">
+                  <p className="text-xs font-bold text-emerald-400 font-mono tabular-nums">
                     ${(item.revenue || 0).toFixed(2)}
                   </p>
                 </div>

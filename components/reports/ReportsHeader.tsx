@@ -41,17 +41,17 @@ export function ReportsHeader(props: ReportsHeaderProps = {}) {
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
             href="/analytics/sales"
-            className="inline-flex items-center gap-2 rounded-xl bg-purple-500/15 border border-purple-500/30 px-3.5 py-2 text-xs font-black text-purple-400 hover:bg-purple-500/25 transition-all active:scale-95 shadow-sm"
+            className="inline-flex items-center gap-2 rounded-lg bg-purple-500/15 border border-purple-500/30 px-3.5 py-2 text-xs font-black text-purple-400 hover:bg-purple-500/25 transition-all active:scale-95 shadow-sm"
           >
             <BarChart3 className="h-4 w-4" />
-            Explorar Gráficas 📈
+            Explorar Gráficas
           </Link>
           <Link
             href="/analytics/hourly"
-            className="inline-flex items-center gap-2 rounded-xl bg-amber-500/15 border border-amber-500/30 px-3.5 py-2 text-xs font-black text-amber-400 hover:bg-amber-500/25 transition-all active:scale-95 shadow-sm"
+            className="inline-flex items-center gap-2 rounded-lg bg-amber-500/15 border border-amber-500/30 px-3.5 py-2 text-xs font-black text-amber-400 hover:bg-amber-500/25 transition-all active:scale-95 shadow-sm"
           >
             <Clock className="h-4 w-4" />
-            Horas Pico ⚡
+            Horas Pico
           </Link>
           <ExportButton
             data={dailySalesData}
@@ -70,7 +70,7 @@ export function ReportsHeader(props: ReportsHeaderProps = {}) {
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition-all shadow-lg shadow-primary/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-black text-background uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition-all shadow-sm focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none cursor-pointer"
           >
             <Printer className="h-4 w-4" /> Imprimir / PDF
           </button>

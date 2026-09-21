@@ -18,7 +18,7 @@ export function DailySalesTable(props: DailySalesTableProps = {}) {
   const currentDateStr = new Date().toISOString().split("T")[0];
 
   return (
-    <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
+    <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
         <div>
           <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
@@ -41,7 +41,7 @@ export function DailySalesTable(props: DailySalesTableProps = {}) {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-border text-xs font-black text-text-light/40 uppercase tracking-wider">
+            <tr className="border-b border-border text-xs font-black text-text-light/60 uppercase tracking-wider bg-secondary">
               <th scope="col" className="py-3 px-3">
                 Fecha
               </th>
@@ -67,26 +67,26 @@ export function DailySalesTable(props: DailySalesTableProps = {}) {
           </thead>
           <tbody className="divide-y divide-border">
             {dailySalesData.map((row) => (
-              <tr key={row.date} className="hover:bg-white/5 transition-colors">
+              <tr key={row.date} className="hover:bg-secondary/40 transition-colors">
                 <td className="py-3.5 px-3 font-mono text-xs font-bold text-text-light">
                   {row.date}
                 </td>
                 <td className="py-3.5 px-3 text-xs font-bold text-text-light/80 uppercase">
                   {row.dayOfWeek}
                 </td>
-                <td className="py-3.5 px-3 text-right font-black text-emerald-400">
+                <td className="py-3.5 px-3 text-right font-black text-emerald-400 font-mono tabular-nums">
                   ${row.totalSales.toFixed(2)}
                 </td>
-                <td className="py-3.5 px-3 text-right font-bold text-text-light">
+                <td className="py-3.5 px-3 text-right font-bold text-text-light font-mono tabular-nums">
                   {row.totalOrders}
                 </td>
-                <td className="py-3.5 px-3 text-right font-medium text-text-light/70">
+                <td className="py-3.5 px-3 text-right font-medium text-text-light/70 font-mono tabular-nums">
                   ${row.averageTicket.toFixed(2)}
                 </td>
                 <td className="py-3.5 px-3 text-xs font-medium text-amber-400">
                   {row.topProduct}
                 </td>
-                <td className="py-3.5 px-3 text-right font-mono text-xs font-black text-text-light/60">
+                <td className="py-3.5 px-3 text-right font-mono text-xs font-black text-text-light/60 tabular-nums">
                   {row.percentageOfPeriod.toFixed(1)}%
                 </td>
               </tr>

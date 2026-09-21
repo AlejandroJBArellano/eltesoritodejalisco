@@ -20,7 +20,7 @@ export function TopCustomersTable(props: TopCustomersTableProps = {}) {
   const currentDateStr = new Date().toISOString().split("T")[0];
 
   return (
-    <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
+    <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border">
       <div className="mb-6 flex items-center justify-between border-b border-border pb-3">
         <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
@@ -37,7 +37,7 @@ export function TopCustomersTable(props: TopCustomersTableProps = {}) {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-border text-xs font-black text-text-light/40 uppercase tracking-wider">
+            <tr className="border-b border-border text-xs font-black text-text-light/60 uppercase tracking-wider bg-secondary">
               <th scope="col" className="py-3 px-3">
                 Cliente
               </th>
@@ -63,22 +63,22 @@ export function TopCustomersTable(props: TopCustomersTableProps = {}) {
                 0;
 
               return (
-                <tr key={index} className="hover:bg-white/5 transition-colors">
+                <tr key={index} className="hover:bg-secondary/40 transition-colors">
                   <td className="py-3.5 px-3">
                     <div className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-xs font-black text-primary">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-xs font-black text-primary">
                         {name.substring(0, 2).toUpperCase()}
                       </span>
-                      <span className="font-bold text-text-light uppercase">
+                      <span className="font-bold text-text-light uppercase text-xs">
                         {name}
                       </span>
                     </div>
                   </td>
-                  <td className="py-3.5 px-3 text-right text-base font-black text-emerald-400">
+                  <td className="py-3.5 px-3 text-right text-base font-black text-emerald-400 font-mono tabular-nums">
                     ${Number(totalSpend).toFixed(2)}
                   </td>
                   <td className="py-3.5 px-3 text-right">
-                    <span className="inline-flex items-center rounded-full bg-purple-500/10 px-3 py-1 text-xs font-black text-purple-400 uppercase tracking-widest border border-purple-500/20">
+                    <span className="inline-flex items-center rounded-full bg-purple-500/10 px-3 py-1 text-xs font-black text-purple-400 uppercase tracking-widest border border-purple-500/20 font-mono tabular-nums">
                       {loyaltyPoints} pts
                     </span>
                   </td>
