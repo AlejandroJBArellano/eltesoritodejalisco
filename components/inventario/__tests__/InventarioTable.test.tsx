@@ -61,7 +61,9 @@ describe("InventarioTable Component", () => {
     expect(screen.getByText("Cilantro")).toBeInTheDocument();
 
     // Check export button is present
-    expect(screen.getByRole("button", { name: /Exportar/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Exportar/i }),
+    ).toBeInTheDocument();
   });
 
   it("should auto-detect mobile width and start in cards view", () => {
@@ -89,7 +91,9 @@ describe("InventarioTable Component", () => {
     // Click "Tabla" view mode button
     await user.click(screen.getByRole("button", { name: /Vista Tabla/i }));
     expect(screen.getByRole("table")).toBeInTheDocument();
-    expect(screen.queryByTestId("inventory-cards-grid")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("inventory-cards-grid"),
+    ).not.toBeInTheDocument();
   });
 
   it("should filter ingredients by low stock and out of stock", async () => {
@@ -121,7 +125,7 @@ describe("InventarioTable Component", () => {
     await user.clear(searchInput);
     await user.type(searchInput, "Inexistente 12345");
     expect(
-      screen.getByText("No hay ingredientes que coincidan con el filtro.")
+      screen.getByText("No hay ingredientes que coincidan con el filtro."),
     ).toBeInTheDocument();
 
     // Clear search using clear button
@@ -174,7 +178,9 @@ describe("InventarioTable Component", () => {
     await user.click(entradaBtns[0]);
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Registrar Entrada/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Registrar Entrada/i }),
+    ).toBeInTheDocument();
 
     // Close drawer
     await user.click(screen.getByRole("button", { name: /Cancelar/i }));
@@ -184,12 +190,16 @@ describe("InventarioTable Component", () => {
     const mermaBtns = screen.getAllByRole("button", { name: /Merma/i });
     await user.click(mermaBtns[0]);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Registrar Merma/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Registrar Merma/i }),
+    ).toBeInTheDocument();
   });
 
   it("should trigger export with correct column accessors for all status types", async () => {
     const user = userEvent.setup();
-    const exportCSVSpy = vi.spyOn(exportLib, "exportToCSV").mockImplementation(() => {});
+    const exportCSVSpy = vi
+      .spyOn(exportLib, "exportToCSV")
+      .mockImplementation(() => {});
 
     render(<InventarioTable initialIngredients={mockIngredients} />);
 

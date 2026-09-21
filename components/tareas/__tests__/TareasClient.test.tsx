@@ -63,12 +63,16 @@ describe("TareasClient Component", () => {
 
     expect(screen.getByText(/Checklist de Turno/i)).toBeInTheDocument();
     expect(screen.getByText("Limpieza de Freidora")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Exportar/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Exportar/i }),
+    ).toBeInTheDocument();
   });
 
   it("should trigger export when export button is clicked", async () => {
     const user = userEvent.setup();
-    const exportCSVSpy = vi.spyOn(exportLib, "exportToCSV").mockImplementation(() => {});
+    const exportCSVSpy = vi
+      .spyOn(exportLib, "exportToCSV")
+      .mockImplementation(() => {});
 
     render(
       <TareasClient

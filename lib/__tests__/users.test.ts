@@ -15,7 +15,9 @@ vi.mock("@/lib/supabase/admin", () => ({
         };
       }
       return {
-        select: () => ({ eq: () => Promise.resolve({ data: [], error: null }) }),
+        select: () => ({
+          eq: () => Promise.resolve({ data: [], error: null }),
+        }),
       };
     },
     auth: {

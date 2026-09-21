@@ -46,7 +46,7 @@ export function WeeklyShiftPlanner({
   const [shifts, setShifts] = useState<EmployeeShift[]>([]);
   const [users, setUsers] = useState<ShiftUserOption[]>(initialUsers);
   const [toleranceMinutes, setToleranceMinutes] = useState<number>(
-    initialToleranceMinutes
+    initialToleranceMinutes,
   );
   const [savingTolerance, setSavingTolerance] = useState(false);
 
@@ -59,8 +59,12 @@ export function WeeklyShiftPlanner({
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingShift, setEditingShift] = useState<EmployeeShift | null>(null);
-  const [modalDefaultDate, setModalDefaultDate] = useState<string | undefined>();
-  const [modalDefaultUserId, setModalDefaultUserId] = useState<string | undefined>();
+  const [modalDefaultDate, setModalDefaultDate] = useState<
+    string | undefined
+  >();
+  const [modalDefaultUserId, setModalDefaultUserId] = useState<
+    string | undefined
+  >();
 
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -89,7 +93,7 @@ export function WeeklyShiftPlanner({
       setIsLoading(true);
       setError(null);
       const res = await fetch(
-        `/api/shifts?start_date=${weekStartStr}&end_date=${weekEndStr}`
+        `/api/shifts?start_date=${weekStartStr}&end_date=${weekEndStr}`,
       );
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
@@ -104,7 +108,9 @@ export function WeeklyShiftPlanner({
         setToleranceMinutes(data.toleranceMinutes);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al cargar los turnos");
+      setError(
+        err instanceof Error ? err.message : "Error al cargar los turnos",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -200,7 +206,7 @@ export function WeeklyShiftPlanner({
     } catch (err) {
       showFeedback(
         err instanceof Error ? err.message : "Error al duplicar turnos",
-        true
+        true,
       );
     } finally {
       setIsDuplicating(false);
@@ -236,7 +242,9 @@ export function WeeklyShiftPlanner({
       const res = await fetch("/api/shifts/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ attendance_tolerance_minutes: toleranceMinutes }),
+        body: JSON.stringify({
+          attendance_tolerance_minutes: toleranceMinutes,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -246,7 +254,7 @@ export function WeeklyShiftPlanner({
     } catch (err) {
       showFeedback(
         err instanceof Error ? err.message : "Error al guardar tolerancia",
-        true
+        true,
       );
     } finally {
       setSavingTolerance(false);
@@ -444,7 +452,10 @@ export function WeeklyShiftPlanner({
               <tbody className="divide-y divide-zinc-800/60 text-xs">
                 {users.map((u) => {
                   return (
-                    <tr key={u.id} className="hover:bg-zinc-900/20 transition-colors">
+                    <tr
+                      key={u.id}
+                      className="hover:bg-zinc-900/20 transition-colors"
+                    >
                       {/* Collaborator Name & Role */}
                       <td className="p-3.5 sticky left-0 bg-zinc-950 z-10 border-r border-zinc-800/80 font-bold">
                         <div className="flex items-center gap-2">
@@ -468,7 +479,7 @@ export function WeeklyShiftPlanner({
                       {daysOfWeek.map((day) => {
                         const dayStr = format(day, "yyyy-MM-dd");
                         const userDayShifts = shifts.filter(
-                          (s) => s.user_id === u.id && s.date === dayStr
+                          (s) => s.user_id === u.id && s.date === dayStr,
                         );
                         const isToday = isSameDay(day, new Date());
 

@@ -34,11 +34,16 @@ describe("POST /api/orders/[id]/undo-payment", () => {
   it("returns 401 if user is not authenticated", async () => {
     vi.mocked(getProfile).mockResolvedValue(null);
 
-    const request = new NextRequest("http://localhost:3000/api/orders/ord-1/undo-payment", {
-      method: "POST",
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/orders/ord-1/undo-payment",
+      {
+        method: "POST",
+      },
+    );
 
-    const response = await POST(request, { params: Promise.resolve({ id: "ord-1" }) });
+    const response = await POST(request, {
+      params: Promise.resolve({ id: "ord-1" }),
+    });
     const body = await response.json();
 
     expect(response.status).toBe(401);
@@ -46,30 +51,48 @@ describe("POST /api/orders/[id]/undo-payment", () => {
   });
 
   it("returns 403 if WAITER does not provide PIN", async () => {
-    vi.mocked(getProfile).mockResolvedValue({ role: "WAITER", tenant_id: "tenant-123" } as any);
+    vi.mocked(getProfile).mockResolvedValue({
+      role: "WAITER",
+      tenant_id: "tenant-123",
+    } as any);
 
-    const request = new NextRequest("http://localhost:3000/api/orders/ord-1/undo-payment", {
-      method: "POST",
-      body: JSON.stringify({}),
+    const request = new NextRequest(
+      "http://localhost:3000/api/orders/ord-1/undo-payment",
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      },
+    );
+
+    const response = await POST(request, {
+      params: Promise.resolve({ id: "ord-1" }),
     });
-
-    const response = await POST(request, { params: Promise.resolve({ id: "ord-1" }) });
     const body = await response.json();
 
     expect(response.status).toBe(403);
-    expect(body.error).toBe("Se requiere PIN de Gerencia para autorizar la reapertura");
+    expect(body.error).toBe(
+      "Se requiere PIN de Gerencia para autorizar la reapertura",
+    );
   });
 
   it("returns 401 if WAITER provides invalid PIN", async () => {
-    vi.mocked(getProfile).mockResolvedValue({ role: "WAITER", tenant_id: "tenant-123" } as any);
+    vi.mocked(getProfile).mockResolvedValue({
+      role: "WAITER",
+      tenant_id: "tenant-123",
+    } as any);
     vi.mocked(verifyManagerPin).mockResolvedValue(null);
 
-    const request = new NextRequest("http://localhost:3000/api/orders/ord-1/undo-payment", {
-      method: "POST",
-      body: JSON.stringify({ pin: "0000" }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/orders/ord-1/undo-payment",
+      {
+        method: "POST",
+        body: JSON.stringify({ pin: "0000" }),
+      },
+    );
 
-    const response = await POST(request, { params: Promise.resolve({ id: "ord-1" }) });
+    const response = await POST(request, {
+      params: Promise.resolve({ id: "ord-1" }),
+    });
     const body = await response.json();
 
     expect(response.status).toBe(401);
@@ -85,7 +108,11 @@ describe("POST /api/orders/[id]/undo-payment", () => {
     } as any);
 
     const mockOrder = { id: "ord-1", status: "PAID", tenant_id: "tenant-123" };
-    const mockUpdatedOrder = { id: "ord-1", status: "PENDING", tenant_id: "tenant-123" };
+    const mockUpdatedOrder = {
+      id: "ord-1",
+      status: "PENDING",
+      tenant_id: "tenant-123",
+    };
 
     const mockDelete = vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({
@@ -101,7 +128,9 @@ describe("POST /api/orders/[id]/undo-payment", () => {
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
-                single: vi.fn().mockResolvedValue({ data: mockOrder, error: null }),
+                single: vi
+                  .fn()
+                  .mockResolvedValue({ data: mockOrder, error: null }),
               }),
             }),
           }),
@@ -109,7 +138,9 @@ describe("POST /api/orders/[id]/undo-payment", () => {
             eq: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
                 select: vi.fn().mockReturnValue({
-                  single: vi.fn().mockResolvedValue({ data: mockUpdatedOrder, error: null }),
+                  single: vi
+                    .fn()
+                    .mockResolvedValue({ data: mockUpdatedOrder, error: null }),
                 }),
               }),
             }),
@@ -129,12 +160,17 @@ describe("POST /api/orders/[id]/undo-payment", () => {
       from: mockFrom,
     } as any);
 
-    const request = new NextRequest("http://localhost:3000/api/orders/ord-1/undo-payment", {
-      method: "POST",
-      body: JSON.stringify({ reason: "Platillo equivocado" }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/orders/ord-1/undo-payment",
+      {
+        method: "POST",
+        body: JSON.stringify({ reason: "Platillo equivocado" }),
+      },
+    );
 
-    const response = await POST(request, { params: Promise.resolve({ id: "ord-1" }) });
+    const response = await POST(request, {
+      params: Promise.resolve({ id: "ord-1" }),
+    });
     const body = await response.json();
 
     expect(response.status).toBe(200);

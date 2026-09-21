@@ -102,7 +102,7 @@ export function useRealtimeOrders(
         lastAudioTime = now;
         try {
           const audio = new Audio("/new_order.mp3");
-          audio.play().catch(() => { });
+          audio.play().catch(() => {});
         } catch {
           // Audio playback fail fallback
         }
@@ -176,12 +176,7 @@ export function useRealtimeOrders(
         clearTimeout(retryTimeoutRef.current);
       }
     };
-  }, [
-    supabase,
-    fetchOrders,
-    debouncedFetchOrders,
-    tenantId,
-  ]);
+  }, [supabase, fetchOrders, debouncedFetchOrders, tenantId]);
 
   return { orders, loading, error, refetch: fetchOrders, setOrders };
 }
@@ -191,7 +186,10 @@ const visibilityListeners = new Set<() => void>();
 let globalVisibilityListenerAttached = false;
 
 function handleGlobalVisibilityChange() {
-  if (typeof document !== "undefined" && document.visibilityState === "visible") {
+  if (
+    typeof document !== "undefined" &&
+    document.visibilityState === "visible"
+  ) {
     visibilityListeners.forEach((listener) => listener());
   }
 }

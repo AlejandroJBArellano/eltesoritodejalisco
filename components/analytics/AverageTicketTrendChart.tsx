@@ -36,12 +36,18 @@ export function AverageTicketTrendChart({
       count === 1
         ? paddingLeft + innerWidth / 2
         : paddingLeft + (i / (count - 1)) * innerWidth;
-    const y = paddingTop + innerHeight - (item.averageTicket / maxVal) * innerHeight;
+    const y =
+      paddingTop + innerHeight - (item.averageTicket / maxVal) * innerHeight;
     return { x, y, item, index: i };
   });
 
   const linePathD = points.length
-    ? points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ")
+    ? points
+        .map(
+          (p, i) =>
+            `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`,
+        )
+        .join(" ")
     : "";
 
   const areaPathD = points.length
@@ -62,7 +68,8 @@ export function AverageTicketTrendChart({
             Evolución del Ticket Promedio
           </h2>
           <p className="text-xs text-text-light/60 mt-1 font-medium">
-            Comportamiento del gasto medio por orden en el tiempo vs el promedio del período.
+            Comportamiento del gasto medio por orden en el tiempo vs el promedio
+            del período.
           </p>
         </div>
         {periodAverageTicket > 0 && (
@@ -84,7 +91,13 @@ export function AverageTicketTrendChart({
             preserveAspectRatio="none"
           >
             <defs>
-              <linearGradient id="ticketAreaGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient
+                id="ticketAreaGradient"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
                 <stop offset="0%" stopColor="#10B981" stopOpacity="0.35" />
                 <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
               </linearGradient>
@@ -92,7 +105,8 @@ export function AverageTicketTrendChart({
 
             {/* Gridlines and Y-axis labels */}
             {yTicks.map((tick, i) => {
-              const y = paddingTop + innerHeight - (tick / maxVal) * innerHeight;
+              const y =
+                paddingTop + innerHeight - (tick / maxVal) * innerHeight;
               return (
                 <g key={`ytick-${i}`}>
                   <line
@@ -118,30 +132,32 @@ export function AverageTicketTrendChart({
             })}
 
             {/* Reference Line for Period Average */}
-            {refY !== null && refY >= paddingTop && refY <= paddingTop + innerHeight && (
-              <g>
-                <line
-                  x1={paddingLeft}
-                  y1={refY}
-                  x2={svgWidth - paddingRight}
-                  y2={refY}
-                  stroke="#10B981"
-                  strokeWidth="1.5"
-                  strokeDasharray="5 4"
-                  strokeOpacity="0.8"
-                />
-                <text
-                  x={svgWidth - paddingRight}
-                  y={refY - 6}
-                  textAnchor="end"
-                  fill="#10B981"
-                  fontSize="10"
-                  fontWeight="800"
-                >
-                  Promedio: ${periodAverageTicket.toFixed(2)}
-                </text>
-              </g>
-            )}
+            {refY !== null &&
+              refY >= paddingTop &&
+              refY <= paddingTop + innerHeight && (
+                <g>
+                  <line
+                    x1={paddingLeft}
+                    y1={refY}
+                    x2={svgWidth - paddingRight}
+                    y2={refY}
+                    stroke="#10B981"
+                    strokeWidth="1.5"
+                    strokeDasharray="5 4"
+                    strokeOpacity="0.8"
+                  />
+                  <text
+                    x={svgWidth - paddingRight}
+                    y={refY - 6}
+                    textAnchor="end"
+                    fill="#10B981"
+                    fontSize="10"
+                    fontWeight="800"
+                  >
+                    Promedio: ${periodAverageTicket.toFixed(2)}
+                  </text>
+                </g>
+              )}
 
             {/* Area fill */}
             {areaPathD && (
@@ -223,7 +239,10 @@ export function AverageTicketTrendChart({
                 {points[hoveredIndex].item.label}
               </p>
               <div className="mt-1 flex gap-4 text-[10px] text-text-light/70 font-semibold">
-                <span>Ventas: ${points[hoveredIndex].item.sales.toLocaleString("es-MX")}</span>
+                <span>
+                  Ventas: $
+                  {points[hoveredIndex].item.sales.toLocaleString("es-MX")}
+                </span>
                 <span>Pedidos: {points[hoveredIndex].item.orders}</span>
               </div>
             </div>

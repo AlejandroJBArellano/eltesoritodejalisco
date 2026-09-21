@@ -52,7 +52,11 @@ export function WeekdayContextualComparison({
   };
 
   const ticketDiff = activeOccurrence
-    ? getMetricsDiff(activeOccurrence.averageTicket, baseline.averageTicket, true)
+    ? getMetricsDiff(
+        activeOccurrence.averageTicket,
+        baseline.averageTicket,
+        true,
+      )
     : null;
 
   const salesDiff = activeOccurrence

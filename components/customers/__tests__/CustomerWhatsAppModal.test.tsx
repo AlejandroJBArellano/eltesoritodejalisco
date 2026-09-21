@@ -1,6 +1,12 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   CustomerWhatsAppModal,
@@ -14,7 +20,8 @@ const mockTenant = {
   system_name: "KittnOS",
 };
 
-let currentTenant: { id: string; name: string; system_name: string } | null = mockTenant;
+let currentTenant: { id: string; name: string; system_name: string } | null =
+  mockTenant;
 
 vi.mock("@/components/TenantProvider", () => ({
   useTenant: () => currentTenant,
@@ -60,8 +67,13 @@ describe("CustomerWhatsAppModal Utilities", () => {
     expect(avisoMsg).toContain("15 puntos");
 
     // Personalizado
-    const customMsg = buildTemplateMessage({ ...params, template: "personalizado" });
-    expect(customMsg).toBe("¡Hola Carlos Ruiz! Te saludamos de Tacos El Pastorcito. ");
+    const customMsg = buildTemplateMessage({
+      ...params,
+      template: "personalizado",
+    });
+    expect(customMsg).toBe(
+      "¡Hola Carlos Ruiz! Te saludamos de Tacos El Pastorcito. ",
+    );
 
     // Unknown template fallback
     // @ts-expect-error testing invalid template key
@@ -107,11 +119,13 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithDebt}
-      />
+      />,
     );
 
     const textarea = screen.getByRole("textbox", { name: /Mensaje a enviar/i });
-    expect((textarea as HTMLTextAreaElement).value).toContain("Te saludamos de Kittn.");
+    expect((textarea as HTMLTextAreaElement).value).toContain(
+      "Te saludamos de Kittn.",
+    );
   });
 
   it("does not render when isOpen is false or customer is null", () => {
@@ -120,16 +134,12 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={false}
         onClose={vi.fn()}
         customer={customerWithDebt}
-      />
+      />,
     );
     expect(container.firstChild).toBeNull();
 
     rerender(
-      <CustomerWhatsAppModal
-        isOpen={true}
-        onClose={vi.fn()}
-        customer={null}
-      />
+      <CustomerWhatsAppModal isOpen={true} onClose={vi.fn()} customer={null} />,
     );
     expect(container.firstChild).toBeNull();
   });
@@ -140,7 +150,7 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithDebt}
-      />
+      />,
     );
 
     expect(screen.getByText("Acciones Rápidas WhatsApp")).toBeInTheDocument();
@@ -149,7 +159,9 @@ describe("CustomerWhatsAppModal Component", () => {
     expect(screen.getByText("wa.me/523311223344")).toBeInTheDocument();
 
     const textarea = screen.getByRole("textbox", { name: /Mensaje a enviar/i });
-    expect((textarea as HTMLTextAreaElement).value).toContain("saldo pendiente de $380.50");
+    expect((textarea as HTMLTextAreaElement).value).toContain(
+      "saldo pendiente de $380.50",
+    );
   });
 
   it("defaults to Aviso / Promoción template when customer has no debt balance", () => {
@@ -158,11 +170,13 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithoutDebtOrPhone}
-      />
+      />,
     );
 
     const textarea = screen.getByRole("textbox", { name: /Mensaje a enviar/i });
-    expect((textarea as HTMLTextAreaElement).value).toContain("10 puntos en tu saldo");
+    expect((textarea as HTMLTextAreaElement).value).toContain(
+      "10 puntos en tu saldo",
+    );
   });
 
   it("switches templates when clicking template buttons", async () => {
@@ -172,14 +186,16 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithDebt}
-      />
+      />,
     );
 
     const textarea = screen.getByRole("textbox", { name: /Mensaje a enviar/i });
 
     // Switch to Confirmación de Pedido
     await user.click(screen.getByText("Confirmación de Pedido"));
-    expect((textarea as HTMLTextAreaElement).value).toContain("registramos tu pedido");
+    expect((textarea as HTMLTextAreaElement).value).toContain(
+      "registramos tu pedido",
+    );
 
     // Switch to Aviso / Promoción
     await user.click(screen.getByText("Aviso / Promoción"));
@@ -187,11 +203,15 @@ describe("CustomerWhatsAppModal Component", () => {
 
     // Switch to Mensaje Libre
     await user.click(screen.getByText("Mensaje Libre"));
-    expect((textarea as HTMLTextAreaElement).value).toBe("¡Hola Ana Morales! Te saludamos de Tacos El Pastorcito. ");
+    expect((textarea as HTMLTextAreaElement).value).toBe(
+      "¡Hola Ana Morales! Te saludamos de Tacos El Pastorcito. ",
+    );
 
     // Switch back to Saldo Pendiente
     await user.click(screen.getByText("Saldo Pendiente"));
-    expect((textarea as HTMLTextAreaElement).value).toContain("saldo pendiente de $380.50");
+    expect((textarea as HTMLTextAreaElement).value).toContain(
+      "saldo pendiente de $380.50",
+    );
   });
 
   it("allows typing directly in the message textarea", async () => {
@@ -201,7 +221,7 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithDebt}
-      />
+      />,
     );
 
     const textarea = screen.getByRole("textbox", { name: /Mensaje a enviar/i });
@@ -226,21 +246,23 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithDebt}
-      />
+      />,
     );
 
     const copyBtn = screen.getByRole("button", { name: /Copiar Mensaje/i });
     await user.click(copyBtn);
 
     expect(writeTextMock).toHaveBeenCalledWith(
-      expect.stringContaining("saldo pendiente")
+      expect.stringContaining("saldo pendiente"),
     );
     expect(screen.getByText("Copiado")).toBeInTheDocument();
   });
 
   it("handles copy failure gracefully with error alert", async () => {
     const user = userEvent.setup();
-    const writeTextMock = vi.fn().mockRejectedValue(new Error("Permission denied"));
+    const writeTextMock = vi
+      .fn()
+      .mockRejectedValue(new Error("Permission denied"));
     Object.defineProperty(navigator, "clipboard", {
       value: { writeText: writeTextMock },
       writable: true,
@@ -252,14 +274,14 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithDebt}
-      />
+      />,
     );
 
     const copyBtn = screen.getByRole("button", { name: /Copiar Mensaje/i });
     await user.click(copyBtn);
 
     expect(
-      screen.getByText("No se pudo copiar el mensaje al portapapeles.")
+      screen.getByText("No se pudo copiar el mensaje al portapapeles."),
     ).toBeInTheDocument();
   });
 
@@ -270,7 +292,7 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithoutDebtOrPhone}
-      />
+      />,
     );
 
     const openBtn = screen.getByRole("button", { name: /Abrir WhatsApp/i });
@@ -280,20 +302,26 @@ describe("CustomerWhatsAppModal Component", () => {
     await user.click(openBtn);
 
     expect(
-      screen.getByText("Ingresa un número celular válido de al menos 10 dígitos.")
+      screen.getByText(
+        "Ingresa un número celular válido de al menos 10 dígitos.",
+      ),
     ).toBeInTheDocument();
 
     // Dismiss error alert
     await user.click(screen.getByText("✕"));
     expect(
-      screen.queryByText("Ingresa un número celular válido de al menos 10 dígitos.")
+      screen.queryByText(
+        "Ingresa un número celular válido de al menos 10 dígitos.",
+      ),
     ).not.toBeInTheDocument();
 
     // Type less than 10 digits
     await user.type(phoneInput, "12345");
     await user.click(openBtn);
     expect(
-      screen.getByText("Ingresa un número celular válido de al menos 10 dígitos.")
+      screen.getByText(
+        "Ingresa un número celular válido de al menos 10 dígitos.",
+      ),
     ).toBeInTheDocument();
   });
 
@@ -304,7 +332,7 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithDebt}
-      />
+      />,
     );
 
     const textarea = screen.getByRole("textbox", { name: /Mensaje a enviar/i });
@@ -313,7 +341,9 @@ describe("CustomerWhatsAppModal Component", () => {
     const openBtn = screen.getByRole("button", { name: /Abrir WhatsApp/i });
     await user.click(openBtn);
 
-    expect(screen.getByText("El mensaje no puede estar vacío.")).toBeInTheDocument();
+    expect(
+      screen.getByText("El mensaje no puede estar vacío."),
+    ).toBeInTheDocument();
   });
 
   it("opens WhatsApp directly when valid phone and does not save if unchecked", async () => {
@@ -325,7 +355,7 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={onCloseMock}
         customer={customerWithDebt}
-      />
+      />,
     );
 
     const openBtn = screen.getByRole("button", { name: /Abrir WhatsApp/i });
@@ -334,7 +364,7 @@ describe("CustomerWhatsAppModal Component", () => {
     expect(global.window.open).toHaveBeenCalledWith(
       expect.stringContaining("https://wa.me/523311223344?text="),
       "_blank",
-      "noopener,noreferrer"
+      "noopener,noreferrer",
     );
     expect(global.fetch).not.toHaveBeenCalled();
     expect(onCloseMock).toHaveBeenCalled();
@@ -351,13 +381,15 @@ describe("CustomerWhatsAppModal Component", () => {
         onClose={onCloseMock}
         customer={customerWithoutDebtOrPhone}
         onCustomerUpdated={onCustomerUpdatedMock}
-      />
+      />,
     );
 
     const phoneInput = screen.getByPlaceholderText("Ej. 3312345678");
     await user.type(phoneInput, "3399887766");
 
-    const checkbox = screen.getByLabelText(/Guardar número en el perfil del cliente/i);
+    const checkbox = screen.getByLabelText(
+      /Guardar número en el perfil del cliente/i,
+    );
     expect(checkbox).toBeChecked();
 
     const openBtn = screen.getByRole("button", { name: /Abrir WhatsApp/i });
@@ -379,7 +411,7 @@ describe("CustomerWhatsAppModal Component", () => {
     expect(global.window.open).toHaveBeenCalledWith(
       expect.stringContaining("https://wa.me/523399887766?text="),
       "_blank",
-      "noopener,noreferrer"
+      "noopener,noreferrer",
     );
     expect(onCloseMock).toHaveBeenCalled();
   });
@@ -397,7 +429,7 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={onCloseMock}
         customer={customerWithoutDebtOrPhone}
-      />
+      />,
     );
 
     const phoneInput = screen.getByPlaceholderText("Ej. 3312345678");
@@ -421,10 +453,12 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithoutDebtOrPhone}
-      />
+      />,
     );
 
-    const checkbox = screen.getByLabelText(/Guardar número en el perfil del cliente/i);
+    const checkbox = screen.getByLabelText(
+      /Guardar número en el perfil del cliente/i,
+    );
     expect(checkbox).toBeChecked();
 
     await user.click(checkbox);
@@ -448,7 +482,7 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithDebt}
-      />
+      />,
     );
 
     const textarea = screen.getByRole("textbox", { name: /Mensaje a enviar/i });
@@ -474,7 +508,7 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={customerWithoutDebtOrPhone}
-      />
+      />,
     );
 
     const phoneInput = screen.getByPlaceholderText("Ej. 3312345678");
@@ -484,7 +518,9 @@ describe("CustomerWhatsAppModal Component", () => {
     await user.click(openBtn);
 
     await waitFor(() => {
-      expect(screen.getByText("Error al actualizar teléfono")).toBeInTheDocument();
+      expect(
+        screen.getByText("Error al actualizar teléfono"),
+      ).toBeInTheDocument();
     });
 
     // Test non-Error throw
@@ -494,7 +530,7 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={{ ...customerWithoutDebtOrPhone, id: "cust-3" }}
-      />
+      />,
     );
 
     const phoneInput2 = screen.getByPlaceholderText("Ej. 3312345678");
@@ -503,7 +539,7 @@ describe("CustomerWhatsAppModal Component", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("No se pudo guardar el teléfono en el perfil.")
+        screen.getByText("No se pudo guardar el teléfono en el perfil."),
       ).toBeInTheDocument();
     });
   });
@@ -522,7 +558,7 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={onCloseMock}
         customer={minimalCustomer}
-      />
+      />,
     );
 
     expect(screen.getByText("0 pts acumulados")).toBeInTheDocument();
@@ -530,12 +566,20 @@ describe("CustomerWhatsAppModal Component", () => {
 
     await user.click(screen.getByText("Aviso / Promoción"));
     expect(
-      (screen.getByRole("textbox", { name: /Mensaje a enviar/i }) as HTMLTextAreaElement).value
+      (
+        screen.getByRole("textbox", {
+          name: /Mensaje a enviar/i,
+        }) as HTMLTextAreaElement
+      ).value,
     ).toContain("0 puntos en tu saldo");
 
     await user.click(screen.getByText("Saldo Pendiente"));
     expect(
-      (screen.getByRole("textbox", { name: /Mensaje a enviar/i }) as HTMLTextAreaElement).value
+      (
+        screen.getByRole("textbox", {
+          name: /Mensaje a enviar/i,
+        }) as HTMLTextAreaElement
+      ).value,
     ).toContain("al corriente sin adeudos pendientes");
 
     const phoneInput = screen.getByPlaceholderText("Ej. 3312345678");
@@ -569,7 +613,7 @@ describe("CustomerWhatsAppModal Component", () => {
         isOpen={true}
         onClose={onCloseMock}
         customer={customerWithDebt}
-      />
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: /Cancelar/i }));

@@ -43,7 +43,9 @@ export async function updateTenantSettings(
       !isNaN(parsedLoyaltyRatio) && parsedLoyaltyRatio > 0
         ? parsedLoyaltyRatio
         : 10;
-    const rawTerminalCommission = formData.get("terminalCommissionRate") as string;
+    const rawTerminalCommission = formData.get(
+      "terminalCommissionRate",
+    ) as string;
     const parsedTerminalCommission = parseFloat(rawTerminalCommission);
     const terminalCommissionRate = Number.isFinite(parsedTerminalCommission)
       ? Math.max(0, Math.min(100, parsedTerminalCommission))

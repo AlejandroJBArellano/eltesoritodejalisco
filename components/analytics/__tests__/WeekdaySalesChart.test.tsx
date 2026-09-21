@@ -248,7 +248,9 @@ describe("WeekdaySalesChart Component", () => {
     ).toBeInTheDocument();
 
     // Click "Limpiar Selección" to close
-    const clearBtn2 = screen.getByRole("button", { name: /Limpiar Selección/i });
+    const clearBtn2 = screen.getByRole("button", {
+      name: /Limpiar Selección/i,
+    });
     fireEvent.click(clearBtn2);
     expect(
       screen.queryByTestId("weekday-contextual-comparison"),

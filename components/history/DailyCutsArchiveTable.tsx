@@ -36,7 +36,8 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
 
   const dailyCuts = props.dailyCuts ?? internalHook.dailyCuts;
   const sortedDailyCuts = props.sortedDailyCuts ?? internalHook.sortedDailyCuts;
-  const paginatedDailyCuts = props.paginatedDailyCuts ?? internalHook.paginatedDailyCuts;
+  const paginatedDailyCuts =
+    props.paginatedDailyCuts ?? internalHook.paginatedDailyCuts;
   const isLoadingCuts = props.isLoadingCuts ?? internalHook.isLoadingCuts;
   const cutsSortField = props.cutsSortField ?? internalHook.cutsSortField;
   const cutsSortDir = props.cutsSortDir ?? internalHook.cutsSortDir;
@@ -44,13 +45,17 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
   const cutsPageSize = props.cutsPageSize ?? internalHook.cutsPageSize;
   const cutsTotalPages = props.cutsTotalPages ?? internalHook.cutsTotalPages;
 
-  const onSort = props.onSort ?? ((f) => {
-    internalHook.setCutsSortField(f);
-    internalHook.setCutsSortDir((d) => (d === "asc" ? "desc" : "asc"));
-  });
+  const onSort =
+    props.onSort ??
+    ((f) => {
+      internalHook.setCutsSortField(f);
+      internalHook.setCutsSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    });
   const onPageChange = props.onPageChange ?? internalHook.setCutsPage;
-  const onPageSizeChange = props.onPageSizeChange ?? internalHook.setCutsPageSize;
-  const onViewCutDetail = props.onViewCutDetail ?? internalHook.setSelectedCutDetail;
+  const onPageSizeChange =
+    props.onPageSizeChange ?? internalHook.setCutsPageSize;
+  const onViewCutDetail =
+    props.onViewCutDetail ?? internalHook.setSelectedCutDetail;
 
   return (
     <>
@@ -133,15 +138,14 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
                       className="hover:bg-white/5 transition-colors"
                     >
                       <td className="py-3.5 px-3 font-bold text-text-light">
-                        {new Date(`${cut.cut_date}T12:00:00`).toLocaleDateString(
-                          "es-MX",
-                          {
-                            weekday: "short",
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          },
-                        )}
+                        {new Date(
+                          `${cut.cut_date}T12:00:00`,
+                        ).toLocaleDateString("es-MX", {
+                          weekday: "short",
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
                       </td>
                       <td className="py-3.5 px-3 text-right font-mono text-text-light/70">
                         {cut.total_orders}

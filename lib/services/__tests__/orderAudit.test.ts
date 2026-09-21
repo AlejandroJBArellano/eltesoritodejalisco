@@ -1,27 +1,30 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  logOrderAction,
-  getPushNotificationCopy,
-} from "../orderAudit";
+import { logOrderAction, getPushNotificationCopy } from "../orderAudit";
 
-const { mockSendTenantPushNotification, mockInsert, mockSingle, mockSupabaseFrom } =
-  vi.hoisted(() => {
-    const mockSendTenantPushNotification = vi.fn().mockResolvedValue({ success: true });
-    const mockSingle = vi.fn();
-    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
-    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
-    const mockSupabaseFrom = vi.fn().mockReturnValue({
-      insert: mockInsert,
-    });
-
-    return {
-      mockSendTenantPushNotification,
-      mockSingle,
-      mockSelect,
-      mockInsert,
-      mockSupabaseFrom,
-    };
+const {
+  mockSendTenantPushNotification,
+  mockInsert,
+  mockSingle,
+  mockSupabaseFrom,
+} = vi.hoisted(() => {
+  const mockSendTenantPushNotification = vi
+    .fn()
+    .mockResolvedValue({ success: true });
+  const mockSingle = vi.fn();
+  const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
+  const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
+  const mockSupabaseFrom = vi.fn().mockReturnValue({
+    insert: mockInsert,
   });
+
+  return {
+    mockSendTenantPushNotification,
+    mockSingle,
+    mockSelect,
+    mockInsert,
+    mockSupabaseFrom,
+  };
+});
 
 vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: vi.fn().mockReturnValue({
@@ -45,7 +48,9 @@ describe("lib/services/orderAudit", () => {
         authorizedBy: "Gerente Juan",
       });
       expect(copy.title).toBe("Alerta: Productos eliminados");
-      expect(copy.body).toContain("Carlos eliminó productos en la orden. Tacos de Birria x1");
+      expect(copy.body).toContain(
+        "Carlos eliminó productos en la orden. Tacos de Birria x1",
+      );
       expect(copy.body).toContain("(Autorizado por Gerente Juan)");
     });
 
@@ -55,7 +60,9 @@ describe("lib/services/orderAudit", () => {
         authorizedBy: "Gerente Juan",
       });
       expect(copy.title).toBe("Alerta: Comanda cancelada");
-      expect(copy.body).toContain("Ana canceló la orden. Motivo: Cliente se retiró.");
+      expect(copy.body).toContain(
+        "Ana canceló la orden. Motivo: Cliente se retiró.",
+      );
       expect(copy.body).toContain("(Autorizado por Gerente Juan)");
     });
 
@@ -83,17 +90,25 @@ describe("lib/services/orderAudit", () => {
         authorizedBy: "Gerente",
       });
       expect(copy.title).toBe("Alerta: Reapertura de comanda");
-      expect(copy.body).toContain("Carlos reabrió la cuenta. Corrección de platillo.");
+      expect(copy.body).toContain(
+        "Carlos reabrió la cuenta. Corrección de platillo.",
+      );
       expect(copy.body).toContain("(Autorizado por Gerente)");
     });
 
     it("omits authorization suffix if authorizedBy matches userName", () => {
-      const copy = getPushNotificationCopy("ITEMS_REMOVED", "Alejandro Arellano", {
-        summary: "papulince x4",
-        authorizedBy: "Alejandro Arellano",
-      });
+      const copy = getPushNotificationCopy(
+        "ITEMS_REMOVED",
+        "Alejandro Arellano",
+        {
+          summary: "papulince x4",
+          authorizedBy: "Alejandro Arellano",
+        },
+      );
       expect(copy.title).toBe("Alerta: Productos eliminados");
-      expect(copy.body).toBe("Alejandro Arellano eliminó productos en la orden. papulince x4");
+      expect(copy.body).toBe(
+        "Alejandro Arellano eliminó productos en la orden. papulince x4",
+      );
       expect(copy.body).not.toContain("Autorizado por");
     });
 
@@ -136,7 +151,9 @@ describe("lib/services/orderAudit", () => {
       expect(result.success).toBe(true);
       expect(result.log).toEqual(mockLogData);
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("[ORDER_AUDIT] [CREATED] Order: order-123 | User: Juan Perez"),
+        expect.stringContaining(
+          "[ORDER_AUDIT] [CREATED] Order: order-123 | User: Juan Perez",
+        ),
       );
       expect(mockSupabaseFrom).toHaveBeenCalledWith("order_audit_logs");
       expect(mockInsert).toHaveBeenCalledWith({
@@ -229,7 +246,9 @@ describe("lib/services/orderAudit", () => {
         "tenant-abc",
         expect.objectContaining({
           title: "Alerta: Productos eliminados",
-          body: expect.stringContaining("Mesero Alex eliminó productos en la orden"),
+          body: expect.stringContaining(
+            "Mesero Alex eliminó productos en la orden",
+          ),
           url: "/history",
           tag: "order-audit-order-456",
         }),
@@ -243,7 +262,9 @@ describe("lib/services/orderAudit", () => {
         data: null,
         error: dbError,
       });
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       const result = await logOrderAction({
         orderId: "order-789",
@@ -254,7 +275,9 @@ describe("lib/services/orderAudit", () => {
       expect(result.success).toBe(false);
       expect(result.error).toBe(dbError);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("[ORDER_AUDIT] Error al insertar registro de auditoría:"),
+        expect.stringContaining(
+          "[ORDER_AUDIT] Error al insertar registro de auditoría:",
+        ),
         dbError,
       );
 
@@ -266,8 +289,12 @@ describe("lib/services/orderAudit", () => {
         data: { id: "audit-6" },
         error: null,
       });
-      mockSendTenantPushNotification.mockRejectedValueOnce(new Error("Push network error"));
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      mockSendTenantPushNotification.mockRejectedValueOnce(
+        new Error("Push network error"),
+      );
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       const result = await logOrderAction({
         orderId: "order-999",
@@ -278,7 +305,9 @@ describe("lib/services/orderAudit", () => {
 
       expect(result.success).toBe(true);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("[ORDER_AUDIT] Excepción al enviar Web Push a Gerencia:"),
+        expect.stringContaining(
+          "[ORDER_AUDIT] Excepción al enviar Web Push a Gerencia:",
+        ),
         expect.any(Error),
       );
 
@@ -289,7 +318,9 @@ describe("lib/services/orderAudit", () => {
       mockSupabaseFrom.mockImplementationOnce(() => {
         throw new Error("Fatal Supabase client crash");
       });
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       const result = await logOrderAction({
         orderId: "order-000",

@@ -3,7 +3,10 @@
 import React, { useMemo } from "react";
 import { useOptionalTenant } from "@/components/TenantProvider";
 import type { TenantContextType } from "@/lib/tenant";
-import { getOrderTipAmount, getOrderPaymentLabel } from "@/components/pos/paymentUtils";
+import {
+  getOrderTipAmount,
+  getOrderPaymentLabel,
+} from "@/components/pos/paymentUtils";
 import { formatServiceTicket } from "@/lib/utils/serviceType";
 import { PaymentMethod } from "@/types";
 import type {
@@ -48,7 +51,8 @@ export function DailySummaryTicket({
 
   const totalOrdersCount = isHistorical
     ? Number(cut?.total_orders ?? 0)
-    : (orders.length || (todayTotals?.ordersAtTable || 0) + (todayTotals?.ordersDelivery || 0));
+    : orders.length ||
+      (todayTotals?.ordersAtTable || 0) + (todayTotals?.ordersDelivery || 0);
 
   const ventaNeta = isHistorical
     ? Number(cut?.venta_neta ?? 0)
@@ -94,7 +98,10 @@ export function DailySummaryTicket({
 
   const utilidadFinal = isHistorical
     ? Number(cut?.utilidad_final ?? 0)
-    : Number(todayTotals?.utilidadFinal ?? (ventaNeta + propinasTotales - totalGastos - comisionTarjeta));
+    : Number(
+        todayTotals?.utilidadFinal ??
+          ventaNeta + propinasTotales - totalGastos - comisionTarjeta,
+      );
 
   // Desglose por método de pago a partir de órdenes si están disponibles
   const paymentBreakdown = useMemo(() => {
@@ -152,10 +159,14 @@ export function DailySummaryTicket({
     >
       {/* 1. ENCABEZADO INSTITUCIONAL */}
       <div className="text-center mb-3">
-        <h2 className="text-base font-bold uppercase tracking-tight">{tenantName}</h2>
+        <h2 className="text-base font-bold uppercase tracking-tight">
+          {tenantName}
+        </h2>
         {rfc && <p className="text-[11px]">RFC: {rfc}</p>}
         {postalCode && <p className="text-[11px]">C.P.: {postalCode}</p>}
-        {regimenFiscal && <p className="text-[11px]">Régimen: {regimenFiscal}</p>}
+        {regimenFiscal && (
+          <p className="text-[11px]">Régimen: {regimenFiscal}</p>
+        )}
         <div className="border-b border-dashed my-2"></div>
         <p className="font-bold text-xs uppercase tracking-wide">
           *** CORTE / RESUMEN DE CAJA DIARIO ***
@@ -294,7 +305,10 @@ export function DailySummaryTicket({
               </thead>
               <tbody>
                 {tipBreakdown.map((item, idx) => (
-                  <tr key={idx} className="border-b border-dotted border-gray-300">
+                  <tr
+                    key={idx}
+                    className="border-b border-dotted border-gray-300"
+                  >
                     <td className="py-0.5 font-bold truncate max-w-22.5">
                       {item.employee_name}
                     </td>
@@ -336,7 +350,10 @@ export function DailySummaryTicket({
                   const serviceLabel = formatServiceTicket(order.table);
 
                   return (
-                    <tr key={order.id} className="border-b border-dotted border-gray-300">
+                    <tr
+                      key={order.id}
+                      className="border-b border-dotted border-gray-300"
+                    >
                       <td className="py-0.5 font-bold">#{order.orderNumber}</td>
                       <td className="py-0.5 truncate max-w-17.5 uppercase">
                         {serviceLabel}
@@ -345,7 +362,9 @@ export function DailySummaryTicket({
                         {paymentLabel}
                       </td>
                       <td className="py-0.5 text-right font-mono">
-                        <span className="font-bold">{formatCurrency(order.total)}</span>
+                        <span className="font-bold">
+                          {formatCurrency(order.total)}
+                        </span>
                         {tipAmt > 0 && (
                           <span className="text-[9px] block text-gray-600">
                             (+{formatCurrency(tipAmt)} prop)

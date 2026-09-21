@@ -15,10 +15,15 @@ export default function NotFound() {
             404 - Sistema No Encontrado
           </h1>
           <p className="text-sm font-medium text-zinc-400 leading-relaxed">
-            El restaurante o sistema de gestión solicitado no está registrado o configurado en la plataforma KITTN.
+            El restaurante o sistema de gestión solicitado no está registrado o
+            configurado en la plataforma KITTN.
           </p>
           <p className="text-xs text-zinc-500 leading-normal">
-            Verifica que la dirección web sea correcta (ejemplo: <span className="font-mono text-orange-400/80">mi-restaurante.admin.trykittn.com</span>).
+            Verifica que la dirección web sea correcta (ejemplo:{" "}
+            <span className="font-mono text-orange-400/80">
+              mi-restaurante.admin.trykittn.com
+            </span>
+            ).
           </p>
         </div>
 

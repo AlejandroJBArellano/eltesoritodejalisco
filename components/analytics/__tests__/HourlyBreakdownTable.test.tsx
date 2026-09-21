@@ -90,11 +90,7 @@ describe("HourlyBreakdownTable Component", () => {
 
   it("should render headers, rows and export button", () => {
     render(
-      <HourlyBreakdownTable
-        rows={mockRows}
-        mode="sum"
-        periodLabel="Hoy"
-      />,
+      <HourlyBreakdownTable rows={mockRows} mode="sum" periodLabel="Hoy" />,
     );
 
     expect(screen.getByTestId("hourly-breakdown-table")).toBeInTheDocument();
@@ -121,7 +117,9 @@ describe("HourlyBreakdownTable Component", () => {
     expect(screen.getByText("Sin Actividad")).toBeInTheDocument();
 
     // Export button should be present
-    expect(screen.getByRole("button", { name: /Exportar/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Exportar/i }),
+    ).toBeInTheDocument();
   });
 
   it("should render average mode column headers", () => {

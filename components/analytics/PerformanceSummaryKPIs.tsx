@@ -33,7 +33,11 @@ export function PerformanceSummaryKPIs({ kpis }: PerformanceSummaryKPIsProps) {
         <div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-black text-white">
-              ${avgTicket.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              $
+              {avgTicket.toLocaleString("es-MX", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </span>
           </div>
           <p className="mt-1 text-xs font-semibold text-text-light/70">
@@ -65,7 +69,11 @@ export function PerformanceSummaryKPIs({ kpis }: PerformanceSummaryKPIsProps) {
               </span>
             </div>
             <p className="mt-1 text-xs font-semibold text-text-light/70">
-              Promedio ${bestDay.averageSales.toLocaleString("es-MX", { minimumFractionDigits: 2 })} / día
+              Promedio $
+              {bestDay.averageSales.toLocaleString("es-MX", {
+                minimumFractionDigits: 2,
+              })}{" "}
+              / día
             </p>
           </div>
         ) : (
@@ -96,7 +104,10 @@ export function PerformanceSummaryKPIs({ kpis }: PerformanceSummaryKPIsProps) {
               </span>
             </div>
             <p className="mt-1 text-xs font-semibold text-text-light/70">
-              Facturación ${recordMonth.totalSales.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+              Facturación $
+              {recordMonth.totalSales.toLocaleString("es-MX", {
+                minimumFractionDigits: 2,
+              })}
             </p>
           </div>
         ) : (

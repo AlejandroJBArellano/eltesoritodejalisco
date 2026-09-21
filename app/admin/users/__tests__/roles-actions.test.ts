@@ -72,7 +72,9 @@ describe("Roles Server Actions", () => {
         if (table === "roles") {
           return {
             select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockResolvedValue({ data: mockRolesData, error: null }),
+              eq: vi
+                .fn()
+                .mockResolvedValue({ data: mockRolesData, error: null }),
             }),
           };
         }
@@ -144,7 +146,10 @@ describe("Roles Server Actions", () => {
     });
 
     it("debe fallar si el nombre está vacío o no tiene permisos", async () => {
-      const res1 = await createCustomRole({ name: "", permissions: ["menu.view"] });
+      const res1 = await createCustomRole({
+        name: "",
+        permissions: ["menu.view"],
+      });
       expect(res1.error).toContain("El nombre del rol es requerido");
 
       const res2 = await createCustomRole({ name: "Cajero", permissions: [] });
@@ -156,7 +161,9 @@ describe("Roles Server Actions", () => {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             ilike: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn().mockResolvedValue({ data: { id: "existing-id" } }),
+              maybeSingle: vi
+                .fn()
+                .mockResolvedValue({ data: { id: "existing-id" } }),
             }),
           }),
         }),
@@ -222,7 +229,9 @@ describe("Roles Server Actions", () => {
         permissions: ["*"],
       });
 
-      expect(res.error).toContain("Los roles predeterminados del sistema no pueden modificarse");
+      expect(res.error).toContain(
+        "Los roles predeterminados del sistema no pueden modificarse",
+      );
     });
   });
 
@@ -284,7 +293,9 @@ describe("Roles Server Actions", () => {
       }));
 
       const res = await deleteCustomRole("role-1");
-      expect(res.error).toContain("Los roles predeterminados del sistema no pueden ser eliminados");
+      expect(res.error).toContain(
+        "Los roles predeterminados del sistema no pueden ser eliminados",
+      );
     });
 
     it("debe solicitar reasignación si el rol tiene usuarios asignados", async () => {

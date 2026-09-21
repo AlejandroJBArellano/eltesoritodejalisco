@@ -31,7 +31,8 @@ export function useDailyCutManager({
   const [manualCard, setManualCard] = useState<string>("");
   const [manualTipsEfectivo, setManualTipsEfectivo] = useState<string>("");
   const [manualTipsTarjeta, setManualTipsTarjeta] = useState<string>("");
-  const [terminalCommissionRate, setTerminalCommissionRate] = useState<number>(0);
+  const [terminalCommissionRate, setTerminalCommissionRate] =
+    useState<number>(0);
 
   // Tips breakdown calculation state
   const [tipBreakdown, setTipBreakdown] = useState<TipBreakdownItem[]>([]);
@@ -218,7 +219,13 @@ export function useDailyCutManager({
       averageTicket,
       creditoOtorgadoHoy,
     };
-  }, [orders, todayOrders, todayExpenses, terminalCommissionRate, todayDateStr]);
+  }, [
+    orders,
+    todayOrders,
+    todayExpenses,
+    terminalCommissionRate,
+    todayDateStr,
+  ]);
 
   const fetchTodayExpenses = useCallback(async () => {
     try {
@@ -382,8 +389,7 @@ export function useDailyCutManager({
         manualTipsTarjeta !== ""
           ? Number(manualTipsTarjeta)
           : todayTotals.propinasTarjeta;
-      const comisionTarjetaFinal =
-        (cardFinal * terminalCommissionRate) / 100;
+      const comisionTarjetaFinal = (cardFinal * terminalCommissionRate) / 100;
 
       let cutNotes: string | null = null;
       if (todayTotals.creditoOtorgadoHoy > 0) {

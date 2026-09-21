@@ -72,7 +72,9 @@ describe("DELETE /api/customers", () => {
       eq: vi.fn().mockReturnThis(),
     };
     // Second eq call returns promise { error: null }
-    mockDeleteBuilder.eq.mockReturnValueOnce(mockDeleteBuilder).mockResolvedValueOnce({ error: null });
+    mockDeleteBuilder.eq
+      .mockReturnValueOnce(mockDeleteBuilder)
+      .mockResolvedValueOnce({ error: null });
 
     vi.mocked(createClient).mockResolvedValue({
       from: vi.fn().mockReturnValue(mockDeleteBuilder),

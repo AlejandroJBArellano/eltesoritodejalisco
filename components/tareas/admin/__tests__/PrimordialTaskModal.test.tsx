@@ -5,8 +5,18 @@ import type { TaskCategory } from "@/types";
 import type { TaskFormData } from "../types";
 
 const mockCategories: TaskCategory[] = [
-  { id: "cat-1", name: "Cocina", created_at: "2026-01-01", updated_at: "2026-01-01" },
-  { id: "cat-2", name: "Barra", created_at: "2026-01-01", updated_at: "2026-01-01" },
+  {
+    id: "cat-1",
+    name: "Cocina",
+    created_at: "2026-01-01",
+    updated_at: "2026-01-01",
+  },
+  {
+    id: "cat-2",
+    name: "Barra",
+    created_at: "2026-01-01",
+    updated_at: "2026-01-01",
+  },
 ];
 
 const mockFormData: TaskFormData = {
@@ -42,14 +52,20 @@ describe("PrimordialTaskModal Component", () => {
     );
 
     expect(screen.getByText("Nueva Tarea")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /guardar tarea/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /guardar tarea/i }),
+    ).toBeInTheDocument();
 
     const nameInput = screen.getByPlaceholderText(/Ej. Limpieza de Freidoras/i);
     expect(nameInput).toHaveValue("Limpieza de Hornos");
     fireEvent.change(nameInput, { target: { value: "Desinfección de Mesas" } });
-    expect(onFormChangeMock).toHaveBeenCalledWith({ name: "Desinfección de Mesas" });
+    expect(onFormChangeMock).toHaveBeenCalledWith({
+      name: "Desinfección de Mesas",
+    });
 
-    const photoCheckbox = screen.getByRole("checkbox", { name: /requiere foto de evidencia/i });
+    const photoCheckbox = screen.getByRole("checkbox", {
+      name: /requiere foto de evidencia/i,
+    });
     expect(photoCheckbox).toBeChecked();
     fireEvent.click(photoCheckbox);
     expect(onFormChangeMock).toHaveBeenCalledWith({ requiresPhoto: false });

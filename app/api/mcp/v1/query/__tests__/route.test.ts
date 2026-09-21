@@ -107,13 +107,18 @@ describe("app/api/mcp/v1/query/route", () => {
         name: "Key",
       });
 
-      const spyExecute = vi.spyOn(MCP_TOOLS.get_dashboard_metrics, "execute").mockResolvedValueOnce({
-        total_sales: 1000,
-      } as any);
+      const spyExecute = vi
+        .spyOn(MCP_TOOLS.get_dashboard_metrics, "execute")
+        .mockResolvedValueOnce({
+          total_sales: 1000,
+        } as any);
 
       const req = new NextRequest("http://localhost:3000/api/mcp/v1/query", {
         method: "POST",
-        body: JSON.stringify({ tool: "get_dashboard_metrics", arguments: { date: "2026-09-21" } }),
+        body: JSON.stringify({
+          tool: "get_dashboard_metrics",
+          arguments: { date: "2026-09-21" },
+        }),
       });
       const res = await POST(req);
       const json = await res.json();
@@ -121,7 +126,10 @@ describe("app/api/mcp/v1/query/route", () => {
       expect(res.status).toBe(200);
       expect(json.success).toBe(true);
       expect(json.result.total_sales).toBe(1000);
-      expect(spyExecute).toHaveBeenCalledWith({ date: "2026-09-21" }, { tenantId: "t-1", scopes: [] });
+      expect(spyExecute).toHaveBeenCalledWith(
+        { date: "2026-09-21" },
+        { tenantId: "t-1", scopes: [] },
+      );
     });
 
     it("should handle execution errors with 500 status", async () => {
@@ -133,9 +141,10 @@ describe("app/api/mcp/v1/query/route", () => {
         name: "Key",
       });
 
-      vi.spyOn(MCP_TOOLS.get_dashboard_metrics, "execute").mockRejectedValueOnce(
-        new Error("Database connection lost"),
-      );
+      vi.spyOn(
+        MCP_TOOLS.get_dashboard_metrics,
+        "execute",
+      ).mockRejectedValueOnce(new Error("Database connection lost"));
 
       const req = new NextRequest("http://localhost:3000/api/mcp/v1/query", {
         method: "POST",

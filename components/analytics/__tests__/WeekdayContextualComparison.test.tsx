@@ -49,7 +49,9 @@ describe("WeekdayContextualComparison Component", () => {
       />,
     );
 
-    expect(screen.getByTestId("weekday-contextual-comparison")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("weekday-contextual-comparison"),
+    ).toBeInTheDocument();
     expect(
       screen.getByText("Comparativa Contextual: Viernes"),
     ).toBeInTheDocument();

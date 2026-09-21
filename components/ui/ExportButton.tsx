@@ -1,17 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import {
-  Download,
-  FileSpreadsheet,
-  FileText,
-  ChevronDown,
-} from "lucide-react";
-import {
-  exportToCSV,
-  exportToExcel,
-  type ExportColumn,
-} from "@/lib/export";
+import { Download, FileSpreadsheet, FileText, ChevronDown } from "lucide-react";
+import { exportToCSV, exportToExcel, type ExportColumn } from "@/lib/export";
 
 export interface ExportButtonProps<T> {
   data: T[];
@@ -105,7 +96,10 @@ export function ExportButton<T>({
   const isButtonDisabled = disabled;
 
   return (
-    <div className={`relative inline-block text-left ${className}`} ref={dropdownRef}>
+    <div
+      className={`relative inline-block text-left ${className}`}
+      ref={dropdownRef}
+    >
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}

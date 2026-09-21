@@ -16,7 +16,9 @@ type DbMenuItem = Database["public"]["Tables"]["menu_items"]["Row"];
 type DbMenuCategory = Database["public"]["Tables"]["menu_categories"]["Row"];
 type DbIngredient = Database["public"]["Tables"]["ingredients"]["Row"];
 
-async function getMenuDropdownItems(): Promise<{ id: string; name: string; price: number; category?: string | null }[]> {
+async function getMenuDropdownItems(): Promise<
+  { id: string; name: string; price: number; category?: string | null }[]
+> {
   const tenant = await getTenantContext();
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -87,7 +89,8 @@ async function getIngredients(): Promise<Ingredient[]> {
     currentStock: ing.current_stock,
     minimumStock: ing.minimum_stock,
     costPerUnit: ing.cost_per_unit,
-    trackingType: (ing.tracking_type === "PIECE" ? "PIECE" : "MEASURABLE") as "MEASURABLE" | "PIECE",
+    trackingType: (ing.tracking_type === "PIECE" ? "PIECE" : "MEASURABLE") as
+      "MEASURABLE" | "PIECE",
     createdAt: ing.created_at ?? "",
     updatedAt: ing.updated_at ?? "",
   }));
@@ -131,7 +134,9 @@ async function getFilteredMenuItems(params: {
     .eq("tenant_id", params.tenantId);
 
   if (params.q.trim()) {
-    query = query.or(`name.ilike.%${params.q.trim()}%,description.ilike.%${params.q.trim()}%,category.ilike.%${params.q.trim()}%`);
+    query = query.or(
+      `name.ilike.%${params.q.trim()}%,description.ilike.%${params.q.trim()}%,category.ilike.%${params.q.trim()}%`,
+    );
   }
   if (params.category === "uncategorized") {
     query = query.or("category.is.null,category.eq.");
@@ -145,7 +150,8 @@ async function getFilteredMenuItems(params: {
   }
 
   // Map sort field to DB column
-  const sortColumn = params.sort === "isAvailable" ? "is_available" : params.sort;
+  const sortColumn =
+    params.sort === "isAvailable" ? "is_available" : params.sort;
   query = query.order(sortColumn, { ascending: params.direction === "asc" });
 
   const start = (params.page - 1) * params.pageSize;
@@ -203,7 +209,13 @@ export default async function MenuPage({
 
   const tenant = await getTenantContext();
 
-  const [dropdownItems, initialCategories, initialIngredients, stats, filteredResult] = await Promise.all([
+  const [
+    dropdownItems,
+    initialCategories,
+    initialIngredients,
+    stats,
+    filteredResult,
+  ] = await Promise.all([
     getMenuDropdownItems(),
     getMenuCategories(),
     getIngredients(),

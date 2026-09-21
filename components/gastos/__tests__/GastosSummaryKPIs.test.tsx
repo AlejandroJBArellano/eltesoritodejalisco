@@ -26,10 +26,7 @@ describe("GastosSummaryKPIs Component", () => {
 
   it("renders positive summary KPIs correctly", () => {
     render(
-      <GastosSummaryKPIs
-        summary={positiveSummary}
-        currentMonth="2026-09"
-      />,
+      <GastosSummaryKPIs summary={positiveSummary} currentMonth="2026-09" />,
     );
 
     expect(screen.getByText(/Gastos Totales \(2026-09\)/i)).toBeInTheDocument();
@@ -48,10 +45,7 @@ describe("GastosSummaryKPIs Component", () => {
 
   it("renders negative utility and margin formatted with -$ and danger styling", () => {
     render(
-      <GastosSummaryKPIs
-        summary={negativeSummary}
-        currentMonth="2026-08"
-      />,
+      <GastosSummaryKPIs summary={negativeSummary} currentMonth="2026-08" />,
     );
 
     expect(screen.getByText("-$4,000.00")).toBeInTheDocument();

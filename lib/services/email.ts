@@ -84,7 +84,9 @@ export function getContrastTextColor(hexColor?: string | null): string {
 /**
  * Retrieves email addresses of all ADMIN and MANAGER profiles associated with a given tenant.
  */
-export async function getTenantAdminEmails(tenantId: string): Promise<string[]> {
+export async function getTenantAdminEmails(
+  tenantId: string,
+): Promise<string[]> {
   try {
     const supabase = createAdminClient();
     const { data: profiles, error } = await supabase
@@ -100,7 +102,9 @@ export async function getTenantAdminEmails(tenantId: string): Promise<string[]> 
 
     return profiles
       .map((p) => p.email?.trim())
-      .filter((email): email is string => Boolean(email && email.includes("@")));
+      .filter((email): email is string =>
+        Boolean(email && email.includes("@")),
+      );
   } catch (err) {
     console.error("Failed to get tenant admin emails:", err);
     return [];
@@ -127,7 +131,9 @@ export function getTenantAdminUrl(slug: string, path = ""): string {
 /**
  * Sends an email notification to tenant admins when a new order is paid via Kittn Pickup.
  */
-export async function sendNewOrderNotificationEmail(params: NewOrderEmailParams) {
+export async function sendNewOrderNotificationEmail(
+  params: NewOrderEmailParams,
+) {
   const {
     tenant,
     orderNumber,
@@ -151,11 +157,14 @@ export async function sendNewOrderNotificationEmail(params: NewOrderEmailParams)
   const recipients = await getTenantAdminEmails(tenant.id);
 
   if (recipients.length === 0) {
-    console.warn(`[Email Notification] No admin emails found for tenant ${tenant.id} (${tenantName}). Skipping email.`);
+    console.warn(
+      `[Email Notification] No admin emails found for tenant ${tenant.id} (${tenantName}). Skipping email.`,
+    );
     return { success: false, reason: "no_recipients" };
   }
 
-  const serviceLabel = type === "dine-in" ? "Comer Aquí / Dine-in" : "Para Llevar / Takeout";
+  const serviceLabel =
+    type === "dine-in" ? "Comer Aquí / Dine-in" : "Para Llevar / Takeout";
   const formattedPickupTime = pickupTime
     ? new Date(pickupTime).toLocaleTimeString("es-MX", {
         timeZone: "America/Mexico_City",
@@ -342,10 +351,15 @@ export async function sendNewOrderNotificationEmail(params: NewOrderEmailParams)
       return { success: false, error };
     }
 
-    console.log(`[Email Notification] Order #${orderNumber} email sent successfully to ${recipients.join(", ")} (id: ${data?.id})`);
+    console.log(
+      `[Email Notification] Order #${orderNumber} email sent successfully to ${recipients.join(", ")} (id: ${data?.id})`,
+    );
     return { success: true, emailId: data?.id };
   } catch (err) {
-    console.error("[Email Notification Exception] Error sending order email:", err);
+    console.error(
+      "[Email Notification Exception] Error sending order email:",
+      err,
+    );
     return { success: false, error: err };
   }
 }
@@ -492,7 +506,10 @@ export async function sendLowStockAlertEmail(params: LowStockEmailParams) {
     );
     return { success: true, emailId: data?.id };
   } catch (err) {
-    console.error("[Inventory Alert Exception] Error sending low stock email:", err);
+    console.error(
+      "[Inventory Alert Exception] Error sending low stock email:",
+      err,
+    );
     return { success: false, error: err };
   }
 }
@@ -532,7 +549,9 @@ export interface CustomerOrderEmailParams {
 /**
  * Sends a friendly branded confirmation email to the customer with live tracking link.
  */
-export async function sendCustomerOrderConfirmationEmail(params: CustomerOrderEmailParams) {
+export async function sendCustomerOrderConfirmationEmail(
+  params: CustomerOrderEmailParams,
+) {
   const {
     tenant,
     orderId,
@@ -884,4 +903,3 @@ export async function sendLoyaltyCampaignEmail(params: LoyaltyEmailParams) {
     };
   }
 }
-

@@ -53,7 +53,9 @@ describe("HourlySalesHeatmap Component", () => {
     render(<HourlySalesHeatmap cells={cells} />);
 
     expect(screen.getByTestId("hourly-heatmap")).toBeInTheDocument();
-    expect(screen.getByText("Mapa de Calor Semanal (Día vs Hora)")).toBeInTheDocument();
+    expect(
+      screen.getByText("Mapa de Calor Semanal (Día vs Hora)"),
+    ).toBeInTheDocument();
 
     // Check all day labels
     DAYS_OF_WEEK.forEach((day) => {
@@ -88,7 +90,9 @@ describe("HourlySalesHeatmap Component", () => {
     render(<HourlySalesHeatmap cells={cells} />);
 
     expect(
-      screen.getByText("Pasa el cursor sobre cualquier celda para ver el detalle."),
+      screen.getByText(
+        "Pasa el cursor sobre cualquier celda para ver el detalle.",
+      ),
     ).toBeInTheDocument();
 
     const peakCell = screen.getByTestId("heatmap-cell-3-14");
@@ -100,7 +104,9 @@ describe("HourlySalesHeatmap Component", () => {
 
     fireEvent.mouseLeave(peakCell);
     expect(
-      screen.getByText("Pasa el cursor sobre cualquier celda para ver el detalle."),
+      screen.getByText(
+        "Pasa el cursor sobre cualquier celda para ver el detalle.",
+      ),
     ).toBeInTheDocument();
   });
 

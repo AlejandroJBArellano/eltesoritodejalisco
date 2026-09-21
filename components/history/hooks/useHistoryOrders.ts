@@ -15,7 +15,9 @@ export function useHistoryOrders(options: UseHistoryOrdersOptions = {}) {
   const { initialOrders = [], autoFetch = true } = options;
 
   const [orders, setOrders] = useState<Order[]>(initialOrders);
-  const [isLoading, setIsLoading] = useState(autoFetch && initialOrders.length === 0);
+  const [isLoading, setIsLoading] = useState(
+    autoFetch && initialOrders.length === 0,
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Filters
@@ -92,8 +94,13 @@ export function useHistoryOrders(options: UseHistoryOrdersOptions = {}) {
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
-    const { searchQuery, dateFilter, tableFilter, paymentMethodFilter, sourceFilter } =
-      filters;
+    const {
+      searchQuery,
+      dateFilter,
+      tableFilter,
+      paymentMethodFilter,
+      sourceFilter,
+    } = filters;
     const query = searchQuery.trim().toLowerCase();
 
     return orders.filter((order) => {

@@ -48,13 +48,13 @@ describe("ProductSalesSection Component", () => {
     expect(
       screen.getByText("Ventas por Producto (Detallado)"),
     ).toBeInTheDocument();
-    expect(screen.getAllByText("Capuchino Vainilla").length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText("Capuchino Vainilla").length,
+    ).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Cafetería")).toBeInTheDocument();
     expect(screen.getAllByText("$3250.00").length).toBeGreaterThanOrEqual(1);
 
-    expect(
-      screen.getByText("Top Productos Más Vendidos"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Top Productos Más Vendidos")).toBeInTheDocument();
     expect(screen.getByText("50 vendidos")).toBeInTheDocument();
   });
 

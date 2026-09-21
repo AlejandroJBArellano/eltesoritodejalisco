@@ -101,7 +101,10 @@ export function calculateOrderDiscountTotals({
 
   subtotalGross = Math.round(subtotalGross * 100) / 100;
   itemsDiscount = Math.round(itemsDiscount * 100) / 100;
-  const subtotalNet = Math.max(0, Math.round((subtotalGross - itemsDiscount) * 100) / 100);
+  const subtotalNet = Math.max(
+    0,
+    Math.round((subtotalGross - itemsDiscount) * 100) / 100,
+  );
 
   let orderDiscount = 0;
   const numOrderVal = Number(orderDiscountValue) || 0;
@@ -110,12 +113,18 @@ export function calculateOrderDiscountTotals({
       const raw = (subtotalNet * numOrderVal) / 100;
       orderDiscount = Math.min(subtotalNet, Math.round(raw * 100) / 100);
     } else if (orderDiscountType === "FIXED") {
-      orderDiscount = Math.min(subtotalNet, Math.round(numOrderVal * 100) / 100);
+      orderDiscount = Math.min(
+        subtotalNet,
+        Math.round(numOrderVal * 100) / 100,
+      );
     }
   }
 
   const totalDiscount = Math.round((itemsDiscount + orderDiscount) * 100) / 100;
-  const total = Math.max(0, Math.round((subtotalNet - orderDiscount) * 100) / 100);
+  const total = Math.max(
+    0,
+    Math.round((subtotalNet - orderDiscount) * 100) / 100,
+  );
 
   return {
     subtotalGross,
@@ -136,6 +145,7 @@ export function formatDiscountBadge(
   reason?: string | null,
 ): string {
   if (!type || !value || value <= 0) return "";
-  const prefix = type === "PERCENT" ? `-${value}%` : `-$${Number(value).toFixed(2)}`;
+  const prefix =
+    type === "PERCENT" ? `-${value}%` : `-$${Number(value).toFixed(2)}`;
   return reason ? `${prefix} (${reason})` : prefix;
 }

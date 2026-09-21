@@ -57,7 +57,7 @@ export function CustomerAccountModal({
       setIsLoading(true);
       setErrorMessage(null);
       const res = await fetch(
-        `/api/customers/${customer.id}/account-statement`
+        `/api/customers/${customer.id}/account-statement`,
       );
       const data = await res.json();
       if (!res.ok) {
@@ -68,18 +68,27 @@ export function CustomerAccountModal({
       setTotalDebt(Number(data.totalDebt || 0));
 
       // Extraer el abono más reciente si existe
-      let latestP: { amount: number; method: string; createdAt: string | Date } | null = null;
+      let latestP: {
+        amount: number;
+        method: string;
+        createdAt: string | Date;
+      } | null = null;
       (data.pendingNotes || []).forEach((note: AccountNoteItem) => {
-        (note.payments || []).forEach((p: { amount: number; method: string; createdAt: string | Date }) => {
-          if (!latestP || new Date(p.createdAt) > new Date(latestP.createdAt)) {
-            latestP = p;
-          }
-        });
+        (note.payments || []).forEach(
+          (p: { amount: number; method: string; createdAt: string | Date }) => {
+            if (
+              !latestP ||
+              new Date(p.createdAt) > new Date(latestP.createdAt)
+            ) {
+              latestP = p;
+            }
+          },
+        );
       });
       setLastPayment(latestP);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Error inesperado"
+        error instanceof Error ? error.message : "Error inesperado",
       );
     } finally {
       setIsLoading(false);
@@ -183,7 +192,9 @@ export function CustomerAccountModal({
                   <span className="text-[10px] font-black text-text-light/50 uppercase tracking-widest">
                     Saldo Deudor Total
                   </span>
-                  <span className={`text-2xl font-black mt-1 ${totalDebt > 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                  <span
+                    className={`text-2xl font-black mt-1 ${totalDebt > 0 ? "text-amber-400" : "text-emerald-400"}`}
+                  >
                     ${totalDebt.toFixed(2)}
                   </span>
                 </div>
@@ -283,8 +294,12 @@ export function CustomerAccountModal({
                           {isExpanded && (
                             <div className="pt-2 border-t border-border/50 text-xs space-y-2 bg-dark/30 p-2.5 rounded-lg">
                               <div className="flex justify-between text-[11px] text-text-light/60 pb-1 border-b border-border/30">
-                                <span>Total Original: ${note.total.toFixed(2)}</span>
-                                <span>Abonado: ${note.totalPaid.toFixed(2)}</span>
+                                <span>
+                                  Total Original: ${note.total.toFixed(2)}
+                                </span>
+                                <span>
+                                  Abonado: ${note.totalPaid.toFixed(2)}
+                                </span>
                               </div>
 
                               {note.items && note.items.length > 0 && (
@@ -302,9 +317,9 @@ export function CustomerAccountModal({
                                       </span>
                                       <span>
                                         $
-                                        {(item.quantity * item.unitPrice).toFixed(
-                                          2
-                                        )}
+                                        {(
+                                          item.quantity * item.unitPrice
+                                        ).toFixed(2)}
                                       </span>
                                     </div>
                                   ))}

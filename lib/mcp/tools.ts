@@ -46,7 +46,9 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
       );
 
       const totalSales = validOrders
-        .filter((o) => o.payment_status === "PAID" || o.payment_status === "PAGADO")
+        .filter(
+          (o) => o.payment_status === "PAID" || o.payment_status === "PAGADO",
+        )
         .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
       const paidCount = validOrders.filter(
@@ -54,7 +56,10 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
       ).length;
 
       const activeOrders = validOrders.filter(
-        (o) => o.status !== "COMPLETADO" && o.status !== "COMPLETED" && o.status !== "ENTREGADO",
+        (o) =>
+          o.status !== "COMPLETADO" &&
+          o.status !== "COMPLETED" &&
+          o.status !== "ENTREGADO",
       );
 
       const avgTicket = paidCount > 0 ? totalSales / paidCount : 0;
@@ -116,7 +121,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         .order("created_at", { ascending: true })
         .limit(limit);
 
-      if (error) throw new Error(`Error al obtener órdenes activas: ${error.message}`);
+      if (error)
+        throw new Error(`Error al obtener órdenes activas: ${error.message}`);
 
       const now = Date.now();
       const formatted = (orders || []).map((o: any) => {
@@ -238,7 +244,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
     },
     execute: async (args, ctx) => {
       const { startDate, endDate } = args;
-      if (!startDate || !endDate) throw new Error("startDate y endDate son requeridos");
+      if (!startDate || !endDate)
+        throw new Error("startDate y endDate son requeridos");
 
       const supabase = createAdminClient();
       const startIso = `${startDate}T00:00:00.000Z`;
@@ -264,7 +271,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         0,
       );
 
-      const dailyBreakdown: Record<string, { count: number; total: number }> = {};
+      const dailyBreakdown: Record<string, { count: number; total: number }> =
+        {};
       validOrders.forEach((o) => {
         const day = o.created_at.split("T")[0];
         if (!dailyBreakdown[day]) dailyBreakdown[day] = { count: 0, total: 0 };
@@ -334,7 +342,10 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         .gte("orders.created_at", dateLimit.toISOString())
         .not("orders.status", "in", '("CANCELADO","CANCELLED")');
 
-      if (error) throw new Error(`Error al consultar platillos populares: ${error.message}`);
+      if (error)
+        throw new Error(
+          `Error al consultar platillos populares: ${error.message}`,
+        );
 
       const itemMap: Record<
         string,
@@ -371,7 +382,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
       properties: {
         onlyLowStock: {
           type: "boolean",
-          description: "Si es true, solo retorna ingredientes con stock menor o igual al mínimo.",
+          description:
+            "Si es true, solo retorna ingredientes con stock menor o igual al mínimo.",
         },
       },
     },
@@ -383,7 +395,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         .eq("tenant_id", ctx.tenantId)
         .order("name", { ascending: true });
 
-      if (error) throw new Error(`Error al consultar inventario: ${error.message}`);
+      if (error)
+        throw new Error(`Error al consultar inventario: ${error.message}`);
 
       const processed = (ingredients || []).map((i) => {
         const isLow = Number(i.current_stock) <= Number(i.min_stock);
@@ -399,7 +412,9 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         };
       });
 
-      const filtered = args?.onlyLowStock ? processed.filter((i) => i.is_low_stock) : processed;
+      const filtered = args?.onlyLowStock
+        ? processed.filter((i) => i.is_low_stock)
+        : processed;
 
       return {
         total_items: processed.length,
@@ -440,7 +455,9 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         itemQuery = itemQuery.ilike("name", `%${args.query}%`);
       }
 
-      const { data: menuItem, error: itemError } = await itemQuery.limit(1).maybeSingle();
+      const { data: menuItem, error: itemError } = await itemQuery
+        .limit(1)
+        .maybeSingle();
       if (itemError || !menuItem) throw new Error("Platillo no encontrado");
 
       const { data: recipes, error: recipeError } = await supabase
@@ -459,7 +476,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         )
         .eq("menu_item_id", menuItem.id);
 
-      if (recipeError) throw new Error(`Error al obtener receta: ${recipeError.message}`);
+      if (recipeError)
+        throw new Error(`Error al obtener receta: ${recipeError.message}`);
 
       let calculatedCost = 0;
       const ingredients = (recipes || []).map((r: any) => {
@@ -484,7 +502,9 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         estimated_food_cost: Math.round(calculatedCost * 100) / 100,
         margin_percent:
           menuItem.price > 0
-            ? Math.round(((menuItem.price - calculatedCost) / menuItem.price) * 100)
+            ? Math.round(
+                ((menuItem.price - calculatedCost) / menuItem.price) * 100,
+              )
             : 0,
       };
     },
@@ -565,7 +585,9 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         query = query.lte("date", args.endDate);
       }
 
-      const { data: expenses, error } = await query.order("date", { ascending: false });
+      const { data: expenses, error } = await query.order("date", {
+        ascending: false,
+      });
       if (error) throw new Error(`Error al consultar gastos: ${error.message}`);
 
       const categoryTotals: Record<string, number> = {};
@@ -609,7 +631,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         .eq("tenant_id", ctx.tenantId)
         .order("sort_order", { ascending: true });
 
-      if (catError) throw new Error(`Error al consultar categorías: ${catError.message}`);
+      if (catError)
+        throw new Error(`Error al consultar categorías: ${catError.message}`);
 
       let itemQuery = supabase
         .from("menu_items")
@@ -622,7 +645,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
       }
 
       const { data: items, error: itemError } = await itemQuery;
-      if (itemError) throw new Error(`Error al consultar platillos: ${itemError.message}`);
+      if (itemError)
+        throw new Error(`Error al consultar platillos: ${itemError.message}`);
 
       return {
         categories: categories || [],

@@ -69,7 +69,13 @@ describe("RoleEditorModal", () => {
   it("envía la creación del rol personalizado al presionar Guardar", async () => {
     vi.mocked(roleActions.createCustomRole).mockResolvedValue({
       success: true,
-      role: { id: "1", name: "Capitán", permissions: ["pos.view"], is_system: false, tenant_id: "t-1" },
+      role: {
+        id: "1",
+        name: "Capitán",
+        permissions: ["pos.view"],
+        is_system: false,
+        tenant_id: "t-1",
+      },
     });
 
     render(
@@ -133,8 +139,6 @@ describe("RoleEditorModal", () => {
 
     expect(screen.getByText("Editar Rol: Administrador")).toBeDefined();
     expect(screen.getByLabelText(/Nombre del Rol/i)).toBeDisabled();
-    expect(
-      screen.getByText("Duplicar como Rol Personalizado"),
-    ).toBeDefined();
+    expect(screen.getByText("Duplicar como Rol Personalizado")).toBeDefined();
   });
 });

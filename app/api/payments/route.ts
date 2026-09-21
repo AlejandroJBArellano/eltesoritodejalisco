@@ -14,7 +14,11 @@ type PaymentInput = {
 
 const CENTS_PER_PESO = 100;
 
-const toPaymentInsert = (orderId: string, payment: PaymentInput, tenantId: string) => ({
+const toPaymentInsert = (
+  orderId: string,
+  payment: PaymentInput,
+  tenantId: string,
+) => ({
   id: crypto.randomUUID(),
   order_id: orderId,
   tenant_id: tenantId,
@@ -135,7 +139,9 @@ export async function POST(request: NextRequest) {
       // 1. Insertar un registro de pago por cada parte
       const { error: splitError } = await supabase
         .from("payments")
-        .insert(splits.map((split) => toPaymentInsert(orderId, split, tenant.id)));
+        .insert(
+          splits.map((split) => toPaymentInsert(orderId, split, tenant.id)),
+        );
 
       if (splitError) {
         console.error(
@@ -166,7 +172,11 @@ export async function POST(request: NextRequest) {
         actionType: "PAID",
         details: {
           splitCount: splits.length,
-          totalAmount: splits.reduce((sum: number, s: { amount?: number }) => sum + Number(s.amount || 0), 0),
+          totalAmount: splits.reduce(
+            (sum: number, s: { amount?: number }) =>
+              sum + Number(s.amount || 0),
+            0,
+          ),
         },
       });
 
@@ -187,13 +197,17 @@ export async function POST(request: NextRequest) {
     const { data: payment, error: paymentError } = await supabase
       .from("payments")
       .insert({
-        ...toPaymentInsert(orderId, {
-          amount,
-          method,
-          receivedAmount,
-          change,
-          tipAmount,
-        }, tenant.id),
+        ...toPaymentInsert(
+          orderId,
+          {
+            amount,
+            method,
+            receivedAmount,
+            change,
+            tipAmount,
+          },
+          tenant.id,
+        ),
       })
       .select()
       .single();

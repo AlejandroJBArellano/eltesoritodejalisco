@@ -159,8 +159,12 @@ describe("useOrders Hook utilities & timers", () => {
         json: async () => ({ orders: [] }),
       } as Response);
 
-      const hook1 = renderHook(() => useRealtimeOrders([], false, undefined, 0));
-      const hook2 = renderHook(() => useRealtimeOrders([], false, undefined, 0));
+      const hook1 = renderHook(() =>
+        useRealtimeOrders([], false, undefined, 0),
+      );
+      const hook2 = renderHook(() =>
+        useRealtimeOrders([], false, undefined, 0),
+      );
 
       const visibilityListenersCount = addEventListenerSpy.mock.calls.filter(
         ([event]) => event === "visibilitychange",

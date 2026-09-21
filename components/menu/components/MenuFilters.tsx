@@ -16,9 +16,7 @@ export function MenuFilters() {
   const searchQuery = rawSearchParams.get("q") || "";
   const categoryFilter = rawSearchParams.get("category") || "all";
   const availabilityFilter = (rawSearchParams.get("availability") || "all") as
-    | "all"
-    | "available"
-    | "unavailable";
+    "all" | "available" | "unavailable";
 
   const [localQuery, setLocalQuery] = useState(searchQuery);
 
@@ -34,7 +32,9 @@ export function MenuFilters() {
       .map((c) => c.name);
   }, [menuCategories]);
 
-  const updateSearchParam = (updates: Record<string, string | number | null>) => {
+  const updateSearchParam = (
+    updates: Record<string, string | number | null>,
+  ) => {
     const params = new URLSearchParams(rawSearchParams.toString());
     Object.entries(updates).forEach(([key, value]) => {
       if (value === null || value === "" || value === "all") {
@@ -59,7 +59,9 @@ export function MenuFilters() {
   };
 
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}>
+    <div
+      className={`grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -103,7 +105,8 @@ export function MenuFilters() {
           value={availabilityFilter}
           onChange={(e) =>
             updateSearchParam({
-              availability: e.target.value as "all" | "available" | "unavailable",
+              availability: e.target.value as
+                "all" | "available" | "unavailable",
             })
           }
           className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary cursor-pointer transition-colors duration-200"

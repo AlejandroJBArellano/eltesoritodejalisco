@@ -49,7 +49,7 @@ describe("WeeklyShiftPlanner Component", () => {
         initialDate={new Date("2026-09-07T12:00:00Z")}
         initialUsers={mockUsers}
         initialToleranceMinutes={10}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -58,7 +58,7 @@ describe("WeeklyShiftPlanner Component", () => {
     });
 
     expect(
-      screen.getByText("Programación Semanal de Colaboradores")
+      screen.getByText("Programación Semanal de Colaboradores"),
     ).toBeInTheDocument();
     expect(screen.getByText("08:00 - 16:00")).toBeInTheDocument();
     expect(screen.getByText("Cocina")).toBeInTheDocument();
@@ -79,12 +79,12 @@ describe("WeeklyShiftPlanner Component", () => {
       <WeeklyShiftPlanner
         initialDate={new Date("2026-09-07T12:00:00Z")}
         initialUsers={[]}
-      />
+      />,
     );
 
     await waitFor(() => {
       expect(
-        screen.getByText(/no hay colaboradores registrados/i)
+        screen.getByText(/no hay colaboradores registrados/i),
       ).toBeInTheDocument();
     });
   });
@@ -103,7 +103,7 @@ describe("WeeklyShiftPlanner Component", () => {
       <WeeklyShiftPlanner
         initialDate={new Date("2026-09-07T12:00:00Z")}
         initialUsers={mockUsers}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -139,7 +139,7 @@ describe("WeeklyShiftPlanner Component", () => {
       <WeeklyShiftPlanner
         initialDate={new Date("2026-09-07T12:00:00Z")}
         initialUsers={mockUsers}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -176,7 +176,9 @@ describe("WeeklyShiftPlanner Component", () => {
     fireEvent.click(duplicateBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/se duplicaron 5 turnos con éxito/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/se duplicaron 5 turnos con éxito/i),
+      ).toBeInTheDocument();
     });
   });
 
@@ -204,7 +206,7 @@ describe("WeeklyShiftPlanner Component", () => {
       <WeeklyShiftPlanner
         initialDate={new Date("2026-09-07T12:00:00Z")}
         initialUsers={mockUsers}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -217,7 +219,9 @@ describe("WeeklyShiftPlanner Component", () => {
     fireEvent.click(duplicateBtn);
 
     await waitFor(() => {
-      expect(screen.getByText("No hay turnos previos para duplicar")).toBeInTheDocument();
+      expect(
+        screen.getByText("No hay turnos previos para duplicar"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -226,7 +230,10 @@ describe("WeeklyShiftPlanner Component", () => {
       if (options?.method === "PUT" && url.includes("/settings")) {
         return Promise.resolve({
           ok: true,
-          json: async () => ({ success: true, attendance_tolerance_minutes: 15 }),
+          json: async () => ({
+            success: true,
+            attendance_tolerance_minutes: 15,
+          }),
         });
       }
       return Promise.resolve({
@@ -244,7 +251,7 @@ describe("WeeklyShiftPlanner Component", () => {
         initialDate={new Date("2026-09-07T12:00:00Z")}
         initialUsers={mockUsers}
         initialToleranceMinutes={10}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -259,7 +266,7 @@ describe("WeeklyShiftPlanner Component", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/tolerancia actualizada exitosamente/i)
+        screen.getByText(/tolerancia actualizada exitosamente/i),
       ).toBeInTheDocument();
     });
   });
@@ -286,7 +293,7 @@ describe("WeeklyShiftPlanner Component", () => {
       <WeeklyShiftPlanner
         initialDate={new Date("2026-09-07T12:00:00Z")}
         initialUsers={mockUsers}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -315,7 +322,7 @@ describe("WeeklyShiftPlanner Component", () => {
       <WeeklyShiftPlanner
         initialDate={new Date("2026-09-07T12:00:00Z")}
         initialUsers={mockUsers}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -326,7 +333,9 @@ describe("WeeklyShiftPlanner Component", () => {
     fireEvent.click(exportBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/imagen descargada exitosamente/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/imagen descargada exitosamente/i),
+      ).toBeInTheDocument();
     });
 
     // Test failure scenario
@@ -334,7 +343,9 @@ describe("WeeklyShiftPlanner Component", () => {
     fireEvent.click(exportBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/no se pudo generar la imagen del rol/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/no se pudo generar la imagen del rol/i),
+      ).toBeInTheDocument();
     });
   });
 
@@ -366,7 +377,7 @@ describe("WeeklyShiftPlanner Component", () => {
       <WeeklyShiftPlanner
         initialDate={new Date("2026-09-07T12:00:00Z")}
         initialUsers={mockUsers}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -383,7 +394,9 @@ describe("WeeklyShiftPlanner Component", () => {
     fireEvent.click(saveBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/turno guardado correctamente/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/turno guardado correctamente/i),
+      ).toBeInTheDocument();
     });
 
     // Open and delete
@@ -394,7 +407,9 @@ describe("WeeklyShiftPlanner Component", () => {
     fireEvent.click(deleteBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/turno eliminado correctamente/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/turno eliminado correctamente/i),
+      ).toBeInTheDocument();
     });
   });
 
@@ -412,7 +427,7 @@ describe("WeeklyShiftPlanner Component", () => {
       <WeeklyShiftPlanner
         initialDate={new Date("2026-09-07T12:00:00Z")}
         initialUsers={mockUsers}
-      />
+      />,
     );
 
     await waitFor(() => {

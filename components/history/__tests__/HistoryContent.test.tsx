@@ -80,7 +80,9 @@ describe("HistoryContent Component", () => {
     expect(screen.getByText("Acceso Denegado")).toBeDefined();
     expect(screen.getByText(/El rol de/)).toBeDefined();
     expect(screen.getByText("MESERO")).toBeDefined();
-    expect(screen.getByRole("link", { name: /Volver al Dashboard/i })).toBeDefined();
+    expect(
+      screen.getByRole("link", { name: /Volver al Dashboard/i }),
+    ).toBeDefined();
   });
 
   it("renders full history view for ADMIN role, toggles archive, finalize modal, and billing modal", async () => {
@@ -92,7 +94,9 @@ describe("HistoryContent Component", () => {
 
     expect(screen.getByText("Corte de Caja Diario")).toBeDefined();
     expect(screen.getByText("Análisis y Tendencias")).toBeDefined();
-    expect(screen.getByPlaceholderText("Buscar por folio (#1001)...")).toBeDefined();
+    expect(
+      screen.getByPlaceholderText("Buscar por folio (#1001)..."),
+    ).toBeDefined();
 
     // Toggle cuts archive
     const archiveBtn = screen.getByText("Archivo de Cortes");
@@ -170,7 +174,9 @@ describe("HistoryContent Component", () => {
     });
 
     // Click Imprimir Ticket
-    const printTicketBtn = screen.getByRole("button", { name: /Imprimir Ticket/i });
+    const printTicketBtn = screen.getByRole("button", {
+      name: /Imprimir Ticket/i,
+    });
     fireEvent.click(printTicketBtn);
     expect(printSpy).toHaveBeenCalled();
 

@@ -25,9 +25,7 @@ const mockMenuItems: MenuItem[] = [
   { id: "item-2", name: "Gringa", price: 45, isAvailable: true },
 ];
 
-const mockCustomers: Customer[] = [
-  { id: "cust-1", name: "Carlos Slim" },
-];
+const mockCustomers: Customer[] = [{ id: "cust-1", name: "Carlos Slim" }];
 
 describe("POSCartSidebar Component", () => {
   const mockHandleFormChange = vi.fn();
@@ -91,10 +89,14 @@ describe("POSCartSidebar Component", () => {
 
     expect(screen.getByRole("radio", { name: /comedor/i })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /llevar/i })).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /domicilio/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("radio", { name: /domicilio/i }),
+    ).toBeInTheDocument();
 
     // In COMEDOR mode, mesa input should be rendered
-    expect(screen.getByPlaceholderText("Ej. 4, Terraza...")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Ej. 4, Terraza..."),
+    ).toBeInTheDocument();
   });
 
   it("calls handleServiceTypeChange when clicking service type buttons", () => {
@@ -125,7 +127,9 @@ describe("POSCartSidebar Component", () => {
     } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSCartSidebar />);
-    expect(screen.queryByPlaceholderText("Ej. 4, Terraza...")).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("Ej. 4, Terraza..."),
+    ).not.toBeInTheDocument();
   });
 
   it("handles table, customer, source, and notes changes", () => {
@@ -135,7 +139,9 @@ describe("POSCartSidebar Component", () => {
     fireEvent.change(tableInput, { target: { value: "Mesa 5" } });
     expect(mockHandleFormChange).toHaveBeenCalledWith("table", "Mesa 5");
 
-    const notesInput = screen.getByPlaceholderText("Sin cebolla, salsa aparte...");
+    const notesInput = screen.getByPlaceholderText(
+      "Sin cebolla, salsa aparte...",
+    );
     fireEvent.change(notesInput, { target: { value: "Sin cilantro" } });
     expect(mockHandleFormChange).toHaveBeenCalledWith("notes", "Sin cilantro");
 
@@ -152,13 +158,12 @@ describe("POSCartSidebar Component", () => {
     render(<POSCartSidebar />);
     expect(screen.getByText("El carrito está vacío")).toBeInTheDocument();
     expect(screen.queryByText("GUARDAR E IMPRIMIR")).not.toBeInTheDocument();
-  });  it("renders items in cart, allows quantity updates, and toggles item notes", () => {
+  });
+  it("renders items in cart, allows quantity updates, and toggles item notes", () => {
     vi.mocked(usePOSCart).mockReturnValue({
       formState: {
         ...defaultFormState,
-        items: [
-          { menuItemId: "item-1", quantity: "2", notes: "" },
-        ],
+        items: [{ menuItemId: "item-1", quantity: "2", notes: "" }],
       },
       formErrors: {},
       cartError: null,
@@ -206,7 +211,9 @@ describe("POSCartSidebar Component", () => {
     const noteToggle = screen.getByTitle("Agregar nota");
     fireEvent.click(noteToggle);
 
-    const noteInput = screen.getByPlaceholderText("Nota especial (sin cebolla, extra salsa...)");
+    const noteInput = screen.getByPlaceholderText(
+      "Nota especial (sin cebolla, extra salsa...)",
+    );
     expect(noteInput).toBeInTheDocument();
 
     fireEvent.change(noteInput, { target: { value: "Extra limón" } });
@@ -214,7 +221,11 @@ describe("POSCartSidebar Component", () => {
 
     // Click again to close note
     fireEvent.click(noteToggle);
-    expect(screen.queryByPlaceholderText("Nota especial (sin cebolla, extra salsa...)")).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText(
+        "Nota especial (sin cebolla, extra salsa...)",
+      ),
+    ).not.toBeInTheDocument();
   });
 
   it("renders armed clear cart confirmation", () => {

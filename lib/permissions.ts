@@ -340,7 +340,11 @@ type PermissionCarrier =
   | {
       role?: string | null;
       permissions?: string[] | null;
-      role_data?: { permissions?: string[] | null; is_system?: boolean; system_slug?: string | null } | null;
+      role_data?: {
+        permissions?: string[] | null;
+        is_system?: boolean;
+        system_slug?: string | null;
+      } | null;
     }
   | string[]
   | null
@@ -359,12 +363,19 @@ export function extractPermissions(carrier: PermissionCarrier): string[] {
   }
 
   // Si tiene role_data con permissions
-  if (carrier.role_data?.permissions && Array.isArray(carrier.role_data.permissions)) {
+  if (
+    carrier.role_data?.permissions &&
+    Array.isArray(carrier.role_data.permissions)
+  ) {
     return carrier.role_data.permissions;
   }
 
   // Fallback para roles heredados por string si no tiene objeto role_data
-  const roleSlug = (carrier.role_data?.system_slug || carrier.role || "").toUpperCase();
+  const roleSlug = (
+    carrier.role_data?.system_slug ||
+    carrier.role ||
+    ""
+  ).toUpperCase();
   if (roleSlug === "ADMIN") return ["*"];
   if (DEFAULT_ROLE_PERMISSIONS[roleSlug]) {
     return DEFAULT_ROLE_PERMISSIONS[roleSlug];

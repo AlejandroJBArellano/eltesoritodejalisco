@@ -6,11 +6,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { AnalyticsNav } from "./AnalyticsNav";
 import { SalesTrendChart } from "./SalesTrendChart";
 import { ProductSalesDistributionChart } from "./ProductSalesDistributionChart";
-import {
-  PERIOD_LABELS,
-  type Period,
-  type ReportData,
-} from "../reports/types";
+import { PERIOD_LABELS, type Period, type ReportData } from "../reports/types";
 
 export function SalesAnalyticsView() {
   const [data, setData] = useState<ReportData | null>(null);
@@ -141,7 +137,9 @@ export function SalesAnalyticsView() {
             disabled={isLoading}
             className="inline-flex items-center gap-2 rounded-xl bg-purple-500/10 border border-purple-500/30 px-3.5 py-2 text-xs font-black text-purple-400 hover:bg-purple-500/20 transition-all active:scale-95 disabled:opacity-50"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
             Actualizar
           </button>
         }
@@ -155,7 +153,8 @@ export function SalesAnalyticsView() {
         <section className="rounded-2xl bg-card p-6 shadow-sm border border-border">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-extrabold text-text-light/50 uppercase tracking-widest flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-purple-400" /> Período de Análisis
+              <Calendar className="h-4 w-4 text-purple-400" /> Período de
+              Análisis
             </h2>
           </div>
 

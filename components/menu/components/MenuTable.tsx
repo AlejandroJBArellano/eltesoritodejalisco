@@ -33,15 +33,22 @@ export function MenuTable({
   const rawSearchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const { openEditProductModal, handleDelete: onDelete, deleteArmedItemId } = useMenuItems();
+  const {
+    openEditProductModal,
+    handleDelete: onDelete,
+    deleteArmedItemId,
+  } = useMenuItems();
   const { openRecipeModal: onOpenRecipe } = useRecipes();
 
   const sortField = (rawSearchParams.get("sort") as SortField) || "name";
-  const sortDirection = (rawSearchParams.get("direction") as "asc" | "desc") || "asc";
+  const sortDirection =
+    (rawSearchParams.get("direction") as "asc" | "desc") || "asc";
   const currentPage = Number(rawSearchParams.get("page")) || 1;
   const pageSize = Number(rawSearchParams.get("pageSize")) || 10;
 
-  const updateSearchParam = (updates: Record<string, string | number | null>) => {
+  const updateSearchParam = (
+    updates: Record<string, string | number | null>,
+  ) => {
     const params = new URLSearchParams(rawSearchParams.toString());
     Object.entries(updates).forEach(([key, value]) => {
       if (value === null || value === "" || value === "all") {
@@ -59,12 +66,15 @@ export function MenuTable({
   };
 
   const handleSort = (field: SortField) => {
-    const nextDirection = sortField === field && sortDirection === "asc" ? "desc" : "asc";
+    const nextDirection =
+      sortField === field && sortDirection === "asc" ? "desc" : "asc";
     updateSearchParam({ sort: field, direction: nextDirection });
   };
 
   return (
-    <div className={`space-y-4 ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}>
+    <div
+      className={`space-y-4 ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}
+    >
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-left text-sm">
           <thead className="bg-dark/40 text-xs uppercase tracking-wider text-text-light/60 border-b border-border">
@@ -103,10 +113,7 @@ export function MenuTable({
           </thead>
           <tbody className="divide-y divide-border">
             {paginatedItems.map((item) => (
-              <tr
-                key={item.id}
-                className="hover:bg-white/2 transition-colors"
-              >
+              <tr key={item.id} className="hover:bg-white/2 transition-colors">
                 <td className="py-3 px-4">
                   {item.imageUrl ? (
                     <Image
@@ -140,10 +147,11 @@ export function MenuTable({
                 </td>
                 <td className="py-3 px-4">
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${item.isAvailable
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                      item.isAvailable
                         ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                         : "bg-red-500/10 text-red-400 border border-red-500/20"
-                      }`}
+                    }`}
                   >
                     {item.isAvailable ? (
                       <>
@@ -176,10 +184,11 @@ export function MenuTable({
                     </button>
                     <button
                       onClick={() => onDelete(item.id)}
-                      className={`rounded-lg border p-2 transition-all text-xs font-black ${deleteArmedItemId === item.id
+                      className={`rounded-lg border p-2 transition-all text-xs font-black ${
+                        deleteArmedItemId === item.id
                           ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
                           : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
-                        }`}
+                      }`}
                       title={
                         deleteArmedItemId === item.id
                           ? "Confirmar eliminación"

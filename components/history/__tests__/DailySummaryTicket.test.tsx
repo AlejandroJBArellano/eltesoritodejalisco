@@ -149,7 +149,9 @@ describe("DailySummaryTicket Component", () => {
 
     expect(screen.getByTestId("daily-summary-ticket")).toBeDefined();
     expect(screen.getByText("KITTN RESTAURANTE")).toBeDefined();
-    expect(screen.getByText("*** CORTE / RESUMEN DE CAJA DIARIO ***")).toBeDefined();
+    expect(
+      screen.getByText("*** CORTE / RESUMEN DE CAJA DIARIO ***"),
+    ).toBeDefined();
     expect(screen.getByText("RESUMEN FINANCIERO")).toBeDefined();
     expect(screen.getByText("ARQUEO DE COBROS")).toBeDefined();
     expect(screen.getByText("KittnOS • Control Operativo")).toBeDefined();
@@ -217,12 +219,7 @@ describe("DailySummaryTicket Component", () => {
   });
 
   it("renders historical cut correctly when cut prop is provided", () => {
-    render(
-      <DailySummaryTicket
-        cut={mockCut}
-        tenantContext={mockTenant}
-      />,
-    );
+    render(<DailySummaryTicket cut={mockCut} tenantContext={mockTenant} />);
 
     expect(screen.getByText("El Tesorito de Jalisco")).toBeDefined();
     expect(screen.getByText("18")).toBeDefined(); // total_orders

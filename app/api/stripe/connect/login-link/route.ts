@@ -9,7 +9,7 @@ export async function POST() {
     if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
       return NextResponse.json(
         { error: "No autorizado para consultar Stripe" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -17,20 +17,26 @@ export async function POST() {
 
     if (!tenant.stripe_account_id) {
       return NextResponse.json(
-        { error: "El restaurante no tiene una cuenta de Stripe Connect configurada" },
-        { status: 400 }
+        {
+          error:
+            "El restaurante no tiene una cuenta de Stripe Connect configurada",
+        },
+        { status: 400 },
       );
     }
 
     if (!tenant.stripe_details_submitted) {
       return NextResponse.json(
-        { error: "Debes completar el registro en Stripe antes de acceder al panel" },
-        { status: 400 }
+        {
+          error:
+            "Debes completar el registro en Stripe antes de acceder al panel",
+        },
+        { status: 400 },
       );
     }
 
     const loginLink = await stripe.accounts.createLoginLink(
-      tenant.stripe_account_id
+      tenant.stripe_account_id,
     );
 
     return NextResponse.json({ url: loginLink.url });
@@ -38,7 +44,7 @@ export async function POST() {
     console.error("Error creating Stripe Connect login link:", error);
     return NextResponse.json(
       { error: "Error al generar la liga de acceso a Stripe" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

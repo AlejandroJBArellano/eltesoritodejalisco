@@ -130,7 +130,9 @@ describe("CampaignsHistoryTable Component", () => {
       />,
     );
 
-    const searchInput = screen.getByPlaceholderText(/Buscar por campaña o asunto/i);
+    const searchInput = screen.getByPlaceholderText(
+      /Buscar por campaña o asunto/i,
+    );
     fireEvent.change(searchInput, { target: { value: "VIP" } });
 
     expect(screen.queryByText("Reactivación Verano")).not.toBeInTheDocument();
@@ -159,7 +161,9 @@ describe("CampaignsHistoryTable Component", () => {
     const viewDetailsBtn = screen.getByTestId("view-campaign-details-camp-1");
     fireEvent.click(viewDetailsBtn);
 
-    expect(screen.getByText("Detalle: Reactivación Verano")).toBeInTheDocument();
+    expect(
+      screen.getByText("Detalle: Reactivación Verano"),
+    ).toBeInTheDocument();
     expect(screen.getByText("Pedro Infante")).toBeInTheDocument();
     expect(screen.getByText("pedro@example.com")).toBeInTheDocument();
     expect(screen.getByText("150 pts")).toBeInTheDocument();
@@ -168,6 +172,8 @@ describe("CampaignsHistoryTable Component", () => {
     const closeBtn = screen.getByRole("button", { name: "Cerrar" });
     fireEvent.click(closeBtn);
 
-    expect(screen.queryByText("Detalle: Reactivación Verano")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Detalle: Reactivación Verano"),
+    ).not.toBeInTheDocument();
   });
 });

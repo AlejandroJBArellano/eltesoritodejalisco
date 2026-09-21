@@ -133,7 +133,9 @@ export function KitchenDisplaySystem({
     tenantId,
   );
   const [view, setView] = useState<"kanban" | "batching">("kanban");
-  const [sourceFilter, setSourceFilter] = useState<"ALL" | "POS" | "PICKUP_APP">("ALL");
+  const [sourceFilter, setSourceFilter] = useState<
+    "ALL" | "POS" | "PICKUP_APP"
+  >("ALL");
   const [updatingItemIds, setUpdatingItemIds] = useState<Set<string>>(
     () => new Set(),
   );
@@ -162,93 +164,96 @@ export function KitchenDisplaySystem({
     try {
       const testAudio = new Audio("/new_order.mp3");
       testAudio.volume = 0.1;
-      testAudio.play().catch(() => { });
+      testAudio.play().catch(() => {});
     } catch {
       // Ignore initial user gesture unlock error
     }
   };
 
-  const handleStatusChange = useCallback(async (
-    orderId: string,
-    newStatus: OrderStatus,
-  ) => {
-    try {
-      const response = await fetch(`/api/orders/${orderId}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update order");
-
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === orderId
-            ? { ...order, status: newStatus, updatedAt: new Date() }
-            : order,
-        ),
-      );
-    } catch (error) {
-      console.error("Error updating order status:", error);
-      showToast(
-        "Error al actualizar el estado de la orden. Por favor reintenta.",
-      );
-    }
-  }, [showToast, setOrders]);
-
-  const handleItemReady = useCallback(async (orderId: string, itemId: string) => {
-    try {
-      setUpdatingItemIds((prev) => {
-        const next = new Set(prev);
-        next.add(itemId);
-        return next;
-      });
-
-      const response = await fetch(
-        `/api/orders/${orderId}/items/${itemId}/status`,
-        {
+  const handleStatusChange = useCallback(
+    async (orderId: string, newStatus: OrderStatus) => {
+      try {
+        const response = await fetch(`/api/orders/${orderId}/status`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: OrderStatus.READY }),
-        },
-      );
+          body: JSON.stringify({ status: newStatus }),
+        });
 
-      if (!response.ok) throw new Error("Failed to update item status");
+        if (!response.ok) throw new Error("Failed to update order");
 
-      const data = await response.json();
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === orderId
+              ? { ...order, status: newStatus, updatedAt: new Date() }
+              : order,
+          ),
+        );
+      } catch (error) {
+        console.error("Error updating order status:", error);
+        showToast(
+          "Error al actualizar el estado de la orden. Por favor reintenta.",
+        );
+      }
+    },
+    [showToast, setOrders],
+  );
 
-      setOrders((prevOrders) =>
-        prevOrders.map((order) => {
-          if (order.id !== orderId) return order;
+  const handleItemReady = useCallback(
+    async (orderId: string, itemId: string) => {
+      try {
+        setUpdatingItemIds((prev) => {
+          const next = new Set(prev);
+          next.add(itemId);
+          return next;
+        });
 
-          return {
-            ...order,
-            status: data.orderStatus,
-            updatedAt: new Date(),
-            orderItems: order.orderItems.map((item) =>
-              item.id === itemId
-                ? {
-                  ...item,
-                  status: data.item.status,
-                  preparationTimeSeconds:
-                    data.item.preparationTimeSeconds ?? null,
-                }
-                : item,
-            ),
-          };
-        }),
-      );
-    } catch (error) {
-      console.error("Error updating item status:", error);
-      showToast("Error al marcar platillo como listo. Reintenta.");
-    } finally {
-      setUpdatingItemIds((prev) => {
-        const next = new Set(prev);
-        next.delete(itemId);
-        return next;
-      });
-    }
-  }, [showToast, setOrders, setUpdatingItemIds]);
+        const response = await fetch(
+          `/api/orders/${orderId}/items/${itemId}/status`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: OrderStatus.READY }),
+          },
+        );
+
+        if (!response.ok) throw new Error("Failed to update item status");
+
+        const data = await response.json();
+
+        setOrders((prevOrders) =>
+          prevOrders.map((order) => {
+            if (order.id !== orderId) return order;
+
+            return {
+              ...order,
+              status: data.orderStatus,
+              updatedAt: new Date(),
+              orderItems: order.orderItems.map((item) =>
+                item.id === itemId
+                  ? {
+                      ...item,
+                      status: data.item.status,
+                      preparationTimeSeconds:
+                        data.item.preparationTimeSeconds ?? null,
+                    }
+                  : item,
+              ),
+            };
+          }),
+        );
+      } catch (error) {
+        console.error("Error updating item status:", error);
+        showToast("Error al marcar platillo como listo. Reintenta.");
+      } finally {
+        setUpdatingItemIds((prev) => {
+          const next = new Set(prev);
+          next.delete(itemId);
+          return next;
+        });
+      }
+    },
+    [showToast, setOrders, setUpdatingItemIds],
+  );
 
   const releasedOrders = orders.filter((o) => {
     // Direct POS / ASAP orders have no scheduled pickupTime and show immediately
@@ -266,13 +271,21 @@ export function KitchenDisplaySystem({
     return true;
   });
 
-  const pickupCount = releasedOrders.filter((o) => o.source === "PICKUP_APP").length;
-  const posCount = releasedOrders.filter((o) => o.source !== "PICKUP_APP").length;
+  const pickupCount = releasedOrders.filter(
+    (o) => o.source === "PICKUP_APP",
+  ).length;
+  const posCount = releasedOrders.filter(
+    (o) => o.source !== "PICKUP_APP",
+  ).length;
 
   // Group orders by status for Kanban view
   const ordersByStatus = {
-    pending: channelFilteredOrders.filter((o) => o.status === OrderStatus.PENDING),
-    preparing: channelFilteredOrders.filter((o) => o.status === OrderStatus.PREPARING),
+    pending: channelFilteredOrders.filter(
+      (o) => o.status === OrderStatus.PENDING,
+    ),
+    preparing: channelFilteredOrders.filter(
+      (o) => o.status === OrderStatus.PREPARING,
+    ),
     ready: channelFilteredOrders.filter((o) => o.status === OrderStatus.READY),
   };
 
@@ -317,19 +330,21 @@ export function KitchenDisplaySystem({
             <div className="flex items-center gap-1 rounded-xl border border-border bg-card/90 p-1 shadow-inner">
               <button
                 onClick={() => setView("kanban")}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${view === "kanban"
-                  ? "bg-amber-500 text-zinc-950 shadow-md"
-                  : "text-text-light/60 hover:text-text-light"
-                  }`}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${
+                  view === "kanban"
+                    ? "bg-amber-500 text-zinc-950 shadow-md"
+                    : "text-text-light/60 hover:text-text-light"
+                }`}
               >
                 <LayoutGrid className="h-4 w-4" /> Vista Kanban
               </button>
               <button
                 onClick={() => setView("batching")}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${view === "batching"
-                  ? "bg-amber-500 text-zinc-950 shadow-md"
-                  : "text-text-light/60 hover:text-text-light"
-                  }`}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${
+                  view === "batching"
+                    ? "bg-amber-500 text-zinc-950 shadow-md"
+                    : "text-text-light/60 hover:text-text-light"
+                }`}
               >
                 <Layers className="h-4 w-4" /> Vista Lotes
               </button>

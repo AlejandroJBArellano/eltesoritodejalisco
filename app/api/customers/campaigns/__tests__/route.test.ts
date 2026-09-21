@@ -3,7 +3,12 @@ import { filterCampaignAudience, GET, POST } from "../route";
 import { NextRequest } from "next/server";
 import type { Tables } from "@/types/supabase";
 
-const { mockSupabaseFrom, mockSendLoyaltyCampaignEmail, mockGetProfile, mockGetTenantContext } = vi.hoisted(() => {
+const {
+  mockSupabaseFrom,
+  mockSendLoyaltyCampaignEmail,
+  mockGetProfile,
+  mockGetTenantContext,
+} = vi.hoisted(() => {
   const mockFrom = vi.fn();
   const mockSendLoyaltyCampaignEmail = vi.fn();
   const mockGetProfile = vi.fn();
@@ -189,10 +194,13 @@ describe("app/api/customers/campaigns", () => {
         role: "WAITER",
       });
 
-      const req = new NextRequest("http://localhost:3000/api/customers/campaigns", {
-        method: "POST",
-        body: JSON.stringify({ name: "Campaña" }),
-      });
+      const req = new NextRequest(
+        "http://localhost:3000/api/customers/campaigns",
+        {
+          method: "POST",
+          body: JSON.stringify({ name: "Campaña" }),
+        },
+      );
 
       const res = await POST(req);
       expect(res.status).toBe(403);
@@ -202,7 +210,12 @@ describe("app/api/customers/campaigns", () => {
       const mockSelectCustomers = vi.fn().mockReturnValue({
         eq: vi.fn().mockResolvedValue({
           data: [
-            { id: "c1", name: "Ana", email: "ana@example.com", loyalty_points: 50 },
+            {
+              id: "c1",
+              name: "Ana",
+              email: "ana@example.com",
+              loyalty_points: 50,
+            },
           ],
         }),
       });
@@ -220,19 +233,23 @@ describe("app/api/customers/campaigns", () => {
       mockSupabaseFrom.mockImplementation((table: string) => {
         if (table === "customers") return { select: mockSelectCustomers };
         if (table === "orders") return { select: mockSelectOrders };
-        if (table === "loyalty_campaign_recipients") return { select: mockSelectRecipients };
+        if (table === "loyalty_campaign_recipients")
+          return { select: mockSelectRecipients };
         return { select: vi.fn() };
       });
 
-      const req = new NextRequest("http://localhost:3000/api/customers/campaigns", {
-        method: "POST",
-        body: JSON.stringify({
-          name: "Prueba Preview",
-          subject: "Asunto",
-          messageContent: "Mensaje",
-          previewOnly: true,
-        }),
-      });
+      const req = new NextRequest(
+        "http://localhost:3000/api/customers/campaigns",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            name: "Prueba Preview",
+            subject: "Asunto",
+            messageContent: "Mensaje",
+            previewOnly: true,
+          }),
+        },
+      );
 
       const res = await POST(req);
       const json = await res.json();

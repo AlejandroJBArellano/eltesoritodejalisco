@@ -51,16 +51,16 @@ export function ShiftModal({
   users,
 }: ShiftModalProps) {
   const [userId, setUserId] = useState<string>(
-    initialShift?.user_id || defaultUserId || (users[0]?.id ?? "")
+    initialShift?.user_id || defaultUserId || (users[0]?.id ?? ""),
   );
   const [date, setDate] = useState<string>(
-    initialShift?.date || defaultDate || new Date().toISOString().split("T")[0]
+    initialShift?.date || defaultDate || new Date().toISOString().split("T")[0],
   );
   const [startTime, setStartTime] = useState<string>(
-    initialShift?.start_time ? initialShift.start_time.slice(0, 5) : "08:00"
+    initialShift?.start_time ? initialShift.start_time.slice(0, 5) : "08:00",
   );
   const [endTime, setEndTime] = useState<string>(
-    initialShift?.end_time ? initialShift.end_time.slice(0, 5) : "16:00"
+    initialShift?.end_time ? initialShift.end_time.slice(0, 5) : "16:00",
   );
   const [area, setArea] = useState<string>(initialShift?.area || "");
   const [notes, setNotes] = useState<string>(initialShift?.notes || "");
@@ -73,8 +73,12 @@ export function ShiftModal({
     if (initialShift) {
       setUserId(initialShift.user_id);
       setDate(initialShift.date);
-      setStartTime(initialShift.start_time ? initialShift.start_time.slice(0, 5) : "08:00");
-      setEndTime(initialShift.end_time ? initialShift.end_time.slice(0, 5) : "16:00");
+      setStartTime(
+        initialShift.start_time ? initialShift.start_time.slice(0, 5) : "08:00",
+      );
+      setEndTime(
+        initialShift.end_time ? initialShift.end_time.slice(0, 5) : "16:00",
+      );
       setArea(initialShift.area || "");
       setNotes(initialShift.notes || "");
     } else {
@@ -129,7 +133,9 @@ export function ShiftModal({
       });
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al guardar el turno");
+      setError(
+        err instanceof Error ? err.message : "Error al guardar el turno",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -137,7 +143,8 @@ export function ShiftModal({
 
   const handleDelete = async () => {
     if (!initialShift?.id || !onDelete) return;
-    if (!window.confirm("¿Seguro que deseas eliminar este turno asignado?")) return;
+    if (!window.confirm("¿Seguro que deseas eliminar este turno asignado?"))
+      return;
 
     try {
       setIsDeleting(true);
@@ -145,7 +152,9 @@ export function ShiftModal({
       await onDelete(initialShift.id);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al eliminar el turno");
+      setError(
+        err instanceof Error ? err.message : "Error al eliminar el turno",
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -188,9 +197,12 @@ export function ShiftModal({
                 <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
                   <div className="flex-1">
-                    <p className="font-bold">No hay colaboradores registrados.</p>
+                    <p className="font-bold">
+                      No hay colaboradores registrados.
+                    </p>
                     <p className="text-[11px] text-amber-400/80 mt-0.5">
-                      Registra colaboradores en el panel de usuarios para asignarles horarios.
+                      Registra colaboradores en el panel de usuarios para
+                      asignarles horarios.
                     </p>
                   </div>
                 </div>
@@ -356,7 +368,8 @@ export function ShiftModal({
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Guardando...
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />{" "}
+                    Guardando...
                   </>
                 ) : (
                   <>

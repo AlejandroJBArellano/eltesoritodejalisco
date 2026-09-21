@@ -51,7 +51,9 @@ describe("SettingsForm Component", () => {
     expect(screen.getByDisplayValue("XAXX010101000")).toBeInTheDocument();
     expect(screen.getByDisplayValue("06000")).toBeInTheDocument();
     expect(screen.getByDisplayValue("626 - RESICO")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("https://maps.app.goo.gl/example")).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue("https://maps.app.goo.gl/example"),
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue("@elsol_restaurante")).toBeInTheDocument();
     expect(screen.getByText("Colores de Marca")).toBeInTheDocument();
     expect(screen.getByText("Programa de Lealtad (CRM)")).toBeInTheDocument();
@@ -95,7 +97,9 @@ describe("SettingsForm Component", () => {
 
     render(<SettingsForm initialTenant={mockTenant} />);
 
-    const submitBtns = screen.getAllByRole("button", { name: /Guardar Cambios/i });
+    const submitBtns = screen.getAllByRole("button", {
+      name: /Guardar Cambios/i,
+    });
     fireEvent.click(submitBtns[0]);
 
     await waitFor(() => {
@@ -113,7 +117,9 @@ describe("SettingsForm Component", () => {
 
     render(<SettingsForm initialTenant={mockTenant} />);
 
-    const submitBtns = screen.getAllByRole("button", { name: /Guardar Cambios/i });
+    const submitBtns = screen.getAllByRole("button", {
+      name: /Guardar Cambios/i,
+    });
     fireEvent.click(submitBtns[0]);
 
     await waitFor(() => {

@@ -18,7 +18,8 @@ export interface ReportsPeriodFilterProps {
 export function ReportsPeriodFilter(props: ReportsPeriodFilterProps = {}) {
   const context = useReportsContextNullable();
   const period = props.period ?? context?.period ?? "7days";
-  const onPeriodChange = props.onPeriodChange ?? context?.handlePeriodChange ?? (() => {});
+  const onPeriodChange =
+    props.onPeriodChange ?? context?.handlePeriodChange ?? (() => {});
   const customStartDate =
     props.customStartDate ?? context?.customStartDate ?? "";
   const customEndDate = props.customEndDate ?? context?.customEndDate ?? "";
@@ -32,7 +33,8 @@ export function ReportsPeriodFilter(props: ReportsPeriodFilterProps = {}) {
     <section className="rounded-2xl bg-card p-6 shadow-sm border border-border">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xs font-extrabold text-text-light/50 uppercase tracking-widest flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-primary" /> Filtro de Período y Fechas
+          <Calendar className="h-4 w-4 text-primary" /> Filtro de Período y
+          Fechas
         </h2>
       </div>
 

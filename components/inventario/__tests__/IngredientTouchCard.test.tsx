@@ -24,7 +24,7 @@ describe("IngredientTouchCard Component", () => {
       <IngredientTouchCard
         ingredient={baseIngredient}
         onAction={handleAction}
-      />
+      />,
     );
 
     expect(screen.getByText("Carne para Birria")).toBeInTheDocument();
@@ -44,12 +44,7 @@ describe("IngredientTouchCard Component", () => {
       costPerUnit: undefined,
     };
 
-    render(
-      <IngredientTouchCard
-        ingredient={zeroMinIng}
-        onAction={vi.fn()}
-      />
-    );
+    render(<IngredientTouchCard ingredient={zeroMinIng} onAction={vi.fn()} />);
 
     expect(screen.getByText("8.00")).toBeInTheDocument();
     expect(screen.getByText("Normal")).toBeInTheDocument();
@@ -63,12 +58,7 @@ describe("IngredientTouchCard Component", () => {
       minimumStock: 5.0,
     };
 
-    render(
-      <IngredientTouchCard
-        ingredient={lowStockIng}
-        onAction={vi.fn()}
-      />
-    );
+    render(<IngredientTouchCard ingredient={lowStockIng} onAction={vi.fn()} />);
 
     expect(screen.getByText("Stock Bajo")).toBeInTheDocument();
     expect(screen.getByText("4.00")).toBeInTheDocument();
@@ -83,12 +73,7 @@ describe("IngredientTouchCard Component", () => {
       costPerUnit: undefined,
     };
 
-    render(
-      <IngredientTouchCard
-        ingredient={outStockIng}
-        onAction={vi.fn()}
-      />
-    );
+    render(<IngredientTouchCard ingredient={outStockIng} onAction={vi.fn()} />);
 
     expect(screen.getByText("Agotado")).toBeInTheDocument();
     expect(screen.getByText("0.00")).toBeInTheDocument();
@@ -102,7 +87,7 @@ describe("IngredientTouchCard Component", () => {
       <IngredientTouchCard
         ingredient={baseIngredient}
         onAction={handleAction}
-      />
+      />,
     );
 
     // Click Entrada

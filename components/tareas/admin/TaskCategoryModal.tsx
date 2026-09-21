@@ -24,9 +24,10 @@ export function TaskCategoryModal(props: TaskCategoryModalProps) {
   const onCategoryNameChange =
     props.onCategoryNameChange ?? context?.setNewCategoryName ?? (() => {});
   const onSubmit =
-    props.onSubmit ?? context?.handleCreateCategory ?? ((e) => e.preventDefault());
-  const isLoading =
-    props.isLoading ?? (context?.loading === "cat");
+    props.onSubmit ??
+    context?.handleCreateCategory ??
+    ((e) => e.preventDefault());
+  const isLoading = props.isLoading ?? context?.loading === "cat";
 
   return (
     <Modal

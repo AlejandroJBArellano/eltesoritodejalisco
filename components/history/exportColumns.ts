@@ -23,7 +23,8 @@ export const ORDERS_EXPORT_COLUMNS: ExportColumn<Order>[] = [
   },
   {
     header: "Mesa/Tipo",
-    accessor: (o) => o.table || (o.source === "PICKUP_APP" ? "Pickup" : "Para Llevar"),
+    accessor: (o) =>
+      o.table || (o.source === "PICKUP_APP" ? "Pickup" : "Para Llevar"),
   },
   {
     header: "Fecha/Hora de Completado",
@@ -77,7 +78,8 @@ export const ORDERS_EXPORT_COLUMNS: ExportColumn<Order>[] = [
   },
   {
     header: "Total",
-    accessor: (o) => `$${(Number(o.total || 0) + getOrderTipAmount(o)).toFixed(2)}`,
+    accessor: (o) =>
+      `$${(Number(o.total || 0) + getOrderTipAmount(o)).toFixed(2)}`,
   },
   { header: "Estado", key: "status" },
   {

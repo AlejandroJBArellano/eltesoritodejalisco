@@ -59,7 +59,7 @@ describe("CustomerAccountTicket Component", () => {
         customer={mockCustomer}
         pendingNotes={mockPendingNotes}
         totalDebt={450.0}
-      />
+      />,
     );
 
     expect(screen.getByText("EL TESORITO DE JALISCO")).toBeInTheDocument();
@@ -94,7 +94,7 @@ describe("CustomerAccountTicket Component", () => {
         pendingNotes={mockPendingNotes}
         totalDebt={450.0}
         lastPayment={lastPayment}
-      />
+      />,
     );
 
     expect(screen.getByText("Último Abono Registrado")).toBeInTheDocument();
@@ -109,7 +109,7 @@ describe("CustomerAccountTicket Component", () => {
         customer={mockCustomer}
         pendingNotes={mockPendingNotes}
         totalDebt={450.0}
-      />
+      />,
     );
 
     const printButton = screen.getByRole("button", {
@@ -126,7 +126,7 @@ describe("CustomerAccountTicket Component", () => {
         customer={mockCustomer}
         pendingNotes={mockPendingNotes}
         totalDebt={450.0}
-      />
+      />,
     );
 
     const waLink = screen.getByRole("link", { name: /Enviar por WhatsApp/i });
@@ -148,12 +148,12 @@ describe("CustomerAccountTicket Component", () => {
         customer={customerNoPhone}
         pendingNotes={[]}
         totalDebt={0}
-      />
+      />,
     );
 
     expect(screen.getByText(/Pedro Sin Teléfono/i)).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /Enviar por WhatsApp/i })
+      screen.queryByRole("link", { name: /Enviar por WhatsApp/i }),
     ).not.toBeInTheDocument();
     expect(screen.getByText("Sin notas pendientes")).toBeInTheDocument();
   });

@@ -33,14 +33,16 @@ async function getCustomers(): Promise<Customer[]> {
   // Obtener órdenes UNCOLLECTED para calcular deuda
   const { data: unpaidOrders } = await supabase
     .from("orders")
-    .select(`
+    .select(
+      `
       id,
       customer_id,
       total,
       payments (
         amount
       )
-    `)
+    `,
+    )
     .eq("tenant_id", tenant.id)
     .eq("status", "UNCOLLECTED")
     .not("customer_id", "is", null);
@@ -52,7 +54,7 @@ async function getCustomers(): Promise<Customer[]> {
     if (!order.customer_id) return;
     const totalPaid = (order.payments || []).reduce(
       (sum, p) => sum + Number(p.amount || 0),
-      0
+      0,
     );
     const balance = Math.max(0, Number(order.total || 0) - totalPaid);
     if (balance > 0) {

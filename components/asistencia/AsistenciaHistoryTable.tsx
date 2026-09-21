@@ -98,10 +98,7 @@ export function AsistenciaHistoryTable() {
             </thead>
             <tbody className="divide-y divide-border">
               {paginatedAttendances.map((rec) => (
-                <tr
-                  key={rec.id}
-                  className="hover:bg-white/2 transition-colors"
-                >
+                <tr key={rec.id} className="hover:bg-white/2 transition-colors">
                   <td className="py-3.5 px-3">
                     <span className="font-bold text-text-light uppercase">
                       {rec.users?.name || "Desconocido"}
@@ -144,7 +141,8 @@ export function AsistenciaHistoryTable() {
                     colSpan={7}
                     className="py-12 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest"
                   >
-                    No se encontraron registros de asistencia con los filtros seleccionados.
+                    No se encontraron registros de asistencia con los filtros
+                    seleccionados.
                   </td>
                 </tr>
               )}

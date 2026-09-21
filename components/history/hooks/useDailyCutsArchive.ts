@@ -16,7 +16,9 @@ export function useDailyCutsArchive(options: UseDailyCutsArchiveOptions = {}) {
   const [cutsSortDir, setCutsSortDir] = useState<"asc" | "desc">("desc");
   const [cutsPage, setCutsPage] = useState(1);
   const [cutsPageSize, setCutsPageSize] = useState(10);
-  const [selectedCutDetail, setSelectedCutDetail] = useState<DailyCut | null>(null);
+  const [selectedCutDetail, setSelectedCutDetail] = useState<DailyCut | null>(
+    null,
+  );
 
   const fetchDailyCuts = useCallback(async () => {
     try {

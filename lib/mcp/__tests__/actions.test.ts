@@ -99,7 +99,10 @@ describe("lib/mcp/actions", () => {
     it("should handle database insert errors", async () => {
       mockGetProfile.mockResolvedValueOnce({ id: "u-1", role: "ADMIN" });
       mockGetTenantContext.mockResolvedValueOnce({ id: "tenant-1" });
-      mockSingle.mockResolvedValueOnce({ data: null, error: { message: "DB Error" } });
+      mockSingle.mockResolvedValueOnce({
+        data: null,
+        error: { message: "DB Error" },
+      });
 
       const res = await createTenantApiKeyAction();
       expect(res.error).toBe("Error al generar la API key");
@@ -117,7 +120,16 @@ describe("lib/mcp/actions", () => {
       mockGetProfile.mockResolvedValueOnce({ id: "u-1", role: "MANAGER" });
       mockGetTenantContext.mockResolvedValueOnce({ id: "tenant-1" });
       mockOrder.mockResolvedValueOnce({
-        data: [{ id: "key-1", name: "MCP", key_prefix: "kt_live_...", scopes: [], last_used_at: null, created_at: "2026-09-21" }],
+        data: [
+          {
+            id: "key-1",
+            name: "MCP",
+            key_prefix: "kt_live_...",
+            scopes: [],
+            last_used_at: null,
+            created_at: "2026-09-21",
+          },
+        ],
         error: null,
       });
 
@@ -129,7 +141,10 @@ describe("lib/mcp/actions", () => {
     it("should handle error when querying keys", async () => {
       mockGetProfile.mockResolvedValueOnce({ id: "u-1", role: "ADMIN" });
       mockGetTenantContext.mockResolvedValueOnce({ id: "tenant-1" });
-      mockOrder.mockResolvedValueOnce({ data: null, error: { message: "Query error" } });
+      mockOrder.mockResolvedValueOnce({
+        data: null,
+        error: { message: "Query error" },
+      });
 
       const res = await listTenantApiKeysAction();
       expect(res.error).toBe("Error al listar las claves");
@@ -146,7 +161,9 @@ describe("lib/mcp/actions", () => {
     it("should revoke key successfully for admin", async () => {
       mockGetProfile.mockResolvedValueOnce({ id: "u-1", role: "ADMIN" });
       mockGetTenantContext.mockResolvedValueOnce({ id: "tenant-1" });
-      mockEq.mockReturnValueOnce({ eq: vi.fn().mockResolvedValueOnce({ error: null }) });
+      mockEq.mockReturnValueOnce({
+        eq: vi.fn().mockResolvedValueOnce({ error: null }),
+      });
 
       const res = await revokeTenantApiKeyAction("k-1");
       expect(res.success).toBe(true);
@@ -155,7 +172,9 @@ describe("lib/mcp/actions", () => {
     it("should handle db error on revoke", async () => {
       mockGetProfile.mockResolvedValueOnce({ id: "u-1", role: "ADMIN" });
       mockGetTenantContext.mockResolvedValueOnce({ id: "tenant-1" });
-      mockEq.mockReturnValueOnce({ eq: vi.fn().mockResolvedValueOnce({ error: { message: "Delete err" } }) });
+      mockEq.mockReturnValueOnce({
+        eq: vi.fn().mockResolvedValueOnce({ error: { message: "Delete err" } }),
+      });
 
       const res = await revokeTenantApiKeyAction("k-1");
       expect(res.error).toBe("Error al revocar la API key");

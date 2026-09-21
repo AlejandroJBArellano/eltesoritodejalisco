@@ -81,7 +81,9 @@ describe("PUT /api/orders/[id]", () => {
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
-                single: vi.fn().mockResolvedValue({ data: mockOrder, error: null }),
+                single: vi
+                  .fn()
+                  .mockResolvedValue({ data: mockOrder, error: null }),
               }),
             }),
           }),
@@ -125,17 +127,22 @@ describe("PUT /api/orders/[id]", () => {
     } as any);
 
     // Mandamos solo item-1 e item-3; item-2 (papulince x4) fue eliminado
-    const request = new NextRequest("http://localhost:3000/api/orders/order-123", {
-      method: "PUT",
-      body: JSON.stringify({
-        items: [
-          { id: "item-1", quantity: 1 },
-          { id: "item-3", quantity: 8 },
-        ],
-      }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/orders/order-123",
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          items: [
+            { id: "item-1", quantity: 1 },
+            { id: "item-3", quantity: 8 },
+          ],
+        }),
+      },
+    );
 
-    const response = await PUT(request, { params: Promise.resolve({ id: "order-123" }) });
+    const response = await PUT(request, {
+      params: Promise.resolve({ id: "order-123" }),
+    });
     expect(response.status).toBe(200);
 
     // Debe registrar la acción con el nombre del producto y omitir authorizedBy
@@ -177,7 +184,9 @@ describe("PUT /api/orders/[id]", () => {
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
-                single: vi.fn().mockResolvedValue({ data: mockOrder, error: null }),
+                single: vi
+                  .fn()
+                  .mockResolvedValue({ data: mockOrder, error: null }),
               }),
             }),
           }),
@@ -221,14 +230,19 @@ describe("PUT /api/orders/[id]", () => {
     } as any);
 
     // Reducimos Coca Cola de 8 a 5 (diferencia de -3)
-    const request = new NextRequest("http://localhost:3000/api/orders/order-123", {
-      method: "PUT",
-      body: JSON.stringify({
-        items: [{ id: "item-3", quantity: 5 }],
-      }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/orders/order-123",
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          items: [{ id: "item-3", quantity: 5 }],
+        }),
+      },
+    );
 
-    const response = await PUT(request, { params: Promise.resolve({ id: "order-123" }) });
+    const response = await PUT(request, {
+      params: Promise.resolve({ id: "order-123" }),
+    });
     expect(response.status).toBe(200);
 
     expect(logOrderAction).toHaveBeenCalledWith(
@@ -271,7 +285,9 @@ describe("PUT /api/orders/[id]", () => {
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
-                single: vi.fn().mockResolvedValue({ data: mockOrder, error: null }),
+                single: vi
+                  .fn()
+                  .mockResolvedValue({ data: mockOrder, error: null }),
               }),
             }),
           }),
@@ -314,15 +330,20 @@ describe("PUT /api/orders/[id]", () => {
       from: mockFrom,
     } as any);
 
-    const request = new NextRequest("http://localhost:3000/api/orders/order-123", {
-      method: "PUT",
-      body: JSON.stringify({
-        items: [{ id: "item-1", quantity: 1 }],
-        pin: "1234",
-      }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/orders/order-123",
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          items: [{ id: "item-1", quantity: 1 }],
+          pin: "1234",
+        }),
+      },
+    );
 
-    const response = await PUT(request, { params: Promise.resolve({ id: "order-123" }) });
+    const response = await PUT(request, {
+      params: Promise.resolve({ id: "order-123" }),
+    });
     expect(response.status).toBe(200);
 
     expect(logOrderAction).toHaveBeenCalledWith(
@@ -371,12 +392,17 @@ describe("DELETE /api/orders/[id]", () => {
       from: mockFrom,
     } as any);
 
-    const request = new NextRequest("http://localhost:3000/api/orders/order-123", {
-      method: "DELETE",
-      body: JSON.stringify({ reason: "Cancelado por error de mesa" }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/orders/order-123",
+      {
+        method: "DELETE",
+        body: JSON.stringify({ reason: "Cancelado por error de mesa" }),
+      },
+    );
 
-    const response = await DELETE(request, { params: Promise.resolve({ id: "order-123" }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: "order-123" }),
+    });
     expect(response.status).toBe(200);
 
     expect(logOrderAction).toHaveBeenCalledWith(

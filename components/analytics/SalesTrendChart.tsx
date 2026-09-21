@@ -54,7 +54,8 @@ export function SalesTrendChart({
             Evolución Diaria de Ventas
           </h2>
           <p className="text-xs text-text-light/60 mt-1 font-medium">
-            Tendencia de facturación día a día. Haz clic en cualquier barra para ver el drill-down de productos vendidos ese día.
+            Tendencia de facturación día a día. Haz clic en cualquier barra para
+            ver el drill-down de productos vendidos ese día.
           </p>
         </div>
         {selectedDay && (
@@ -81,7 +82,8 @@ export function SalesTrendChart({
           >
             {/* Gridlines and Y-axis labels */}
             {yTicks.map((tick, i) => {
-              const y = paddingTop + innerHeight - (tick / maxVal) * innerHeight;
+              const y =
+                paddingTop + innerHeight - (tick / maxVal) * innerHeight;
               return (
                 <g key={`ytick-${i}`}>
                   <line
@@ -113,7 +115,10 @@ export function SalesTrendChart({
               const barWidth = Math.min(Math.max(slotWidth * 0.6, 12), 48);
               const xCenter = paddingLeft + (index + 0.5) * slotWidth;
               const barX = xCenter - barWidth / 2;
-              const barHeight = Math.max((entry.total / maxVal) * innerHeight, 2);
+              const barHeight = Math.max(
+                (entry.total / maxVal) * innerHeight,
+                2,
+              );
               const barY = paddingTop + innerHeight - barHeight;
               const isSelected = selectedDay === entry.date;
               const isHovered = hoveredIndex === index;
@@ -128,9 +133,7 @@ export function SalesTrendChart({
                 <g
                   key={entry.date}
                   className="cursor-pointer transition-opacity"
-                  onClick={() =>
-                    onSelectDay(isSelected ? null : entry.date)
-                  }
+                  onClick={() => onSelectDay(isSelected ? null : entry.date)}
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                 >
@@ -165,8 +168,7 @@ export function SalesTrendChart({
               style={{
                 left: `${
                   ((paddingLeft +
-                    (hoveredIndex + 0.5) *
-                      (innerWidth / chartData.length)) /
+                    (hoveredIndex + 0.5) * (innerWidth / chartData.length)) /
                     svgWidth) *
                   100
                 }%`,

@@ -10,7 +10,7 @@ export function POSTipModal() {
   const isWaiter = user?.isWaiter ?? false;
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  const { refreshOrders } = usePOSData()
+  const { refreshOrders } = usePOSData();
 
   const {
     isSubmittingCheckout,
@@ -73,30 +73,33 @@ export function POSTipModal() {
                   setEditTipType("NONE");
                   setEditTipInput("");
                 }}
-                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${editTipType === "NONE"
-                  ? "bg-primary/20 border-primary text-primary"
-                  : "border-border text-text-light/60 bg-white/5 hover:border-border"
-                  }`}
+                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${
+                  editTipType === "NONE"
+                    ? "bg-primary/20 border-primary text-primary"
+                    : "border-border text-text-light/60 bg-white/5 hover:border-border"
+                }`}
               >
                 Sin Propina
               </button>
               <button
                 type="button"
                 onClick={() => setEditTipType("PERCENTAGE")}
-                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${editTipType === "PERCENTAGE"
-                  ? "bg-primary/20 border-primary text-primary"
-                  : "border-border text-text-light/60 bg-white/5 hover:border-border"
-                  }`}
+                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${
+                  editTipType === "PERCENTAGE"
+                    ? "bg-primary/20 border-primary text-primary"
+                    : "border-border text-text-light/60 bg-white/5 hover:border-border"
+                }`}
               >
                 %
               </button>
               <button
                 type="button"
                 onClick={() => setEditTipType("FIXED")}
-                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${editTipType === "FIXED"
-                  ? "bg-primary/20 border-primary text-primary"
-                  : "border-border text-text-light/60 bg-white/5 hover:border-border"
-                  }`}
+                className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border transition-all ${
+                  editTipType === "FIXED"
+                    ? "bg-primary/20 border-primary text-primary"
+                    : "border-border text-text-light/60 bg-white/5 hover:border-border"
+                }`}
               >
                 $ Fijo
               </button>
@@ -111,10 +114,11 @@ export function POSTipModal() {
                     setEditTipType("PERCENTAGE");
                     setEditTipInput(pct);
                   }}
-                  className={`py-2 text-xs rounded-xl font-black uppercase border transition-all ${editTipType === "PERCENTAGE" && editTipInput === pct
-                    ? "bg-primary text-black border-primary"
-                    : "border-border text-text-light/60 bg-white/5 hover:border-border"
-                    }`}
+                  className={`py-2 text-xs rounded-xl font-black uppercase border transition-all ${
+                    editTipType === "PERCENTAGE" && editTipInput === pct
+                      ? "bg-primary text-black border-primary"
+                      : "border-border text-text-light/60 bg-white/5 hover:border-border"
+                  }`}
                 >
                   {pct}%
                 </button>

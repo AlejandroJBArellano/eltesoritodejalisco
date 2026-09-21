@@ -19,7 +19,7 @@ describe("POSManagerAuthModal", () => {
         onClose={mockOnClose}
         title="Autorizar Cancelación"
         onAuthorize={mockOnAuthorize}
-      />
+      />,
     );
     expect(screen.queryByText("Autorizar Cancelación")).not.toBeInTheDocument();
   });
@@ -32,13 +32,17 @@ describe("POSManagerAuthModal", () => {
         title="Autorizar Cancelación"
         description="Se requiere autorización para continuar"
         onAuthorize={mockOnAuthorize}
-      />
+      />,
     );
 
     expect(screen.getByText("Autorizar Cancelación")).toBeInTheDocument();
-    expect(screen.getByText("Se requiere autorización para continuar")).toBeInTheDocument();
+    expect(
+      screen.getByText("Se requiere autorización para continuar"),
+    ).toBeInTheDocument();
     expect(screen.getByPlaceholderText("••••")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Error de captura" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Error de captura" }),
+    ).toBeInTheDocument();
   });
 
   it("shows error when submitting without entering PIN", async () => {
@@ -48,7 +52,7 @@ describe("POSManagerAuthModal", () => {
         onClose={mockOnClose}
         title="Autorizar Cancelación"
         onAuthorize={mockOnAuthorize}
-      />
+      />,
     );
 
     const submitBtn = screen.getByRole("button", { name: "Autorizar" });
@@ -57,14 +61,19 @@ describe("POSManagerAuthModal", () => {
     fireEvent.change(input, { target: { value: " " } });
     fireEvent.submit(input.closest("form")!);
 
-    expect(await screen.findByText("Ingresa el PIN de autorización")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Ingresa el PIN de autorización"),
+    ).toBeInTheDocument();
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it("displays error message if verify-pin returns invalid", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: false,
-      json: async () => ({ valid: false, error: "PIN de autorización incorrecto" }),
+      json: async () => ({
+        valid: false,
+        error: "PIN de autorización incorrecto",
+      }),
     });
 
     render(
@@ -73,14 +82,16 @@ describe("POSManagerAuthModal", () => {
         onClose={mockOnClose}
         title="Autorizar Cancelación"
         onAuthorize={mockOnAuthorize}
-      />
+      />,
     );
 
     const input = screen.getByPlaceholderText("••••");
     fireEvent.change(input, { target: { value: "9999" } });
     fireEvent.click(screen.getByRole("button", { name: "Autorizar" }));
 
-    expect(await screen.findByText("PIN de autorización incorrecto")).toBeInTheDocument();
+    expect(
+      await screen.findByText("PIN de autorización incorrecto"),
+    ).toBeInTheDocument();
     expect(mockOnAuthorize).not.toHaveBeenCalled();
     expect(mockOnClose).not.toHaveBeenCalled();
   });
@@ -100,7 +111,7 @@ describe("POSManagerAuthModal", () => {
         onClose={mockOnClose}
         title="Autorizar Cancelación"
         onAuthorize={mockOnAuthorize}
-      />
+      />,
     );
 
     // Select a quick reason
@@ -137,12 +148,16 @@ describe("POSManagerAuthModal", () => {
         onClose={mockOnClose}
         title="Autorizar Cancelación"
         onAuthorize={mockOnAuthorize}
-      />
+      />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Otro" }));
-    const customReasonInput = screen.getByPlaceholderText("Especifica el motivo...");
-    fireEvent.change(customReasonInput, { target: { value: "Mesa se cambió de lugar" } });
+    const customReasonInput = screen.getByPlaceholderText(
+      "Especifica el motivo...",
+    );
+    fireEvent.change(customReasonInput, {
+      target: { value: "Mesa se cambió de lugar" },
+    });
 
     const pinInput = screen.getByPlaceholderText("••••");
     fireEvent.change(pinInput, { target: { value: "1234" } });
@@ -164,7 +179,7 @@ describe("POSManagerAuthModal", () => {
         onClose={mockOnClose}
         title="Autorizar Cancelación"
         onAuthorize={mockOnAuthorize}
-      />
+      />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
@@ -175,7 +190,9 @@ describe("POSManagerAuthModal", () => {
   });
 
   it("handles network error during pin verification", async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("Network Error"));
+    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error("Network Error"),
+    );
 
     render(
       <POSManagerAuthModal
@@ -183,13 +200,15 @@ describe("POSManagerAuthModal", () => {
         onClose={mockOnClose}
         title="Autorizar Cancelación"
         onAuthorize={mockOnAuthorize}
-      />
+      />,
     );
 
     const input = screen.getByPlaceholderText("••••");
     fireEvent.change(input, { target: { value: "1234" } });
     fireEvent.click(screen.getByRole("button", { name: "Autorizar" }));
 
-    expect(await screen.findByText("Error al verificar PIN de autorización")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Error al verificar PIN de autorización"),
+    ).toBeInTheDocument();
   });
 });

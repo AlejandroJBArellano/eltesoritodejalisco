@@ -9,7 +9,11 @@ export interface POSManagerAuthModalProps {
   title: string;
   description?: string;
   reasonPresets?: string[];
-  onAuthorize: (auth: { pin: string; reason?: string; managerName?: string }) => Promise<void> | void;
+  onAuthorize: (auth: {
+    pin: string;
+    reason?: string;
+    managerName?: string;
+  }) => Promise<void> | void;
   isSubmitting?: boolean;
 }
 

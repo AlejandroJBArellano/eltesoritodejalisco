@@ -12,7 +12,7 @@ describe("ReportsContext", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     expect(() => renderHook(() => useReportsContext())).toThrow(
-      "useReportsContext must be used within a ReportsProvider"
+      "useReportsContext must be used within a ReportsProvider",
     );
 
     consoleSpy.mockRestore();

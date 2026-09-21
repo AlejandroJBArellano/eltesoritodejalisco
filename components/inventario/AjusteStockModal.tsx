@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import {
-  X,
-  Plus,
-  Minus,
-  Package,
-  Loader2,
-} from "lucide-react";
+import { X, Plus, Minus, Package, Loader2 } from "lucide-react";
 import type { Ingredient } from "@/types";
 
 const RAZONES = [

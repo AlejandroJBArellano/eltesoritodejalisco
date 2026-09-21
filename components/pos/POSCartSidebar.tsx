@@ -1,7 +1,12 @@
 import { isMixedOrderItem, usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
-import { Customer, MenuItem, OrderFormState, OrderServiceType } from "@/types/pos";
+import {
+  Customer,
+  MenuItem,
+  OrderFormState,
+  OrderServiceType,
+} from "@/types/pos";
 import {
   AlertTriangle,
   Bike,
@@ -18,10 +23,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { sourceOptions } from "../menu/types";
-import {
-  POSDiscountModal,
-  DiscountData,
-} from "./modals/POSDiscountModal";
+import { POSDiscountModal, DiscountData } from "./modals/POSDiscountModal";
 import {
   calculateItemDiscount,
   formatDiscountBadge,
@@ -44,11 +46,7 @@ export interface POSCartSidebarProps {
 }
 
 export function POSCartSidebar() {
-  const {
-    availableMenuItems,
-    customers,
-    refreshOrders,
-  } = usePOSData();
+  const { availableMenuItems, customers, refreshOrders } = usePOSData();
 
   const {
     formState,
@@ -77,9 +75,7 @@ export function POSCartSidebar() {
     total: 0,
   };
 
-  const {
-    isSubmittingCheckout,
-  } = usePOSCheckout(refreshOrders);
+  const { isSubmittingCheckout } = usePOSCheckout(refreshOrders);
   // Track which cart items have the note input expanded
   const [expandedNotes, setExpandedNotes] = useState<Set<number>>(new Set());
 
@@ -105,7 +101,9 @@ export function POSCartSidebar() {
       isOpen: true,
       isItem: true,
       itemIndex: index,
-      title: product?.name ? `Descuento: ${product.name}` : "Descuento en Producto",
+      title: product?.name
+        ? `Descuento: ${product.name}`
+        : "Descuento en Producto",
       subtitle: `$${(product?.price || 0).toFixed(2)} c/u`,
       itemQuantity: Number(item.quantity) || 1,
       initialDiscount: {
@@ -176,16 +174,21 @@ export function POSCartSidebar() {
           </div>
 
           {/* Selector de servicio: Comedor, Para Llevar, Domicilio */}
-          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Tipo de servicio">
+          <div
+            className="grid grid-cols-3 gap-2"
+            role="radiogroup"
+            aria-label="Tipo de servicio"
+          >
             <button
               type="button"
               role="radio"
               aria-checked={formState.serviceType === "COMEDOR"}
               onClick={() => handleServiceTypeChange?.("COMEDOR")}
-              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${formState.serviceType === "COMEDOR"
+              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${
+                formState.serviceType === "COMEDOR"
                   ? "bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/10"
                   : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
-                }`}
+              }`}
             >
               <Utensils className="h-3.5 w-3.5 shrink-0" />
               <span>COMEDOR</span>
@@ -196,10 +199,11 @@ export function POSCartSidebar() {
               role="radio"
               aria-checked={formState.serviceType === "PARA_LLEVAR"}
               onClick={() => handleServiceTypeChange?.("PARA_LLEVAR")}
-              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${formState.serviceType === "PARA_LLEVAR"
+              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${
+                formState.serviceType === "PARA_LLEVAR"
                   ? "bg-primary/20 border-primary text-primary shadow-sm shadow-primary/10"
                   : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
-                }`}
+              }`}
             >
               <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
               <span>LLEVAR</span>
@@ -210,10 +214,11 @@ export function POSCartSidebar() {
               role="radio"
               aria-checked={formState.serviceType === "DOMICILIO"}
               onClick={() => handleServiceTypeChange?.("DOMICILIO")}
-              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${formState.serviceType === "DOMICILIO"
+              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs font-black transition-all border outline-none cursor-pointer ${
+                formState.serviceType === "DOMICILIO"
                   ? "bg-secondary/20 border-secondary text-secondary shadow-sm shadow-secondary/10"
                   : "bg-white/5 border-transparent text-text-light/60 hover:border-border/15 hover:text-text-light"
-                }`}
+              }`}
             >
               <Bike className="h-3.5 w-3.5 shrink-0" />
               <span>DOMICILIO</span>
@@ -221,7 +226,9 @@ export function POSCartSidebar() {
           </div>
         </div>
 
-        <div className={`grid gap-4 ${formState.serviceType === "COMEDOR" ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
+        <div
+          className={`grid gap-4 ${formState.serviceType === "COMEDOR" ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}
+        >
           {formState.serviceType === "COMEDOR" && (
             <div>
               <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5">
@@ -262,10 +269,11 @@ export function POSCartSidebar() {
             <select
               value={formState.source}
               onChange={(e) => handleFormChange("source", e.target.value)}
-              className={`w-full rounded-xl border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none transition-colors ${formErrors.source
-                ? "border-red-500/50 focus:border-red-400"
-                : "border-border focus:border-primary"
-                }`}
+              className={`w-full rounded-xl border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none transition-colors ${
+                formErrors.source
+                  ? "border-red-500/50 focus:border-red-400"
+                  : "border-border focus:border-primary"
+              }`}
             >
               {sourceOptions.map((s) => (
                 <option key={s} value={s}>
@@ -301,10 +309,11 @@ export function POSCartSidebar() {
             <button
               type="button"
               onClick={handleClearCart}
-              className={`text-[10px] font-black uppercase tracking-wider transition-all px-2.5 py-1 rounded-lg border ${clearCartArmed
-                ? "bg-red-500/20 border-red-500/50 text-red-400 animate-[pulse_0.5s_ease-in-out_infinite]"
-                : "border-transparent text-red-400/60 hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/10"
-                }`}
+              className={`text-[10px] font-black uppercase tracking-wider transition-all px-2.5 py-1 rounded-lg border ${
+                clearCartArmed
+                  ? "bg-red-500/20 border-red-500/50 text-red-400 animate-[pulse_0.5s_ease-in-out_infinite]"
+                  : "border-transparent text-red-400/60 hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/10"
+              }`}
             >
               {clearCartArmed ? "¿Confirmar?" : "Vaciar"}
             </button>
@@ -413,7 +422,10 @@ export function POSCartSidebar() {
                         {hasItemDiscount ? (
                           <div>
                             <span className="text-[10px] font-bold line-through text-text-light/40 mr-1 block">
-                              ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
+                              $
+                              {(
+                                (product?.price || 0) * Number(item.quantity)
+                              ).toFixed(2)}
                             </span>
                             <span className="font-black text-xs text-emerald-400 tabular-nums">
                               ${finalPrice.toFixed(2)}
@@ -421,7 +433,10 @@ export function POSCartSidebar() {
                           </div>
                         ) : (
                           <p className="font-black text-xs text-text-light tabular-nums">
-                            ${((product?.price || 0) * Number(item.quantity)).toFixed(2)}
+                            $
+                            {(
+                              (product?.price || 0) * Number(item.quantity)
+                            ).toFixed(2)}
                           </p>
                         )}
                       </div>
@@ -435,7 +450,11 @@ export function POSCartSidebar() {
                             ? "text-emerald-400 hover:text-emerald-300"
                             : "text-text-light/30 hover:text-primary"
                         }`}
-                        title={hasItemDiscount ? "Editar descuento" : "Descuento en producto"}
+                        title={
+                          hasItemDiscount
+                            ? "Editar descuento"
+                            : "Descuento en producto"
+                        }
                       >
                         <Percent className="h-3.5 w-3.5" />
                       </button>
@@ -522,7 +541,9 @@ export function POSCartSidebar() {
                 }`}
               >
                 <Tag className="h-3 w-3" />
-                {formState.discountType ? "Editar Descuento Orden" : "+ Descuento Orden"}
+                {formState.discountType
+                  ? "Editar Descuento Orden"
+                  : "+ Descuento Orden"}
               </button>
 
               {formState.discountType && (

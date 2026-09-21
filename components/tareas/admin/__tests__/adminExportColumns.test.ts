@@ -40,22 +40,32 @@ describe("adminExportColumns", () => {
     const dateCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Fecha");
     expect(dateCol?.accessor?.(mockExecution)).toBe("2026-09-03");
 
-    const catCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Categoría");
+    const catCol = EXECUTIONS_EXPORT_COLUMNS.find(
+      (c) => c.header === "Categoría",
+    );
     expect(catCol?.accessor?.(mockExecution)).toBe("Sin Categoría");
 
-    const statusCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Estado");
+    const statusCol = EXECUTIONS_EXPORT_COLUMNS.find(
+      (c) => c.header === "Estado",
+    );
     expect(statusCol?.accessor?.(mockExecution)).toBe("Listo para Aprobar");
 
     const taskCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Tarea");
     expect(taskCol?.accessor?.(mockExecution)).toBe("Limpieza profunda");
 
-    const userCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Colaborador");
+    const userCol = EXECUTIONS_EXPORT_COLUMNS.find(
+      (c) => c.header === "Colaborador",
+    );
     expect(userCol?.accessor?.(mockExecution)).toBe("Esteban Cocinero");
 
-    const durCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Duración (min)");
+    const durCol = EXECUTIONS_EXPORT_COLUMNS.find(
+      (c) => c.header === "Duración (min)",
+    );
     expect(durCol?.accessor?.(mockExecution)).toBe(45);
 
-    const appCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Aprobada");
+    const appCol = EXECUTIONS_EXPORT_COLUMNS.find(
+      (c) => c.header === "Aprobada",
+    );
     expect(appCol?.accessor?.(mockExecution)).toBe("Sí");
   });
 
@@ -86,19 +96,29 @@ describe("adminExportColumns", () => {
       },
     };
 
-    const catCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Categoría");
+    const catCol = EXECUTIONS_EXPORT_COLUMNS.find(
+      (c) => c.header === "Categoría",
+    );
     expect(catCol?.accessor?.(notDoneExec)).toBe("Almacén");
 
-    const statusCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Estado");
+    const statusCol = EXECUTIONS_EXPORT_COLUMNS.find(
+      (c) => c.header === "Estado",
+    );
     expect(statusCol?.accessor?.(notDoneExec)).toBe("No Realizada");
 
-    const userCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Colaborador");
+    const userCol = EXECUTIONS_EXPORT_COLUMNS.find(
+      (c) => c.header === "Colaborador",
+    );
     expect(userCol?.accessor?.(notDoneExec)).toBe("Sin Asignar");
 
-    const durCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Duración (min)");
+    const durCol = EXECUTIONS_EXPORT_COLUMNS.find(
+      (c) => c.header === "Duración (min)",
+    );
     expect(durCol?.accessor?.(notDoneExec)).toBe("N/A");
 
-    const appCol = EXECUTIONS_EXPORT_COLUMNS.find((c) => c.header === "Aprobada");
+    const appCol = EXECUTIONS_EXPORT_COLUMNS.find(
+      (c) => c.header === "Aprobada",
+    );
     expect(appCol?.accessor?.(notDoneExec)).toBe("No");
 
     // With explicit net_duration_minutes
@@ -119,10 +139,14 @@ describe("adminExportColumns", () => {
       avgDurationMinutes: 22,
     };
 
-    const nameCol = PERFORMANCE_EXPORT_COLUMNS.find((c) => c.header === "Colaborador");
+    const nameCol = PERFORMANCE_EXPORT_COLUMNS.find(
+      (c) => c.header === "Colaborador",
+    );
     expect(nameCol?.key).toBe("name");
 
-    const durCol = PERFORMANCE_EXPORT_COLUMNS.find((c) => c.header === "Duración Promedio (min)");
+    const durCol = PERFORMANCE_EXPORT_COLUMNS.find(
+      (c) => c.header === "Duración Promedio (min)",
+    );
     expect(durCol?.accessor?.(mockMetric)).toBe("22 min");
   });
 
@@ -145,13 +169,19 @@ describe("adminExportColumns", () => {
       },
     };
 
-    const catCol = TASKS_CONFIG_EXPORT_COLUMNS.find((c) => c.header === "Categoría");
+    const catCol = TASKS_CONFIG_EXPORT_COLUMNS.find(
+      (c) => c.header === "Categoría",
+    );
     expect(catCol?.accessor?.(mockTask)).toBe("Seguridad");
 
-    const timeCol = TASKS_CONFIG_EXPORT_COLUMNS.find((c) => c.header === "Tiempo Límite");
+    const timeCol = TASKS_CONFIG_EXPORT_COLUMNS.find(
+      (c) => c.header === "Tiempo Límite",
+    );
     expect(timeCol?.accessor?.(mockTask)).toBe("10 min");
 
-    const photoCol = TASKS_CONFIG_EXPORT_COLUMNS.find((c) => c.header === "Requiere Foto");
+    const photoCol = TASKS_CONFIG_EXPORT_COLUMNS.find(
+      (c) => c.header === "Requiere Foto",
+    );
     expect(photoCol?.accessor?.(mockTask)).toBe("No");
   });
 });

@@ -232,7 +232,9 @@ describe("PerformanceAnalyticsView Component", () => {
     render(<PerformanceAnalyticsView />);
 
     await waitFor(() => {
-      expect(screen.getByText("Error al Cargar Rendimiento")).toBeInTheDocument();
+      expect(
+        screen.getByText("Error al Cargar Rendimiento"),
+      ).toBeInTheDocument();
       expect(screen.getByText("Error en base de datos")).toBeInTheDocument();
     });
 
@@ -241,7 +243,9 @@ describe("PerformanceAnalyticsView Component", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Analítica de Rendimiento")).toBeInTheDocument();
-      expect(screen.getByText("Evolución del Ticket Promedio")).toBeInTheDocument();
+      expect(
+        screen.getByText("Evolución del Ticket Promedio"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -256,20 +260,30 @@ describe("PerformanceAnalyticsView Component", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Analítica de Rendimiento")).toBeInTheDocument();
-      expect(screen.getByText("Evolución del Ticket Promedio")).toBeInTheDocument();
-      expect(screen.getByText("Rendimiento por Día de la Semana")).toBeInTheDocument();
-      expect(screen.getByText("Ventas Mensuales (Últimos 12 Meses)")).toBeInTheDocument();
+      expect(
+        screen.getByText("Evolución del Ticket Promedio"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Rendimiento por Día de la Semana"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Ventas Mensuales (Últimos 12 Meses)"),
+      ).toBeInTheDocument();
     });
 
     // Switch period to "Hoy"
     const todayBtn = screen.getByRole("button", { name: "Hoy" });
     fireEvent.click(todayBtn);
-    expect(fetchMock).toHaveBeenCalledWith("/api/analytics/performance?period=today");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/analytics/performance?period=today",
+    );
 
     // Click refresh button in header
     const refreshBtn = screen.getByRole("button", { name: /Actualizar/i });
     fireEvent.click(refreshBtn);
-    expect(fetchMock).toHaveBeenCalledWith("/api/analytics/performance?period=today");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/analytics/performance?period=today",
+    );
   });
 
   it("supports custom date range filters", async () => {
@@ -308,7 +322,9 @@ describe("PerformanceAnalyticsView Component", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /Actualizar/i })).not.toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: /Actualizar/i }),
+      ).not.toBeDisabled();
     });
 
     // Click refresh button in header while in custom mode
@@ -325,7 +341,9 @@ describe("PerformanceAnalyticsView Component", () => {
     render(<PerformanceAnalyticsView />);
 
     await waitFor(() => {
-      expect(screen.getByText("Error al Cargar Rendimiento")).toBeInTheDocument();
+      expect(
+        screen.getByText("Error al Cargar Rendimiento"),
+      ).toBeInTheDocument();
       expect(screen.getByText("Error de red desconocido")).toBeInTheDocument();
     });
   });

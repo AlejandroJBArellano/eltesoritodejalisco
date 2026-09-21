@@ -109,7 +109,9 @@ describe("OrdersMobileFunction component", () => {
   });
 
   it("renders filter buttons with order counts and shows all orders by default", () => {
-    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
+    render(
+      <OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />,
+    );
 
     // Status Tabs
     expect(screen.getByRole("button", { name: /Pendientes/i })).toBeDefined();
@@ -124,7 +126,9 @@ describe("OrdersMobileFunction component", () => {
   });
 
   it("filters only pending orders when clicking on Pendientes tab", () => {
-    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
+    render(
+      <OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: /Pendientes/i }));
 
@@ -133,7 +137,9 @@ describe("OrdersMobileFunction component", () => {
   });
 
   it("filters only paid orders when clicking on Pagadas tab", () => {
-    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
+    render(
+      <OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: /Pagadas/i }));
 
@@ -142,7 +148,9 @@ describe("OrdersMobileFunction component", () => {
   });
 
   it("restores all orders when clicking on Todas tab after filtering", () => {
-    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
+    render(
+      <OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: /Pagadas/i }));
     expect(screen.queryByText("#101")).toBeNull();
@@ -155,7 +163,9 @@ describe("OrdersMobileFunction component", () => {
   });
 
   it("filters only POS orders when clicking on POS filter", () => {
-    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
+    render(
+      <OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />,
+    );
 
     fireEvent.click(screen.getByText(/POS \(1\)/i));
 
@@ -164,7 +174,9 @@ describe("OrdersMobileFunction component", () => {
   });
 
   it("filters only Pickup orders when clicking on Pickup filter and restores with Todos", () => {
-    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
+    render(
+      <OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />,
+    );
 
     fireEvent.click(screen.getByText(/Pickup \(1\)/i));
 
@@ -177,7 +189,9 @@ describe("OrdersMobileFunction component", () => {
   });
 
   it("displays contextual empty message when no orders match combined filters on mobile", () => {
-    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
+    render(
+      <OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />,
+    );
 
     // Filter: Pagadas + POS -> 0 orders
     fireEvent.click(screen.getByRole("button", { name: /Pagadas/i }));
@@ -189,14 +203,20 @@ describe("OrdersMobileFunction component", () => {
     fireEvent.click(screen.getByRole("button", { name: /Pendientes/i }));
     fireEvent.click(screen.getByText(/Pickup \(1\)/i));
 
-    expect(screen.getByText(/No hay órdenes pendientes de Kittn Pickup/i)).toBeDefined();
+    expect(
+      screen.getByText(/No hay órdenes pendientes de Kittn Pickup/i),
+    ).toBeDefined();
   });
 
   it("shows tip amount and Propina button when user is Admin", () => {
-    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
+    render(
+      <OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />,
+    );
 
     expect(screen.getByText("+$25.00 propina")).toBeDefined();
-    expect(screen.getAllByRole("button", { name: /Propina/i }).length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByRole("button", { name: /Propina/i }).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it("shows Propina button when user is Waiter and prompts authorization on undo", () => {
@@ -209,10 +229,14 @@ describe("OrdersMobileFunction component", () => {
       isAuthenticated: true,
     });
 
-    render(<OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />);
+    render(
+      <OrdersMobileFunction onClickCancel={vi.fn()} cancelArmedId={null} />,
+    );
 
     expect(screen.queryByText("+$25.00 propina")).toBeNull();
-    expect(screen.getAllByRole("button", { name: /Propina/i }).length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByRole("button", { name: /Propina/i }).length,
+    ).toBeGreaterThanOrEqual(1);
 
     const undoButton = screen.queryByRole("button", { name: /Deshacer Pago/i });
     if (undoButton) {

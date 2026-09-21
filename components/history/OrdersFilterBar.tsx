@@ -22,24 +22,28 @@ export interface OrdersFilterBarProps {
 export function OrdersFilterBar(props: OrdersFilterBarProps = {}) {
   const context = useHistoryContextNullable();
 
-  const filters = props.filters ?? context?.filters ?? {
-    searchQuery: "",
-    dateFilter: "",
-    tableFilter: "",
-    paymentMethodFilter: "",
-    sourceFilter: "",
-  };
-  const availableTables = props.availableTables ?? context?.availableTables ?? [];
+  const filters = props.filters ??
+    context?.filters ?? {
+      searchQuery: "",
+      dateFilter: "",
+      tableFilter: "",
+      paymentMethodFilter: "",
+      sourceFilter: "",
+    };
+  const availableTables =
+    props.availableTables ?? context?.availableTables ?? [];
   const sortedOrders = props.sortedOrders ?? context?.sortedOrders ?? [];
-  const onFilterChange = props.onFilterChange ?? context?.setFilter ?? (() => {});
-  const onResetFilters = props.onResetFilters ?? context?.resetFilters ?? (() => {});
+  const onFilterChange =
+    props.onFilterChange ?? context?.setFilter ?? (() => {});
+  const onResetFilters =
+    props.onResetFilters ?? context?.resetFilters ?? (() => {});
 
   const hasActiveFilters = Boolean(
     filters.searchQuery ||
-      filters.dateFilter ||
-      filters.tableFilter ||
-      filters.paymentMethodFilter ||
-      filters.sourceFilter,
+    filters.dateFilter ||
+    filters.tableFilter ||
+    filters.paymentMethodFilter ||
+    filters.sourceFilter,
   );
 
   return (
@@ -124,9 +128,7 @@ export function OrdersFilterBar(props: OrdersFilterBarProps = {}) {
           <ExportButton
             data={sortedOrders}
             columns={ORDERS_EXPORT_COLUMNS}
-            filename={() =>
-              `ordenes_${new Date().toISOString().split("T")[0]}`
-            }
+            filename={() => `ordenes_${new Date().toISOString().split("T")[0]}`}
             sheetName="Historial de Órdenes"
           />
         </div>

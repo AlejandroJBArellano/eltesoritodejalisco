@@ -50,51 +50,58 @@ export function OrderTicket({ order }: OrderTicketProps) {
 
   const rawOrderFields = order as unknown as DbDiscountFields;
 
-  const itemsDiscountTotal =
-    (order.orderItems || []).reduce((sum, item) => {
-      const rawItem = item as unknown as DbDiscountFields;
-      const explicitAmt = Number(item.discountAmount ?? rawItem.discount_amount);
-      if (explicitAmt > 0) return sum + explicitAmt;
-      const type = (item.discountType ?? rawItem.discount_type) as ("PERCENT" | "FIXED" | null | undefined);
-      const val = item.discountValue ?? rawItem.discount_value;
-      if (type && val) {
-        return (
-          sum +
-          calculateItemDiscount({
-            unitPrice: item.unitPrice,
-            quantity: item.quantity,
-            discountType: type,
-            discountValue: val,
-            discountScope: (item.discountScope ?? rawItem.discount_scope) as ("ROW" | "UNIT" | null | undefined),
-          }).discountAmount
-        );
-      }
-      return sum;
-    }, 0);
+  const itemsDiscountTotal = (order.orderItems || []).reduce((sum, item) => {
+    const rawItem = item as unknown as DbDiscountFields;
+    const explicitAmt = Number(item.discountAmount ?? rawItem.discount_amount);
+    if (explicitAmt > 0) return sum + explicitAmt;
+    const type = (item.discountType ?? rawItem.discount_type) as
+      "PERCENT" | "FIXED" | null | undefined;
+    const val = item.discountValue ?? rawItem.discount_value;
+    if (type && val) {
+      return (
+        sum +
+        calculateItemDiscount({
+          unitPrice: item.unitPrice,
+          quantity: item.quantity,
+          discountType: type,
+          discountValue: val,
+          discountScope: (item.discountScope ?? rawItem.discount_scope) as
+            "ROW" | "UNIT" | null | undefined,
+        }).discountAmount
+      );
+    }
+    return sum;
+  }, 0);
 
-  const rawOrderDiscountVal = Number(order.discountAmount ?? rawOrderFields.discount_amount) || 0;
-  const orderDiscountType = (order.discountType ?? rawOrderFields.discount_type) as ("PERCENT" | "FIXED" | null | undefined);
-  const orderDiscountValue = order.discountValue ?? rawOrderFields.discount_value;
-  const orderDiscountReason = order.discountReason ?? rawOrderFields.discount_reason;
+  const rawOrderDiscountVal =
+    Number(order.discountAmount ?? rawOrderFields.discount_amount) || 0;
+  const orderDiscountType = (order.discountType ??
+    rawOrderFields.discount_type) as "PERCENT" | "FIXED" | null | undefined;
+  const orderDiscountValue =
+    order.discountValue ?? rawOrderFields.discount_value;
+  const orderDiscountReason =
+    order.discountReason ?? rawOrderFields.discount_reason;
 
   const orderDiscountTotal =
     rawOrderDiscountVal > 0
       ? rawOrderDiscountVal
       : orderDiscountType && orderDiscountValue
         ? calculateOrderDiscountTotals({
-          items: (order.orderItems || []).map((it) => {
-            const rawIt = it as unknown as DbDiscountFields;
-            return {
-              unitPrice: it.unitPrice,
-              quantity: it.quantity,
-              discountType: (it.discountType ?? rawIt.discount_type) as ("PERCENT" | "FIXED" | null | undefined),
-              discountValue: it.discountValue ?? rawIt.discount_value,
-              discountScope: (it.discountScope ?? rawIt.discount_scope) as ("ROW" | "UNIT" | null | undefined),
-            };
-          }),
-          orderDiscountType,
-          orderDiscountValue,
-        }).orderDiscount
+            items: (order.orderItems || []).map((it) => {
+              const rawIt = it as unknown as DbDiscountFields;
+              return {
+                unitPrice: it.unitPrice,
+                quantity: it.quantity,
+                discountType: (it.discountType ?? rawIt.discount_type) as
+                  "PERCENT" | "FIXED" | null | undefined,
+                discountValue: it.discountValue ?? rawIt.discount_value,
+                discountScope: (it.discountScope ?? rawIt.discount_scope) as
+                  "ROW" | "UNIT" | null | undefined,
+              };
+            }),
+            orderDiscountType,
+            orderDiscountValue,
+          }).orderDiscount
         : 0;
 
   const totalDiscounts = itemsDiscountTotal + orderDiscountTotal;
@@ -148,21 +155,27 @@ export function OrderTicket({ order }: OrderTicketProps) {
           {order.orderItems.map((item) => {
             const rawItem = item as unknown as DbDiscountFields;
             const gross = item.quantity * item.unitPrice;
-            const explicitItemDiscount = Number(item.discountAmount ?? rawItem.discount_amount) || 0;
-            const itemDiscountType = (item.discountType ?? rawItem.discount_type) as ("PERCENT" | "FIXED" | null | undefined);
-            const itemDiscountValue = item.discountValue ?? rawItem.discount_value;
-            const itemDiscountReason = item.discountReason ?? rawItem.discount_reason;
+            const explicitItemDiscount =
+              Number(item.discountAmount ?? rawItem.discount_amount) || 0;
+            const itemDiscountType = (item.discountType ??
+              rawItem.discount_type) as "PERCENT" | "FIXED" | null | undefined;
+            const itemDiscountValue =
+              item.discountValue ?? rawItem.discount_value;
+            const itemDiscountReason =
+              item.discountReason ?? rawItem.discount_reason;
             const itemDiscount =
               explicitItemDiscount > 0
                 ? explicitItemDiscount
                 : itemDiscountType && itemDiscountValue
                   ? calculateItemDiscount({
-                    unitPrice: item.unitPrice,
-                    quantity: item.quantity,
-                    discountType: itemDiscountType,
-                    discountValue: itemDiscountValue,
-                    discountScope: (item.discountScope ?? rawItem.discount_scope) as ("ROW" | "UNIT" | null | undefined),
-                  }).discountAmount
+                      unitPrice: item.unitPrice,
+                      quantity: item.quantity,
+                      discountType: itemDiscountType,
+                      discountValue: itemDiscountValue,
+                      discountScope: (item.discountScope ??
+                        rawItem.discount_scope) as
+                        "ROW" | "UNIT" | null | undefined,
+                    }).discountAmount
                   : 0;
             const net = Math.max(0, gross - itemDiscount);
             return (
@@ -204,7 +217,9 @@ export function OrderTicket({ order }: OrderTicketProps) {
       <div className="text-right space-y-1">
         {totalDiscounts > 0 && (
           <>
-            <p className="text-sm">SUBTOTAL BRUTO: ${subtotalGross.toFixed(2)}</p>
+            <p className="text-sm">
+              SUBTOTAL BRUTO: ${subtotalGross.toFixed(2)}
+            </p>
             {itemsDiscountTotal > 0 && (
               <p className="text-sm">
                 DESCUENTOS PROD.: -${itemsDiscountTotal.toFixed(2)}
@@ -229,8 +244,9 @@ export function OrderTicket({ order }: OrderTicketProps) {
 
         {tipAmount > 0 && (
           <p
-            className={`font-bold text-md text-gray-700 ${isWaiter ? "hidden print:block" : ""
-              }`}
+            className={`font-bold text-md text-gray-700 ${
+              isWaiter ? "hidden print:block" : ""
+            }`}
           >
             PROPINA: ${tipAmount.toFixed(2)}
           </p>
@@ -258,7 +274,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
                   <img
                     data-testid="qr-pickup"
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=70x70&ecc=M&data=${encodeURIComponent(
-                      pickupUrl
+                      pickupUrl,
                     )}`}
                     alt="Menú Digital Pickup"
                     width={70}
@@ -278,7 +294,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
                   <img
                     data-testid="qr-reviews"
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=70x70&ecc=M&data=${encodeURIComponent(
-                      reviewsUrl
+                      reviewsUrl,
                     )}`}
                     alt="Google Reviews"
                     width={70}
@@ -299,7 +315,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
                 <img
                   data-testid="qr-pickup"
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&ecc=M&data=${encodeURIComponent(
-                    pickupUrl
+                    pickupUrl,
                   )}`}
                   alt="Menú Digital Pickup"
                   width={80}

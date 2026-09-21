@@ -55,7 +55,10 @@ export const EXECUTIONS_EXPORT_COLUMNS: ExportColumn<TaskExecution>[] = [
     header: "Duración (min)",
     accessor: (e) => {
       if (e.status === "NOT_DONE") return "N/A";
-      if (e.net_duration_minutes !== undefined && e.net_duration_minutes !== null) {
+      if (
+        e.net_duration_minutes !== undefined &&
+        e.net_duration_minutes !== null
+      ) {
         return e.net_duration_minutes;
       }
       if (!e.start_time || !e.end_time) return "N/A";

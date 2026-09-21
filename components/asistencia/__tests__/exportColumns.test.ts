@@ -44,9 +44,9 @@ describe("Attendance exportColumns", () => {
   });
 
   it("formatAttendanceDuration returns 'En curso...' when check_out is null", () => {
-    expect(
-      formatAttendanceDuration(mockActiveRecord.check_in, null),
-    ).toBe("En curso...");
+    expect(formatAttendanceDuration(mockActiveRecord.check_in, null)).toBe(
+      "En curso...",
+    );
   });
 
   it("formatAttendanceTime formats valid dates in Mexico City timezone", () => {
@@ -92,7 +92,9 @@ describe("Attendance exportColumns", () => {
       ...mockRecord,
       users: undefined,
     };
-    const empCol = ATTENDANCE_EXPORT_COLUMNS.find((c) => c.header === "Empleado");
+    const empCol = ATTENDANCE_EXPORT_COLUMNS.find(
+      (c) => c.header === "Empleado",
+    );
     const rolCol = ATTENDANCE_EXPORT_COLUMNS.find((c) => c.header === "Rol");
     expect(empCol?.accessor?.(recordNoUser)).toBe("Desconocido");
     expect(rolCol?.accessor?.(recordNoUser)).toBe("N/A");

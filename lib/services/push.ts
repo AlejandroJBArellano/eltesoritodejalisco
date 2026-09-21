@@ -81,7 +81,10 @@ export async function sendTenantPushNotification(
     const { data: subscriptions, error } = await query;
 
     if (error) {
-      console.error("[WebPush Error] Error querying push subscriptions:", error);
+      console.error(
+        "[WebPush Error] Error querying push subscriptions:",
+        error,
+      );
       return { success: false, error };
     }
 
@@ -124,7 +127,10 @@ export async function sendTenantPushNotification(
           if (statusCode === 404 || statusCode === 410) {
             expiredEndpoints.push(sub.endpoint);
           } else {
-            console.error(`[WebPush Error] Failed to send push to ${sub.endpoint}:`, err);
+            console.error(
+              `[WebPush Error] Failed to send push to ${sub.endpoint}:`,
+              err,
+            );
           }
         }
       }),
@@ -148,7 +154,10 @@ export async function sendTenantPushNotification(
       cleanedCount: expiredEndpoints.length,
     };
   } catch (error) {
-    console.error("[WebPush Exception] Error dispatching push notifications:", error);
+    console.error(
+      "[WebPush Exception] Error dispatching push notifications:",
+      error,
+    );
     return { success: false, error };
   }
 }

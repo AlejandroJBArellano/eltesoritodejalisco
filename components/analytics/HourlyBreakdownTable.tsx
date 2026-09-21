@@ -52,8 +52,8 @@ export function HourlyBreakdownTable({
             Desglose Detallado por Hora
           </h3>
           <p className="text-xs text-text-light/60 mt-0.5">
-            Analiza el comportamiento numérico horario y exporta a formato CSV
-            o Excel.
+            Analiza el comportamiento numérico horario y exporta a formato CSV o
+            Excel.
           </p>
         </div>
 
@@ -105,7 +105,10 @@ export function HourlyBreakdownTable({
                   </td>
 
                   <td className="py-3.5 px-6 text-right font-black text-white">
-                    ${row.sales.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                    $
+                    {row.sales.toLocaleString("es-MX", {
+                      minimumFractionDigits: 2,
+                    })}
                   </td>
 
                   <td className="py-3.5 px-6 text-right">

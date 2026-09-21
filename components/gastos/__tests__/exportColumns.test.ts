@@ -19,7 +19,10 @@ describe("Expenses Export Columns", () => {
 
   const getCol = (header: string) => {
     const col = EXPENSES_EXPORT_COLUMNS.find((c) => c.header === header);
-    if (!col) throw new Error(`Column "${header}" not found in EXPENSES_EXPORT_COLUMNS`);
+    if (!col)
+      throw new Error(
+        `Column "${header}" not found in EXPENSES_EXPORT_COLUMNS`,
+      );
     return col;
   };
 
@@ -38,7 +41,9 @@ describe("Expenses Export Columns", () => {
   it("should format Categoría with fallback", () => {
     const col = getCol("Categoría");
     expect(col.accessor!(sampleExpense)).toBe("Insumos y Café");
-    expect(col.accessor!({ ...sampleExpense, expense_categories: undefined })).toBe("Sin Categoría");
+    expect(
+      col.accessor!({ ...sampleExpense, expense_categories: undefined }),
+    ).toBe("Sin Categoría");
   });
 
   it("should format Tipo de Gasto as Fijo or Variable", () => {

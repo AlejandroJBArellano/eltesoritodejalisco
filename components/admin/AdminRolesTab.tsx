@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { type RoleData, ALL_PERMISSION_KEYS } from "@/lib/permissions";
-import { getTenantRoles, deleteCustomRole } from "@/app/admin/users/roles-actions";
+import {
+  getTenantRoles,
+  deleteCustomRole,
+} from "@/app/admin/users/roles-actions";
 import { RoleEditorModal } from "./RoleEditorModal";
 
 export function AdminRolesTab() {
@@ -114,7 +117,8 @@ export function AdminRolesTab() {
             Roles y Permisos Operativos
           </h2>
           <p className="text-xs text-text-light/60 mt-0.5">
-            Personaliza el acceso de cada puesto de trabajo a módulos de cocina, ventas, inventarios y reportes.
+            Personaliza el acceso de cada puesto de trabajo a módulos de cocina,
+            ventas, inventarios y reportes.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -221,7 +225,8 @@ export function AdminRolesTab() {
                   No hay roles personalizados creados aún.
                 </p>
                 <p className="text-[11px] text-text-light/40 mt-1">
-                  Crea perfiles como "Capitán de Meseros", "Barman" o "Cajero" con permisos a la medida.
+                  Crea perfiles como "Capitán de Meseros", "Barman" o "Cajero"
+                  con permisos a la medida.
                 </p>
                 <button
                   type="button"
@@ -293,7 +298,8 @@ export function AdminRolesTab() {
                 Eliminar Rol: {roleToDelete.name}
               </h3>
               <p className="text-xs text-text-light/70">
-                ¿Estás seguro de que deseas eliminar este rol personalizado? Esta acción no se puede deshacer.
+                ¿Estás seguro de que deseas eliminar este rol personalizado?
+                Esta acción no se puede deshacer.
               </p>
             </div>
 
@@ -301,10 +307,12 @@ export function AdminRolesTab() {
             {roleToDelete.user_count && roleToDelete.user_count > 0 ? (
               <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl space-y-2 text-xs text-amber-300">
                 <p className="font-bold">
-                  ⚠️ Hay {roleToDelete.user_count} colaborador(es) con este rol asignado.
+                  ⚠️ Hay {roleToDelete.user_count} colaborador(es) con este rol
+                  asignado.
                 </p>
                 <p className="text-text-light/80">
-                  Selecciona a qué rol deseas transferir estos colaboradores antes de proceder:
+                  Selecciona a qué rol deseas transferir estos colaboradores
+                  antes de proceder:
                 </p>
                 <select
                   value={reassignRoleId}

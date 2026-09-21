@@ -108,7 +108,7 @@ describe("KitchenTicket Component", () => {
 
     expect(screen.getByText("#0026")).toBeInTheDocument();
     expect(screen.getByText("ENTREGA:")).toBeInTheDocument();
-    
+
     // Check that flavor lines are split and displayed
     expect(screen.getByText(/▪\s*Pastor/i)).toBeInTheDocument();
     expect(screen.getByText(/▪\s*Asada/i)).toBeInTheDocument();

@@ -35,7 +35,9 @@ export function McpConnectCard() {
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedSnippet, setCopiedSnippet] = useState(false);
-  const [activeTab, setActiveTab] = useState<"claude" | "cursor" | "cli">("claude");
+  const [activeTab, setActiveTab] = useState<"claude" | "cursor" | "cli">(
+    "claude",
+  );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const fetchKeys = async () => {
@@ -75,7 +77,11 @@ export function McpConnectCard() {
   };
 
   const handleRevokeKey = async (id: string) => {
-    if (!confirm("¿Deseas revocar esta clave de acceso? Tu asistente de IA perderá conexión.")) {
+    if (
+      !confirm(
+        "¿Deseas revocar esta clave de acceso? Tu asistente de IA perderá conexión.",
+      )
+    ) {
       return;
     }
     try {
@@ -89,7 +95,9 @@ export function McpConnectCard() {
     }
   };
 
-  const currentDisplayKey = createdKey || (keys.length > 0 ? `${keys[0].key_prefix}` : "kt_live_TU_API_KEY");
+  const currentDisplayKey =
+    createdKey ||
+    (keys.length > 0 ? `${keys[0].key_prefix}` : "kt_live_TU_API_KEY");
 
   const claudeConfig = JSON.stringify(
     {
@@ -162,7 +170,8 @@ export function McpConnectCard() {
               </span>
             </div>
             <p className="text-xs text-text-light/60 mt-0.5">
-              Conecta Claude Desktop, Cursor o ChatGPT para consultar ventas, inventario y comandas en tiempo real.
+              Conecta Claude Desktop, Cursor o ChatGPT para consultar ventas,
+              inventario y comandas en tiempo real.
             </p>
           </div>
         </div>
@@ -196,7 +205,8 @@ export function McpConnectCard() {
             ¡Nueva clave generada con éxito!
           </div>
           <p className="text-xs text-emerald-200/70">
-            Copia esta clave ahora. Por seguridad, no se volverá a mostrar completa.
+            Copia esta clave ahora. Por seguridad, no se volverá a mostrar
+            completa.
           </p>
           <div className="flex items-center gap-2 bg-dark/40 border border-emerald-500/30 rounded-lg p-2.5">
             <code className="font-mono text-xs text-emerald-300 flex-1 break-all">
@@ -208,7 +218,11 @@ export function McpConnectCard() {
               className="p-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-md transition cursor-pointer shrink-0"
               title="Copiar Clave"
             >
-              {copiedKey ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copiedKey ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
             </button>
           </div>
         </div>
@@ -220,7 +234,9 @@ export function McpConnectCard() {
           <div className="text-[10px] font-extrabold uppercase text-primary tracking-wider">
             Paso 1
           </div>
-          <div className="text-xs font-bold text-text-light">Genera tu clave</div>
+          <div className="text-xs font-bold text-text-light">
+            Genera tu clave
+          </div>
           <p className="text-[11px] text-text-light/50">
             Crea una API Key segura con acceso de solo lectura a tus métricas.
           </p>
@@ -230,7 +246,9 @@ export function McpConnectCard() {
           <div className="text-[10px] font-extrabold uppercase text-primary tracking-wider">
             Paso 2
           </div>
-          <div className="text-xs font-bold text-text-light">Pega la configuración</div>
+          <div className="text-xs font-bold text-text-light">
+            Pega la configuración
+          </div>
           <p className="text-[11px] text-text-light/50">
             Copia el bloque JSON para Claude Desktop o Cursor con 1 clic.
           </p>
@@ -240,9 +258,12 @@ export function McpConnectCard() {
           <div className="text-[10px] font-extrabold uppercase text-primary tracking-wider">
             Paso 3
           </div>
-          <div className="text-xs font-bold text-text-light">Pregúntale a tu IA</div>
+          <div className="text-xs font-bold text-text-light">
+            Pregúntale a tu IA
+          </div>
           <p className="text-[11px] text-text-light/50">
-            Pide reportes como: &quot;¿Cuáles fueron las ventas de hoy y qué platillo se vendió más?&quot;
+            Pide reportes como: &quot;¿Cuáles fueron las ventas de hoy y qué
+            platillo se vendió más?&quot;
           </p>
         </div>
       </div>
@@ -303,8 +324,8 @@ export function McpConnectCard() {
                   {activeTab === "claude"
                     ? "Copiar para Claude Desktop"
                     : activeTab === "cursor"
-                    ? "Copiar para Cursor"
-                    : "Copiar Comando"}
+                      ? "Copiar para Cursor"
+                      : "Copiar Comando"}
                 </span>
               </>
             )}
@@ -326,10 +347,13 @@ export function McpConnectCard() {
         </h4>
 
         {fetchingKeys ? (
-          <div className="text-xs text-text-light/40 py-2">Cargando claves...</div>
+          <div className="text-xs text-text-light/40 py-2">
+            Cargando claves...
+          </div>
         ) : keys.length === 0 ? (
           <div className="text-xs text-text-light/40 py-2">
-            No tienes claves de IA activas. Haz clic en &quot;Activar Conexión IA&quot; para generar tu primera clave.
+            No tienes claves de IA activas. Haz clic en &quot;Activar Conexión
+            IA&quot; para generar tu primera clave.
           </div>
         ) : (
           <div className="divide-y divide-border/40">

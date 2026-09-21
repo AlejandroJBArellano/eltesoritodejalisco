@@ -45,8 +45,10 @@ export default function Navbar() {
   if (email === null) return null;
 
   const systemName = system_name;
-  const endsWithOS = systemName ? systemName.toLowerCase().endsWith("os") : false;
-  const prefix = endsWithOS ? systemName.slice(0, -2) : (systemName || "");
+  const endsWithOS = systemName
+    ? systemName.toLowerCase().endsWith("os")
+    : false;
+  const prefix = endsWithOS ? systemName.slice(0, -2) : systemName || "";
   const suffix = endsWithOS ? systemName.slice(-2) : "";
 
   const isWaiter = user?.isWaiter ?? false;
@@ -135,8 +137,8 @@ export default function Navbar() {
               role={
                 user?.role === "CHEF"
                   ? "KITCHEN"
-                  : (user?.role as "ADMIN" | "MANAGER" | "WAITER" | undefined) ??
-                    "ADMIN"
+                  : ((user?.role as
+                      "ADMIN" | "MANAGER" | "WAITER" | undefined) ?? "ADMIN")
               }
             />
             {email && (

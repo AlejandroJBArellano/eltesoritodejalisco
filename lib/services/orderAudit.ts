@@ -31,9 +31,9 @@ export function getPushNotificationCopy(
 ): { title: string; body: string } {
   const isAuthorized = Boolean(
     details?.authorizedBy &&
-      String(details.authorizedBy).trim() !== "" &&
-      String(details.authorizedBy).trim().toLowerCase() !==
-        userName.trim().toLowerCase(),
+    String(details.authorizedBy).trim() !== "" &&
+    String(details.authorizedBy).trim().toLowerCase() !==
+      userName.trim().toLowerCase(),
   );
   const authorizedSuffix = isAuthorized
     ? ` (Autorizado por ${details?.authorizedBy})`
@@ -89,12 +89,13 @@ export async function logOrderAction({
   actionType,
   details = {},
   notifyCritical = false,
-}: LogOrderActionParams): Promise<{ success: boolean; log?: OrderAuditLog; error?: unknown }> {
+}: LogOrderActionParams): Promise<{
+  success: boolean;
+  log?: OrderAuditLog;
+  error?: unknown;
+}> {
   const userName =
-    user?.full_name?.trim() ||
-    user?.name?.trim() ||
-    user?.role ||
-    "Sistema";
+    user?.full_name?.trim() || user?.name?.trim() || user?.role || "Sistema";
 
   const userId = user?.id || null;
 
@@ -121,7 +122,10 @@ export async function logOrderAction({
       .single();
 
     if (error) {
-      console.error("[ORDER_AUDIT] Error al insertar registro de auditoría:", error);
+      console.error(
+        "[ORDER_AUDIT] Error al insertar registro de auditoría:",
+        error,
+      );
     }
 
     // 3. Alertas Web Push a Gerencia (ADMIN, MANAGER) si es crítico
@@ -158,10 +162,7 @@ export async function logOrderAction({
       error,
     };
   } catch (exception) {
-    console.error(
-      "[ORDER_AUDIT] Excepción en logOrderAction:",
-      exception,
-    );
+    console.error("[ORDER_AUDIT] Excepción en logOrderAction:", exception);
     return { success: false, error: exception };
   }
 }

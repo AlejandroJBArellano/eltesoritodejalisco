@@ -31,8 +31,20 @@ const mockSalesData: ReportData = {
   },
   topSellingItems: [{ name: "Flat White", quantity: 20, revenue: 1300 }],
   productSales: [
-    { id: "1", name: "Flat White", category: "Bebidas", quantity: 20, revenue: 1300 },
-    { id: "2", name: "Brownie", category: "Postres", quantity: 15, revenue: 750 },
+    {
+      id: "1",
+      name: "Flat White",
+      category: "Bebidas",
+      quantity: 20,
+      revenue: 1300,
+    },
+    {
+      id: "2",
+      name: "Brownie",
+      category: "Postres",
+      quantity: 15,
+      revenue: 750,
+    },
   ],
   customers: {
     topCustomers: [],
@@ -73,15 +85,21 @@ describe("SalesAnalyticsView Component", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Error al Cargar Gráficas")).toBeInTheDocument();
-      expect(screen.getByText("Error interno del servidor")).toBeInTheDocument();
+      expect(
+        screen.getByText("Error interno del servidor"),
+      ).toBeInTheDocument();
     });
 
     const retryBtn = screen.getByRole("button", { name: /Reintentar/i });
     fireEvent.click(retryBtn);
 
     await waitFor(() => {
-      expect(screen.getByText("Analítica de Ventas y Productos")).toBeInTheDocument();
-      expect(screen.getByText("Evolución Diaria de Ventas")).toBeInTheDocument();
+      expect(
+        screen.getByText("Analítica de Ventas y Productos"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Evolución Diaria de Ventas"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -95,9 +113,15 @@ describe("SalesAnalyticsView Component", () => {
     render(<SalesAnalyticsView />);
 
     await waitFor(() => {
-      expect(screen.getByText("Analítica de Ventas y Productos")).toBeInTheDocument();
-      expect(screen.getByText("Evolución Diaria de Ventas")).toBeInTheDocument();
-      expect(screen.getByText("Distribución de Ventas por Producto")).toBeInTheDocument();
+      expect(
+        screen.getByText("Analítica de Ventas y Productos"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Evolución Diaria de Ventas"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Distribución de Ventas por Producto"),
+      ).toBeInTheDocument();
     });
 
     // Switch period to "Hoy"
@@ -117,7 +141,9 @@ describe("SalesAnalyticsView Component", () => {
     render(<SalesAnalyticsView />);
 
     await waitFor(() => {
-      expect(screen.getByText("Analítica de Ventas y Productos")).toBeInTheDocument();
+      expect(
+        screen.getByText("Analítica de Ventas y Productos"),
+      ).toBeInTheDocument();
     });
 
     const customBtn = screen.getByRole("button", { name: "Personalizado" });

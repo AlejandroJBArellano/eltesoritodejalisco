@@ -86,9 +86,11 @@ function formatLogMessage(log: OrderAuditLog): string {
   const details = log.details || {};
   const isAuthorizedWithPin = Boolean(
     details.authorizedBy &&
-      String(details.authorizedBy).trim() !== "" &&
-      String(details.authorizedBy).trim().toLowerCase() !==
-        String(log.user_name || "").trim().toLowerCase(),
+    String(details.authorizedBy).trim() !== "" &&
+    String(details.authorizedBy).trim().toLowerCase() !==
+      String(log.user_name || "")
+        .trim()
+        .toLowerCase(),
   );
   const authorizedSuffix = isAuthorizedWithPin ? ` (Autorizado con PIN)` : "";
 
@@ -127,7 +129,9 @@ function formatLogMessage(log: OrderAuditLog): string {
           ? `-${details.discountValue}%`
           : `-$${Number(details.discountValue).toFixed(2)}`
         : "";
-      const reason = details.discountReason ? ` (${details.discountReason})` : "";
+      const reason = details.discountReason
+        ? ` (${details.discountReason})`
+        : "";
       return `${log.user_name} aplicó descuento: ${value}${reason}${authorizedSuffix}`;
     }
     case "PAID": {
@@ -172,7 +176,9 @@ export function OrderDetailExpanded({
     let isMounted = true;
 
     fetch(`/api/orders/${order.id}/audit`)
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Failed"))))
+      .then((res) =>
+        res.ok ? res.json() : Promise.reject(new Error("Failed")),
+      )
       .then((data) => {
         if (isMounted) {
           setFetchedLogs(data.logs || []);
@@ -262,7 +268,9 @@ export function OrderDetailExpanded({
 
       {order.notes && (
         <div className="pt-2 border-t border-border text-[11px] text-text-light/60">
-          <span className="font-bold text-text-light/80">Notas generales: </span>
+          <span className="font-bold text-text-light/80">
+            Notas generales:{" "}
+          </span>
           {order.notes}
         </div>
       )}

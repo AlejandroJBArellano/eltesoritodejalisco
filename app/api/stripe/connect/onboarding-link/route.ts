@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
       return NextResponse.json(
         { error: "No autorizado para configurar pagos" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         console.error("Error updating tenant stripe_account_id:", updateError);
         return NextResponse.json(
           { error: "No se pudo guardar la cuenta de Stripe Connect" },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating Stripe Connect onboarding link:", error);
     return NextResponse.json(
       { error: "Error al generar la liga de configuración con Stripe" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

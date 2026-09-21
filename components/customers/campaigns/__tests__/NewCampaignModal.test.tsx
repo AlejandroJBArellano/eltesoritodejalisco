@@ -23,29 +23,31 @@ describe("NewCampaignModal Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
-      if (url.includes("preview=true")) {
+    global.fetch = vi
+      .fn()
+      .mockImplementation((url: string, init?: RequestInit) => {
+        if (url.includes("preview=true")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ totalAudienceCount: 15, sample: [] }),
+          });
+        }
+        if (init?.method === "POST") {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              success: true,
+              sentCount: 15,
+              failedCount: 0,
+              campaign: { id: "camp-123", name: "Campaña Test" },
+            }),
+          });
+        }
         return Promise.resolve({
           ok: true,
-          json: async () => ({ totalAudienceCount: 15, sample: [] }),
+          json: async () => ({}),
         });
-      }
-      if (init?.method === "POST") {
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({
-            success: true,
-            sentCount: 15,
-            failedCount: 0,
-            campaign: { id: "camp-123", name: "Campaña Test" },
-          }),
-        });
-      }
-      return Promise.resolve({
-        ok: true,
-        json: async () => ({}),
       });
-    });
   });
 
   it("should render Step 1 with segmentation filters and calculate audience preview", async () => {
@@ -57,14 +59,18 @@ describe("NewCampaignModal Component", () => {
       />,
     );
 
-    expect(screen.getByText(/Nueva Campaña: Segmentación/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Nueva Campaña: Segmentación/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Días de Inactividad/i)).toBeInTheDocument();
     expect(screen.getByText(/Saldo Mínimo de Puntos/i)).toBeInTheDocument();
     expect(screen.getByText(/Frecuencia de Compra/i)).toBeInTheDocument();
 
     // Wait for debounced audience preview fetch
     await waitFor(() => {
-      expect(screen.getByText(/15 cliente\(s\) recibirán este correo/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/15 cliente\(s\) recibirán este correo/i),
+      ).toBeInTheDocument();
     });
 
     // Test clicking on filter options
@@ -74,7 +80,9 @@ describe("NewCampaignModal Component", () => {
     const hundredPointsBtn = screen.getByRole("button", { name: "100+ pts" });
     fireEvent.click(hundredPointsBtn);
 
-    const recurrentBtn = screen.getByRole("button", { name: "Recurrentes (3+)" });
+    const recurrentBtn = screen.getByRole("button", {
+      name: "Recurrentes (3+)",
+    });
     fireEvent.click(recurrentBtn);
 
     const antiSaturationToggle = screen.getByTestId("anti-saturation-toggle");
@@ -106,11 +114,15 @@ describe("NewCampaignModal Component", () => {
     fireEvent.click(canjePointsBtn);
 
     expect(
-      screen.getByDisplayValue(/¡{nombre}, tienes {puntos} puntos listos para canjear! 🎉/i),
+      screen.getByDisplayValue(
+        /¡{nombre}, tienes {puntos} puntos listos para canjear! 🎉/i,
+      ),
     ).toBeInTheDocument();
 
     // Insert variable in message
-    const insertNameBtn = screen.getAllByRole("button", { name: "{nombre}" })[1];
+    const insertNameBtn = screen.getAllByRole("button", {
+      name: "{nombre}",
+    })[1];
     fireEvent.click(insertNameBtn);
 
     // Live preview check
@@ -139,7 +151,9 @@ describe("NewCampaignModal Component", () => {
 
     fireEvent.click(screen.getByTestId("go-to-confirm-button"));
 
-    expect(screen.getByText(/Nueva Campaña: Confirmación/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Nueva Campaña: Confirmación/i),
+    ).toBeInTheDocument();
     expect(screen.getByText("Campaña Fieles Octubre")).toBeInTheDocument();
     expect(screen.getByText(/15 cliente\(s\)/i)).toBeInTheDocument();
 
@@ -153,21 +167,23 @@ describe("NewCampaignModal Component", () => {
   });
 
   it("should display error message if API fails on submission", async () => {
-    global.fetch = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
-      if (url.includes("preview=true")) {
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({ totalAudienceCount: 5 }),
-        });
-      }
-      if (init?.method === "POST") {
-        return Promise.resolve({
-          ok: false,
-          json: async () => ({ error: "Error de conexión con Resend" }),
-        });
-      }
-      return Promise.resolve({ ok: true, json: async () => ({}) });
-    });
+    global.fetch = vi
+      .fn()
+      .mockImplementation((url: string, init?: RequestInit) => {
+        if (url.includes("preview=true")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ totalAudienceCount: 5 }),
+          });
+        }
+        if (init?.method === "POST") {
+          return Promise.resolve({
+            ok: false,
+            json: async () => ({ error: "Error de conexión con Resend" }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      });
 
     render(
       <NewCampaignModal
@@ -188,7 +204,9 @@ describe("NewCampaignModal Component", () => {
     fireEvent.click(sendBtn);
 
     await waitFor(() => {
-      expect(screen.getByText("Error de conexión con Resend")).toBeInTheDocument();
+      expect(
+        screen.getByText("Error de conexión con Resend"),
+      ).toBeInTheDocument();
     });
     expect(mockOnSuccess).not.toHaveBeenCalled();
   });

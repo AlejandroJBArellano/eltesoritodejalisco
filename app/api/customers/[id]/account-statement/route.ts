@@ -30,14 +30,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     if (customerError || !customer) {
       return NextResponse.json(
         { error: "Cliente no encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // 2. Obtener órdenes a crédito o pendientes de cobro
     const { data: orders, error: ordersError } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         id,
         order_number,
         created_at,
@@ -62,7 +63,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           created_at,
           tip_amount
         )
-      `)
+      `,
+      )
       .eq("customer_id", customerId)
       .eq("tenant_id", tenant.id)
       .eq("status", "UNCOLLECTED")
@@ -74,9 +76,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const pendingNotes = (orders || []).map((order) => {
       const totalPaid = (order.payments || []).reduce(
         (sum, p) => sum + Number(p.amount || 0),
-        0
+        0,
       );
-      const remainingBalance = Math.max(0, Number(order.total || 0) - totalPaid);
+      const remainingBalance = Math.max(
+        0,
+        Number(order.total || 0) - totalPaid,
+      );
 
       type RawOrderItem = {
         id: string;
@@ -115,7 +120,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const totalDebt = pendingNotes.reduce(
       (acc, note) => acc + note.remainingBalance,
-      0
+      0,
     );
 
     return NextResponse.json({
@@ -127,7 +132,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     console.error("Error al obtener estado de cuenta:", error);
     return NextResponse.json(
       { error: "Error al cargar estado de cuenta" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -147,7 +152,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (!paymentAmount || paymentAmount <= 0) {
       return NextResponse.json(
         { error: "El monto debe ser mayor a 0" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -161,7 +166,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (!method || !validMethods.includes(method)) {
       return NextResponse.json(
         { error: "Método de pago no válido" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -171,7 +176,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // 1. Obtener órdenes pendientes en orden FIFO (más antiguas primero)
     const { data: orders, error: ordersError } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         id,
         total,
         status,
@@ -179,7 +185,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         payments (
           amount
         )
-      `)
+      `,
+      )
       .eq("customer_id", customerId)
       .eq("tenant_id", tenant.id)
       .eq("status", "UNCOLLECTED")
@@ -190,7 +197,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (!orders || orders.length === 0) {
       return NextResponse.json(
         { error: "No hay notas pendientes para este cliente" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -211,7 +218,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       const orderPayments = order.payments || [];
       const alreadyPaid = orderPayments.reduce(
         (sum, p) => sum + Number(p.amount || 0),
-        0
+        0,
       );
       const balance = Math.max(0, Number(order.total || 0) - alreadyPaid);
 
@@ -224,7 +231,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         tenant_id: tenant.id,
         amount: appliedToThis,
         method: method as "CASH" | "CARD" | "TRANSFER" | "OTHER",
-        received_amount: method === "CASH" ? Number(receivedAmount || appliedToThis) : appliedToThis,
+        received_amount:
+          method === "CASH"
+            ? Number(receivedAmount || appliedToThis)
+            : appliedToThis,
         change: method === "CASH" ? Number(change || 0) : 0,
       });
 
@@ -268,7 +278,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     console.error("Error al registrar abono:", error);
     return NextResponse.json(
       { error: "Error al registrar el abono" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

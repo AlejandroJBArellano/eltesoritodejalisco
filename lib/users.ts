@@ -1,9 +1,16 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ShiftUserOption } from "@/components/admin/shifts/ShiftModal";
 
-export type UserRole = "ADMIN" | "MANAGER" | "WAITER" | "CHEF" | "INVENTORY" | string;
+export type UserRole =
+  "ADMIN" | "MANAGER" | "WAITER" | "CHEF" | "INVENTORY" | string;
 
-const VALID_SYSTEM_ROLES = new Set<string>(["ADMIN", "MANAGER", "WAITER", "CHEF", "INVENTORY"]);
+const VALID_SYSTEM_ROLES = new Set<string>([
+  "ADMIN",
+  "MANAGER",
+  "WAITER",
+  "CHEF",
+  "INVENTORY",
+]);
 
 export function sanitizeRole(role?: string | null): string {
   if (!role) return "WAITER";
@@ -18,7 +25,9 @@ export function sanitizeRole(role?: string | null): string {
  * Obtiene todos los colaboradores registrados para un tenant específico
  * consultando la tabla 'profiles' (y metadata de auth si fuera necesario).
  */
-export async function getTenantCollaborators(tenantId: string): Promise<ShiftUserOption[]> {
+export async function getTenantCollaborators(
+  tenantId: string,
+): Promise<ShiftUserOption[]> {
   const adminClient = createAdminClient();
 
   // 1. Obtener perfiles registrados para este tenant
@@ -28,18 +37,27 @@ export async function getTenantCollaborators(tenantId: string): Promise<ShiftUse
     .eq("tenant_id", tenantId);
 
   if (profilesError) {
-    console.error("[getTenantCollaborators] Error fetching profiles:", profilesError);
+    console.error(
+      "[getTenantCollaborators] Error fetching profiles:",
+      profilesError,
+    );
   }
 
   // 2. Obtener usuarios de Auth para resolver nombres o emails si faltan en perfiles
   let authUsers: Array<{
     id: string;
     email?: string;
-    user_metadata?: { name?: string; full_name?: string; role?: string; tenant_id?: string };
+    user_metadata?: {
+      name?: string;
+      full_name?: string;
+      role?: string;
+      tenant_id?: string;
+    };
   }> = [];
 
   try {
-    const { data: authData, error: authError } = await adminClient.auth.admin.listUsers();
+    const { data: authData, error: authError } =
+      await adminClient.auth.admin.listUsers();
     if (!authError && authData?.users) {
       authUsers = authData.users;
     }
@@ -76,7 +94,9 @@ export async function getTenantCollaborators(tenantId: string): Promise<ShiftUse
   const list = Array.from(collaboratorsMap.values());
 
   // Ordenar alfabéticamente por nombre
-  list.sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
+  list.sort((a, b) =>
+    a.name.localeCompare(b.name, "es", { sensitivity: "base" }),
+  );
 
   return list;
 }

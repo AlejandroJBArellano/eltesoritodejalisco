@@ -28,20 +28,43 @@ describe("lib/mcp/tools", () => {
     mockChain.limit = vi.fn().mockReturnValue(mockChain);
     mockChain.ilike = vi.fn().mockReturnValue(mockChain);
     mockChain.single = vi.fn().mockResolvedValue({ data: null, error: null });
-    mockChain.maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+    mockChain.maybeSingle = vi
+      .fn()
+      .mockResolvedValue({ data: null, error: null });
   });
 
   it("get_dashboard_metrics: should calculate totals, active orders and avg ticket", async () => {
     mockChain.lte.mockResolvedValueOnce({
       data: [
-        { id: "o-1", total: 250, status: "COMPLETADO", payment_status: "PAID", created_at: "2026-09-21T12:00:00Z" },
-        { id: "o-2", total: 150, status: "EN_PREPARACION", payment_status: "PENDING", created_at: "2026-09-21T13:00:00Z" },
-        { id: "o-3", total: 100, status: "CANCELADO", payment_status: "CANCELLED", created_at: "2026-09-21T14:00:00Z" },
+        {
+          id: "o-1",
+          total: 250,
+          status: "COMPLETADO",
+          payment_status: "PAID",
+          created_at: "2026-09-21T12:00:00Z",
+        },
+        {
+          id: "o-2",
+          total: 150,
+          status: "EN_PREPARACION",
+          payment_status: "PENDING",
+          created_at: "2026-09-21T13:00:00Z",
+        },
+        {
+          id: "o-3",
+          total: 100,
+          status: "CANCELADO",
+          payment_status: "CANCELLED",
+          created_at: "2026-09-21T14:00:00Z",
+        },
       ],
       error: null,
     });
 
-    const res = await MCP_TOOLS.get_dashboard_metrics.execute({ date: "2026-09-21" }, ctx);
+    const res = await MCP_TOOLS.get_dashboard_metrics.execute(
+      { date: "2026-09-21" },
+      ctx,
+    );
     expect(res.total_sales).toBe(250);
     expect(res.completed_orders_count).toBe(1);
     expect(res.active_orders_count).toBe(1);
@@ -104,9 +127,27 @@ describe("lib/mcp/tools", () => {
   it("get_sales_report: should aggregate sales by day", async () => {
     mockChain.lte.mockResolvedValueOnce({
       data: [
-        { id: "o-1", total: 200, status: "ENTREGADO", payment_status: "PAID", created_at: "2026-09-20T10:00:00Z" },
-        { id: "o-2", total: 300, status: "ENTREGADO", payment_status: "PAID", created_at: "2026-09-20T15:00:00Z" },
-        { id: "o-3", total: 400, status: "ENTREGADO", payment_status: "PAID", created_at: "2026-09-21T11:00:00Z" },
+        {
+          id: "o-1",
+          total: 200,
+          status: "ENTREGADO",
+          payment_status: "PAID",
+          created_at: "2026-09-20T10:00:00Z",
+        },
+        {
+          id: "o-2",
+          total: 300,
+          status: "ENTREGADO",
+          payment_status: "PAID",
+          created_at: "2026-09-20T15:00:00Z",
+        },
+        {
+          id: "o-3",
+          total: 400,
+          status: "ENTREGADO",
+          payment_status: "PAID",
+          created_at: "2026-09-21T11:00:00Z",
+        },
       ],
       error: null,
     });
@@ -125,9 +166,24 @@ describe("lib/mcp/tools", () => {
   it("get_popular_items: should aggregate item sales and sort by quantity", async () => {
     mockChain.not.mockResolvedValueOnce({
       data: [
-        { menu_item_id: "m-1", quantity: 5, total_price: 500, menu_items: { name: "Hamburguesa" } },
-        { menu_item_id: "m-1", quantity: 3, total_price: 300, menu_items: { name: "Hamburguesa" } },
-        { menu_item_id: "m-2", quantity: 2, total_price: 100, menu_items: { name: "Papas" } },
+        {
+          menu_item_id: "m-1",
+          quantity: 5,
+          total_price: 500,
+          menu_items: { name: "Hamburguesa" },
+        },
+        {
+          menu_item_id: "m-1",
+          quantity: 3,
+          total_price: 300,
+          menu_items: { name: "Hamburguesa" },
+        },
+        {
+          menu_item_id: "m-2",
+          quantity: 2,
+          total_price: 100,
+          menu_items: { name: "Papas" },
+        },
       ],
       error: null,
     });
@@ -142,13 +198,30 @@ describe("lib/mcp/tools", () => {
   it("get_inventory_status: should flag low stock items", async () => {
     mockChain.order.mockResolvedValueOnce({
       data: [
-        { id: "ing-1", name: "Carne", current_stock: 2, min_stock: 5, unit: "kg", cost: 120 },
-        { id: "ing-2", name: "Queso", current_stock: 10, min_stock: 5, unit: "kg", cost: 90 },
+        {
+          id: "ing-1",
+          name: "Carne",
+          current_stock: 2,
+          min_stock: 5,
+          unit: "kg",
+          cost: 120,
+        },
+        {
+          id: "ing-2",
+          name: "Queso",
+          current_stock: 10,
+          min_stock: 5,
+          unit: "kg",
+          cost: 90,
+        },
       ],
       error: null,
     });
 
-    const res = await MCP_TOOLS.get_inventory_status.execute({ onlyLowStock: true }, ctx);
+    const res = await MCP_TOOLS.get_inventory_status.execute(
+      { onlyLowStock: true },
+      ctx,
+    );
     expect(res.total_items).toBe(2);
     expect(res.low_stock_count).toBe(1);
     expect(res.items.length).toBe(1);
@@ -158,7 +231,12 @@ describe("lib/mcp/tools", () => {
 
   it("get_recipe_details: should calculate food cost and margin", async () => {
     mockChain.maybeSingle.mockResolvedValueOnce({
-      data: { id: "m-1", name: "Pizza Margarita", price: 200, description: "Pizza clásica" },
+      data: {
+        id: "m-1",
+        name: "Pizza Margarita",
+        price: 200,
+        description: "Pizza clásica",
+      },
       error: null,
     });
 
@@ -166,8 +244,21 @@ describe("lib/mcp/tools", () => {
       if (field === "menu_item_id") {
         return Promise.resolve({
           data: [
-            { id: "r-1", quantity: 0.2, ingredients: { id: "ing-1", name: "Queso", cost: 100, unit: "kg" } }, // 20
-            { id: "r-2", quantity: 0.1, ingredients: { id: "ing-2", name: "Salsa", cost: 50, unit: "l" } },   // 5
+            {
+              id: "r-1",
+              quantity: 0.2,
+              ingredients: {
+                id: "ing-1",
+                name: "Queso",
+                cost: 100,
+                unit: "kg",
+              },
+            }, // 20
+            {
+              id: "r-2",
+              quantity: 0.1,
+              ingredients: { id: "ing-2", name: "Salsa", cost: 50, unit: "l" },
+            }, // 5
           ],
           error: null,
         });
@@ -175,14 +266,24 @@ describe("lib/mcp/tools", () => {
       return mockChain;
     });
 
-    const res = await MCP_TOOLS.get_recipe_details.execute({ menuItemId: "m-1" }, ctx);
+    const res = await MCP_TOOLS.get_recipe_details.execute(
+      { menuItemId: "m-1" },
+      ctx,
+    );
     expect(res.estimated_food_cost).toBe(25);
     expect(res.margin_percent).toBe(88);
   });
 
   it("get_daily_cuts: should return daily cuts history", async () => {
     mockChain.limit.mockResolvedValueOnce({
-      data: [{ id: "cut-1", total_sales: 15000, cash_expected: 5000, card_sales: 10000 }],
+      data: [
+        {
+          id: "cut-1",
+          total_sales: 15000,
+          cash_expected: 5000,
+          card_sales: 10000,
+        },
+      ],
       error: null,
     });
 
@@ -194,8 +295,18 @@ describe("lib/mcp/tools", () => {
   it("get_expenses_summary: should aggregate expenses by category", async () => {
     mockChain.order.mockResolvedValueOnce({
       data: [
-        { id: "e-1", amount: 1200, date: "2026-09-20", expense_categories: { name: "Insumos" } },
-        { id: "e-2", amount: 800, date: "2026-09-21", expense_categories: { name: "Servicios" } },
+        {
+          id: "e-1",
+          amount: 1200,
+          date: "2026-09-20",
+          expense_categories: { name: "Insumos" },
+        },
+        {
+          id: "e-2",
+          amount: 800,
+          date: "2026-09-21",
+          expense_categories: { name: "Servicios" },
+        },
       ],
       error: null,
     });
@@ -213,7 +324,15 @@ describe("lib/mcp/tools", () => {
         error: null,
       })
       .mockResolvedValueOnce({
-        data: [{ id: "item-1", name: "Limonada", price: 45, is_available: true, category_id: "cat-1" }],
+        data: [
+          {
+            id: "item-1",
+            name: "Limonada",
+            price: 45,
+            is_available: true,
+            category_id: "cat-1",
+          },
+        ],
         error: null,
       });
 

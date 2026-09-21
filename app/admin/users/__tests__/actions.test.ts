@@ -146,13 +146,13 @@ describe("Admin Users Server Actions", () => {
     mockFromSelect.mockResolvedValueOnce({ data: null, error: null });
     mockCreateUser.mockResolvedValueOnce({
       data: { user: null },
-      error: { message: "A user with this email address has already been registered" },
+      error: {
+        message: "A user with this email address has already been registered",
+      },
     });
     mockListUsers.mockResolvedValueOnce({
       data: {
-        users: [
-          { id: "global-user-123", email: "existingglobal@gmail.com" },
-        ],
+        users: [{ id: "global-user-123", email: "existingglobal@gmail.com" }],
       },
       error: null,
     });
@@ -197,7 +197,9 @@ describe("Admin Users Server Actions", () => {
       error: null,
     });
 
-    mockFromUpdate.mockResolvedValueOnce({ error: { message: "Database error" } });
+    mockFromUpdate.mockResolvedValueOnce({
+      error: { message: "Database error" },
+    });
 
     const res = await updateUserRole("user-1", customRoleId);
     expect(res).toEqual({ error: "Error al actualizar el rol" });

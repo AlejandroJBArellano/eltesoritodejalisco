@@ -178,7 +178,9 @@ describe("usePOSData Hook", () => {
     });
 
     expect(result.current.menuItemMap).toBeInstanceOf(Map);
-    expect(result.current.menuItemMap.get("item-1")?.name).toBe("Taco al Pastor");
+    expect(result.current.menuItemMap.get("item-1")?.name).toBe(
+      "Taco al Pastor",
+    );
     expect(result.current.menuItemMap.get("item-2")?.price).toBe(30);
     expect(result.current.menuItemMap.has("non-existent")).toBe(false);
   });

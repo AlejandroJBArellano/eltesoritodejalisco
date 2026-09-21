@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     if (!pin || typeof pin !== "string" || !pin.trim()) {
       return NextResponse.json(
         { valid: false, error: "Ingresa el PIN de autorización" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (!manager) {
       return NextResponse.json(
         { valid: false, error: "PIN de autorización incorrecto" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     console.error("Error al verificar PIN:", error);
     return NextResponse.json(
       { error: "Error interno al verificar PIN" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

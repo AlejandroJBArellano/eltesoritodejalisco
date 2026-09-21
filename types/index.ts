@@ -326,12 +326,7 @@ export type TaskFrequency =
   "CONTINUOUS" | "VARIABLE" | "ROUTINE" | "DAILY" | "WEEKLY" | "CLOSING";
 
 export type TaskStatus =
-  | "PENDING"
-  | "IN_PROGRESS"
-  | "PAUSED"
-  | "COMPLETED"
-  | "APPROVED"
-  | "NOT_DONE";
+  "PENDING" | "IN_PROGRESS" | "PAUSED" | "COMPLETED" | "APPROVED" | "NOT_DONE";
 
 export interface TaskCategory {
   id: string;

@@ -41,12 +41,16 @@ describe("EmployeeShiftsSchedule Component", () => {
       json: async () => ({ shifts: mockShifts }),
     });
 
-    render(<EmployeeShiftsSchedule initialDate={new Date("2026-09-07T12:00:00Z")} />);
+    render(
+      <EmployeeShiftsSchedule initialDate={new Date("2026-09-07T12:00:00Z")} />,
+    );
 
     expect(screen.getByText(/cargando rol de turnos/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.queryByText(/cargando rol de turnos/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/cargando rol de turnos/i),
+      ).not.toBeInTheDocument();
     });
 
     expect(screen.getByText("Rol Semanal de Turnos")).toBeInTheDocument();
@@ -67,10 +71,14 @@ describe("EmployeeShiftsSchedule Component", () => {
       json: async () => ({ shifts: [] }),
     });
 
-    render(<EmployeeShiftsSchedule initialDate={new Date("2026-08-10T12:00:00Z")} />);
+    render(
+      <EmployeeShiftsSchedule initialDate={new Date("2026-08-10T12:00:00Z")} />,
+    );
 
     await waitFor(() => {
-      expect(screen.queryByText(/cargando rol de turnos/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/cargando rol de turnos/i),
+      ).not.toBeInTheDocument();
     });
 
     const nextBtn = screen.getByRole("button", { name: /semana siguiente/i });
@@ -101,7 +109,9 @@ describe("EmployeeShiftsSchedule Component", () => {
       json: async () => ({ error: "Error de conexión" }),
     });
 
-    render(<EmployeeShiftsSchedule initialDate={new Date("2026-09-07T12:00:00Z")} />);
+    render(
+      <EmployeeShiftsSchedule initialDate={new Date("2026-09-07T12:00:00Z")} />,
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Error de conexión")).toBeInTheDocument();

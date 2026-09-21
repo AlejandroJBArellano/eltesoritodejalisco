@@ -37,13 +37,17 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
               Ventas Mensuales (Últimos 12 Meses)
             </h2>
             <p className="text-xs text-text-light/60 mt-1 font-medium">
-              Evolución comercial histórica a largo plazo y variación intermensual.
+              Evolución comercial histórica a largo plazo y variación
+              intermensual.
             </p>
           </div>
           {recordMonth && recordMonth.totalSales > 0 && (
             <div className="inline-flex items-center gap-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 px-3 py-1.5 text-xs font-bold text-purple-400 self-start sm:self-auto">
               <Trophy className="h-3.5 w-3.5" />
-              Mes Récord: <span className="text-white font-black">{recordMonth.monthName}</span>
+              Mes Récord:{" "}
+              <span className="text-white font-black">
+                {recordMonth.monthName}
+              </span>
             </div>
           )}
         </div>
@@ -60,7 +64,8 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
             >
               {/* Gridlines */}
               {yTicks.map((tick, i) => {
-                const y = paddingTop + innerHeight - (tick / maxVal) * innerHeight;
+                const y =
+                  paddingTop + innerHeight - (tick / maxVal) * innerHeight;
                 return (
                   <g key={`ytick-${i}`}>
                     <line
@@ -91,7 +96,10 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
                 const barWidth = Math.min(Math.max(slotWidth * 0.55, 12), 34);
                 const xCenter = paddingLeft + (index + 0.5) * slotWidth;
                 const barX = xCenter - barWidth / 2;
-                const barHeight = Math.max((m.totalSales / maxVal) * innerHeight, 3);
+                const barHeight = Math.max(
+                  (m.totalSales / maxVal) * innerHeight,
+                  3,
+                );
                 const barY = paddingTop + innerHeight - barHeight;
                 const isHovered = hoveredIndex === index;
 
@@ -122,12 +130,7 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
 
                     {/* Record month indicator dot */}
                     {m.isRecordMonth && (
-                      <circle
-                        cx={xCenter}
-                        cy={barY - 7}
-                        r={3}
-                        fill="#A855F7"
-                      />
+                      <circle cx={xCenter} cy={barY - 7} r={3} fill="#A855F7" />
                     )}
 
                     {/* X Axis Label */}
@@ -135,7 +138,13 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
                       x={xCenter}
                       y={svgHeight - 14}
                       textAnchor="middle"
-                      fill={m.isRecordMonth ? "#C084FC" : isHovered ? "#FFFFFF" : "#888888"}
+                      fill={
+                        m.isRecordMonth
+                          ? "#C084FC"
+                          : isHovered
+                            ? "#FFFFFF"
+                            : "#888888"
+                      }
                       fontSize="10"
                       fontWeight={m.isRecordMonth ? "900" : "700"}
                     >
@@ -174,7 +183,10 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
                   <div className="flex justify-between gap-4">
                     <span>Ventas del mes:</span>
                     <span className="font-black text-white">
-                      ${data[hoveredIndex].totalSales.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                      $
+                      {data[hoveredIndex].totalSales.toLocaleString("es-MX", {
+                        minimumFractionDigits: 2,
+                      })}
                     </span>
                   </div>
                   <div className="flex justify-between gap-4">

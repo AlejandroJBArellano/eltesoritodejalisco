@@ -77,7 +77,9 @@ describe("useMenuCategories Hook", () => {
     expect(result.current.deleteArmedCategoryId).toBe(null);
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(mockRefresh).toHaveBeenCalledTimes(1);
-    expect(result.current.menuCategories.find((c) => c.id === "cat-1")).toBeUndefined();
+    expect(
+      result.current.menuCategories.find((c) => c.id === "cat-1"),
+    ).toBeUndefined();
   });
 
   it("should create category and update local state immediately", async () => {
@@ -109,7 +111,9 @@ describe("useMenuCategories Hook", () => {
     });
 
     const mockSuccess = vi.fn();
-    const fakeEvent = { preventDefault: vi.fn() } as unknown as React.SubmitEvent<HTMLFormElement>;
+    const fakeEvent = {
+      preventDefault: vi.fn(),
+    } as unknown as React.SubmitEvent<HTMLFormElement>;
 
     await act(async () => {
       await result.current.handleCategorySubmit(fakeEvent, mockSuccess);
@@ -119,7 +123,9 @@ describe("useMenuCategories Hook", () => {
     expect(mockRefresh).toHaveBeenCalledTimes(1);
     expect(mockSuccess).toHaveBeenCalledWith("POSTRES");
     expect(result.current.menuCategories).toHaveLength(3);
-    expect(result.current.menuCategories.find((c) => c.id === "cat-3")).toEqual(newCategory);
+    expect(result.current.menuCategories.find((c) => c.id === "cat-3")).toEqual(
+      newCategory,
+    );
   });
 
   it("should reorder categories optimistically and submit to API", async () => {

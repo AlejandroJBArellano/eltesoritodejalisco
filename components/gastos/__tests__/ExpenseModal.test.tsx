@@ -43,8 +43,12 @@ describe("ExpenseModal Component", () => {
       />,
     );
 
-    expect(screen.getByText("Crea una categoría primero ☝️")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Guardar Gasto/i })).toBeDisabled();
+    expect(
+      screen.getByText("Crea una categoría primero ☝️"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Guardar Gasto/i }),
+    ).toBeDisabled();
   });
 
   it("handles form submission with valid values", async () => {
@@ -119,7 +123,9 @@ describe("ExpenseModal Component", () => {
   });
 
   it("displays error message when onSubmit fails", async () => {
-    const onSubmit = vi.fn().mockRejectedValue(new Error("Error en el servidor"));
+    const onSubmit = vi
+      .fn()
+      .mockRejectedValue(new Error("Error en el servidor"));
 
     render(
       <ExpenseModal

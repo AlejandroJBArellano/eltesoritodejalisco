@@ -38,7 +38,10 @@ export function CustomerAbonoModal({
 
   const numAmount = parseFloat(amount) || 0;
   const numReceived = parseFloat(receivedAmount) || 0;
-  const change = method === PaymentMethod.CASH && numReceived > numAmount ? numReceived - numAmount : 0;
+  const change =
+    method === PaymentMethod.CASH && numReceived > numAmount
+      ? numReceived - numAmount
+      : 0;
 
   const handleSetTotal = () => {
     setAmount(totalDebt.toFixed(2));
@@ -58,13 +61,15 @@ export function CustomerAbonoModal({
 
     if (numAmount > totalDebt + 0.01) {
       setErrorMessage(
-        `El monto no puede ser mayor al saldo deudor ($${totalDebt.toFixed(2)})`
+        `El monto no puede ser mayor al saldo deudor ($${totalDebt.toFixed(2)})`,
       );
       return;
     }
 
     if (method === PaymentMethod.CASH && numReceived < numAmount) {
-      setErrorMessage("El monto recibido en efectivo no puede ser menor al abono");
+      setErrorMessage(
+        "El monto recibido en efectivo no puede ser menor al abono",
+      );
       return;
     }
 
@@ -78,10 +83,11 @@ export function CustomerAbonoModal({
           body: JSON.stringify({
             amount: numAmount,
             method,
-            receivedAmount: method === PaymentMethod.CASH ? numReceived : numAmount,
+            receivedAmount:
+              method === PaymentMethod.CASH ? numReceived : numAmount,
             change,
           }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -93,7 +99,7 @@ export function CustomerAbonoModal({
       onClose();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Error al procesar el abono"
+        error instanceof Error ? error.message : "Error al procesar el abono",
       );
     } finally {
       setIsSubmitting(false);
@@ -119,7 +125,10 @@ export function CustomerAbonoModal({
         {/* Monto del Abono */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center">
-            <label htmlFor="abono-amount" className="text-xs font-bold text-text-light/70 uppercase tracking-wider">
+            <label
+              htmlFor="abono-amount"
+              className="text-xs font-bold text-text-light/70 uppercase tracking-wider"
+            >
               Monto del Abono
             </label>
             <button
@@ -181,7 +190,10 @@ export function CustomerAbonoModal({
         {method === PaymentMethod.CASH && (
           <div className="space-y-3 bg-dark/30 p-3.5 rounded-xl border border-border">
             <div className="space-y-1">
-              <label htmlFor="received-amount" className="text-xs font-bold text-text-light/70">
+              <label
+                htmlFor="received-amount"
+                className="text-xs font-bold text-text-light/70"
+              >
                 Efectivo Recibido
               </label>
               <div className="relative">
@@ -201,8 +213,12 @@ export function CustomerAbonoModal({
             </div>
 
             <div className="flex justify-between items-center pt-1 border-t border-border/50 text-xs">
-              <span className="text-text-light/60 font-bold">Cambio a entregar:</span>
-              <span className={`font-black text-sm ${change > 0 ? "text-emerald-400" : "text-text-light/40"}`}>
+              <span className="text-text-light/60 font-bold">
+                Cambio a entregar:
+              </span>
+              <span
+                className={`font-black text-sm ${change > 0 ? "text-emerald-400" : "text-text-light/40"}`}
+              >
                 ${change.toFixed(2)}
               </span>
             </div>

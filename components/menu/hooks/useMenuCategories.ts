@@ -11,11 +11,14 @@ import {
 
 type MenuCategoriesContextType = ReturnType<typeof useMenuCategoriesInner>;
 
-const MenuCategoriesContext = createContext<MenuCategoriesContextType | null>(null);
+const MenuCategoriesContext = createContext<MenuCategoriesContextType | null>(
+  null,
+);
 
 function useMenuCategoriesInner(initialCategories: MenuCategory[]) {
   const router = useRouter();
-  const [menuCategories, setMenuCategories] = useState<MenuCategory[]>(initialCategories);
+  const [menuCategories, setMenuCategories] =
+    useState<MenuCategory[]>(initialCategories);
   const [categoriesLoaded] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -86,7 +89,9 @@ function useMenuCategoriesInner(initialCategories: MenuCategory[]) {
       if (data.category) {
         setMenuCategories((prev) => {
           if (isEditing) {
-            return prev.map((c) => (c.id === data.category.id ? data.category : c));
+            return prev.map((c) =>
+              c.id === data.category.id ? data.category : c,
+            );
           } else {
             return [...prev, data.category];
           }
@@ -165,7 +170,10 @@ function useMenuCategoriesInner(initialCategories: MenuCategory[]) {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          reorder: localUpdated.map((c) => ({ id: c.id, sort_order: c.sort_order })),
+          reorder: localUpdated.map((c) => ({
+            id: c.id,
+            sort_order: c.sort_order,
+          })),
         }),
       });
       router.refresh();
@@ -203,7 +211,11 @@ export function MenuCategoriesProvider({
   children: React.ReactNode;
 }) {
   const value = useMenuCategoriesInner(initialCategories);
-  return React.createElement(MenuCategoriesContext.Provider, { value }, children);
+  return React.createElement(
+    MenuCategoriesContext.Provider,
+    { value },
+    children,
+  );
 }
 
 export function useMenuCategories(initialCategories?: MenuCategory[]) {
@@ -212,7 +224,9 @@ export function useMenuCategories(initialCategories?: MenuCategory[]) {
 
   // Fallback for tests/isolated calls
   if (!initialCategories) {
-    throw new Error("useMenuCategories must be used within a MenuCategoriesProvider or passed initialCategories directly");
+    throw new Error(
+      "useMenuCategories must be used within a MenuCategoriesProvider or passed initialCategories directly",
+    );
   }
   // eslint-disable-next-line react-hooks/rules-of-hooks
   return useMenuCategoriesInner(initialCategories);

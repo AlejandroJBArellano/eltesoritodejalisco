@@ -42,7 +42,9 @@ describe("GastosFilterBar Component", () => {
     );
 
     // Search
-    const searchInput = screen.getByPlaceholderText("Descripción o categoría...");
+    const searchInput = screen.getByPlaceholderText(
+      "Descripción o categoría...",
+    );
     fireEvent.change(searchInput, { target: { value: "Gasolina" } });
     expect(onSearchChange).toHaveBeenCalledWith("Gasolina");
 

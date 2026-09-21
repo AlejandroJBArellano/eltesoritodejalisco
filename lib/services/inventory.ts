@@ -204,12 +204,14 @@ export async function deductInventoryForOrder(
       const hasOutOfStock = result.deductions.some((d) => d.newStock <= 0);
       if (hasOutOfStock) {
         // Non-blocking fire-and-forget
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+        const siteUrl =
+          process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
         fetch(`${siteUrl}/api/inventory/alert`, {
           method: "POST",
           headers: {
             // We call this internally, bypassing auth check by adding a server secret header
-            "x-internal-secret": process.env.INTERNAL_API_SECRET || "kittnos-internal",
+            "x-internal-secret":
+              process.env.INTERNAL_API_SECRET || "kittnos-internal",
           },
         }).catch((err) =>
           console.error("Failed to send stock alert email:", err),

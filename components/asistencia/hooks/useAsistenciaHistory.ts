@@ -30,7 +30,8 @@ export function useAsistenciaHistory() {
       setIsLoading(true);
       setError(null);
       let url = "/api/attendance/history?";
-      if (selectedUserId !== "ALL") url += `&userId=${encodeURIComponent(selectedUserId)}`;
+      if (selectedUserId !== "ALL")
+        url += `&userId=${encodeURIComponent(selectedUserId)}`;
       if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
       if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
 

@@ -25,7 +25,9 @@ describe("LastOrders Component", () => {
     render(<LastOrders />);
 
     expect(screen.getByText("Últimas Órdenes")).toBeInTheDocument();
-    const historyLink = screen.getByRole("link", { name: /Ver Historial Completo/i });
+    const historyLink = screen.getByRole("link", {
+      name: /Ver Historial Completo/i,
+    });
     expect(historyLink).toBeInTheDocument();
     expect(historyLink).toHaveAttribute("href", "/history");
   });
@@ -36,7 +38,9 @@ describe("LastOrders Component", () => {
     render(<LastOrders />);
 
     expect(screen.getByText("Últimas Órdenes")).toBeInTheDocument();
-    const historyLink = screen.getByRole("link", { name: /Ver Historial Completo/i });
+    const historyLink = screen.getByRole("link", {
+      name: /Ver Historial Completo/i,
+    });
     expect(historyLink).toBeInTheDocument();
   });
 
@@ -53,7 +57,11 @@ describe("LastOrders Component", () => {
     render(<LastOrders />);
 
     expect(screen.getByText("Últimas Órdenes")).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /Ver Historial Completo/i })).not.toBeInTheDocument();
-    expect(screen.queryByText("Ver Historial Completo")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /Ver Historial Completo/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Ver Historial Completo"),
+    ).not.toBeInTheDocument();
   });
 });

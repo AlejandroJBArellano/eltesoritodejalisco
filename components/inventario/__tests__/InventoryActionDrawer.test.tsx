@@ -28,7 +28,7 @@ describe("InventoryActionDrawer Component", () => {
         ingredient={mockIngredient}
         onClose={vi.fn()}
         onSuccess={vi.fn()}
-      />
+      />,
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
@@ -38,7 +38,7 @@ describe("InventoryActionDrawer Component", () => {
         ingredient={null}
         onClose={vi.fn()}
         onSuccess={vi.fn()}
-      />
+      />,
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
@@ -51,7 +51,7 @@ describe("InventoryActionDrawer Component", () => {
         initialAction="ENTRADA"
         onClose={vi.fn()}
         onSuccess={vi.fn()}
-      />
+      />,
     );
 
     // Click Merma mode
@@ -60,7 +60,9 @@ describe("InventoryActionDrawer Component", () => {
 
     // Click suggestion chips
     fireEvent.click(screen.getByRole("button", { name: "Caducado" }));
-    const reasonInput = screen.getByPlaceholderText(/Ej. Se cayó al servir/i) as HTMLInputElement;
+    const reasonInput = screen.getByPlaceholderText(
+      /Ej. Se cayó al servir/i,
+    ) as HTMLInputElement;
     expect(reasonInput.value).toBe("Caducado");
 
     // Click Ajustar mode
@@ -81,7 +83,7 @@ describe("InventoryActionDrawer Component", () => {
         initialAction="ENTRADA"
         onClose={vi.fn()}
         onSuccess={vi.fn()}
-      />
+      />,
     );
 
     const display = screen.getByTestId("keypad-display");
@@ -106,7 +108,9 @@ describe("InventoryActionDrawer Component", () => {
     expect(display).toHaveTextContent("5.25");
 
     // Backspace
-    await user.click(screen.getByRole("button", { name: /Borrar último dígito/i }));
+    await user.click(
+      screen.getByRole("button", { name: /Borrar último dígito/i }),
+    );
     expect(display).toHaveTextContent("5.2");
 
     // Clear
@@ -123,7 +127,7 @@ describe("InventoryActionDrawer Component", () => {
         initialAction="ENTRADA"
         onClose={vi.fn()}
         onSuccess={vi.fn()}
-      />
+      />,
     );
 
     const display = screen.getByTestId("keypad-display");
@@ -156,20 +160,24 @@ describe("InventoryActionDrawer Component", () => {
         initialAction="ENTRADA"
         onClose={vi.fn()}
         onSuccess={vi.fn()}
-      />
+      />,
     );
 
     // Click submit with 0
-    await user.click(screen.getByRole("button", { name: /Registrar Entrada/i }));
+    await user.click(
+      screen.getByRole("button", { name: /Registrar Entrada/i }),
+    );
     expect(
-      screen.getByText(/Ingresa una cantidad válida mayor a 0 para la entrada/i)
+      screen.getByText(
+        /Ingresa una cantidad válida mayor a 0 para la entrada/i,
+      ),
     ).toBeInTheDocument();
 
     // Switch to MERMA
     await user.click(screen.getByRole("button", { name: "Merma" }));
     await user.click(screen.getByRole("button", { name: /Registrar Merma/i }));
     expect(
-      screen.getByText(/Ingresa una cantidad válida mayor a 0 para la merma/i)
+      screen.getByText(/Ingresa una cantidad válida mayor a 0 para la merma/i),
     ).toBeInTheDocument();
   });
 
@@ -190,7 +198,7 @@ describe("InventoryActionDrawer Component", () => {
         initialAction="ENTRADA"
         onClose={handleClose}
         onSuccess={handleSuccess}
-      />
+      />,
     );
 
     // Type 4.5
@@ -203,7 +211,9 @@ describe("InventoryActionDrawer Component", () => {
     expect(screen.getByText("+4.50")).toBeInTheDocument();
 
     // Submit
-    await user.click(screen.getByRole("button", { name: /Registrar Entrada/i }));
+    await user.click(
+      screen.getByRole("button", { name: /Registrar Entrada/i }),
+    );
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith("/api/inventory/adjust", {
@@ -219,7 +229,7 @@ describe("InventoryActionDrawer Component", () => {
         expect.objectContaining({
           id: "ing-123",
           currentStock: 14.5,
-        })
+        }),
       );
       expect(handleClose).toHaveBeenCalled();
     });
@@ -242,7 +252,7 @@ describe("InventoryActionDrawer Component", () => {
         initialAction="MERMA"
         onClose={handleClose}
         onSuccess={handleSuccess}
-      />
+      />,
     );
 
     // Type 3
@@ -254,7 +264,9 @@ describe("InventoryActionDrawer Component", () => {
 
     // Try submit without reason -> should show error
     await user.click(screen.getByRole("button", { name: /Registrar Merma/i }));
-    expect(screen.getByText(/Especifica el motivo de la merma/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Especifica el motivo de la merma/i),
+    ).toBeInTheDocument();
 
     // Type reason manually in input
     const reasonInput = screen.getByPlaceholderText(/Ej. Se cayó al servir/i);
@@ -277,7 +289,7 @@ describe("InventoryActionDrawer Component", () => {
         expect.objectContaining({
           id: "ing-123",
           currentStock: 7,
-        })
+        }),
       );
     });
   });
@@ -291,7 +303,7 @@ describe("InventoryActionDrawer Component", () => {
         initialAction="MERMA"
         onClose={vi.fn()}
         onSuccess={vi.fn()}
-      />
+      />,
     );
 
     // Type 15
@@ -299,7 +311,7 @@ describe("InventoryActionDrawer Component", () => {
     await user.click(screen.getByRole("button", { name: "5" }));
 
     expect(
-      screen.getByText(/Alerta: El ajuste resultará en stock negativo/i)
+      screen.getByText(/Alerta: El ajuste resultará en stock negativo/i),
     ).toBeInTheDocument();
   });
 
@@ -319,7 +331,7 @@ describe("InventoryActionDrawer Component", () => {
         initialAction="AJUSTE"
         onClose={vi.fn()}
         onSuccess={handleSuccess}
-      />
+      />,
     );
 
     // Initial counted stock is currentStock (10)
@@ -327,7 +339,9 @@ describe("InventoryActionDrawer Component", () => {
 
     // Try submit without changing -> error same stock
     await user.click(screen.getByRole("button", { name: /Confirmar Ajuste/i }));
-    expect(screen.getByText(/El nuevo stock es idéntico al actual/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/El nuevo stock es idéntico al actual/i),
+    ).toBeInTheDocument();
 
     // Change to 12
     await user.click(screen.getByRole("button", { name: /Limpiar/i }));
@@ -365,16 +379,16 @@ describe("InventoryActionDrawer Component", () => {
         initialAction="ENTRADA"
         onClose={vi.fn()}
         onSuccess={vi.fn()}
-      />
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: "5" }));
-    await user.click(screen.getByRole("button", { name: /Registrar Entrada/i }));
+    await user.click(
+      screen.getByRole("button", { name: /Registrar Entrada/i }),
+    );
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Error al actualizar stock")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Error al actualizar stock")).toBeInTheDocument();
     });
   });
 
@@ -390,11 +404,13 @@ describe("InventoryActionDrawer Component", () => {
         initialAction="ENTRADA"
         onClose={vi.fn()}
         onSuccess={vi.fn()}
-      />
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: "5" }));
-    await user.click(screen.getByRole("button", { name: /Registrar Entrada/i }));
+    await user.click(
+      screen.getByRole("button", { name: /Registrar Entrada/i }),
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Fallo de red")).toBeInTheDocument();
@@ -413,15 +429,17 @@ describe("InventoryActionDrawer Component", () => {
         initialAction="ENTRADA"
         onClose={vi.fn()}
         onSuccess={vi.fn()}
-      />
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: "5" }));
-    await user.click(screen.getByRole("button", { name: /Registrar Entrada/i }));
+    await user.click(
+      screen.getByRole("button", { name: /Registrar Entrada/i }),
+    );
 
     await waitFor(() => {
       expect(
-        screen.getByText("Error desconocido al procesar ajuste")
+        screen.getByText("Error desconocido al procesar ajuste"),
       ).toBeInTheDocument();
     });
   });
@@ -436,7 +454,7 @@ describe("InventoryActionDrawer Component", () => {
         ingredient={mockIngredient}
         onClose={handleClose}
         onSuccess={vi.fn()}
-      />
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: /Cancelar/i }));

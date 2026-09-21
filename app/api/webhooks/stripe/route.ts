@@ -49,7 +49,10 @@ export async function POST(request: NextRequest) {
         .eq("stripe_account_id", account.id);
 
       if (updateError) {
-        console.error("Error updating tenant Stripe Connect status:", updateError);
+        console.error(
+          "Error updating tenant Stripe Connect status:",
+          updateError,
+        );
       } else {
         invalidateTenantCache();
         console.log(
@@ -87,9 +90,12 @@ export async function POST(request: NextRequest) {
       const notes = metadata.notes || "";
       const pickupTime = metadata.pickupTime || null;
       const rawOrderItems = JSON.parse(metadata.orderItems);
-      const orderItems: Array<{ menuItemId: string; quantity: number; notes: string }> =
-        Array.isArray(rawOrderItems)
-          ? rawOrderItems.map((item: unknown) => {
+      const orderItems: Array<{
+        menuItemId: string;
+        quantity: number;
+        notes: string;
+      }> = Array.isArray(rawOrderItems)
+        ? rawOrderItems.map((item: unknown) => {
             if (Array.isArray(item)) {
               return {
                 menuItemId: String(item[0]),
@@ -104,12 +110,12 @@ export async function POST(request: NextRequest) {
               notes: String(obj.notes || ""),
             };
           })
-          : [];
+        : [];
       const tipAmount = Number(metadata.tipAmount || 0);
 
       if (session.payment_status !== "paid") {
         console.log(
-          `[Stripe Webhook] Checkout session ${session.id} payment_status is '${session.payment_status}'. Skipping order creation until paid.`
+          `[Stripe Webhook] Checkout session ${session.id} payment_status is '${session.payment_status}'. Skipping order creation until paid.`,
         );
         return NextResponse.json({ received: true });
       }
@@ -118,7 +124,9 @@ export async function POST(request: NextRequest) {
       const rawPhone = session.customer_details?.phone || null;
 
       // Normalize phone to E.164 (preserve leading '+' and digits)
-      const phone = rawPhone ? (rawPhone.startsWith("+") ? "+" : "") + rawPhone.replace(/\D/g, "") : null;
+      const phone = rawPhone
+        ? (rawPhone.startsWith("+") ? "+" : "") + rawPhone.replace(/\D/g, "")
+        : null;
 
       const supabaseAdmin = createAdminClient();
 
@@ -130,7 +138,9 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (existingOrder) {
-        console.log(`[Stripe Webhook] Order ${orderId} already processed. Skipping duplicate.`);
+        console.log(
+          `[Stripe Webhook] Order ${orderId} already processed. Skipping duplicate.`,
+        );
         return NextResponse.json({ received: true });
       }
 
@@ -158,14 +168,17 @@ export async function POST(request: NextRequest) {
             .eq("tenant_id", tenantId);
 
           if (email && phone) {
-            customerQuery = customerQuery.or(`email.eq.${email},phone.eq.${phone}`);
+            customerQuery = customerQuery.or(
+              `email.eq.${email},phone.eq.${phone}`,
+            );
           } else if (email) {
             customerQuery = customerQuery.eq("email", email);
           } else if (phone) {
             customerQuery = customerQuery.eq("phone", phone);
           }
 
-          const { data: existingCustomer, error: findError } = await customerQuery.limit(1).maybeSingle();
+          const { data: existingCustomer, error: findError } =
+            await customerQuery.limit(1).maybeSingle();
           if (findError) {
             console.error("Error looking up existing customer:", findError);
           }
@@ -175,21 +188,25 @@ export async function POST(request: NextRequest) {
           } else {
             // Create new customer
             const newCustomerId = crypto.randomUUID();
-            const { data: newCustomer, error: insertCustomerError } = await supabaseAdmin
-              .from("customers")
-              .insert({
-                id: newCustomerId,
-                name: customerName,
-                phone: phone,
-                email: email,
-                tenant_id: tenantId,
-                updated_at: getCurrentCDMXDate(),
-              })
-              .select("id")
-              .single();
+            const { data: newCustomer, error: insertCustomerError } =
+              await supabaseAdmin
+                .from("customers")
+                .insert({
+                  id: newCustomerId,
+                  name: customerName,
+                  phone: phone,
+                  email: email,
+                  tenant_id: tenantId,
+                  updated_at: getCurrentCDMXDate(),
+                })
+                .select("id")
+                .single();
 
             if (insertCustomerError) {
-              console.error("Error creating new customer:", insertCustomerError);
+              console.error(
+                "Error creating new customer:",
+                insertCustomerError,
+              );
             } else if (newCustomer) {
               customerId = newCustomer.id;
             }
@@ -239,7 +256,12 @@ export async function POST(request: NextRequest) {
       let subtotal = 0;
       const itemsWithPrices = [];
       const itemSummaries = [];
-      const itemsForEmail: Array<{ name: string; quantity: number; unitPrice: number; notes?: string }> = [];
+      const itemsForEmail: Array<{
+        name: string;
+        quantity: number;
+        unitPrice: number;
+        notes?: string;
+      }> = [];
 
       for (const item of orderItems) {
         const { data: menuItem } = await supabaseAdmin
@@ -380,7 +402,10 @@ export async function POST(request: NextRequest) {
         tipAmount,
         total,
       }).catch((emailErr) => {
-        console.error("[Stripe Webhook] Failed to send new order email:", emailErr);
+        console.error(
+          "[Stripe Webhook] Failed to send new order email:",
+          emailErr,
+        );
       });
 
       // 8. Trigger async confirmation email to the customer (non-blocking)
@@ -399,7 +424,10 @@ export async function POST(request: NextRequest) {
           tipAmount,
           total,
         }).catch((custEmailErr) => {
-          console.error("[Stripe Webhook] Failed to send customer confirmation email:", custEmailErr);
+          console.error(
+            "[Stripe Webhook] Failed to send customer confirmation email:",
+            custEmailErr,
+          );
         });
       }
 
@@ -419,7 +447,10 @@ export async function POST(request: NextRequest) {
         },
         ["ADMIN", "MANAGER", "KITCHEN", "CASHIER", "WAITER"],
       ).catch((pushErr) => {
-        console.error("[Stripe Webhook] Failed to send push notification:", pushErr);
+        console.error(
+          "[Stripe Webhook] Failed to send push notification:",
+          pushErr,
+        );
       });
 
       console.log(

@@ -152,10 +152,10 @@ export function aggregateHourlySales(
 
   // Matriz de 7 días x 24 horas para el heatmap
   // heatmapRaw[dayIndex][hour] = { sales, orders }
-  const heatmapRaw: Array<Array<{ sales: number; orders: number }>> = Array.from(
-    { length: 7 },
-    () => Array.from({ length: 24 }, () => ({ sales: 0, orders: 0 })),
-  );
+  const heatmapRaw: Array<Array<{ sales: number; orders: number }>> =
+    Array.from({ length: 7 }, () =>
+      Array.from({ length: 24 }, () => ({ sales: 0, orders: 0 })),
+    );
 
   let totalPeriodSales = 0;
   let totalPeriodOrders = 0;
@@ -313,7 +313,9 @@ export function aggregateHourlySales(
         hour: h,
         hourLabel: formatHourLabel(h),
         sales: Number((cellData.sales / divisor).toFixed(2)),
-        orders: Number((cellData.orders / divisor).toFixed(mode === "average" ? 1 : 0)),
+        orders: Number(
+          (cellData.orders / divisor).toFixed(mode === "average" ? 1 : 0),
+        ),
         intensity: Number(intensity.toFixed(3)),
       });
     }
@@ -336,7 +338,9 @@ export function aggregateHourlySales(
         ? {
             hour: maxOrdersHour,
             label: formatHourLabel(maxOrdersHour),
-            count: Number((maxOrders / divisor).toFixed(mode === "average" ? 1 : 0)),
+            count: Number(
+              (maxOrders / divisor).toFixed(mode === "average" ? 1 : 0),
+            ),
             percentage: Number(
               ((maxOrders / (totalPeriodOrders || 1)) * 100).toFixed(1),
             ),
@@ -357,7 +361,9 @@ export function aggregateHourlySales(
           endHour: bestRushWindow.endHour,
           label: `${formatHourLabel(bestRushWindow.startHour)} - ${formatHourLabel(bestRushWindow.endHour)}`,
           sales: Number(bestRushWindow.sales.toFixed(2)),
-          orders: Number(bestRushWindow.orders.toFixed(mode === "average" ? 1 : 0)),
+          orders: Number(
+            bestRushWindow.orders.toFixed(mode === "average" ? 1 : 0),
+          ),
           percentage: Number(
             (
               ((bestRushWindow.sales * divisor) / (totalPeriodSales || 1)) *
@@ -410,20 +416,21 @@ export function transformHourlyRowsToExportItems(
   });
 }
 
-export const HOURLY_SALES_EXPORT_COLUMNS: ExportColumn<HourlySaleExportItem>[] = [
-  { header: "Rango Horario", key: "hour" },
-  {
-    header: "Ventas",
-    accessor: (item) => `$${item.sales.toFixed(2)}`,
-  },
-  {
-    header: "% del Total",
-    accessor: (item) => `${item.percentage.toFixed(1)}%`,
-  },
-  { header: "Pedidos", key: "orders" },
-  {
-    header: "Ticket Promedio",
-    accessor: (item) => `$${item.averageTicket.toFixed(2)}`,
-  },
-  { header: "Indicador", key: "peakIndicator" },
-];
+export const HOURLY_SALES_EXPORT_COLUMNS: ExportColumn<HourlySaleExportItem>[] =
+  [
+    { header: "Rango Horario", key: "hour" },
+    {
+      header: "Ventas",
+      accessor: (item) => `$${item.sales.toFixed(2)}`,
+    },
+    {
+      header: "% del Total",
+      accessor: (item) => `${item.percentage.toFixed(1)}%`,
+    },
+    { header: "Pedidos", key: "orders" },
+    {
+      header: "Ticket Promedio",
+      accessor: (item) => `$${item.averageTicket.toFixed(2)}`,
+    },
+    { header: "Indicador", key: "peakIndicator" },
+  ];

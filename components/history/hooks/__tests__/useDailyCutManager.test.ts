@@ -17,7 +17,12 @@ const mockInsert = vi.fn().mockResolvedValue({ error: null });
 const mockSelect = vi.fn().mockReturnValue({
   eq: vi.fn().mockReturnValue({
     eq: vi.fn().mockResolvedValue({
-      data: [{ amount: 150, expense_categories: { tipo_gasto: "variable", name: "Insumos" } }],
+      data: [
+        {
+          amount: 150,
+          expense_categories: { tipo_gasto: "variable", name: "Insumos" },
+        },
+      ],
     }),
   }),
 });
@@ -99,7 +104,10 @@ describe("useDailyCutManager", () => {
     vi.clearAllMocks();
     global.fetch = vi.fn().mockImplementation(async (url: string) => {
       if (url === "/api/tenant") {
-        return { ok: true, json: async () => ({ tenant: { id: "tenant-123" } }) };
+        return {
+          ok: true,
+          json: async () => ({ tenant: { id: "tenant-123" } }),
+        };
       }
       if (url === "/api/daily-cuts") {
         return { ok: true, json: async () => ({ success: true }) };
@@ -108,7 +116,9 @@ describe("useDailyCutManager", () => {
         return {
           ok: true,
           json: async () => ({
-            breakdown: [{ employee_name: "Juan", hours_worked: 8, tip_amount: 50 }],
+            breakdown: [
+              { employee_name: "Juan", hours_worked: 8, tip_amount: 50 },
+            ],
             total_hours: 8,
           }),
         };
@@ -203,7 +213,9 @@ describe("useDailyCutManager", () => {
     });
 
     expect(result.current.pendingCutArmed).toBe(false);
-    expect(result.current.historySuccess).toContain("Corte extemporáneo generado");
+    expect(result.current.historySuccess).toContain(
+      "Corte extemporáneo generado",
+    );
     expect(onCutFinalized).toHaveBeenCalled();
   });
 
@@ -219,7 +231,9 @@ describe("useDailyCutManager", () => {
 
     expect(result.current.finalizeSuccess).toBe(true);
     expect(result.current.showFinalizeModal).toBe(false);
-    expect(result.current.historySuccess).toContain("Corte de día finalizado con éxito");
+    expect(result.current.historySuccess).toContain(
+      "Corte de día finalizado con éxito",
+    );
     expect(onCutFinalized).toHaveBeenCalled();
   });
 
@@ -330,18 +344,23 @@ describe("useDailyCutManager", () => {
 
   it("includes credit granted note in daily cut payload when creditoOtorgadoHoy > 0", async () => {
     let capturedBody: Record<string, unknown> | null = null;
-    global.fetch = vi.fn().mockImplementation(async (url: string, init?: RequestInit) => {
-      if (url === "/api/tenant") {
-        return { ok: true, json: async () => ({ tenant: { id: "tenant-123" } }) };
-      }
-      if (url === "/api/daily-cuts") {
-        if (init?.body) {
-          capturedBody = JSON.parse(init.body as string);
+    global.fetch = vi
+      .fn()
+      .mockImplementation(async (url: string, init?: RequestInit) => {
+        if (url === "/api/tenant") {
+          return {
+            ok: true,
+            json: async () => ({ tenant: { id: "tenant-123" } }),
+          };
         }
-        return { ok: true, json: async () => ({ success: true }) };
-      }
-      return { ok: false };
-    });
+        if (url === "/api/daily-cuts") {
+          if (init?.body) {
+            capturedBody = JSON.parse(init.body as string);
+          }
+          return { ok: true, json: async () => ({ success: true }) };
+        }
+        return { ok: false };
+      });
 
     const ordersWithCredit: OrderWithDetails[] = [
       ...mockTodayOrders,
@@ -371,6 +390,8 @@ describe("useDailyCutManager", () => {
     });
 
     expect(capturedBody).not.toBeNull();
-    expect((capturedBody as unknown as { notes?: string })?.notes).toContain("[Crédito otorgado hoy: $232.00]");
+    expect((capturedBody as unknown as { notes?: string })?.notes).toContain(
+      "[Crédito otorgado hoy: $232.00]",
+    );
   });
 });

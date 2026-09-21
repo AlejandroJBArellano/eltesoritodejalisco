@@ -224,7 +224,9 @@ export function useMenuItems(items?: MenuItem[]) {
 
   // Fallback for tests/isolated calls
   if (!items) {
-    throw new Error("useMenuItems must be used within a MenuItemsProvider or passed items directly");
+    throw new Error(
+      "useMenuItems must be used within a MenuItemsProvider or passed items directly",
+    );
   }
   // eslint-disable-next-line react-hooks/rules-of-hooks
   return useMenuItemsInner(items);

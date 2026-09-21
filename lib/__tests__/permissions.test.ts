@@ -33,7 +33,9 @@ describe("RBAC Permissions Core", () => {
 
     it("debe extraer permisos de un objeto con propiedad permissions", () => {
       expect(
-        extractPermissions({ permissions: ["inventory.view", "finance.cash_cut"] }),
+        extractPermissions({
+          permissions: ["inventory.view", "finance.cash_cut"],
+        }),
       ).toEqual(["inventory.view", "finance.cash_cut"]);
     });
 
@@ -63,9 +65,9 @@ describe("RBAC Permissions Core", () => {
   describe("hasPermission", () => {
     it("debe retornar true para admin con comodín *", () => {
       expect(hasPermission(["*"], "pos.cancel_order")).toBe(true);
-      expect(hasPermission({ role: "ADMIN" }, "settings.manage_restaurant")).toBe(
-        true,
-      );
+      expect(
+        hasPermission({ role: "ADMIN" }, "settings.manage_restaurant"),
+      ).toBe(true);
     });
 
     it("debe retornar true si el permiso exacto está presente", () => {
@@ -84,7 +86,10 @@ describe("RBAC Permissions Core", () => {
   describe("hasAnyPermission", () => {
     it("debe retornar true si cuenta con comodín *", () => {
       expect(
-        hasAnyPermission(["*"], ["inventory.adjust_stock", "finance.manage_expenses"]),
+        hasAnyPermission(
+          ["*"],
+          ["inventory.adjust_stock", "finance.manage_expenses"],
+        ),
       ).toBe(true);
     });
 
@@ -97,26 +102,39 @@ describe("RBAC Permissions Core", () => {
 
     it("debe retornar false si ninguno coincide", () => {
       const user = { permissions: ["kitchen.view"] };
-      expect(hasAnyPermission(user, ["pos.view", "finance.cash_cut"])).toBe(false);
+      expect(hasAnyPermission(user, ["pos.view", "finance.cash_cut"])).toBe(
+        false,
+      );
     });
   });
 
   describe("hasAllPermissions", () => {
     it("debe retornar true si cuenta con comodín *", () => {
       expect(
-        hasAllPermissions(["*"], ["pos.view", "pos.create_order", "team.manage_roles"]),
+        hasAllPermissions(
+          ["*"],
+          ["pos.view", "pos.create_order", "team.manage_roles"],
+        ),
       ).toBe(true);
     });
 
     it("debe retornar true si contiene todos los permisos requeridos", () => {
-      const user = { permissions: ["pos.view", "pos.create_order", "pos.split_bill"] };
-      expect(hasAllPermissions(user, ["pos.view", "pos.split_bill"])).toBe(true);
+      const user = {
+        permissions: ["pos.view", "pos.create_order", "pos.split_bill"],
+      };
+      expect(hasAllPermissions(user, ["pos.view", "pos.split_bill"])).toBe(
+        true,
+      );
     });
 
     it("debe retornar false si falta al menos uno", () => {
       const user = { permissions: ["pos.view", "pos.create_order"] };
       expect(
-        hasAllPermissions(user, ["pos.view", "pos.create_order", "pos.cancel_order"]),
+        hasAllPermissions(user, [
+          "pos.view",
+          "pos.create_order",
+          "pos.cancel_order",
+        ]),
       ).toBe(false);
     });
   });

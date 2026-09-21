@@ -30,7 +30,12 @@ export async function POST(req: Request) {
         );
       }
 
-      const factura = await crearFacturaDirecta(venta, cliente, orderId, tenant.id);
+      const factura = await crearFacturaDirecta(
+        venta,
+        cliente,
+        orderId,
+        tenant.id,
+      );
       return NextResponse.json(factura);
     } else if (tipo === "TICKET") {
       const ticket = await generarTicketAutofactura(venta, orderId, tenant.id);
@@ -55,4 +60,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

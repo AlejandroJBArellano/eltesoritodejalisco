@@ -1,7 +1,18 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
-import { useGastosData, type CreateExpensePayload, type CreateCategoryPayload, type UpdateCategoryPayload } from "./hooks/useGastosData";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
+import {
+  useGastosData,
+  type CreateExpensePayload,
+  type CreateCategoryPayload,
+  type UpdateCategoryPayload,
+} from "./hooks/useGastosData";
 import { useGastosTable } from "./hooks/useGastosTable";
 import type {
   Category,

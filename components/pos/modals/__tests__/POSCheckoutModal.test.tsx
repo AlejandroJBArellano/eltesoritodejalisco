@@ -177,7 +177,9 @@ describe("POSCheckoutModal", () => {
   it("handles exact amount quick cash preset button", () => {
     render(<POSCheckoutModal />);
 
-    const exactBtn = screen.getByRole("button", { name: /Exacto \(\$680\.00\)/i });
+    const exactBtn = screen.getByRole("button", {
+      name: /Exacto \(\$680\.00\)/i,
+    });
     expect(exactBtn).toBeDefined();
 
     fireEvent.click(exactBtn);
@@ -241,8 +243,12 @@ describe("POSCheckoutModal", () => {
 
     render(<POSCheckoutModal />);
 
-    expect(screen.getByText(/Orden 100% Bonificada \/ Cortesía/i)).toBeDefined();
-    const courtesyBtn = screen.getByRole("button", { name: /Registrar Cortesía \(\$0\.00\)/i });
+    expect(
+      screen.getByText(/Orden 100% Bonificada \/ Cortesía/i),
+    ).toBeDefined();
+    const courtesyBtn = screen.getByRole("button", {
+      name: /Registrar Cortesía \(\$0\.00\)/i,
+    });
     fireEvent.click(courtesyBtn);
 
     expect(mockHandleCourtesyPayment).toHaveBeenCalled();
@@ -260,7 +266,9 @@ describe("POSCheckoutModal", () => {
     expect(mockOpenModifyModal).toHaveBeenCalledWith(baseOrder);
     expect(mockSetCheckoutOrder).toHaveBeenCalledWith(null);
 
-    const failedBtn = screen.getByRole("button", { name: /Marcar como Pago Fallido/i });
+    const failedBtn = screen.getByRole("button", {
+      name: /Marcar como Pago Fallido/i,
+    });
     fireEvent.click(failedBtn);
     expect(mockHandleFailedPayment).toHaveBeenCalled();
   });
@@ -272,7 +280,9 @@ describe("POSCheckoutModal", () => {
     fireEvent.click(creditBtn);
 
     expect(screen.getByText(/Confirmar Venta a Crédito/i)).toBeDefined();
-    const confirmCreditBtn = screen.getByRole("button", { name: /Confirmar Crédito/i });
+    const confirmCreditBtn = screen.getByRole("button", {
+      name: /Confirmar Crédito/i,
+    });
     fireEvent.click(confirmCreditBtn);
 
     expect(mockHandleCreditPayment).toHaveBeenCalled();
@@ -290,7 +300,9 @@ describe("POSCheckoutModal", () => {
     render(<POSCheckoutModal />);
 
     expect(screen.getByText(/Propina inusual/i)).toBeDefined();
-    expect(screen.getByText(/\$300\.00 \(44\.1%\) — ¿es correcto\?/i)).toBeDefined();
+    expect(
+      screen.getByText(/\$300\.00 \(44\.1%\) — ¿es correcto\?/i),
+    ).toBeDefined();
 
     const confirmBtn = screen.getByRole("button", { name: /Sí, confirmar/i });
     fireEvent.click(confirmBtn);
@@ -326,7 +338,9 @@ describe("POSCheckoutModal", () => {
 
     render(<POSCheckoutModal />);
 
-    const courtesyBtn = screen.getByRole("button", { name: /Registrar Cortesía \(\$0\.00\)/i });
+    const courtesyBtn = screen.getByRole("button", {
+      name: /Registrar Cortesía \(\$0\.00\)/i,
+    });
     fireEvent.click(courtesyBtn);
 
     expect(mockHandleCourtesyPayment).toHaveBeenCalled();
@@ -353,7 +367,9 @@ describe("POSCheckoutModal", () => {
 
     render(<POSCheckoutModal />);
 
-    const courtesyBtn = screen.getByRole("button", { name: /Registrar Cortesía \(\$0\.00\)/i });
+    const courtesyBtn = screen.getByRole("button", {
+      name: /Registrar Cortesía \(\$0\.00\)/i,
+    });
     fireEvent.click(courtesyBtn);
 
     // Should NOT call courtesy payment directly

@@ -21,7 +21,9 @@ export async function GET() {
     const [{ data: items, error }, { data: popularData }] = await Promise.all([
       supabase
         .from("menu_items")
-        .select("*, translations, ingredients(id, current_stock, minimum_stock)")
+        .select(
+          "*, translations, ingredients(id, current_stock, minimum_stock)",
+        )
         .eq("tenant_id", tenant.id)
         .order("name", { ascending: true }),
       supabase
@@ -35,10 +37,16 @@ export async function GET() {
 
     if (error) throw error;
 
-    const popularIds = new Set((popularData || []).map((row) => row.menu_item_id));
+    const popularIds = new Set(
+      (popularData || []).map((row) => row.menu_item_id),
+    );
 
     const enrichedItems = (items || []).map((item) => {
-      const ingredient = item.ingredients as { id: string; current_stock: number; minimum_stock: number } | null;
+      const ingredient = item.ingredients as {
+        id: string;
+        current_stock: number;
+        minimum_stock: number;
+      } | null;
       return {
         ...item,
         // Flatten ingredient stock fields for easy consumption in the POS

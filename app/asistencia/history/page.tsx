@@ -5,7 +5,8 @@ export type { AttendanceRecord } from "@/components/asistencia/types";
 
 export const metadata = {
   title: "Historial de Asistencia | KittnOS",
-  description: "Control de entradas, salidas y duraciones de turno del personal",
+  description:
+    "Control de entradas, salidas y duraciones de turno del personal",
 };
 
 export default function AttendanceHistoryPage() {

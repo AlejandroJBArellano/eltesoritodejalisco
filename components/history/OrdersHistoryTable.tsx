@@ -1,11 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  ChevronDown,
-  ChevronRight,
-  ShoppingBag,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, ShoppingBag } from "lucide-react";
 import {
   TableHeaderSortCell,
   TablePagination,
@@ -45,18 +41,28 @@ export function OrdersHistoryTable(props: OrdersHistoryTableProps = {}) {
   const pageSize = props.pageSize ?? context?.ordersPageSize ?? 10;
   const totalPages = props.totalPages ?? context?.ordersTotalPages ?? 1;
   const totalItems = props.totalItems ?? context?.ordersTotalItems ?? 0;
-  const expandedRow = props.expandedRow !== undefined ? props.expandedRow : (context?.expandedRow ?? null);
+  const expandedRow =
+    props.expandedRow !== undefined
+      ? props.expandedRow
+      : (context?.expandedRow ?? null);
 
-  const onSort = props.onSort ?? ((field) => {
-    if (context) {
-      context.setOrdersSortField(field);
-      context.setOrdersSortDir(context.ordersSortDir === "asc" ? "desc" : "asc");
-    }
-  });
-  const onPageChange = props.onPageChange ?? context?.setOrdersPage ?? (() => {});
-  const onPageSizeChange = props.onPageSizeChange ?? context?.setOrdersPageSize ?? (() => {});
+  const onSort =
+    props.onSort ??
+    ((field) => {
+      if (context) {
+        context.setOrdersSortField(field);
+        context.setOrdersSortDir(
+          context.ordersSortDir === "asc" ? "desc" : "asc",
+        );
+      }
+    });
+  const onPageChange =
+    props.onPageChange ?? context?.setOrdersPage ?? (() => {});
+  const onPageSizeChange =
+    props.onPageSizeChange ?? context?.setOrdersPageSize ?? (() => {});
   const onToggleRow = props.onToggleRow ?? context?.toggleRow ?? (() => {});
-  const onBillOrder = props.onBillOrder ?? context?.setBillingOrder ?? (() => {});
+  const onBillOrder =
+    props.onBillOrder ?? context?.setBillingOrder ?? (() => {});
 
   return (
     <div className="overflow-x-auto space-y-4">
@@ -114,8 +120,7 @@ export function OrdersHistoryTable(props: OrdersHistoryTableProps = {}) {
 
             if (order.status === "UNCOLLECTED") {
               methodLabel = "NO COBRADA";
-              methodBadgeClass =
-                "bg-red-500/10 text-red-400 border-red-500/20";
+              methodBadgeClass = "bg-red-500/10 text-red-400 border-red-500/20";
             } else if (
               primaryPaymentMethod === "CARD" ||
               primaryPaymentMethod === "TRANSFER"
@@ -194,7 +199,10 @@ export function OrdersHistoryTable(props: OrdersHistoryTableProps = {}) {
 
                 {/* FILA EXPANDIDA */}
                 {isExpanded && (
-                  <tr className="bg-dark/40" data-testid={`order-expanded-${order.id}`}>
+                  <tr
+                    className="bg-dark/40"
+                    data-testid={`order-expanded-${order.id}`}
+                  >
                     <td colSpan={8} className="px-6 py-4">
                       <OrderDetailExpanded
                         order={order}

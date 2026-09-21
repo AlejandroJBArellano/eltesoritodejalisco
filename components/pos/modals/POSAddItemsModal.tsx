@@ -19,7 +19,8 @@ import { MenuItem } from "@/types/pos";
 
 /** Derive stock status for a menu item */
 function getStockStatus(item: MenuItem): "out" | "low" | "ok" | "untracked" {
-  if (item.ingredientId == null || item.currentStock == null) return "untracked";
+  if (item.ingredientId == null || item.currentStock == null)
+    return "untracked";
   if (item.currentStock <= 0) return "out";
   if (item.minimumStock != null && item.currentStock <= item.minimumStock)
     return "low";
@@ -138,11 +139,7 @@ export function POSAddItemsModal() {
       updateAdditionalItemQty(index, 1);
     } else {
       const current = Number(additionalItems[index]?.quantity) || 1;
-      handleAdditionalItemChange?.(
-        index,
-        "quantity",
-        (current + 1).toString(),
-      );
+      handleAdditionalItemChange?.(index, "quantity", (current + 1).toString());
     }
   };
 
@@ -209,8 +206,12 @@ export function POSAddItemsModal() {
               {(editingOrder.table || editingOrder.customer?.name) && (
                 <p className="text-[11px] font-bold text-text-light/50 uppercase tracking-wider mt-0.5">
                   {editingOrder.table ? `Mesa: ${editingOrder.table}` : ""}
-                  {editingOrder.table && editingOrder.customer?.name ? " · " : ""}
-                  {editingOrder.customer?.name ? editingOrder.customer.name : ""}
+                  {editingOrder.table && editingOrder.customer?.name
+                    ? " · "
+                    : ""}
+                  {editingOrder.customer?.name
+                    ? editingOrder.customer.name
+                    : ""}
                 </p>
               )}
             </div>
@@ -267,7 +268,8 @@ export function POSAddItemsModal() {
             {categories.map((cat, idx) => {
               const config = getCategoryConfig(cat, idx);
               const isActive =
-                activeCategory.toUpperCase().trim() === cat.toUpperCase().trim();
+                activeCategory.toUpperCase().trim() ===
+                cat.toUpperCase().trim();
               return (
                 <button
                   key={cat}

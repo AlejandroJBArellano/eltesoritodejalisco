@@ -55,8 +55,8 @@ export function InventoryActionDrawer({
         initialAction === "ENTRADA"
           ? "Compra"
           : initialAction === "AJUSTE"
-          ? "Corrección de inventario"
-          : ""
+            ? "Corrección de inventario"
+            : "",
       );
       setError(null);
     }
@@ -162,8 +162,8 @@ export function InventoryActionDrawer({
       action === "ENTRADA"
         ? reason || "Compra"
         : action === "AJUSTE"
-        ? reason || "Corrección de inventario"
-        : reason.trim();
+          ? reason || "Corrección de inventario"
+          : reason.trim();
 
     setError(null);
 
@@ -190,7 +190,11 @@ export function InventoryActionDrawer({
         });
         onClose();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Error desconocido al procesar ajuste");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Error desconocido al procesar ajuste",
+        );
       }
     });
   };
@@ -210,7 +214,10 @@ export function InventoryActionDrawer({
               <Package className="h-5 w-5" />
             </span>
             <div>
-              <h2 id="drawer-title" className="text-sm font-black text-text-light uppercase tracking-wide">
+              <h2
+                id="drawer-title"
+                className="text-sm font-black text-text-light uppercase tracking-wide"
+              >
                 Control de Stock
               </h2>
               <p className="text-xs text-text-light/60 font-medium truncate max-w-60 sm:max-w-xs">
@@ -293,7 +300,9 @@ export function InventoryActionDrawer({
                         : "bg-red-500/20 text-red-400"
                     }`}
                   >
-                    {calculatedAdjustment > 0 ? `+${calculatedAdjustment.toFixed(2)}` : calculatedAdjustment.toFixed(2)}
+                    {calculatedAdjustment > 0
+                      ? `+${calculatedAdjustment.toFixed(2)}`
+                      : calculatedAdjustment.toFixed(2)}
                   </span>
                 )}
                 <span
@@ -301,14 +310,16 @@ export function InventoryActionDrawer({
                     isNegativeStock
                       ? "text-red-400"
                       : action === "ENTRADA"
-                      ? "text-emerald-400"
-                      : action === "MERMA"
-                      ? "text-amber-400"
-                      : "text-text-light"
+                        ? "text-emerald-400"
+                        : action === "MERMA"
+                          ? "text-amber-400"
+                          : "text-text-light"
                   }`}
                 >
                   {projectedStock.toFixed(2)}{" "}
-                  <span className="text-xs font-bold text-text-light/50">{ingredient.unit}</span>
+                  <span className="text-xs font-bold text-text-light/50">
+                    {ingredient.unit}
+                  </span>
                 </span>
               </div>
             </div>
@@ -325,7 +336,10 @@ export function InventoryActionDrawer({
           {action === "MERMA" && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label htmlFor="merma-reason-input" className="text-[11px] font-black uppercase tracking-wider text-text-light/60">
+                <label
+                  htmlFor="merma-reason-input"
+                  className="text-[11px] font-black uppercase tracking-wider text-text-light/60"
+                >
                   Motivo de la merma <span className="text-red-400">*</span>
                 </label>
               </div>
@@ -408,16 +422,18 @@ export function InventoryActionDrawer({
 
           {/* Teclado Numérico Táctil (Numpad POS) */}
           <div className="grid grid-cols-3 gap-2">
-            {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0"].map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => handleDigit(key)}
-                className="h-12 rounded-2xl bg-white/5 border border-border text-lg font-black text-text-light hover:bg-white/10 hover:border-border/80 active:scale-95 active:bg-primary/20 transition-all flex items-center justify-center select-none"
-              >
-                {key}
-              </button>
-            ))}
+            {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0"].map(
+              (key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => handleDigit(key)}
+                  className="h-12 rounded-2xl bg-white/5 border border-border text-lg font-black text-text-light hover:bg-white/10 hover:border-border/80 active:scale-95 active:bg-primary/20 transition-all flex items-center justify-center select-none"
+                >
+                  {key}
+                </button>
+              ),
+            )}
             <button
               type="button"
               onClick={handleBackspace}
@@ -452,8 +468,8 @@ export function InventoryActionDrawer({
               action === "ENTRADA"
                 ? "bg-emerald-500 text-black hover:bg-emerald-400 shadow-emerald-500/20"
                 : action === "MERMA"
-                ? "bg-red-500 text-white hover:bg-red-400 shadow-red-500/20"
-                : "bg-primary text-black hover:brightness-110 shadow-primary/20"
+                  ? "bg-red-500 text-white hover:bg-red-400 shadow-red-500/20"
+                  : "bg-primary text-black hover:brightness-110 shadow-primary/20"
             }`}
           >
             {isPending ? (
@@ -466,8 +482,8 @@ export function InventoryActionDrawer({
                 {action === "ENTRADA"
                   ? "Registrar Entrada"
                   : action === "MERMA"
-                  ? "Registrar Merma"
-                  : "Confirmar Ajuste"}
+                    ? "Registrar Merma"
+                    : "Confirmar Ajuste"}
               </span>
             )}
           </button>

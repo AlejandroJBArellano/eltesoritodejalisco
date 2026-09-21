@@ -157,7 +157,10 @@ export function RoleEditorModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-dark/60">
           <div>
-            <h2 id="role-modal-title" className="text-lg font-black tracking-tight text-white">
+            <h2
+              id="role-modal-title"
+              className="text-lg font-black tracking-tight text-white"
+            >
               {isDuplicating
                 ? `Duplicar Rol: ${roleToEdit?.name}`
                 : roleToEdit
@@ -193,7 +196,10 @@ export function RoleEditorModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
           <div className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
             {errorMsg && (
               <div
@@ -262,10 +268,12 @@ export function RoleEditorModal({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                 <div>
                   <h3 className="text-sm font-black uppercase tracking-wider text-white">
-                    Matriz de Permisos ({selectedPermissions.size} seleccionados)
+                    Matriz de Permisos ({selectedPermissions.size}{" "}
+                    seleccionados)
                   </h3>
                   <p className="text-xs text-text-light/50">
-                    Define qué acciones y vistas operativas tiene permitidas este rol.
+                    Define qué acciones y vistas operativas tiene permitidas
+                    este rol.
                   </p>
                 </div>
                 {!isEditingSystem && (
@@ -323,7 +331,9 @@ export function RoleEditorModal({
                             onClick={() => toggleModuleAll(moduleKeys)}
                             className="text-xs font-bold text-primary hover:underline"
                           >
-                            {isAllModuleSelected ? "Deseleccionar" : "Seleccionar todo"}
+                            {isAllModuleSelected
+                              ? "Deseleccionar"
+                              : "Seleccionar todo"}
                           </button>
                         )}
                       </div>

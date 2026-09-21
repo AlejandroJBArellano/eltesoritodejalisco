@@ -411,8 +411,10 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
 
     const calculatedTotals = calculateOrderDiscountTotals({
       items: itemsInput,
-      orderDiscountType: checkoutOrder.discountType || rawCheckout.discount_type || null,
-      orderDiscountValue: checkoutOrder.discountValue ?? rawCheckout.discount_value ?? null,
+      orderDiscountType:
+        checkoutOrder.discountType || rawCheckout.discount_type || null,
+      orderDiscountValue:
+        checkoutOrder.discountValue ?? rawCheckout.discount_value ?? null,
     });
 
     const orderDiscountTotal =
@@ -420,7 +422,8 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
       calculatedTotals.orderDiscount ||
       0;
     if (orderDiscountTotal > 0) {
-      const reason = checkoutOrder.discountReason || rawCheckout.discount_reason;
+      const reason =
+        checkoutOrder.discountReason || rawCheckout.discount_reason;
       msg += `\n*Descuento en orden: -$${orderDiscountTotal.toFixed(2)}${reason ? ` (${reason})` : ""}*\n`;
     }
 

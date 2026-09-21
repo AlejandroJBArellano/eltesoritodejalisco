@@ -76,13 +76,17 @@ describe("GET /auth/callback", () => {
     expect(response.status).toBe(307);
     const location = response.headers.get("location");
     expect(location).toContain("/login?error=");
-    expect(location).toContain(encodeURIComponent("No se pudo iniciar sesión con Google"));
+    expect(location).toContain(
+      encodeURIComponent("No se pudo iniciar sesión con Google"),
+    );
   });
 
   it("redirects to login error when code exchange fails", async () => {
     mockExchangeCode.mockResolvedValue({ error: { message: "Invalid code" } });
 
-    const request = new Request("http://localhost:3000/auth/callback?code=bad-code");
+    const request = new Request(
+      "http://localhost:3000/auth/callback?code=bad-code",
+    );
     const response = await GET(request);
 
     expect(response.status).toBe(307);
@@ -105,7 +109,9 @@ describe("GET /auth/callback", () => {
     // Profile does not exist for this tenant (neither by id nor by email)
     mockSelectFromProfiles.mockResolvedValue({ data: null, error: null });
 
-    const request = new Request("http://localhost:3000/auth/callback?code=valid-code");
+    const request = new Request(
+      "http://localhost:3000/auth/callback?code=valid-code",
+    );
     const response = await GET(request);
 
     expect(mockSignOut).toHaveBeenCalledTimes(1);
@@ -113,7 +119,9 @@ describe("GET /auth/callback", () => {
     const location = response.headers.get("location");
     expect(location).toContain("/login?error=");
     expect(location).toContain(
-      encodeURIComponent("Este correo no está registrado en este restaurante. Contacta a un administrador.")
+      encodeURIComponent(
+        "Este correo no está registrado en este restaurante. Contacta a un administrador.",
+      ),
     );
   });
 
@@ -140,7 +148,9 @@ describe("GET /auth/callback", () => {
       error: null,
     });
 
-    const request = new Request("http://localhost:3000/auth/callback?code=valid-code&next=/pos");
+    const request = new Request(
+      "http://localhost:3000/auth/callback?code=valid-code&next=/pos",
+    );
     const response = await GET(request);
 
     expect(mockSignOut).not.toHaveBeenCalled();
@@ -173,7 +183,9 @@ describe("GET /auth/callback", () => {
         error: null,
       });
 
-    const request = new Request("http://localhost:3000/auth/callback?code=valid-code");
+    const request = new Request(
+      "http://localhost:3000/auth/callback?code=valid-code",
+    );
     const response = await GET(request);
 
     expect(mockSignOut).not.toHaveBeenCalled();

@@ -31,14 +31,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       if (!pin) {
         return NextResponse.json(
           { error: "Se requiere PIN de Gerencia para autorizar la reapertura" },
-          { status: 403 }
+          { status: 403 },
         );
       }
       const manager = await verifyManagerPin(tenant.id, String(pin).trim());
       if (!manager) {
         return NextResponse.json(
           { error: "PIN de autorización incorrecto" },
-          { status: 401 }
+          { status: 401 },
         );
       }
       authorizedByName = manager.full_name || manager.role;
@@ -57,7 +57,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (fetchError || !order) {
-      return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Orden no encontrada" },
+        { status: 404 },
+      );
     }
 
     const previousStatus = order.status;
@@ -125,7 +128,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     console.error("Error undoing payment:", error);
     return NextResponse.json(
       { error: "Error al deshacer pago" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

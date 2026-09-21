@@ -97,7 +97,8 @@ export function SettingsProvider({
   }
 
   const pickupUrl =
-    typeof window !== "undefined" && window.location.hostname.endsWith(".localhost")
+    typeof window !== "undefined" &&
+    window.location.hostname.endsWith(".localhost")
       ? `http://${initialTenant.slug}.localhost:5173`
       : `https://${initialTenant.slug}.trykittn.com`;
 
@@ -291,7 +292,9 @@ export function SettingsProvider({
 export function useSettingsContext() {
   const context = useContext(SettingsContext);
   if (!context) {
-    throw new Error("useSettingsContext must be used within a SettingsProvider");
+    throw new Error(
+      "useSettingsContext must be used within a SettingsProvider",
+    );
   }
   return context;
 }

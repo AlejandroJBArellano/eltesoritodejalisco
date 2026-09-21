@@ -46,13 +46,17 @@ describe("useDailyCutsArchive", () => {
   });
 
   it("initializes with empty cuts by default", () => {
-    const { result } = renderHook(() => useDailyCutsArchive({ autoFetch: false }));
+    const { result } = renderHook(() =>
+      useDailyCutsArchive({ autoFetch: false }),
+    );
     expect(result.current.dailyCuts).toEqual([]);
     expect(result.current.isLoadingCuts).toBe(false);
   });
 
   it("sorts cuts by date, orders, venta_neta, and utilidad_final", () => {
-    const { result } = renderHook(() => useDailyCutsArchive({ autoFetch: false }));
+    const { result } = renderHook(() =>
+      useDailyCutsArchive({ autoFetch: false }),
+    );
 
     act(() => {
       result.current.setDailyCuts(mockCuts);
@@ -82,7 +86,9 @@ describe("useDailyCutsArchive", () => {
   });
 
   it("paginates daily cuts correctly", () => {
-    const { result } = renderHook(() => useDailyCutsArchive({ autoFetch: false }));
+    const { result } = renderHook(() =>
+      useDailyCutsArchive({ autoFetch: false }),
+    );
 
     act(() => {
       result.current.setDailyCuts(mockCuts);
@@ -99,7 +105,9 @@ describe("useDailyCutsArchive", () => {
   });
 
   it("handles selectedCutDetail state", () => {
-    const { result } = renderHook(() => useDailyCutsArchive({ autoFetch: false }));
+    const { result } = renderHook(() =>
+      useDailyCutsArchive({ autoFetch: false }),
+    );
 
     expect(result.current.selectedCutDetail).toBeNull();
 
@@ -120,7 +128,9 @@ describe("useDailyCutsArchive", () => {
       json: async () => ({ cuts: mockCuts }),
     });
 
-    const { result } = renderHook(() => useDailyCutsArchive({ autoFetch: true }));
+    const { result } = renderHook(() =>
+      useDailyCutsArchive({ autoFetch: true }),
+    );
 
     await act(async () => {
       await result.current.refetch();
@@ -134,7 +144,9 @@ describe("useDailyCutsArchive", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     global.fetch = vi.fn().mockRejectedValue(new Error("Network failure"));
 
-    const { result } = renderHook(() => useDailyCutsArchive({ autoFetch: false }));
+    const { result } = renderHook(() =>
+      useDailyCutsArchive({ autoFetch: false }),
+    );
 
     await act(async () => {
       await result.current.refetch();

@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     if (!isAdmin) {
       return NextResponse.json(
         { error: "Permisos insuficientes para duplicar turnos" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     if (!source_week_start || !target_week_start) {
       return NextResponse.json(
         { error: "Fechas de inicio de semana requeridas (origen y destino)" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -68,20 +68,29 @@ export async function POST(request: Request) {
 
     if (fetchError) {
       console.error("Error fetching source shifts:", fetchError);
-      return NextResponse.json({ error: "Error al consultar turnos de la semana origen" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Error al consultar turnos de la semana origen" },
+        { status: 500 },
+      );
     }
 
     if (!sourceShifts || sourceShifts.length === 0) {
       return NextResponse.json(
-        { error: "No hay turnos registrados en la semana de origen para duplicar" },
-        { status: 400 }
+        {
+          error:
+            "No hay turnos registrados en la semana de origen para duplicar",
+        },
+        { status: 400 },
       );
     }
 
     // 2. Prepare new shifts by shifting date
     const newShifts: ShiftInsert[] = sourceShifts.map((s) => {
       const originalDate = parseISO(s.date);
-      const newShiftDate = format(addDays(originalDate, daysDiff), "yyyy-MM-dd");
+      const newShiftDate = format(
+        addDays(originalDate, daysDiff),
+        "yyyy-MM-dd",
+      );
       return {
         tenant_id: tenant.id,
         user_id: s.user_id,
@@ -109,7 +118,10 @@ export async function POST(request: Request) {
 
     if (insertError) {
       console.error("Error inserting duplicated shifts:", insertError);
-      return NextResponse.json({ error: "Error al duplicar turnos en la semana destino" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Error al duplicar turnos en la semana destino" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({
@@ -119,6 +131,9 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("POST /api/shifts/duplicate error:", error);
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 },
+    );
   }
 }

@@ -77,11 +77,20 @@ export function CampaignsHistoryTable({
   const getTemplateLabel = (key: string) => {
     switch (key) {
       case "te_extranamos":
-        return { label: "Te Extrañamos", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" };
+        return {
+          label: "Te Extrañamos",
+          color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+        };
       case "canje_puntos":
-        return { label: "Canje de Puntos", color: "text-amber-400 bg-amber-500/10 border-amber-500/20" };
+        return {
+          label: "Canje de Puntos",
+          color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+        };
       default:
-        return { label: "Personalizado", color: "text-purple-400 bg-purple-500/10 border-purple-500/20" };
+        return {
+          label: "Personalizado",
+          color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+        };
     }
   };
 
@@ -288,7 +297,8 @@ export function CampaignsHistoryTable({
                   Total Enviados
                 </span>
                 <strong className="text-emerald-400 text-sm font-bold">
-                  {selectedCampaign.sent_count} / {selectedCampaign.total_recipients}
+                  {selectedCampaign.sent_count} /{" "}
+                  {selectedCampaign.total_recipients}
                 </strong>
               </div>
               <div className="rounded-xl bg-dark/40 p-3 border border-border">
@@ -310,7 +320,9 @@ export function CampaignsHistoryTable({
                   Fecha
                 </span>
                 <span className="text-text-light font-bold text-[11px]">
-                  {formatDate(selectedCampaign.sent_at || selectedCampaign.created_at)}
+                  {formatDate(
+                    selectedCampaign.sent_at || selectedCampaign.created_at,
+                  )}
                 </span>
               </div>
             </div>
@@ -318,7 +330,8 @@ export function CampaignsHistoryTable({
             {/* Recipient list */}
             <div className="space-y-2">
               <h4 className="text-xs font-black uppercase tracking-wider text-text-light/70">
-                Lista de Destinatarios ({selectedCampaign.recipients?.length || 0})
+                Lista de Destinatarios (
+                {selectedCampaign.recipients?.length || 0})
               </h4>
 
               <div className="max-h-60 overflow-y-auto rounded-xl border border-border divide-y divide-border">

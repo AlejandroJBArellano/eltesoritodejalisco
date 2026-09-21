@@ -1,6 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback, useRef, createContext, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+  createContext,
+  useContext,
+} from "react";
 import { MenuItem, Customer, Order } from "@/types/pos";
 import { mapOrderData } from "@/lib/mappers/orders";
 import type { DbOrderPayload } from "@/lib/mappers/orders";
@@ -82,8 +90,10 @@ function usePOSDataInternal(tenantId?: string) {
   const supabase = useMemo(() => createClient(), []);
   // Debounce refs to batch rapid realtime events
   const fetchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const menuDebounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const categoriesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const menuDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const categoriesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const [categories, setCategories] = useState<string[]>([]);
 
@@ -130,7 +140,10 @@ function usePOSDataInternal(tenantId?: string) {
         }
       } else if (isOtros) {
         const normalizedItemCategory = m.category?.toUpperCase().trim();
-        if (normalizedItemCategory && registeredCategoriesSet.has(normalizedItemCategory)) {
+        if (
+          normalizedItemCategory &&
+          registeredCategoriesSet.has(normalizedItemCategory)
+        ) {
           return false;
         }
       }
@@ -142,19 +155,30 @@ function usePOSDataInternal(tenantId?: string) {
 
       return true;
     });
-  }, [availableMenuItems, searchQuery, activeCategory, registeredCategoriesSet]);
+  }, [
+    availableMenuItems,
+    searchQuery,
+    activeCategory,
+    registeredCategoriesSet,
+  ]);
 
   const fetchCategories = useCallback(async () => {
     try {
       const response = await fetch("/api/menu-categories");
       const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "Error al cargar categorías");
+      if (!response.ok)
+        throw new Error(data?.error || "Error al cargar categorías");
       const activeCats: string[] = (data.categories || [])
         .filter((c: DbMenuCategory) => c.is_active !== false)
-        .sort((a: DbMenuCategory, b: DbMenuCategory) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        .sort(
+          (a: DbMenuCategory, b: DbMenuCategory) =>
+            (a.sort_order ?? 0) - (b.sort_order ?? 0),
+        )
         .map((c: DbMenuCategory) => c.name);
 
-      const hasOtros = activeCats.some((c) => c.toUpperCase().trim() === "OTROS");
+      const hasOtros = activeCats.some(
+        (c) => c.toUpperCase().trim() === "OTROS",
+      );
       setCategories(hasOtros ? activeCats : [...activeCats, "OTROS"]);
     } catch (err) {
       console.error("[POS] Error fetching categories:", err);
@@ -223,7 +247,9 @@ function usePOSDataInternal(tenantId?: string) {
           fetchOrders().finally(() => setOrdersLoading(false)),
         ]);
       } catch (err) {
-        setErrorMessage(err instanceof Error ? err.message : "Error al cargar datos");
+        setErrorMessage(
+          err instanceof Error ? err.message : "Error al cargar datos",
+        );
       }
     }
     load();
@@ -248,7 +274,8 @@ function usePOSDataInternal(tenantId?: string) {
 
     const debouncedFetchCategories = (payload: unknown) => {
       console.log("[POS Realtime] Category update event:", payload);
-      if (categoriesDebounceRef.current) clearTimeout(categoriesDebounceRef.current);
+      if (categoriesDebounceRef.current)
+        clearTimeout(categoriesDebounceRef.current);
       categoriesDebounceRef.current = setTimeout(() => fetchCategories(), 300);
     };
 
@@ -294,17 +321,21 @@ function usePOSDataInternal(tenantId?: string) {
         debouncedFetchMenu,
       )
       .subscribe((status, err) => {
-        console.log(`[POS Realtime] Subscription status for tenant ${tenantId}:`, status, err);
+        console.log(
+          `[POS Realtime] Subscription status for tenant ${tenantId}:`,
+          status,
+          err,
+        );
       });
 
     return () => {
       supabase.removeChannel(channel);
       if (fetchDebounceRef.current) clearTimeout(fetchDebounceRef.current);
-      if (menuDebounceRef.current)  clearTimeout(menuDebounceRef.current);
-      if (categoriesDebounceRef.current) clearTimeout(categoriesDebounceRef.current);
+      if (menuDebounceRef.current) clearTimeout(menuDebounceRef.current);
+      if (categoriesDebounceRef.current)
+        clearTimeout(categoriesDebounceRef.current);
     };
   }, [tenantId, supabase, fetchOrders, fetchMenu, fetchCategories]);
-
 
   // Today metrics summary — single pass O(N) loop
   const todayStats = useMemo(() => {

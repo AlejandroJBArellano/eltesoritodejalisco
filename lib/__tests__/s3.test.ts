@@ -73,7 +73,9 @@ describe("lib/s3", () => {
         "Formato de imagen no soportado. Usa JPEG, PNG, WebP o AVIF",
       );
 
-      const pdfFile = new File(["test"], "doc.pdf", { type: "application/pdf" });
+      const pdfFile = new File(["test"], "doc.pdf", {
+        type: "application/pdf",
+      });
       expect(() => validateImageFile(pdfFile)).toThrow(
         "Formato de imagen no soportado. Usa JPEG, PNG, WebP o AVIF",
       );
@@ -153,14 +155,20 @@ describe("lib/s3", () => {
     it("should use AWS_S3_CUSTOM_DOMAIN when provided", () => {
       process.env.AWS_S3_CUSTOM_DOMAIN = "https://cdn.trykittn.com/";
       const url = getS3PublicUrl("tenant-1/menu-items/photo.webp");
-      expect(url).toBe("https://cdn.trykittn.com/tenant-1/menu-items/photo.webp");
+      expect(url).toBe(
+        "https://cdn.trykittn.com/tenant-1/menu-items/photo.webp",
+      );
     });
   });
 
   describe("uploadMenuItemImage", () => {
     it("should throw if file validation fails", async () => {
-      const invalidFile = new File(["test"], "test.txt", { type: "text/plain" });
-      await expect(uploadMenuItemImage(invalidFile, "tenant-1")).rejects.toThrow(
+      const invalidFile = new File(["test"], "test.txt", {
+        type: "text/plain",
+      });
+      await expect(
+        uploadMenuItemImage(invalidFile, "tenant-1"),
+      ).rejects.toThrow(
         "Formato de imagen no soportado. Usa JPEG, PNG, WebP o AVIF",
       );
       expect(mockSend).not.toHaveBeenCalled();
@@ -187,9 +195,15 @@ describe("lib/s3", () => {
       expect(command).toBeInstanceOf(PutObjectCommand);
       expect(command.input.Bucket).toBe("test-bucket");
       expect(command.input.ContentType).toBe("image/jpeg");
-      expect(command.input.CacheControl).toBe("public, max-age=31536000, immutable");
-      expect(command.input.Key).toMatch(/^tenant123_special\/menu-items\/\d+-[a-f0-9-]+\.jpg$/);
-      expect(url).toContain("https://test-bucket.s3.us-east-1.amazonaws.com/tenant123_special/menu-items/");
+      expect(command.input.CacheControl).toBe(
+        "public, max-age=31536000, immutable",
+      );
+      expect(command.input.Key).toMatch(
+        /^tenant123_special\/menu-items\/\d+-[a-f0-9-]+\.jpg$/,
+      );
+      expect(url).toContain(
+        "https://test-bucket.s3.us-east-1.amazonaws.com/tenant123_special/menu-items/",
+      );
     });
 
     it("should correctly detect extension for webp and png files", async () => {
@@ -203,7 +217,9 @@ describe("lib/s3", () => {
     });
 
     it("should handle S3 upload errors and throw friendly Spanish message", async () => {
-      mockSend.mockRejectedValueOnce(new Error("AccessDenied: User not authorized"));
+      mockSend.mockRejectedValueOnce(
+        new Error("AccessDenied: User not authorized"),
+      );
       const file = new File(["data"], "dish.jpg", { type: "image/jpeg" });
 
       await expect(uploadMenuItemImage(file, "tenant-1")).rejects.toThrow(

@@ -121,10 +121,13 @@ describe("lib/services/email", () => {
     });
 
     it("should return empty array if database returns an error", async () => {
-      mockSupabaseFrom().select().eq().in.mockResolvedValueOnce({
-        data: null,
-        error: new Error("DB Error"),
-      });
+      mockSupabaseFrom()
+        .select()
+        .eq()
+        .in.mockResolvedValueOnce({
+          data: null,
+          error: new Error("DB Error"),
+        });
 
       const emails = await getTenantAdminEmails("tenant-123");
       expect(emails).toEqual([]);
@@ -161,10 +164,13 @@ describe("lib/services/email", () => {
     });
 
     it("should send email with custom primary color and logo URL", async () => {
-      mockSupabaseFrom().select().eq().in.mockResolvedValueOnce({
-        data: [{ email: "admin@sucursalprueba.com" }],
-        error: null,
-      });
+      mockSupabaseFrom()
+        .select()
+        .eq()
+        .in.mockResolvedValueOnce({
+          data: [{ email: "admin@sucursalprueba.com" }],
+          error: null,
+        });
 
       const result = await sendNewOrderNotificationEmail({
         tenant: {
@@ -183,7 +189,12 @@ describe("lib/services/email", () => {
         table: "Mesa 4",
         notes: "Salsa aparte por favor",
         items: [
-          { name: "Hamburguesa Clásica", quantity: 2, unitPrice: 120, notes: "Sin cebolla" },
+          {
+            name: "Hamburguesa Clásica",
+            quantity: 2,
+            unitPrice: 120,
+            notes: "Sin cebolla",
+          },
         ],
         subtotal: 240,
         tipAmount: 30,
@@ -208,10 +219,13 @@ describe("lib/services/email", () => {
 
   describe("sendLowStockAlertEmail", () => {
     it("should render low stock email with tenant branding and item details", async () => {
-      mockSupabaseFrom().select().eq().in.mockResolvedValueOnce({
-        data: [{ email: "manager@restaurante.com" }],
-        error: null,
-      });
+      mockSupabaseFrom()
+        .select()
+        .eq()
+        .in.mockResolvedValueOnce({
+          data: [{ email: "manager@restaurante.com" }],
+          error: null,
+        });
 
       const result = await sendLowStockAlertEmail({
         tenant: {
@@ -222,14 +236,38 @@ describe("lib/services/email", () => {
           primary_color: "#10B981",
         },
         lowStock: [
-          { id: "ing-1", name: "Carne Asada", current_stock: 0, minimum_stock: 5, unit: "kg" },
-          { id: "ing-2", name: "Queso Oaxaca", current_stock: 2, minimum_stock: 4, unit: "kg" },
+          {
+            id: "ing-1",
+            name: "Carne Asada",
+            current_stock: 0,
+            minimum_stock: 5,
+            unit: "kg",
+          },
+          {
+            id: "ing-2",
+            name: "Queso Oaxaca",
+            current_stock: 2,
+            minimum_stock: 4,
+            unit: "kg",
+          },
         ],
         outOfStock: [
-          { id: "ing-1", name: "Carne Asada", current_stock: 0, minimum_stock: 5, unit: "kg" },
+          {
+            id: "ing-1",
+            name: "Carne Asada",
+            current_stock: 0,
+            minimum_stock: 5,
+            unit: "kg",
+          },
         ],
         belowMin: [
-          { id: "ing-2", name: "Queso Oaxaca", current_stock: 2, minimum_stock: 4, unit: "kg" },
+          {
+            id: "ing-2",
+            name: "Queso Oaxaca",
+            current_stock: 2,
+            minimum_stock: 4,
+            unit: "kg",
+          },
         ],
       });
 
@@ -279,7 +317,8 @@ describe("lib/services/email", () => {
         customerEmail: "carlos@example.com",
         loyaltyPoints: 120,
         subject: "¡Hola {nombre}, tienes una sorpresa en {restaurante}!",
-        messageContent: "Hola {nombre},\n\nTienes {puntos} puntos listos para canjear en {restaurante}.",
+        messageContent:
+          "Hola {nombre},\n\nTienes {puntos} puntos listos para canjear en {restaurante}.",
         templateKey: "te_extranamos",
       });
 
@@ -289,7 +328,8 @@ describe("lib/services/email", () => {
         expect.objectContaining({
           from: `Taquería El Pastor <${LOYALTY_FROM}>`,
           to: ["carlos@example.com"],
-          subject: "¡Hola Carlos Gómez, tienes una sorpresa en Taquería El Pastor!",
+          subject:
+            "¡Hola Carlos Gómez, tienes una sorpresa en Taquería El Pastor!",
           html: expect.stringContaining("Taquería El Pastor"),
         }),
       );

@@ -52,7 +52,8 @@ export function GastosTable(props: GastosTableProps = {}) {
         </h2>
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-text-light/50 uppercase tracking-widest hidden sm:inline">
-            Mostrando {expenses.length} de {filteredCount} egresos ({totalCount} totales)
+            Mostrando {expenses.length} de {filteredCount} egresos ({totalCount}{" "}
+            totales)
           </span>
           <ExportButton
             data={expenses}
@@ -170,7 +171,8 @@ export function GastosTable(props: GastosTableProps = {}) {
                   colSpan={5}
                   className="py-8 text-center text-text-light/40 italic"
                 >
-                  No hay registros de gastos encontrados para los filtros seleccionados.
+                  No hay registros de gastos encontrados para los filtros
+                  seleccionados.
                 </td>
               </tr>
             )}

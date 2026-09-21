@@ -272,7 +272,9 @@ export function ProductModal({
                 type="checkbox"
                 id="showInTakeaway"
                 checked={formState.showInTakeaway}
-                onChange={(e) => onFormChange("showInTakeaway", e.target.checked)}
+                onChange={(e) =>
+                  onFormChange("showInTakeaway", e.target.checked)
+                }
                 className="h-4 w-4 rounded border-border bg-dark/40 text-primary focus:ring-primary"
               />
               <label

@@ -65,7 +65,9 @@ export function NewCampaignModal({
   // Form State
   const [name, setName] = useState("");
   const [templateKey, setTemplateKey] = useState<TemplateKey>("te_extranamos");
-  const [subject, setSubject] = useState(DEFAULT_TEMPLATES.te_extranamos.subject);
+  const [subject, setSubject] = useState(
+    DEFAULT_TEMPLATES.te_extranamos.subject,
+  );
   const [messageContent, setMessageContent] = useState(
     DEFAULT_TEMPLATES.te_extranamos.message,
   );
@@ -77,7 +79,8 @@ export function NewCampaignModal({
     "all",
   );
   const [antiSaturationDays, setAntiSaturationDays] = useState<number>(7);
-  const [enableAntiSaturation, setEnableAntiSaturation] = useState<boolean>(true);
+  const [enableAntiSaturation, setEnableAntiSaturation] =
+    useState<boolean>(true);
 
   // Audience Preview State
   const [audienceCount, setAudienceCount] = useState<number | null>(null);
@@ -122,7 +125,9 @@ export function NewCampaignModal({
             : "0",
         });
 
-        const res = await fetch(`/api/customers/campaigns?${params.toString()}`);
+        const res = await fetch(
+          `/api/customers/campaigns?${params.toString()}`,
+        );
         if (!res.ok) throw new Error("Error calculando audiencia");
         const data = await res.json();
         if (isMounted) {
@@ -141,7 +146,14 @@ export function NewCampaignModal({
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [isOpen, inactiveDays, minPoints, frequency, antiSaturationDays, enableAntiSaturation]);
+  }, [
+    isOpen,
+    inactiveDays,
+    minPoints,
+    frequency,
+    antiSaturationDays,
+    enableAntiSaturation,
+  ]);
 
   const handleTemplateSelect = (key: TemplateKey) => {
     setTemplateKey(key);
@@ -150,7 +162,9 @@ export function NewCampaignModal({
     setMessageContent(template.message);
   };
 
-  const insertVariable = (variable: "{nombre}" | "{puntos}" | "{restaurante}") => {
+  const insertVariable = (
+    variable: "{nombre}" | "{puntos}" | "{restaurante}",
+  ) => {
     setMessageContent((prev) => `${prev} ${variable}`);
   };
 
@@ -436,7 +450,8 @@ export function NewCampaignModal({
                 />
               </div>
               <p className="text-[11px] text-text-light/60">
-                Evita enviar más de un correo promocional al mismo cliente en un periodo de tiempo.
+                Evita enviar más de un correo promocional al mismo cliente en un
+                periodo de tiempo.
               </p>
               {enableAntiSaturation && (
                 <div className="flex items-center gap-3 pt-1">
@@ -496,27 +511,31 @@ export function NewCampaignModal({
                 Seleccionar Plantilla
               </label>
               <div className="grid grid-cols-3 gap-2">
-                {(Object.keys(DEFAULT_TEMPLATES) as TemplateKey[]).map((key) => {
-                  const t = DEFAULT_TEMPLATES[key];
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => handleTemplateSelect(key)}
-                      className={`rounded-xl border p-3 text-left transition-all cursor-pointer ${
-                        templateKey === key
-                          ? "border-emerald-500 bg-emerald-500/15 shadow-sm"
-                          : "border-border bg-card text-text-light/70 hover:bg-white/5"
-                      }`}
-                      data-testid={`template-btn-${key}`}
-                    >
-                      <p className="text-xs font-black text-text-light">{t.name}</p>
-                      <span className="text-[10px] text-text-light/50 line-clamp-1 mt-0.5">
-                        {t.badge}
-                      </span>
-                    </button>
-                  );
-                })}
+                {(Object.keys(DEFAULT_TEMPLATES) as TemplateKey[]).map(
+                  (key) => {
+                    const t = DEFAULT_TEMPLATES[key];
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => handleTemplateSelect(key)}
+                        className={`rounded-xl border p-3 text-left transition-all cursor-pointer ${
+                          templateKey === key
+                            ? "border-emerald-500 bg-emerald-500/15 shadow-sm"
+                            : "border-border bg-card text-text-light/70 hover:bg-white/5"
+                        }`}
+                        data-testid={`template-btn-${key}`}
+                      >
+                        <p className="text-xs font-black text-text-light">
+                          {t.name}
+                        </p>
+                        <span className="text-[10px] text-text-light/50 line-clamp-1 mt-0.5">
+                          {t.badge}
+                        </span>
+                      </button>
+                    );
+                  },
+                )}
               </div>
             </div>
 
@@ -527,7 +546,9 @@ export function NewCampaignModal({
                   Asunto del Correo *
                 </label>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-text-light/40">Insertar:</span>
+                  <span className="text-[10px] text-text-light/40">
+                    Insertar:
+                  </span>
                   {(["{nombre}", "{puntos}", "{restaurante}"] as const).map(
                     (v) => (
                       <button
@@ -559,7 +580,9 @@ export function NewCampaignModal({
                   Cuerpo del Mensaje *
                 </label>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-text-light/40">Variables:</span>
+                  <span className="text-[10px] text-text-light/40">
+                    Variables:
+                  </span>
                   {(["{nombre}", "{puntos}", "{restaurante}"] as const).map(
                     (v) => (
                       <button
@@ -594,7 +617,10 @@ export function NewCampaignModal({
               <div className="rounded-xl border border-border bg-[#18181b] p-4 text-xs space-y-3 text-text-light">
                 <div className="border-b border-border pb-2 flex items-center justify-between">
                   <span className="font-bold text-text-light/60">
-                    Asunto: <strong className="text-text-light">{previewSubject}</strong>
+                    Asunto:{" "}
+                    <strong className="text-text-light">
+                      {previewSubject}
+                    </strong>
                   </span>
                   <span className="text-[10px] font-mono text-emerald-400">
                     remember@trykittn.com
@@ -620,7 +646,9 @@ export function NewCampaignModal({
                     <span className="text-[10px] font-bold text-amber-400 block">
                       ⭐ Tu Saldo de Puntos
                     </span>
-                    <strong className="text-lg text-amber-300">150 puntos</strong>
+                    <strong className="text-lg text-amber-300">
+                      150 puntos
+                    </strong>
                   </div>
                 )}
 

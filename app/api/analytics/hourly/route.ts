@@ -22,11 +22,8 @@ export async function GET(request: NextRequest) {
     const mode = (searchParams.get("mode") || "sum") as HourlyAggregationMode;
     const onlyActiveHours = searchParams.get("onlyActiveHours") === "true";
 
-    const { startDate, endDate, startIsoDate, endIsoDate } = calculateReportDates(
-      period,
-      customStartParam,
-      customEndParam,
-    );
+    const { startDate, endDate, startIsoDate, endIsoDate } =
+      calculateReportDates(period, customStartParam, customEndParam);
 
     const tenant = await getTenantContext();
     const supabase = await createClient();

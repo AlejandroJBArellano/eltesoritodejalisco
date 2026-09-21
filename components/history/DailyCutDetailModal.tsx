@@ -17,7 +17,8 @@ export function DailyCutDetailModal({
   onPrintCut: customOnPrintCut,
 }: DailyCutDetailModalProps) {
   const context = useHistoryContextNullable();
-  const onPrintCut = customOnPrintCut ?? ((c: DailyCut) => context?.openDailySummaryTicket(c));
+  const onPrintCut =
+    customOnPrintCut ?? ((c: DailyCut) => context?.openDailySummaryTicket(c));
 
   if (!cut) return null;
 
@@ -31,12 +32,15 @@ export function DailyCutDetailModal({
               Detalle del Corte
             </h3>
             <p className="text-xs font-bold text-text-light/50 mt-0.5">
-              {new Date(`${cut.cut_date}T12:00:00`).toLocaleDateString("es-MX", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {new Date(`${cut.cut_date}T12:00:00`).toLocaleDateString(
+                "es-MX",
+                {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                },
+              )}
             </p>
           </div>
           <button

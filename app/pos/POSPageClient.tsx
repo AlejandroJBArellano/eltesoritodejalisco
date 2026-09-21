@@ -1,7 +1,10 @@
 "use client";
 
 import { POSCartProvider, usePOSCart } from "@/hooks/pos/usePOSCart";
-import { POSCheckoutProvider, usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
+import {
+  POSCheckoutProvider,
+  usePOSCheckout,
+} from "@/hooks/pos/usePOSCheckout";
 import { POSDataProvider, usePOSData } from "@/hooks/pos/usePOSData";
 import { useEffect, useRef, useState } from "react";
 
@@ -51,10 +54,17 @@ export default function POSPageClient({ tenantId }: { tenantId: string }) {
   );
 }
 
-function POSCartAndCheckoutProviders({ children }: { children: React.ReactNode }) {
+function POSCartAndCheckoutProviders({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { availableMenuItems, refreshOrders } = usePOSData();
   return (
-    <POSCartProvider availableMenuItems={availableMenuItems} refreshOrders={refreshOrders}>
+    <POSCartProvider
+      availableMenuItems={availableMenuItems}
+      refreshOrders={refreshOrders}
+    >
       <POSCheckoutProvider refreshOrders={refreshOrders}>
         {children}
       </POSCheckoutProvider>
@@ -63,12 +73,8 @@ function POSCartAndCheckoutProviders({ children }: { children: React.ReactNode }
 }
 
 function POSPageContent() {
-  const {
-    isLoading,
-    ordersLoading,
-    errorMessage,
-    lowStockItems,
-  } = usePOSData();
+  const { isLoading, ordersLoading, errorMessage, lowStockItems } =
+    usePOSData();
 
   const {
     editingOrder,
@@ -186,15 +192,12 @@ function POSPageContent() {
   };
 
   if (isLoading) {
-    return <LoadingPOS />
+    return <LoadingPOS />;
   }
 
   if (errorMessage) {
-    return (
-      <ErrorPOS>{errorMessage}</ErrorPOS>
-    );
+    return <ErrorPOS>{errorMessage}</ErrorPOS>;
   }
-
 
   return (
     <div className="space-y-2 lg:space-y-6 pb-20 pos-client-root">
@@ -243,10 +246,16 @@ function POSPageContent() {
           <LoadingOrdersPOS />
         ) : (
           <>
-            <OrdersPOS onClickCancel={onClickCancel} cancelArmedId={cancelArmedId} />
+            <OrdersPOS
+              onClickCancel={onClickCancel}
+              cancelArmedId={cancelArmedId}
+            />
 
             {/* VISTA DE TARJETAS PARA MÓVIL (Últimas Órdenes) */}
-            <OrdersMobileFunction onClickCancel={onClickCancel} cancelArmedId={cancelArmedId} />
+            <OrdersMobileFunction
+              onClickCancel={onClickCancel}
+              cancelArmedId={cancelArmedId}
+            />
           </>
         )}
       </section>
@@ -260,7 +269,8 @@ function POSPageContent() {
         >
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse" />
           <span className="text-xs font-bold text-text-light">
-            Productos agregados a la Orden #{addItemsSuccessNotification.orderNumber}
+            Productos agregados a la Orden #
+            {addItemsSuccessNotification.orderNumber}
           </span>
           <button
             type="button"
@@ -386,7 +396,11 @@ function POSPageContent() {
 
       {/* Barra flotante para móviles cuando el carrito tiene ítems y estamos en la pestaña del catálogo */}
       {totalCartItems > 0 && activeTab === "menu" && (
-        <FloatingMobileBarPOS totalCartItems={totalCartItems} cartTotal={cartTotal} setActiveTab={setActiveTab} />
+        <FloatingMobileBarPOS
+          totalCartItems={totalCartItems}
+          cartTotal={cartTotal}
+          setActiveTab={setActiveTab}
+        />
       )}
 
       {/* Modal de Autorización de Gerencia para Cancelar Orden */}

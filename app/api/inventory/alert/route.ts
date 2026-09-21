@@ -19,7 +19,8 @@ export async function POST(request: NextRequest) {
     const internalSecret = request.headers.get("x-internal-secret");
     const isInternal =
       internalSecret &&
-      internalSecret === (process.env.INTERNAL_API_SECRET || "kittnos-internal");
+      internalSecret ===
+        (process.env.INTERNAL_API_SECRET || "kittnos-internal");
 
     if (!isInternal) {
       const profile = await getProfile();
@@ -88,7 +89,10 @@ export async function POST(request: NextRequest) {
       },
       ["ADMIN", "MANAGER", "INVENTORY"],
     ).catch((err) => {
-      console.error("[Push Notification Error] Failed to send low stock push:", err);
+      console.error(
+        "[Push Notification Error] Failed to send low stock push:",
+        err,
+      );
     });
 
     return NextResponse.json({

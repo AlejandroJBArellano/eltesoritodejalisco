@@ -85,6 +85,8 @@ describe("CampaignsContent Component", () => {
     const newCampaignBtn = screen.getByTestId("new-campaign-header-btn");
     fireEvent.click(newCampaignBtn);
 
-    expect(screen.getByText(/Nueva Campaña: Segmentación/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Nueva Campaña: Segmentación/i),
+    ).toBeInTheDocument();
   });
 });

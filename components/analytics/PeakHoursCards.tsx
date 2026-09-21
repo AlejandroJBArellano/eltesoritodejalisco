@@ -12,10 +12,7 @@ interface PeakHoursCardsProps {
   mode?: HourlyAggregationMode;
 }
 
-export function PeakHoursCards({
-  summary,
-  mode = "sum",
-}: PeakHoursCardsProps) {
+export function PeakHoursCards({ summary, mode = "sum" }: PeakHoursCardsProps) {
   const isAvg = mode === "average";
   const peakSales = summary?.peakSalesHour;
   const peakOrders = summary?.peakOrdersHour;
@@ -48,7 +45,10 @@ export function PeakHoursCards({
               </span>
             </div>
             <p className="mt-1 text-sm font-semibold text-text-light/70">
-              ${peakSales.amount.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+              $
+              {peakSales.amount.toLocaleString("es-MX", {
+                minimumFractionDigits: 2,
+              })}
               {isAvg ? " / día" : ""}
             </p>
           </div>
@@ -111,7 +111,9 @@ export function PeakHoursCards({
               </span>
             </div>
             <p className="mt-1 text-sm font-semibold text-text-light/70">
-              ${rush.sales.toLocaleString("es-MX", { minimumFractionDigits: 2 })} ({rush.orders} ped.)
+              $
+              {rush.sales.toLocaleString("es-MX", { minimumFractionDigits: 2 })}{" "}
+              ({rush.orders} ped.)
             </p>
           </div>
         ) : (
@@ -135,7 +137,10 @@ export function PeakHoursCards({
           <div>
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-black text-white">
-                ${peakTicket.averageTicket.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                $
+                {peakTicket.averageTicket.toLocaleString("es-MX", {
+                  minimumFractionDigits: 2,
+                })}
               </span>
               <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                 a las {peakTicket.label}

@@ -19,8 +19,7 @@ export function AdminTareasNav(props: AdminTareasNavProps) {
   const context = useOptionalAdminTareasContext();
 
   const activeTab = props.activeTab ?? context?.activeTab ?? "history";
-  const onTabChange =
-    props.onTabChange ?? context?.setActiveTab ?? (() => {});
+  const onTabChange = props.onTabChange ?? context?.setActiveTab ?? (() => {});
   const selectedDate = props.selectedDate ?? context?.selectedDate ?? "";
   const onDateChange =
     props.onDateChange ?? context?.setSelectedDate ?? (() => {});

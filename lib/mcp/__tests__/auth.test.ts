@@ -81,7 +81,10 @@ describe("lib/mcp/auth", () => {
     });
 
     it("should fail if key not found in database", async () => {
-      mockSingle.mockResolvedValueOnce({ data: null, error: { message: "Not found" } });
+      mockSingle.mockResolvedValueOnce({
+        data: null,
+        error: { message: "Not found" },
+      });
 
       const res = await validateMcpApiKey("kt_live_1234567890abcdef12345678");
       expect(res.valid).toBe(false);

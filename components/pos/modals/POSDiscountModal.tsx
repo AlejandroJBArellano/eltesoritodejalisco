@@ -73,7 +73,11 @@ export function POSDiscountModal({
         );
         setScope(initialDiscount.discountScope || "ROW");
         const existingReason = initialDiscount.discountReason || "";
-        if (DISCOUNT_REASONS.includes(existingReason as (typeof DISCOUNT_REASONS)[number])) {
+        if (
+          DISCOUNT_REASONS.includes(
+            existingReason as (typeof DISCOUNT_REASONS)[number],
+          )
+        ) {
           setReason(existingReason);
           setCustomReason("");
         } else {
@@ -96,10 +100,13 @@ export function POSDiscountModal({
   if (!isOpen) return null;
 
   const numericValue = Number(value) || 0;
-  const isValueValid = numericValue > 0 && (type !== "PERCENT" || numericValue <= 100);
+  const isValueValid =
+    numericValue > 0 && (type !== "PERCENT" || numericValue <= 100);
 
   const finalReason =
-    reason === "Otro" ? customReason.trim() : (reason || customReason.trim()) || null;
+    reason === "Otro"
+      ? customReason.trim()
+      : reason || customReason.trim() || null;
 
   const handleApplyClick = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,7 +199,11 @@ export function POSDiscountModal({
             <label className="text-[10px] font-black text-text-light/40 uppercase tracking-widest block">
               Tipo de Descuento
             </label>
-            <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Tipo de descuento">
+            <div
+              className="grid grid-cols-2 gap-2"
+              role="radiogroup"
+              aria-label="Tipo de descuento"
+            >
               <button
                 type="button"
                 role="radio"
@@ -257,7 +268,9 @@ export function POSDiscountModal({
           {/* Valor de entrada */}
           <div className="space-y-1.5">
             <label className="text-[10px] font-black text-text-light/40 uppercase tracking-widest block">
-              {type === "PERCENT" ? "Porcentaje de descuento" : "Monto a descontar"}
+              {type === "PERCENT"
+                ? "Porcentaje de descuento"
+                : "Monto a descontar"}
             </label>
             <div className="relative flex items-center">
               <input
@@ -372,7 +385,8 @@ export function POSDiscountModal({
                     Autorización de Gerencia Requerida
                   </p>
                   <p className="text-[11px] font-medium text-amber-300/80">
-                    Ingresa el PIN de gerente o administrador para autorizar el descuento.
+                    Ingresa el PIN de gerente o administrador para autorizar el
+                    descuento.
                   </p>
                 </div>
               </div>

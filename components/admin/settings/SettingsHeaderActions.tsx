@@ -11,7 +11,10 @@ export function SettingsHeaderActions() {
       {success && (
         <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-3 animate-in fade-in duration-200">
           <CheckCircle2 className="h-5 w-5 shrink-0" />
-          <span>Configuración guardada exitosamente. Los cambios se reflejarán de inmediato.</span>
+          <span>
+            Configuración guardada exitosamente. Los cambios se reflejarán de
+            inmediato.
+          </span>
         </div>
       )}
 
@@ -28,7 +31,8 @@ export function SettingsHeaderActions() {
             Ajustes del Restaurante
           </h2>
           <p className="text-xs text-text-light/50 font-medium">
-            Personaliza la identidad visual, datos de facturación y servicios en línea.
+            Personaliza la identidad visual, datos de facturación y servicios en
+            línea.
           </p>
         </div>
         <button

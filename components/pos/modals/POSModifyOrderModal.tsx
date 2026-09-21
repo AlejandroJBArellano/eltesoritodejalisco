@@ -13,10 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
-import {
-  POSDiscountModal,
-  DiscountData,
-} from "./POSDiscountModal";
+import { POSDiscountModal, DiscountData } from "./POSDiscountModal";
 import { POSManagerAuthModal } from "./POSManagerAuthModal";
 import {
   calculateItemDiscount,
@@ -27,11 +24,7 @@ export function POSModifyOrderModal() {
   const user = useOptionalUser();
   const isWaiter = user?.isWaiter ?? false;
 
-  const {
-    availableMenuItems,
-    customers,
-    refreshOrders,
-  } = usePOSData();
+  const { availableMenuItems, customers, refreshOrders } = usePOSData();
 
   const {
     modifyingOrder,
@@ -680,5 +673,3 @@ export function POSModifyOrderModal() {
     </div>
   );
 }
-
-

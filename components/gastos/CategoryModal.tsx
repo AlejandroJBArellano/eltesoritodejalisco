@@ -20,11 +20,12 @@ export interface CategoryModalProps {
 export function CategoryModal(props: CategoryModalProps = {}) {
   const context = useGastosContextNullable();
   const isOpen = props.isOpen ?? context?.isCategoryModalOpen ?? false;
-  const onClose = props.onClose ?? context?.handleCloseCategoryModal ?? (() => {});
+  const onClose =
+    props.onClose ?? context?.handleCloseCategoryModal ?? (() => {});
   const editingCategory =
     props.editingCategory !== undefined
       ? props.editingCategory
-      : context?.editingCategory ?? null;
+      : (context?.editingCategory ?? null);
   const onCreateCategory =
     props.onCreateCategory ?? context?.handleCreateCategory ?? (async () => {});
   const onUpdateCategory =
@@ -76,7 +77,9 @@ export function CategoryModal(props: CategoryModalProps = {}) {
       }
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al procesar categoría");
+      setError(
+        err instanceof Error ? err.message : "Error al procesar categoría",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -207,8 +210,8 @@ export function CategoryModal(props: CategoryModalProps = {}) {
               {isSubmitting
                 ? "Guardando..."
                 : editingCategory
-                ? "Actualizar Categoría"
-                : "Guardar Categoría"}
+                  ? "Actualizar Categoría"
+                  : "Guardar Categoría"}
             </button>
           </div>
         </form>

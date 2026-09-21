@@ -81,14 +81,10 @@ export function generateCSVContent<T>(
     return sanitized;
   };
 
-  const headerLine = columns
-    .map((col) => formatCSVField(col.header))
-    .join(",");
+  const headerLine = columns.map((col) => formatCSVField(col.header)).join(",");
 
   const rows = data.map((item) =>
-    columns
-      .map((col) => formatCSVField(getCellValue(item, col)))
-      .join(","),
+    columns.map((col) => formatCSVField(getCellValue(item, col))).join(","),
   );
 
   // UTF-8 BOM (\uFEFF) ensures Excel opens special characters correctly

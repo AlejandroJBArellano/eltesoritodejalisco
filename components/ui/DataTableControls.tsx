@@ -176,4 +176,3 @@ export function TablePagination({
 // --- BOTÓN ESTÁNDAR DE EXPORTACIÓN ---
 export { ExportButton, type ExportButtonProps } from "./ExportButton";
 export type { ExportColumn, ExportOptions } from "@/lib/export";
-

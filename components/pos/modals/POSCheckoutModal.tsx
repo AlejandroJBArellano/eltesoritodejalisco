@@ -38,15 +38,9 @@ export function POSCheckoutModal() {
   const isWaiter = user?.isWaiter ?? false;
   const [isCourtesyAuthModalOpen, setIsCourtesyAuthModalOpen] = useState(false);
 
-  const {
-    availableMenuItems,
-    customers,
-    refreshOrders,
-  } = usePOSData();
+  const { availableMenuItems, customers, refreshOrders } = usePOSData();
 
-  const {
-    openModifyModal,
-  } = usePOSCart(availableMenuItems, refreshOrders);
+  const { openModifyModal } = usePOSCart(availableMenuItems, refreshOrders);
 
   const {
     isSubmittingCheckout,
@@ -101,10 +95,13 @@ export function POSCheckoutModal() {
       const updatedOrders = await refreshOrders();
       const rawPayload = data.order as DbOrderPayload | undefined;
       const mappedApiOrder = rawPayload
-        ? (rawPayload.order_number ? mapOrderData(rawPayload) : (rawPayload as unknown as Order))
+        ? rawPayload.order_number
+          ? mapOrderData(rawPayload)
+          : (rawPayload as unknown as Order)
         : null;
-      const freshOrder =
-        updatedOrders?.find((o: Order) => o.id === checkoutOrder.id) ||
+      const freshOrder = updatedOrders?.find(
+        (o: Order) => o.id === checkoutOrder.id,
+      ) ||
         mappedApiOrder || {
           ...checkoutOrder,
           discountType: discount.discountType,
@@ -138,10 +135,13 @@ export function POSCheckoutModal() {
       const updatedOrders = await refreshOrders();
       const rawPayload = data.order as DbOrderPayload | undefined;
       const mappedApiOrder = rawPayload
-        ? (rawPayload.order_number ? mapOrderData(rawPayload) : (rawPayload as unknown as Order))
+        ? rawPayload.order_number
+          ? mapOrderData(rawPayload)
+          : (rawPayload as unknown as Order)
         : null;
-      const freshOrder =
-        updatedOrders?.find((o: Order) => o.id === checkoutOrder.id) ||
+      const freshOrder = updatedOrders?.find(
+        (o: Order) => o.id === checkoutOrder.id,
+      ) ||
         mappedApiOrder || {
           ...checkoutOrder,
           discountType: null,
@@ -171,7 +171,9 @@ export function POSCheckoutModal() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Error al asignar cliente");
 
-      const assignedCustomer = customers.find((c) => c.id === selectedCustomerId);
+      const assignedCustomer = customers.find(
+        (c) => c.id === selectedCustomerId,
+      );
       const updatedOrder = {
         ...checkoutOrder,
         customerId: selectedCustomerId,
@@ -206,23 +208,29 @@ export function POSCheckoutModal() {
 
   const orderTotals = calculateOrderDiscountTotals({
     items: itemsInput,
-    orderDiscountType: checkoutOrder.discountType || rawCheckoutOrder.discount_type || null,
-    orderDiscountValue: checkoutOrder.discountValue ?? rawCheckoutOrder.discount_value ?? null,
+    orderDiscountType:
+      checkoutOrder.discountType || rawCheckoutOrder.discount_type || null,
+    orderDiscountValue:
+      checkoutOrder.discountValue ?? rawCheckoutOrder.discount_value ?? null,
   });
 
   const explicitItemsDiscount =
-    checkoutOrder.orderItems?.reduce(
-      (sum, it) => {
-        const rawIt = it as unknown as DbDiscountFields;
-        return sum + (Number(it.discountAmount ?? rawIt.discount_amount) || 0);
-      },
-      0,
-    ) || 0;
-  const itemsDiscount = explicitItemsDiscount > 0 ? explicitItemsDiscount : orderTotals.itemsDiscount;
+    checkoutOrder.orderItems?.reduce((sum, it) => {
+      const rawIt = it as unknown as DbDiscountFields;
+      return sum + (Number(it.discountAmount ?? rawIt.discount_amount) || 0);
+    }, 0) || 0;
+  const itemsDiscount =
+    explicitItemsDiscount > 0
+      ? explicitItemsDiscount
+      : orderTotals.itemsDiscount;
 
   const explicitOrderDiscount =
-    Number(checkoutOrder.discountAmount ?? rawCheckoutOrder.discount_amount) || 0;
-  const orderDiscount = explicitOrderDiscount > 0 ? explicitOrderDiscount : orderTotals.orderDiscount;
+    Number(checkoutOrder.discountAmount ?? rawCheckoutOrder.discount_amount) ||
+    0;
+  const orderDiscount =
+    explicitOrderDiscount > 0
+      ? explicitOrderDiscount
+      : orderTotals.orderDiscount;
 
   const calculatedSubtotalGross =
     checkoutOrder.orderItems && checkoutOrder.orderItems.length > 0
@@ -231,7 +239,10 @@ export function POSCheckoutModal() {
           0,
         )
       : (checkoutOrder.subtotal || 0) + itemsDiscount;
-  const subtotalGross = orderTotals.subtotalGross > 0 ? orderTotals.subtotalGross : calculatedSubtotalGross;
+  const subtotalGross =
+    orderTotals.subtotalGross > 0
+      ? orderTotals.subtotalGross
+      : calculatedSubtotalGross;
 
   const isSubmitDisabled =
     isSubmittingCheckout ||
@@ -240,8 +251,7 @@ export function POSCheckoutModal() {
     (checkoutOrder.total + tipAmountCalculated > 0 &&
       paymentMethod === "CASH" &&
       (!receivedAmount ||
-        Number(receivedAmount) <
-          checkoutOrder.total + tipAmountCalculated));
+        Number(receivedAmount) < checkoutOrder.total + tipAmountCalculated));
 
   const exactTotalDue = checkoutOrder.total + tipAmountCalculated;
   const quickCashPresets = [50, 100, 200, 500, 1000]
@@ -349,22 +359,30 @@ export function POSCheckoutModal() {
                   <Receipt className="h-3.5 w-3.5 text-text-light/50" />
                   Resumen de la Orden
                 </h3>
-                {checkoutOrder.orderItems && checkoutOrder.orderItems.length > 0 && (
-                  <span className="text-[10px] font-bold text-text-light/40">
-                    {checkoutOrder.orderItems.length} {checkoutOrder.orderItems.length === 1 ? "ítem" : "ítems"}
-                  </span>
-                )}
+                {checkoutOrder.orderItems &&
+                  checkoutOrder.orderItems.length > 0 && (
+                    <span className="text-[10px] font-bold text-text-light/40">
+                      {checkoutOrder.orderItems.length}{" "}
+                      {checkoutOrder.orderItems.length === 1 ? "ítem" : "ítems"}
+                    </span>
+                  )}
               </div>
 
               {/* Lista de productos */}
               <div className="rounded-xl border border-border/60 bg-dark/30 p-2.5 max-h-45 md:max-h-55 overflow-y-auto custom-scrollbar divide-y divide-border/30">
-                {checkoutOrder.orderItems && checkoutOrder.orderItems.length > 0 ? (
+                {checkoutOrder.orderItems &&
+                checkoutOrder.orderItems.length > 0 ? (
                   checkoutOrder.orderItems.map((item, idx) => (
-                    <div key={item.id || idx} className="py-2 first:pt-1 last:pb-1 space-y-0.5">
+                    <div
+                      key={item.id || idx}
+                      className="py-2 first:pt-1 last:pb-1 space-y-0.5"
+                    >
                       <div className="flex justify-between items-start gap-2">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-black text-text-light truncate">
-                            <span className="text-primary font-black mr-1">{item.quantity}x</span>
+                            <span className="text-primary font-black mr-1">
+                              {item.quantity}x
+                            </span>
                             {item.menuItem?.name || "Producto"}
                           </p>
                           {item.notes && (
@@ -380,19 +398,29 @@ export function POSCheckoutModal() {
                           {(() => {
                             const rawIt = item as unknown as DbDiscountFields;
                             const itDiscount =
-                              Number(item.discountAmount ?? rawIt.discount_amount) ||
+                              Number(
+                                item.discountAmount ?? rawIt.discount_amount,
+                              ) ||
                               calculateItemDiscount({
                                 unitPrice: item.unitPrice,
                                 quantity: item.quantity,
-                                discountType: item.discountType || rawIt.discount_type || null,
-                                discountValue: item.discountValue ?? rawIt.discount_value,
-                                discountScope: item.discountScope || rawIt.discount_scope || null,
+                                discountType:
+                                  item.discountType ||
+                                  rawIt.discount_type ||
+                                  null,
+                                discountValue:
+                                  item.discountValue ?? rawIt.discount_value,
+                                discountScope:
+                                  item.discountScope ||
+                                  rawIt.discount_scope ||
+                                  null,
                               }).discountAmount ||
                               0;
                             if (itDiscount <= 0) return null;
                             return (
                               <span className="text-[9px] font-bold text-emerald-400 block">
-                                -{formatDiscountBadge(
+                                -
+                                {formatDiscountBadge(
                                   item.discountType || rawIt.discount_type,
                                   item.discountValue ?? rawIt.discount_value,
                                   item.discountReason || rawIt.discount_reason,
@@ -416,12 +444,16 @@ export function POSCheckoutModal() {
               <div className="space-y-1.5 text-xs bg-white/5 p-3 rounded-xl border border-border">
                 <div className="flex justify-between text-text-light/60">
                   <span>Subtotal bruto</span>
-                  <span className="tabular-nums">${subtotalGross.toFixed(2)}</span>
+                  <span className="tabular-nums">
+                    ${subtotalGross.toFixed(2)}
+                  </span>
                 </div>
                 {itemsDiscount > 0 && (
                   <div className="flex justify-between text-emerald-400/90 font-bold">
                     <span>Descuentos en productos</span>
-                    <span className="tabular-nums">-${itemsDiscount.toFixed(2)}</span>
+                    <span className="tabular-nums">
+                      -${itemsDiscount.toFixed(2)}
+                    </span>
                   </div>
                 )}
                 {orderDiscount > 0 && (
@@ -429,18 +461,25 @@ export function POSCheckoutModal() {
                     <span>
                       Descuento orden{" "}
                       {formatDiscountBadge(
-                        checkoutOrder.discountType || rawCheckoutOrder.discount_type,
-                        checkoutOrder.discountValue ?? rawCheckoutOrder.discount_value,
-                        checkoutOrder.discountReason || rawCheckoutOrder.discount_reason,
+                        checkoutOrder.discountType ||
+                          rawCheckoutOrder.discount_type,
+                        checkoutOrder.discountValue ??
+                          rawCheckoutOrder.discount_value,
+                        checkoutOrder.discountReason ||
+                          rawCheckoutOrder.discount_reason,
                       )}
                     </span>
-                    <span className="tabular-nums">-${orderDiscount.toFixed(2)}</span>
+                    <span className="tabular-nums">
+                      -${orderDiscount.toFixed(2)}
+                    </span>
                   </div>
                 )}
                 {tipAmountCalculated > 0 && (
                   <div className="flex justify-between text-blue-400 font-bold">
                     <span>Propina agregada</span>
-                    <span className="tabular-nums">+${tipAmountCalculated.toFixed(2)}</span>
+                    <span className="tabular-nums">
+                      +${tipAmountCalculated.toFixed(2)}
+                    </span>
                   </div>
                 )}
 
@@ -451,16 +490,21 @@ export function POSCheckoutModal() {
                     onClick={() => setShowDiscountModal(true)}
                     disabled={isSubmittingCheckout || isApplyingDiscount}
                     className={`text-[11px] font-black uppercase tracking-wider py-1 px-2.5 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
-                      checkoutOrder.discountType || rawCheckoutOrder.discount_type
+                      checkoutOrder.discountType ||
+                      rawCheckoutOrder.discount_type
                         ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/25"
                         : "bg-white/5 border-border/40 text-text-light/60 hover:text-text-light hover:border-primary/40 hover:bg-primary/10"
                     }`}
                   >
                     <Tag className="h-3 w-3" />
-                    {checkoutOrder.discountType || rawCheckoutOrder.discount_type ? "Editar Descuento" : "+ Descuento Orden"}
+                    {checkoutOrder.discountType ||
+                    rawCheckoutOrder.discount_type
+                      ? "Editar Descuento"
+                      : "+ Descuento Orden"}
                   </button>
 
-                  {(checkoutOrder.discountType || rawCheckoutOrder.discount_type) && (
+                  {(checkoutOrder.discountType ||
+                    rawCheckoutOrder.discount_type) && (
                     <button
                       type="button"
                       disabled={isSubmittingCheckout || isApplyingDiscount}
@@ -509,9 +553,13 @@ export function POSCheckoutModal() {
                   onClick={() => {
                     setCreditAuthError(null);
                     setManagerPin("");
-                    const hasCustomer = Boolean(checkoutOrder.customer || checkoutOrder.customerId);
+                    const hasCustomer = Boolean(
+                      checkoutOrder.customer || checkoutOrder.customerId,
+                    );
                     if (!hasCustomer) {
-                      setCreditAuthError("Para enviar a crédito, asigna primero un cliente seleccionándolo aquí abajo o regresando a editar.");
+                      setCreditAuthError(
+                        "Para enviar a crédito, asigna primero un cliente seleccionándolo aquí abajo o regresando a editar.",
+                      );
                       return;
                     }
                     setShowCreditPrompt(true);
@@ -523,7 +571,9 @@ export function POSCheckoutModal() {
                 </button>
 
                 {/* Asignación rápida de cliente si la comanda no tiene uno */}
-                {!Boolean(checkoutOrder.customer || checkoutOrder.customerId) && (
+                {!Boolean(
+                  checkoutOrder.customer || checkoutOrder.customerId,
+                ) && (
                   <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-2.5 space-y-2">
                     <p className="text-[10px] font-extrabold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
                       <UserCheck className="h-3 w-3 text-amber-400" />
@@ -546,7 +596,11 @@ export function POSCheckoutModal() {
                       </select>
                       <button
                         type="button"
-                        disabled={!selectedCustomerId || isAssigningCustomer || isSubmittingCheckout}
+                        disabled={
+                          !selectedCustomerId ||
+                          isAssigningCustomer ||
+                          isSubmittingCheckout
+                        }
                         onClick={handleAssignCustomer}
                         className="rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs px-3 py-1.5 uppercase tracking-wider disabled:opacity-50 transition-all cursor-pointer shadow-sm"
                       >
@@ -564,10 +618,16 @@ export function POSCheckoutModal() {
                     <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                     <div>
                       <p className="text-xs font-black text-amber-400 uppercase tracking-wide">
-                        {isWaiter ? "Autorización de Gerencia Requerida" : "Confirmar Venta a Crédito"}
+                        {isWaiter
+                          ? "Autorización de Gerencia Requerida"
+                          : "Confirmar Venta a Crédito"}
                       </p>
                       <p className="text-[11px] font-bold text-text-light/70 mt-0.5">
-                        Cliente: <span className="text-amber-400">{checkoutOrder.customer?.name || "Asignado"}</span> — ${checkoutOrder.total.toFixed(2)}
+                        Cliente:{" "}
+                        <span className="text-amber-400">
+                          {checkoutOrder.customer?.name || "Asignado"}
+                        </span>{" "}
+                        — ${checkoutOrder.total.toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -611,7 +671,11 @@ export function POSCheckoutModal() {
                     </button>
                     <button
                       type="button"
-                      disabled={isVerifyingPin || isSubmittingCheckout || (isWaiter && !managerPin.trim())}
+                      disabled={
+                        isVerifyingPin ||
+                        isSubmittingCheckout ||
+                        (isWaiter && !managerPin.trim())
+                      }
                       onClick={async () => {
                         if (isWaiter) {
                           try {
@@ -624,7 +688,9 @@ export function POSCheckoutModal() {
                             });
                             const data = await res.json();
                             if (!res.ok || !data.valid) {
-                              setCreditAuthError(data.error || "PIN incorrecto");
+                              setCreditAuthError(
+                                data.error || "PIN incorrecto",
+                              );
                               return;
                             }
                             setShowCreditPrompt(false);
@@ -705,7 +771,9 @@ export function POSCheckoutModal() {
                     }}
                     className="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 py-3.5 rounded-xl font-black text-base transition-all uppercase tracking-wider shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    {isSubmittingCheckout ? "Procesando..." : "Registrar Cortesía ($0.00)"}
+                    {isSubmittingCheckout
+                      ? "Procesando..."
+                      : "Registrar Cortesía ($0.00)"}
                   </button>
                 </div>
               ) : (
@@ -788,7 +856,9 @@ export function POSCheckoutModal() {
                         disabled={isSubmittingCheckout}
                         onChange={(e) => setTipInput(e.target.value)}
                         placeholder={
-                          tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto propina"
+                          tipType === "PERCENTAGE"
+                            ? "% Ej. 10"
+                            : "$ Monto propina"
                         }
                         className="w-full text-base font-black p-2.5 border border-border bg-dark/40 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-center text-text-light transition-all duration-200 placeholder:text-text-light/30 disabled:opacity-50"
                       />
@@ -841,7 +911,9 @@ export function POSCheckoutModal() {
                         <button
                           type="button"
                           disabled={isSubmittingCheckout}
-                          onClick={() => setReceivedAmount(exactTotalDue.toFixed(2))}
+                          onClick={() =>
+                            setReceivedAmount(exactTotalDue.toFixed(2))
+                          }
                           className="flex-1 py-1.5 px-2 rounded-lg bg-white/5 hover:bg-white/10 border border-border text-[10px] font-black uppercase text-text-light/70 hover:text-text-light transition-all"
                         >
                           Exacto (${exactTotalDue.toFixed(2)})
@@ -863,7 +935,9 @@ export function POSCheckoutModal() {
                         <span className="font-black text-text-light/40 text-xs uppercase tracking-widest">
                           Cambio a Entregar
                         </span>
-                        <span className={`text-xl sm:text-2xl font-black tabular-nums transition-all duration-200 ${change > 0 ? "text-success" : "text-text-light/40"}`}>
+                        <span
+                          className={`text-xl sm:text-2xl font-black tabular-nums transition-all duration-200 ${change > 0 ? "text-success" : "text-text-light/40"}`}
+                        >
                           ${change.toFixed(2)}
                         </span>
                       </div>
@@ -895,14 +969,20 @@ export function POSCheckoutModal() {
         subtitle={`Subtotal: $${(subtotalGross - itemsDiscount).toFixed(2)}`}
         isItem={false}
         initialDiscount={{
-          discountType: checkoutOrder.discountType || rawCheckoutOrder.discount_type || null,
+          discountType:
+            checkoutOrder.discountType ||
+            rawCheckoutOrder.discount_type ||
+            null,
           discountValue:
             checkoutOrder.discountValue != null
               ? Number(checkoutOrder.discountValue)
               : rawCheckoutOrder.discount_value != null
                 ? Number(rawCheckoutOrder.discount_value)
                 : null,
-          discountReason: checkoutOrder.discountReason || rawCheckoutOrder.discount_reason || null,
+          discountReason:
+            checkoutOrder.discountReason ||
+            rawCheckoutOrder.discount_reason ||
+            null,
         }}
         onApply={handleApplyOrderDiscount}
         onRemove={handleRemoveOrderDiscount}

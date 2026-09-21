@@ -14,7 +14,8 @@ import {
   User,
 } from "lucide-react";
 
-export type WhatsAppTemplateKey = "saldo" | "pedido" | "aviso" | "personalizado";
+export type WhatsAppTemplateKey =
+  "saldo" | "pedido" | "aviso" | "personalizado";
 
 export interface CustomerWhatsAppModalCustomer {
   id: string;
@@ -93,7 +94,8 @@ function CustomerWhatsAppModalContent({
   const [phone, setPhone] = useState(initialPhone);
   const initialTemplate: WhatsAppTemplateKey =
     (customer.debt_balance || 0) > 0 ? "saldo" : "aviso";
-  const [selectedTemplate, setSelectedTemplate] = useState<WhatsAppTemplateKey>(initialTemplate);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<WhatsAppTemplateKey>(initialTemplate);
   const [message, setMessage] = useState(() =>
     buildTemplateMessage({
       template: initialTemplate,
@@ -101,7 +103,7 @@ function CustomerWhatsAppModalContent({
       tenantName,
       debtBalance: customer.debt_balance || 0,
       loyaltyPoints: customer.loyalty_points || 0,
-    })
+    }),
   );
   const [savePhone, setSavePhone] = useState(!customer.phone);
   const [copied, setCopied] = useState(false);
@@ -160,7 +162,9 @@ function CustomerWhatsAppModalContent({
 
     const digitsOnly = phone.replace(/\D/g, "");
     if (!digitsOnly || digitsOnly.length < 10) {
-      setErrorMessage("Ingresa un número celular válido de al menos 10 dígitos.");
+      setErrorMessage(
+        "Ingresa un número celular válido de al menos 10 dígitos.",
+      );
       return;
     }
 
@@ -170,7 +174,11 @@ function CustomerWhatsAppModalContent({
     }
 
     // Si se activó guardar teléfono y el teléfono es nuevo o cambió
-    if (savePhone && customer.id && digitsOnly !== (customer.phone || "").replace(/\D/g, "")) {
+    if (
+      savePhone &&
+      customer.id &&
+      digitsOnly !== (customer.phone || "").replace(/\D/g, "")
+    ) {
       try {
         setIsSaving(true);
         const res = await fetch("/api/customers", {
@@ -193,7 +201,7 @@ function CustomerWhatsAppModalContent({
         setErrorMessage(
           err instanceof Error
             ? err.message
-            : "No se pudo guardar el teléfono en el perfil."
+            : "No se pudo guardar el teléfono en el perfil.",
         );
         setIsSaving(false);
         return;

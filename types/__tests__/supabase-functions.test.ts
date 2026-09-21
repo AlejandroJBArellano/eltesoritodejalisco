@@ -7,9 +7,11 @@ import path from "node:path";
  * y detecta si alguna función RPC tiene sobrecargas (tipos de unión con '|')
  * que provocan el error de PostgREST PGRST203 ("Could not choose the best candidate function").
  */
-export function findOverloadedFunctions(supabaseTypesContent: string): string[] {
+export function findOverloadedFunctions(
+  supabaseTypesContent: string,
+): string[] {
   const functionsBlockMatch = supabaseTypesContent.match(
-    /Functions:\s*\{([\s\S]*?)\n\s{4}\}\s*(?:Enums:|CompositeTypes:|\})/
+    /Functions:\s*\{([\s\S]*?)\n\s{4}\}\s*(?:Enums:|CompositeTypes:|\})/,
   );
 
   if (!functionsBlockMatch) {
@@ -110,7 +112,8 @@ describe("Supabase RPC Overloads Guard (Prevención de PGRST203)", () => {
         `Para solucionarlo, debes ejecutar en tu migración:\n` +
         overloaded
           .map(
-            (fn) => `DROP FUNCTION IF EXISTS public.${fn}(<argumentos_anteriores>);`
+            (fn) =>
+              `DROP FUNCTION IF EXISTS public.${fn}(<argumentos_anteriores>);`,
           )
           .join("\n") +
         `\nY luego regenerar tipos con: npm run db:types`;

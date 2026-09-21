@@ -103,189 +103,196 @@ const OrderItemRow = memo(function OrderItemRow({
  * KDS Order Card Component
  * Displays order details with real-time timer and status management
  */
-export const OrderCard = memo(function OrderCard({
-  order,
-  onStatusChange,
-  onItemReady,
-  updatingItemIds,
-}: OrderCardProps) {
-  const ALERT_THRESHOLD_MINUTES = 15;
-  const isCompleted =
-    order.status === OrderStatus.READY ||
-    order.status === OrderStatus.DELIVERED;
-  const endTime = isCompleted ? order.completedAt || order.updatedAt : null;
+export const OrderCard = memo(
+  function OrderCard({
+    order,
+    onStatusChange,
+    onItemReady,
+    updatingItemIds,
+  }: OrderCardProps) {
+    const ALERT_THRESHOLD_MINUTES = 15;
+    const isCompleted =
+      order.status === OrderStatus.READY ||
+      order.status === OrderStatus.DELIVERED;
+    const endTime = isCompleted ? order.completedAt || order.updatedAt : null;
 
-  const timerStartTime = useMemo(() => {
-    if (order.pickupTime) {
-      return new Date(new Date(order.pickupTime).getTime() - 30 * 60 * 1000);
-    }
-    return order.createdAt;
-  }, [order.pickupTime, order.createdAt]);
+    const timerStartTime = useMemo(() => {
+      if (order.pickupTime) {
+        return new Date(new Date(order.pickupTime).getTime() - 30 * 60 * 1000);
+      }
+      return order.createdAt;
+    }, [order.pickupTime, order.createdAt]);
 
-  const elapsedSeconds = useOrderTimer(timerStartTime, endTime);
-  const isOverdue = elapsedSeconds / 60 >= ALERT_THRESHOLD_MINUTES;
+    const elapsedSeconds = useOrderTimer(timerStartTime, endTime);
+    const isOverdue = elapsedSeconds / 60 >= ALERT_THRESHOLD_MINUTES;
 
-  const activeItems = order.orderItems.filter(
-    (item) => item.status !== OrderStatus.DELIVERED,
-  );
-  const allReady =
-    activeItems.length > 0 &&
-    activeItems.every((item) => item.status === OrderStatus.READY);
+    const activeItems = order.orderItems.filter(
+      (item) => item.status !== OrderStatus.DELIVERED,
+    );
+    const allReady =
+      activeItems.length > 0 &&
+      activeItems.every((item) => item.status === OrderStatus.READY);
 
-  return (
-    <div
-      className={`rounded-2xl border p-3 shadow-md transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-3 ease-out ${isOverdue &&
-        order.status !== OrderStatus.DELIVERED &&
-        order.status !== OrderStatus.READY
-        ? "border-red-500/70 bg-linear-to-b from-[#2A1212] to-[#1F0C0C] shadow-lg shadow-red-950/40 ring-1 ring-red-500/20"
-        : "border-border bg-card-light hover:border-border/80 hover:shadow-xl"
+    return (
+      <div
+        className={`rounded-2xl border p-3 shadow-md transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-3 ease-out ${
+          isOverdue &&
+          order.status !== OrderStatus.DELIVERED &&
+          order.status !== OrderStatus.READY
+            ? "border-red-500/70 bg-linear-to-b from-[#2A1212] to-[#1F0C0C] shadow-lg shadow-red-950/40 ring-1 ring-red-500/20"
+            : "border-border bg-card-light hover:border-border/80 hover:shadow-xl"
         }`}
-    >
-      {/* Service Type & Table Prominent Banner */}
-      {(() => {
-        const serviceType = getServiceType(order.table);
-        return (
-          <div
-            className={`-mx-3 -mt-3 mb-3 px-3.5 py-2.5 rounded-t-2xl border-b flex items-center justify-between gap-2 ${
-              serviceType === "domicilio"
-                ? "bg-sky-500/15 border-sky-500/30 text-sky-300"
-                : serviceType === "para_llevar"
-                  ? "bg-purple-500/15 border-purple-500/30 text-purple-300"
-                  : "bg-amber-500/20 border-amber-500/35 text-amber-300"
-            }`}
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              {serviceType === "domicilio" ? (
-                <Bike className="h-5 w-5 shrink-0 text-sky-400" />
-              ) : serviceType === "para_llevar" ? (
-                <ShoppingBag className="h-5 w-5 shrink-0 text-purple-400" />
-              ) : (
-                <Utensils className="h-5 w-5 shrink-0 text-amber-400" />
-              )}
-              <span className="text-sm sm:text-base font-black uppercase tracking-wider truncate">
-                {serviceType === "domicilio"
-                  ? "A Domicilio"
+      >
+        {/* Service Type & Table Prominent Banner */}
+        {(() => {
+          const serviceType = getServiceType(order.table);
+          return (
+            <div
+              className={`-mx-3 -mt-3 mb-3 px-3.5 py-2.5 rounded-t-2xl border-b flex items-center justify-between gap-2 ${
+                serviceType === "domicilio"
+                  ? "bg-sky-500/15 border-sky-500/30 text-sky-300"
                   : serviceType === "para_llevar"
-                    ? "Para Llevar"
-                    : formatServiceLabel(order.table)}
-              </span>
-            </div>
+                    ? "bg-purple-500/15 border-purple-500/30 text-purple-300"
+                    : "bg-amber-500/20 border-amber-500/35 text-amber-300"
+              }`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                {serviceType === "domicilio" ? (
+                  <Bike className="h-5 w-5 shrink-0 text-sky-400" />
+                ) : serviceType === "para_llevar" ? (
+                  <ShoppingBag className="h-5 w-5 shrink-0 text-purple-400" />
+                ) : (
+                  <Utensils className="h-5 w-5 shrink-0 text-amber-400" />
+                )}
+                <span className="text-sm sm:text-base font-black uppercase tracking-wider truncate">
+                  {serviceType === "domicilio"
+                    ? "A Domicilio"
+                    : serviceType === "para_llevar"
+                      ? "Para Llevar"
+                      : formatServiceLabel(order.table)}
+                </span>
+              </div>
 
-            {order.payments && order.payments.length > 0 && (
-              <span className="inline-flex items-center gap-1 rounded bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-black text-emerald-400 uppercase tracking-wider shrink-0">
-                Pagado Online
-              </span>
+              {order.payments && order.payments.length > 0 && (
+                <span className="inline-flex items-center gap-1 rounded bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-black text-emerald-400 uppercase tracking-wider shrink-0">
+                  Pagado Online
+                </span>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* Card Header Info */}
+        <div className="mb-4 flex items-start justify-between gap-2">
+          <div>
+            <h3 className="text-2xl font-black text-text-light tracking-tight uppercase">
+              #{order.orderNumber}
+            </h3>
+            {order.customer?.name && (
+              <div className="flex items-center gap-1.5 mt-1 text-xs text-text-light/90">
+                <User className="h-3.5 w-3.5 text-text-light/60 shrink-0" />
+                <span className="font-semibold text-text-light/70">
+                  Cliente:
+                </span>
+                <span className="font-bold text-white truncate max-w-42.5">
+                  {order.customer.name}
+                </span>
+              </div>
             )}
           </div>
-        );
-      })()}
 
-      {/* Card Header Info */}
-      <div className="mb-4 flex items-start justify-between gap-2">
-        <div>
-          <h3 className="text-2xl font-black text-text-light tracking-tight uppercase">
-            #{order.orderNumber}
-          </h3>
-          {order.customer?.name && (
-            <div className="flex items-center gap-1.5 mt-1 text-xs text-text-light/90">
-              <User className="h-3.5 w-3.5 text-text-light/60 shrink-0" />
-              <span className="font-semibold text-text-light/70">Cliente:</span>
-              <span className="font-bold text-white truncate max-w-42.5">
-                {order.customer.name}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Timer Badge */}
-        <div
-          className={`rounded-xl px-3.5 py-1.5 font-mono text-base font-black shadow-inner flex items-center gap-1.5 transition-colors shrink-0 ${isOverdue &&
-            order.status !== OrderStatus.DELIVERED &&
-            order.status !== OrderStatus.READY
-            ? "bg-red-600 text-white shadow-red-900/50 ring-2 ring-red-400/40"
-            : "bg-card text-text-light border border-border"
+          {/* Timer Badge */}
+          <div
+            className={`rounded-xl px-3.5 py-1.5 font-mono text-base font-black shadow-inner flex items-center gap-1.5 transition-colors shrink-0 ${
+              isOverdue &&
+              order.status !== OrderStatus.DELIVERED &&
+              order.status !== OrderStatus.READY
+                ? "bg-red-600 text-white shadow-red-900/50 ring-2 ring-red-400/40"
+                : "bg-card text-text-light border border-border"
             }`}
-        >
-          <Clock
-            className={`h-4 w-4 ${isOverdue ? "animate-spin" : ""}`}
-            style={{ animationDuration: "3s" }}
-          />
-          {formatTime(elapsedSeconds)}
-        </div>
-      </div>
-
-      {/* Order Items List */}
-      <div className="mb-4 space-y-2.5">
-        {activeItems.map((item) => (
-          <OrderItemRow
-            key={item.id}
-            item={item}
-            orderId={order.id}
-            orderStatus={order.status}
-            timerStartTime={timerStartTime}
-            onItemReady={onItemReady}
-            isUpdating={!!updatingItemIds?.has(item.id)}
-          />
-        ))}
-      </div>
-
-      {/* Order Level Notes */}
-      {order.notes && (
-        <div className="mb-4 rounded-xl border-l-4 border-amber-500 bg-amber-500/10 p-3">
-          <div className="text-xs font-bold text-amber-300 flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />{" "}
-            <span>Nota de Orden: {order.notes}</span>
+          >
+            <Clock
+              className={`h-4 w-4 ${isOverdue ? "animate-spin" : ""}`}
+              style={{ animationDuration: "3s" }}
+            />
+            {formatTime(elapsedSeconds)}
           </div>
         </div>
-      )}
 
-      {/* Action Buttons */}
-      <div className="flex gap-2">
-        {order.status === OrderStatus.PENDING && (
-          <button
-            onClick={() => onStatusChange(order.id, OrderStatus.PREPARING)}
-            className="w-full min-h-12 rounded-xl bg-amber-500 px-4 py-3 text-xs font-black text-zinc-950 uppercase tracking-wider hover:bg-amber-400 transition-all duration-200 ease-out shadow-md active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 outline-none"
-          >
-            Comenzar Preparación <ArrowRight className="h-4 w-4" />
-          </button>
+        {/* Order Items List */}
+        <div className="mb-4 space-y-2.5">
+          {activeItems.map((item) => (
+            <OrderItemRow
+              key={item.id}
+              item={item}
+              orderId={order.id}
+              orderStatus={order.status}
+              timerStartTime={timerStartTime}
+              onItemReady={onItemReady}
+              isUpdating={!!updatingItemIds?.has(item.id)}
+            />
+          ))}
+        </div>
+
+        {/* Order Level Notes */}
+        {order.notes && (
+          <div className="mb-4 rounded-xl border-l-4 border-amber-500 bg-amber-500/10 p-3">
+            <div className="text-xs font-bold text-amber-300 flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />{" "}
+              <span>Nota de Orden: {order.notes}</span>
+            </div>
+          </div>
         )}
 
-        {order.status === OrderStatus.PREPARING && (
-          <button
-            onClick={() => onStatusChange(order.id, OrderStatus.READY)}
-            disabled={!allReady}
-            className="w-full min-h-12 rounded-xl bg-emerald-600 px-4 py-3 text-xs font-black text-white uppercase tracking-wider hover:bg-emerald-500 transition-all duration-200 ease-out shadow-md active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 outline-none"
-          >
-            <CheckCircle2 className="h-4 w-4" /> Cerrar Orden
-          </button>
-        )}
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          {order.status === OrderStatus.PENDING && (
+            <button
+              onClick={() => onStatusChange(order.id, OrderStatus.PREPARING)}
+              className="w-full min-h-12 rounded-xl bg-amber-500 px-4 py-3 text-xs font-black text-zinc-950 uppercase tracking-wider hover:bg-amber-400 transition-all duration-200 ease-out shadow-md active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 outline-none"
+            >
+              Comenzar Preparación <ArrowRight className="h-4 w-4" />
+            </button>
+          )}
 
-        {order.status === OrderStatus.READY && (
-          <button
-            onClick={() => onStatusChange(order.id, OrderStatus.DELIVERED)}
-            className="w-full min-h-12 rounded-xl bg-card-light border border-border px-4 py-3 text-xs font-black text-text-light uppercase tracking-wider hover:bg-card-light/80 transition-all duration-200 ease-out active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"
-          >
-            Marcar Entregado
-          </button>
-        )}
+          {order.status === OrderStatus.PREPARING && (
+            <button
+              onClick={() => onStatusChange(order.id, OrderStatus.READY)}
+              disabled={!allReady}
+              className="w-full min-h-12 rounded-xl bg-emerald-600 px-4 py-3 text-xs font-black text-white uppercase tracking-wider hover:bg-emerald-500 transition-all duration-200 ease-out shadow-md active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 outline-none"
+            >
+              <CheckCircle2 className="h-4 w-4" /> Cerrar Orden
+            </button>
+          )}
+
+          {order.status === OrderStatus.READY && (
+            <button
+              onClick={() => onStatusChange(order.id, OrderStatus.DELIVERED)}
+              className="w-full min-h-12 rounded-xl bg-card-light border border-border px-4 py-3 text-xs font-black text-text-light uppercase tracking-wider hover:bg-card-light/80 transition-all duration-200 ease-out active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"
+            >
+              Marcar Entregado
+            </button>
+          )}
+        </div>
       </div>
-    </div>
-  );
-}, (prevProps, nextProps) => {
-  if (prevProps.order !== nextProps.order) return false;
-  if (prevProps.onStatusChange !== nextProps.onStatusChange) return false;
-  if (prevProps.onItemReady !== nextProps.onItemReady) return false;
+    );
+  },
+  (prevProps, nextProps) => {
+    if (prevProps.order !== nextProps.order) return false;
+    if (prevProps.onStatusChange !== nextProps.onStatusChange) return false;
+    if (prevProps.onItemReady !== nextProps.onItemReady) return false;
 
-  const prevItems = prevProps.order.orderItems;
-  const nextItems = nextProps.order.orderItems;
+    const prevItems = prevProps.order.orderItems;
+    const nextItems = nextProps.order.orderItems;
 
-  if (prevItems.length !== nextItems.length) return false;
+    if (prevItems.length !== nextItems.length) return false;
 
-  for (let i = 0; i < prevItems.length; i++) {
-    const prevUpdating = !!prevProps.updatingItemIds?.has(prevItems[i].id);
-    const nextUpdating = !!nextProps.updatingItemIds?.has(nextItems[i].id);
-    if (prevUpdating !== nextUpdating) return false;
-  }
+    for (let i = 0; i < prevItems.length; i++) {
+      const prevUpdating = !!prevProps.updatingItemIds?.has(prevItems[i].id);
+      const nextUpdating = !!nextProps.updatingItemIds?.has(nextItems[i].id);
+      if (prevUpdating !== nextUpdating) return false;
+    }
 
-  return true;
-});
+    return true;
+  },
+);

@@ -26,11 +26,15 @@ export function GastosFilterBar(props: GastosFilterBarProps = {}) {
   const categoryFilter =
     props.categoryFilter ?? context?.tableCategoryFilter ?? "";
   const onCategoryFilterChange =
-    props.onCategoryFilterChange ?? context?.handleCategoryFilterChange ?? (() => {});
+    props.onCategoryFilterChange ??
+    context?.handleCategoryFilterChange ??
+    (() => {});
   const invoiceFilter =
     props.invoiceFilter ?? context?.tableInvoiceFilter ?? "all";
   const onInvoiceFilterChange =
-    props.onInvoiceFilterChange ?? context?.handleInvoiceFilterChange ?? (() => {});
+    props.onInvoiceFilterChange ??
+    context?.handleInvoiceFilterChange ??
+    (() => {});
   const typeFilter = props.typeFilter ?? context?.tableTypeFilter ?? "all";
   const onTypeFilterChange =
     props.onTypeFilterChange ?? context?.handleTypeFilterChange ?? (() => {});

@@ -35,7 +35,11 @@ vi.mock("@/lib/supabase/server", () => ({
 
 describe("Menu API Route Handlers (/api/menu)", () => {
   const mockTenant = { id: "tenant-123" };
-  const mockAdminProfile = { id: "admin-1", role: "ADMIN", tenant_id: "tenant-123" };
+  const mockAdminProfile = {
+    id: "admin-1",
+    role: "ADMIN",
+    tenant_id: "tenant-123",
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -63,8 +67,12 @@ describe("Menu API Route Handlers (/api/menu)", () => {
         data: [{ menu_item_id: "item-1" }],
         error: null,
       });
-      const mockOrderPopular = vi.fn().mockReturnValue({ limit: mockLimitPopular });
-      const mockGtePopular = vi.fn().mockReturnValue({ order: mockOrderPopular });
+      const mockOrderPopular = vi
+        .fn()
+        .mockReturnValue({ limit: mockLimitPopular });
+      const mockGtePopular = vi
+        .fn()
+        .mockReturnValue({ order: mockOrderPopular });
       const mockEqPopular = vi.fn().mockReturnValue({ gte: mockGtePopular });
       const mockSelectPopular = vi.fn().mockReturnValue({ eq: mockEqPopular });
 
@@ -149,7 +157,8 @@ describe("Menu API Route Handlers (/api/menu)", () => {
     });
 
     it("uploads image to S3 and creates menu item successfully", async () => {
-      const s3Url = "https://kittnos.s3.us-east-1.amazonaws.com/tenant-123/menu-items/123-abc.jpg";
+      const s3Url =
+        "https://kittnos.s3.us-east-1.amazonaws.com/tenant-123/menu-items/123-abc.jpg";
       vi.mocked(uploadMenuItemImage).mockResolvedValueOnce(s3Url);
 
       const mockSingle = vi.fn().mockResolvedValue({
@@ -217,7 +226,8 @@ describe("Menu API Route Handlers (/api/menu)", () => {
     });
 
     it("uploads new image to S3 and updates item successfully", async () => {
-      const newS3Url = "https://kittnos.s3.us-east-1.amazonaws.com/tenant-123/menu-items/new-photo.webp";
+      const newS3Url =
+        "https://kittnos.s3.us-east-1.amazonaws.com/tenant-123/menu-items/new-photo.webp";
       vi.mocked(uploadMenuItemImage).mockResolvedValueOnce(newS3Url);
 
       // Mock item lookup
@@ -225,7 +235,9 @@ describe("Menu API Route Handlers (/api/menu)", () => {
         data: { stripe_product_id: null },
         error: null,
       });
-      const mockEqTenant = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
+      const mockEqTenant = vi
+        .fn()
+        .mockReturnValue({ maybeSingle: mockMaybeSingle });
       const mockEqId = vi.fn().mockReturnValue({ eq: mockEqTenant });
       const mockSelectProduct = vi.fn().mockReturnValue({ eq: mockEqId });
 
@@ -235,8 +247,12 @@ describe("Menu API Route Handlers (/api/menu)", () => {
         error: null,
       });
       const mockSelectUpdate = vi.fn().mockReturnValue({ single: mockSingle });
-      const mockEqUpdateTenant = vi.fn().mockReturnValue({ select: mockSelectUpdate });
-      const mockEqUpdateId = vi.fn().mockReturnValue({ eq: mockEqUpdateTenant });
+      const mockEqUpdateTenant = vi
+        .fn()
+        .mockReturnValue({ select: mockSelectUpdate });
+      const mockEqUpdateId = vi
+        .fn()
+        .mockReturnValue({ eq: mockEqUpdateTenant });
       const mockUpdate = vi.fn().mockReturnValue({ eq: mockEqUpdateId });
 
       mockSupabaseAdmin.from.mockImplementation((table: string) => {
@@ -268,7 +284,6 @@ describe("Menu API Route Handlers (/api/menu)", () => {
       expect(uploadMenuItemImage).toHaveBeenCalledWith(file, "tenant-123");
       expect(body.item.image_url).toBe(newS3Url);
     });
-
   });
 
   describe("DELETE /api/menu", () => {

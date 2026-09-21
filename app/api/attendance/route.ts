@@ -166,7 +166,10 @@ export async function POST(request: Request) {
           profileId = profileByEmail.id;
         } else {
           return NextResponse.json(
-            { error: "No se encontró el perfil del colaborador en este restaurante." },
+            {
+              error:
+                "No se encontró el perfil del colaborador en este restaurante.",
+            },
             { status: 400 },
           );
         }

@@ -125,7 +125,9 @@ describe("hourlyAnalytics service", () => {
         },
       ];
 
-      const resultAll = aggregateHourlySales(orders, { onlyActiveHours: false });
+      const resultAll = aggregateHourlySales(orders, {
+        onlyActiveHours: false,
+      });
       expect(resultAll.rows).toHaveLength(24);
 
       const resultActive = aggregateHourlySales(orders, {
@@ -405,8 +407,12 @@ describe("hourlyAnalytics service", () => {
         peakIndicator: "Pico de Ventas ⚡",
       };
 
-      const salesCol = HOURLY_SALES_EXPORT_COLUMNS.find((c) => c.header === "Ventas");
-      const pctCol = HOURLY_SALES_EXPORT_COLUMNS.find((c) => c.header === "% del Total");
+      const salesCol = HOURLY_SALES_EXPORT_COLUMNS.find(
+        (c) => c.header === "Ventas",
+      );
+      const pctCol = HOURLY_SALES_EXPORT_COLUMNS.find(
+        (c) => c.header === "% del Total",
+      );
       const ticketCol = HOURLY_SALES_EXPORT_COLUMNS.find(
         (c) => c.header === "Ticket Promedio",
       );

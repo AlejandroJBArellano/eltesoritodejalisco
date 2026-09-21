@@ -9,8 +9,14 @@ import {
   Table as TableIcon,
 } from "lucide-react";
 import type { Ingredient } from "@/types";
-import { ExportButton, type ExportColumn } from "@/components/ui/DataTableControls";
-import { IngredientTouchCard, type InventoryActionType } from "./IngredientTouchCard";
+import {
+  ExportButton,
+  type ExportColumn,
+} from "@/components/ui/DataTableControls";
+import {
+  IngredientTouchCard,
+  type InventoryActionType,
+} from "./IngredientTouchCard";
 import { InventoryActionDrawer } from "./InventoryActionDrawer";
 
 type FilterType = "all" | "low" | "out";
@@ -72,7 +78,9 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
   const [filter, setFilter] = useState<FilterType>("all");
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<InventoryViewMode>(() =>
-    typeof window !== "undefined" && window.innerWidth < 768 ? "cards" : "table"
+    typeof window !== "undefined" && window.innerWidth < 768
+      ? "cards"
+      : "table",
   );
   const [activeAction, setActiveAction] = useState<{
     ingredient: Ingredient;
@@ -100,7 +108,7 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
 
   const handleOpenAction = (
     action: InventoryActionType,
-    ingredient: Ingredient
+    ingredient: Ingredient,
   ) => {
     setActiveAction({ ingredient, action });
   };
@@ -253,7 +261,9 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
             <ExportButton
               data={filtered}
               columns={INVENTORY_EXPORT_COLUMNS}
-              filename={() => `inventario_${new Date().toISOString().split("T")[0]}`}
+              filename={() =>
+                `inventario_${new Date().toISOString().split("T")[0]}`
+              }
               sheetName="Inventario"
             />
           </div>
@@ -330,8 +340,8 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
                             status === "out"
                               ? "text-red-400"
                               : status === "low"
-                              ? "text-amber-400"
-                              : "text-text-light"
+                                ? "text-amber-400"
+                                : "text-text-light"
                           }`}
                         >
                           {Number(ing.currentStock).toFixed(2)}
@@ -344,7 +354,9 @@ export function InventarioTable({ initialIngredients }: InventarioTableProps) {
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-black border ${cfg.badge}`}
                         >
-                          <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`}
+                          />
                           {cfg.label}
                         </span>
                       </td>

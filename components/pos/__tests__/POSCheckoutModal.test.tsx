@@ -130,7 +130,7 @@ describe("POSCheckoutModal Component", () => {
 
     // Header
     expect(screen.getByText("Cobrar Orden #1050")).toBeInTheDocument();
-    
+
     // Total to pay
     expect(screen.getByText("Total a Pagar")).toBeInTheDocument();
     expect(screen.getAllByText("$116.00").length).toBeGreaterThan(0);
@@ -177,7 +177,9 @@ describe("POSCheckoutModal Component", () => {
     } as unknown as ReturnType<typeof usePOSCheckout>);
 
     render(<POSCheckoutModal />);
-    expect(screen.getByText("Ocurrió un error al procesar el pago")).toBeInTheDocument();
+    expect(
+      screen.getByText("Ocurrió un error al procesar el pago"),
+    ).toBeInTheDocument();
   });
 
   it("should render unusual tip warning banner and buttons when present", () => {
@@ -194,7 +196,9 @@ describe("POSCheckoutModal Component", () => {
     render(<POSCheckoutModal />);
 
     expect(screen.getByText("Propina inusual")).toBeInTheDocument();
-    expect(screen.getByText("$200.00 (50.0%) — ¿es correcto?")).toBeInTheDocument();
+    expect(
+      screen.getByText("$200.00 (50.0%) — ¿es correcto?"),
+    ).toBeInTheDocument();
 
     // Confirm button
     const confirmBtn = screen.getByRole("button", { name: /Sí, confirmar/i });
@@ -246,13 +250,17 @@ describe("POSCheckoutModal Component", () => {
     expect(setShowSplitBill).toHaveBeenCalledWith(true);
 
     // Click Return to Edit button
-    const returnBtn = screen.getByRole("button", { name: /Regresar a Editar/i });
+    const returnBtn = screen.getByRole("button", {
+      name: /Regresar a Editar/i,
+    });
     fireEvent.click(returnBtn);
     expect(openModifyModal).toHaveBeenCalledWith(mockOrder);
     expect(setCheckoutOrder).toHaveBeenCalledWith(null);
 
     // Click Failed Payment button
-    const failedBtn = screen.getByRole("button", { name: /Marcar como Pago Fallido/i });
+    const failedBtn = screen.getByRole("button", {
+      name: /Marcar como Pago Fallido/i,
+    });
     fireEvent.click(failedBtn);
     expect(handleFailedPayment).toHaveBeenCalled();
   });
@@ -324,7 +332,7 @@ describe("POSCheckoutModal Component", () => {
     fireEvent.click(creditBtn);
 
     expect(
-      screen.getByText(/Para enviar a crédito, asigna primero un cliente/i)
+      screen.getByText(/Para enviar a crédito, asigna primero un cliente/i),
     ).toBeInTheDocument();
   });
 
@@ -349,7 +357,9 @@ describe("POSCheckoutModal Component", () => {
     expect(screen.getByText("Confirmar Venta a Crédito")).toBeInTheDocument();
     expect(screen.getAllByText(/Raúl González/i).length).toBeGreaterThan(0);
 
-    const confirmBtn = screen.getByRole("button", { name: /Confirmar Crédito/i });
+    const confirmBtn = screen.getByRole("button", {
+      name: /Confirmar Crédito/i,
+    });
     fireEvent.click(confirmBtn);
 
     expect(handleCreditPaymentMock).toHaveBeenCalled();
@@ -387,12 +397,16 @@ describe("POSCheckoutModal Component", () => {
     const creditBtn = screen.getByRole("button", { name: /A Crédito/i });
     fireEvent.click(creditBtn);
 
-    expect(screen.getByText(/Autorización de Gerencia Requerida/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Autorización de Gerencia Requerida/i),
+    ).toBeInTheDocument();
 
     const pinInput = screen.getByPlaceholderText(/Ingresa PIN de 4 dígitos/i);
     fireEvent.change(pinInput, { target: { value: "1234" } });
 
-    const confirmBtn = screen.getByRole("button", { name: /Confirmar Crédito/i });
+    const confirmBtn = screen.getByRole("button", {
+      name: /Confirmar Crédito/i,
+    });
     fireEvent.click(confirmBtn);
 
     expect(global.fetch).toHaveBeenCalledWith(
@@ -400,7 +414,7 @@ describe("POSCheckoutModal Component", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ pin: "1234" }),
-      })
+      }),
     );
 
     await vi.waitFor(() => {
@@ -432,7 +446,10 @@ describe("POSCheckoutModal Component", () => {
 
     global.fetch = vi.fn().mockResolvedValueOnce({
       ok: false,
-      json: async () => ({ valid: false, error: "PIN de autorización incorrecto" }),
+      json: async () => ({
+        valid: false,
+        error: "PIN de autorización incorrecto",
+      }),
     });
 
     render(<POSCheckoutModal />);
@@ -443,11 +460,13 @@ describe("POSCheckoutModal Component", () => {
     const pinInput = screen.getByPlaceholderText(/Ingresa PIN de 4 dígitos/i);
     fireEvent.change(pinInput, { target: { value: "9999" } });
 
-    const confirmBtn = screen.getByRole("button", { name: /Confirmar Crédito/i });
+    const confirmBtn = screen.getByRole("button", {
+      name: /Confirmar Crédito/i,
+    });
     fireEvent.click(confirmBtn);
 
     expect(
-      await screen.findByText("PIN de autorización incorrecto")
+      await screen.findByText("PIN de autorización incorrecto"),
     ).toBeInTheDocument();
     expect(handleCreditPaymentMock).not.toHaveBeenCalled();
   });
@@ -481,7 +500,9 @@ describe("POSCheckoutModal Component", () => {
 
     render(<POSCheckoutModal />);
 
-    const select = screen.getByRole("combobox", { name: /seleccionar cliente/i });
+    const select = screen.getByRole("combobox", {
+      name: /seleccionar cliente/i,
+    });
     fireEvent.change(select, { target: { value: "cust-9" } });
 
     const assignBtn = screen.getByRole("button", { name: /asignar/i });
@@ -572,13 +593,19 @@ describe("POSCheckoutModal Component", () => {
 
     render(<POSCheckoutModal />);
 
-    expect(screen.getByText(/Orden 100% Bonificada \/ Cortesía/i)).toBeInTheDocument();
-    const courtesyBtn = screen.getByRole("button", { name: /Registrar Cortesía \(\$0\.00\)/i });
+    expect(
+      screen.getByText(/Orden 100% Bonificada \/ Cortesía/i),
+    ).toBeInTheDocument();
+    const courtesyBtn = screen.getByRole("button", {
+      name: /Registrar Cortesía \(\$0\.00\)/i,
+    });
     expect(courtesyBtn).toBeInTheDocument();
 
     // Ensure payment method options and cash inputs are NOT rendered
     expect(screen.queryByText(/Método de Pago/i)).not.toBeInTheDocument();
-    expect(screen.queryByPlaceholderText(/Monto recibido/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText(/Monto recibido/i),
+    ).not.toBeInTheDocument();
 
     fireEvent.click(courtesyBtn);
     expect(handleCourtesyPaymentMock).toHaveBeenCalled();

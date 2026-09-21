@@ -88,10 +88,5 @@ async function getCampaignsData() {
 export default async function CampaignsPage() {
   const { campaigns, stats } = await getCampaignsData();
 
-  return (
-    <CampaignsContent
-      initialCampaigns={campaigns}
-      initialStats={stats}
-    />
-  );
+  return <CampaignsContent initialCampaigns={campaigns} initialStats={stats} />;
 }

@@ -29,7 +29,7 @@ export async function PUT(request: Request) {
     if (!isAdmin) {
       return NextResponse.json(
         { error: "Permisos insuficientes para modificar configuración" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -38,8 +38,10 @@ export async function PUT(request: Request) {
 
     if (isNaN(tolerance) || tolerance < 0) {
       return NextResponse.json(
-        { error: "El margen de tolerancia debe ser un número mayor o igual a 0" },
-        { status: 400 }
+        {
+          error: "El margen de tolerancia debe ser un número mayor o igual a 0",
+        },
+        { status: 400 },
       );
     }
 
@@ -51,7 +53,10 @@ export async function PUT(request: Request) {
 
     if (updateError) {
       console.error("Error updating attendance tolerance:", updateError);
-      return NextResponse.json({ error: "Error al guardar tolerancia" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Error al guardar tolerancia" },
+        { status: 500 },
+      );
     }
 
     invalidateTenantCache(tenant.slug);
@@ -62,6 +67,9 @@ export async function PUT(request: Request) {
     });
   } catch (error) {
     console.error("PUT /api/shifts/settings error:", error);
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 },
+    );
   }
 }

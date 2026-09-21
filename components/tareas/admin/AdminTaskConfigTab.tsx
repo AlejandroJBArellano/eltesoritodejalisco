@@ -41,11 +41,9 @@ export interface AdminTaskConfigTabProps {
 export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
   const context = useOptionalAdminTareasContext();
 
-  const filteredTasks =
-    props.filteredTasks ?? context?.filteredTasks ?? [];
+  const filteredTasks = props.filteredTasks ?? context?.filteredTasks ?? [];
   const sortedTasks = props.sortedTasks ?? context?.sortedTasks ?? [];
-  const paginatedTasks =
-    props.paginatedTasks ?? context?.paginatedTasks ?? [];
+  const paginatedTasks = props.paginatedTasks ?? context?.paginatedTasks ?? [];
   const categories = props.categories ?? context?.categories ?? [];
   const search = props.search ?? context?.taskSearch ?? "";
   const onSearchChange =
@@ -71,8 +69,7 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
   const page = props.page ?? context?.taskPage ?? 1;
   const pageSize = props.pageSize ?? context?.taskPageSize ?? 10;
   const totalPages = props.totalPages ?? context?.taskTotalPages ?? 1;
-  const onPageChange =
-    props.onPageChange ?? context?.setTaskPage ?? (() => {});
+  const onPageChange = props.onPageChange ?? context?.setTaskPage ?? (() => {});
   const onPageSizeChange =
     props.onPageSizeChange ?? context?.setTaskPageSize ?? (() => {});
   const onEditTask =

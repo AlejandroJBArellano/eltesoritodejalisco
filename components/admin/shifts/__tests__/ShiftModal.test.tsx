@@ -20,7 +20,7 @@ describe("ShiftModal Component", () => {
         onClose={vi.fn()}
         onSave={vi.fn()}
         users={mockUsers}
-      />
+      />,
     );
     expect(container).toBeEmptyDOMElement();
   });
@@ -37,7 +37,7 @@ describe("ShiftModal Component", () => {
         defaultDate="2026-09-07"
         defaultUserId="u-1"
         users={mockUsers}
-      />
+      />,
     );
 
     expect(screen.getByText("Asignar Nuevo Turno")).toBeInTheDocument();
@@ -51,8 +51,12 @@ describe("ShiftModal Component", () => {
     fireEvent.click(cocinaBtn);
 
     // Enter notes
-    const notesInput = screen.getByPlaceholderText(/observaciones particulares/i);
-    fireEvent.change(notesInput, { target: { value: "Turno pesado de fin de semana" } });
+    const notesInput = screen.getByPlaceholderText(
+      /observaciones particulares/i,
+    );
+    fireEvent.change(notesInput, {
+      target: { value: "Turno pesado de fin de semana" },
+    });
 
     // Submit form
     const saveBtn = screen.getByRole("button", { name: /guardar turno/i });
@@ -81,7 +85,7 @@ describe("ShiftModal Component", () => {
         onClose={vi.fn()}
         onSave={onSaveMock}
         users={mockUsers}
-      />
+      />,
     );
 
     // Change collaborator
@@ -89,7 +93,9 @@ describe("ShiftModal Component", () => {
     fireEvent.change(userSelect, { target: { value: "u-2" } });
 
     // Change date
-    const dateInputs = screen.getAllByDisplayValue(new Date().toISOString().split("T")[0]);
+    const dateInputs = screen.getAllByDisplayValue(
+      new Date().toISOString().split("T")[0],
+    );
     fireEvent.change(dateInputs[0], { target: { value: "2026-09-10" } });
 
     // Change manual area
@@ -106,7 +112,7 @@ describe("ShiftModal Component", () => {
           user_id: "u-2",
           date: "2026-09-10",
           area: "Parrilla",
-        })
+        }),
       );
     });
   });
@@ -137,11 +143,13 @@ describe("ShiftModal Component", () => {
         onDelete={onDeleteMock}
         initialShift={existingShift}
         users={mockUsers}
-      />
+      />,
     );
 
     expect(screen.getByText("Editar Turno")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Encargado de bebidas")).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue("Encargado de bebidas"),
+    ).toBeInTheDocument();
 
     const deleteBtn = screen.getByRole("button", { name: /eliminar/i });
     fireEvent.click(deleteBtn);
@@ -177,7 +185,7 @@ describe("ShiftModal Component", () => {
         onDelete={onDeleteMock}
         initialShift={existingShift}
         users={mockUsers}
-      />
+      />,
     );
 
     const deleteBtn = screen.getByRole("button", { name: /eliminar/i });
@@ -187,7 +195,9 @@ describe("ShiftModal Component", () => {
   });
 
   it("handles error thrown by onSave", async () => {
-    const onSaveMock = vi.fn().mockRejectedValue(new Error("Error al guardar en base de datos"));
+    const onSaveMock = vi
+      .fn()
+      .mockRejectedValue(new Error("Error al guardar en base de datos"));
 
     render(
       <ShiftModal
@@ -196,20 +206,24 @@ describe("ShiftModal Component", () => {
         onSave={onSaveMock}
         defaultDate="2026-09-07"
         users={mockUsers}
-      />
+      />,
     );
 
     const saveBtn = screen.getByRole("button", { name: /guardar turno/i });
     fireEvent.click(saveBtn);
 
     await waitFor(() => {
-      expect(screen.getByText("Error al guardar en base de datos")).toBeInTheDocument();
+      expect(
+        screen.getByText("Error al guardar en base de datos"),
+      ).toBeInTheDocument();
     });
   });
 
   it("handles error thrown by onDelete", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
-    const onDeleteMock = vi.fn().mockRejectedValue(new Error("Error al eliminar turno"));
+    const onDeleteMock = vi
+      .fn()
+      .mockRejectedValue(new Error("Error al eliminar turno"));
 
     const existingShift: EmployeeShift = {
       id: "shift-99",
@@ -232,7 +246,7 @@ describe("ShiftModal Component", () => {
         onDelete={onDeleteMock}
         initialShift={existingShift}
         users={mockUsers}
-      />
+      />,
     );
 
     const deleteBtn = screen.getByRole("button", { name: /eliminar/i });
@@ -251,7 +265,7 @@ describe("ShiftModal Component", () => {
         onClose={onCloseMock}
         onSave={vi.fn()}
         users={mockUsers}
-      />
+      />,
     );
 
     const closeBtn = screen.getByRole("button", { name: /cerrar modal/i });
@@ -266,22 +280,20 @@ describe("ShiftModal Component", () => {
         onClose={vi.fn()}
         onSave={vi.fn()}
         users={[]}
-      />
+      />,
     );
 
     expect(
-      screen.getByText(/no hay colaboradores registrados/i)
+      screen.getByText(/no hay colaboradores registrados/i),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(/no hay opciones/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/no hay opciones/i)).toBeInTheDocument();
 
     // Try saving without collaborator
     const saveBtn = screen.getByRole("button", { name: /guardar turno/i });
     fireEvent.click(saveBtn);
 
     expect(
-      screen.getByText("Debes seleccionar un colaborador")
+      screen.getByText("Debes seleccionar un colaborador"),
     ).toBeInTheDocument();
   });
 });

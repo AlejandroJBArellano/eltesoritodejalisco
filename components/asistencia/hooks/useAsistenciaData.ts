@@ -126,7 +126,9 @@ export function useAsistenciaData(initialCustomTime?: string) {
     [getFinishedAttendances],
   );
 
-  const activeEmployeeAttendance = attendances.find((a) => a.status === "ACTIVE");
+  const activeEmployeeAttendance = attendances.find(
+    (a) => a.status === "ACTIVE",
+  );
 
   const getUserTodayShift = useCallback(
     (userId?: string) => {

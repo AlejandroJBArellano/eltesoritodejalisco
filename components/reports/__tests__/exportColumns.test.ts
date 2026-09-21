@@ -24,7 +24,10 @@ describe("Reports Export Columns", () => {
 
     const getCol = (header: string) => {
       const col = DAILY_SALES_EXPORT_COLUMNS.find((c) => c.header === header);
-      if (!col) throw new Error(`Column "${header}" not found in DAILY_SALES_EXPORT_COLUMNS`);
+      if (!col)
+        throw new Error(
+          `Column "${header}" not found in DAILY_SALES_EXPORT_COLUMNS`,
+        );
       return col;
     };
 
@@ -71,7 +74,10 @@ describe("Reports Export Columns", () => {
 
     const getCol = (header: string) => {
       const col = PRODUCT_SALES_EXPORT_COLUMNS.find((c) => c.header === header);
-      if (!col) throw new Error(`Column "${header}" not found in PRODUCT_SALES_EXPORT_COLUMNS`);
+      if (!col)
+        throw new Error(
+          `Column "${header}" not found in PRODUCT_SALES_EXPORT_COLUMNS`,
+        );
       return col;
     };
 
@@ -129,7 +135,9 @@ describe("Reports Export Columns", () => {
     it("should format % Participación with percent symbol", () => {
       const col = getCol("% Participación");
       expect(col.accessor!(sampleProduct)).toBe("18.5%");
-      expect(col.accessor!({ ...sampleProduct, percentageOfTotal: undefined })).toBe("-");
+      expect(
+        col.accessor!({ ...sampleProduct, percentageOfTotal: undefined }),
+      ).toBe("-");
     });
   });
 
@@ -142,7 +150,10 @@ describe("Reports Export Columns", () => {
 
     const getCol = (header: string) => {
       const col = TOP_CUSTOMERS_EXPORT_COLUMNS.find((c) => c.header === header);
-      if (!col) throw new Error(`Column "${header}" not found in TOP_CUSTOMERS_EXPORT_COLUMNS`);
+      if (!col)
+        throw new Error(
+          `Column "${header}" not found in TOP_CUSTOMERS_EXPORT_COLUMNS`,
+        );
       return col;
     };
 

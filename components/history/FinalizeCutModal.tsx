@@ -30,48 +30,82 @@ export interface FinalizeCutModalProps {
 export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
   const context = useHistoryContextNullable();
 
-  const isOpen = props.isOpen !== undefined ? props.isOpen : (context?.showFinalizeModal ?? false);
+  const isOpen =
+    props.isOpen !== undefined
+      ? props.isOpen
+      : (context?.showFinalizeModal ?? false);
   const onClose = props.onClose ?? (() => context?.setShowFinalizeModal(false));
   const onConfirm = props.onConfirm ?? (() => context?.handleFinalizarDia());
-  const onPrintClosingTicket = props.onPrintClosingTicket ?? (() => context?.openDailySummaryTicket());
-  const isFinalizing = props.isFinalizing !== undefined ? props.isFinalizing : (context?.isFinalizing ?? false);
+  const onPrintClosingTicket =
+    props.onPrintClosingTicket ?? (() => context?.openDailySummaryTicket());
+  const isFinalizing =
+    props.isFinalizing !== undefined
+      ? props.isFinalizing
+      : (context?.isFinalizing ?? false);
 
-  const todayTotals = props.todayTotals ?? context?.todayTotals ?? {
-    ventaNeta: 0,
-    ivaAcumulado: 0,
-    propinasEfectivo: 0,
-    propinasTarjeta: 0,
-    cajaEfectivo: 0,
-    cajaTarjeta: 0,
-    comisionTarjeta: 0,
-    cajaTarjetaNeta: 0,
-    utilidadReal: 0,
-    utilidadFinal: 0,
-    ordersAtTable: 0,
-    ordersDelivery: 0,
-    averageTicket: 0,
-    creditoOtorgadoHoy: 0,
-  };
-  const todayOrdersCount = props.todayOrdersCount ?? context?.todayOrders.length ?? 0;
+  const todayTotals = props.todayTotals ??
+    context?.todayTotals ?? {
+      ventaNeta: 0,
+      ivaAcumulado: 0,
+      propinasEfectivo: 0,
+      propinasTarjeta: 0,
+      cajaEfectivo: 0,
+      cajaTarjeta: 0,
+      comisionTarjeta: 0,
+      cajaTarjetaNeta: 0,
+      utilidadReal: 0,
+      utilidadFinal: 0,
+      ordersAtTable: 0,
+      ordersDelivery: 0,
+      averageTicket: 0,
+      creditoOtorgadoHoy: 0,
+    };
+  const todayOrdersCount =
+    props.todayOrdersCount ?? context?.todayOrders.length ?? 0;
   const todayExpenses = props.todayExpenses ?? context?.todayExpenses ?? 0;
-  const terminalCommissionRate = props.terminalCommissionRate !== undefined
-    ? props.terminalCommissionRate
-    : (context?.terminalCommissionRate ?? 0);
+  const terminalCommissionRate =
+    props.terminalCommissionRate !== undefined
+      ? props.terminalCommissionRate
+      : (context?.terminalCommissionRate ?? 0);
 
-  const manualCash = props.manualCash !== undefined ? props.manualCash : (context?.manualCash ?? "");
-  const manualCard = props.manualCard !== undefined ? props.manualCard : (context?.manualCard ?? "");
-  const manualTipsEfectivo = props.manualTipsEfectivo !== undefined ? props.manualTipsEfectivo : (context?.manualTipsEfectivo ?? "");
-  const manualTipsTarjeta = props.manualTipsTarjeta !== undefined ? props.manualTipsTarjeta : (context?.manualTipsTarjeta ?? "");
+  const manualCash =
+    props.manualCash !== undefined
+      ? props.manualCash
+      : (context?.manualCash ?? "");
+  const manualCard =
+    props.manualCard !== undefined
+      ? props.manualCard
+      : (context?.manualCard ?? "");
+  const manualTipsEfectivo =
+    props.manualTipsEfectivo !== undefined
+      ? props.manualTipsEfectivo
+      : (context?.manualTipsEfectivo ?? "");
+  const manualTipsTarjeta =
+    props.manualTipsTarjeta !== undefined
+      ? props.manualTipsTarjeta
+      : (context?.manualTipsTarjeta ?? "");
 
-  const onManualCashChange = props.onManualCashChange ?? context?.setManualCash ?? (() => {});
-  const onManualCardChange = props.onManualCardChange ?? context?.setManualCard ?? (() => {});
-  const onManualTipsEfectivoChange = props.onManualTipsEfectivoChange ?? context?.setManualTipsEfectivo ?? (() => {});
-  const onManualTipsTarjetaChange = props.onManualTipsTarjetaChange ?? context?.setManualTipsTarjeta ?? (() => {});
+  const onManualCashChange =
+    props.onManualCashChange ?? context?.setManualCash ?? (() => {});
+  const onManualCardChange =
+    props.onManualCardChange ?? context?.setManualCard ?? (() => {});
+  const onManualTipsEfectivoChange =
+    props.onManualTipsEfectivoChange ??
+    context?.setManualTipsEfectivo ??
+    (() => {});
+  const onManualTipsTarjetaChange =
+    props.onManualTipsTarjetaChange ??
+    context?.setManualTipsTarjeta ??
+    (() => {});
 
-  const isCalculatingTips = props.isCalculatingTips !== undefined ? props.isCalculatingTips : (context?.isCalculatingTips ?? false);
+  const isCalculatingTips =
+    props.isCalculatingTips !== undefined
+      ? props.isCalculatingTips
+      : (context?.isCalculatingTips ?? false);
   const tipBreakdown = props.tipBreakdown ?? context?.tipBreakdown ?? [];
 
-  const currentCard = manualCard !== "" ? Number(manualCard) : todayTotals.cajaTarjeta;
+  const currentCard =
+    manualCard !== "" ? Number(manualCard) : todayTotals.cajaTarjeta;
   const currentCommission = (currentCard * terminalCommissionRate) / 100;
   const currentNetCard = Math.max(0, currentCard - currentCommission);
 

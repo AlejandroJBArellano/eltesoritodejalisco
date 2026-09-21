@@ -31,8 +31,20 @@ const mockReportData: ReportData = {
   },
   topSellingItems: [{ name: "Cappuccino", quantity: 25, revenue: 2500 }],
   productSales: [
-    { id: "1", name: "Cappuccino", category: "Bebidas", quantity: 25, revenue: 2500 },
-    { id: "2", name: "Croissant", category: "Panadería", quantity: 10, revenue: 800 },
+    {
+      id: "1",
+      name: "Cappuccino",
+      category: "Bebidas",
+      quantity: 25,
+      revenue: 2500,
+    },
+    {
+      id: "2",
+      name: "Croissant",
+      category: "Panadería",
+      quantity: 10,
+      revenue: 800,
+    },
   ],
   customers: {
     topCustomers: [{ name: "Juan", totalSpend: 500, loyaltyPoints: 20 }],
@@ -51,7 +63,9 @@ describe("useReportsData Hook", () => {
       json: async () => mockReportData,
     });
 
-    const { result } = renderHook(() => useReportsData({ initialPeriod: "7days" }));
+    const { result } = renderHook(() =>
+      useReportsData({ initialPeriod: "7days" }),
+    );
 
     expect(result.current.isLoading).toBe(true);
 
@@ -92,7 +106,9 @@ describe("useReportsData Hook", () => {
     });
     global.fetch = fetchMock;
 
-    const { result } = renderHook(() => useReportsData({ initialPeriod: "today" }));
+    const { result } = renderHook(() =>
+      useReportsData({ initialPeriod: "today" }),
+    );
 
     await act(async () => {
       await Promise.resolve();
@@ -115,7 +131,9 @@ describe("useReportsData Hook", () => {
     });
     global.fetch = fetchMock;
 
-    const { result } = renderHook(() => useReportsData({ initialPeriod: "custom", autoFetch: false }));
+    const { result } = renderHook(() =>
+      useReportsData({ initialPeriod: "custom", autoFetch: false }),
+    );
 
     act(() => {
       result.current.setCustomStartDate("2026-08-01");
@@ -138,7 +156,9 @@ describe("useReportsData Hook", () => {
     });
     global.fetch = fetchMock;
 
-    const { result } = renderHook(() => useReportsData({ initialPeriod: "30days" }));
+    const { result } = renderHook(() =>
+      useReportsData({ initialPeriod: "30days" }),
+    );
 
     await act(async () => {
       await Promise.resolve();

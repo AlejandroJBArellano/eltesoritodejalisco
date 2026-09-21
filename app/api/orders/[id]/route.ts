@@ -116,19 +116,19 @@ export async function PUT(
     // Fetch current order items with menu item names
     const { data: currentItems } = await supabase
       .from("order_items")
-      .select(`
+      .select(
+        `
         id,
         unit_price,
         quantity,
         menu_items (
           name
         )
-      `)
+      `,
+      )
       .eq("order_id", id);
 
-    const currentMap = new Map(
-      (currentItems || []).map((ci) => [ci.id, ci]),
-    );
+    const currentMap = new Map((currentItems || []).map((ci) => [ci.id, ci]));
     const currentIds = Array.from(currentMap.keys());
 
     // Delete items that are no longer in the list
@@ -149,7 +149,10 @@ export async function PUT(
       if (profile?.role === "WAITER") {
         if (!pin) {
           return NextResponse.json(
-            { error: "Se requiere PIN de Gerencia para eliminar o reducir productos" },
+            {
+              error:
+                "Se requiere PIN de Gerencia para eliminar o reducir productos",
+            },
             { status: 403 },
           );
         }
@@ -219,7 +222,9 @@ export async function PUT(
     // Recalculate order totals from what's left in the database
     const { data: remainingItems } = await supabase
       .from("order_items")
-      .select("unit_price, quantity, discount_type, discount_value, discount_scope")
+      .select(
+        "unit_price, quantity, discount_type, discount_value, discount_scope",
+      )
       .eq("order_id", id);
 
     const activeOrderDiscountType =
@@ -237,7 +242,8 @@ export async function PUT(
         discountValue: ri.discount_value,
         discountScope: (ri.discount_scope as "ROW" | "UNIT") || null,
       })),
-      orderDiscountType: (activeOrderDiscountType as "PERCENT" | "FIXED") || null,
+      orderDiscountType:
+        (activeOrderDiscountType as "PERCENT" | "FIXED") || null,
       orderDiscountValue: activeOrderDiscountValue,
     });
 
@@ -277,13 +283,13 @@ export async function PUT(
 
     if (updateOrderError) throw updateOrderError;
 
-    const authorizedByName = manager
-      ? manager.full_name || manager.role
-      : null;
+    const authorizedByName = manager ? manager.full_name || manager.role : null;
 
     if (hasRemovedItems || hasReducedQuantity) {
       const getItemName = (item: unknown): string => {
-        const row = item as { menu_items?: { name?: string } | { name?: string }[] | null } | undefined;
+        const row = item as
+          | { menu_items?: { name?: string } | { name?: string }[] | null }
+          | undefined;
         if (!row?.menu_items) return "Producto";
         if (Array.isArray(row.menu_items)) {
           return row.menu_items[0]?.name || "Producto";
@@ -332,8 +338,11 @@ export async function PUT(
     }
 
     const discountChanged =
-      (discountType !== undefined || discountValue !== undefined || discountReason !== undefined) &&
-      (activeOrderDiscountType !== order.discount_type || activeOrderDiscountValue !== order.discount_value);
+      (discountType !== undefined ||
+        discountValue !== undefined ||
+        discountReason !== undefined) &&
+      (activeOrderDiscountType !== order.discount_type ||
+        activeOrderDiscountValue !== order.discount_value);
 
     if (discountChanged) {
       await logOrderAction({
@@ -401,7 +410,10 @@ export async function PATCH(
         discountValue === undefined &&
         discountReason === undefined
       ) {
-        return NextResponse.json({ error: "No items or updates provided" }, { status: 400 });
+        return NextResponse.json(
+          { error: "No items or updates provided" },
+          { status: 400 },
+        );
       }
 
       const updatePayload: Record<string, unknown> = {
@@ -428,7 +440,9 @@ export async function PATCH(
 
         const { data: existingItems } = await supabase
           .from("order_items")
-          .select("unit_price, quantity, discount_type, discount_value, discount_scope")
+          .select(
+            "unit_price, quantity, discount_type, discount_value, discount_scope",
+          )
           .eq("order_id", id);
 
         const totals = calculateOrderDiscountTotals({
@@ -439,7 +453,8 @@ export async function PATCH(
             discountValue: ri.discount_value,
             discountScope: (ri.discount_scope as "ROW" | "UNIT") || null,
           })),
-          orderDiscountType: (activeOrderDiscountType as "PERCENT" | "FIXED") || null,
+          orderDiscountType:
+            (activeOrderDiscountType as "PERCENT" | "FIXED") || null,
           orderDiscountValue: activeOrderDiscountValue,
         });
 
@@ -456,14 +471,16 @@ export async function PATCH(
         .update(updatePayload)
         .eq("id", id)
         .eq("tenant_id", tenant.id)
-        .select(`
+        .select(
+          `
           *,
           order_items (
             *,
             menu_items (*)
           ),
           customer:customers (*)
-        `)
+        `,
+        )
         .single();
 
       if (updateOrderError) throw updateOrderError;
@@ -668,9 +685,7 @@ export async function DELETE(
       manager = await verifyManagerPin(tenant.id, String(pin).trim());
     }
 
-    const authorizedByName = manager
-      ? manager.full_name || manager.role
-      : null;
+    const authorizedByName = manager ? manager.full_name || manager.role : null;
 
     await logOrderAction({
       orderId: id,

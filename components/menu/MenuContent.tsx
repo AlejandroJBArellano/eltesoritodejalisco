@@ -5,7 +5,10 @@ import { BookOpen, Plus, RefreshCw, Tag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { SubmitEvent, useMemo, useState, useTransition } from "react";
 
-import { MenuCategoriesProvider, useMenuCategories } from "./hooks/useMenuCategories";
+import {
+  MenuCategoriesProvider,
+  useMenuCategories,
+} from "./hooks/useMenuCategories";
 import { MenuItemsProvider, useMenuItems } from "./hooks/useMenuItems";
 import { RecipesProvider, useRecipes } from "./hooks/useRecipes";
 
@@ -18,7 +21,14 @@ import { MenuTable } from "./components/MenuTable";
 import { ProductModal } from "./components/ProductModal";
 import { RecipeModal } from "./components/RecipeModal";
 
-import { EMPTY_INGREDIENT_FORM, Ingredient, IngredientFormState, MenuCategory, MenuItem, SortField } from "./types";
+import {
+  EMPTY_INGREDIENT_FORM,
+  Ingredient,
+  IngredientFormState,
+  MenuCategory,
+  MenuItem,
+  SortField,
+} from "./types";
 
 interface MenuContentProps {
   items: MenuItem[];
@@ -76,19 +86,22 @@ function MenuContentInner({
     openCategoryModal,
   } = useMenuCategories();
 
-  const {
-    openRecipeModal,
-    isRecipeModalOpen,
-    setRecipeForm,
-  } = useRecipes();
+  const { openRecipeModal, isRecipeModalOpen, setRecipeForm } = useRecipes();
 
   // Ingredient modal state
   const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
-  const [ingredientForm, setIngredientForm] = useState<IngredientFormState>(EMPTY_INGREDIENT_FORM);
-  const [ingredientErrors, setIngredientErrors] = useState<Record<string, string>>({});
+  const [ingredientForm, setIngredientForm] = useState<IngredientFormState>(
+    EMPTY_INGREDIENT_FORM,
+  );
+  const [ingredientErrors, setIngredientErrors] = useState<
+    Record<string, string>
+  >({});
   const [isIngredientSubmitting, setIsIngredientSubmitting] = useState(false);
 
-  const handleIngredientFormChange = (field: keyof IngredientFormState, value: string) => {
+  const handleIngredientFormChange = (
+    field: keyof IngredientFormState,
+    value: string,
+  ) => {
     setIngredientForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -111,7 +124,9 @@ function MenuContentInner({
           unit: ingredientForm.unit,
           currentStock: Number(ingredientForm.currentStock || 0),
           minimumStock: Number(ingredientForm.minimumStock || 0),
-          costPerUnit: ingredientForm.costPerUnit ? Number(ingredientForm.costPerUnit) : null,
+          costPerUnit: ingredientForm.costPerUnit
+            ? Number(ingredientForm.costPerUnit)
+            : null,
           trackingType: ingredientForm.trackingType,
         }),
       });
@@ -140,7 +155,9 @@ function MenuContentInner({
       setIngredientForm(EMPTY_INGREDIENT_FORM);
     } catch (err) {
       console.error("Error saving ingredient:", err);
-      setErrorMessage(err instanceof Error ? err.message : "Error al guardar el ingrediente");
+      setErrorMessage(
+        err instanceof Error ? err.message : "Error al guardar el ingrediente",
+      );
     } finally {
       setIsIngredientSubmitting(false);
     }
@@ -209,9 +226,7 @@ function MenuContentInner({
 
         <MenuStatsCards />
 
-        {categoriesLoaded && (
-          <CategoriesPanel />
-        )}
+        {categoriesLoaded && <CategoriesPanel />}
 
         <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">

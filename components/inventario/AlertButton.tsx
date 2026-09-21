@@ -32,8 +32,8 @@ export function AlertButton() {
         result === "success"
           ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
           : result === "error"
-          ? "bg-red-500/15 border-red-500/30 text-red-400"
-          : "bg-white/5 border-border text-text-light/60 hover:text-text-light hover:bg-white/10"
+            ? "bg-red-500/15 border-red-500/30 text-red-400"
+            : "bg-white/5 border-border text-text-light/60 hover:text-text-light hover:bg-white/10"
       }`}
     >
       {isPending ? (
@@ -46,10 +46,10 @@ export function AlertButton() {
       {isPending
         ? "Enviando..."
         : result === "success"
-        ? "¡Enviado!"
-        : result === "error"
-        ? "Error al enviar"
-        : "Enviar Alerta"}
+          ? "¡Enviado!"
+          : result === "error"
+            ? "Error al enviar"
+            : "Enviar Alerta"}
     </button>
   );
 }

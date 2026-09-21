@@ -167,7 +167,10 @@ describe("lib/services/reports", () => {
       expect(metrics.averageCompletionTimeMinutes).toBe(12.5); // (15 + 10) / 2
       expect(metrics.salesByDay["2026-08-27"]).toBe(350);
       expect(metrics.ordersByDay["2026-08-27"]).toBe(2);
-      expect(metrics.salesBySource["Comedor"]).toEqual({ count: 1, total: 250 });
+      expect(metrics.salesBySource["Comedor"]).toEqual({
+        count: 1,
+        total: 250,
+      });
       expect(metrics.salesBySource["Pickup"]).toEqual({ count: 1, total: 100 });
 
       // Product sales check
@@ -214,7 +217,10 @@ describe("lib/services/reports", () => {
 
       expect(metrics.totalSales).toBe(80);
       expect(metrics.totalOrders).toBe(1);
-      expect(metrics.salesBySource["Desconocido"]).toEqual({ count: 1, total: 80 });
+      expect(metrics.salesBySource["Desconocido"]).toEqual({
+        count: 1,
+        total: 80,
+      });
       expect(metrics.productSales).toEqual([]);
     });
   });

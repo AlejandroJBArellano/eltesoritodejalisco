@@ -40,39 +40,61 @@ export interface DailyCutBannerProps {
 export function DailyCutBanner(props: DailyCutBannerProps = {}) {
   const context = useHistoryContextNullable();
 
-  const todayTotals = props.todayTotals ?? context?.todayTotals ?? {
-    ventaNeta: 0,
-    ivaAcumulado: 0,
-    propinasEfectivo: 0,
-    propinasTarjeta: 0,
-    cajaEfectivo: 0,
-    cajaTarjeta: 0,
-    comisionTarjeta: 0,
-    cajaTarjetaNeta: 0,
-    utilidadReal: 0,
-    utilidadFinal: 0,
-    ordersAtTable: 0,
-    ordersDelivery: 0,
-    averageTicket: 0,
-    creditoOtorgadoHoy: 0,
-  };
-  const todayOrdersCount = props.todayOrdersCount ?? context?.todayOrders.length ?? 0;
+  const todayTotals = props.todayTotals ??
+    context?.todayTotals ?? {
+      ventaNeta: 0,
+      ivaAcumulado: 0,
+      propinasEfectivo: 0,
+      propinasTarjeta: 0,
+      cajaEfectivo: 0,
+      cajaTarjeta: 0,
+      comisionTarjeta: 0,
+      cajaTarjetaNeta: 0,
+      utilidadReal: 0,
+      utilidadFinal: 0,
+      ordersAtTable: 0,
+      ordersDelivery: 0,
+      averageTicket: 0,
+      creditoOtorgadoHoy: 0,
+    };
+  const todayOrdersCount =
+    props.todayOrdersCount ?? context?.todayOrders.length ?? 0;
   const todayExpenses = props.todayExpenses ?? context?.todayExpenses ?? 0;
-  const finalizeSuccess = props.finalizeSuccess ?? context?.finalizeSuccess ?? false;
+  const finalizeSuccess =
+    props.finalizeSuccess ?? context?.finalizeSuccess ?? false;
   const hasPendingCut = props.hasPendingCut ?? context?.hasPendingCut ?? false;
-  const pendingDate = props.pendingDate !== undefined ? props.pendingDate : (context?.pendingDate ?? null);
+  const pendingDate =
+    props.pendingDate !== undefined
+      ? props.pendingDate
+      : (context?.pendingDate ?? null);
   const pendingOrders = props.pendingOrders ?? context?.pendingOrders ?? 0;
-  const pendingCutArmed = props.pendingCutArmed ?? context?.pendingCutArmed ?? false;
-  const isGeneratingPendingCut = props.isGeneratingPendingCut ?? context?.isGeneratingPendingCut ?? false;
-  const showCutsArchive = props.showCutsArchive ?? context?.showCutsArchive ?? false;
-  const historyError = props.historyError !== undefined ? props.historyError : (context?.historyError ?? null);
-  const historySuccess = props.historySuccess !== undefined ? props.historySuccess : (context?.historySuccess ?? null);
+  const pendingCutArmed =
+    props.pendingCutArmed ?? context?.pendingCutArmed ?? false;
+  const isGeneratingPendingCut =
+    props.isGeneratingPendingCut ?? context?.isGeneratingPendingCut ?? false;
+  const showCutsArchive =
+    props.showCutsArchive ?? context?.showCutsArchive ?? false;
+  const historyError =
+    props.historyError !== undefined
+      ? props.historyError
+      : (context?.historyError ?? null);
+  const historySuccess =
+    props.historySuccess !== undefined
+      ? props.historySuccess
+      : (context?.historySuccess ?? null);
 
-  const onFinalizeDayClick = props.onFinalizeDayClick ?? context?.openFinalizeModal ?? (() => {});
-  const onToggleCutsArchive = props.onToggleCutsArchive ?? context?.toggleCutsArchive ?? (() => {});
-  const onGeneratePendingCut = props.onGeneratePendingCut ?? context?.handleGeneratePendingCut ?? (() => {});
-  const onDismissError = props.onDismissError ?? (() => context?.setHistoryError(null));
-  const onPrintSummaryClick = props.onPrintSummaryClick ?? (() => context?.openDailySummaryTicket());
+  const onFinalizeDayClick =
+    props.onFinalizeDayClick ?? context?.openFinalizeModal ?? (() => {});
+  const onToggleCutsArchive =
+    props.onToggleCutsArchive ?? context?.toggleCutsArchive ?? (() => {});
+  const onGeneratePendingCut =
+    props.onGeneratePendingCut ??
+    context?.handleGeneratePendingCut ??
+    (() => {});
+  const onDismissError =
+    props.onDismissError ?? (() => context?.setHistoryError(null));
+  const onPrintSummaryClick =
+    props.onPrintSummaryClick ?? (() => context?.openDailySummaryTicket());
 
   return (
     <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-6">
@@ -189,13 +211,17 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
               <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                 Venta Neta Total (Sin IVA)
               </span>
-              <span className="text-text-light/40 text-xl font-mono">$0.00</span>
+              <span className="text-text-light/40 text-xl font-mono">
+                $0.00
+              </span>
             </div>
             <div className="bg-dark/40 p-3.5 rounded-xl border border-border">
               <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                 IVA Acumulado
               </span>
-              <span className="text-text-light/40 text-xl font-mono">$0.00</span>
+              <span className="text-text-light/40 text-xl font-mono">
+                $0.00
+              </span>
             </div>
           </div>
           <div className="space-y-3">
@@ -203,13 +229,17 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
               <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                 Propinas (Efectivo)
               </span>
-              <span className="text-text-light/40 text-xl font-mono">$0.00</span>
+              <span className="text-text-light/40 text-xl font-mono">
+                $0.00
+              </span>
             </div>
             <div className="bg-dark/40 p-3.5 rounded-xl border border-border">
               <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                 Propinas (Tarjeta)
               </span>
-              <span className="text-text-light/40 text-xl font-mono">$0.00</span>
+              <span className="text-text-light/40 text-xl font-mono">
+                $0.00
+              </span>
             </div>
           </div>
           <div className="space-y-3">
@@ -217,13 +247,17 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
               <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                 Caja Final (Efectivo)
               </span>
-              <span className="text-text-light/40 text-xl font-mono">$0.00</span>
+              <span className="text-text-light/40 text-xl font-mono">
+                $0.00
+              </span>
             </div>
             <div className="bg-dark/40 p-3.5 rounded-xl border border-blue-500/20">
               <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                 Caja Final (Tarjeta)
               </span>
-              <span className="text-text-light/40 text-xl font-mono">$0.00</span>
+              <span className="text-text-light/40 text-xl font-mono">
+                $0.00
+              </span>
             </div>
           </div>
           <div className="bg-emerald-500/10 p-5 rounded-2xl flex flex-col justify-center items-center border border-emerald-500/20 lg:col-span-1 md:col-span-2">
@@ -296,7 +330,8 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
               </span>
               {todayTotals.comisionTarjeta > 0 && (
                 <span className="text-[10px] text-blue-300/70 font-mono block mt-1">
-                  Comisión: -${todayTotals.comisionTarjeta.toFixed(2)} · Neto: ${todayTotals.cajaTarjetaNeta.toFixed(2)}
+                  Comisión: -${todayTotals.comisionTarjeta.toFixed(2)} · Neto: $
+                  {todayTotals.cajaTarjetaNeta.toFixed(2)}
                 </span>
               )}
             </div>
@@ -356,7 +391,8 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
                 Créditos Otorgados Hoy (Cuentas por Cobrar)
               </span>
               <span className="text-text-light/60 text-[11px]">
-                Ventas pendientes de cobro · No computan en caja hasta que el cliente liquide o abone
+                Ventas pendientes de cobro · No computan en caja hasta que el
+                cliente liquide o abone
               </span>
             </div>
           </div>

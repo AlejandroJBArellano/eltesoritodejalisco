@@ -12,7 +12,9 @@ describe("PerformanceSummaryKPIs Component", () => {
     expect(screen.getByText("$0.00")).toBeInTheDocument();
     expect(screen.getByText("Sin pedidos registrados")).toBeInTheDocument();
     expect(screen.getByText("Sin datos en el período")).toBeInTheDocument();
-    expect(screen.getByText("Sin histórico de facturación")).toBeInTheDocument();
+    expect(
+      screen.getByText("Sin histórico de facturación"),
+    ).toBeInTheDocument();
   });
 
   it("renders populated KPI cards with metrics and badges", () => {
@@ -51,8 +53,6 @@ describe("PerformanceSummaryKPIs Component", () => {
     // Mes récord
     expect(screen.getByText("Ago 2026")).toBeInTheDocument();
     expect(screen.getByText("Récord")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Facturación \$85,000.00/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Facturación \$85,000.00/i)).toBeInTheDocument();
   });
 });

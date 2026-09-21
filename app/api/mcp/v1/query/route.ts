@@ -9,10 +9,7 @@ export async function POST(req: NextRequest) {
 
     const authResult = await validateMcpApiKey(authHeader);
     if (!authResult.valid) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: authResult.error }, { status: 401 });
     }
 
     const body = await req.json().catch(() => ({}));
@@ -64,10 +61,7 @@ export async function GET(req: NextRequest) {
 
   const authResult = await validateMcpApiKey(authHeader);
   if (!authResult.valid) {
-    return NextResponse.json(
-      { error: authResult.error },
-      { status: 401 },
-    );
+    return NextResponse.json({ error: authResult.error }, { status: 401 });
   }
 
   // Retorna el catálogo de herramientas disponibles

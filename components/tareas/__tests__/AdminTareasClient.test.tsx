@@ -78,7 +78,9 @@ describe("AdminTareasClient Component", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     const tasksActions = await import("@/lib/actions/tasks");
-    vi.mocked(tasksActions.getExecutionsForDate).mockResolvedValue(mockExecutions);
+    vi.mocked(tasksActions.getExecutionsForDate).mockResolvedValue(
+      mockExecutions,
+    );
   });
 
   it("should render active tab 'history' and display export button", () => {
@@ -91,13 +93,17 @@ describe("AdminTareasClient Component", () => {
     );
 
     expect(screen.getByText(/Ejecución de Tareas/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Exportar/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Exportar/i }),
+    ).toBeInTheDocument();
     expect(screen.getAllByText("Carlos").length).toBeGreaterThanOrEqual(1);
   });
 
   it("should trigger export for executions in history tab", async () => {
     const user = userEvent.setup();
-    const exportCSVSpy = vi.spyOn(exportLib, "exportToCSV").mockImplementation(() => {});
+    const exportCSVSpy = vi
+      .spyOn(exportLib, "exportToCSV")
+      .mockImplementation(() => {});
 
     render(
       <AdminTareasClient
@@ -133,9 +139,13 @@ describe("AdminTareasClient Component", () => {
     // Click config tab
     await user.click(screen.getByRole("button", { name: /Configuración/i }));
 
-    expect(screen.getByText(/Catálogo de Tareas Primordiales/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Catálogo de Tareas Primordiales/i),
+    ).toBeInTheDocument();
     expect(screen.getByText("Encender Plancha")).toBeInTheDocument();
     expect(screen.getByText("Desinfectar Mesa")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Exportar/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Exportar/i }),
+    ).toBeInTheDocument();
   });
 });

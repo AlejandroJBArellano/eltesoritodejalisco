@@ -46,7 +46,9 @@ function useRecipesInner(items: MenuItem[]) {
     setIsRecipeModalOpen(true);
   };
 
-  const handleRecipeSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
+  const handleRecipeSubmit = async (
+    event: React.SubmitEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
     if (!selectedRecipeMenuItemId) {
       setRecipeErrors({ menuItemId: "Selecciona un producto" });
@@ -145,7 +147,9 @@ export function useRecipes(items?: MenuItem[]) {
 
   // Fallback for tests/isolated calls
   if (!items) {
-    throw new Error("useRecipes must be used within a RecipesProvider or passed items directly");
+    throw new Error(
+      "useRecipes must be used within a RecipesProvider or passed items directly",
+    );
   }
   // eslint-disable-next-line react-hooks/rules-of-hooks
   return useRecipesInner(items);

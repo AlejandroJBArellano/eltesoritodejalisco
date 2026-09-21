@@ -108,7 +108,7 @@ describe("OrderTicket Component", () => {
 
     // Subtotal (116 / 1.16 = 100.00)
     expect(screen.getByText("SUBTOTAL: $100.00")).toBeInTheDocument();
-    
+
     // IVA (116 - 100 = 16.00)
     expect(screen.getByText("IVA (16%): $16.00")).toBeInTheDocument();
 
@@ -135,13 +135,17 @@ describe("OrderTicket Component", () => {
     expect(qrPickup.getAttribute("height")).toBe("80");
 
     const expectedPickupUrl = "https://tesorito.trykittn.com";
-    expect(qrPickup.getAttribute("src")).toContain(encodeURIComponent(expectedPickupUrl));
+    expect(qrPickup.getAttribute("src")).toContain(
+      encodeURIComponent(expectedPickupUrl),
+    );
 
     // Reviews QR should NOT be rendered
     expect(screen.queryByTestId("qr-reviews")).not.toBeInTheDocument();
 
     // Powered by Kittn footer
-    expect(screen.getByText(/Powered by Kittn • trykittn.com/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Powered by Kittn • trykittn.com/i),
+    ).toBeInTheDocument();
   });
 
   it("should render dual QR codes (Pickup + Google Reviews) and social footer when configured", () => {
@@ -161,17 +165,23 @@ describe("OrderTicket Component", () => {
     expect(qrReviews).toBeInTheDocument();
     expect(qrReviews.getAttribute("width")).toBe("70");
     expect(qrReviews.getAttribute("height")).toBe("70");
-    expect(qrReviews.getAttribute("src")).toContain(encodeURIComponent("https://g.page/r/CbXxExample/review"));
+    expect(qrReviews.getAttribute("src")).toContain(
+      encodeURIComponent("https://g.page/r/CbXxExample/review"),
+    );
 
     // Check headers
     expect(screen.getByText("Pide en Línea")).toBeInTheDocument();
     expect(screen.getByText("Califícanos")).toBeInTheDocument();
 
     // Check social footer
-    expect(screen.getByText("📸 @el_tesorito_jalisco • 🎵 @tesorito")).toBeInTheDocument();
+    expect(
+      screen.getByText("📸 @el_tesorito_jalisco • 🎵 @tesorito"),
+    ).toBeInTheDocument();
 
     // Powered by Kittn footer
-    expect(screen.getByText(/Powered by Kittn • trykittn.com/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Powered by Kittn • trykittn.com/i),
+    ).toBeInTheDocument();
   });
 
   it("should display tip without hidden class on screen when user is Admin", () => {
@@ -228,7 +238,9 @@ describe("OrderTicket Component", () => {
     expect(screen.getByText("Desc: -$10.00 (Promoción)")).toBeInTheDocument();
     expect(screen.getByText("SUBTOTAL BRUTO: $100.00")).toBeInTheDocument();
     expect(screen.getByText("DESCUENTOS PROD.: -$10.00")).toBeInTheDocument();
-    expect(screen.getByText("DESC. ORDEN (Cortesía): -$10.00")).toBeInTheDocument();
+    expect(
+      screen.getByText("DESC. ORDEN (Cortesía): -$10.00"),
+    ).toBeInTheDocument();
     expect(screen.getByText("TOTAL VENTA: $80.00")).toBeInTheDocument();
   });
 
@@ -262,7 +274,9 @@ describe("OrderTicket Component", () => {
     expect(screen.getByText("SUBTOTAL BRUTO: $100.00")).toBeInTheDocument();
     expect(screen.getByText("DESCUENTOS PROD.: -$10.00")).toBeInTheDocument();
     // Order: net 90 * 10% = 9 discount
-    expect(screen.getByText("DESC. ORDEN (Cortesía): -$9.00")).toBeInTheDocument();
+    expect(
+      screen.getByText("DESC. ORDEN (Cortesía): -$9.00"),
+    ).toBeInTheDocument();
     expect(screen.getByText("TOTAL VENTA: $81.00")).toBeInTheDocument();
   });
 
@@ -294,9 +308,13 @@ describe("OrderTicket Component", () => {
 
     render(<OrderTicket order={snakeCaseOrder} />);
 
-    expect(screen.getByText("Desc: -$5.00 (Promo Producto)")).toBeInTheDocument();
+    expect(
+      screen.getByText("Desc: -$5.00 (Promo Producto)"),
+    ).toBeInTheDocument();
     expect(screen.getByText("SUBTOTAL BRUTO: $100.00")).toBeInTheDocument();
     expect(screen.getByText("DESCUENTOS PROD.: -$5.00")).toBeInTheDocument();
-    expect(screen.getByText("DESC. ORDEN (Descuento VIP): -$15.00")).toBeInTheDocument();
+    expect(
+      screen.getByText("DESC. ORDEN (Descuento VIP): -$15.00"),
+    ).toBeInTheDocument();
   });
 });

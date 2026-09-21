@@ -1,7 +1,11 @@
 "use server";
 
 import { getProfile } from "@/lib/auth";
-import { hasPermission, type PermissionKey, type RoleData } from "@/lib/permissions";
+import {
+  hasPermission,
+  type PermissionKey,
+  type RoleData,
+} from "@/lib/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext } from "@/lib/tenant";
 import { revalidatePath } from "next/cache";
@@ -25,7 +29,10 @@ async function verifyAdminAuth() {
 /**
  * Obtiene todos los roles disponibles para el tenant actual, incluyendo conteo de usuarios.
  */
-export async function getTenantRoles(): Promise<{ data?: RoleData[]; error?: string }> {
+export async function getTenantRoles(): Promise<{
+  data?: RoleData[];
+  error?: string;
+}> {
   try {
     const profile = await getProfile();
     if (!profile) {
@@ -133,7 +140,11 @@ export async function createCustomRole(data: {
       return { error: "El nombre del rol es requerido." };
     }
 
-    if (!data.permissions || !Array.isArray(data.permissions) || data.permissions.length === 0) {
+    if (
+      !data.permissions ||
+      !Array.isArray(data.permissions) ||
+      data.permissions.length === 0
+    ) {
       return { error: "Debes seleccionar al menos un permiso para el rol." };
     }
 
@@ -197,7 +208,11 @@ export async function updateCustomRole(
       return { error: "El nombre del rol es requerido." };
     }
 
-    if (!data.permissions || !Array.isArray(data.permissions) || data.permissions.length === 0) {
+    if (
+      !data.permissions ||
+      !Array.isArray(data.permissions) ||
+      data.permissions.length === 0
+    ) {
       return { error: "Debes seleccionar al menos un permiso para el rol." };
     }
 
@@ -284,8 +299,7 @@ export async function duplicateRole(
       return { error: "No se encontró el rol de origen." };
     }
 
-    const newName =
-      customName?.trim() || `${sourceRole.name} (Copia)`;
+    const newName = customName?.trim() || `${sourceRole.name} (Copia)`;
 
     return await createCustomRole({
       name: newName,
@@ -326,7 +340,10 @@ export async function deleteCustomRole(
     }
 
     if (role.is_system) {
-      return { error: "Los roles predeterminados del sistema no pueden ser eliminados." };
+      return {
+        error:
+          "Los roles predeterminados del sistema no pueden ser eliminados.",
+      };
     }
 
     // Verificar usuarios asignados a este rol

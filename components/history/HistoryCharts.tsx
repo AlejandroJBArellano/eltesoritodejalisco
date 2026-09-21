@@ -97,20 +97,13 @@ export function HistoryCharts(props: HistoryChartsProps = {}) {
   const lineInnerW = lineSvgWidth - linePadLeft - linePadRight;
   const lineInnerH = lineSvgHeight - linePadTop - linePadBottom;
 
-  const maxDaily = Math.max(
-    ...chartsData.dailySales.map((d) => d.total),
-    0,
-  );
+  const maxDaily = Math.max(...chartsData.dailySales.map((d) => d.total), 0);
   const maxDailyVal = maxDaily > 0 ? Math.ceil(maxDaily * 1.15) : 100;
   const yTicks = [0, maxDailyVal * 0.33, maxDailyVal * 0.66, maxDailyVal];
 
   const getLineX = (i: number) => {
-    if (chartsData.dailySales.length <= 1)
-      return linePadLeft + lineInnerW / 2;
-    return (
-      linePadLeft +
-      (i / (chartsData.dailySales.length - 1)) * lineInnerW
-    );
+    if (chartsData.dailySales.length <= 1) return linePadLeft + lineInnerW / 2;
+    return linePadLeft + (i / (chartsData.dailySales.length - 1)) * lineInnerW;
   };
 
   const getLineY = (val: number) => {
@@ -162,10 +155,13 @@ export function HistoryCharts(props: HistoryChartsProps = {}) {
 
       const pathD =
         chartsData.salesMix.length === 1
-          ? `M ${center} ${center - outerR} A ${outerR} ${outerR} 0 1 1 ${center} ${center + outerR
-          } A ${outerR} ${outerR} 0 1 1 ${center} ${center - outerR
-          } M ${center} ${center - innerR} A ${innerR} ${innerR} 0 1 0 ${center} ${center + innerR
-          } A ${innerR} ${innerR} 0 1 0 ${center} ${center - innerR} Z`
+          ? `M ${center} ${center - outerR} A ${outerR} ${outerR} 0 1 1 ${center} ${
+              center + outerR
+            } A ${outerR} ${outerR} 0 1 1 ${center} ${
+              center - outerR
+            } M ${center} ${center - innerR} A ${innerR} ${innerR} 0 1 0 ${center} ${
+              center + innerR
+            } A ${innerR} ${innerR} 0 1 0 ${center} ${center - innerR} Z`
           : `M ${x1Outer} ${y1Outer} A ${outerR} ${outerR} 0 ${largeArcFlag} 1 ${x2Outer} ${y2Outer} L ${x1Inner} ${y1Inner} A ${innerR} ${innerR} 0 ${largeArcFlag} 0 ${x2Inner} ${y2Inner} Z`;
 
       slices.push({
@@ -298,8 +294,9 @@ export function HistoryCharts(props: HistoryChartsProps = {}) {
                   chartsData.dailySales[hoveredDayIndex] && (
                     <div
                       style={{
-                        left: `${(getLineX(hoveredDayIndex) / lineSvgWidth) * 100
-                          }%`,
+                        left: `${
+                          (getLineX(hoveredDayIndex) / lineSvgWidth) * 100
+                        }%`,
                         top: "8%",
                       }}
                       className="absolute pointer-events-none -translate-x-1/2 z-20 rounded-xl border border-border bg-card p-2.5 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap"
@@ -309,9 +306,9 @@ export function HistoryCharts(props: HistoryChartsProps = {}) {
                       </p>
                       <p className="text-primary font-bold">
                         Venta Neta: $
-                        {chartsData.dailySales[
-                          hoveredDayIndex
-                        ].total.toFixed(2)}
+                        {chartsData.dailySales[hoveredDayIndex].total.toFixed(
+                          2,
+                        )}
                       </p>
                     </div>
                   )}

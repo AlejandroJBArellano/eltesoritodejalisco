@@ -82,8 +82,8 @@ export function useGastosData(options: UseGastosDataOptions = {}) {
         const loadedExpenses: Expense[] = Array.isArray(expJson?.expenses)
           ? expJson.expenses
           : Array.isArray(expJson)
-          ? expJson
-          : [];
+            ? expJson
+            : [];
 
         setCategories(loadedCats);
         setExpenses(loadedExpenses);

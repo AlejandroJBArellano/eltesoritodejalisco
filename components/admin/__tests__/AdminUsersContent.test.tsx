@@ -15,11 +15,31 @@ vi.mock("@/app/admin/users/roles-actions", () => ({
   getTenantRoles: vi.fn().mockResolvedValue({
     data: [
       { id: "r-1", name: "ADMIN", is_system: true, permissions: ["*"] },
-      { id: "r-2", name: "MANAGER", is_system: true, permissions: ["pos.view"] },
+      {
+        id: "r-2",
+        name: "MANAGER",
+        is_system: true,
+        permissions: ["pos.view"],
+      },
       { id: "r-3", name: "WAITER", is_system: true, permissions: ["pos.view"] },
-      { id: "r-4", name: "CHEF", is_system: true, permissions: ["kitchen.view"] },
-      { id: "r-5", name: "INVENTORY", is_system: true, permissions: ["inventory.view"] },
-      { id: "r-6", name: "Capitán de Meseros", is_system: false, permissions: ["pos.view", "pos.apply_discount"] },
+      {
+        id: "r-4",
+        name: "CHEF",
+        is_system: true,
+        permissions: ["kitchen.view"],
+      },
+      {
+        id: "r-5",
+        name: "INVENTORY",
+        is_system: true,
+        permissions: ["inventory.view"],
+      },
+      {
+        id: "r-6",
+        name: "Capitán de Meseros",
+        is_system: false,
+        permissions: ["pos.view", "pos.apply_discount"],
+      },
     ],
   }),
   createCustomRole: vi.fn(),
@@ -110,19 +130,25 @@ describe("AdminUsersContent Component", () => {
   });
 
   it("allows changing user role to custom role by ID", async () => {
-    vi.mocked(actions.updateUserRole).mockResolvedValue({ success: true } as any);
+    vi.mocked(actions.updateUserRole).mockResolvedValue({
+      success: true,
+    } as any);
 
     render(<AdminUsersContent initialProfiles={mockProfiles} />);
 
     await waitFor(() => {
       const options = screen.getAllByRole("option");
-      const customOpt = options.find((opt) => opt.textContent?.includes("Capitán de Meseros"));
+      const customOpt = options.find((opt) =>
+        opt.textContent?.includes("Capitán de Meseros"),
+      );
       expect(customOpt).toBeDefined();
     });
 
     const roleSelects = screen.getAllByRole("combobox");
     const userRoleSelect = roleSelects.find(
-      (s) => (s as HTMLSelectElement).value === "r-3" || (s as HTMLSelectElement).value === "WAITER",
+      (s) =>
+        (s as HTMLSelectElement).value === "r-3" ||
+        (s as HTMLSelectElement).value === "WAITER",
     );
     expect(userRoleSelect).toBeDefined();
 
@@ -150,7 +176,9 @@ describe("AdminUsersContent Component", () => {
   });
 
   it("opens PIN edit modal, validates length and calls updateUserPin on submit", async () => {
-    vi.mocked(actions.updateUserPin).mockResolvedValue({ success: true } as any);
+    vi.mocked(actions.updateUserPin).mockResolvedValue({
+      success: true,
+    } as any);
 
     render(<AdminUsersContent initialProfiles={mockProfiles} />);
 
@@ -165,7 +193,7 @@ describe("AdminUsersContent Component", () => {
     fireEvent.click(screen.getByRole("button", { name: /Guardar PIN/i }));
 
     expect(
-      screen.getByText("El PIN debe contener entre 4 y 6 dígitos numéricos")
+      screen.getByText("El PIN debe contener entre 4 y 6 dígitos numéricos"),
     ).toBeDefined();
     expect(actions.updateUserPin).not.toHaveBeenCalled();
 

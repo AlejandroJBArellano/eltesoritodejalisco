@@ -96,14 +96,13 @@ describe("AdminTaskHistoryTab Component", () => {
 
     expect(screen.getByText("Cierre de Caja")).toBeInTheDocument();
     expect(screen.getByText("María López")).toBeInTheDocument();
-    expect(screen.getAllByText("Listo para Aprobar").length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText("Listo para Aprobar").length,
+    ).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("25 min")).toBeInTheDocument();
 
     const photoLink = screen.getByRole("link", { name: /ver foto/i });
-    expect(photoLink).toHaveAttribute(
-      "href",
-      "https://example.com/photo.jpg",
-    );
+    expect(photoLink).toHaveAttribute("href", "https://example.com/photo.jpg");
 
     const approveBtn = screen.getByRole("button", { name: /aprobar/i });
     expect(approveBtn).toBeInTheDocument();
@@ -196,9 +195,13 @@ describe("AdminTaskHistoryTab Component", () => {
     );
 
     expect(screen.getByText("Desinfección de Mesas")).toBeInTheDocument();
-    expect(screen.getAllByText("No Realizada").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("No Realizada").length).toBeGreaterThanOrEqual(
+      1,
+    );
     expect(screen.getAllByText("Sin Asignar").length).toBeGreaterThanOrEqual(1);
     // Verify no approve button is rendered for NOT_DONE
-    expect(screen.queryByRole("button", { name: /aprobar/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /aprobar/i }),
+    ).not.toBeInTheDocument();
   });
 });

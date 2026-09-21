@@ -2,7 +2,8 @@ import { format } from "date-fns-tz";
 import { ATTENDANCE_TIMEZONE } from "./types";
 import type { Database } from "@/types/supabase";
 
-export type EmployeeShift = Database["public"]["Tables"]["employee_shifts"]["Row"];
+export type EmployeeShift =
+  Database["public"]["Tables"]["employee_shifts"]["Row"];
 
 export type PunctualityResult = {
   status: "ON_TIME" | "LATE" | "NO_SHIFT";
@@ -19,7 +20,7 @@ export type PunctualityResult = {
 export function calculatePunctuality(
   checkInIso?: string | null,
   shiftStartTime?: string | null,
-  toleranceMinutes: number = 10
+  toleranceMinutes: number = 10,
 ): PunctualityResult {
   if (!checkInIso || !shiftStartTime) {
     return {

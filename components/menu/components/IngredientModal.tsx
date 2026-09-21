@@ -77,8 +77,12 @@ export function IngredientModal({
               onChange={(e) => onFormChange("trackingType", e.target.value)}
               className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-primary"
             >
-              <option value="MEASURABLE">Medible (Admite decimales, ej: 0.5 kg)</option>
-              <option value="PIECE">Por pieza (Solo enteros, ej: 2 panes)</option>
+              <option value="MEASURABLE">
+                Medible (Admite decimales, ej: 0.5 kg)
+              </option>
+              <option value="PIECE">
+                Por pieza (Solo enteros, ej: 2 panes)
+              </option>
             </select>
           </div>
         </div>
@@ -90,7 +94,9 @@ export function IngredientModal({
             </label>
             <input
               type="number"
-              step={ingredientForm.trackingType === "MEASURABLE" ? "0.001" : "1"}
+              step={
+                ingredientForm.trackingType === "MEASURABLE" ? "0.001" : "1"
+              }
               value={ingredientForm.currentStock}
               onChange={(e) => onFormChange("currentStock", e.target.value)}
               className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary"
@@ -104,7 +110,9 @@ export function IngredientModal({
             </label>
             <input
               type="number"
-              step={ingredientForm.trackingType === "MEASURABLE" ? "0.001" : "1"}
+              step={
+                ingredientForm.trackingType === "MEASURABLE" ? "0.001" : "1"
+              }
               value={ingredientForm.minimumStock}
               onChange={(e) => onFormChange("minimumStock", e.target.value)}
               className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary"

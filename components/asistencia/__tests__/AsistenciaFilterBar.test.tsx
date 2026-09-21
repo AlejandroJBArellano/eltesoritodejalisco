@@ -73,6 +73,8 @@ describe("AsistenciaFilterBar Component", () => {
     expect(handleApplyFiltersMock).toHaveBeenCalled();
 
     // Export button
-    expect(screen.getByRole("button", { name: /exportar/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /exportar/i }),
+    ).toBeInTheDocument();
   });
 });

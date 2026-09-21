@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { AlertTriangle, DollarSign, FileText, ReceiptText, Tag, X } from "lucide-react";
+import {
+  AlertTriangle,
+  DollarSign,
+  FileText,
+  ReceiptText,
+  Tag,
+  X,
+} from "lucide-react";
 import { useGastosContextNullable } from "./GastosContext";
 import type { Category } from "./types";
 import type { CreateExpensePayload } from "./hooks/useGastosData";
@@ -16,7 +23,8 @@ export interface ExpenseModalProps {
 export function ExpenseModal(props: ExpenseModalProps = {}) {
   const context = useGastosContextNullable();
   const isOpen = props.isOpen ?? context?.isExpenseModalOpen ?? false;
-  const onClose = props.onClose ?? context?.handleCloseExpenseModal ?? (() => {});
+  const onClose =
+    props.onClose ?? context?.handleCloseExpenseModal ?? (() => {});
   const categories = props.categories ?? context?.categories ?? [];
   const onSubmit =
     props.onSubmit ?? context?.handleCreateExpense ?? (async () => {});
@@ -39,7 +47,12 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!categoryId || !amount || parseFloat(amount) <= 0 || !description.trim()) {
+    if (
+      !categoryId ||
+      !amount ||
+      parseFloat(amount) <= 0 ||
+      !description.trim()
+    ) {
       setError("Completa todos los campos requeridos");
       return;
     }
@@ -122,7 +135,8 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
                   </option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id} className="bg-card">
-                      {cat.name} ({cat.tipo_gasto === "fijo" ? "Fijo" : "Variable"})
+                      {cat.name} (
+                      {cat.tipo_gasto === "fijo" ? "Fijo" : "Variable"})
                     </option>
                   ))}
                 </select>

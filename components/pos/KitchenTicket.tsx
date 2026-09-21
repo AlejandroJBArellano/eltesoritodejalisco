@@ -72,7 +72,9 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
         {/* Identificación de cliente */}
         {order.customer?.name && (
           <div className="my-2 p-1.5 border-2 border-black text-center bg-gray-50 rounded-sm">
-            <p className="text-[10px] font-bold text-gray-700 tracking-wider">CLIENTE:</p>
+            <p className="text-[10px] font-bold text-gray-700 tracking-wider">
+              CLIENTE:
+            </p>
             <p className="text-base font-black uppercase tracking-wide">
               {order.customer.name}
             </p>
@@ -110,7 +112,10 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
               : [];
 
           return (
-            <div key={item.id} className="border-b border-dashed border-gray-300 pb-2 kitchen-item-row">
+            <div
+              key={item.id}
+              className="border-b border-dashed border-gray-300 pb-2 kitchen-item-row"
+            >
               <div className="flex justify-between items-start">
                 <span className="text-2xl font-black mr-2 bg-black text-white px-1.5 py-0.5 rounded-sm">
                   {item.quantity}
@@ -143,7 +148,9 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
       {order.notes && (
         <div className="mt-4 p-2 border-4 border-double border-black">
           <p className="text-xs font-black">NOTAS GENERALES:</p>
-          <p className="text-sm font-bold uppercase mt-1 leading-snug">{order.notes}</p>
+          <p className="text-sm font-bold uppercase mt-1 leading-snug">
+            {order.notes}
+          </p>
         </div>
       )}
 
@@ -151,7 +158,9 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
       <div className="border-t border-dashed border-black mt-4 pt-2 text-[10px] space-y-0.5 text-gray-600">
         <div className="flex justify-between">
           <span>ORDENADO:</span>
-          <span>{orderDate} {orderTime}</span>
+          <span>
+            {orderDate} {orderTime}
+          </span>
         </div>
         <div className="flex justify-between font-bold text-black">
           <span>IMPRESO:</span>
@@ -214,4 +223,3 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
     </div>
   );
 }
-

@@ -21,7 +21,8 @@ export function AdminControlsBar(props: AdminControlsBarProps) {
           <ShieldAlert className="h-4 w-4 text-primary" /> Modo Administrador
         </h3>
         <p className="text-xs text-text-light/60 mt-1 font-medium">
-          Puedes registrar entradas o salidas manuales usando una hora personalizada.
+          Puedes registrar entradas o salidas manuales usando una hora
+          personalizada.
         </p>
       </div>
       <div className="flex items-center gap-3">

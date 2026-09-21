@@ -9,7 +9,8 @@ export function getServiceType(table?: string | null): NormalizedServiceType {
   if (!table || !table.trim()) return "para_llevar";
   const t = table.trim().toLowerCase();
   if (t === "domicilio" || t === "a domicilio") return "domicilio";
-  if (t === "para llevar" || t === "takeout" || t === "pickup") return "para_llevar";
+  if (t === "para llevar" || t === "takeout" || t === "pickup")
+    return "para_llevar";
   return "comedor";
 }
 
@@ -21,7 +22,8 @@ export function formatServiceLabel(table?: string | null): string {
   const t = table.trim();
   const lower = t.toLowerCase();
   if (lower === "domicilio" || lower === "a domicilio") return "A Domicilio";
-  if (lower === "para llevar" || lower === "takeout" || lower === "pickup") return "Para Llevar";
+  if (lower === "para llevar" || lower === "takeout" || lower === "pickup")
+    return "Para Llevar";
   if (lower === "comer aquí" || lower === "comedor") return "Comedor";
   if (lower.startsWith("mesa")) return t;
   return `Mesa ${t}`;
@@ -35,7 +37,8 @@ export function formatServiceTicket(table?: string | null): string {
   const t = table.trim();
   const lower = t.toLowerCase();
   if (lower === "domicilio" || lower === "a domicilio") return "A DOMICILIO";
-  if (lower === "para llevar" || lower === "takeout" || lower === "pickup") return "PARA LLEVAR";
+  if (lower === "para llevar" || lower === "takeout" || lower === "pickup")
+    return "PARA LLEVAR";
   if (lower === "comer aquí" || lower === "comedor") return "COMEDOR";
   if (lower.startsWith("mesa")) return t.toUpperCase();
   return `MESA ${t.toUpperCase()}`;

@@ -60,7 +60,10 @@ export function resetS3Client(): void {
  * Valida el tipo MIME y tamaño de la imagen proporcionada.
  */
 export function validateImageFile(file: File | Blob): void {
-  if (!file.type || !ALLOWED_IMAGE_TYPES.includes(file.type as AllowedImageType)) {
+  if (
+    !file.type ||
+    !ALLOWED_IMAGE_TYPES.includes(file.type as AllowedImageType)
+  ) {
     throw new Error(
       "Formato de imagen no soportado. Usa JPEG, PNG, WebP o AVIF",
     );

@@ -117,8 +117,7 @@ export function HourlyAnalyticsView() {
     fetchData(period, mode, onlyActiveHours, customStartDate, customEndDate);
   };
 
-  const isMultiDay =
-    period !== "today" && period !== "yesterday";
+  const isMultiDay = period !== "today" && period !== "yesterday";
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -139,11 +138,21 @@ export function HourlyAnalyticsView() {
             <button
               type="button"
               data-testid="refresh-btn"
-              onClick={() => fetchData(period, mode, onlyActiveHours, customStartDate, customEndDate)}
+              onClick={() =>
+                fetchData(
+                  period,
+                  mode,
+                  onlyActiveHours,
+                  customStartDate,
+                  customEndDate,
+                )
+              }
               disabled={isLoading}
               className="inline-flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/30 px-3.5 py-2 text-xs font-black text-amber-400 hover:bg-amber-500/20 transition-all active:scale-95 disabled:opacity-50"
             >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+              />
               Actualizar
             </button>
           </div>
@@ -348,10 +357,7 @@ export function HourlyAnalyticsView() {
             {/* 2. Visualizations (Bar Chart or Heatmap) */}
             <section>
               {activeTab === "bar" ? (
-                <HourlySalesBarChart
-                  data={data.rows}
-                  mode={data.mode}
-                />
+                <HourlySalesBarChart data={data.rows} mode={data.mode} />
               ) : (
                 <HourlySalesHeatmap
                   cells={data.heatmapCells}

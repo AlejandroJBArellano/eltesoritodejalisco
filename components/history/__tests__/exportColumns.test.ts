@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { ORDERS_EXPORT_COLUMNS, DAILY_CUTS_EXPORT_COLUMNS } from "../exportColumns";
+import {
+  ORDERS_EXPORT_COLUMNS,
+  DAILY_CUTS_EXPORT_COLUMNS,
+} from "../exportColumns";
 import { type OrderWithDetails, OrderStatus, PaymentMethod } from "@/types";
 import type { DailyCut } from "../types";
 
@@ -76,12 +79,16 @@ describe("exportColumns in components/history", () => {
     };
 
     it("formats Venta Bruta correctly", () => {
-      const col = DAILY_CUTS_EXPORT_COLUMNS.find((c) => c.header === "Venta Bruta");
+      const col = DAILY_CUTS_EXPORT_COLUMNS.find(
+        (c) => c.header === "Venta Bruta",
+      );
       expect(col?.accessor!(cut)).toBe("$1160.00");
     });
 
     it("formats Venta Neta correctly", () => {
-      const col = DAILY_CUTS_EXPORT_COLUMNS.find((c) => c.header === "Venta Neta");
+      const col = DAILY_CUTS_EXPORT_COLUMNS.find(
+        (c) => c.header === "Venta Neta",
+      );
       expect(col?.accessor!(cut)).toBe("$1000.00");
     });
 
@@ -96,12 +103,18 @@ describe("exportColumns in components/history", () => {
     });
 
     it("formats Comisión correctly", () => {
-      const col = DAILY_CUTS_EXPORT_COLUMNS.find((c) => c.header === "Comisión");
-      expect(col?.accessor!({ ...cut, comision_tarjeta: 40.6 })).toBe("-$40.60");
+      const col = DAILY_CUTS_EXPORT_COLUMNS.find(
+        (c) => c.header === "Comisión",
+      );
+      expect(col?.accessor!({ ...cut, comision_tarjeta: 40.6 })).toBe(
+        "-$40.60",
+      );
     });
 
     it("formats Utilidad Final correctly", () => {
-      const col = DAILY_CUTS_EXPORT_COLUMNS.find((c) => c.header === "Utilidad Final");
+      const col = DAILY_CUTS_EXPORT_COLUMNS.find(
+        (c) => c.header === "Utilidad Final",
+      );
       expect(col?.accessor!(cut)).toBe("$850.00");
     });
   });

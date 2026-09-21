@@ -68,7 +68,9 @@ describe("CustomersContent Component", () => {
     expect(screen.getByText("Juan Pérez")).toBeInTheDocument();
     expect(screen.getByText("María Gómez")).toBeInTheDocument();
     expect(screen.getByText("Directorio de Clientes (2)")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Exportar/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Exportar/i }),
+    ).toBeInTheDocument();
 
     // Total por Cobrar KPI y badge de tabla
     expect(screen.getByText("Total por Cobrar")).toBeInTheDocument();
@@ -85,7 +87,9 @@ describe("CustomersContent Component", () => {
     expect(screen.getByText("Juan Pérez")).toBeInTheDocument();
     expect(screen.getByText("María Gómez")).toBeInTheDocument();
 
-    const soloConDeudaBtn = screen.getByRole("button", { name: /Solo con Deuda/i });
+    const soloConDeudaBtn = screen.getByRole("button", {
+      name: /Solo con Deuda/i,
+    });
     fireEvent.click(soloConDeudaBtn);
 
     expect(screen.getByText("Juan Pérez")).toBeInTheDocument();
@@ -110,7 +114,9 @@ describe("CustomersContent Component", () => {
     const user = userEvent.setup();
     render(<CustomersContent initialCustomers={mockCustomers} />);
 
-    const searchInput = screen.getByPlaceholderText(/Buscar cliente, teléfono o email.../i);
+    const searchInput = screen.getByPlaceholderText(
+      /Buscar cliente, teléfono o email.../i,
+    );
     await user.type(searchInput, "Juan");
 
     expect(screen.getByText("Juan Pérez")).toBeInTheDocument();
@@ -119,7 +125,9 @@ describe("CustomersContent Component", () => {
 
   it("should trigger export with customer columns including Saldo Deudor", async () => {
     const user = userEvent.setup();
-    const exportCSVSpy = vi.spyOn(exportLib, "exportToCSV").mockImplementation(() => {});
+    const exportCSVSpy = vi
+      .spyOn(exportLib, "exportToCSV")
+      .mockImplementation(() => {});
 
     render(<CustomersContent initialCustomers={mockCustomers} />);
 
@@ -176,5 +184,3 @@ describe("CustomersContent Component", () => {
     expect(campanasLink).toHaveAttribute("href", "/customers/campanas");
   });
 });
-
-

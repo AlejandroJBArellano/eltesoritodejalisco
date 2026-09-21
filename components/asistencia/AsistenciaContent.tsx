@@ -11,15 +11,12 @@ import { EmployeeShiftsSchedule } from "./EmployeeShiftsSchedule";
 import { useAsistenciaContext, AsistenciaProvider } from "./AsistenciaContext";
 
 function AsistenciaContentInner() {
-  const {
-    isAdmin,
-    users,
-    attendances,
-    isLoading,
-    error,
-  } = useAsistenciaContext();
+  const { isAdmin, users, attendances, isLoading, error } =
+    useAsistenciaContext();
 
-  const [employeeTab, setEmployeeTab] = useState<"checkin" | "schedule">("checkin");
+  const [employeeTab, setEmployeeTab] = useState<"checkin" | "schedule">(
+    "checkin",
+  );
 
   return (
     <div className="min-h-screen bg-background pb-16 text-text-light">

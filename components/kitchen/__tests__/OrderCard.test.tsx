@@ -40,12 +40,7 @@ const mockBaseOrder: OrderWithDetails = {
 
 describe("OrderCard Component", () => {
   it("renders Comedor order with prominent table banner", () => {
-    render(
-      <OrderCard
-        order={mockBaseOrder}
-        onStatusChange={vi.fn()}
-      />,
-    );
+    render(<OrderCard order={mockBaseOrder} onStatusChange={vi.fn()} />);
 
     expect(screen.getByText("#0042")).toBeInTheDocument();
     expect(screen.getByText(/mesa 4/i)).toBeInTheDocument();
@@ -57,12 +52,7 @@ describe("OrderCard Component", () => {
       table: "Para Llevar",
     };
 
-    render(
-      <OrderCard
-        order={takeoutOrder}
-        onStatusChange={vi.fn()}
-      />,
-    );
+    render(<OrderCard order={takeoutOrder} onStatusChange={vi.fn()} />);
 
     expect(screen.getByText(/para llevar/i)).toBeInTheDocument();
   });
@@ -73,12 +63,7 @@ describe("OrderCard Component", () => {
       table: "A Domicilio",
     };
 
-    render(
-      <OrderCard
-        order={deliveryOrder}
-        onStatusChange={vi.fn()}
-      />,
-    );
+    render(<OrderCard order={deliveryOrder} onStatusChange={vi.fn()} />);
 
     expect(screen.getByText(/a domicilio/i)).toBeInTheDocument();
   });
@@ -96,24 +81,14 @@ describe("OrderCard Component", () => {
       },
     };
 
-    render(
-      <OrderCard
-        order={orderWithCustomer}
-        onStatusChange={vi.fn()}
-      />,
-    );
+    render(<OrderCard order={orderWithCustomer} onStatusChange={vi.fn()} />);
 
     expect(screen.getByText("Cliente:")).toBeInTheDocument();
     expect(screen.getByText("Mariana Rodríguez")).toBeInTheDocument();
   });
 
   it("omits customer section when no customer is assigned", () => {
-    render(
-      <OrderCard
-        order={mockBaseOrder}
-        onStatusChange={vi.fn()}
-      />,
-    );
+    render(<OrderCard order={mockBaseOrder} onStatusChange={vi.fn()} />);
 
     expect(screen.queryByText("Cliente:")).not.toBeInTheDocument();
   });
@@ -132,12 +107,7 @@ describe("OrderCard Component", () => {
       ],
     };
 
-    render(
-      <OrderCard
-        order={paidOrder}
-        onStatusChange={vi.fn()}
-      />,
-    );
+    render(<OrderCard order={paidOrder} onStatusChange={vi.fn()} />);
 
     expect(screen.getByText("Pagado Online")).toBeInTheDocument();
   });
@@ -145,10 +115,7 @@ describe("OrderCard Component", () => {
   it("handles order status change when clicking action button", () => {
     const handleStatusChange = vi.fn();
     render(
-      <OrderCard
-        order={mockBaseOrder}
-        onStatusChange={handleStatusChange}
-      />,
+      <OrderCard order={mockBaseOrder} onStatusChange={handleStatusChange} />,
     );
 
     const startButton = screen.getByRole("button", {
@@ -184,12 +151,7 @@ describe("OrderCard Component", () => {
   });
 
   it("renders order notes and item notes correctly", () => {
-    render(
-      <OrderCard
-        order={mockBaseOrder}
-        onStatusChange={vi.fn()}
-      />,
-    );
+    render(<OrderCard order={mockBaseOrder} onStatusChange={vi.fn()} />);
 
     expect(screen.getByText(/Nota: Bien dorados/i)).toBeInTheDocument();
     expect(
@@ -203,12 +165,7 @@ describe("OrderCard Component", () => {
       pickupTime: new Date("2026-08-08T13:00:00Z"),
     };
 
-    render(
-      <OrderCard
-        order={orderWithPickup}
-        onStatusChange={vi.fn()}
-      />,
-    );
+    render(<OrderCard order={orderWithPickup} onStatusChange={vi.fn()} />);
 
     expect(screen.getByText("#0042")).toBeInTheDocument();
   });
@@ -251,7 +208,10 @@ describe("OrderCard Component", () => {
     expect(closeButton).not.toBeDisabled();
     fireEvent.click(closeButton);
 
-    expect(handleStatusChange).toHaveBeenCalledWith("order-123", OrderStatus.READY);
+    expect(handleStatusChange).toHaveBeenCalledWith(
+      "order-123",
+      OrderStatus.READY,
+    );
   });
 
   it("handles marking delivered when order is in READY status", () => {
@@ -263,13 +223,12 @@ describe("OrderCard Component", () => {
     };
 
     render(
-      <OrderCard
-        order={readyOrder}
-        onStatusChange={handleStatusChange}
-      />,
+      <OrderCard order={readyOrder} onStatusChange={handleStatusChange} />,
     );
 
-    const deliverButton = screen.getByRole("button", { name: /marcar entregado/i });
+    const deliverButton = screen.getByRole("button", {
+      name: /marcar entregado/i,
+    });
     fireEvent.click(deliverButton);
 
     expect(handleStatusChange).toHaveBeenCalledWith(

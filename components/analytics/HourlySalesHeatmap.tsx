@@ -137,10 +137,7 @@ export function HourlySalesHeatmap({
               const dayCells = cellsByDay.get(day.index) || [];
 
               return (
-                <div
-                  key={`day-row-${day.index}`}
-                  className="flex items-center"
-                >
+                <div key={`day-row-${day.index}`} className="flex items-center">
                   <div className="w-12 shrink-0 text-xs font-bold text-text-light/70 pr-2">
                     {day.short}
                   </div>
@@ -208,7 +205,10 @@ export function HourlySalesHeatmap({
               </span>
               <span>—</span>
               <span className="text-amber-400 font-bold">
-                ${hoveredCell.sales.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                $
+                {hoveredCell.sales.toLocaleString("es-MX", {
+                  minimumFractionDigits: 2,
+                })}
                 {isAvg ? " / día" : ""}
               </span>
               <span>•</span>

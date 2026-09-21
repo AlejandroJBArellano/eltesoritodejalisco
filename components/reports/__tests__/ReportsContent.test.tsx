@@ -35,7 +35,13 @@ const mockData: ReportData = {
   },
   topSellingItems: [{ name: "Americano", quantity: 20, revenue: 1000 }],
   productSales: [
-    { id: "p1", name: "Americano", category: "Café", quantity: 20, revenue: 1000 },
+    {
+      id: "p1",
+      name: "Americano",
+      category: "Café",
+      quantity: 20,
+      revenue: 1000,
+    },
   ],
   customers: {
     topCustomers: [{ name: "Ana Torres", totalSpend: 800, loyaltyPoints: 80 }],
@@ -59,7 +65,9 @@ describe("ReportsContent Component", () => {
   it("renders loading state initially", () => {
     global.fetch = vi.fn().mockReturnValue(new Promise(() => {})); // pending forever
     render(<ReportsContent />);
-    expect(screen.getByText(/Cargando reportes & métricas/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Cargando reportes & métricas/i),
+    ).toBeInTheDocument();
   });
 
   it("renders error state when API fails and allows retry", async () => {
@@ -90,7 +98,9 @@ describe("ReportsContent Component", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Reportes & Balance")).toBeInTheDocument();
-      expect(screen.getAllByText("$12,000.00").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText("$12,000.00").length).toBeGreaterThanOrEqual(
+        1,
+      );
     });
   });
 
@@ -104,9 +114,13 @@ describe("ReportsContent Component", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Reportes & Balance")).toBeInTheDocument();
-      expect(screen.getByText("Resumen Financiero y Operativo")).toBeInTheDocument();
+      expect(
+        screen.getByText("Resumen Financiero y Operativo"),
+      ).toBeInTheDocument();
       expect(screen.getByText("Detalle de Ventas Diarias")).toBeInTheDocument();
-      expect(screen.getByText("Ventas por Producto (Detallado)")).toBeInTheDocument();
+      expect(
+        screen.getByText("Ventas por Producto (Detallado)"),
+      ).toBeInTheDocument();
       expect(screen.getByText("Mejores Clientes")).toBeInTheDocument();
     });
   });

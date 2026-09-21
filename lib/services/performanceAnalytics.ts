@@ -1,7 +1,10 @@
 import { MEX_TIMEZONE } from "@/lib/utils";
 import type { RawReportOrder } from "@/lib/services/reports";
 import { getMexicoDateStr } from "@/lib/services/reports";
-import { DAYS_OF_WEEK, getMexicoHourAndDay } from "@/lib/services/hourlyAnalytics";
+import {
+  DAYS_OF_WEEK,
+  getMexicoHourAndDay,
+} from "@/lib/services/hourlyAnalytics";
 
 export interface DailyTicketRow {
   date: string;
@@ -94,7 +97,9 @@ export const SPANISH_MONTHS = [
   { index: 11, name: "Diciembre", short: "Dic" },
 ];
 
-export function generateLast12Months(baseDate: Date = new Date()): MonthlySalesRow[] {
+export function generateLast12Months(
+  baseDate: Date = new Date(),
+): MonthlySalesRow[] {
   const mxBase = getMexicoDateStr(baseDate);
   const [currentYearStr, currentMonthStr] = mxBase.split("-");
   const baseYear = parseInt(currentYearStr, 10);
@@ -214,7 +219,8 @@ export function aggregatePerformanceData(
     .sort((a, b) => a.localeCompare(b))
     .map((date) => {
       const { sales, orders } = dailyMap[date];
-      const avgTicket = orders > 0 ? Math.round((sales / orders) * 100) / 100 : 0;
+      const avgTicket =
+        orders > 0 ? Math.round((sales / orders) * 100) / 100 : 0;
       const labelDate = new Date(`${date}T12:00:00-06:00`);
       const label = labelDate.toLocaleDateString("es-MX", {
         weekday: "short",
@@ -310,9 +316,7 @@ export function aggregatePerformanceData(
     const histAvgSales = Math.round((histSales / histOccurrences) * 100) / 100;
     const histAvgOrders = Math.round((histOrders / histOccurrences) * 10) / 10;
     const histAvgTicket =
-      histOrders > 0
-        ? Math.round((histSales / histOrders) * 100) / 100
-        : 0;
+      histOrders > 0 ? Math.round((histSales / histOrders) * 100) / 100 : 0;
 
     // Period occurrences sorted chronologically
     const occurrences: WeekdayOccurrence[] = Object.keys(

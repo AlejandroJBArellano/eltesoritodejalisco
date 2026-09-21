@@ -50,7 +50,9 @@ describe("CategoryModal Component", () => {
     // Toggle to Fijo
     fireEvent.click(screen.getByRole("button", { name: "Fijo" }));
 
-    const form = screen.getByRole("button", { name: /Guardar Categoría/i }).closest("form")!;
+    const form = screen
+      .getByRole("button", { name: /Guardar Categoría/i })
+      .closest("form")!;
     fireEvent.submit(form);
 
     await waitFor(() => {
@@ -113,7 +115,9 @@ describe("CategoryModal Component", () => {
       />,
     );
 
-    const form = screen.getByRole("button", { name: /Guardar Categoría/i }).closest("form")!;
+    const form = screen
+      .getByRole("button", { name: /Guardar Categoría/i })
+      .closest("form")!;
     fireEvent.submit(form);
 
     expect(
@@ -161,11 +165,15 @@ describe("CategoryModal Component", () => {
     fireEvent.change(screen.getByLabelText("Nombre de la Categoría"), {
       target: { value: "Insumos" },
     });
-    const form = screen.getByRole("button", { name: /Guardar Categoría/i }).closest("form")!;
+    const form = screen
+      .getByRole("button", { name: /Guardar Categoría/i })
+      .closest("form")!;
     fireEvent.submit(form);
 
     await waitFor(() => {
-      expect(screen.getByText("Error al procesar categoría")).toBeInTheDocument();
+      expect(
+        screen.getByText("Error al procesar categoría"),
+      ).toBeInTheDocument();
     });
   });
 

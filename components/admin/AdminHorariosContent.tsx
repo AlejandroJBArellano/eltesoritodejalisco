@@ -37,7 +37,9 @@ export function AdminHorariosContent({
   initialUsers = [],
   initialToleranceMinutes = 10,
 }: AdminHorariosContentProps) {
-  const [activeTab, setActiveTab] = useState<"shifts" | "business_hours">("shifts");
+  const [activeTab, setActiveTab] = useState<"shifts" | "business_hours">(
+    "shifts",
+  );
   const [hoursList, setHoursList] = useState<DbBusinessHours[]>(initialHours);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,19 +47,19 @@ export function AdminHorariosContent({
 
   const handleToggleClosed = (index: number) => {
     setHoursList((prev) =>
-      prev.map((h, i) => (i === index ? { ...h, is_closed: !h.is_closed } : h))
+      prev.map((h, i) => (i === index ? { ...h, is_closed: !h.is_closed } : h)),
     );
   };
 
   const handleTimeChange = (
     index: number,
     field: "open_time" | "close_time",
-    value: string
+    value: string,
   ) => {
     // Append seconds ":00" if not present to match PostgreSQL Time type format
     const formattedTime = value.length === 5 ? `${value}:00` : value;
     setHoursList((prev) =>
-      prev.map((h, i) => (i === index ? { ...h, [field]: formattedTime } : h))
+      prev.map((h, i) => (i === index ? { ...h, [field]: formattedTime } : h)),
     );
   };
 
@@ -73,7 +75,7 @@ export function AdminHorariosContent({
       if (!day.is_closed) {
         if (day.open_time >= day.close_time) {
           setError(
-            `El horario de apertura debe ser anterior al de cierre para el día ${DAYS_OF_WEEK_NAMES[day.day_of_week]}.`
+            `El horario de apertura debe ser anterior al de cierre para el día ${DAYS_OF_WEEK_NAMES[day.day_of_week]}.`,
           );
           setIsSaving(false);
           return;
@@ -97,7 +99,7 @@ export function AdminHorariosContent({
     } catch (err) {
       console.error(err);
       setError(
-        err instanceof Error ? err.message : "Ocurrió un error inesperado"
+        err instanceof Error ? err.message : "Ocurrió un error inesperado",
       );
     } finally {
       setIsSaving(false);
@@ -231,7 +233,11 @@ export function AdminHorariosContent({
                               disabled={dayHours.is_closed}
                               value={formatTimeForInput(dayHours.open_time)}
                               onChange={(e) =>
-                                handleTimeChange(idx, "open_time", e.target.value)
+                                handleTimeChange(
+                                  idx,
+                                  "open_time",
+                                  e.target.value,
+                                )
                               }
                               className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed"
                             />
@@ -246,7 +252,11 @@ export function AdminHorariosContent({
                               disabled={dayHours.is_closed}
                               value={formatTimeForInput(dayHours.close_time)}
                               onChange={(e) =>
-                                handleTimeChange(idx, "close_time", e.target.value)
+                                handleTimeChange(
+                                  idx,
+                                  "close_time",
+                                  e.target.value,
+                                )
                               }
                               className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed"
                             />

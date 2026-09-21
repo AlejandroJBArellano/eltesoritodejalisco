@@ -10,7 +10,12 @@ import {
 } from "@/components/ui/DataTableControls";
 import { EXECUTIONS_EXPORT_COLUMNS } from "./adminExportColumns";
 import { useOptionalAdminTareasContext } from "./AdminTareasContext";
-import type { ExecComplianceFilter, CollaboratorOption, ExecSortField, SortDir } from "./types";
+import type {
+  ExecComplianceFilter,
+  CollaboratorOption,
+  ExecSortField,
+  SortDir,
+} from "./types";
 
 export interface AdminTaskHistoryTabProps {
   selectedDate?: string;
@@ -41,8 +46,7 @@ export interface AdminTaskHistoryTabProps {
 export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
   const context = useOptionalAdminTareasContext();
 
-  const selectedDate =
-    props.selectedDate ?? context?.selectedDate ?? "";
+  const selectedDate = props.selectedDate ?? context?.selectedDate ?? "";
   const loading = props.loading ?? context?.loading ?? null;
   const sortedExecutions =
     props.sortedExecutions ?? context?.sortedExecutions ?? [];
@@ -51,12 +55,10 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
   const search = props.search ?? context?.execSearch ?? "";
   const onSearchChange =
     props.onSearchChange ?? context?.setExecSearch ?? (() => {});
-  const statusFilter =
-    props.statusFilter ?? context?.execStatusFilter ?? "ALL";
+  const statusFilter = props.statusFilter ?? context?.execStatusFilter ?? "ALL";
   const onStatusFilterChange =
     props.onStatusFilterChange ?? context?.setExecStatusFilter ?? (() => {});
-  const userFilter =
-    props.userFilter ?? context?.execUserFilter ?? "ALL";
+  const userFilter = props.userFilter ?? context?.execUserFilter ?? "ALL";
   const onUserFilterChange =
     props.onUserFilterChange ?? context?.setExecUserFilter ?? (() => {});
   const complianceFilter =
@@ -65,8 +67,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
     props.onComplianceFilterChange ??
     context?.setExecComplianceFilter ??
     (() => {});
-  const collaborators =
-    props.collaborators ?? context?.collaborators ?? [];
+  const collaborators = props.collaborators ?? context?.collaborators ?? [];
   const sortField = props.sortField ?? context?.execSortField ?? "task";
   const sortDir = props.sortDir ?? context?.execSortDir ?? "asc";
   const onSort =
@@ -80,12 +81,10 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
   const page = props.page ?? context?.execPage ?? 1;
   const pageSize = props.pageSize ?? context?.execPageSize ?? 10;
   const totalPages = props.totalPages ?? context?.execTotalPages ?? 1;
-  const onPageChange =
-    props.onPageChange ?? context?.setExecPage ?? (() => {});
+  const onPageChange = props.onPageChange ?? context?.setExecPage ?? (() => {});
   const onPageSizeChange =
     props.onPageSizeChange ?? context?.setExecPageSize ?? (() => {});
-  const onApprove =
-    props.onApprove ?? context?.handleApprove ?? (() => {});
+  const onApprove = props.onApprove ?? context?.handleApprove ?? (() => {});
 
   return (
     <div className="space-y-4 rounded-2xl bg-card p-6 border border-border">
@@ -233,10 +232,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
           </thead>
           <tbody className="divide-y divide-border">
             {paginatedExecutions.map((exec) => (
-              <tr
-                key={exec.id}
-                className="hover:bg-white/2 transition-colors"
-              >
+              <tr key={exec.id} className="hover:bg-white/2 transition-colors">
                 <td className="py-3 px-4 text-white font-bold">
                   {exec.task?.name || "Desconocida"}
                 </td>

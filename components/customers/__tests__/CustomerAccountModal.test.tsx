@@ -38,8 +38,17 @@ describe("CustomerAccountModal Component", () => {
         totalPaid: 50,
         remainingBalance: 200,
         notes: null,
-        items: [{ id: "it-1", quantity: 2, name: "Torta Ahogada", unitPrice: 125 }],
-        payments: [{ id: "p-1", amount: 50, method: "CASH", createdAt: "2026-05-15T13:00:00Z" }],
+        items: [
+          { id: "it-1", quantity: 2, name: "Torta Ahogada", unitPrice: 125 },
+        ],
+        payments: [
+          {
+            id: "p-1",
+            amount: 50,
+            method: "CASH",
+            createdAt: "2026-05-15T13:00:00Z",
+          },
+        ],
       },
       {
         id: "note-2",
@@ -49,7 +58,9 @@ describe("CustomerAccountModal Component", () => {
         totalPaid: 0,
         remainingBalance: 180,
         notes: null,
-        items: [{ id: "it-2", quantity: 1, name: "Agua Horchata", unitPrice: 180 }],
+        items: [
+          { id: "it-2", quantity: 1, name: "Agua Horchata", unitPrice: 180 },
+        ],
         payments: [],
       },
     ],
@@ -69,7 +80,7 @@ describe("CustomerAccountModal Component", () => {
         isOpen={false}
         onClose={vi.fn()}
         customer={mockCustomer}
-      />
+      />,
     );
     expect(container).toBeEmptyDOMElement();
   });
@@ -80,11 +91,11 @@ describe("CustomerAccountModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={mockCustomer}
-      />
+      />,
     );
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/customers/cust-1/account-statement"
+      "/api/customers/cust-1/account-statement",
     );
 
     expect(await screen.findByText(/Ana Morales/i)).toBeInTheDocument();
@@ -100,7 +111,7 @@ describe("CustomerAccountModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={mockCustomer}
-      />
+      />,
     );
 
     await screen.findByText("#201");
@@ -114,8 +125,12 @@ describe("CustomerAccountModal Component", () => {
     const summaryTab = screen.getByRole("button", { name: /Resumen y Notas/i });
     fireEvent.click(summaryTab);
 
-    expect(screen.queryByTestId("account-ticket-container")).not.toBeInTheDocument();
-    expect(screen.getByText("Desglose de Notas Anteriores (2)")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("account-ticket-container"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Desglose de Notas Anteriores (2)"),
+    ).toBeInTheDocument();
   });
 
   it("expands note to view product items and abonos", async () => {
@@ -124,7 +139,7 @@ describe("CustomerAccountModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={mockCustomer}
-      />
+      />,
     );
 
     await screen.findByText("#201");
@@ -146,7 +161,7 @@ describe("CustomerAccountModal Component", () => {
         onClose={vi.fn()}
         customer={mockCustomer}
         onAbonoSuccess={onAbonoSuccess}
-      />
+      />,
     );
 
     await screen.findByText("$380.00");
@@ -187,11 +202,9 @@ describe("CustomerAccountModal Component", () => {
         isOpen={true}
         onClose={vi.fn()}
         customer={mockCustomer}
-      />
+      />,
     );
 
-    expect(
-      await screen.findByText("Error de servidor")
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Error de servidor")).toBeInTheDocument();
   });
 });

@@ -30,7 +30,11 @@ describe("AdminHorariosContent Component", () => {
     vi.clearAllMocks();
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ shifts: [], users: mockUsers, toleranceMinutes: 10 }),
+      json: async () => ({
+        shifts: [],
+        users: mockUsers,
+        toleranceMinutes: 10,
+      }),
     });
   });
 
@@ -40,18 +44,18 @@ describe("AdminHorariosContent Component", () => {
         initialHours={mockHours}
         initialUsers={mockUsers}
         initialToleranceMinutes={10}
-      />
+      />,
     );
 
     expect(
-      screen.getByRole("button", { name: /turnos de personal/i })
+      screen.getByRole("button", { name: /turnos de personal/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /horarios de atención/i })
+      screen.getByRole("button", { name: /horarios de atención/i }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText("Programación Semanal de Colaboradores")
+      screen.getByText("Programación Semanal de Colaboradores"),
     ).toBeInTheDocument();
   });
 
@@ -61,7 +65,7 @@ describe("AdminHorariosContent Component", () => {
         initialHours={mockHours}
         initialUsers={mockUsers}
         initialToleranceMinutes={10}
-      />
+      />,
     );
 
     const businessHoursTab = screen.getByRole("button", {
@@ -85,7 +89,7 @@ describe("AdminHorariosContent Component", () => {
         initialHours={mockHours}
         initialUsers={mockUsers}
         initialToleranceMinutes={10}
-      />
+      />,
     );
 
     const businessHoursTab = screen.getByRole("button", {
@@ -112,7 +116,7 @@ describe("AdminHorariosContent Component", () => {
         initialHours={mockHours}
         initialUsers={mockUsers}
         initialToleranceMinutes={10}
-      />
+      />,
     );
 
     const businessHoursTab = screen.getByRole("button", {
@@ -130,7 +134,9 @@ describe("AdminHorariosContent Component", () => {
     fireEvent.click(saveBtn);
 
     expect(
-      screen.getByText(/el horario de apertura debe ser anterior al de cierre/i)
+      screen.getByText(
+        /el horario de apertura debe ser anterior al de cierre/i,
+      ),
     ).toBeInTheDocument();
   });
 
@@ -145,7 +151,7 @@ describe("AdminHorariosContent Component", () => {
         initialHours={mockHours}
         initialUsers={mockUsers}
         initialToleranceMinutes={10}
-      />
+      />,
     );
 
     const businessHoursTab = screen.getByRole("button", {
@@ -165,7 +171,7 @@ describe("AdminHorariosContent Component", () => {
         body: expect.stringContaining('"hours":'),
       });
       expect(
-        screen.getByText(/horarios comerciales actualizados exitosamente/i)
+        screen.getByText(/horarios comerciales actualizados exitosamente/i),
       ).toBeInTheDocument();
     });
   });
@@ -181,7 +187,7 @@ describe("AdminHorariosContent Component", () => {
         initialHours={mockHours}
         initialUsers={mockUsers}
         initialToleranceMinutes={10}
-      />
+      />,
     );
 
     const businessHoursTab = screen.getByRole("button", {
@@ -195,7 +201,9 @@ describe("AdminHorariosContent Component", () => {
     fireEvent.click(saveBtn);
 
     await waitFor(() => {
-      expect(screen.getByText("Error en el servidor al guardar")).toBeInTheDocument();
+      expect(
+        screen.getByText("Error en el servidor al guardar"),
+      ).toBeInTheDocument();
     });
   });
 });

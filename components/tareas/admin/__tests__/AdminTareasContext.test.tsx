@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, renderHook, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  renderHook,
+  act,
+} from "@testing-library/react";
 import React from "react";
 import {
   AdminTareasProvider,
@@ -12,38 +18,49 @@ vi.mock("@/lib/actions/tasks", () => ({
   approveTask: vi.fn(),
   getExecutionsForDate: vi.fn().mockResolvedValue([]),
   getStaffPerformanceMetrics: vi.fn().mockResolvedValue([]),
-  createTaskCategory: vi.fn().mockImplementation((name) =>
-    Promise.resolve({ id: "cat-new", name, created_at: "2026-01-01" }),
-  ),
-  createPrimordialTask: vi.fn().mockImplementation((name, freq, photo, timeout, catId) =>
-    Promise.resolve({
-      id: "task-new",
-      name,
-      frequency_type: freq,
-      requires_photo: photo,
-      timeout_minutes: timeout,
-      category_id: catId,
-      is_active: true,
-      created_at: "2026-01-01",
-    }),
-  ),
-  updatePrimordialTask: vi.fn().mockImplementation((id, name, freq, photo, timeout, catId) =>
-    Promise.resolve({
-      id,
-      name,
-      frequency_type: freq,
-      requires_photo: photo,
-      timeout_minutes: timeout,
-      category_id: catId,
-      is_active: true,
-      created_at: "2026-01-01",
-    }),
-  ),
+  createTaskCategory: vi
+    .fn()
+    .mockImplementation((name) =>
+      Promise.resolve({ id: "cat-new", name, created_at: "2026-01-01" }),
+    ),
+  createPrimordialTask: vi
+    .fn()
+    .mockImplementation((name, freq, photo, timeout, catId) =>
+      Promise.resolve({
+        id: "task-new",
+        name,
+        frequency_type: freq,
+        requires_photo: photo,
+        timeout_minutes: timeout,
+        category_id: catId,
+        is_active: true,
+        created_at: "2026-01-01",
+      }),
+    ),
+  updatePrimordialTask: vi
+    .fn()
+    .mockImplementation((id, name, freq, photo, timeout, catId) =>
+      Promise.resolve({
+        id,
+        name,
+        frequency_type: freq,
+        requires_photo: photo,
+        timeout_minutes: timeout,
+        category_id: catId,
+        is_active: true,
+        created_at: "2026-01-01",
+      }),
+    ),
   deletePrimordialTask: vi.fn().mockResolvedValue(true),
 }));
 
 const mockCategories: TaskCategory[] = [
-  { id: "cat-1", name: "Cocina", created_at: "2026-01-01", updated_at: "2026-01-01" },
+  {
+    id: "cat-1",
+    name: "Cocina",
+    created_at: "2026-01-01",
+    updated_at: "2026-01-01",
+  },
 ];
 
 const mockTasks: PrimordialTask[] = [
@@ -160,8 +177,12 @@ describe("AdminTareasContext and Provider", () => {
 
     // Click config tab
     fireEvent.click(screen.getByText(/⚙️ Configuración/i));
-    expect(screen.getByText(/Catálogo de Tareas Primordiales/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /nueva categoría/i })).toBeInTheDocument();
+    expect(
+      screen.getByText(/Catálogo de Tareas Primordiales/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /nueva categoría/i }),
+    ).toBeInTheDocument();
   });
 
   it("calculates unifiedExecutions with NOT_DONE virtual rows and filters by compliance and collaborator", () => {
@@ -236,9 +257,8 @@ describe("AdminTareasContext and Provider", () => {
   });
 
   it("loads executions for a past date without month restriction error", async () => {
-    const { getExecutionsForDate, getStaffPerformanceMetrics } = await import(
-      "@/lib/actions/tasks"
-    );
+    const { getExecutionsForDate, getStaffPerformanceMetrics } =
+      await import("@/lib/actions/tasks");
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <AdminTareasProvider

@@ -26,20 +26,22 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
       ? props.activeAttendance
       : context?.activeEmployeeAttendance;
   const isLoading = props.isLoading ?? context?.isSubmitting ?? false;
-  const onAction = props.onAction ?? ((action) => context?.handleAction(action));
+  const onAction =
+    props.onAction ?? ((action) => context?.handleAction(action));
 
   const scheduledShift =
     props.scheduledShift !== undefined
       ? props.scheduledShift
       : context?.todayShift;
 
-  const toleranceMinutes = props.toleranceMinutes ?? context?.toleranceMinutes ?? 10;
+  const toleranceMinutes =
+    props.toleranceMinutes ?? context?.toleranceMinutes ?? 10;
 
   const punctuality = activeAttendance
     ? calculatePunctuality(
         activeAttendance.check_in,
         scheduledShift?.start_time,
-        toleranceMinutes
+        toleranceMinutes,
       )
     : null;
 
@@ -66,10 +68,13 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
             )}
           </div>
           <p className="mt-1 font-mono text-sm font-bold text-text-light">
-            {scheduledShift.start_time.slice(0, 5)} - {scheduledShift.end_time.slice(0, 5)}
+            {scheduledShift.start_time.slice(0, 5)} -{" "}
+            {scheduledShift.end_time.slice(0, 5)}
           </p>
           {scheduledShift.notes && (
-            <p className="mt-0.5 text-[11px] text-text-light/60">{scheduledShift.notes}</p>
+            <p className="mt-0.5 text-[11px] text-text-light/60">
+              {scheduledShift.notes}
+            </p>
           )}
         </div>
       ) : (

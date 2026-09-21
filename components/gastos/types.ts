@@ -1,7 +1,8 @@
 import type { Database } from "@/types/supabase";
 
 export type DbExpense = Database["public"]["Tables"]["expenses"]["Row"];
-export type DbExpenseCategory = Database["public"]["Tables"]["expense_categories"]["Row"];
+export type DbExpenseCategory =
+  Database["public"]["Tables"]["expense_categories"]["Row"];
 
 export type ExpenseCategoryType = "fijo" | "variable";
 

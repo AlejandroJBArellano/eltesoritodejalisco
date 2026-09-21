@@ -115,7 +115,9 @@ export function calculateReportDates(
   };
 }
 
-export function transformTopCustomers(customers: RawCustomer[] | null | undefined) {
+export function transformTopCustomers(
+  customers: RawCustomer[] | null | undefined,
+) {
   return (customers || []).map((c) => ({
     id: c.id,
     name: c.name?.trim() || "Cliente",
@@ -124,7 +126,9 @@ export function transformTopCustomers(customers: RawCustomer[] | null | undefine
   }));
 }
 
-export function aggregateSalesData(orders: RawReportOrder[] | null | undefined) {
+export function aggregateSalesData(
+  orders: RawReportOrder[] | null | undefined,
+) {
   const typedOrders = orders || [];
 
   let totalCompletionTimeMs = 0;
@@ -182,7 +186,9 @@ export function aggregateSalesData(orders: RawReportOrder[] | null | undefined) 
     salesBySource[source].total += Number(order.total || 0);
 
     if (!itemsByDay[date]) itemsByDay[date] = {};
-    const orderItems = Array.isArray(order.order_items) ? order.order_items : [];
+    const orderItems = Array.isArray(order.order_items)
+      ? order.order_items
+      : [];
 
     orderItems.forEach((item) => {
       if (!item || !item.menu_item_id) return;

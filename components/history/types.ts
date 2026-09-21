@@ -4,9 +4,11 @@ import type { Database } from "@/types/supabase";
 export type Order = OrderWithDetails;
 
 export type DbDailyCut = Database["public"]["Tables"]["daily_cuts"]["Row"];
-export type DbDailyCutInsert = Database["public"]["Tables"]["daily_cuts"]["Insert"];
+export type DbDailyCutInsert =
+  Database["public"]["Tables"]["daily_cuts"]["Insert"];
 export type DbDailyTip = Database["public"]["Tables"]["daily_tips"]["Row"];
-export type DbDailyTipInsert = Database["public"]["Tables"]["daily_tips"]["Insert"];
+export type DbDailyTipInsert =
+  Database["public"]["Tables"]["daily_tips"]["Insert"];
 export type DbExpense = Database["public"]["Tables"]["expenses"]["Row"];
 
 export interface TipBreakdownItem {
@@ -42,7 +44,8 @@ export interface DailyCut {
 }
 
 export type OrderSortField = "orderNumber" | "createdAt" | "table" | "total";
-export type CutSortField = "cut_date" | "total_orders" | "venta_neta" | "utilidad_final";
+export type CutSortField =
+  "cut_date" | "total_orders" | "venta_neta" | "utilidad_final";
 
 export interface OrderFilters {
   searchQuery: string;

@@ -185,13 +185,17 @@ describe("OrdersPOS component", () => {
     fireEvent.click(screen.getByRole("button", { name: /Pagadas/i }));
     fireEvent.click(screen.getByText(/POS Directo/i));
 
-    expect(screen.getByText(/No hay órdenes pagadas de POS todavía/i)).toBeDefined();
+    expect(
+      screen.getByText(/No hay órdenes pagadas de POS todavía/i),
+    ).toBeDefined();
 
     // Filter: Pendientes + Kittn Pickup -> 0 orders
     fireEvent.click(screen.getByRole("button", { name: /Pendientes/i }));
     fireEvent.click(screen.getByText(/Kittn Pickup/i));
 
-    expect(screen.getByText(/No hay órdenes pendientes de Kittn Pickup todavía/i)).toBeDefined();
+    expect(
+      screen.getByText(/No hay órdenes pendientes de Kittn Pickup todavía/i),
+    ).toBeDefined();
   });
 
   it("shows tip amount and Propina button for paid order when user is Admin", () => {

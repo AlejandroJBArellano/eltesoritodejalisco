@@ -8,10 +8,7 @@ import { PerformanceSummaryKPIs } from "./PerformanceSummaryKPIs";
 import { AverageTicketTrendChart } from "./AverageTicketTrendChart";
 import { WeekdaySalesChart } from "./WeekdaySalesChart";
 import { MonthlySalesChart } from "./MonthlySalesChart";
-import {
-  PERIOD_LABELS,
-  type Period,
-} from "../reports/types";
+import { PERIOD_LABELS, type Period } from "../reports/types";
 import type { PerformanceAnalyticsResult } from "@/lib/services/performanceAnalytics";
 
 export function PerformanceAnalyticsView() {
@@ -39,7 +36,9 @@ export function PerformanceAnalyticsView() {
       const response = await fetch(url);
       const json = await response.json();
       if (!response.ok) {
-        throw new Error(json.error || "Error al cargar analítica de rendimiento");
+        throw new Error(
+          json.error || "Error al cargar analítica de rendimiento",
+        );
       }
       setData(json);
     } catch (err) {
@@ -87,7 +86,9 @@ export function PerformanceAnalyticsView() {
             disabled={isLoading}
             className="inline-flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-2 text-xs font-black text-emerald-400 hover:bg-emerald-500/20 transition-all active:scale-95 disabled:opacity-50"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
             Actualizar
           </button>
         }
@@ -101,7 +102,8 @@ export function PerformanceAnalyticsView() {
         <section className="rounded-2xl bg-card p-6 shadow-sm border border-border">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-extrabold text-text-light/50 uppercase tracking-widest flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-emerald-400" /> Período de Análisis
+              <Calendar className="h-4 w-4 text-emerald-400" /> Período de
+              Análisis
             </h2>
           </div>
 

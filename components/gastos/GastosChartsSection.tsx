@@ -97,10 +97,7 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
   const variablesPathD = createPathD(variablesPoints);
 
   // Category horizontal max
-  const maxCategory = Math.max(
-    ...categoryExpensesData.map((c) => c.value),
-    0,
-  );
+  const maxCategory = Math.max(...categoryExpensesData.map((c) => c.value), 0);
   const maxCategoryVal = maxCategory > 0 ? maxCategory : 1;
 
   return (
@@ -280,19 +277,16 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
                     <p className="text-amber-400 font-extrabold flex justify-between gap-3">
                       <span>Fijos:</span>
                       <span>
-                        $
-                        {dailyExpensesData[
-                          hoveredDailyIndex
-                        ].fijos.toFixed(2)}
+                        ${dailyExpensesData[hoveredDailyIndex].fijos.toFixed(2)}
                       </span>
                     </p>
                     <p className="text-emerald-400 font-extrabold flex justify-between gap-3">
                       <span>Variables:</span>
                       <span>
                         $
-                        {dailyExpensesData[
-                          hoveredDailyIndex
-                        ].variables.toFixed(2)}
+                        {dailyExpensesData[hoveredDailyIndex].variables.toFixed(
+                          2,
+                        )}
                       </span>
                     </p>
                   </div>

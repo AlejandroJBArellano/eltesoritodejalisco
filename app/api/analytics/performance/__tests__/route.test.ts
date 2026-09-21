@@ -31,7 +31,9 @@ describe("GET /api/analytics/performance", () => {
       tenant_id: "tenant-123",
     } as any);
 
-    const request = new NextRequest("http://localhost:3000/api/analytics/performance");
+    const request = new NextRequest(
+      "http://localhost:3000/api/analytics/performance",
+    );
     const response = await GET(request);
     const body = await response.json();
 
@@ -96,7 +98,9 @@ describe("GET /api/analytics/performance", () => {
       in: vi.fn().mockReturnThis(),
       gte: vi.fn().mockReturnThis(),
       lte: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: null, error: new Error("DB Query Error") }),
+      order: vi
+        .fn()
+        .mockResolvedValue({ data: null, error: new Error("DB Query Error") }),
     };
 
     vi.mocked(createClient).mockResolvedValue({

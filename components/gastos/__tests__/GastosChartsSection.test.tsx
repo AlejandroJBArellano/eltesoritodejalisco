@@ -10,8 +10,20 @@ import type { CategoryExpenseItem, DailyExpenseTrendItem } from "../types";
 
 describe("GastosChartsSection Component", () => {
   const mockDailyData: DailyExpenseTrendItem[] = [
-    { date: "09/01", rawDate: "2026-09-01", fijos: 500, variables: 200, total: 700 },
-    { date: "09/02", rawDate: "2026-09-02", fijos: 0, variables: 350, total: 350 },
+    {
+      date: "09/01",
+      rawDate: "2026-09-01",
+      fijos: 500,
+      variables: 200,
+      total: 700,
+    },
+    {
+      date: "09/02",
+      rawDate: "2026-09-02",
+      fijos: 0,
+      variables: 350,
+      total: 350,
+    },
   ];
 
   const mockCategoryData: CategoryExpenseItem[] = [
@@ -31,7 +43,9 @@ describe("GastosChartsSection Component", () => {
     );
 
     expect(
-      screen.getByText(/Tendencia de Egresos: Gastos Fijos vs Variables \(2026-09\)/i),
+      screen.getByText(
+        /Tendencia de Egresos: Gastos Fijos vs Variables \(2026-09\)/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Distribución por Categoría de Gasto \(2026-09\)/i),
@@ -55,7 +69,9 @@ describe("GastosChartsSection Component", () => {
       />,
     );
 
-    const fallbacks = screen.getAllByText("Aún no hay gastos registrados este mes.");
+    const fallbacks = screen.getAllByText(
+      "Aún no hay gastos registrados este mes.",
+    );
     expect(fallbacks.length).toBe(2);
   });
 
@@ -64,7 +80,10 @@ describe("GastosChartsSection Component", () => {
     expect(formatExpenseTooltip(250.5)).toEqual(["$250.50", ""]);
     expect(formatExpenseTooltip(null)).toEqual(["$0.00", ""]);
     expect(formatCategoryTooltip(800)).toEqual(["$800.00", "Gasto Acumulado"]);
-    expect(formatCategoryTooltip(undefined)).toEqual(["$0.00", "Gasto Acumulado"]);
+    expect(formatCategoryTooltip(undefined)).toEqual([
+      "$0.00",
+      "Gasto Acumulado",
+    ]);
   });
 
   it("handles hover interactions on line points and category rows", () => {
@@ -88,7 +107,9 @@ describe("GastosChartsSection Component", () => {
     const catRow = screen.getByText("Insumos").closest(".group");
     if (catRow) {
       fireEvent.mouseEnter(catRow);
-      expect(screen.getByText(/Gasto Acumulado: \$550\.00/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Gasto Acumulado: \$550\.00/i),
+      ).toBeInTheDocument();
       fireEvent.mouseLeave(catRow);
     }
   });

@@ -144,7 +144,9 @@ describe("POSTipModal", () => {
   it("calls handleUpdateTip directly without auth modal when user is ADMIN", async () => {
     render(<POSTipModal />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Actualizar Propina/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Actualizar Propina/i }),
+    );
 
     expect(mockHandleUpdateTip).toHaveBeenCalledTimes(1);
     expect(screen.queryByTestId("manager-auth-modal")).toBeNull();
@@ -162,7 +164,9 @@ describe("POSTipModal", () => {
 
     render(<POSTipModal />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Actualizar Propina/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Actualizar Propina/i }),
+    );
 
     expect(mockHandleUpdateTip).not.toHaveBeenCalled();
     expect(screen.getByTestId("manager-auth-modal")).toBeDefined();
@@ -173,7 +177,9 @@ describe("POSTipModal", () => {
     expect(screen.queryByTestId("manager-auth-modal")).toBeNull();
 
     // Reopen and authorize
-    fireEvent.click(screen.getByRole("button", { name: /Actualizar Propina/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Actualizar Propina/i }),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Autorizar Mock" }));
     await waitFor(() => {
       expect(mockHandleUpdateTip).toHaveBeenCalledWith("1234");

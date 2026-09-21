@@ -94,7 +94,9 @@ describe("GastosContent Component", () => {
     fireEvent.click(retryBtn);
 
     await waitFor(() => {
-      expect(screen.getByText("Control de Gastos & Egresos")).toBeInTheDocument();
+      expect(
+        screen.getByText("Control de Gastos & Egresos"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -119,7 +121,9 @@ describe("GastosContent Component", () => {
 
     // Check main dashboard rendered
     await waitFor(() => {
-      expect(screen.getByText("Control de Gastos & Egresos")).toBeInTheDocument();
+      expect(
+        screen.getByText("Control de Gastos & Egresos"),
+      ).toBeInTheDocument();
       expect(screen.getByText("Resumen Financiero")).toBeInTheDocument();
       expect(screen.getByText("Categorías Registradas")).toBeInTheDocument();
       expect(screen.getByText("Historial de Gastos")).toBeInTheDocument();
@@ -127,27 +131,41 @@ describe("GastosContent Component", () => {
 
     // Test opening and closing Expense Modal
     fireEvent.click(screen.getByRole("button", { name: /Registrar Gasto/i }));
-    expect(screen.getByRole("heading", { name: "Registrar Gasto" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Registrar Gasto" }),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText("Cerrar modal de gasto"));
     await waitFor(() => {
-      expect(screen.queryByRole("heading", { name: "Registrar Gasto" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: "Registrar Gasto" }),
+      ).not.toBeInTheDocument();
     });
 
     // Test opening and closing Category Modal (Create mode)
-    const newCatBtns = screen.getAllByRole("button", { name: /Nueva Categoría/i });
+    const newCatBtns = screen.getAllByRole("button", {
+      name: /Nueva Categoría/i,
+    });
     fireEvent.click(newCatBtns[0]);
-    expect(screen.getByRole("heading", { name: "Crear Categoría de Gasto" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Crear Categoría de Gasto" }),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText("Cerrar modal de categoría"));
     await waitFor(() => {
-      expect(screen.queryByRole("heading", { name: "Crear Categoría de Gasto" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: "Crear Categoría de Gasto" }),
+      ).not.toBeInTheDocument();
     });
 
     // Test editing category
     fireEvent.click(screen.getByLabelText("Editar categoría Renta"));
-    expect(screen.getByRole("heading", { name: "Editar Categoría" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Editar Categoría" }),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText("Cerrar modal de categoría"));
     await waitFor(() => {
-      expect(screen.queryByRole("heading", { name: "Editar Categoría" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: "Editar Categoría" }),
+      ).not.toBeInTheDocument();
     });
   });
 });

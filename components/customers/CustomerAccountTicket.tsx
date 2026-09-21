@@ -128,7 +128,9 @@ export function CustomerAccountTicket({
           </h2>
           {rfc && <p className="text-[10px]">RFC: {rfc}</p>}
           {postal_code && <p className="text-[10px]">C.P.: {postal_code}</p>}
-          {regimen_fiscal && <p className="text-[10px]">Régimen: {regimen_fiscal}</p>}
+          {regimen_fiscal && (
+            <p className="text-[10px]">Régimen: {regimen_fiscal}</p>
+          )}
           <div className="border-b border-dashed border-black my-2" />
           <p className="font-black text-xs uppercase tracking-wider">
             ESTADO DE CUENTA
@@ -176,7 +178,10 @@ export function CustomerAccountTicket({
             ))}
             {pendingNotes.length === 0 && (
               <tr>
-                <td colSpan={4} className="py-2 text-center text-gray-500 italic">
+                <td
+                  colSpan={4}
+                  className="py-2 text-center text-gray-500 italic"
+                >
                   Sin notas pendientes
                 </td>
               </tr>
@@ -210,8 +215,12 @@ export function CustomerAccountTicket({
 
         {/* Footer */}
         <div className="text-center mt-5 space-y-1 text-[10px]">
-          <p className="font-bold">Válido como comprobante de cuenta por cobrar</p>
-          <p className="text-gray-600">Agradecemos su preferencia y puntual pago</p>
+          <p className="font-bold">
+            Válido como comprobante de cuenta por cobrar
+          </p>
+          <p className="text-gray-600">
+            Agradecemos su preferencia y puntual pago
+          </p>
           {ticket_footer_text && (
             <p className="mt-2 text-[9px] font-bold text-gray-800 whitespace-pre-wrap">
               {ticket_footer_text}

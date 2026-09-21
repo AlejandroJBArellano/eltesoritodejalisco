@@ -14,7 +14,8 @@ export function SettingsPickupSection() {
     >
       <div className="flex items-center justify-between border-b border-border pb-3">
         <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2">
-          <ShoppingBag className="h-4 w-4 text-primary" /> Portal Kittn Pickup & Pagos con Stripe
+          <ShoppingBag className="h-4 w-4 text-primary" /> Portal Kittn Pickup &
+          Pagos con Stripe
         </h3>
         {initialTenant.stripe_charges_enabled ? (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
@@ -30,19 +31,28 @@ export function SettingsPickupSection() {
 
       {/* Explicación de Kittn Pickup */}
       <p className="text-xs text-text-light/60 leading-relaxed">
-        <strong className="text-text-light">Kittn Pickup</strong> es el portal web donde tus comensales exploran tu menú digital, configuran pedidos para llevar o comer aquí, y pagan con tarjeta bancaria. Para que tu portal esté activo y reciba cobros, tu restaurante debe conectarse con Stripe.
+        <strong className="text-text-light">Kittn Pickup</strong> es el portal
+        web donde tus comensales exploran tu menú digital, configuran pedidos
+        para llevar o comer aquí, y pagan con tarjeta bancaria. Para que tu
+        portal esté activo y reciba cobros, tu restaurante debe conectarse con
+        Stripe.
       </p>
 
       {/* Enlace de tu Menú Pickup */}
       <div className="rounded-xl bg-dark/30 border border-border/70 p-4 space-y-3">
         <div className="flex items-center justify-between">
           <label className="text-[11px] font-bold text-text-light/50 uppercase tracking-wider flex items-center gap-1.5">
-            <Globe className="h-3.5 w-3.5 text-primary" /> Enlace de tu Menú Kittn Pickup
+            <Globe className="h-3.5 w-3.5 text-primary" /> Enlace de tu Menú
+            Kittn Pickup
           </label>
           {initialTenant.stripe_charges_enabled ? (
-            <span className="text-[10px] font-bold text-emerald-400">Listo para compartir</span>
+            <span className="text-[10px] font-bold text-emerald-400">
+              Listo para compartir
+            </span>
           ) : (
-            <span className="text-[10px] font-bold text-amber-400/80">Requiere activar Stripe</span>
+            <span className="text-[10px] font-bold text-amber-400/80">
+              Requiere activar Stripe
+            </span>
           )}
         </div>
 

@@ -26,7 +26,10 @@ describe("CustomerQRModal Component", () => {
 
     const img = screen.getByTestId("qr-registration-img");
     expect(img).toBeInTheDocument();
-    expect(img).toHaveAttribute("src", expect.stringContaining("api.qrserver.com"));
+    expect(img).toHaveAttribute(
+      "src",
+      expect.stringContaining("api.qrserver.com"),
+    );
   });
 
   it("does not render when isOpen is false", () => {

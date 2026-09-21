@@ -31,8 +31,7 @@ export function PrimordialTaskModal(props: PrimordialTaskModalProps) {
 
   const isOpen = props.isOpen ?? context?.isTaskModalOpen ?? false;
   const onClose = props.onClose ?? context?.closeTaskModal ?? (() => {});
-  const isEditing =
-    props.isEditing ?? Boolean(context?.editingTaskId);
+  const isEditing = props.isEditing ?? Boolean(context?.editingTaskId);
   const categories = props.categories ?? context?.categories ?? [];
   const formData = props.formData ?? context?.taskFormData ?? DEFAULT_FORM_DATA;
   const onFormChange =
@@ -41,8 +40,7 @@ export function PrimordialTaskModal(props: PrimordialTaskModalProps) {
     props.onSubmit ??
     (isEditing ? context?.handleUpdateTask : context?.handleCreateTask) ??
     ((e) => e.preventDefault());
-  const isLoading =
-    props.isLoading ?? (context?.loading === "task");
+  const isLoading = props.isLoading ?? context?.loading === "task";
 
   return (
     <Modal

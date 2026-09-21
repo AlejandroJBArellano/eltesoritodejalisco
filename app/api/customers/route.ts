@@ -30,14 +30,16 @@ export async function GET() {
     // Calcular saldo deudor acumulado de cada cliente
     const { data: unpaidOrders } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         id,
         customer_id,
         total,
         payments (
           amount
         )
-      `)
+      `,
+      )
       .eq("tenant_id", tenant.id)
       .eq("status", "UNCOLLECTED")
       .not("customer_id", "is", null);
@@ -49,11 +51,12 @@ export async function GET() {
       if (!order.customer_id) return;
       const totalPaid = (order.payments || []).reduce(
         (sum, p) => sum + Number(p.amount || 0),
-        0
+        0,
       );
       const balance = Math.max(0, Number(order.total || 0) - totalPaid);
       if (balance > 0) {
-        debtMap[order.customer_id] = (debtMap[order.customer_id] || 0) + balance;
+        debtMap[order.customer_id] =
+          (debtMap[order.customer_id] || 0) + balance;
         countMap[order.customer_id] = (countMap[order.customer_id] || 0) + 1;
       }
     });
@@ -161,7 +164,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         { customer: updated, isExisting: true },
-        { status: 200 }
+        { status: 200 },
       );
     }
 

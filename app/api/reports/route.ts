@@ -21,11 +21,8 @@ export async function GET(request: NextRequest) {
     const customStartParam = searchParams.get("startDate");
     const customEndParam = searchParams.get("endDate");
 
-    const { startDate, endDate, startIsoDate, endIsoDate } = calculateReportDates(
-      period,
-      customStartParam,
-      customEndParam,
-    );
+    const { startDate, endDate, startIsoDate, endIsoDate } =
+      calculateReportDates(period, customStartParam, customEndParam);
 
     const tenant = await getTenantContext();
     const supabase = await createClient();
@@ -163,9 +160,13 @@ export async function GET(request: NextRequest) {
         endDate.toISOString(),
       );
     }
-    const { data: uncollectedOrders, error: uncollError } = await uncollectedQuery;
+    const { data: uncollectedOrders, error: uncollError } =
+      await uncollectedQuery;
     if (uncollError) {
-      console.error("Error fetching uncollected orders in reports:", uncollError);
+      console.error(
+        "Error fetching uncollected orders in reports:",
+        uncollError,
+      );
     }
 
     const totalUncollected = (uncollectedOrders || []).reduce(
@@ -201,7 +202,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error generating reports:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Error al generar reportes" },
+      {
+        error:
+          error instanceof Error ? error.message : "Error al generar reportes",
+      },
       { status: 500 },
     );
   }

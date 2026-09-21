@@ -25,7 +25,7 @@ import {
   Trash2,
   User,
   UserPlus,
-  Users
+  Users,
 } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { AdminRolesTab } from "./AdminRolesTab";
@@ -123,7 +123,8 @@ export const ROLE_PERMISSIONS: Record<
   },
   INVENTORY: {
     title: "Inventario / Almacén (INVENTORY)",
-    subtitle: "Control de stock, registro de entradas, mermas y catálogo de insumos",
+    subtitle:
+      "Control de stock, registro de entradas, mermas y catálogo de insumos",
     color: "text-teal-400",
     badgeBg: "bg-teal-500/10",
     badgeBorder: "border-teal-500/20",
@@ -150,7 +151,11 @@ export function getRoleBadgeConfig(
   if (roleId) {
     const custom = customRoles.find((r) => r.id === roleId);
     if (custom) {
-      if (custom.is_system && custom.system_slug && ROLE_PERMISSIONS[custom.system_slug]) {
+      if (
+        custom.is_system &&
+        custom.system_slug &&
+        ROLE_PERMISSIONS[custom.system_slug]
+      ) {
         return ROLE_PERMISSIONS[custom.system_slug];
       }
       return {
@@ -179,7 +184,11 @@ export function getRoleBadgeConfig(
       r.system_slug === upper,
   );
   if (custom) {
-    if (custom.is_system && custom.system_slug && ROLE_PERMISSIONS[custom.system_slug]) {
+    if (
+      custom.is_system &&
+      custom.system_slug &&
+      ROLE_PERMISSIONS[custom.system_slug]
+    ) {
       return ROLE_PERMISSIONS[custom.system_slug];
     }
     return {
@@ -337,7 +346,9 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
       if (res?.error) {
         setPinError(res.error);
       } else {
-        setSuccessMsg(`PIN actualizado para ${editingPinUser.full_name || editingPinUser.email}`);
+        setSuccessMsg(
+          `PIN actualizado para ${editingPinUser.full_name || editingPinUser.email}`,
+        );
         setEditingPinUser(null);
         fetchProfiles();
       }
@@ -376,7 +387,9 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
   const currentRoleInfo = getRoleBadgeConfig(
     selectedFormRole,
     availableRoles,
-    availableRoles.find((r) => r.id === selectedFormRole || r.name === selectedFormRole)?.id,
+    availableRoles.find(
+      (r) => r.id === selectedFormRole || r.name === selectedFormRole,
+    )?.id,
   );
 
   // Filtered & Sorted Profiles
@@ -395,7 +408,8 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
         if (matchedRole) {
           if (matchedRole.id === roleFilter) return true;
           if (matchedRole.system_slug === roleFilter) return true;
-          if (matchedRole.name.toLowerCase() === roleFilter.toLowerCase()) return true;
+          if (matchedRole.name.toLowerCase() === roleFilter.toLowerCase())
+            return true;
         }
         return false;
       }
@@ -460,10 +474,11 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           <button
             type="button"
             onClick={() => setActiveTab("team")}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${activeTab === "team"
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+              activeTab === "team"
                 ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
                 : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
-              }`}
+            }`}
           >
             <Users className="h-4 w-4" />
             <span>Equipo de Trabajo ({profiles.length})</span>
@@ -472,10 +487,11 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           <button
             type="button"
             onClick={() => setActiveTab("roles")}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${activeTab === "roles"
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+              activeTab === "roles"
                 ? "bg-primary/15 text-primary border border-primary/30"
                 : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
-              }`}
+            }`}
           >
             <ShieldCheck className="h-4 w-4" />
             <span>Roles y Permisos</span>
@@ -621,7 +637,9 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
                               <div className="h-9 w-9 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black">
-                                {(p.full_name || p.email).charAt(0).toUpperCase()}
+                                {(p.full_name || p.email)
+                                  .charAt(0)
+                                  .toUpperCase()}
                               </div>
                               <div>
                                 <p className="font-bold text-text-light">
@@ -709,11 +727,14 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                             </select>
                           </td>
                           <td className="py-3 px-4 text-xs text-text-light/50">
-                            {new Date(p.created_at).toLocaleDateString("es-MX", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })}
+                            {new Date(p.created_at).toLocaleDateString(
+                              "es-MX",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )}
                           </td>
                           <td className="py-3 px-4 text-right">
                             <div className="flex items-center justify-end gap-1.5">
@@ -729,7 +750,9 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                                   title="Configurar PIN de Autorización"
                                 >
                                   <ShieldCheck className="h-3.5 w-3.5" />
-                                  <span className="font-mono">{p.pin || "1234"}</span>
+                                  <span className="font-mono">
+                                    {p.pin || "1234"}
+                                  </span>
                                 </button>
                               )}
                               <button
@@ -737,10 +760,11 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                                 onClick={() =>
                                   handleDelete(p.id, p.full_name || p.email)
                                 }
-                                className={`rounded-lg border p-2 transition-all text-xs font-black ${deleteArmedId === p.id
-                                  ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
-                                  : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
-                                  }`}
+                                className={`rounded-lg border p-2 transition-all text-xs font-black ${
+                                  deleteArmedId === p.id
+                                    ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
+                                    : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                                }`}
                                 title={
                                   deleteArmedId === p.id
                                     ? "Confirmar eliminación"
@@ -862,7 +886,9 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
               <optgroup label="Roles del Sistema">
                 <option value="WAITER">Mesero (WAITER)</option>
                 <option value="CHEF">Cocinero / Chef (CHEF)</option>
-                <option value="INVENTORY">Inventario / Almacén (INVENTORY)</option>
+                <option value="INVENTORY">
+                  Inventario / Almacén (INVENTORY)
+                </option>
                 <option value="MANAGER">Gerente (MANAGER)</option>
                 <option value="ADMIN">Administrador (ADMIN)</option>
               </optgroup>
@@ -881,35 +907,40 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             <input
               type="hidden"
               name="role_id"
-              value={availableRoles.find((r) => r.id === selectedFormRole)?.id || ""}
+              value={
+                availableRoles.find((r) => r.id === selectedFormRole)?.id || ""
+              }
             />
           </div>
 
           {(selectedFormRole === "ADMIN" ||
             selectedFormRole === "MANAGER" ||
-            availableRoles.find((r) => r.id === selectedFormRole)?.system_slug === "ADMIN" ||
-            availableRoles.find((r) => r.id === selectedFormRole)?.system_slug === "MANAGER") && (
-              <div>
-                <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
-                  PIN de Autorización (4 a 6 dígitos)
-                </label>
-                <div className="relative">
-                  <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400" />
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    name="pin"
-                    defaultValue="1234"
-                    maxLength={6}
-                    className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
-                    placeholder="1234"
-                  />
-                </div>
-                <p className="text-[11px] text-text-light/40 mt-1">
-                  PIN individual para autorizar descuentos, cancelaciones y reaperturas a meseros.
-                </p>
+            availableRoles.find((r) => r.id === selectedFormRole)
+              ?.system_slug === "ADMIN" ||
+            availableRoles.find((r) => r.id === selectedFormRole)
+              ?.system_slug === "MANAGER") && (
+            <div>
+              <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
+                PIN de Autorización (4 a 6 dígitos)
+              </label>
+              <div className="relative">
+                <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400" />
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  name="pin"
+                  defaultValue="1234"
+                  maxLength={6}
+                  className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
+                  placeholder="1234"
+                />
               </div>
-            )}
+              <p className="text-[11px] text-text-light/40 mt-1">
+                PIN individual para autorizar descuentos, cancelaciones y
+                reaperturas a meseros.
+              </p>
+            </div>
+          )}
 
           {/* Resumen dinámico del rol seleccionado */}
           <div
@@ -973,10 +1004,13 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
               />
             </div>
             {pinError && (
-              <p className="text-xs text-red-400 font-bold mt-1.5">{pinError}</p>
+              <p className="text-xs text-red-400 font-bold mt-1.5">
+                {pinError}
+              </p>
             )}
             <p className="text-[11px] text-text-light/40 mt-2">
-              Este PIN debe ser recordado por el colaborador para autorizaciones presenciales.
+              Este PIN debe ser recordado por el colaborador para autorizaciones
+              presenciales.
             </p>
           </div>
 

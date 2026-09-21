@@ -1,16 +1,10 @@
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSData } from "@/hooks/pos/usePOSData";
-import {
-  MIXED_ORDER_FLAVORS,
-  MIXED_ORDER_TOTAL
-} from "@/types/pos";
+import { MIXED_ORDER_FLAVORS, MIXED_ORDER_TOTAL } from "@/types/pos";
 import { Minus, Plus, UtensilsCrossed, X } from "lucide-react";
 
 export function POSMixedOrderModal() {
-  const {
-    availableMenuItems,
-    refreshOrders,
-  } = usePOSData();
+  const { availableMenuItems, refreshOrders } = usePOSData();
 
   const {
     mixedOrderMenuItem,
@@ -87,10 +81,11 @@ export function POSMixedOrderModal() {
             return (
               <div
                 key={i}
-                className={`w-3.5 h-3.5 rounded-full border transition-all ${filled
-                  ? "bg-primary border-primary shadow-sm shadow-primary/50"
-                  : "border-white/20 bg-transparent"
-                  }`}
+                className={`w-3.5 h-3.5 rounded-full border transition-all ${
+                  filled
+                    ? "bg-primary border-primary shadow-sm shadow-primary/50"
+                    : "border-white/20 bg-transparent"
+                }`}
               />
             );
           })}

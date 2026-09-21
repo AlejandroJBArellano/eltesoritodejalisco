@@ -20,7 +20,9 @@ export async function GET(request: NextRequest) {
     const profile = await getProfile();
     if (profile?.role === "WAITER" && posParam !== "true") {
       return NextResponse.json(
-        { error: "No autorizado para consultar el historial general de órdenes" },
+        {
+          error: "No autorizado para consultar el historial general de órdenes",
+        },
         { status: 403 },
       );
     }
@@ -29,8 +31,9 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
 
     // POS view uses a narrower select — only columns read by mapOrderData
-    const selectFields = posParam === "true"
-      ? `
+    const selectFields =
+      posParam === "true"
+        ? `
           id, order_number, customer_id, source, status, table, notes,
           subtotal, tax, total, created_at, updated_at, completed_at,
           corte_id, estado_cierre, operational_date, pickup_time,
@@ -42,7 +45,7 @@ export async function GET(request: NextRequest) {
           payments ( id, order_id, method, amount, received_amount, change, tip_amount, created_at ),
           customer:customers ( id, name, email, phone )
         `
-      : `
+        : `
           *,
           order_items (
             *,
@@ -65,7 +68,9 @@ export async function GET(request: NextRequest) {
 
     if (posParam === "true") {
       const today = getCurrentCDMXDay();
-      query = query.or(`operational_date.eq.${today},and(corte_id.is.null,estado_cierre.neq.ARCHIVADA)`);
+      query = query.or(
+        `operational_date.eq.${today},and(corte_id.is.null,estado_cierre.neq.ARCHIVADA)`,
+      );
     }
 
     const { data: orders, error } = await query;

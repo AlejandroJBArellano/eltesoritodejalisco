@@ -17,11 +17,8 @@ export async function GET(request: NextRequest) {
     const customStartParam = searchParams.get("startDate");
     const customEndParam = searchParams.get("endDate");
 
-    const { startDate, endDate, startIsoDate, endIsoDate } = calculateReportDates(
-      period,
-      customStartParam,
-      customEndParam,
-    );
+    const { startDate, endDate, startIsoDate, endIsoDate } =
+      calculateReportDates(period, customStartParam, customEndParam);
 
     const tenant = await getTenantContext();
     const supabase = await createClient();
@@ -52,7 +49,10 @@ export async function GET(request: NextRequest) {
       { ascending: true },
     );
     if (periodError) {
-      console.error("Error fetching period orders in performance analytics:", periodError);
+      console.error(
+        "Error fetching period orders in performance analytics:",
+        periodError,
+      );
       throw periodError;
     }
 
@@ -81,7 +81,10 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: true });
 
     if (historyError) {
-      console.error("Error fetching historical orders in performance analytics:", historyError);
+      console.error(
+        "Error fetching historical orders in performance analytics:",
+        historyError,
+      );
       throw historyError;
     }
 
@@ -100,7 +103,12 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error in performance analytics API:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Error al generar analítica de rendimiento" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Error al generar analítica de rendimiento",
+      },
       { status: 500 },
     );
   }

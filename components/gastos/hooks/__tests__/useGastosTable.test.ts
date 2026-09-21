@@ -11,7 +11,11 @@ const sampleExpenses: Expense[] = [
     date: "2026-09-02",
     has_invoice: true,
     category_id: "c1",
-    expense_categories: { name: "Lácteos", color: "#3B82F6", tipo_gasto: "variable" },
+    expense_categories: {
+      name: "Lácteos",
+      color: "#3B82F6",
+      tipo_gasto: "variable",
+    },
   },
   {
     id: "2",
@@ -20,7 +24,11 @@ const sampleExpenses: Expense[] = [
     date: "2026-09-01",
     has_invoice: false,
     category_id: "c2",
-    expense_categories: { name: "Rentas", color: "#F59E0B", tipo_gasto: "fijo" },
+    expense_categories: {
+      name: "Rentas",
+      color: "#F59E0B",
+      tipo_gasto: "fijo",
+    },
   },
   {
     id: "3",
@@ -29,13 +37,19 @@ const sampleExpenses: Expense[] = [
     date: "2026-09-03",
     has_invoice: true,
     category_id: "c3",
-    expense_categories: { name: "Limpieza", color: "#10B981", tipo_gasto: "variable" },
+    expense_categories: {
+      name: "Limpieza",
+      color: "#10B981",
+      tipo_gasto: "variable",
+    },
   },
 ];
 
 describe("useGastosTable Hook", () => {
   it("initializes with default sorting and pagination", () => {
-    const { result } = renderHook(() => useGastosTable(sampleExpenses, { initialPageSize: 2 }));
+    const { result } = renderHook(() =>
+      useGastosTable(sampleExpenses, { initialPageSize: 2 }),
+    );
 
     expect(result.current.filteredExpenses).toHaveLength(3);
     expect(result.current.totalPages).toBe(2);
@@ -109,7 +123,9 @@ describe("useGastosTable Hook", () => {
   });
 
   it("handles pagination navigation and page size change", () => {
-    const { result } = renderHook(() => useGastosTable(sampleExpenses, { initialPageSize: 1 }));
+    const { result } = renderHook(() =>
+      useGastosTable(sampleExpenses, { initialPageSize: 1 }),
+    );
 
     expect(result.current.totalPages).toBe(3);
     expect(result.current.currentPage).toBe(1);

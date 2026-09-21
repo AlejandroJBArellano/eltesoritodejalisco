@@ -4,8 +4,18 @@ import { AdminTaskConfigTab } from "../AdminTaskConfigTab";
 import type { PrimordialTask, TaskCategory } from "@/types";
 
 const mockCategories: TaskCategory[] = [
-  { id: "cat-1", name: "Cocina", created_at: "2026-01-01", updated_at: "2026-01-01" },
-  { id: "cat-2", name: "Barra", created_at: "2026-01-01", updated_at: "2026-01-01" },
+  {
+    id: "cat-1",
+    name: "Cocina",
+    created_at: "2026-01-01",
+    updated_at: "2026-01-01",
+  },
+  {
+    id: "cat-2",
+    name: "Barra",
+    created_at: "2026-01-01",
+    updated_at: "2026-01-01",
+  },
 ];
 
 const mockTasks: PrimordialTask[] = [

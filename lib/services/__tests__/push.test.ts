@@ -1,34 +1,39 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { sendTenantPushNotification } from "../push";
 
-const { mockSendNotification, mockSetVapidDetails, mockSupabaseFrom } = vi.hoisted(() => {
-  const mockSendNotification = vi.fn().mockResolvedValue({});
-  const mockSetVapidDetails = vi.fn();
+const { mockSendNotification, mockSetVapidDetails, mockSupabaseFrom } =
+  vi.hoisted(() => {
+    const mockSendNotification = vi.fn().mockResolvedValue({});
+    const mockSetVapidDetails = vi.fn();
 
-  const mockDeleteIn = vi.fn().mockResolvedValue({ error: null });
-  const mockDeleteEq = vi.fn().mockReturnValue({ in: mockDeleteIn });
-  const mockDelete = vi.fn().mockReturnValue({ eq: mockDeleteEq, in: mockDeleteIn });
+    const mockDeleteIn = vi.fn().mockResolvedValue({ error: null });
+    const mockDeleteEq = vi.fn().mockReturnValue({ in: mockDeleteIn });
+    const mockDelete = vi
+      .fn()
+      .mockReturnValue({ eq: mockDeleteEq, in: mockDeleteIn });
 
-  const mockSelectIn = vi.fn();
-  const mockSelectEq = vi.fn().mockReturnValue({ in: mockSelectIn });
-  const mockSelect = vi.fn().mockReturnValue({ eq: mockSelectEq, in: mockSelectIn });
+    const mockSelectIn = vi.fn();
+    const mockSelectEq = vi.fn().mockReturnValue({ in: mockSelectIn });
+    const mockSelect = vi
+      .fn()
+      .mockReturnValue({ eq: mockSelectEq, in: mockSelectIn });
 
-  const mockSupabaseFrom = vi.fn().mockReturnValue({
-    select: mockSelect,
-    delete: mockDelete,
+    const mockSupabaseFrom = vi.fn().mockReturnValue({
+      select: mockSelect,
+      delete: mockDelete,
+    });
+
+    return {
+      mockSendNotification,
+      mockSetVapidDetails,
+      mockSupabaseFrom,
+      mockSelect,
+      mockSelectEq,
+      mockSelectIn,
+      mockDelete,
+      mockDeleteIn,
+    };
   });
-
-  return {
-    mockSendNotification,
-    mockSetVapidDetails,
-    mockSupabaseFrom,
-    mockSelect,
-    mockSelectEq,
-    mockSelectIn,
-    mockDelete,
-    mockDeleteIn,
-  };
-});
 
 vi.mock("web-push", () => ({
   default: {
@@ -87,19 +92,21 @@ describe("lib/services/push", () => {
   });
 
   it("should dispatch push notification to subscribed endpoints", async () => {
-    mockSupabaseFrom().select().eq.mockResolvedValueOnce({
-      data: [
-        {
-          id: "sub-1",
-          tenant_id: "tenant-123",
-          endpoint: "https://push.example.com/sub-1",
-          p256dh: "key-1",
-          auth: "auth-1",
-          role: "ADMIN",
-        },
-      ],
-      error: null,
-    });
+    mockSupabaseFrom()
+      .select()
+      .eq.mockResolvedValueOnce({
+        data: [
+          {
+            id: "sub-1",
+            tenant_id: "tenant-123",
+            endpoint: "https://push.example.com/sub-1",
+            p256dh: "key-1",
+            auth: "auth-1",
+            role: "ADMIN",
+          },
+        ],
+        error: null,
+      });
 
     const result = await sendTenantPushNotification("tenant-123", {
       title: "🛍️ Nuevo Pedido #001",

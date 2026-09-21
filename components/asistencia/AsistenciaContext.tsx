@@ -7,7 +7,11 @@ type AsistenciaContextValue = ReturnType<typeof useAsistenciaData>;
 
 const AsistenciaContext = createContext<AsistenciaContextValue | null>(null);
 
-export function AsistenciaProvider({ children }: { children: React.ReactNode }) {
+export function AsistenciaProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const value = useAsistenciaData();
 
   return (

@@ -92,15 +92,22 @@ describe("AdminRolesTab", () => {
     fireEvent.click(deleteBtn);
 
     expect(screen.getByText(/Eliminar Rol: Capitán de Meseros/i)).toBeDefined();
-    expect(screen.getByText(/Hay 1 colaborador\(es\) con este rol/i)).toBeDefined();
+    expect(
+      screen.getByText(/Hay 1 colaborador\(es\) con este rol/i),
+    ).toBeDefined();
 
-    vi.mocked(roleActions.deleteCustomRole).mockResolvedValue({ success: true });
+    vi.mocked(roleActions.deleteCustomRole).mockResolvedValue({
+      success: true,
+    });
 
     const confirmBtn = screen.getByText("Confirmar Eliminación");
     fireEvent.click(confirmBtn);
 
     await waitFor(() => {
-      expect(roleActions.deleteCustomRole).toHaveBeenCalledWith("role-2", "role-1");
+      expect(roleActions.deleteCustomRole).toHaveBeenCalledWith(
+        "role-2",
+        "role-1",
+      );
     });
   });
 });

@@ -22,7 +22,9 @@ export function SettingsStripeSection() {
                 Cuenta de Stripe Activa & Cobros Habilitados
               </h4>
               <p className="text-xs text-emerald-200/70">
-                Tus clientes ya pueden pedir y pagar en línea en Kittn Pickup. Los cobros se depositan en tu cuenta bancaria (Comisión Kittn: 8%).
+                Tus clientes ya pueden pedir y pagar en línea en Kittn Pickup.
+                Los cobros se depositan en tu cuenta bancaria (Comisión Kittn:
+                8%).
               </p>
             </div>
           </div>
@@ -43,7 +45,9 @@ export function SettingsStripeSection() {
               Verificación Pendiente en Stripe
             </h4>
             <p className="text-xs text-amber-200/70">
-              Tu cuenta de Stripe requiere información fiscal o bancaria adicional antes de poder recibir pagos de clientes en Kittn Pickup.
+              Tu cuenta de Stripe requiere información fiscal o bancaria
+              adicional antes de poder recibir pagos de clientes en Kittn
+              Pickup.
             </p>
           </div>
           <button
@@ -63,7 +67,8 @@ export function SettingsStripeSection() {
               Conecta tu cuenta bancaria con Stripe
             </h4>
             <p className="text-xs text-text-light/50">
-              Configura tu CLABE y datos fiscales para recibir depósitos directos y activar tu menú en línea de Kittn Pickup.
+              Configura tu CLABE y datos fiscales para recibir depósitos
+              directos y activar tu menú en línea de Kittn Pickup.
             </p>
           </div>
           <button
@@ -72,7 +77,9 @@ export function SettingsStripeSection() {
             disabled={connectingStripe}
             className="px-5 py-2.5 bg-primary text-dark font-extrabold text-xs uppercase tracking-wider rounded-xl hover:opacity-90 transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md"
           >
-            {connectingStripe ? "Generando liga..." : "Conectar Stripe y Activar Pickup"}
+            {connectingStripe
+              ? "Generando liga..."
+              : "Conectar Stripe y Activar Pickup"}
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>

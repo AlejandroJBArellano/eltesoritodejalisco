@@ -28,7 +28,8 @@ export function SettingsBrandingSection() {
       {/* Logotipo e Identidad Visual */}
       <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20">
         <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
-          <Upload className="h-4 w-4 text-primary" /> Logotipo e Identidad Visual
+          <Upload className="h-4 w-4 text-primary" /> Logotipo e Identidad
+          Visual
         </h3>
 
         <div className="space-y-4">
@@ -61,8 +62,12 @@ export function SettingsBrandingSection() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-text-light">Logotipo cargado</p>
-                  <p className="text-[10px] text-text-light/40">Arrastra una nueva imagen para cambiarla</p>
+                  <p className="text-xs font-bold text-text-light">
+                    Logotipo cargado
+                  </p>
+                  <p className="text-[10px] text-text-light/40">
+                    Arrastra una nueva imagen para cambiarla
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -79,10 +84,14 @@ export function SettingsBrandingSection() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs font-bold text-text-light">
-                    Arrastra tu logotipo aquí, o <span className="text-primary hover:underline">haz clic para buscar</span>
+                    Arrastra tu logotipo aquí, o{" "}
+                    <span className="text-primary hover:underline">
+                      haz clic para buscar
+                    </span>
                   </p>
                   <p className="text-[10px] text-text-light/40">
-                    Soporta imágenes JPG, PNG o SVG. Recomendado formato cuadrado de mín. 200x200px.
+                    Soporta imágenes JPG, PNG o SVG. Recomendado formato
+                    cuadrado de mín. 200x200px.
                   </p>
                 </div>
               </div>
@@ -102,13 +111,15 @@ export function SettingsBrandingSection() {
         {/* Paletas Recomendadas */}
         <div className="space-y-3">
           <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider flex items-center gap-1">
-            <Sparkles className="h-3 w-3 text-primary animate-pulse" /> Paletas Recomendadas
+            <Sparkles className="h-3 w-3 text-primary animate-pulse" /> Paletas
+            Recomendadas
           </label>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1">
             {COLOR_PRESETS.map((preset) => {
               const isSelected =
                 primaryColor.toLowerCase() === preset.primary.toLowerCase() &&
-                secondaryColor.toLowerCase() === preset.secondary.toLowerCase() &&
+                secondaryColor.toLowerCase() ===
+                  preset.secondary.toLowerCase() &&
                 darkBgColor.toLowerCase() === preset.darkBg.toLowerCase();
               return (
                 <button
@@ -140,7 +151,10 @@ export function SettingsBrandingSection() {
                     {preset.name}
                   </span>
                   {isSelected && (
-                    <Check className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+                    <Check
+                      className="h-3.5 w-3.5 shrink-0 text-primary"
+                      aria-hidden="true"
+                    />
                   )}
                 </button>
               );

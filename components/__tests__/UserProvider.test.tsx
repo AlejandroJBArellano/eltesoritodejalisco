@@ -104,7 +104,10 @@ describe("UserProvider and useUser Hook", () => {
       result.current.hasAnyPermission?.(["pos.create_order", "menu.manage"]),
     ).toBe(true);
     expect(
-      result.current.hasAllPermissions?.(["pos.create_order", "team.manage_roles"]),
+      result.current.hasAllPermissions?.([
+        "pos.create_order",
+        "team.manage_roles",
+      ]),
     ).toBe(true);
   });
 
@@ -142,7 +145,9 @@ describe("UserProvider and useUser Hook", () => {
 
   it("provides correct context values for INVENTORY", () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <UserProvider initialProfile={mockInventoryProfile}>{children}</UserProvider>
+      <UserProvider initialProfile={mockInventoryProfile}>
+        {children}
+      </UserProvider>
     );
 
     const { result } = renderHook(() => useUser(), { wrapper });
@@ -169,7 +174,10 @@ describe("UserProvider and useUser Hook", () => {
     expect(result.current.hasPermission?.("pos.apply_discount")).toBe(true);
     expect(result.current.hasPermission?.("pos.cancel_order")).toBe(false);
     expect(
-      result.current.hasAnyPermission?.(["pos.cancel_order", "pos.apply_discount"]),
+      result.current.hasAnyPermission?.([
+        "pos.cancel_order",
+        "pos.apply_discount",
+      ]),
     ).toBe(true);
     expect(
       result.current.hasAllPermissions?.(["pos.view", "pos.apply_discount"]),

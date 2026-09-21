@@ -19,7 +19,8 @@ export function SettingsLoyaltySection() {
             Activar Programa de Lealtad
           </span>
           <span className="text-xs text-text-light/40">
-            Permite a los clientes acumular puntos por sus compras usando su número telefónico.
+            Permite a los clientes acumular puntos por sus compras usando su
+            número telefónico.
           </span>
         </div>
 
@@ -65,7 +66,8 @@ export function SettingsLoyaltySection() {
               />
             </div>
             <p className="text-[10px] text-text-light/40 mt-1.5">
-              Define cuántos pesos debe gastar el cliente para acumular 1 punto (ej. 10 pesos = 1 punto).
+              Define cuántos pesos debe gastar el cliente para acumular 1 punto
+              (ej. 10 pesos = 1 punto).
             </p>
           </div>
         </div>

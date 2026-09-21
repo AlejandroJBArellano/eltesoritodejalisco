@@ -53,10 +53,14 @@ export async function createUser(formData: FormData) {
           .eq("id", rawRoleId)
           .eq("tenant_id", tenant.id)
           .maybeSingle();
-        if (res?.error) console.error("[createUser] Error buscando rol por ID:", res.error);
+        if (res?.error)
+          console.error("[createUser] Error buscando rol por ID:", res.error);
         roleRecord = res?.data;
       } else if (rawRole) {
-        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawRole);
+        const isUUID =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            rawRole,
+          );
         if (isUUID) {
           const res = await adminClient
             .from("roles")
@@ -135,7 +139,8 @@ export async function createUser(formData: FormData) {
     // 5. Crear o actualizar perfil en profiles para este tenant
     const rawPin = (formData.get("pin") as string)?.trim();
     const pin =
-      rawPin || (resolvedRole === "ADMIN" || resolvedRole === "MANAGER" ? "1234" : null);
+      rawPin ||
+      (resolvedRole === "ADMIN" || resolvedRole === "MANAGER" ? "1234" : null);
 
     const profileUpsert: any = {
       id: userId,
@@ -149,7 +154,9 @@ export async function createUser(formData: FormData) {
       profileUpsert.role_id = resolvedRoleId;
     }
 
-    const { error: upsertError } = await adminClient.from("profiles").upsert(profileUpsert);
+    const { error: upsertError } = await adminClient
+      .from("profiles")
+      .upsert(profileUpsert);
 
     if (upsertError) {
       console.error("[createUser] Error al registrar perfil:", upsertError);
@@ -197,7 +204,11 @@ export async function updateUserRole(id: string, newRole: string) {
           .eq("tenant_id", tenant.id)
           .eq("id", rawInput)
           .maybeSingle();
-        if (res?.error) console.error("[updateUserRole] Error buscando rol por ID:", res.error);
+        if (res?.error)
+          console.error(
+            "[updateUserRole] Error buscando rol por ID:",
+            res.error,
+          );
         roleRecord = res?.data;
       } else {
         const res = await adminClient
@@ -206,7 +217,11 @@ export async function updateUserRole(id: string, newRole: string) {
           .eq("tenant_id", tenant.id)
           .or(`system_slug.eq.${rawInput.toUpperCase()},name.ilike.${rawInput}`)
           .maybeSingle();
-        if (res?.error) console.error("[updateUserRole] Error buscando rol por slug/name:", res.error);
+        if (res?.error)
+          console.error(
+            "[updateUserRole] Error buscando rol por slug/name:",
+            res.error,
+          );
         roleRecord = res?.data;
       }
 
@@ -231,7 +246,10 @@ export async function updateUserRole(id: string, newRole: string) {
       .eq("tenant_id", tenant.id);
 
     if (updateError) {
-      console.error("[updateUserRole] Error al actualizar perfil:", updateError);
+      console.error(
+        "[updateUserRole] Error al actualizar perfil:",
+        updateError,
+      );
       return { error: "Error al actualizar el rol" };
     }
 
@@ -241,7 +259,10 @@ export async function updateUserRole(id: string, newRole: string) {
         user_metadata: { role: resolvedRole, role_id: resolvedRoleId },
       });
     } catch (authErr) {
-      console.warn("[updateUserRole] Error actualizando user_metadata en auth:", authErr);
+      console.warn(
+        "[updateUserRole] Error actualizando user_metadata en auth:",
+        authErr,
+      );
     }
 
     revalidatePath("/admin/users");

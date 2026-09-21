@@ -24,7 +24,9 @@ describe("OrdersFilterBar Component", () => {
       />,
     );
 
-    expect(screen.getByPlaceholderText("Buscar por folio (#1001)...")).toBeDefined();
+    expect(
+      screen.getByPlaceholderText("Buscar por folio (#1001)..."),
+    ).toBeDefined();
     expect(screen.getByText("Todas las Mesas")).toBeDefined();
     expect(screen.getByText("Todos los Métodos")).toBeDefined();
     expect(screen.getByText("Todos los Canales")).toBeDefined();
@@ -90,7 +92,10 @@ describe("OrdersFilterBar Component", () => {
 
     const paymentSelect = screen.getByDisplayValue("Todos los Métodos");
     fireEvent.change(paymentSelect, { target: { value: PaymentMethod.CASH } });
-    expect(onFilterChange).toHaveBeenCalledWith("paymentMethodFilter", PaymentMethod.CASH);
+    expect(onFilterChange).toHaveBeenCalledWith(
+      "paymentMethodFilter",
+      PaymentMethod.CASH,
+    );
 
     const channelSelect = screen.getByDisplayValue("Todos los Canales");
     fireEvent.change(channelSelect, { target: { value: "PICKUP_APP" } });

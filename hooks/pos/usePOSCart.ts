@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, createContext, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  createContext,
+  useContext,
+} from "react";
 import {
   Order,
   OrderFormState,
@@ -70,7 +76,10 @@ export function usePOSCart(
   const context = useContext(POSCartContext);
   if (context) return context;
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  return usePOSCartInternal(availableMenuItems || [], refreshOrders || (async () => []));
+  return usePOSCartInternal(
+    availableMenuItems || [],
+    refreshOrders || (async () => []),
+  );
 }
 
 function usePOSCartInternal(
@@ -91,10 +100,11 @@ function usePOSCartInternal(
   // Edit Order State (add items)
   const [editingOrder, setEditingOrderState] = useState<Order | null>(null);
   const [additionalItems, setAdditionalItems] = useState<OrderItemDraft[]>([]);
-  const [addItemsSuccessNotification, setAddItemsSuccessNotification] = useState<{
-    order: Order;
-    orderNumber: string;
-  } | null>(null);
+  const [addItemsSuccessNotification, setAddItemsSuccessNotification] =
+    useState<{
+      order: Order;
+      orderNumber: string;
+    } | null>(null);
 
   const setEditingOrder = React.useCallback((order: Order | null) => {
     setEditingOrderState(order);
@@ -118,7 +128,9 @@ function usePOSCartInternal(
   // Two-step clear cart: null = idle, true = armed (waiting for confirm click)
   const [clearCartArmed, setClearCartArmed] = useState(false);
   // Ref to cancel the auto-reset timer on unmount
-  const clearCartArmRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearCartArmRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   /** Pre-computed cart totals — avoids double .reduce() in consuming components */
   const totalCartItems = useMemo(
@@ -149,7 +161,12 @@ function usePOSCartInternal(
       orderDiscountType: formState.discountType,
       orderDiscountValue: formState.discountValue,
     });
-  }, [formState.items, formState.discountType, formState.discountValue, availableMenuItemMap]);
+  }, [
+    formState.items,
+    formState.discountType,
+    formState.discountValue,
+    availableMenuItemMap,
+  ]);
 
   const cartTotal = cartTotals.total;
 
@@ -334,7 +351,10 @@ function usePOSCartInternal(
     });
   };
 
-  const handleApplyModifyItemDiscount = (index: number, discount: DiscountData) => {
+  const handleApplyModifyItemDiscount = (
+    index: number,
+    discount: DiscountData,
+  ) => {
     setModifyItems((prev) => {
       const next = [...prev];
       const { discountAmount } = calculateItemDiscount({
@@ -386,7 +406,10 @@ function usePOSCartInternal(
   const handleClearCart = () => {
     if (!clearCartArmed) {
       setClearCartArmed(true);
-      clearCartArmRef.current = setTimeout(() => setClearCartArmed(false), 3000);
+      clearCartArmRef.current = setTimeout(
+        () => setClearCartArmed(false),
+        3000,
+      );
       return;
     }
     if (clearCartArmRef.current) clearTimeout(clearCartArmRef.current);
@@ -467,7 +490,8 @@ function usePOSCartInternal(
   const quickAddAdditionalItem = (menuItem: MenuItem) => {
     setAdditionalItems((prev) => {
       const existingIndex = prev.findIndex(
-        (item) => item.menuItemId === menuItem.id && (!item.notes || item.notes === ""),
+        (item) =>
+          item.menuItemId === menuItem.id && (!item.notes || item.notes === ""),
       );
       if (existingIndex >= 0) {
         const nextItems = [...prev];
@@ -478,10 +502,7 @@ function usePOSCartInternal(
         };
         return nextItems;
       }
-      return [
-        ...prev,
-        { menuItemId: menuItem.id, quantity: "1", notes: "" },
-      ];
+      return [...prev, { menuItemId: menuItem.id, quantity: "1", notes: "" }];
     });
   };
 

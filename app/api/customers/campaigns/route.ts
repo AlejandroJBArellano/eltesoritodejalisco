@@ -77,7 +77,8 @@ export function filterCampaignAudience(
     const daysSinceActivity = Math.max(
       0,
       Math.floor(
-        (nowDate.getTime() - lastActivityDate.getTime()) / (1000 * 60 * 60 * 24),
+        (nowDate.getTime() - lastActivityDate.getTime()) /
+          (1000 * 60 * 60 * 24),
       ),
     );
     const orderCount = orderInfo?.count || 0;
@@ -134,9 +135,7 @@ export async function GET(request: NextRequest) {
       const inactiveDays = Number(searchParams.get("inactiveDays") || 0);
       const minPoints = Number(searchParams.get("minPoints") || 0);
       const frequency = (searchParams.get("frequency") || "all") as
-        | "all"
-        | "recurrent"
-        | "inactive";
+        "all" | "recurrent" | "inactive";
       const antiSaturationDays = Number(
         searchParams.get("antiSaturationDays") || 0,
       );

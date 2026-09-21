@@ -6,7 +6,15 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { orderItems, type, customerName, notes, pickupTime, tipAmount, locale } = body;
+    const {
+      orderItems,
+      type,
+      customerName,
+      notes,
+      pickupTime,
+      tipAmount,
+      locale,
+    } = body;
 
     if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
       return NextResponse.json(
@@ -25,9 +33,16 @@ export async function POST(request: NextRequest) {
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
-    if (!tenant.stripe_account_id || !tenant.stripe_charges_enabled || tenant.commission_rate == null) {
+    if (
+      !tenant.stripe_account_id ||
+      !tenant.stripe_charges_enabled ||
+      tenant.commission_rate == null
+    ) {
       return NextResponse.json(
-        { error: "El restaurante aún no ha configurado sus pagos digitales con Stripe Connect" },
+        {
+          error:
+            "El restaurante aún no ha configurado sus pagos digitales con Stripe Connect",
+        },
         { status: 400 },
       );
     }
@@ -171,7 +186,9 @@ export async function POST(request: NextRequest) {
           currency: "mxn",
           unit_amount: digitalFeeCents,
           product_data: {
-            name: isEn ? "Digital service fee" : "Comisión por servicio digital",
+            name: isEn
+              ? "Digital service fee"
+              : "Comisión por servicio digital",
           },
         },
         quantity: 1,
@@ -182,11 +199,18 @@ export async function POST(request: NextRequest) {
 
     const orderId = crypto.randomUUID();
 
-    const typeLabel = type === "dine-in"
-      ? (isEn ? "Dine-in" : "Comer aquí")
-      : (isEn ? "Takeout" : "Para llevar");
+    const typeLabel =
+      type === "dine-in"
+        ? isEn
+          ? "Dine-in"
+          : "Comer aquí"
+        : isEn
+          ? "Takeout"
+          : "Para llevar";
 
-    let timeFormatted = isEn ? "I'm on my way (~30 min)" : "Voy para allá (~30 min)";
+    let timeFormatted = isEn
+      ? "I'm on my way (~30 min)"
+      : "Voy para allá (~30 min)";
     if (pickupTime) {
       try {
         const dateObj = new Date(pickupTime);
@@ -220,7 +244,7 @@ export async function POST(request: NextRequest) {
     const compactOrderItems = validatedItems.map((item) =>
       item.notes
         ? [item.menuItemId, item.quantity, item.notes.slice(0, 100)]
-        : [item.menuItemId, item.quantity]
+        : [item.menuItemId, item.quantity],
     );
 
     const stripeLocale = isEn ? "en" : "es-419";

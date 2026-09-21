@@ -17,19 +17,18 @@ import { McpConnectCard } from "./McpConnectCard";
 import { getContrastColor } from "./settings/types";
 
 export { COLOR_PRESETS, getContrastColor } from "./settings/types";
-export { SettingsProvider, useSettingsContext } from "./settings/SettingsContext";
+export {
+  SettingsProvider,
+  useSettingsContext,
+} from "./settings/SettingsContext";
 
 interface SettingsFormProps {
   initialTenant: TenantContextType;
 }
 
 function SettingsFormContent() {
-  const {
-    loading,
-    primaryColor,
-    secondaryColor,
-    handleSubmit,
-  } = useSettingsContext();
+  const { loading, primaryColor, secondaryColor, handleSubmit } =
+    useSettingsContext();
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 max-w-7xl mx-auto pb-12">

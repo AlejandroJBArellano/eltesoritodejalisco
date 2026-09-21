@@ -164,9 +164,7 @@ describe("lib/export", () => {
       );
 
       // Check XML escaping in values
-      expect(xml).toContain(
-        'Rica &amp; sabrosa &lt;&quot;con queso&quot;&gt;',
-      );
+      expect(xml).toContain("Rica &amp; sabrosa &lt;&quot;con queso&quot;&gt;");
 
       // Check formula sanitization in String cell
       expect(xml).toContain("&apos;=Dangerous");

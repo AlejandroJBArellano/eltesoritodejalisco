@@ -59,12 +59,30 @@ const CATEGORY_CONFIG: Record<
 };
 
 const CUSTOM_PALETTES = [
-  { badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20", color: "#22D3EE" },
-  { badgeBg: "bg-violet-500/10 text-violet-400 border-violet-500/20", color: "#A78BFA" },
-  { badgeBg: "bg-pink-500/10 text-pink-400 border-pink-500/20", color: "#F472B6" },
-  { badgeBg: "bg-lime-500/10 text-lime-400 border-lime-500/20", color: "#A3E635" },
-  { badgeBg: "bg-teal-500/10 text-teal-400 border-teal-500/20", color: "#2DD4BF" },
-  { badgeBg: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20", color: "#818CF8" },
+  {
+    badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+    color: "#22D3EE",
+  },
+  {
+    badgeBg: "bg-violet-500/10 text-violet-400 border-violet-500/20",
+    color: "#A78BFA",
+  },
+  {
+    badgeBg: "bg-pink-500/10 text-pink-400 border-pink-500/20",
+    color: "#F472B6",
+  },
+  {
+    badgeBg: "bg-lime-500/10 text-lime-400 border-lime-500/20",
+    color: "#A3E635",
+  },
+  {
+    badgeBg: "bg-teal-500/10 text-teal-400 border-teal-500/20",
+    color: "#2DD4BF",
+  },
+  {
+    badgeBg: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+    color: "#818CF8",
+  },
 ];
 
 export function getCategoryConfig(cat: string, index = 0) {
@@ -72,7 +90,10 @@ export function getCategoryConfig(cat: string, index = 0) {
   if (CATEGORY_CONFIG[normalizedKey]) {
     return {
       ...CATEGORY_CONFIG[normalizedKey],
-      label: normalizedKey === "OTROS" ? "Otros" : (CATEGORY_CONFIG[normalizedKey].label || cat),
+      label:
+        normalizedKey === "OTROS"
+          ? "Otros"
+          : CATEGORY_CONFIG[normalizedKey].label || cat,
     };
   }
   const palette = CUSTOM_PALETTES[Math.abs(index) % CUSTOM_PALETTES.length];
@@ -86,9 +107,11 @@ export function getCategoryConfig(cat: string, index = 0) {
 
 /** Derive stock status for a menu item */
 function getStockStatus(item: MenuItem): "out" | "low" | "ok" | "untracked" {
-  if (item.ingredientId == null || item.currentStock == null) return "untracked";
+  if (item.ingredientId == null || item.currentStock == null)
+    return "untracked";
   if (item.currentStock <= 0) return "out";
-  if (item.minimumStock != null && item.currentStock <= item.minimumStock) return "low";
+  if (item.minimumStock != null && item.currentStock <= item.minimumStock)
+    return "low";
   return "ok";
 }
 
@@ -139,10 +162,11 @@ export function POSMenuGrid() {
         <button
           type="button"
           onClick={() => setActiveCategory("")}
-          className={`px-4 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${activeCategory === ""
-            ? "bg-white/10 border-white/20 text-text-light shadow-sm scale-105"
-            : "bg-white/5 text-text-light/50 border-transparent hover:border-border/15 hover:text-text-light"
-            }`}
+          className={`px-4 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${
+            activeCategory === ""
+              ? "bg-white/10 border-white/20 text-text-light shadow-sm scale-105"
+              : "bg-white/5 text-text-light/50 border-transparent hover:border-border/15 hover:text-text-light"
+          }`}
         >
           Todos
         </button>
@@ -155,10 +179,11 @@ export function POSMenuGrid() {
               key={cat}
               type="button"
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${isActive
-                ? `${config.badgeBg} shadow-sm scale-105`
-                : "bg-white/5 text-text-light/50 border-transparent hover:border-border/15 hover:text-text-light"
-                }`}
+              className={`px-4 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${
+                isActive
+                  ? `${config.badgeBg} shadow-sm scale-105`
+                  : "bg-white/5 text-text-light/50 border-transparent hover:border-border/15 hover:text-text-light"
+              }`}
             >
               {config.label}
             </button>
@@ -193,7 +218,10 @@ interface MenuItemCardProps {
   onClick: (item: MenuItem) => void;
 }
 
-const MenuItemCard = memo(function MenuItemCard({ item: m, onClick }: MenuItemCardProps) {
+const MenuItemCard = memo(function MenuItemCard({
+  item: m,
+  onClick,
+}: MenuItemCardProps) {
   const isMixed = isMixedOrderItem(m.name);
   const stockStatus = getStockStatus(m);
   const isOutOfStock = stockStatus === "out";
@@ -203,12 +231,13 @@ const MenuItemCard = memo(function MenuItemCard({ item: m, onClick }: MenuItemCa
     <button
       type="button"
       onClick={() => onClick(m)}
-      className={`group relative rounded-2xl bg-card-light p-4 border transition-all shadow-sm flex flex-col justify-between text-left h-28 overflow-hidden active:scale-95 ${isOutOfStock
-        ? "border-red-500/25 hover:border-red-500/50 hover:shadow-md hover:-translate-y-0.5"
-        : isLowStock
-          ? "border-amber-500/30 hover:border-amber-500/60 hover:shadow-md hover:-translate-y-0.5"
-          : "border-border hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5"
-        }`}
+      className={`group relative rounded-2xl bg-card-light p-4 border transition-all shadow-sm flex flex-col justify-between text-left h-28 overflow-hidden active:scale-95 ${
+        isOutOfStock
+          ? "border-red-500/25 hover:border-red-500/50 hover:shadow-md hover:-translate-y-0.5"
+          : isLowStock
+            ? "border-amber-500/30 hover:border-amber-500/60 hover:shadow-md hover:-translate-y-0.5"
+            : "border-border hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5"
+      }`}
     >
       {/* Sin Stock warning badge — visual only, no bloqueo */}
       {isOutOfStock && (
@@ -219,10 +248,11 @@ const MenuItemCard = memo(function MenuItemCard({ item: m, onClick }: MenuItemCa
 
       <div className="flex items-start justify-between gap-1 w-full">
         <span
-          className={`font-black text-xs uppercase tracking-tight leading-snug line-clamp-2 transition-colors ${isOutOfStock
-            ? "text-text-light/60 group-hover:text-red-300"
-            : "text-text-light group-hover:text-primary"
-            }`}
+          className={`font-black text-xs uppercase tracking-tight leading-snug line-clamp-2 transition-colors ${
+            isOutOfStock
+              ? "text-text-light/60 group-hover:text-red-300"
+              : "text-text-light group-hover:text-primary"
+          }`}
         >
           {m.name}
         </span>
@@ -241,12 +271,13 @@ const MenuItemCard = memo(function MenuItemCard({ item: m, onClick }: MenuItemCa
         {/* Stock badge — only when ingredient is tracked */}
         {stockStatus !== "untracked" && (
           <span
-            className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-black tabular-nums border ${isOutOfStock
-              ? "bg-red-500/10 border-red-500/20 text-red-400"
-              : isLowStock
-                ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-              }`}
+            className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-black tabular-nums border ${
+              isOutOfStock
+                ? "bg-red-500/10 border-red-500/20 text-red-400"
+                : isLowStock
+                  ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                  : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+            }`}
           >
             <Package className="h-2.5 w-2.5 shrink-0" />
             {m.currentStock}

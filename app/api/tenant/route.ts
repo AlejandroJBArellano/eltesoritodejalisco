@@ -12,9 +12,10 @@ export async function GET() {
       { tenant },
       {
         headers: {
-          "Cache-Control": "public, max-age=10, s-maxage=60, stale-while-revalidate=600",
+          "Cache-Control":
+            "public, max-age=10, s-maxage=60, stale-while-revalidate=600",
         },
-      }
+      },
     );
   } catch (error: unknown) {
     const err = error as { digest?: string };

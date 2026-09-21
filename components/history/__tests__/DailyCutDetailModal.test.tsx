@@ -63,7 +63,9 @@ describe("DailyCutDetailModal Component", () => {
 
     render(<DailyCutDetailModal cut={cutWithCommission} onClose={vi.fn()} />);
 
-    expect(screen.getByText(/Comisión: -\$40\.60 · Neto: \$959\.40/i)).toBeDefined();
+    expect(
+      screen.getByText(/Comisión: -\$40\.60 · Neto: \$959\.40/i),
+    ).toBeDefined();
   });
 
   it("handles reprint ticket click", () => {

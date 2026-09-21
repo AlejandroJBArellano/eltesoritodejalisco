@@ -11,7 +11,8 @@ export interface SalesSourceCardProps {
 
 export function SalesSourceCard(props: SalesSourceCardProps = {}) {
   const context = useReportsContextNullable();
-  const salesBySource = props.salesBySource ?? context?.data?.salesBySource ?? {};
+  const salesBySource =
+    props.salesBySource ?? context?.data?.salesBySource ?? {};
   const sources = Object.entries(salesBySource || {});
 
   return (

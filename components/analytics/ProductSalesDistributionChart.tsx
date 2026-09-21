@@ -44,7 +44,8 @@ export function ProductSalesDistributionChart({
             Distribución de Ventas por Producto
           </h2>
           <p className="text-xs text-text-light/60 mt-1 font-medium">
-            Analiza el volumen y concentración de ventas individuales por producto y categoría.
+            Analiza el volumen y concentración de ventas individuales por
+            producto y categoría.
           </p>
         </div>
 

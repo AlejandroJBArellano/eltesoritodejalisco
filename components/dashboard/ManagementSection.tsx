@@ -36,8 +36,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
   const isAdmin = props?.isAdmin ?? user?.isAdmin ?? false;
   const isWaiter = props?.isWaiter ?? user?.isWaiter ?? false;
   const isInventory = props?.isInventory ?? user?.isInventory ?? false;
-  const tenant =
-    props?.tenant ??
+  const tenant = props?.tenant ??
     tenantContext ?? { slug: "", stripe_charges_enabled: false };
 
   if (!isAdmin && !isWaiter && !isInventory) return null;

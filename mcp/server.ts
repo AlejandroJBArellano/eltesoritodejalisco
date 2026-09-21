@@ -21,7 +21,8 @@ export const KITTN_TOOLS_SCHEMAS = [
       properties: {
         date: {
           type: "string",
-          description: "Fecha en formato YYYY-MM-DD. Si se omite, consulta el día de hoy.",
+          description:
+            "Fecha en formato YYYY-MM-DD. Si se omite, consulta el día de hoy.",
         },
       },
     },
@@ -101,7 +102,8 @@ export const KITTN_TOOLS_SCHEMAS = [
       properties: {
         onlyLowStock: {
           type: "boolean",
-          description: "Si es true, solo retorna insumos con stock crítico/bajo mínimo.",
+          description:
+            "Si es true, solo retorna insumos con stock crítico/bajo mínimo.",
         },
       },
     },

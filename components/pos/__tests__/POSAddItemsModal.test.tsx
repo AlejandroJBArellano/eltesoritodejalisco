@@ -13,7 +13,9 @@ vi.mock("@/hooks/pos/usePOSData", () => ({
 
 vi.mock("@/hooks/pos/usePOSCart", () => ({
   usePOSCart: vi.fn(),
-  isMixedOrderItem: vi.fn((name: string) => name.toLowerCase().includes("orden mixta")),
+  isMixedOrderItem: vi.fn((name: string) =>
+    name.toLowerCase().includes("orden mixta"),
+  ),
 }));
 
 const mockOrder: Order = {
@@ -22,7 +24,10 @@ const mockOrder: Order = {
   source: "POS",
   status: OrderStatus.PENDING,
   table: "Mesa 4",
-  customer: { id: "cust-1", name: "Juan Perez" } as unknown as Order["customer"],
+  customer: {
+    id: "cust-1",
+    name: "Juan Perez",
+  } as unknown as Order["customer"],
   notes: "Sin picante",
   subtotal: 100,
   tax: 16,
@@ -105,9 +110,7 @@ describe("POSAddItemsModal Component", () => {
   it("Test 1: should render header with active order details and autoFocus search input", () => {
     render(<POSAddItemsModal />);
 
-    expect(
-      screen.getByText("Agregar a Orden #1050"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Agregar a Orden #1050")).toBeInTheDocument();
     expect(screen.getByText(/Mesa: Mesa 4/i)).toBeInTheDocument();
     expect(screen.getByText(/Juan Perez/i)).toBeInTheDocument();
 
@@ -252,9 +255,7 @@ describe("POSAddItemsModal Component", () => {
     const removeAdditionalItemRow = vi.fn();
     vi.mocked(usePOSCart).mockReturnValue({
       ...defaultCartValue,
-      additionalItems: [
-        { menuItemId: "menu-1", quantity: "1", notes: "" },
-      ],
+      additionalItems: [{ menuItemId: "menu-1", quantity: "1", notes: "" }],
       updateAdditionalItemQty: undefined,
       handleAdditionalItemChange,
       removeAdditionalItemRow,
@@ -287,9 +288,7 @@ describe("POSAddItemsModal Component", () => {
     const handleAdditionalItemChange = vi.fn();
     vi.mocked(usePOSCart).mockReturnValue({
       ...defaultCartValue,
-      additionalItems: [
-        { menuItemId: "menu-1", quantity: "3", notes: "" },
-      ],
+      additionalItems: [{ menuItemId: "menu-1", quantity: "3", notes: "" }],
       updateAdditionalItemQty: undefined,
       handleAdditionalItemChange,
     } as unknown as ReturnType<typeof usePOSCart>);
@@ -306,9 +305,7 @@ describe("POSAddItemsModal Component", () => {
     const updateAdditionalItemQty = vi.fn();
     vi.mocked(usePOSCart).mockReturnValue({
       ...defaultCartValue,
-      additionalItems: [
-        { menuItemId: "menu-1", quantity: "2", notes: "" },
-      ],
+      additionalItems: [{ menuItemId: "menu-1", quantity: "2", notes: "" }],
       updateAdditionalItemQty,
       removeAdditionalItemRow: undefined,
     } as unknown as ReturnType<typeof usePOSCart>);
@@ -325,18 +322,21 @@ describe("POSAddItemsModal Component", () => {
     const setAdditionalItemNotes = vi.fn();
     vi.mocked(usePOSCart).mockReturnValue({
       ...defaultCartValue,
-      additionalItems: [
-        { menuItemId: "menu-1", quantity: "1", notes: "" },
-      ],
+      additionalItems: [{ menuItemId: "menu-1", quantity: "1", notes: "" }],
       setAdditionalItemNotes,
     } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSAddItemsModal />);
 
     const noteInput = screen.getByLabelText("Nota de producto");
-    fireEvent.change(noteInput, { target: { value: "Sin cebolla y salsa aparte" } });
+    fireEvent.change(noteInput, {
+      target: { value: "Sin cebolla y salsa aparte" },
+    });
 
-    expect(setAdditionalItemNotes).toHaveBeenCalledWith(0, "Sin cebolla y salsa aparte");
+    expect(setAdditionalItemNotes).toHaveBeenCalledWith(
+      0,
+      "Sin cebolla y salsa aparte",
+    );
   });
 
   // Test 5b: Fallback for notes update when setAdditionalItemNotes is not provided
@@ -344,9 +344,7 @@ describe("POSAddItemsModal Component", () => {
     const handleAdditionalItemChange = vi.fn();
     vi.mocked(usePOSCart).mockReturnValue({
       ...defaultCartValue,
-      additionalItems: [
-        { menuItemId: "menu-1", quantity: "1", notes: "" },
-      ],
+      additionalItems: [{ menuItemId: "menu-1", quantity: "1", notes: "" }],
       setAdditionalItemNotes: undefined,
       handleAdditionalItemChange,
     } as unknown as ReturnType<typeof usePOSCart>);
@@ -356,7 +354,11 @@ describe("POSAddItemsModal Component", () => {
     const noteInput = screen.getByLabelText("Nota de producto");
     fireEvent.change(noteInput, { target: { value: "Bien dorado" } });
 
-    expect(handleAdditionalItemChange).toHaveBeenCalledWith(0, "notes", "Bien dorado");
+    expect(handleAdditionalItemChange).toHaveBeenCalledWith(
+      0,
+      "notes",
+      "Bien dorado",
+    );
   });
 
   // Test 6: Envío del formulario y llamada a la API con los parámetros correctos
@@ -387,9 +389,7 @@ describe("POSAddItemsModal Component", () => {
   it("Test 6b: should disable inputs and buttons while isSubmittingCart is true", () => {
     vi.mocked(usePOSCart).mockReturnValue({
       ...defaultCartValue,
-      additionalItems: [
-        { menuItemId: "menu-1", quantity: "1", notes: "" },
-      ],
+      additionalItems: [{ menuItemId: "menu-1", quantity: "1", notes: "" }],
       isSubmittingCart: true,
     } as unknown as ReturnType<typeof usePOSCart>);
 
@@ -450,9 +450,7 @@ describe("POSAddItemsModal Component", () => {
   it("Test 8: should handle mobile tray view toggling and display stock badges", () => {
     vi.mocked(usePOSCart).mockReturnValue({
       ...defaultCartValue,
-      additionalItems: [
-        { menuItemId: "menu-1", quantity: "1", notes: "" },
-      ],
+      additionalItems: [{ menuItemId: "menu-1", quantity: "1", notes: "" }],
     } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSAddItemsModal />);
@@ -513,7 +511,10 @@ describe("POSAddItemsModal Component", () => {
       editingOrder: {
         ...mockOrder,
         table: "",
-        customer: { id: "c-2", name: "Maria Lopez" } as unknown as Order["customer"],
+        customer: {
+          id: "c-2",
+          name: "Maria Lopez",
+        } as unknown as Order["customer"],
       },
       additionalItems: undefined,
     } as unknown as ReturnType<typeof usePOSCart>);
@@ -534,9 +535,7 @@ describe("POSAddItemsModal Component", () => {
       updateAdditionalItemQty: undefined,
       removeAdditionalItemRow: undefined,
       setAdditionalItemNotes: undefined,
-      additionalItems: [
-        { menuItemId: "menu-1", quantity: "1", notes: "" },
-      ],
+      additionalItems: [{ menuItemId: "menu-1", quantity: "1", notes: "" }],
     } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSAddItemsModal />);
@@ -577,9 +576,7 @@ describe("POSAddItemsModal Component", () => {
       },
       updateAdditionalItemQty: undefined,
       handleAdditionalItemChange,
-      additionalItems: [
-        { menuItemId: "unknown-id", quantity: "", notes: "" },
-      ],
+      additionalItems: [{ menuItemId: "unknown-id", quantity: "", notes: "" }],
     } as unknown as ReturnType<typeof usePOSCart>);
 
     render(<POSAddItemsModal />);

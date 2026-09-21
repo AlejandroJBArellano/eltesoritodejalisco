@@ -112,40 +112,64 @@ describe("Service Mode Exclusivity Validation", () => {
   };
 
   it("should reject unavailable (sold out) item regardless of service mode", () => {
-    const takeoutResult = validateItemAvailabilityAndServiceMode(unavailableItem, "takeout");
+    const takeoutResult = validateItemAvailabilityAndServiceMode(
+      unavailableItem,
+      "takeout",
+    );
     expect(takeoutResult.valid).toBe(false);
     expect(takeoutResult.error).toContain("está agotado o no disponible");
 
-    const dineInResult = validateItemAvailabilityAndServiceMode(unavailableItem, "dine-in");
+    const dineInResult = validateItemAvailabilityAndServiceMode(
+      unavailableItem,
+      "dine-in",
+    );
     expect(dineInResult.valid).toBe(false);
     expect(dineInResult.error).toContain("está agotado o no disponible");
   });
 
   it("should reject exclusive dine-in item when ordering for takeout", () => {
-    const result = validateItemAvailabilityAndServiceMode(exclusiveDineInItem, "takeout");
+    const result = validateItemAvailabilityAndServiceMode(
+      exclusiveDineInItem,
+      "takeout",
+    );
     expect(result.valid).toBe(false);
-    expect(result.error).toContain("solo está disponible para consumir en el restaurante");
+    expect(result.error).toContain(
+      "solo está disponible para consumir en el restaurante",
+    );
   });
 
   it("should allow exclusive dine-in item when ordering for dine-in", () => {
-    const result = validateItemAvailabilityAndServiceMode(exclusiveDineInItem, "dine-in");
+    const result = validateItemAvailabilityAndServiceMode(
+      exclusiveDineInItem,
+      "dine-in",
+    );
     expect(result.valid).toBe(true);
   });
 
   it("should reject exclusive takeout item when ordering for dine-in", () => {
-    const result = validateItemAvailabilityAndServiceMode(exclusiveTakeoutItem, "dine-in");
+    const result = validateItemAvailabilityAndServiceMode(
+      exclusiveTakeoutItem,
+      "dine-in",
+    );
     expect(result.valid).toBe(false);
     expect(result.error).toContain("solo está disponible para llevar");
   });
 
   it("should allow exclusive takeout item when ordering for takeout", () => {
-    const result = validateItemAvailabilityAndServiceMode(exclusiveTakeoutItem, "takeout");
+    const result = validateItemAvailabilityAndServiceMode(
+      exclusiveTakeoutItem,
+      "takeout",
+    );
     expect(result.valid).toBe(true);
   });
 
   it("should allow omni-channel item for both dine-in and takeout", () => {
-    expect(validateItemAvailabilityAndServiceMode(omniChannelItem, "takeout").valid).toBe(true);
-    expect(validateItemAvailabilityAndServiceMode(omniChannelItem, "dine-in").valid).toBe(true);
+    expect(
+      validateItemAvailabilityAndServiceMode(omniChannelItem, "takeout").valid,
+    ).toBe(true);
+    expect(
+      validateItemAvailabilityAndServiceMode(omniChannelItem, "dine-in").valid,
+    ).toBe(true);
   });
 });
 
@@ -176,10 +200,20 @@ describe("Tip Amount Sanitization", () => {
 describe("Silent Cart Price Sync and Stale Item Purge", () => {
   it("should silently update prices and names when menu items change in database", () => {
     const initialCart: CartItem[] = [
-      { menuItemId: "item-1", name: "Tacos de Birria", price: 100, quantity: 2 },
+      {
+        menuItemId: "item-1",
+        name: "Tacos de Birria",
+        price: 100,
+        quantity: 2,
+      },
     ];
     const freshMenuItems: MenuItemValidation[] = [
-      { id: "item-1", name: "Tacos de Birria Suprema", price: 120, is_available: true },
+      {
+        id: "item-1",
+        name: "Tacos de Birria Suprema",
+        price: 120,
+        is_available: true,
+      },
     ];
 
     const synced = syncCartPricesAndPurgeObsolete(initialCart, freshMenuItems);
@@ -191,13 +225,33 @@ describe("Silent Cart Price Sync and Stale Item Purge", () => {
 
   it("should purge items from cart if deleted or marked is_available = false in database", () => {
     const initialCart: CartItem[] = [
-      { menuItemId: "item-1", name: "Tacos de Birria", price: 100, quantity: 2 },
-      { menuItemId: "item-deleted", name: "Platillo Antiguo Eliminado", price: 50, quantity: 1 },
-      { menuItemId: "item-unavailable", name: "Postre Agotado", price: 40, quantity: 1 },
+      {
+        menuItemId: "item-1",
+        name: "Tacos de Birria",
+        price: 100,
+        quantity: 2,
+      },
+      {
+        menuItemId: "item-deleted",
+        name: "Platillo Antiguo Eliminado",
+        price: 50,
+        quantity: 1,
+      },
+      {
+        menuItemId: "item-unavailable",
+        name: "Postre Agotado",
+        price: 40,
+        quantity: 1,
+      },
     ];
     const freshMenuItems: MenuItemValidation[] = [
       { id: "item-1", name: "Tacos de Birria", price: 100, is_available: true },
-      { id: "item-unavailable", name: "Postre Agotado", price: 40, is_available: false },
+      {
+        id: "item-unavailable",
+        name: "Postre Agotado",
+        price: 40,
+        is_available: false,
+      },
     ];
 
     const synced = syncCartPricesAndPurgeObsolete(initialCart, freshMenuItems);

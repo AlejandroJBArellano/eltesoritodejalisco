@@ -28,7 +28,8 @@ export function HourlyBarChartTooltip({
   isAvg?: boolean;
   metric?: ChartMetric;
 }) {
-  if (!active || !payload || !payload.length || !payload[0].payload) return null;
+  if (!active || !payload || !payload.length || !payload[0].payload)
+    return null;
   const row = payload[0].payload;
   return (
     <div

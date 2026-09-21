@@ -96,7 +96,9 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [accountCustomer, setAccountCustomer] = useState<Customer | null>(null);
-  const [whatsappCustomer, setWhatsappCustomer] = useState<Customer | null>(null);
+  const [whatsappCustomer, setWhatsappCustomer] = useState<Customer | null>(
+    null,
+  );
   const [formState, setFormState] = useState<CustomerFormState>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
@@ -108,7 +110,8 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [onlyDebtors, setOnlyDebtors] = useState(false);
 
-  type SortField = "name" | "loyalty_points" | "total_spend" | "birthday" | "debt_balance";
+  type SortField =
+    "name" | "loyalty_points" | "total_spend" | "birthday" | "debt_balance";
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
@@ -408,14 +411,22 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Total por Cobrar
               </p>
-              <p className={`mt-1 text-2xl font-black ${totalDebtSum > 0 ? "text-amber-400" : "text-emerald-400"}`}>
-                ${totalDebtSum.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              <p
+                className={`mt-1 text-2xl font-black ${totalDebtSum > 0 ? "text-amber-400" : "text-emerald-400"}`}
+              >
+                $
+                {totalDebtSum.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
               </p>
               <p className="text-[10px] font-bold text-text-light/40 mt-0.5">
-                {debtorCustomersCount} {debtorCustomersCount === 1 ? "con deuda" : "con deuda"}
+                {debtorCustomersCount}{" "}
+                {debtorCustomersCount === 1 ? "con deuda" : "con deuda"}
               </p>
             </div>
-            <div className={`rounded-xl p-3 ${totalDebtSum > 0 ? "bg-amber-500/10 text-amber-400" : "bg-emerald-500/10 text-emerald-400"}`}>
+            <div
+              className={`rounded-xl p-3 ${totalDebtSum > 0 ? "bg-amber-500/10 text-amber-400" : "bg-emerald-500/10 text-emerald-400"}`}
+            >
               <ReceiptText className="h-5 w-5" />
             </div>
           </div>
@@ -505,7 +516,9 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
               <ExportButton
                 data={sortedCustomers}
                 columns={CUSTOMER_EXPORT_COLUMNS}
-                filename={() => `clientes_${new Date().toISOString().split("T")[0]}`}
+                filename={() =>
+                  `clientes_${new Date().toISOString().split("T")[0]}`
+                }
                 sheetName="Clientes"
               />
               <button

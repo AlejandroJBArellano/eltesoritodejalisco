@@ -23,7 +23,8 @@ export function CustomerQRModal({
 
   // Generación de URL de destino para el cliente
   const registrationUrl =
-    typeof window !== "undefined" && window.location.hostname.includes("localhost")
+    typeof window !== "undefined" &&
+    window.location.hostname.includes("localhost")
       ? `http://localhost:5173/registro`
       : `https://${tenantSlug}.trykittn.com/registro`;
 

@@ -50,7 +50,8 @@ describe("ORDERS_EXPORT_COLUMNS in History Page", () => {
 
   const getCol = (header: string) => {
     const col = ORDERS_EXPORT_COLUMNS.find((c) => c.header === header);
-    if (!col) throw new Error(`Column "${header}" not found in ORDERS_EXPORT_COLUMNS`);
+    if (!col)
+      throw new Error(`Column "${header}" not found in ORDERS_EXPORT_COLUMNS`);
     return col;
   };
 
@@ -80,7 +81,10 @@ describe("ORDERS_EXPORT_COLUMNS in History Page", () => {
     const col = () => getCol("Fecha/Hora de Completado");
 
     it("should format completedAt date when present", () => {
-      const order = { ...baseOrder, completedAt: new Date("2026-09-01T18:25:00Z") };
+      const order = {
+        ...baseOrder,
+        completedAt: new Date("2026-09-01T18:25:00Z"),
+      };
       const val = col().accessor!(order);
       expect(val).not.toBe("N/A");
       expect(val).toContain("2026");
@@ -112,7 +116,10 @@ describe("ORDERS_EXPORT_COLUMNS in History Page", () => {
     const col = () => getCol("Hora de Pickup / Programada");
 
     it("should format pickupTime date when present", () => {
-      const order = { ...baseOrder, pickupTime: new Date("2026-09-01T19:00:00Z") };
+      const order = {
+        ...baseOrder,
+        pickupTime: new Date("2026-09-01T19:00:00Z"),
+      };
       const val = col().accessor!(order);
       expect(val).not.toBe("Inmediato / N/A");
       expect(val).toContain("2026");

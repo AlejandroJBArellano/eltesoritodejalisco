@@ -30,11 +30,15 @@ describe("POST /api/payments", () => {
     vi.mocked(getTenantContext).mockResolvedValue(mockTenant as any);
   });
 
-  const setupSupabaseMock = (orderToCheck = { corte_id: null, estado_cierre: null }) => {
+  const setupSupabaseMock = (
+    orderToCheck = { corte_id: null, estado_cierre: null },
+  ) => {
     const mockOrderSelect = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: orderToCheck, error: null }),
+      maybeSingle: vi
+        .fn()
+        .mockResolvedValue({ data: orderToCheck, error: null }),
     };
 
     const mockPaymentsInsert = {
@@ -94,7 +98,9 @@ describe("POST /api/payments", () => {
     const body = await response.json();
 
     expect(response.status).toBe(403);
-    expect(body.error).toBe("Se requiere PIN de Gerencia para registrar cortesías");
+    expect(body.error).toBe(
+      "Se requiere PIN de Gerencia para registrar cortesías",
+    );
   });
 
   it("returns 403 when WAITER attempts courtesy payment ($0.00) with invalid PIN", async () => {

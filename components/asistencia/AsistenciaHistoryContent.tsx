@@ -1,9 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/PageHeader";
-import {
-  AsistenciaHistoryProvider,
-} from "./AsistenciaHistoryContext";
+import { AsistenciaHistoryProvider } from "./AsistenciaHistoryContext";
 import { AsistenciaFilterBar } from "./AsistenciaFilterBar";
 import { AsistenciaSummaryKPIs } from "./AsistenciaSummaryKPIs";
 import { AsistenciaHistoryTable } from "./AsistenciaHistoryTable";

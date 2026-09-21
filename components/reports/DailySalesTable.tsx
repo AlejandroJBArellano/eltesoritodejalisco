@@ -26,7 +26,8 @@ export function DailySalesTable(props: DailySalesTableProps = {}) {
             Detalle de Ventas Diarias
           </h2>
           <p className="text-xs text-text-light/60 mt-1 font-medium">
-            Desglose tabular día a día con cálculo de ticket promedio y producto líder.
+            Desglose tabular día a día con cálculo de ticket promedio y producto
+            líder.
           </p>
         </div>
         <ExportButton

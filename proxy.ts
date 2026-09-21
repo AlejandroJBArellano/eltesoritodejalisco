@@ -94,7 +94,7 @@ export async function proxy(request: NextRequest) {
         {
           status: 429,
           headers: corsHeaders,
-        }
+        },
       );
     }
   }

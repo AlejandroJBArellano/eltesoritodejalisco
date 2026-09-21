@@ -9,7 +9,8 @@ export function SettingsFiscalSection() {
   return (
     <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20">
       <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
-        <FileText className="h-4 w-4 text-primary" /> Datos Fiscales del Restaurante
+        <FileText className="h-4 w-4 text-primary" /> Datos Fiscales del
+        Restaurante
       </h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

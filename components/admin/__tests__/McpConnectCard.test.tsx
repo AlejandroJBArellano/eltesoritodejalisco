@@ -27,7 +27,9 @@ describe("McpConnectCard Component", () => {
 
     render(<McpConnectCard />);
 
-    expect(screen.getByText("Conectar con Asistentes de IA (MCP)")).toBeInTheDocument();
+    expect(
+      screen.getByText("Conectar con Asistentes de IA (MCP)"),
+    ).toBeInTheDocument();
     expect(screen.getByText("1-Click Setup")).toBeInTheDocument();
     expect(screen.getByText("Paso 1")).toBeInTheDocument();
     expect(screen.getByText("Paso 2")).toBeInTheDocument();
@@ -82,14 +84,20 @@ describe("McpConnectCard Component", () => {
     fireEvent.click(generateBtn);
 
     await waitFor(() => {
-      expect(screen.getByText("¡Nueva clave generada con éxito!")).toBeInTheDocument();
-      expect(screen.getByText("kt_live_abcd1234567890abcdef12345678")).toBeInTheDocument();
+      expect(
+        screen.getByText("¡Nueva clave generada con éxito!"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("kt_live_abcd1234567890abcdef12345678"),
+      ).toBeInTheDocument();
     });
 
     // Test copy raw key
     const copyKeyBtn = screen.getByTitle("Copiar Clave");
     fireEvent.click(copyKeyBtn);
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith("kt_live_abcd1234567890abcdef12345678");
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      "kt_live_abcd1234567890abcdef12345678",
+    );
   });
 
   it("should switch tabs and copy snippet", async () => {
@@ -141,7 +149,9 @@ describe("McpConnectCard Component", () => {
     fireEvent.click(deleteBtn);
 
     await waitFor(() => {
-      expect(actionsModule.revokeTenantApiKeyAction).toHaveBeenCalledWith("key-to-del");
+      expect(actionsModule.revokeTenantApiKeyAction).toHaveBeenCalledWith(
+        "key-to-del",
+      );
     });
   });
 });

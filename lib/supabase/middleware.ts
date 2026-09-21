@@ -42,7 +42,7 @@ export async function updateSession(request: NextRequest, isPublic = false) {
     if (request.nextUrl.pathname.startsWith("/api")) {
       return NextResponse.json(
         { error: "Unauthorized: Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
     // no user, potentially respond by redirecting the user to the login page

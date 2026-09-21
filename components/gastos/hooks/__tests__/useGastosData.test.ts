@@ -96,18 +96,26 @@ describe("useGastosData Hook", () => {
   });
 
   it("creates expense and reloads data", async () => {
-    const fetchMock = vi.fn().mockImplementation((url: string, opts?: RequestInit) => {
-      if (opts?.method === "POST") {
-        return Promise.resolve({ ok: true, json: async () => ({ id: "new-exp" }) });
-      }
-      if (url.includes("/categorias")) {
-        return Promise.resolve({ ok: true, json: async () => mockCategories });
-      }
-      return Promise.resolve({
-        ok: true,
-        json: async () => ({ expenses: mockExpenses, totalSales: 15000 }),
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((url: string, opts?: RequestInit) => {
+        if (opts?.method === "POST") {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ id: "new-exp" }),
+          });
+        }
+        if (url.includes("/categorias")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => mockCategories,
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ expenses: mockExpenses, totalSales: 15000 }),
+        });
       });
-    });
     global.fetch = fetchMock;
 
     const { result } = renderHook(() =>
@@ -135,12 +143,17 @@ describe("useGastosData Hook", () => {
   });
 
   it("creates and updates category", async () => {
-    const fetchMock = vi.fn().mockImplementation((_url: string, opts?: RequestInit) => {
-      if (opts?.method === "POST" || opts?.method === "PUT") {
-        return Promise.resolve({ ok: true, json: async () => ({ id: "cat-x" }) });
-      }
-      return Promise.resolve({ ok: true, json: async () => [] });
-    });
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((_url: string, opts?: RequestInit) => {
+        if (opts?.method === "POST" || opts?.method === "PUT") {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ id: "cat-x" }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => [] });
+      });
     global.fetch = fetchMock;
 
     const { result } = renderHook(() => useGastosData({ autoFetch: false }));

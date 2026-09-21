@@ -97,7 +97,9 @@ describe("useAsistenciaHistory Hook", () => {
     });
 
     expect(result.current.filteredAttendances).toHaveLength(1);
-    expect(result.current.filteredAttendances[0].users?.name).toBe("Laura Cocinera");
+    expect(result.current.filteredAttendances[0].users?.name).toBe(
+      "Laura Cocinera",
+    );
 
     act(() => {
       result.current.setSearchQuery("2026-09-01");
@@ -150,7 +152,9 @@ describe("useAsistenciaHistory Hook", () => {
       result.current.handleSort("name");
     });
     expect(result.current.sortField).toBe("name");
-    expect(result.current.sortedAttendances[0].users?.name).toBe("Laura Cocinera"); // desc: L before C
+    expect(result.current.sortedAttendances[0].users?.name).toBe(
+      "Laura Cocinera",
+    ); // desc: L before C
 
     // Change to role
     act(() => {

@@ -46,10 +46,11 @@ export function IngredientTouchCard({
   const cfg = STATUS_CONFIG[status];
 
   // Cálculo de progreso visual respecto al stock mínimo o nivel óptimo
-  const targetStock = ingredient.minimumStock > 0 ? ingredient.minimumStock * 2 : 10;
+  const targetStock =
+    ingredient.minimumStock > 0 ? ingredient.minimumStock * 2 : 10;
   const progressPercent = Math.min(
     100,
-    Math.max(0, (ingredient.currentStock / targetStock) * 100)
+    Math.max(0, (ingredient.currentStock / targetStock) * 100),
   );
 
   return (
@@ -60,7 +61,10 @@ export function IngredientTouchCard({
       {/* Encabezado: Nombre y Badge de Estado */}
       <div className="flex items-start justify-between gap-2.5">
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-sm sm:text-base text-text-light truncate" title={ingredient.name}>
+          <h3
+            className="font-bold text-sm sm:text-base text-text-light truncate"
+            title={ingredient.name}
+          >
             {ingredient.name}
           </h3>
           <div className="flex items-center gap-2 mt-1">
@@ -69,7 +73,8 @@ export function IngredientTouchCard({
             </span>
             {ingredient.costPerUnit !== undefined && (
               <span className="text-[11px] text-text-light/40 font-medium">
-                ${ingredient.costPerUnit.toFixed(2)} / {ingredient.unit.toLowerCase()}
+                ${ingredient.costPerUnit.toFixed(2)} /{" "}
+                {ingredient.unit.toLowerCase()}
               </span>
             )}
           </div>
@@ -90,7 +95,10 @@ export function IngredientTouchCard({
             Stock Disponible
           </span>
           <span className="text-[11px] text-text-light/50 font-medium">
-            Mínimo: <span className="font-bold text-text-light/70">{ingredient.minimumStock} {ingredient.unit}</span>
+            Mínimo:{" "}
+            <span className="font-bold text-text-light/70">
+              {ingredient.minimumStock} {ingredient.unit}
+            </span>
           </span>
         </div>
 
@@ -100,8 +108,8 @@ export function IngredientTouchCard({
               status === "out"
                 ? "text-red-400"
                 : status === "low"
-                ? "text-amber-400"
-                : "text-text-light"
+                  ? "text-amber-400"
+                  : "text-text-light"
             }`}
           >
             {Number(ingredient.currentStock).toFixed(2)}

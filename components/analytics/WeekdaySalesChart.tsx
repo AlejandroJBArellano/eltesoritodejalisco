@@ -39,7 +39,9 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
 
   const bestDay = data.find((d) => d.isBestDay);
   const selectedDay =
-    selectedDayIndex !== null ? data.find((d) => d.dayIndex === selectedDayIndex) : null;
+    selectedDayIndex !== null
+      ? data.find((d) => d.dayIndex === selectedDayIndex)
+      : null;
 
   return (
     <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border flex flex-col justify-between">
@@ -51,7 +53,8 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
               Rendimiento por Día de la Semana
             </h2>
             <p className="text-xs text-text-light/60 mt-1 font-medium">
-              Compara ticket promedio, ventas y patrones. Haz clic en un día para ver su comparativa contextual.
+              Compara ticket promedio, ventas y patrones. Haz clic en un día
+              para ver su comparativa contextual.
             </p>
           </div>
 
@@ -97,8 +100,12 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
           {bestDay && bestDay.totalSales > 0 && (
             <div className="inline-flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 text-xs font-bold text-amber-400">
               <Sparkles className="h-3.5 w-3.5" />
-              Día más fuerte en ventas: <span className="text-white font-black">{bestDay.name}</span> (
-              ${bestDay.averageSales.toLocaleString("es-MX", { minimumFractionDigits: 2 })} prom.)
+              Día más fuerte en ventas:{" "}
+              <span className="text-white font-black">{bestDay.name}</span> ( $
+              {bestDay.averageSales.toLocaleString("es-MX", {
+                minimumFractionDigits: 2,
+              })}{" "}
+              prom.)
             </div>
           )}
 
@@ -126,7 +133,8 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
             >
               {/* Gridlines */}
               {yTicks.map((tick, i) => {
-                const y = paddingTop + innerHeight - (tick / maxVal) * innerHeight;
+                const y =
+                  paddingTop + innerHeight - (tick / maxVal) * innerHeight;
                 return (
                   <g key={`ytick-${i}`}>
                     <line
@@ -264,13 +272,19 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
                   <div className="flex justify-between gap-4">
                     <span>Promedio / día:</span>
                     <span className="font-black text-white">
-                      ${data[hoveredIndex].averageSales.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                      $
+                      {data[hoveredIndex].averageSales.toLocaleString("es-MX", {
+                        minimumFractionDigits: 2,
+                      })}
                     </span>
                   </div>
                   <div className="flex justify-between gap-4">
                     <span>Total acumulado:</span>
                     <span className="font-bold text-text-light/80">
-                      ${data[hoveredIndex].totalSales.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                      $
+                      {data[hoveredIndex].totalSales.toLocaleString("es-MX", {
+                        minimumFractionDigits: 2,
+                      })}
                     </span>
                   </div>
                   <div className="flex justify-between gap-4">

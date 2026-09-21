@@ -21,7 +21,7 @@ describe("CustomerAbonoModal Component", () => {
 
   it("returns null if not open", () => {
     const { container } = render(
-      <CustomerAbonoModal {...defaultProps} isOpen={false} />
+      <CustomerAbonoModal {...defaultProps} isOpen={false} />,
     );
     expect(container).toBeEmptyDOMElement();
   });
@@ -54,7 +54,7 @@ describe("CustomerAbonoModal Component", () => {
     fireEvent.submit(form);
 
     expect(
-      await screen.findByText(/El monto a abonar debe ser mayor a 0/i)
+      await screen.findByText(/El monto a abonar debe ser mayor a 0/i),
     ).toBeInTheDocument();
     expect(defaultProps.onSuccess).not.toHaveBeenCalled();
   });
@@ -69,7 +69,7 @@ describe("CustomerAbonoModal Component", () => {
     fireEvent.submit(form);
 
     expect(
-      await screen.findByText(/El monto no puede ser mayor al saldo deudor/i)
+      await screen.findByText(/El monto no puede ser mayor al saldo deudor/i),
     ).toBeInTheDocument();
   });
 
@@ -80,7 +80,9 @@ describe("CustomerAbonoModal Component", () => {
     fireEvent.click(cardBtn);
 
     // When card is selected, cash received input should be hidden
-    expect(screen.queryByLabelText(/Efectivo Recibido/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(/Efectivo Recibido/i),
+    ).not.toBeInTheDocument();
 
     const cashBtn = screen.getByRole("button", { name: /Efectivo/i });
     fireEvent.click(cashBtn);
@@ -108,7 +110,9 @@ describe("CustomerAbonoModal Component", () => {
     fireEvent.submit(form);
 
     expect(
-      await screen.findByText(/El monto recibido en efectivo no puede ser menor/i)
+      await screen.findByText(
+        /El monto recibido en efectivo no puede ser menor/i,
+      ),
     ).toBeInTheDocument();
   });
 
@@ -140,7 +144,7 @@ describe("CustomerAbonoModal Component", () => {
             receivedAmount: 200,
             change: 0,
           }),
-        })
+        }),
       );
       expect(defaultProps.onSuccess).toHaveBeenCalledWith(200);
       expect(defaultProps.onClose).toHaveBeenCalled();
@@ -165,7 +169,7 @@ describe("CustomerAbonoModal Component", () => {
     fireEvent.submit(form);
 
     expect(
-      await screen.findByText("Error en base de datos")
+      await screen.findByText("Error en base de datos"),
     ).toBeInTheDocument();
     expect(defaultProps.onSuccess).not.toHaveBeenCalled();
   });

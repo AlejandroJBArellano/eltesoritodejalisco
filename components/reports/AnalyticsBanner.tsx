@@ -17,7 +17,9 @@ export function AnalyticsBanner() {
             Descubre Tendencias Gráficas y Patrones de Venta
           </h3>
           <p className="text-xs text-text-light/60 font-medium">
-            Visualiza la evolución de ingresos con drill-down diario, distribución por categoría en unidades o facturación, y analiza la concurrencia horaria con el mapa de calor interactivo.
+            Visualiza la evolución de ingresos con drill-down diario,
+            distribución por categoría en unidades o facturación, y analiza la
+            concurrencia horaria con el mapa de calor interactivo.
           </p>
         </div>
 

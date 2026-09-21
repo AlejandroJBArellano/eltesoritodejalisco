@@ -19,10 +19,9 @@ describe("ReportsHeader Component", () => {
 
     expect(screen.getByText("Reportes & Balance")).toBeInTheDocument();
     expect(screen.getByText(/Últimos 7 días/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Explorar Gráficas/i })).toHaveAttribute(
-      "href",
-      "/analytics/sales",
-    );
+    expect(
+      screen.getByRole("link", { name: /Explorar Gráficas/i }),
+    ).toHaveAttribute("href", "/analytics/sales");
     expect(screen.getByRole("link", { name: /Horas Pico/i })).toHaveAttribute(
       "href",
       "/analytics/hourly",
@@ -37,7 +36,9 @@ describe("ReportsHeader Component", () => {
 
   it("triggers export filename callbacks when exporting", () => {
     render(<ReportsHeader period="today" />);
-    const btn1 = screen.getByRole("button", { name: /Exportar Ventas Diarias/i });
+    const btn1 = screen.getByRole("button", {
+      name: /Exportar Ventas Diarias/i,
+    });
     fireEvent.click(btn1);
     const csvBtn1 = screen.getAllByText(/CSV \(\.csv\)/i)[0];
     if (csvBtn1) fireEvent.click(csvBtn1);

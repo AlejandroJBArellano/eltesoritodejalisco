@@ -10,8 +10,10 @@ export default async function LoginPage({
   const tenant = await getTenantContext();
 
   const systemName = tenant.system_name;
-  const endsWithOS = systemName ? systemName.toLowerCase().endsWith("os") : false;
-  const prefix = endsWithOS ? systemName.slice(0, -2) : (systemName || "");
+  const endsWithOS = systemName
+    ? systemName.toLowerCase().endsWith("os")
+    : false;
+  const prefix = endsWithOS ? systemName.slice(0, -2) : systemName || "";
   const suffix = endsWithOS ? systemName.slice(-2) : "";
 
   return (

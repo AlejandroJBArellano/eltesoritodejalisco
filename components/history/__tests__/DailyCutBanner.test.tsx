@@ -217,7 +217,9 @@ describe("DailyCutBanner Component", () => {
       />,
     );
 
-    expect(screen.getByText(/Comisión: -\$40\.60 · Neto: \$959\.40/i)).toBeDefined();
+    expect(
+      screen.getByText(/Comisión: -\$40\.60 · Neto: \$959\.40/i),
+    ).toBeDefined();
   });
 
   it("renders Créditos Otorgados Hoy callout when creditoOtorgadoHoy > 0", () => {
@@ -234,7 +236,9 @@ describe("DailyCutBanner Component", () => {
       />,
     );
 
-    expect(screen.getByText("Créditos Otorgados Hoy (Cuentas por Cobrar)")).toBeDefined();
+    expect(
+      screen.getByText("Créditos Otorgados Hoy (Cuentas por Cobrar)"),
+    ).toBeDefined();
     expect(screen.getByText("$750.00")).toBeDefined();
   });
 });

@@ -20,8 +20,12 @@ describe("GastosHeader Component", () => {
         "Registro contable, deducciones operativas y categorización financiera",
       ),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Registrar Gasto/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Nueva Categoría/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Registrar Gasto/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Nueva Categoría/i }),
+    ).toBeInTheDocument();
   });
 
   it("triggers callback when Registrar Gasto button is clicked", () => {

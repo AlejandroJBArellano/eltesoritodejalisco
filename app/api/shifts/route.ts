@@ -38,7 +38,8 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from("employee_shifts")
-      .select(`
+      .select(
+        `
         id,
         tenant_id,
         user_id,
@@ -49,7 +50,8 @@ export async function GET(request: Request) {
         notes,
         created_at,
         updated_at
-      `)
+      `,
+      )
       .eq("tenant_id", tenant.id);
 
     if (startDate) {
@@ -66,18 +68,21 @@ export async function GET(request: Request) {
       query = query.eq("user_id", requestedUserId);
     }
 
-    query = query.order("date", { ascending: true }).order("start_time", { ascending: true });
+    query = query
+      .order("date", { ascending: true })
+      .order("start_time", { ascending: true });
 
     const [shiftsRes, collaborators] = await Promise.all([
       query,
-      isAdmin
-        ? getTenantCollaborators(tenant.id)
-        : Promise.resolve([]),
+      isAdmin ? getTenantCollaborators(tenant.id) : Promise.resolve([]),
     ]);
 
     if (shiftsRes.error) {
       console.error("Error fetching shifts:", shiftsRes.error);
-      return NextResponse.json({ error: "Error al obtener turnos" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Error al obtener turnos" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({
@@ -87,7 +92,10 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("GET /api/shifts error:", error);
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 },
+    );
   }
 }
 
@@ -118,7 +126,7 @@ export async function POST(request: Request) {
     if (!isAdmin) {
       return NextResponse.json(
         { error: "Permisos insuficientes para asignar turnos" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -127,8 +135,11 @@ export async function POST(request: Request) {
 
     if (!user_id || !date || !start_time || !end_time) {
       return NextResponse.json(
-        { error: "Faltan campos obligatorios (empleado, fecha, hora inicio, hora fin)" },
-        { status: 400 }
+        {
+          error:
+            "Faltan campos obligatorios (empleado, fecha, hora inicio, hora fin)",
+        },
+        { status: 400 },
       );
     }
 
@@ -159,7 +170,10 @@ export async function POST(request: Request) {
 
       if (updateError) {
         console.error("Error updating shift:", updateError);
-        return NextResponse.json({ error: "Error al actualizar turno" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Error al actualizar turno" },
+          { status: 500 },
+        );
       }
 
       return NextResponse.json({ shift: updated });
@@ -183,14 +197,20 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Error creating shift:", insertError);
-        return NextResponse.json({ error: "Error al crear turno" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Error al crear turno" },
+          { status: 500 },
+        );
       }
 
       return NextResponse.json({ shift: created }, { status: 201 });
     }
   } catch (error) {
     console.error("POST /api/shifts error:", error);
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 },
+    );
   }
 }
 
@@ -220,7 +240,7 @@ export async function DELETE(request: Request) {
     if (!isAdmin) {
       return NextResponse.json(
         { error: "Permisos insuficientes para eliminar turnos" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -228,7 +248,10 @@ export async function DELETE(request: Request) {
     const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ error: "ID de turno requerido" }, { status: 400 });
+      return NextResponse.json(
+        { error: "ID de turno requerido" },
+        { status: 400 },
+      );
     }
 
     const adminSupabase = createAdminClient();
@@ -240,12 +263,18 @@ export async function DELETE(request: Request) {
 
     if (deleteError) {
       console.error("Error deleting shift:", deleteError);
-      return NextResponse.json({ error: "Error al eliminar turno" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Error al eliminar turno" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("DELETE /api/shifts error:", error);
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 },
+    );
   }
 }

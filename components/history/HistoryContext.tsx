@@ -1,9 +1,22 @@
 "use client";
 
-import React, { createContext, useContext, useMemo, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useCallback,
+} from "react";
 import { useHistoryOrders } from "./hooks/useHistoryOrders";
 import { useDailyCutManager } from "./hooks/useDailyCutManager";
-import type { DailyCut, DailyCutSummaryTotals, Order, OrderFilters, OrderSortField, TipBreakdownItem } from "./types";
+import type {
+  DailyCut,
+  DailyCutSummaryTotals,
+  Order,
+  OrderFilters,
+  OrderSortField,
+  TipBreakdownItem,
+} from "./types";
 
 export interface HistoryContextValue {
   // Orders State
@@ -14,7 +27,10 @@ export interface HistoryContextValue {
   ordersTotalItems: number;
   availableTables: string[];
   filters: OrderFilters;
-  setFilter: <K extends keyof OrderFilters>(key: K, value: OrderFilters[K]) => void;
+  setFilter: <K extends keyof OrderFilters>(
+    key: K,
+    value: OrderFilters[K],
+  ) => void;
   resetFilters: () => void;
   ordersSortField: OrderSortField;
   setOrdersSortField: (field: OrderSortField) => void;
@@ -104,7 +120,8 @@ export function HistoryProvider({
   const [showCutsArchive, setShowCutsArchive] = useState(false);
   const [billingOrder, setBillingOrder] = useState<Order | null>(null);
   const [showDailySummaryTicket, setShowDailySummaryTicket] = useState(false);
-  const [dailySummaryTicketCut, setDailySummaryTicketCut] = useState<DailyCut | null>(null);
+  const [dailySummaryTicketCut, setDailySummaryTicketCut] =
+    useState<DailyCut | null>(null);
 
   const openDailySummaryTicket = useCallback((cut?: DailyCut | null) => {
     setDailySummaryTicketCut(cut ?? null);
@@ -134,86 +151,87 @@ export function HistoryProvider({
     onCutFinalized: handleCutFinalized,
   });
 
-  const value = useMemo<HistoryContextValue>(() => ({
-    orders: ordersHook.orders,
-    sortedOrders: ordersHook.sortedOrders,
-    paginatedOrders: ordersHook.paginatedOrders,
-    ordersTotalPages: ordersHook.totalPages,
-    ordersTotalItems: ordersHook.totalItems,
-    availableTables: ordersHook.availableTables,
-    filters: ordersHook.filters,
-    setFilter: ordersHook.setFilter,
-    resetFilters: ordersHook.resetFilters,
-    ordersSortField: ordersHook.sortField,
-    setOrdersSortField: ordersHook.setSortField,
-    ordersSortDir: ordersHook.sortDir,
-    setOrdersSortDir: ordersHook.setSortDir,
-    ordersPage: ordersHook.page,
-    setOrdersPage: ordersHook.setPage,
-    ordersPageSize: ordersHook.pageSize,
-    setOrdersPageSize: ordersHook.setPageSize,
-    expandedRow: ordersHook.expandedRow,
-    toggleRow: ordersHook.toggleRow,
-    isLoadingOrders: ordersHook.isLoading,
-    refetchOrders: ordersHook.refetch,
+  const value = useMemo<HistoryContextValue>(
+    () => ({
+      orders: ordersHook.orders,
+      sortedOrders: ordersHook.sortedOrders,
+      paginatedOrders: ordersHook.paginatedOrders,
+      ordersTotalPages: ordersHook.totalPages,
+      ordersTotalItems: ordersHook.totalItems,
+      availableTables: ordersHook.availableTables,
+      filters: ordersHook.filters,
+      setFilter: ordersHook.setFilter,
+      resetFilters: ordersHook.resetFilters,
+      ordersSortField: ordersHook.sortField,
+      setOrdersSortField: ordersHook.setSortField,
+      ordersSortDir: ordersHook.sortDir,
+      setOrdersSortDir: ordersHook.setSortDir,
+      ordersPage: ordersHook.page,
+      setOrdersPage: ordersHook.setPage,
+      ordersPageSize: ordersHook.pageSize,
+      setOrdersPageSize: ordersHook.setPageSize,
+      expandedRow: ordersHook.expandedRow,
+      toggleRow: ordersHook.toggleRow,
+      isLoadingOrders: ordersHook.isLoading,
+      refetchOrders: ordersHook.refetch,
 
-    todayTotals: cutManagerHook.todayTotals,
-    todayOrders: cutManagerHook.todayOrders,
-    todayExpenses: cutManagerHook.todayExpenses,
-    showFinalizeModal: cutManagerHook.showFinalizeModal,
-    setShowFinalizeModal: cutManagerHook.setShowFinalizeModal,
-    finalizeSuccess: cutManagerHook.finalizeSuccess,
-    isFinalizing: cutManagerHook.isFinalizing,
-    manualCash: cutManagerHook.manualCash,
-    setManualCash: cutManagerHook.setManualCash,
-    manualCard: cutManagerHook.manualCard,
-    setManualCard: cutManagerHook.setManualCard,
-    manualTipsEfectivo: cutManagerHook.manualTipsEfectivo,
-    setManualTipsEfectivo: cutManagerHook.setManualTipsEfectivo,
-    manualTipsTarjeta: cutManagerHook.manualTipsTarjeta,
-    setManualTipsTarjeta: cutManagerHook.setManualTipsTarjeta,
-    tipBreakdown: cutManagerHook.tipBreakdown,
-    isCalculatingTips: cutManagerHook.isCalculatingTips,
-    historyError: cutManagerHook.historyError,
-    setHistoryError: cutManagerHook.setHistoryError,
-    historySuccess: cutManagerHook.historySuccess,
-    pendingCutArmed: cutManagerHook.pendingCutArmed,
-    isGeneratingPendingCut: cutManagerHook.isGeneratingPendingCut,
-    hasPendingCut: cutManagerHook.hasPendingCut,
-    pendingDate: cutManagerHook.pendingDate,
-    pendingOrders: cutManagerHook.pendingOrders,
-    openFinalizeModal: cutManagerHook.openFinalizeModal,
-    handleFinalizarDia: cutManagerHook.handleFinalizarDia,
-    handleGeneratePendingCut: cutManagerHook.handleGeneratePendingCut,
-    terminalCommissionRate: cutManagerHook.terminalCommissionRate,
+      todayTotals: cutManagerHook.todayTotals,
+      todayOrders: cutManagerHook.todayOrders,
+      todayExpenses: cutManagerHook.todayExpenses,
+      showFinalizeModal: cutManagerHook.showFinalizeModal,
+      setShowFinalizeModal: cutManagerHook.setShowFinalizeModal,
+      finalizeSuccess: cutManagerHook.finalizeSuccess,
+      isFinalizing: cutManagerHook.isFinalizing,
+      manualCash: cutManagerHook.manualCash,
+      setManualCash: cutManagerHook.setManualCash,
+      manualCard: cutManagerHook.manualCard,
+      setManualCard: cutManagerHook.setManualCard,
+      manualTipsEfectivo: cutManagerHook.manualTipsEfectivo,
+      setManualTipsEfectivo: cutManagerHook.setManualTipsEfectivo,
+      manualTipsTarjeta: cutManagerHook.manualTipsTarjeta,
+      setManualTipsTarjeta: cutManagerHook.setManualTipsTarjeta,
+      tipBreakdown: cutManagerHook.tipBreakdown,
+      isCalculatingTips: cutManagerHook.isCalculatingTips,
+      historyError: cutManagerHook.historyError,
+      setHistoryError: cutManagerHook.setHistoryError,
+      historySuccess: cutManagerHook.historySuccess,
+      pendingCutArmed: cutManagerHook.pendingCutArmed,
+      isGeneratingPendingCut: cutManagerHook.isGeneratingPendingCut,
+      hasPendingCut: cutManagerHook.hasPendingCut,
+      pendingDate: cutManagerHook.pendingDate,
+      pendingOrders: cutManagerHook.pendingOrders,
+      openFinalizeModal: cutManagerHook.openFinalizeModal,
+      handleFinalizarDia: cutManagerHook.handleFinalizarDia,
+      handleGeneratePendingCut: cutManagerHook.handleGeneratePendingCut,
+      terminalCommissionRate: cutManagerHook.terminalCommissionRate,
 
-    showCutsArchive,
-    setShowCutsArchive,
-    toggleCutsArchive,
-    billingOrder,
-    setBillingOrder,
+      showCutsArchive,
+      setShowCutsArchive,
+      toggleCutsArchive,
+      billingOrder,
+      setBillingOrder,
 
-    showDailySummaryTicket,
-    setShowDailySummaryTicket,
-    dailySummaryTicketCut,
-    setDailySummaryTicketCut,
-    openDailySummaryTicket,
-    closeDailySummaryTicket,
-  }), [
-    ordersHook,
-    cutManagerHook,
-    showCutsArchive,
-    toggleCutsArchive,
-    billingOrder,
-    showDailySummaryTicket,
-    dailySummaryTicketCut,
-    openDailySummaryTicket,
-    closeDailySummaryTicket,
-  ]);
+      showDailySummaryTicket,
+      setShowDailySummaryTicket,
+      dailySummaryTicketCut,
+      setDailySummaryTicketCut,
+      openDailySummaryTicket,
+      closeDailySummaryTicket,
+    }),
+    [
+      ordersHook,
+      cutManagerHook,
+      showCutsArchive,
+      toggleCutsArchive,
+      billingOrder,
+      showDailySummaryTicket,
+      dailySummaryTicketCut,
+      openDailySummaryTicket,
+      closeDailySummaryTicket,
+    ],
+  );
 
   return (
-    <HistoryContext.Provider value={value}>
-      {children}
-    </HistoryContext.Provider>
+    <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>
   );
 }

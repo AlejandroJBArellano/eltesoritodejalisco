@@ -16,7 +16,9 @@ describe("SalesTrendChart Component", () => {
 
     expect(screen.getByText("Evolución Diaria de Ventas")).toBeInTheDocument();
     expect(
-      screen.getByText("No hay registros de ventas en el período seleccionado."),
+      screen.getByText(
+        "No hay registros de ventas en el período seleccionado.",
+      ),
     ).toBeInTheDocument();
   });
 
@@ -53,9 +55,7 @@ describe("SalesTrendChart Component", () => {
 
   it("handles bar hover and bar click", () => {
     const handleSelectDay = vi.fn();
-    const mockChartData = [
-      { date: "2026-09-01", total: 4500, label: "mar 1" },
-    ];
+    const mockChartData = [{ date: "2026-09-01", total: 4500, label: "mar 1" }];
     render(
       <SalesTrendChart
         chartData={mockChartData}

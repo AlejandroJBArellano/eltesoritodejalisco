@@ -130,9 +130,7 @@ describe("POSDiscountModal", () => {
     const applyBtn = screen.getByRole("button", { name: /aplicar descuento/i });
     fireEvent.click(applyBtn);
 
-    expect(
-      screen.getByText("Ingresa el PIN de gerencia"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Ingresa el PIN de gerencia")).toBeInTheDocument();
     expect(handleApply).not.toHaveBeenCalled();
 
     // Enter PIN

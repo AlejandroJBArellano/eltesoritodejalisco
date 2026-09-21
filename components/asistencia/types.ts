@@ -30,12 +30,7 @@ export type AttendanceRecord = {
 export type AttendanceAction = "CHECK_IN" | "CHECK_OUT";
 
 export type AttendanceSortField =
-  | "name"
-  | "role"
-  | "date"
-  | "check_in"
-  | "duration"
-  | "status";
+  "name" | "role" | "date" | "check_in" | "duration" | "status";
 
 export type SortDirection = "asc" | "desc";
 

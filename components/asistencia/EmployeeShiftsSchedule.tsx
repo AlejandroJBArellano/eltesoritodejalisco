@@ -11,7 +11,13 @@ import {
   isSameDay,
 } from "date-fns";
 import { es } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Calendar, Clock, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Clock,
+  Loader2,
+} from "lucide-react";
 import type { EmployeeShift } from "./types";
 
 interface EmployeeShiftsScheduleProps {
@@ -40,7 +46,7 @@ export function EmployeeShiftsSchedule({
       setIsLoading(true);
       setError(null);
       const res = await fetch(
-        `/api/shifts?start_date=${weekStartStr}&end_date=${weekEndStr}`
+        `/api/shifts?start_date=${weekStartStr}&end_date=${weekEndStr}`,
       );
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
@@ -173,7 +179,8 @@ export function EmployeeShiftsSchedule({
                         <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-text-light">
                           <Clock className="h-3 w-3 text-primary shrink-0" />
                           <span>
-                            {s.start_time.slice(0, 5)} - {s.end_time.slice(0, 5)}
+                            {s.start_time.slice(0, 5)} -{" "}
+                            {s.end_time.slice(0, 5)}
                           </span>
                         </div>
                         {s.area && (

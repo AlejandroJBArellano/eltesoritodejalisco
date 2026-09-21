@@ -8,11 +8,17 @@ describe("AverageTicketTrendChart Component", () => {
   it("renders empty state when data array is empty", () => {
     render(<AverageTicketTrendChart data={[]} periodAverageTicket={0} />);
 
-    expect(screen.getByText("Evolución del Ticket Promedio")).toBeInTheDocument();
     expect(
-      screen.getByText("No hay órdenes registradas en el período seleccionado."),
+      screen.getByText("Evolución del Ticket Promedio"),
     ).toBeInTheDocument();
-    expect(screen.queryByTestId("average-ticket-trend-chart")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "No hay órdenes registradas en el período seleccionado.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("average-ticket-trend-chart"),
+    ).not.toBeInTheDocument();
   });
 
   it("renders chart with multiple data points, reference line and handles hover events", () => {
@@ -34,13 +40,12 @@ describe("AverageTicketTrendChart Component", () => {
     ];
 
     render(
-      <AverageTicketTrendChart
-        data={mockData}
-        periodAverageTicket={225}
-      />,
+      <AverageTicketTrendChart data={mockData} periodAverageTicket={225} />,
     );
 
-    expect(screen.getByTestId("average-ticket-trend-chart")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("average-ticket-trend-chart"),
+    ).toBeInTheDocument();
     expect(screen.getByText("Promedio Período: $225.00")).toBeInTheDocument();
     expect(screen.getByText("mar 1")).toBeInTheDocument();
     expect(screen.getByText("mié 2")).toBeInTheDocument();
@@ -70,13 +75,12 @@ describe("AverageTicketTrendChart Component", () => {
     ];
 
     render(
-      <AverageTicketTrendChart
-        data={singleData}
-        periodAverageTicket={0}
-      />,
+      <AverageTicketTrendChart data={singleData} periodAverageTicket={0} />,
     );
 
-    expect(screen.getByTestId("average-ticket-trend-chart")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("average-ticket-trend-chart"),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/Promedio Período:/i)).not.toBeInTheDocument();
     expect(screen.getByText("mar 1")).toBeInTheDocument();
   });

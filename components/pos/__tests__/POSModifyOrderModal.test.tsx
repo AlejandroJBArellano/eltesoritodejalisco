@@ -1,6 +1,12 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { POSModifyOrderModal } from "../modals/POSModifyOrderModal";
 import { Order } from "@/types/pos";
 import { OrderStatus } from "@/types";
@@ -139,18 +145,26 @@ describe("POSModifyOrderModal Component", () => {
     expect(screen.getByText("$80.00 c/u")).toBeInTheDocument();
     expect(screen.getAllByText("$240.00").length).toBeGreaterThanOrEqual(1);
 
-    const noteInput = screen.getByPlaceholderText(/Nota \(ej\. Sin cebolla\)\.\.\./i);
+    const noteInput = screen.getByPlaceholderText(
+      /Nota \(ej\. Sin cebolla\)\.\.\./i,
+    );
     expect(noteInput).toBeInTheDocument();
     expect(noteInput).toHaveValue("Bien fría");
 
-    expect(screen.getByRole("button", { name: /Agregar Productos/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Agregar Productos/i }),
+    ).toBeInTheDocument();
   });
 
   it("modifies item notes when typing in the notes input", () => {
     render(<POSModifyOrderModal />);
 
-    const noteInput = screen.getByPlaceholderText(/Nota \(ej\. Sin cebolla\)\.\.\./i);
-    fireEvent.change(noteInput, { target: { value: "Sin hielo y con popote" } });
+    const noteInput = screen.getByPlaceholderText(
+      /Nota \(ej\. Sin cebolla\)\.\.\./i,
+    );
+    fireEvent.change(noteInput, {
+      target: { value: "Sin hielo y con popote" },
+    });
 
     expect(defaultCartValue.handleModifyNotesChange).toHaveBeenCalledWith(
       0,
@@ -237,7 +251,9 @@ describe("POSModifyOrderModal Component", () => {
     ).toBeInTheDocument();
 
     // Cancel discard dialog
-    const continueBtn = screen.getByRole("button", { name: /Continuar editando/i });
+    const continueBtn = screen.getByRole("button", {
+      name: /Continuar editando/i,
+    });
     fireEvent.click(continueBtn);
     expect(screen.queryByText("Descartar cambios")).not.toBeInTheDocument();
     expect(defaultCartValue.setModifyingOrder).not.toHaveBeenCalled();
@@ -252,7 +268,9 @@ describe("POSModifyOrderModal Component", () => {
   it("transitions directly to adding items if there are no unsaved changes", () => {
     render(<POSModifyOrderModal />);
 
-    const addProductsBtn = screen.getByRole("button", { name: /Agregar Productos/i });
+    const addProductsBtn = screen.getByRole("button", {
+      name: /Agregar Productos/i,
+    });
     fireEvent.click(addProductsBtn);
 
     expect(defaultCartValue.setEditingOrder).toHaveBeenCalledWith(mockOrder);
@@ -267,17 +285,23 @@ describe("POSModifyOrderModal Component", () => {
 
     render(<POSModifyOrderModal />);
 
-    const addProductsBtn = screen.getByRole("button", { name: /Agregar Productos/i });
+    const addProductsBtn = screen.getByRole("button", {
+      name: /Agregar Productos/i,
+    });
     fireEvent.click(addProductsBtn);
 
     expect(screen.getByText("Cambios sin guardar")).toBeInTheDocument();
     expect(
-      screen.getByText(/Tienes cambios sin guardar\. ¿Deseas guardarlos antes de agregar productos\?/i),
+      screen.getByText(
+        /Tienes cambios sin guardar\. ¿Deseas guardarlos antes de agregar productos\?/i,
+      ),
     ).toBeInTheDocument();
 
     // Option 1: Cancel
     const alertDialog = screen.getByRole("alertdialog");
-    const cancelOption = within(alertDialog).getByRole("button", { name: /^Cancelar$/i });
+    const cancelOption = within(alertDialog).getByRole("button", {
+      name: /^Cancelar$/i,
+    });
     fireEvent.click(cancelOption);
     expect(screen.queryByText("Cambios sin guardar")).not.toBeInTheDocument();
     expect(defaultCartValue.setEditingOrder).not.toHaveBeenCalled();
@@ -485,16 +509,22 @@ describe("POSModifyOrderModal Component", () => {
     expect(screen.getByText(/Descuento: COCA COLA/i)).toBeInTheDocument();
 
     // Remove discount from inside the modal
-    const removeDiscountBtn = within(dialog).getByRole("button", { name: /Quitar Descuento/i });
+    const removeDiscountBtn = within(dialog).getByRole("button", {
+      name: /Quitar Descuento/i,
+    });
     fireEvent.click(removeDiscountBtn);
-    expect(defaultCartValue.handleRemoveModifyItemDiscount).toHaveBeenCalledWith(0);
+    expect(
+      defaultCartValue.handleRemoveModifyItemDiscount,
+    ).toHaveBeenCalledWith(0);
 
     // Re-open and apply a preset discount
     fireEvent.click(screen.getByText(/-10%/i));
     const dialog2 = screen.getByRole("dialog");
     const presetBtn = within(dialog2).getByRole("button", { name: "15%" });
     fireEvent.click(presetBtn);
-    const applyDiscountBtn = within(dialog2).getByRole("button", { name: /Aplicar Descuento/i });
+    const applyDiscountBtn = within(dialog2).getByRole("button", {
+      name: /Aplicar Descuento/i,
+    });
     fireEvent.click(applyDiscountBtn);
     expect(defaultCartValue.handleApplyModifyItemDiscount).toHaveBeenCalledWith(
       0,
@@ -522,10 +552,14 @@ describe("POSModifyOrderModal Component", () => {
     const dialog2 = screen.getByRole("dialog");
     const presetBtn = within(dialog2).getByRole("button", { name: "20%" });
     fireEvent.click(presetBtn);
-    const applyBtn = within(dialog2).getByRole("button", { name: /Aplicar Descuento/i });
+    const applyBtn = within(dialog2).getByRole("button", {
+      name: /Aplicar Descuento/i,
+    });
     fireEvent.click(applyBtn);
 
-    expect(defaultCartValue.handleApplyModifyOrderDiscount).toHaveBeenCalledWith(
+    expect(
+      defaultCartValue.handleApplyModifyOrderDiscount,
+    ).toHaveBeenCalledWith(
       expect.objectContaining({ discountType: "PERCENT", discountValue: 20 }),
     );
   });
@@ -547,7 +581,9 @@ describe("POSModifyOrderModal Component", () => {
     fireEvent.click(editOrderDiscountBtn);
 
     const dialog = screen.getByRole("dialog");
-    const removeBtn = within(dialog).getByRole("button", { name: /Quitar Descuento/i });
+    const removeBtn = within(dialog).getByRole("button", {
+      name: /Quitar Descuento/i,
+    });
     fireEvent.click(removeBtn);
 
     expect(defaultCartValue.handleRemoveModifyOrderDiscount).toHaveBeenCalled();
@@ -609,7 +645,9 @@ describe("POSModifyOrderModal Component", () => {
     fireEvent.click(authSubmit);
 
     await waitFor(() => {
-      expect(defaultCartValue.handleSaveModifiedOrder).toHaveBeenCalledWith("1234");
+      expect(defaultCartValue.handleSaveModifiedOrder).toHaveBeenCalledWith(
+        "1234",
+      );
     });
   });
 
@@ -642,7 +680,9 @@ describe("POSModifyOrderModal Component", () => {
     render(<POSModifyOrderModal />);
 
     // Click + Agregar Productos with unsaved changes & reductions
-    const addProductsBtn = screen.getByRole("button", { name: /Agregar Productos/i });
+    const addProductsBtn = screen.getByRole("button", {
+      name: /Agregar Productos/i,
+    });
     fireEvent.click(addProductsBtn);
 
     // Click Guardar y Continuar in confirmation modal
@@ -664,7 +704,9 @@ describe("POSModifyOrderModal Component", () => {
     fireEvent.click(authSubmit);
 
     await waitFor(() => {
-      expect(defaultCartValue.handleSaveModifiedOrder).toHaveBeenCalledWith("4321");
+      expect(defaultCartValue.handleSaveModifiedOrder).toHaveBeenCalledWith(
+        "4321",
+      );
       expect(defaultCartValue.setEditingOrder).toHaveBeenCalledWith(mockOrder);
     });
   });
@@ -692,12 +734,17 @@ describe("POSModifyOrderModal Component", () => {
     render(<POSModifyOrderModal />);
 
     fireEvent.click(screen.getByRole("button", { name: /Guardar Cambios/i }));
-    const authModalCard = screen.getByText(/Autorizar Cancelación de Productos/i).closest("div.bg-card")!;
+    const authModalCard = screen
+      .getByText(/Autorizar Cancelación de Productos/i)
+      .closest("div.bg-card")!;
     expect(authModalCard).toBeInTheDocument();
 
-    const closeBtn = within(authModalCard as HTMLElement).getByLabelText("Cerrar");
+    const closeBtn = within(authModalCard as HTMLElement).getByLabelText(
+      "Cerrar",
+    );
     fireEvent.click(closeBtn);
-    expect(screen.queryByText(/Autorizar Cancelación de Productos/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Autorizar Cancelación de Productos/i),
+    ).not.toBeInTheDocument();
   });
 });
-

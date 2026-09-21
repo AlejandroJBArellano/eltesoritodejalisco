@@ -26,9 +26,10 @@ export async function GET() {
       { categories },
       {
         headers: {
-          "Cache-Control": "public, max-age=10, s-maxage=60, stale-while-revalidate=600",
+          "Cache-Control":
+            "public, max-age=10, s-maxage=60, stale-while-revalidate=600",
         },
-      }
+      },
     );
   } catch (error) {
     console.error("Error fetching menu categories:", error);
@@ -148,7 +149,8 @@ export async function PUT(request: NextRequest) {
     }
 
     // Single category update
-    const { id, name, translations, sort_order, is_active, show_in_pickup } = body;
+    const { id, name, translations, sort_order, is_active, show_in_pickup } =
+      body;
 
     if (!id) {
       return NextResponse.json(
@@ -177,7 +179,8 @@ export async function PUT(request: NextRequest) {
     if (translations !== undefined) updatePayload.translations = translations;
     if (sort_order !== undefined) updatePayload.sort_order = sort_order;
     if (is_active !== undefined) updatePayload.is_active = is_active;
-    if (show_in_pickup !== undefined) updatePayload.show_in_pickup = show_in_pickup;
+    if (show_in_pickup !== undefined)
+      updatePayload.show_in_pickup = show_in_pickup;
 
     const { data: category, error: updateError } = await supabase
       .from("menu_categories")

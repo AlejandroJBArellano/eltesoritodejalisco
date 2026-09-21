@@ -32,7 +32,9 @@ describe("mcp/server", () => {
 
   it("should return list of tools on ListToolsRequest", async () => {
     const server = createKittnMcpServer({ apiKey: "kt_live_test_123" });
-    const handler = (server as any)._requestHandlers.get(ListToolsRequestSchema.shape.method.value);
+    const handler = (server as any)._requestHandlers.get(
+      ListToolsRequestSchema.shape.method.value,
+    );
     expect(handler).toBeDefined();
 
     const res = await handler({
@@ -44,7 +46,9 @@ describe("mcp/server", () => {
 
   it("should throw error if apiKey is not configured on tool call", async () => {
     const server = createKittnMcpServer();
-    const handler = (server as any)._requestHandlers.get(CallToolRequestSchema.shape.method.value);
+    const handler = (server as any)._requestHandlers.get(
+      CallToolRequestSchema.shape.method.value,
+    );
 
     await expect(
       handler({
@@ -59,7 +63,9 @@ describe("mcp/server", () => {
 
   it("should throw error if called tool is not recognized", async () => {
     const server = createKittnMcpServer({ apiKey: "kt_live_valid123" });
-    const handler = (server as any)._requestHandlers.get(CallToolRequestSchema.shape.method.value);
+    const handler = (server as any)._requestHandlers.get(
+      CallToolRequestSchema.shape.method.value,
+    );
 
     await expect(
       handler({
@@ -82,7 +88,9 @@ describe("mcp/server", () => {
     });
 
     const server = createKittnMcpServer({ apiKey: "kt_live_valid123" });
-    const handler = (server as any)._requestHandlers.get(CallToolRequestSchema.shape.method.value);
+    const handler = (server as any)._requestHandlers.get(
+      CallToolRequestSchema.shape.method.value,
+    );
 
     const res = await handler({
       method: "tools/call",
@@ -112,7 +120,9 @@ describe("mcp/server", () => {
     });
 
     const server = createKittnMcpServer({ apiKey: "kt_live_valid123" });
-    const handler = (server as any)._requestHandlers.get(CallToolRequestSchema.shape.method.value);
+    const handler = (server as any)._requestHandlers.get(
+      CallToolRequestSchema.shape.method.value,
+    );
 
     const res = await handler({
       method: "tools/call",
@@ -130,7 +140,9 @@ describe("mcp/server", () => {
     mockFetch.mockRejectedValueOnce(new Error("ECONNREFUSED"));
 
     const server = createKittnMcpServer({ apiKey: "kt_live_valid123" });
-    const handler = (server as any)._requestHandlers.get(CallToolRequestSchema.shape.method.value);
+    const handler = (server as any)._requestHandlers.get(
+      CallToolRequestSchema.shape.method.value,
+    );
 
     const res = await handler({
       method: "tools/call",

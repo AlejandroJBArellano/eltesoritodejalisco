@@ -266,7 +266,9 @@ export function TareasClient({
               },
             },
           ]}
-          filename={() => `checklist_tareas_${new Date().toISOString().split("T")[0]}`}
+          filename={() =>
+            `checklist_tareas_${new Date().toISOString().split("T")[0]}`
+          }
           sheetName="Checklist"
         />
       </div>

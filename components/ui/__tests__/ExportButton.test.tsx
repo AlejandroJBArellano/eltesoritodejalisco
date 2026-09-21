@@ -35,7 +35,9 @@ describe("ExportButton Component", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /Exportar/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Exportar/i }),
+    ).toBeInTheDocument();
   });
 
   it("should render with custom label and variant", () => {
@@ -123,7 +125,9 @@ describe("ExportButton Component", () => {
 
   it("should trigger exportToCSV when CSV option is clicked", async () => {
     const user = userEvent.setup();
-    const exportCSVSpy = vi.spyOn(exportLib, "exportToCSV").mockImplementation(() => {});
+    const exportCSVSpy = vi
+      .spyOn(exportLib, "exportToCSV")
+      .mockImplementation(() => {});
 
     render(
       <ExportButton
@@ -146,7 +150,9 @@ describe("ExportButton Component", () => {
 
   it("should trigger exportToExcel with resolved filename function and custom sheet name", async () => {
     const user = userEvent.setup();
-    const exportExcelSpy = vi.spyOn(exportLib, "exportToExcel").mockImplementation(() => {});
+    const exportExcelSpy = vi
+      .spyOn(exportLib, "exportToExcel")
+      .mockImplementation(() => {});
 
     render(
       <ExportButton

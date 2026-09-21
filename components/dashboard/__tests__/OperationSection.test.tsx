@@ -48,7 +48,9 @@ describe("OperationSection Component", () => {
   });
 
   it("hides POS and Tareas Diarias when user is not admin, waiter nor inventory", () => {
-    render(<OperationSection isAdmin={false} isWaiter={false} isInventory={false} />);
+    render(
+      <OperationSection isAdmin={false} isWaiter={false} isInventory={false} />,
+    );
 
     expect(screen.queryByText("Punto de Venta")).not.toBeInTheDocument();
     expect(screen.queryByText("Tareas Diarias")).not.toBeInTheDocument();
@@ -57,7 +59,9 @@ describe("OperationSection Component", () => {
   });
 
   it("shows Tareas Diarias but hides POS when isInventory is true", () => {
-    render(<OperationSection isAdmin={false} isWaiter={false} isInventory={true} />);
+    render(
+      <OperationSection isAdmin={false} isWaiter={false} isInventory={true} />,
+    );
 
     expect(screen.queryByText("Punto de Venta")).not.toBeInTheDocument();
     expect(screen.getByText("Tareas Diarias")).toBeInTheDocument();

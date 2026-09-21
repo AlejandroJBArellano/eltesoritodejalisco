@@ -1,7 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import React from "react";
-import { HistoryProvider, useHistoryContext, useHistoryContextNullable } from "../HistoryContext";
+import {
+  HistoryProvider,
+  useHistoryContext,
+  useHistoryContextNullable,
+} from "../HistoryContext";
 
 vi.mock("@/hooks/usePendingCut", () => ({
   usePendingCut: () => ({

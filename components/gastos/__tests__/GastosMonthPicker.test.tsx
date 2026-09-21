@@ -13,7 +13,9 @@ describe("GastosMonthPicker Component", () => {
     );
 
     expect(screen.getByText("Resumen Financiero")).toBeInTheDocument();
-    expect(screen.getByText("Control de Egresos y Balance")).toBeInTheDocument();
+    expect(
+      screen.getByText("Control de Egresos y Balance"),
+    ).toBeInTheDocument();
 
     const input = screen.getByLabelText("Seleccionar mes") as HTMLInputElement;
     expect(input).toBeInTheDocument();

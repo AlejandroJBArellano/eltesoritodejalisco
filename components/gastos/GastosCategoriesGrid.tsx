@@ -15,7 +15,9 @@ export function GastosCategoriesGrid(props: GastosCategoriesGridProps = {}) {
   const context = useGastosContextNullable();
   const categories = props.categories ?? context?.categories ?? [];
   const onOpenCreateCategory =
-    props.onOpenCreateCategory ?? context?.handleOpenCreateCategory ?? (() => {});
+    props.onOpenCreateCategory ??
+    context?.handleOpenCreateCategory ??
+    (() => {});
   const onEditCategory =
     props.onEditCategory ?? context?.handleOpenEditCategory ?? (() => {});
   return (

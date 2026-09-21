@@ -279,7 +279,9 @@ describe("usePOSCart Hook", () => {
     });
 
     const setCheckoutOrder = vi.fn();
-    const fakeEvent = { preventDefault: vi.fn() } as unknown as React.FormEvent<HTMLFormElement>;
+    const fakeEvent = {
+      preventDefault: vi.fn(),
+    } as unknown as React.FormEvent<HTMLFormElement>;
 
     await act(async () => {
       await result.current.handleCheckoutSubmit(fakeEvent, setCheckoutOrder);
