@@ -13,6 +13,7 @@ import { SettingsPickupSection } from "./settings/SettingsPickupSection";
 import { SettingsStripeSection } from "./settings/SettingsStripeSection";
 import { SettingsTerminalSection } from "./settings/SettingsTerminalSection";
 import { SettingsBrandingSection } from "./settings/SettingsBrandingSection";
+import { McpConnectCard } from "./McpConnectCard";
 import { getContrastColor } from "./settings/types";
 
 export { COLOR_PRESETS, getContrastColor } from "./settings/types";
@@ -46,6 +47,7 @@ function SettingsFormContent() {
             <SettingsPickupSection />
             <SettingsStripeSection />
           </div>
+          <McpConnectCard />
         </div>
 
         {/* Right Column: Branding, Colors and Logo */}
