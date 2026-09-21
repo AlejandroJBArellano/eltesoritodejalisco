@@ -23,7 +23,7 @@ export function OperationSection(props?: OperationSectionProps) {
 
   return (
     <CollapsibleSection title="Operación Diaria" dotColorClass="bg-primary">
-      <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         {canAccessPOS && (
           <ModuleCard
             title="Punto de Venta"
@@ -61,7 +61,7 @@ export function OperationSection(props?: OperationSectionProps) {
           href="/asistencia"
           icon={Clock}
           badge="Turnos"
-          themeClass="bg-purple-500/10 text-purple-500"
+          themeClass="bg-purple-500/10 text-purple-400"
           hoverColor="#a855f7"
         />
       </div>

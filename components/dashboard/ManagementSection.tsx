@@ -45,8 +45,11 @@ export function ManagementSection(props?: ManagementSectionProps) {
   const slug = tenant.slug || "";
 
   return (
-    <CollapsibleSection title="Gestión y Clientes" dotColorClass="bg-success">
-      <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-3">
+    <CollapsibleSection
+      title="Gestión y Clientes"
+      dotColorClass="bg-emerald-500"
+    >
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
         {(isAdmin || isWaiter) && (
           <ModuleCard
             title="Kittn Pickup"
@@ -66,7 +69,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
             themeClass={
               isStripeEnabled
                 ? "bg-emerald-500/10 text-emerald-400"
-                : "bg-zinc-800 text-text-light/50"
+                : "bg-secondary text-text-light/50 border border-border"
             }
             hoverColor={isStripeEnabled ? "#10b981" : "var(--color-primary)"}
           />
@@ -78,7 +81,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
             href="/customers"
             icon={Users}
             badge="CRM"
-            themeClass="bg-success/10 text-success"
+            themeClass="bg-emerald-500/10 text-emerald-400"
             hoverColor="var(--color-success)"
           />
         )}
@@ -99,7 +102,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
             href="/inventario"
             icon={Package}
             badge="Stock"
-            themeClass="bg-emerald-500/10 text-emerald-500"
+            themeClass="bg-emerald-500/10 text-emerald-400"
             hoverColor="#10b981"
           />
         )}
@@ -110,7 +113,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
             href="/asistencia/history"
             icon={ReceiptText}
             badge="Historial"
-            themeClass="bg-purple-500/10 text-purple-500"
+            themeClass="bg-purple-500/10 text-purple-400"
             hoverColor="#a855f7"
           />
         )}
@@ -121,7 +124,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
             href="/admin/tareas"
             icon={ClipboardCheck}
             badge="Control"
-            themeClass="bg-blue-500/10 text-blue-500"
+            themeClass="bg-blue-500/10 text-blue-400"
             hoverColor="#3b82f6"
           />
         )}
@@ -142,7 +145,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
             href="/admin/horarios"
             icon={Clock}
             badge="Config"
-            themeClass="bg-amber-500/10 text-amber-500"
+            themeClass="bg-amber-500/10 text-amber-400"
             hoverColor="#f59e0b"
           />
         )}
@@ -153,7 +156,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
             href="/admin/settings"
             icon={Settings}
             badge="Empresa"
-            themeClass="bg-card text-white border border-border"
+            themeClass="bg-secondary text-text-light/80 border border-border"
             hoverColor="var(--color-primary)"
           />
         )}

@@ -6,13 +6,13 @@ export default function CustomersLoading() {
   return (
     <div className="min-h-screen bg-background text-text-light animate-pulse">
       {/* Header skeleton */}
-      <div className="border-b border-border bg-dark/40 px-4 py-4 sm:px-6 lg:px-8">
+      <div className="border-b border-border bg-card/40 px-4 py-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl flex items-center justify-between">
           <div className="space-y-2">
             <div className="h-5 w-40 rounded-lg bg-white/10" />
-            <div className="h-3 w-72 rounded-lg bg-white/5" />
+            <div className="h-3 w-72 rounded-md bg-white/5" />
           </div>
-          <div className="h-8 w-32 rounded-xl bg-emerald-500/20" />
+          <div className="h-8 w-32 rounded-lg bg-emerald-500/20" />
         </div>
       </div>
 
@@ -22,31 +22,31 @@ export default function CustomersLoading() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between"
+              className="rounded-xl bg-card p-5 border border-border flex items-center justify-between shadow-sm"
             >
               <div className="space-y-2">
                 <div className="h-3 w-24 rounded bg-white/10" />
-                <div className="h-7 w-16 rounded bg-white/10" />
+                <div className="h-7 w-16 rounded bg-white/10 font-mono" />
               </div>
-              <div className="h-11 w-11 rounded-xl bg-white/5" />
+              <div className="h-10 w-10 rounded-lg bg-white/5" />
             </div>
           ))}
         </div>
 
         {/* Table skeleton */}
-        <section className="rounded-2xl bg-card p-6 border border-border space-y-4">
+        <section className="rounded-xl bg-card p-6 border border-border space-y-4 shadow-sm">
           <div className="flex items-center justify-between border-b border-border pb-4">
             <div className="h-4 w-48 rounded bg-white/10" />
-            <div className="h-8 w-56 rounded-xl bg-white/5" />
+            <div className="h-8 w-56 rounded-lg bg-white/5" />
           </div>
 
           <div className="rounded-xl border border-border overflow-hidden">
             {/* Table header */}
-            <div className="bg-dark/40 px-4 py-3 flex gap-6 border-b border-border">
+            <div className="bg-background/50 px-4 py-3 flex gap-6 border-b border-border">
               {[140, 100, 80, 60, 80, 60].map((w, i) => (
                 <div
                   key={i}
-                  className={`h-3 w-${w} rounded bg-white/10`}
+                  className="h-3 rounded bg-white/10"
                   style={{ width: w }}
                 />
               ))}
@@ -58,16 +58,16 @@ export default function CustomersLoading() {
                 className="px-4 py-3.5 flex items-center gap-6 border-b border-border last:border-0"
               >
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-emerald-500/10" />
+                  <div className="h-8 w-8 rounded-full bg-secondary" />
                   <div className="h-3 w-28 rounded bg-white/10" />
                 </div>
-                <div className="h-3 w-24 rounded bg-white/5" />
-                <div className="h-3 w-16 rounded bg-white/5" />
-                <div className="h-5 w-20 rounded-full bg-amber-500/10" />
+                <div className="h-3 w-24 rounded bg-white/5 font-mono" />
+                <div className="h-3 w-16 rounded bg-white/5 font-mono" />
+                <div className="h-5 w-20 rounded-md bg-amber-500/10 border border-amber-500/20" />
                 <div className="h-3 w-16 rounded bg-white/5" />
                 <div className="ml-auto flex gap-2">
                   <div className="h-8 w-8 rounded-lg bg-white/5" />
-                  <div className="h-8 w-8 rounded-lg bg-red-500/10" />
+                  <div className="h-8 w-8 rounded-lg bg-rose-500/10" />
                 </div>
               </div>
             ))}

@@ -17,54 +17,57 @@ export default async function LoginPage({
   const suffix = endsWithOS ? systemName.slice(-2) : "";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-dark px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-6 bg-card p-8 rounded-2xl border border-border shadow-2xl">
-        <div className="text-center space-y-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
+      {/* Subtle background ambient highlight */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--color-primary)_0%,transparent_60%)] opacity-[0.03]" />
+
+      <div className="relative w-full max-w-md space-y-6 rounded-xl border border-border bg-card p-6 sm:p-8 shadow-xl">
+        <div className="text-center space-y-3">
           {/* Logo container showing KITTN and Tenant logo if set */}
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-3.5">
             {tenant.logo_url ? (
               <>
                 <img
                   src={tenant.logo_url}
                   alt={tenant.name}
-                  className="h-14 w-14 rounded-2xl object-cover border border-border/80 shadow-md"
+                  className="h-12 w-12 rounded-lg object-cover border border-border/80 shadow-xs"
                 />
-                <div className="h-8 w-px bg-border/60" />
+                <div className="h-6 w-px bg-border/80" />
                 <img
                   src="/logo-icon-orange.svg"
                   alt="Kittn Logo"
-                  className="h-14 w-14 object-contain"
+                  className="h-12 w-12 object-contain"
                 />
               </>
             ) : (
               <img
                 src="/logo-icon-orange.svg"
                 alt="Kittn Logo"
-                className="h-16 w-16 object-contain"
+                className="h-14 w-14 object-contain"
               />
             )}
           </div>
 
           <div className="space-y-1">
-            <h1 className="text-3xl font-black tracking-tighter uppercase">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight uppercase">
               <span className="text-primary">{prefix}</span>
               {suffix && <span className="text-warning">{suffix}</span>}
             </h1>
-            <h2 className="text-sm font-black text-text-light/80 uppercase tracking-wider">
+            <h2 className="text-sm font-semibold text-text-light/90">
               Iniciar sesión
             </h2>
-            <p className="text-[10px] font-bold text-text-light/40 uppercase tracking-widest">
+            <p className="text-xs text-text-light/50">
               Ingresa tus credenciales para acceder al sistema
             </p>
           </div>
         </div>
 
         <form className="space-y-4" action={login}>
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             <div>
               <label
                 htmlFor="email-address"
-                className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1"
+                className="text-xs font-semibold text-text-light/70 block mb-1.5"
               >
                 Correo electrónico
               </label>
@@ -74,14 +77,14 @@ export default async function LoginPage({
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full rounded-xl border border-border bg-dark/40 px-3.5 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
+                className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2.5 text-sm text-text-light outline-none transition-all placeholder:text-text-light/30 focus:border-primary focus:ring-1 focus:ring-primary/40"
                 placeholder="usuario@ejemplo.com"
               />
             </div>
             <div>
               <label
                 htmlFor="password"
-                className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1"
+                className="text-xs font-semibold text-text-light/70 block mb-1.5"
               >
                 Contraseña
               </label>
@@ -91,42 +94,42 @@ export default async function LoginPage({
                 type="password"
                 autoComplete="current-password"
                 required
-                className="w-full rounded-xl border border-border bg-dark/40 px-3.5 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
+                className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2.5 text-sm text-text-light outline-none transition-all placeholder:text-text-light/30 focus:border-primary focus:ring-1 focus:ring-primary/40"
                 placeholder="••••••••"
               />
             </div>
           </div>
 
           {error && (
-            <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-xs font-bold text-red-400">
+            <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-xs font-medium text-red-400">
               {error}
             </div>
           )}
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-primary px-4 py-3 text-xs font-black text-dark uppercase tracking-wider hover:bg-secondary transition-all shadow-md active:scale-98 cursor-pointer"
+            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-all hover:brightness-105 active:scale-[0.98] cursor-pointer shadow-sm"
           >
             Entrar
           </button>
         </form>
 
         <div className="flex items-center justify-center gap-3 my-2">
-          <div className="h-px flex-1 bg-white/10" />
-          <span className="text-[10px] font-black text-text-light/30 uppercase tracking-widest">
+          <div className="h-px flex-1 bg-border/60" />
+          <span className="text-[11px] font-semibold text-text-light/30 uppercase tracking-wider">
             O
           </span>
-          <div className="h-px flex-1 bg-white/10" />
+          <div className="h-px flex-1 bg-border/60" />
         </div>
 
         <form action={loginWithGoogle}>
           <button
             type="submit"
-            className="w-full flex justify-center items-center gap-2.5 rounded-xl border border-border bg-dark/40 px-4 py-3 text-xs font-bold text-text-light hover:bg-white/5 transition-all cursor-pointer"
+            className="w-full flex justify-center items-center gap-2.5 rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-medium text-text-light hover:bg-border/60 active:scale-[0.98] transition-all cursor-pointer"
           >
             <svg
               viewBox="0 0 24 24"
-              className="w-4 h-4"
+              className="w-4 h-4 shrink-0"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path

@@ -15,8 +15,12 @@ export function DailyStatsSection({ stats }: DailyStatsSectionProps) {
   });
 
   return (
-    <CollapsibleSection title="Resumen del Día" defaultOpen={false}>
-      <div className="grid gap-2 sm:gap-6 grid-cols-2 lg:grid-cols-4">
+    <CollapsibleSection
+      title="Resumen del Día"
+      dotColorClass="bg-primary"
+      defaultOpen={true}
+    >
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Órdenes Activas"
           icon={ClipboardList}
@@ -33,13 +37,13 @@ export function DailyStatsSection({ stats }: DailyStatsSectionProps) {
           title="Clientes"
           icon={Users}
           value={stats.customersCount}
-          themeClass="bg-success/10 text-success"
+          themeClass="bg-emerald-500/10 text-emerald-400"
         />
         <StatCard
           title="Propinas Hoy"
           icon={HandCoins}
           value={currencyFormatter.format(stats.tipsToday)}
-          themeClass="bg-blue-500/10 text-blue-500"
+          themeClass="bg-blue-500/10 text-blue-400"
         />
       </div>
     </CollapsibleSection>
