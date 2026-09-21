@@ -59,7 +59,7 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
 
   return (
     <>
-      <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+      <section className="rounded-xl bg-card p-6 shadow-xs border border-border space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
             <Folder className="h-5 w-5 text-blue-400" />
@@ -135,7 +135,7 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
                   return (
                     <tr
                       key={cut.id}
-                      className="hover:bg-white/5 transition-colors"
+                      className="hover:bg-card-light transition-colors"
                     >
                       <td className="py-3.5 px-3 font-bold text-text-light">
                         {new Date(
@@ -147,28 +147,28 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
                           day: "numeric",
                         })}
                       </td>
-                      <td className="py-3.5 px-3 text-right font-mono text-text-light/70">
+                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-text-light/70">
                         {cut.total_orders}
                       </td>
-                      <td className="py-3.5 px-3 text-right font-mono text-text-light/70">
+                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-text-light/70">
                         ${ventaBruta.toFixed(2)}
                       </td>
-                      <td className="py-3.5 px-3 text-right font-mono text-text-light font-bold">
+                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-text-light font-bold">
                         ${Number(cut.venta_neta).toFixed(2)}
                       </td>
-                      <td className="py-3.5 px-3 text-right font-mono text-amber-400/80">
+                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-amber-400/80">
                         ${Number(cut.iva_acumulado).toFixed(2)}
                       </td>
-                      <td className="py-3.5 px-3 text-right font-mono text-red-400">
+                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-red-400">
                         -${Number(cut.total_gastos).toFixed(2)}
                       </td>
-                      <td className="py-3.5 px-3 text-right font-mono text-blue-400/80">
+                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-blue-400/80">
                         {Number(cut.comision_tarjeta || 0) > 0
                           ? `-$${Number(cut.comision_tarjeta).toFixed(2)}`
                           : "$0.00"}
                       </td>
                       <td
-                        className={`py-3.5 px-3 text-right font-mono font-black ${
+                        className={`py-3.5 px-3 text-right font-mono tabular-nums font-black ${
                           Number(cut.utilidad_final) >= 0
                             ? "text-emerald-400"
                             : "text-red-400"

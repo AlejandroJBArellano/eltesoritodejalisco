@@ -60,7 +60,7 @@ function HistoryMainView() {
         <HistoryCharts />
 
         {/* TABLA DE ÓRDENES Y FILTROS (0 PROPS) */}
-        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-6">
+        <section className="rounded-xl bg-card p-6 shadow-xs border border-border space-y-6">
           <OrdersFilterBar />
           <OrdersHistoryTable />
         </section>
@@ -88,14 +88,14 @@ function HistoryMainView() {
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="bg-success text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+                className="bg-success text-white px-5 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Printer className="h-4 w-4" /> Imprimir Ticket
               </button>
               <button
                 type="button"
                 onClick={closeDailySummaryTicket}
-                className="bg-white/10 text-text-light px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+                className="bg-secondary text-text-light border border-border px-5 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider hover:bg-card-light active:scale-95 transition-all cursor-pointer"
               >
                 Cerrar
               </button>
@@ -120,8 +120,8 @@ export function HistoryContent() {
   if (user?.isWaiter) {
     return (
       <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
-        <div className="bg-card p-8 rounded-2xl shadow-xl border border-red-500/20 max-w-md w-full text-center space-y-4">
-          <div className="rounded-2xl bg-red-500/10 p-4 text-red-400 w-16 h-16 mx-auto flex items-center justify-center">
+        <div className="bg-card p-8 rounded-xl shadow-xs border border-red-500/20 max-w-md w-full text-center space-y-4">
+          <div className="rounded-lg bg-red-500/10 p-4 text-red-400 w-16 h-16 mx-auto flex items-center justify-center">
             <ShieldAlert className="h-8 w-8" />
           </div>
           <h1 className="text-2xl font-black text-text-light tracking-tight uppercase">
@@ -134,7 +134,7 @@ export function HistoryContent() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 w-full py-3 bg-[#E0E0E0] text-black rounded-xl font-black text-sm uppercase tracking-wider hover:bg-white transition-all shadow-md"
+            className="inline-flex items-center justify-center gap-2 w-full py-3 bg-secondary text-text-light border border-border rounded-lg font-black text-sm uppercase tracking-wider hover:bg-card-light transition-all shadow-xs"
           >
             <ArrowLeft className="h-4 w-4" /> Volver al Dashboard
           </Link>

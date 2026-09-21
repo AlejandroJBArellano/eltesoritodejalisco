@@ -184,7 +184,7 @@ export function HistoryCharts(props: HistoryChartsProps = {}) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Venta Diaria */}
-        <div className="rounded-2xl bg-card p-6 shadow-sm border border-border lg:col-span-2 space-y-4">
+        <div className="rounded-xl bg-card p-6 shadow-xs border border-border lg:col-span-2 space-y-4">
           <h3 className="text-sm font-black text-text-light uppercase tracking-wider flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-blue-400" />
             Venta Diaria ({format(new Date(), "MMMM", { locale: es })})
@@ -322,7 +322,7 @@ export function HistoryCharts(props: HistoryChartsProps = {}) {
         </div>
 
         {/* Mix de Categorías */}
-        <div className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4 flex flex-col justify-between">
+        <div className="rounded-xl bg-card p-6 shadow-xs border border-border space-y-4 flex flex-col justify-between">
           <h3 className="text-sm font-black text-text-light uppercase tracking-wider flex items-center gap-2">
             <PieChartIcon className="h-4 w-4 text-emerald-400" />
             Mix de Categorías
@@ -356,8 +356,8 @@ export function HistoryCharts(props: HistoryChartsProps = {}) {
                 {/* Donut Tooltip overlay */}
                 {hoveredSliceIndex !== null &&
                   donutSlices[hoveredSliceIndex] && (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none text-center bg-dark/95 border border-border px-2 py-1 rounded-lg z-20 shadow-xl">
-                      <p className="text-[11px] font-black text-white truncate max-w-22.5">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none text-center bg-card border border-border px-2.5 py-1.5 rounded-lg z-20 shadow-xl font-mono tabular-nums">
+                      <p className="text-[11px] font-black text-text-light truncate max-w-22.5 font-sans">
                         {donutSlices[hoveredSliceIndex].name}
                       </p>
                       <p className="text-[10px] font-bold text-emerald-400">

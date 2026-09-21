@@ -24,7 +24,7 @@ export function DailyCutDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 no-print">
-      <div className="w-full max-w-lg rounded-2xl bg-card p-6 shadow-2xl border border-border max-h-[90vh] overflow-y-auto custom-scrollbar space-y-5">
+      <div className="w-full max-w-lg rounded-xl bg-card p-6 shadow-2xl border border-border max-h-[90vh] overflow-y-auto custom-scrollbar space-y-5">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
             <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
@@ -53,55 +53,55 @@ export function DailyCutDetailModal({
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-dark/40 p-3 rounded-xl border border-border">
+          <div className="bg-secondary p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Venta Neta (Sin IVA)
             </span>
-            <span className="text-text-light text-lg font-mono font-bold">
+            <span className="text-text-light text-lg font-mono tabular-nums font-bold">
               ${Number(cut.venta_neta).toFixed(2)}
             </span>
           </div>
-          <div className="bg-dark/40 p-3 rounded-xl border border-border">
+          <div className="bg-secondary p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               IVA Acumulado
             </span>
-            <span className="text-amber-400 text-lg font-mono font-bold">
+            <span className="text-amber-400 text-lg font-mono tabular-nums font-bold">
               ${Number(cut.iva_acumulado).toFixed(2)}
             </span>
           </div>
-          <div className="bg-dark/40 p-3 rounded-xl border border-border">
+          <div className="bg-secondary p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Propinas (Efectivo)
             </span>
-            <span className="text-emerald-400 text-lg font-mono font-bold">
+            <span className="text-emerald-400 text-lg font-mono tabular-nums font-bold">
               ${Number(cut.propinas_efectivo).toFixed(2)}
             </span>
           </div>
-          <div className="bg-dark/40 p-3 rounded-xl border border-border">
+          <div className="bg-secondary p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Propinas (Tarjeta)
             </span>
-            <span className="text-blue-400 text-lg font-mono font-bold">
+            <span className="text-blue-400 text-lg font-mono tabular-nums font-bold">
               ${Number(cut.propinas_tarjeta).toFixed(2)}
             </span>
           </div>
-          <div className="bg-dark/40 p-3 rounded-xl border border-border">
+          <div className="bg-secondary p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Caja Final (Efectivo)
             </span>
-            <span className="text-emerald-400 text-lg font-mono font-bold">
+            <span className="text-emerald-400 text-lg font-mono tabular-nums font-bold">
               ${Number(cut.caja_efectivo).toFixed(2)}
             </span>
           </div>
-          <div className="bg-dark/40 p-3 rounded-xl border border-border">
+          <div className="bg-secondary p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Caja Final (Tarjeta)
             </span>
-            <span className="text-blue-400 text-lg font-mono font-bold">
+            <span className="text-blue-400 text-lg font-mono tabular-nums font-bold">
               ${Number(cut.caja_tarjeta).toFixed(2)}
             </span>
             {Number(cut.comision_tarjeta || 0) > 0 && (
-              <span className="text-[10px] text-blue-300/70 font-mono block mt-1">
+              <span className="text-[10px] text-blue-300/70 font-mono tabular-nums block mt-1">
                 Comisión: -${Number(cut.comision_tarjeta).toFixed(2)} · Neto: $
                 {(
                   Number(cut.caja_tarjeta) - Number(cut.comision_tarjeta)
@@ -109,20 +109,20 @@ export function DailyCutDetailModal({
               </span>
             )}
           </div>
-          <div className="bg-dark/40 p-3 rounded-xl border border-border">
+          <div className="bg-secondary p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Total Gastos
             </span>
-            <span className="text-red-400 text-lg font-mono font-bold">
+            <span className="text-red-400 text-lg font-mono tabular-nums font-bold">
               -${Number(cut.total_gastos).toFixed(2)}
             </span>
           </div>
-          <div className="bg-dark/40 p-3 rounded-xl border border-border">
+          <div className="bg-secondary p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Utilidad Final
             </span>
             <span
-              className={`text-lg font-mono font-bold ${
+              className={`text-lg font-mono tabular-nums font-bold ${
                 Number(cut.utilidad_final) >= 0
                   ? "text-emerald-400"
                   : "text-red-400"
@@ -143,7 +143,7 @@ export function DailyCutDetailModal({
               {cut.expenses_detail.map((exp, idx) => (
                 <div
                   key={idx}
-                  className="flex justify-between items-center bg-dark/30 p-2 rounded-lg border border-border text-xs"
+                  className="flex justify-between items-center bg-secondary p-2 rounded-lg border border-border text-xs"
                 >
                   <div>
                     <span className="font-bold text-text-light">
@@ -161,7 +161,7 @@ export function DailyCutDetailModal({
                         FAC
                       </span>
                     )}
-                    <span className="font-mono text-red-400 font-bold">
+                    <span className="font-mono tabular-nums text-red-400 font-bold">
                       -${Number(exp.amount).toFixed(2)}
                     </span>
                   </div>
@@ -175,7 +175,7 @@ export function DailyCutDetailModal({
           <button
             type="button"
             onClick={() => onPrintCut(cut)}
-            className="w-full bg-blue-600/20 text-blue-300 border border-blue-500/30 py-3 rounded-xl font-black hover:bg-blue-600/30 transition-colors uppercase text-xs tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full bg-blue-600/20 text-blue-300 border border-blue-500/30 py-3 rounded-lg font-black hover:bg-blue-600/30 transition-colors uppercase text-xs tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Printer className="h-4 w-4" />
             Reimprimir Ticket
@@ -183,7 +183,7 @@ export function DailyCutDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full bg-white/5 text-text-light/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider cursor-pointer"
+            className="w-full bg-secondary text-text-light/60 border border-border py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider cursor-pointer"
           >
             Cerrar
           </button>
