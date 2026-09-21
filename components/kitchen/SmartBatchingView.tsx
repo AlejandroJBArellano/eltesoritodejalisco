@@ -72,7 +72,7 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between border-b border-border pb-3">
         <h2 className="text-sm font-black text-text-light tracking-tight uppercase flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-secondary"></span>
+          <span className="h-2 w-2 rounded-full bg-dark/40"></span>
           Resumen de Preparación en Lote (Smart Batching)
         </h2>
       </div>
@@ -90,7 +90,7 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
                   <Utensils className="h-4 w-4 text-secondary" />
                   {item.menuItemName}
                 </h3>
-                <div className="rounded-lg bg-secondary/15 border border-secondary/30 px-3 py-1 text-center">
+                <div className="rounded-lg bg-dark/40 border border-secondary/30 px-3 py-1 text-center">
                   <span className="text-xl font-mono font-bold text-secondary tabular-nums">
                     {item.totalQuantity}{" "}
                     <span className="text-[10px] font-sans font-bold uppercase text-secondary/70">
@@ -108,7 +108,7 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
                 {item.orders.map((orderRef) => (
                   <div
                     key={orderRef.orderId}
-                    className="flex items-center justify-between rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium border border-border"
+                    className="flex items-center justify-between rounded-lg bg-dark/40 px-3 py-1.5 text-xs font-medium border border-border"
                   >
                     <span className="text-text-light/80">
                       Orden #{orderRef.orderNumber}

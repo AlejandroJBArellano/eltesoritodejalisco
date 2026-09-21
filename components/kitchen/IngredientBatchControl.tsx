@@ -159,7 +159,7 @@ export function IngredientBatchControl({
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-lg transition-all hover:border-border/80">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border bg-secondary p-4">
+      <div className="flex items-center justify-between border-b border-border bg-dark/40 p-4">
         <h3 className="flex items-center gap-2 font-black text-text-light">
           <Package className="h-5 w-5 text-emerald-400" />
           <span>{ingredientName}</span>
