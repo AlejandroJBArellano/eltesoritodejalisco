@@ -63,7 +63,10 @@ export function TopCustomersTable(props: TopCustomersTableProps = {}) {
                 0;
 
               return (
-                <tr key={index} className="hover:bg-secondary/40 transition-colors">
+                <tr
+                  key={index}
+                  className="hover:bg-secondary/40 transition-colors"
+                >
                   <td className="py-3.5 px-3">
                     <div className="flex items-center gap-3">
                       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-xs font-black text-primary">

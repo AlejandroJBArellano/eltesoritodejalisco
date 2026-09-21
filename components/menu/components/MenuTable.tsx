@@ -113,7 +113,10 @@ export function MenuTable({
           </thead>
           <tbody className="divide-y divide-border">
             {paginatedItems.map((item) => (
-              <tr key={item.id} className="hover:bg-secondary/40 transition-colors">
+              <tr
+                key={item.id}
+                className="hover:bg-secondary/40 transition-colors"
+              >
                 <td className="py-3 px-4">
                   {item.imageUrl ? (
                     <Image

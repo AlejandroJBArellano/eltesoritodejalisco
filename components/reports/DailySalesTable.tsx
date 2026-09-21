@@ -67,7 +67,10 @@ export function DailySalesTable(props: DailySalesTableProps = {}) {
           </thead>
           <tbody className="divide-y divide-border">
             {dailySalesData.map((row) => (
-              <tr key={row.date} className="hover:bg-secondary/40 transition-colors">
+              <tr
+                key={row.date}
+                className="hover:bg-secondary/40 transition-colors"
+              >
                 <td className="py-3.5 px-3 font-mono text-xs font-bold text-text-light">
                   {row.date}
                 </td>

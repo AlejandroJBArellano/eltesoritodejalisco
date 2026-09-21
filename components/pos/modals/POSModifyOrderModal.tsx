@@ -465,12 +465,16 @@ export function POSModifyOrderModal() {
               <div className="space-y-1 text-xs bg-secondary p-2.5 rounded-lg border border-border font-mono">
                 <div className="flex justify-between text-text-light/60">
                   <span>Subtotal bruto</span>
-                  <span className="tabular-nums">${safeTotals.subtotalGross.toFixed(2)}</span>
+                  <span className="tabular-nums">
+                    ${safeTotals.subtotalGross.toFixed(2)}
+                  </span>
                 </div>
                 {safeTotals.itemsDiscount > 0 && (
                   <div className="flex justify-between text-emerald-400/90 font-bold">
                     <span>Descuentos en productos</span>
-                    <span className="tabular-nums">-${safeTotals.itemsDiscount.toFixed(2)}</span>
+                    <span className="tabular-nums">
+                      -${safeTotals.itemsDiscount.toFixed(2)}
+                    </span>
                   </div>
                 )}
                 {safeTotals.orderDiscount > 0 && (
@@ -483,7 +487,9 @@ export function POSModifyOrderModal() {
                         modifyOrderDiscount?.discountReason,
                       )}
                     </span>
-                    <span className="tabular-nums">-${safeTotals.orderDiscount.toFixed(2)}</span>
+                    <span className="tabular-nums">
+                      -${safeTotals.orderDiscount.toFixed(2)}
+                    </span>
                   </div>
                 )}
               </div>

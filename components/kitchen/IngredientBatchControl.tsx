@@ -220,7 +220,9 @@ export function IngredientBatchControl({
                 </div>
                 <div className="mt-3 flex justify-between border-t border-amber-500/20 pt-2 font-black text-amber-300">
                   <span>Total Producido:</span>
-                  <span className="font-mono tabular-nums">{summaryData.totalItems} platillos</span>
+                  <span className="font-mono tabular-nums">
+                    {summaryData.totalItems} platillos
+                  </span>
                 </div>
               </div>
             )}

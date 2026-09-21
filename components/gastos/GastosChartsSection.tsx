@@ -364,7 +364,9 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
                     {/* Tooltip on hover */}
                     {isHovered && (
                       <div className="absolute right-0 bottom-full mb-1 z-20 pointer-events-none rounded-lg border border-border bg-card p-2.5 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap font-mono tabular-nums">
-                        <p className="font-black text-text-light font-sans">{cat.name}</p>
+                        <p className="font-black text-text-light font-sans">
+                          {cat.name}
+                        </p>
                         <p className="text-[11px] text-text-light/70 font-medium">
                           Gasto Acumulado: ${cat.value.toFixed(2)}
                         </p>

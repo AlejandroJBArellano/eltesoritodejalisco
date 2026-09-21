@@ -232,7 +232,10 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
           </thead>
           <tbody className="divide-y divide-border">
             {paginatedExecutions.map((exec) => (
-              <tr key={exec.id} className="hover:bg-secondary/40 transition-colors">
+              <tr
+                key={exec.id}
+                className="hover:bg-secondary/40 transition-colors"
+              >
                 <td className="py-3 px-4 text-text-light font-bold">
                   {exec.task?.name || "Desconocida"}
                 </td>

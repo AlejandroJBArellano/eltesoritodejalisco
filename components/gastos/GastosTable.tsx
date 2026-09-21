@@ -119,7 +119,10 @@ export function GastosTable(props: GastosTableProps = {}) {
           </thead>
           <tbody className="divide-y divide-border">
             {expenses.map((exp) => (
-              <tr key={exp.id} className="hover:bg-card-light transition-colors">
+              <tr
+                key={exp.id}
+                className="hover:bg-card-light transition-colors"
+              >
                 <td className="py-3.5 px-3 font-mono text-xs font-bold text-text-light/80 whitespace-nowrap tabular-nums">
                   {exp.date}
                 </td>

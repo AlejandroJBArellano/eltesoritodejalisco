@@ -101,7 +101,10 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
             <div className="inline-flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 text-xs font-bold text-amber-400">
               <Sparkles className="h-3.5 w-3.5" />
               Día más fuerte en ventas:{" "}
-              <span className="text-text-light font-black">{bestDay.name}</span> ( $
+              <span className="text-text-light font-black">
+                {bestDay.name}
+              </span>{" "}
+              ( $
               {bestDay.averageSales.toLocaleString("es-MX", {
                 minimumFractionDigits: 2,
               })}{" "}

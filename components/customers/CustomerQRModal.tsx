@@ -124,7 +124,7 @@ export function CustomerQRModal({
         <div className="space-y-3">
           {/* Enlace directo y botón de copiar */}
           <div className="flex items-center gap-2 rounded-lg bg-secondary border border-border p-2">
-            <span className="text-xs font-mono text-text-light/70 truncate flex-1 px-2 select-all font-mono">
+            <span className="text-xs font-mono text-text-light/70 truncate flex-1 px-2 select-all">
               {registrationUrl}
             </span>
             <button

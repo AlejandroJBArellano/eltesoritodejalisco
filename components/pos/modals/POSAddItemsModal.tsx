@@ -370,7 +370,9 @@ export function POSAddItemsModal() {
                 <ShoppingBag className="h-4 w-4" />
                 Ver bandeja ({totalAdditionalCount} productos)
               </span>
-              <span className="font-mono tabular-nums">${totalAdditionalAmount.toFixed(2)}</span>
+              <span className="font-mono tabular-nums">
+                ${totalAdditionalAmount.toFixed(2)}
+              </span>
             </button>
           </div>
         </div>

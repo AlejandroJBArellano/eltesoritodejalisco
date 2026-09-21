@@ -180,7 +180,9 @@ export function POSDiscountModal({
               {title}
             </h2>
             {subtitle && (
-              <p className="text-xs font-semibold text-text-light/50">{subtitle}</p>
+              <p className="text-xs font-semibold text-text-light/50">
+                {subtitle}
+              </p>
             )}
           </div>
           <button

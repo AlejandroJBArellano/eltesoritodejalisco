@@ -627,7 +627,10 @@ export function POSCheckoutModal() {
                         <span className="text-amber-400">
                           {checkoutOrder.customer?.name || "Asignado"}
                         </span>{" "}
-                        — <span className="font-mono tabular-nums">${checkoutOrder.total.toFixed(2)}</span>
+                        —{" "}
+                        <span className="font-mono tabular-nums">
+                          ${checkoutOrder.total.toFixed(2)}
+                        </span>
                       </p>
                     </div>
                   </div>
