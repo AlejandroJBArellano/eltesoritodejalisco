@@ -1,13 +1,14 @@
-# 📋 Arquitectura del Sistema - TesoritoOS
+# 📋 Arquitectura del Sistema - KittnOS
 
 ## Visión General
 
-TesoritoOS es una aplicación web full-stack construida con Next.js 16, diseñada específicamente para la gestión de restaurantes con énfasis en:
+KittnOS es una plataforma SaaS multi-tenant full-stack construida con Next.js 16 y Supabase (PostgreSQL), diseñada específicamente para la operación integral de restaurantes:
 
-- **Velocidad operativa** en el punto de venta
-- **Gestión automática de inventario**
-- **Tracking de efectividad de marketing**
-- **Experiencia optimizada para cocina**
+- **Aislamiento Multi-Tenant estricto** por restaurante (`tenant_id`)
+- **Velocidad operativa** en el punto de venta (POS) y comanderos
+- **Gestión automática de inventario**, insumos y recetas
+- **Kitchen Display System (KDS)** en tiempo real
+- **Analytics avanzados** (ventas por hora, tendencias, rendimientos de personal)
 
 ## Diagrama de Arquitectura
 
@@ -251,26 +252,30 @@ Admin consulta dashboard
 
 ## Decisiones de Arquitectura
 
+### Multi-Tenancy y Resolución de Tenants (`getTenantContext`)
+
+- **Aislamiento Lógico**: Base de datos unificada en PostgreSQL (Supabase) con filtrado estricto por `tenant_id`.
+- **Resolución Dinámica**: `getTenantContext()` (`lib/tenant.ts`) resuelve el restaurante a partir del subdominio (`[slug].admin.trykittn.com`, `[slug].localhost`) o el header `x-tenant-slug`.
+- **Caché de Doble Nivel**:
+  - `react.cache()`: Deduplica lecturas concurrentes dentro del ciclo de render de React Server Components.
+  - `tenantMemoryCache`: Mapa en memoria del worker Node.js con TTL de 2 minutos que evita la latencia de ~80ms por query a Supabase en cada request.
+
+### Separación de Clientes Supabase
+
+- **`createClient()` (`lib/supabase/server.ts`)**: Basado en `@supabase/ssr` para operaciones bajo el contexto de cookies de sesión del usuario autenticado.
+- **`createAdminClient()` (`lib/supabase/admin.ts`)**: Basado en `@supabase/supabase-js` con `SUPABASE_SERVICE_ROLE_KEY` para operaciones del sistema (aprovisionamiento, RPCs administrativas, webhooks y consultas de tenants).
+
 ### ¿Por qué Next.js App Router?
 
-- **Server Components**: Reduce JavaScript enviado al cliente
-- **API Routes integradas**: Backend y frontend en un mismo proyecto
-- **Streaming SSR**: Mejora percepción de velocidad
-- **Type-safety**: TypeScript end-to-end
+- **Server Components & Server Actions**: Reduce JavaScript enviado al cliente y elimina la necesidad de capas de API boilerplate para mutaciones directas.
+- **Streaming SSR**: Mejora la percepción de velocidad en dashboards y POS.
+- **Type-safety**: TypeScript end-to-end con tipos generados de Supabase (`types/supabase.ts`).
 
-### ¿Por qué Prisma?
+### ¿Por qué PostgreSQL (Supabase)?
 
-- **Type-safety**: Tipos generados automáticamente
-- **Migraciones**: Control de versiones de schema
-- **Queries optimizados**: Prevención de N+1 queries
-- **Introspección**: Fácil debugging con Prisma Studio
-
-### ¿Por qué PostgreSQL?
-
-- **Transacciones ACID**: Crítico para inventario
-- **JSON support**: Flexible para campos dinámicos
-- **Escalabilidad**: Soporta millones de registros
-- **Ecosystem**: Compatible con Supabase, Vercel, etc.
+- **Transacciones ACID & RPCs**: Crítico para descuentos atómicos de inventario y creación de comandas (`create_order_with_items`).
+- **JSONB**: Flexibilidad para notas mixtas, modificadores y configuraciones por restaurante.
+- **Supabase Realtime**: Sincronización instantánea por WebSockets para KDS y comandas en cocina.
 
 ## Consideraciones de Performance
 
