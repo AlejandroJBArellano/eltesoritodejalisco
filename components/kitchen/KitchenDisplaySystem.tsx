@@ -29,7 +29,7 @@ interface KitchenDisplaySystemProps {
 interface KanbanColumnProps {
   title: string;
   count: number;
-  colorClass: "amber" | "blue" | "emerald";
+  colorClass: "amber" | "blue" | "primary" | "emerald";
   orders: OrderWithDetails[];
   emptyIcon: React.ElementType;
   emptyTitle: string;
@@ -59,12 +59,19 @@ function KanbanColumn({
       text: "text-amber-400",
       border: "border-amber-500/30",
     },
+    primary: {
+      bg: "bg-primary",
+      shadow: "shadow-primary/50",
+      badgeBg: "bg-primary/10",
+      text: "text-primary",
+      border: "border-primary/30",
+    },
     blue: {
-      bg: "bg-blue-500",
-      shadow: "shadow-blue-500/50",
-      badgeBg: "bg-blue-500/10",
-      text: "text-blue-400",
-      border: "border-blue-500/30",
+      bg: "bg-primary",
+      shadow: "shadow-primary/50",
+      badgeBg: "bg-primary/10",
+      text: "text-primary",
+      border: "border-primary/30",
     },
     emerald: {
       bg: "bg-emerald-500",
@@ -330,7 +337,7 @@ export function KitchenDisplaySystem({
                 onClick={() => setView("kanban")}
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${
                   view === "kanban"
-                    ? "bg-amber-500 text-zinc-950 shadow-md"
+                    ? "bg-amber-500 text-dark font-black shadow-md"
                     : "text-text-light/60 hover:text-text-light"
                 }`}
               >
@@ -340,7 +347,7 @@ export function KitchenDisplaySystem({
                 onClick={() => setView("batching")}
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition-all duration-200 ease-out active:scale-95 cursor-pointer ${
                   view === "batching"
-                    ? "bg-amber-500 text-zinc-950 shadow-md"
+                    ? "bg-amber-500 text-dark font-black shadow-md"
                     : "text-text-light/60 hover:text-text-light"
                 }`}
               >
@@ -360,7 +367,7 @@ export function KitchenDisplaySystem({
             onClick={() => setSourceFilter("ALL")}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer whitespace-nowrap ${
               sourceFilter === "ALL"
-                ? "bg-amber-500 text-zinc-950 shadow-sm"
+                ? "bg-amber-500 text-dark font-black shadow-sm"
                 : "text-text-light/60 hover:text-text-light"
             }`}
           >
@@ -371,7 +378,7 @@ export function KitchenDisplaySystem({
             onClick={() => setSourceFilter("POS")}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               sourceFilter === "POS"
-                ? "bg-amber-500 text-zinc-950 shadow-sm"
+                ? "bg-amber-500 text-dark font-black shadow-sm"
                 : "text-text-light/60 hover:text-text-light"
             }`}
           >
@@ -383,7 +390,7 @@ export function KitchenDisplaySystem({
             onClick={() => setSourceFilter("PICKUP_APP")}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               sourceFilter === "PICKUP_APP"
-                ? "bg-emerald-500 text-zinc-950 shadow-sm"
+                ? "bg-emerald-500 text-dark font-black shadow-sm"
                 : "text-text-light/60 hover:text-emerald-400"
             }`}
           >
@@ -410,7 +417,7 @@ export function KitchenDisplaySystem({
             <KanbanColumn
               title="En Preparación"
               count={ordersByStatus.preparing.length}
-              colorClass="blue"
+              colorClass="primary"
               orders={ordersByStatus.preparing}
               emptyIcon={ChefHat}
               emptyTitle="Cocina despejada"

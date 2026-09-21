@@ -390,7 +390,7 @@ export function TareasClient({
                             <button
                               onClick={() => handleResume(activeExecution.id)}
                               disabled={loadingTaskId === activeExecution.id}
-                              className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg flex-1 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-xs"
+                              className="inline-flex items-center justify-center gap-2 bg-primary hover:opacity-90 text-dark font-black text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg flex-1 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-xs"
                             >
                               <RotateCcw className="h-4 w-4" /> Reanudar
                             </button>
@@ -411,7 +411,7 @@ export function TareasClient({
                       <button
                         onClick={() => handleStart(task.id)}
                         disabled={loadingTaskId === task.id}
-                        className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-primary hover:brightness-110 text-background font-bold text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg transition-all shadow-xs active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                        className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-primary hover:opacity-90 text-dark font-black text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg transition-all shadow-xs active:scale-[0.98] disabled:opacity-50 cursor-pointer"
                       >
                         <Play className="h-4 w-4 fill-current" />{" "}
                         {loadingTaskId === task.id

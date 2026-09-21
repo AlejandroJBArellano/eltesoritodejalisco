@@ -83,22 +83,22 @@ export function PerformanceSummaryKPIs({ kpis }: PerformanceSummaryKPIsProps) {
       </div>
 
       {/* 3. Mes Récord */}
-      <div className="relative overflow-hidden rounded-xl bg-card border border-purple-500/20 p-5 shadow-sm transition-all hover:border-purple-500/40">
+      <div className="relative overflow-hidden rounded-xl bg-card border border-primary/20 p-5 shadow-xs transition-all hover:border-primary/40">
         <div className="flex items-center justify-between gap-3 mb-3">
-          <span className="text-xs font-black uppercase tracking-wider text-text-light/60">
+          <span className="text-xs font-bold uppercase tracking-wider text-text-light/60">
             Mes Récord (Último Año)
           </span>
-          <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400">
+          <div className="p-2 rounded-lg bg-primary/10 text-primary">
             <Trophy className="h-4 w-4" />
           </div>
         </div>
         {recordMonth ? (
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-text-light">
+              <span className="text-2xl font-bold text-text-light">
                 {recordMonth.monthName}
               </span>
-              <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+              <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
                 Récord
               </span>
             </div>

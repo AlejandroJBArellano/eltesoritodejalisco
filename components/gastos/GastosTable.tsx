@@ -156,14 +156,14 @@ export function GastosTable(props: GastosTableProps = {}) {
                 </td>
                 <td className="py-3.5 px-3 text-center">
                   {exp.has_invoice ? (
-                    <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-[9px] font-black text-blue-400 uppercase">
+                    <span className="rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[9px] font-bold text-primary uppercase">
                       FAC
                     </span>
                   ) : (
                     <span className="text-text-light/30 font-bold">—</span>
                   )}
                 </td>
-                <td className="py-3.5 px-3 text-right font-mono font-black text-red-400 tabular-nums">
+                <td className="py-3.5 px-3 text-right font-mono font-bold text-rose-400 tabular-nums">
                   - ${exp.amount.toFixed(2)}
                 </td>
               </tr>

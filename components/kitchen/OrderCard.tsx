@@ -152,7 +152,7 @@ export const OrderCard = memo(
                 serviceType === "domicilio"
                   ? "bg-sky-500/15 border-sky-500/30 text-sky-300"
                   : serviceType === "para_llevar"
-                    ? "bg-purple-500/15 border-purple-500/30 text-purple-300"
+                    ? "bg-primary/15 border-primary/30 text-primary"
                     : "bg-amber-500/20 border-amber-500/35 text-amber-300"
               }`}
             >
@@ -160,7 +160,7 @@ export const OrderCard = memo(
                 {serviceType === "domicilio" ? (
                   <Bike className="h-4 w-4 shrink-0 text-sky-400" />
                 ) : serviceType === "para_llevar" ? (
-                  <ShoppingBag className="h-4 w-4 shrink-0 text-purple-400" />
+                  <ShoppingBag className="h-4 w-4 shrink-0 text-primary" />
                 ) : (
                   <Utensils className="h-4 w-4 shrink-0 text-amber-400" />
                 )}

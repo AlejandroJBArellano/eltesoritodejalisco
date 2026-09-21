@@ -55,9 +55,9 @@ export const ROLE_PERMISSIONS: Record<
   ADMIN: {
     title: "Administrador (ADMIN)",
     subtitle: "Acceso total a todos los módulos y configuraciones del sistema",
-    color: "text-blue-400",
-    badgeBg: "bg-blue-500/10",
-    badgeBorder: "border-blue-500/20",
+    color: "text-primary",
+    badgeBg: "bg-primary/10",
+    badgeBorder: "border-primary/20",
     permissions: [
       "Acceso completo a todos los módulos",
       "Administración de usuarios y roles",
@@ -106,9 +106,9 @@ export const ROLE_PERMISSIONS: Record<
     title: "Cocinero / Chef (CHEF)",
     subtitle:
       "Pantalla KDS de cocina, preparación de pedidos y tareas de cocina",
-    color: "text-purple-400",
-    badgeBg: "bg-purple-500/10",
-    badgeBorder: "border-purple-500/20",
+    color: "text-primary",
+    badgeBg: "bg-primary/10",
+    badgeBorder: "border-primary/20",
     permissions: [
       "Display KDS de cocina (/kitchen)",
       "Vista por lotes (Smart Batching) de platillos",
@@ -429,12 +429,12 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
       <PageHeader
         title="Gestión de Personal & Usuarios"
         subtitle="Administra cuentas de acceso, asignación de roles y permisos"
-        badgeColor="bg-blue-500"
+        badgeColor="bg-primary"
         actions={
           activeTab === "team" ? (
             <button
               onClick={() => setIsModalOpen(true)}
-              className="rounded-xl bg-blue-500 px-4 py-2 text-xs font-black text-background hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-blue-500/20 cursor-pointer"
+              className="rounded-xl bg-primary px-4 py-2 text-xs font-black text-dark hover:opacity-90 active:scale-[0.98] transition-all uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-primary/20 cursor-pointer"
             >
               <UserPlus className="h-4 w-4" />
               Nuevo Usuario
@@ -451,7 +451,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             onClick={() => setActiveTab("team")}
             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "team"
-                ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                ? "bg-primary/15 text-primary border border-primary/30"
                 : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
             }`}
           >
@@ -528,7 +528,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                       setRoleFilter(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-blue-500 cursor-pointer"
+                    className="rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary cursor-pointer"
                   >
                     <option value="ALL">Todos los roles</option>
                     <optgroup label="Roles del Sistema">
@@ -611,7 +611,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                         >
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
-                              <div className="h-9 w-9 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black">
+                              <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black">
                                 {(p.full_name || p.email)
                                   .charAt(0)
                                   .toUpperCase()}
@@ -793,7 +793,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
         onClose={() => setIsModalOpen(false)}
         title="Crear Nuevo Usuario"
         subtitle="Registra las credenciales de acceso para el personal"
-        icon={<UserPlus className="h-5 w-5 text-blue-400" />}
+        icon={<UserPlus className="h-5 w-5 text-primary" />}
         maxWidth="lg"
       >
         <form onSubmit={handleCreateUser} className="space-y-4">
@@ -807,7 +807,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 type="text"
                 name="full_name"
                 required
-                className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-medium"
+                className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-medium"
                 placeholder="Ej. María García"
               />
             </div>
@@ -823,7 +823,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 type="email"
                 name="email"
                 required
-                className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
+                className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono"
                 placeholder="maria@eltesoritodejalisco.com"
               />
             </div>
@@ -839,7 +839,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 type="password"
                 name="password"
                 minLength={6}
-                className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
+                className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono"
                 placeholder="Mínimo 6 caracteres o vacío si usará Google"
               />
             </div>
@@ -856,7 +856,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
               name="role"
               value={selectedFormRole}
               onChange={(e) => setSelectedFormRole(e.target.value)}
-              className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-blue-500 cursor-pointer"
+              className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-primary cursor-pointer"
             >
               <optgroup label="Roles del Sistema">
                 <option value="WAITER">Mesero (WAITER)</option>
@@ -906,7 +906,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                   name="pin"
                   defaultValue="1234"
                   maxLength={6}
-                  className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
+                  className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono"
                   placeholder="1234"
                 />
               </div>
@@ -942,7 +942,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-blue-500 px-5 py-2.5 text-xs font-black text-background hover:brightness-105 transition-all uppercase tracking-wider disabled:opacity-50 cursor-pointer shadow-md"
+              className="rounded-lg bg-primary px-5 py-2.5 text-xs font-black text-dark hover:opacity-90 active:scale-[0.98] transition-all uppercase tracking-wider disabled:opacity-50 cursor-pointer shadow-md"
             >
               {isPending ? "Guardando..." : "Crear Usuario"}
             </button>

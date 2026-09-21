@@ -250,7 +250,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
                       exec.status === "COMPLETED"
                         ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                         : exec.status === "APPROVED"
-                          ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                          ? "bg-primary/10 text-primary border border-primary/20"
                           : exec.status === "IN_PROGRESS"
                             ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                             : exec.status === "NOT_DONE"

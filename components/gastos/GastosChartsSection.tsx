@@ -303,8 +303,8 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
       {/* 2. Gráfica de Distribución por Categoría de Gasto */}
       <section className="rounded-xl bg-card p-6 shadow-xs border border-border space-y-6">
         <div className="flex items-center justify-between border-b border-border pb-4">
-          <h2 className="text-base font-black text-text-light uppercase tracking-wider flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-purple-400" />
+          <h2 className="text-base font-bold text-text-light uppercase tracking-wider flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-primary" />
             Distribución por Categoría de Gasto ({currentMonth})
           </h2>
         </div>

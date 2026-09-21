@@ -550,7 +550,7 @@ export function SplitBillModal({
                         className="flex-1 text-xs font-mono font-bold p-2 border border-border bg-dark/40 rounded-lg focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
                       />
                       {!isWaiter && tip > 0 && (
-                        <span className="text-[10px] font-mono font-bold text-blue-400 whitespace-nowrap tabular-nums">
+                        <span className="text-[10px] font-mono font-bold text-primary whitespace-nowrap tabular-nums">
                           +${tip.toFixed(2)}
                         </span>
                       )}

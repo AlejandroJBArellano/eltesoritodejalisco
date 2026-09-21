@@ -28,12 +28,12 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
   const recordMonth = data.find((d) => d.isRecordMonth);
 
   return (
-    <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border flex flex-col justify-between">
+    <section className="rounded-xl bg-card p-6 sm:p-8 shadow-xs border border-border flex flex-col justify-between">
       <div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
           <div>
-            <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+            <h2 className="text-base font-bold text-text-light tracking-tight uppercase flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-primary"></span>
               Ventas Mensuales (Últimos 12 Meses)
             </h2>
             <p className="text-xs text-text-light/60 mt-1 font-medium">
@@ -42,10 +42,10 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
             </p>
           </div>
           {recordMonth && recordMonth.totalSales > 0 && (
-            <div className="inline-flex items-center gap-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 px-3 py-1.5 text-xs font-bold text-purple-400 self-start sm:self-auto">
+            <div className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 border border-primary/20 px-3 py-1.5 text-xs font-bold text-primary self-start sm:self-auto">
               <Trophy className="h-3.5 w-3.5" />
               Mes Récord:{" "}
-              <span className="text-text-light font-black">
+              <span className="text-text-light font-bold">
                 {recordMonth.monthName}
               </span>
             </div>
@@ -105,11 +105,11 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
 
                 const fillColor = m.isRecordMonth
                   ? isHovered
-                    ? "#C084FC"
-                    : "#A855F7"
+                    ? "var(--color-primary)"
+                    : "var(--color-primary)"
                   : isHovered
-                    ? "#818CF8"
-                    : "#6366F1";
+                    ? "color-mix(in srgb, var(--color-primary) 85%, white 15%)"
+                    : "color-mix(in srgb, var(--color-primary) 55%, transparent)";
 
                 return (
                   <g
@@ -130,7 +130,7 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
 
                     {/* Record month indicator dot */}
                     {m.isRecordMonth && (
-                      <circle cx={xCenter} cy={barY - 7} r={3} fill="#A855F7" />
+                      <circle cx={xCenter} cy={barY - 7} r={3} fill="var(--color-primary)" />
                     )}
 
                     {/* X Axis Label */}
@@ -140,7 +140,7 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
                       textAnchor="middle"
                       fill={
                         m.isRecordMonth
-                          ? "#C084FC"
+                          ? "var(--color-primary)"
                           : isHovered
                             ? "#FFFFFF"
                             : "#888888"
@@ -170,19 +170,19 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
                 className="absolute pointer-events-none -translate-x-1/2 z-20 rounded-xl border border-border bg-card p-3.5 shadow-2xl backdrop-blur-md whitespace-nowrap"
               >
                 <div className="flex items-center justify-between gap-3 border-b border-border pb-1 mb-2">
-                  <span className="text-xs font-black text-text-light">
+                  <span className="text-xs font-bold text-text-light">
                     {data[hoveredIndex].monthName}
                   </span>
                   {data[hoveredIndex].isRecordMonth && (
-                    <span className="text-[10px] font-black uppercase text-purple-300 bg-purple-500/20 px-1.5 py-0.5 rounded-md border border-purple-500/30">
+                    <span className="text-[10px] font-bold uppercase text-primary bg-primary/20 px-1.5 py-0.5 rounded-md border border-primary/30">
                       Récord 🏆
                     </span>
                   )}
                 </div>
-                <div className="space-y-1 text-[11px] text-text-light font-medium">
+                <div className="space-y-1 text-[11px] text-text-light font-medium font-mono tabular-nums">
                   <div className="flex justify-between gap-4">
-                    <span>Ventas del mes:</span>
-                    <span className="font-black text-white">
+                    <span className="font-sans font-normal text-text-light/70">Ventas del mes:</span>
+                    <span className="font-bold text-white">
                       $
                       {data[hoveredIndex].totalSales.toLocaleString("es-MX", {
                         minimumFractionDigits: 2,
@@ -190,25 +190,25 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
                     </span>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <span>Pedidos:</span>
+                    <span className="font-sans font-normal text-text-light/70">Pedidos:</span>
                     <span className="font-bold text-white">
                       {data[hoveredIndex].totalOrders}
                     </span>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <span>Ticket promedio:</span>
+                    <span className="font-sans font-normal text-text-light/70">Ticket promedio:</span>
                     <span className="font-bold text-emerald-400">
                       ${data[hoveredIndex].averageTicket.toFixed(2)}
                     </span>
                   </div>
                   {data[hoveredIndex].growthPercentage !== null && (
-                    <div className="flex justify-between items-center gap-4 pt-1 border-t border-border">
-                      <span>Vs mes anterior:</span>
+                    <div className="flex justify-between items-center gap-4 pt-1 border-t border-border font-mono">
+                      <span className="font-sans font-normal text-text-light/70">Vs mes anterior:</span>
                       <span
-                        className={`font-black flex items-center gap-0.5 ${
+                        className={`font-bold flex items-center gap-0.5 ${
                           data[hoveredIndex].growthPercentage! >= 0
                             ? "text-emerald-400"
-                            : "text-red-400"
+                            : "text-rose-400"
                         }`}
                       >
                         {data[hoveredIndex].growthPercentage! >= 0 ? (

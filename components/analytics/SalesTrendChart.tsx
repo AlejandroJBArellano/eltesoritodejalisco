@@ -49,8 +49,8 @@ export function SalesTrendChart({
     <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
         <div>
-          <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+          <h2 className="text-lg font-bold text-text-light tracking-tight uppercase flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-primary"></span>
             Evolución Diaria de Ventas
           </h2>
           <p className="text-xs text-text-light/60 mt-1 font-medium">
@@ -62,7 +62,7 @@ export function SalesTrendChart({
           <button
             type="button"
             onClick={() => onSelectDay(null)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-dark/40 border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition-all active:scale-95 self-start sm:self-auto cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-dark/40 border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition-all active:scale-[0.98] self-start sm:self-auto cursor-pointer"
           >
             <X className="h-3.5 w-3.5" />
             Limpiar Selección ({selectedDay})
@@ -126,8 +126,8 @@ export function SalesTrendChart({
               const fillColor = isSelected
                 ? "#F59E0B"
                 : isHovered
-                  ? "#60A5FA"
-                  : "#3B82F6";
+                  ? "var(--color-primary)"
+                  : "color-mix(in srgb, var(--color-primary) 65%, transparent)";
 
               return (
                 <g

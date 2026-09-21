@@ -43,7 +43,7 @@ export function DailyStatsSection({ stats }: DailyStatsSectionProps) {
           title="Propinas Hoy"
           icon={HandCoins}
           value={currencyFormatter.format(stats.tipsToday)}
-          themeClass="bg-blue-500/10 text-blue-400"
+          themeClass="bg-primary/10 text-primary"
         />
       </div>
     </CollapsibleSection>

@@ -223,8 +223,8 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
                     onChange={(e) => setHasInvoice(e.target.checked)}
                     aria-label="¿Facturado?"
                   />
-                  <div className="peer h-6 w-11 rounded-full bg-dark/40 border border-border after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-border after:bg-text-light after:transition-all after:content-[''] peer-checked:bg-blue-500 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
-                  <span className="ml-2.5 text-xs font-black uppercase text-text-light/70">
+                  <div className="peer h-6 w-11 rounded-full bg-dark/40 border border-border after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-border after:bg-text-light after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
+                  <span className="ml-2.5 text-xs font-bold uppercase text-text-light/70">
                     {hasInvoice ? "Sí" : "No"}
                   </span>
                 </label>
@@ -237,14 +237,14 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
             <button
               type="button"
               onClick={onClose}
-              className="w-full bg-dark/40 text-text-light/60 py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider active:scale-95 border border-border"
+              className="w-full bg-dark/40 text-text-light/60 py-3 rounded-lg font-bold hover:bg-card-light transition-colors uppercase text-xs tracking-wider active:scale-[0.98] border border-border cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting || categories.length === 0}
-              className="w-full bg-primary text-background py-3 rounded-lg font-black hover:brightness-105 transition-all uppercase text-xs tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50 active:scale-95"
+              className="w-full bg-primary text-dark py-3 rounded-lg font-bold hover:opacity-90 transition-all uppercase text-xs tracking-wider shadow-xs disabled:opacity-50 active:scale-[0.98] cursor-pointer"
             >
               {isSubmitting ? "Registrando..." : "Guardar Gasto"}
             </button>

@@ -126,10 +126,10 @@ export function OrdersHistoryTable(props: OrdersHistoryTableProps = {}) {
               primaryPaymentMethod === "TRANSFER"
             ) {
               methodBadgeClass =
-                "bg-blue-500/10 text-blue-400 border-blue-500/20";
+                "bg-primary/10 text-primary border-primary/20";
             } else if (paymentMethods.length > 1) {
               methodBadgeClass =
-                "bg-purple-500/10 text-purple-300 border-purple-500/20";
+                "bg-amber-500/10 text-amber-300 border-amber-500/20";
             }
 
             const isExpanded = expandedRow === order.id;
@@ -189,7 +189,7 @@ export function OrdersHistoryTable(props: OrdersHistoryTableProps = {}) {
                   <td className="py-3.5 px-3 text-right font-mono text-amber-400/80">
                     ${ivaFiscal.toFixed(2)}
                   </td>
-                  <td className="py-3.5 px-3 text-right font-mono text-blue-400">
+                  <td className="py-3.5 px-3 text-right font-mono text-primary">
                     ${tipAmount.toFixed(2)}
                   </td>
                   <td className="py-3.5 px-3 text-right font-mono font-black text-text-light text-sm">

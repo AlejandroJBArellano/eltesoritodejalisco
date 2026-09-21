@@ -57,7 +57,7 @@ export function GastosSummaryKPIs(props: GastosSummaryKPIsProps = {}) {
           <span className="text-[11px] font-semibold text-text-light/60 uppercase tracking-wider truncate">
             Gastos Facturados
           </span>
-          <div className="rounded-lg bg-blue-500/10 p-2 text-blue-400 shrink-0">
+          <div className="rounded-lg bg-primary/10 p-2 text-primary shrink-0">
             <FileText className="h-4 w-4" />
           </div>
         </div>

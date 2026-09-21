@@ -200,7 +200,7 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => onEditTask(t)}
-                        className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-2 text-blue-400 hover:bg-blue-500/20 transition-colors cursor-pointer"
+                        className="rounded-lg bg-primary/10 border border-primary/20 p-2 text-primary hover:bg-primary/20 transition-colors cursor-pointer active:scale-[0.98]"
                         title="Editar Tarea"
                       >
                         <Edit3 className="h-4 w-4" />

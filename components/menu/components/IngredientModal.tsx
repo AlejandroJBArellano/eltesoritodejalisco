@@ -28,7 +28,7 @@ export function IngredientModal({
       onClose={onClose}
       title="Nuevo Ingrediente / Insumo"
       subtitle="Registra un ingrediente en el catálogo para control de recetas y stock"
-      icon={<Package className="h-5 w-5 text-purple-400" />}
+      icon={<Package className="h-5 w-5 text-primary" />}
       maxWidth="md"
     >
       <form onSubmit={onSubmit} className="space-y-4">
@@ -146,7 +146,7 @@ export function IngredientModal({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-lg bg-purple-500 px-5 py-2.5 text-xs font-black text-white hover:bg-purple-600 disabled:opacity-50 cursor-pointer shadow-sm"
+            className="rounded-lg bg-primary px-5 py-2.5 text-xs font-black text-dark hover:opacity-90 active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-sm"
           >
             {isSubmitting ? "Guardando..." : "Crear Ingrediente"}
           </button>

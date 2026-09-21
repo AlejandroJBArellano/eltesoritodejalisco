@@ -144,11 +144,11 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
           </div>
 
           {todayTotals.creditoOtorgadoHoy > 0 && (
-            <div className="flex justify-between items-center bg-violet-500/10 p-2.5 rounded-lg border border-violet-500/20">
-              <span className="text-violet-300 font-bold">
+            <div className="flex justify-between items-center bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
+              <span className="text-amber-400 font-bold">
                 Crédito otorgado hoy
               </span>
-              <span className="text-violet-300 font-mono tabular-nums font-black">
+              <span className="text-amber-400 font-mono tabular-nums font-black">
                 ${todayTotals.creditoOtorgadoHoy.toFixed(2)}
               </span>
             </div>
@@ -174,7 +174,7 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
                 type="number"
                 value={manualCard}
                 onChange={(e) => onManualCardChange(e.target.value)}
-                className="w-full bg-card border border-border rounded-lg px-2.5 py-1.5 text-blue-400 font-mono tabular-nums font-bold focus:border-blue-400 outline-none"
+                className="w-full bg-card border border-border rounded-lg px-2.5 py-1.5 text-primary font-mono tabular-nums font-bold focus:border-primary outline-none"
               />
             </div>
             <div>
@@ -196,22 +196,22 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
                 type="number"
                 value={manualTipsTarjeta}
                 onChange={(e) => onManualTipsTarjetaChange(e.target.value)}
-                className="w-full bg-card border border-border rounded-lg px-2.5 py-1.5 text-blue-400/80 font-mono tabular-nums font-bold focus:border-blue-400 outline-none"
+                className="w-full bg-card border border-border rounded-lg px-2.5 py-1.5 text-primary/80 font-mono tabular-nums font-bold focus:border-primary outline-none"
               />
             </div>
           </div>
 
           {terminalCommissionRate > 0 && (
-            <div className="flex justify-between items-center bg-blue-500/10 border border-blue-500/20 p-2.5 rounded-lg text-xs">
+            <div className="flex justify-between items-center bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-xs">
               <div className="flex flex-col">
-                <span className="text-blue-300 font-bold">
+                <span className="text-primary font-bold">
                   Comisión ({terminalCommissionRate.toFixed(2)}%)
                 </span>
-                <span className="text-[10px] text-blue-300/70 font-mono tabular-nums">
+                <span className="text-[10px] text-primary/70 font-mono tabular-nums">
                   Neto: ${currentNetCard.toFixed(2)}
                 </span>
               </div>
-              <span className="text-blue-300 font-mono tabular-nums font-black">
+              <span className="text-primary font-mono tabular-nums font-black">
                 -${currentCommission.toFixed(2)}
               </span>
             </div>
@@ -225,7 +225,7 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
           </div>
           <div className="flex justify-between text-text-light/60">
             <span>Gastos del Día</span>
-            <span className="text-red-400 font-mono tabular-nums font-bold">
+            <span className="text-rose-400 font-mono tabular-nums font-bold">
               -${todayExpenses.toFixed(2)}
             </span>
           </div>
@@ -236,7 +236,7 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
           <h4 className="text-xs font-black text-text-light uppercase tracking-wider flex items-center justify-between">
             <span>Distribución de Propinas</span>
             {isCalculatingTips && (
-              <span className="text-[10px] text-blue-400">Calculando...</span>
+              <span className="text-[10px] text-primary">Calculando...</span>
             )}
           </h4>
           {!isCalculatingTips && tipBreakdown.length > 0 ? (
@@ -271,7 +271,7 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
           <button
             type="button"
             onClick={() => onPrintClosingTicket()}
-            className="w-full bg-blue-600/20 text-blue-300 border border-blue-500/30 py-2.5 rounded-lg font-black hover:bg-blue-600/30 transition-all uppercase text-xs tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full bg-primary/10 text-primary border border-primary/20 py-2.5 rounded-lg font-bold hover:bg-primary/20 transition-all uppercase text-xs tracking-wider flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
           >
             <Printer className="h-4 w-4" />
             Imprimir Ticket de Cierre
@@ -283,7 +283,7 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
             type="button"
             onClick={onClose}
             disabled={isFinalizing}
-            className="w-full bg-dark/40 text-text-light/60 border border-border py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider disabled:opacity-50 cursor-pointer"
+            className="w-full bg-dark/40 text-text-light/60 border border-border py-3 rounded-lg font-bold hover:bg-card-light transition-colors uppercase text-xs tracking-wider disabled:opacity-50 cursor-pointer active:scale-[0.98]"
           >
             Cancelar
           </button>
@@ -291,7 +291,7 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
             type="button"
             onClick={onConfirm}
             disabled={isFinalizing}
-            className="w-full bg-success text-white py-3 rounded-lg font-black hover:brightness-110 transition-all uppercase text-xs tracking-wider shadow-lg shadow-success/20 disabled:opacity-50 cursor-pointer"
+            className="w-full bg-emerald-500 text-dark py-3 rounded-lg font-bold hover:opacity-90 transition-all uppercase text-xs tracking-wider shadow-xs disabled:opacity-50 cursor-pointer active:scale-[0.98]"
           >
             {isFinalizing ? "Guardando..." : "Confirmar y Finalizar"}
           </button>

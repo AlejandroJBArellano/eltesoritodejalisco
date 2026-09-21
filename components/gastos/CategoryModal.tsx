@@ -89,8 +89,8 @@ export function CategoryModal(props: CategoryModalProps = {}) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 no-print">
       <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-2xl border border-border space-y-5">
         <div className="flex justify-between items-center border-b border-border pb-3">
-          <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
-            <Tag className="h-4 w-4 text-purple-400" />
+          <h3 className="text-base font-bold text-text-light uppercase tracking-tight flex items-center gap-2">
+            <Tag className="h-4 w-4 text-primary" />
             {editingCategory ? "Editar Categoría" : "Crear Categoría de Gasto"}
           </h3>
           <button

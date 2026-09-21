@@ -58,7 +58,7 @@ export function CategoryModal() {
         </div>
         <div>
           <label className="text-xs font-extrabold text-text-light/40 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-            <Globe className="h-3 w-3 text-blue-400" />
+            <Globe className="h-3 w-3 text-primary" />
             Nombre en Inglés (EN)
           </label>
           <input
@@ -68,7 +68,7 @@ export function CategoryModal() {
               const val = e.target.value;
               setCategoryForm((p) => ({ ...p, nameEn: val }));
             }}
-            className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-blue-500"
+            className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-primary"
             placeholder="e.g. Snacks"
           />
         </div>
@@ -81,7 +81,7 @@ export function CategoryModal() {
               const checked = e.target.checked;
               setCategoryForm((p) => ({ ...p, showInPickup: checked }));
             }}
-            className="h-4 w-4 rounded border-border bg-dark/40 text-amber-500 focus:ring-amber-500 cursor-pointer"
+            className="h-4 w-4 rounded border-border bg-dark/40 text-primary focus:ring-primary cursor-pointer"
           />
           <label
             htmlFor="showInPickup"
@@ -101,7 +101,7 @@ export function CategoryModal() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-lg bg-amber-500 px-5 py-2.5 text-xs font-black text-black hover:brightness-105 disabled:opacity-50 cursor-pointer shadow-sm"
+            className="rounded-lg bg-primary px-5 py-2.5 text-xs font-black text-dark hover:opacity-90 active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-sm"
           >
             {isSubmitting
               ? "Guardando..."

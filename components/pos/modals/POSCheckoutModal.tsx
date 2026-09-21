@@ -602,7 +602,7 @@ export function POSCheckoutModal() {
                           isSubmittingCheckout
                         }
                         onClick={handleAssignCustomer}
-                        className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs px-3 py-1.5 uppercase tracking-wider disabled:opacity-50 transition-all cursor-pointer shadow-sm active:scale-[0.98]"
+                        className="rounded-lg bg-amber-500 hover:bg-amber-400 text-dark font-black text-xs px-3 py-1.5 uppercase tracking-wider disabled:opacity-50 transition-all cursor-pointer shadow-sm active:scale-[0.98]"
                       >
                         {isAssigningCustomer ? "..." : "Asignar"}
                       </button>
@@ -772,7 +772,7 @@ export function POSCheckoutModal() {
                         handleCourtesyPayment();
                       }
                     }}
-                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 py-3.5 rounded-lg font-bold text-base transition-all uppercase tracking-wider shadow-sm cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98]"
+                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-dark font-black py-3.5 rounded-lg text-base transition-all uppercase tracking-wider shadow-sm cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98]"
                   >
                     {isSubmittingCheckout
                       ? "Procesando..."

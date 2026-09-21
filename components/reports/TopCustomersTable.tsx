@@ -81,7 +81,7 @@ export function TopCustomersTable(props: TopCustomersTableProps = {}) {
                     ${Number(totalSpend).toFixed(2)}
                   </td>
                   <td className="py-3.5 px-3 text-right">
-                    <span className="inline-flex items-center rounded-full bg-purple-500/10 px-3 py-1 text-xs font-black text-purple-400 uppercase tracking-widest border border-purple-500/20 font-mono tabular-nums">
+                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary uppercase tracking-wider border border-primary/20 font-mono tabular-nums">
                       {loyaltyPoints} pts
                     </span>
                   </td>

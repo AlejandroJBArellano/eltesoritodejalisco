@@ -21,8 +21,8 @@ export function DailySalesTable(props: DailySalesTableProps = {}) {
     <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
         <div>
-          <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+          <h2 className="text-lg font-bold text-text-light tracking-tight uppercase flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-primary"></span>
             Detalle de Ventas Diarias
           </h2>
           <p className="text-xs text-text-light/60 mt-1 font-medium">

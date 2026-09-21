@@ -324,7 +324,7 @@ export function POSAddItemsModal() {
                       {/* Badges de Estado */}
                       <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
                         {isMixed && (
-                          <span className="rounded bg-purple-500/20 border border-purple-500/30 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wider text-purple-300">
+                          <span className="rounded bg-primary/20 border border-primary/30 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wider text-primary">
                             Mixto
                           </span>
                         )}

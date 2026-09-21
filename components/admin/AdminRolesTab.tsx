@@ -380,7 +380,7 @@ function RoleCard({ role, onEdit, onDuplicate, onDelete }: RoleCardProps) {
             </h4>
             <div className="flex items-center gap-2">
               {role.is_system ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
                   Sistema
                 </span>
               ) : (

@@ -18,7 +18,7 @@ export function AsistenciaSummaryKPIs() {
             {filteredAttendances.length}
           </p>
         </div>
-        <div className="rounded-lg bg-blue-500/10 p-2 text-blue-400 shrink-0">
+        <div className="rounded-lg bg-primary/10 p-2 text-primary shrink-0">
           <FileText className="h-4 w-4" />
         </div>
       </div>

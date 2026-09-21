@@ -35,7 +35,7 @@ export function TaskCategoryModal(props: TaskCategoryModalProps) {
       onClose={onClose}
       title="Crear Nueva Categoría"
       subtitle="Organiza las tareas en grupos de trabajo"
-      icon={<FolderPlus className="h-5 w-5 text-purple-400" />}
+      icon={<FolderPlus className="h-5 w-5 text-primary" />}
       maxWidth="sm"
     >
       <form onSubmit={onSubmit} className="space-y-4">
@@ -65,7 +65,7 @@ export function TaskCategoryModal(props: TaskCategoryModalProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="rounded-lg bg-primary px-5 py-2 text-xs font-black uppercase tracking-wider text-background hover:bg-primary-hover disabled:opacity-50 active:scale-[0.98] transition-all shadow-sm"
+            className="rounded-lg bg-primary px-5 py-2 text-xs font-black uppercase tracking-wider text-dark hover:opacity-90 disabled:opacity-50 active:scale-[0.98] transition-all shadow-sm"
           >
             {isLoading ? "Guardando..." : "Crear Categoría"}
           </button>

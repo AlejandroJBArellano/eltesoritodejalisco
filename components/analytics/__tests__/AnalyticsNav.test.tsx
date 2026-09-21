@@ -13,7 +13,7 @@ describe("AnalyticsNav Component", () => {
 
     const salesLink = screen.getByRole("link", { name: /Ventas & Productos/i });
     expect(salesLink).toHaveAttribute("href", "/analytics/sales");
-    expect(salesLink.className).toContain("bg-purple-600");
+    expect(salesLink.className).toContain("bg-primary");
 
     const hourlyLink = screen.getByRole("link", {
       name: /Horas Pico & Calor/i,
@@ -37,6 +37,7 @@ describe("AnalyticsNav Component", () => {
     render(<AnalyticsNav activeTab="performance" />);
 
     const perfLink = screen.getByRole("link", { name: /Rendimiento/i });
-    expect(perfLink.className).toContain("bg-emerald-600");
+    expect(perfLink.className).toContain("bg-emerald-500");
   });
 });
+

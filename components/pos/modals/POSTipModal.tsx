@@ -39,7 +39,7 @@ export function POSTipModal() {
       <div className="bg-card rounded-xl max-w-md w-full p-6 shadow-2xl border border-border space-y-6">
         <div className="flex justify-between items-center border-b border-border pb-3">
           <h3 className="text-sm font-bold text-text-light uppercase tracking-tight flex items-center gap-2">
-            <HandCoins className="h-4 w-4 text-blue-400" />
+            <HandCoins className="h-4 w-4 text-primary" />
             Editar Propina - Orden #{editingTipOrder.orderNumber}
           </h3>
           <button
@@ -57,7 +57,7 @@ export function POSTipModal() {
             <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider font-mono tabular-nums">
               Total de la orden: ${editingTipOrder.total.toFixed(2)}
             </p>
-            <p className="text-xl font-bold font-mono text-blue-400 tabular-nums">
+            <p className="text-xl font-bold font-mono text-primary tabular-nums">
               Nueva Propina: ${editTipAmountCalculated.toFixed(2)}
             </p>
           </div>

@@ -27,8 +27,8 @@ export function DailyCutDetailModal({
       <div className="w-full max-w-lg rounded-xl bg-card p-6 shadow-2xl border border-border max-h-[90vh] overflow-y-auto custom-scrollbar space-y-5">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
-            <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
-              <Receipt className="h-4 w-4 text-blue-400" />
+            <h3 className="text-base font-bold text-text-light uppercase tracking-tight flex items-center gap-2">
+              <Receipt className="h-4 w-4 text-primary" />
               Detalle del Corte
             </h3>
             <p className="text-xs font-bold text-text-light/50 mt-0.5">
@@ -81,7 +81,7 @@ export function DailyCutDetailModal({
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Propinas (Tarjeta)
             </span>
-            <span className="text-blue-400 text-lg font-mono tabular-nums font-bold">
+            <span className="text-primary text-lg font-mono tabular-nums font-bold">
               ${Number(cut.propinas_tarjeta).toFixed(2)}
             </span>
           </div>
@@ -97,11 +97,11 @@ export function DailyCutDetailModal({
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Caja Final (Tarjeta)
             </span>
-            <span className="text-blue-400 text-lg font-mono tabular-nums font-bold">
+            <span className="text-primary text-lg font-mono tabular-nums font-bold">
               ${Number(cut.caja_tarjeta).toFixed(2)}
             </span>
             {Number(cut.comision_tarjeta || 0) > 0 && (
-              <span className="text-[10px] text-blue-300/70 font-mono tabular-nums block mt-1">
+              <span className="text-[10px] text-primary/70 font-mono tabular-nums block mt-1">
                 Comisión: -${Number(cut.comision_tarjeta).toFixed(2)} · Neto: $
                 {(
                   Number(cut.caja_tarjeta) - Number(cut.comision_tarjeta)
@@ -113,7 +113,7 @@ export function DailyCutDetailModal({
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Total Gastos
             </span>
-            <span className="text-red-400 text-lg font-mono tabular-nums font-bold">
+            <span className="text-rose-400 text-lg font-mono tabular-nums font-bold">
               -${Number(cut.total_gastos).toFixed(2)}
             </span>
           </div>
@@ -125,7 +125,7 @@ export function DailyCutDetailModal({
               className={`text-lg font-mono tabular-nums font-bold ${
                 Number(cut.utilidad_final) >= 0
                   ? "text-emerald-400"
-                  : "text-red-400"
+                  : "text-rose-400"
               }`}
             >
               ${Number(cut.utilidad_final).toFixed(2)}
@@ -157,11 +157,11 @@ export function DailyCutDetailModal({
                   </div>
                   <div className="flex items-center gap-2">
                     {exp.has_invoice && (
-                      <span className="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold">
+                      <span className="text-[9px] bg-primary/20 text-primary px-1.5 py-0.5 rounded font-bold">
                         FAC
                       </span>
                     )}
-                    <span className="font-mono tabular-nums text-red-400 font-bold">
+                    <span className="font-mono tabular-nums text-rose-400 font-bold">
                       -${Number(exp.amount).toFixed(2)}
                     </span>
                   </div>
@@ -175,7 +175,7 @@ export function DailyCutDetailModal({
           <button
             type="button"
             onClick={() => onPrintCut(cut)}
-            className="w-full bg-blue-600/20 text-blue-300 border border-blue-500/30 py-3 rounded-lg font-black hover:bg-blue-600/30 transition-colors uppercase text-xs tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full bg-primary/10 text-primary border border-primary/20 py-3 rounded-lg font-bold hover:bg-primary/20 transition-colors uppercase text-xs tracking-wider flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
           >
             <Printer className="h-4 w-4" />
             Reimprimir Ticket
@@ -183,7 +183,7 @@ export function DailyCutDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full bg-dark/40 text-text-light/60 border border-border py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider cursor-pointer"
+            className="w-full bg-dark/40 text-text-light/60 border border-border py-3 rounded-lg font-bold hover:bg-card-light transition-colors uppercase text-xs tracking-wider cursor-pointer active:scale-[0.98]"
           >
             Cerrar
           </button>

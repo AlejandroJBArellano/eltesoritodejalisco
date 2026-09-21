@@ -73,7 +73,7 @@ export function CustomerQRModal({
       title="QR de Registro de Clientes"
       subtitle="Exhibe o imprime este código para que tus comensales se registren desde su celular"
       maxWidth="md"
-      icon={<QrCode className="h-5 w-5 text-emerald-400" />}
+      icon={<QrCode className="h-5 w-5 text-primary" />}
     >
       <div className="p-6 space-y-6">
         {/* Contenedor imprimible y visual */}
@@ -85,15 +85,15 @@ export function CustomerQRModal({
             <QrCode className="h-6 w-6" />
           </div>
 
-          <h3 className="text-base font-black uppercase tracking-wider text-zinc-900">
+          <h3 className="text-base font-black uppercase tracking-wider text-neutral-900">
             {tenantName || "Club de Clientes"}
           </h3>
-          <p className="text-xs text-zinc-500 font-medium mt-0.5">
+          <p className="text-xs text-neutral-500 font-medium mt-0.5">
             ¡Escanea y únete a nuestro club de clientes!
           </p>
 
           {/* Imagen del QR */}
-          <div className="mt-4 p-3 bg-white rounded-lg border border-zinc-200 shadow-xs inline-block">
+          <div className="mt-4 p-3 bg-white rounded-lg border border-neutral-200 shadow-xs inline-block">
             <img
               src={qrImageUrl}
               alt="Código QR de Registro"
@@ -105,16 +105,16 @@ export function CustomerQRModal({
           </div>
 
           <div className="mt-4 space-y-1">
-            <p className="text-xs font-bold text-zinc-800">
+            <p className="text-xs font-bold text-neutral-800">
               🎁 Acumula puntos y recibe beneficios
             </p>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-neutral-500">
               Apunta la cámara de tu teléfono para auto-registrarte
             </p>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-dashed border-zinc-200 w-full">
-            <span className="text-[10px] font-mono text-zinc-400 truncate block">
+          <div className="mt-3 pt-3 border-t border-dashed border-neutral-200 w-full">
+            <span className="text-[10px] font-mono text-neutral-400 truncate block">
               {registrationUrl}
             </span>
           </div>

@@ -113,8 +113,8 @@ export function ManagementSection(props?: ManagementSectionProps) {
             href="/asistencia/history"
             icon={ReceiptText}
             badge="Historial"
-            themeClass="bg-purple-500/10 text-purple-400"
-            hoverColor="#a855f7"
+            themeClass="bg-primary/10 text-primary"
+            hoverColor="var(--color-primary)"
           />
         )}
         {isAdmin && (
@@ -124,8 +124,8 @@ export function ManagementSection(props?: ManagementSectionProps) {
             href="/admin/tareas"
             icon={ClipboardCheck}
             badge="Control"
-            themeClass="bg-blue-500/10 text-blue-400"
-            hoverColor="#3b82f6"
+            themeClass="bg-amber-500/10 text-amber-400"
+            hoverColor="#f59e0b"
           />
         )}
         {isAdmin && (

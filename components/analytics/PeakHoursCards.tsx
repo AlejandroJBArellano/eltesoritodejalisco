@@ -91,22 +91,22 @@ export function PeakHoursCards({ summary, mode = "sum" }: PeakHoursCardsProps) {
       </div>
 
       {/* 3. Franja Más Activa (Rush Window) */}
-      <div className="relative overflow-hidden rounded-xl bg-card border border-purple-500/20 p-5 shadow-sm transition-all hover:border-purple-500/40">
+      <div className="relative overflow-hidden rounded-xl bg-card border border-primary/20 p-5 shadow-xs transition-all hover:border-primary/40">
         <div className="flex items-center justify-between gap-3 mb-3">
-          <span className="text-xs font-black uppercase tracking-wider text-text-light/60">
+          <span className="text-xs font-bold uppercase tracking-wider text-text-light/60">
             Ventana Rush (3h)
           </span>
-          <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400">
+          <div className="p-2 rounded-lg bg-primary/10 text-primary">
             <TrendingUp className="h-4 w-4" />
           </div>
         </div>
         {rush ? (
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-text-light font-mono tabular-nums">
+              <span className="text-2xl font-bold text-text-light font-mono tabular-nums">
                 {rush.label}
               </span>
-              <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20 font-mono tabular-nums">
+              <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 font-mono tabular-nums">
                 {rush.percentage}% del día
               </span>
             </div>

@@ -137,7 +137,7 @@ export function FinancialSummaryKPIs(props: FinancialSummaryKPIsProps = {}) {
             <span className="text-[11px] font-semibold text-text-light/60 uppercase tracking-wider truncate">
               Tiempo Promedio KDS
             </span>
-            <div className="rounded-lg bg-purple-500/10 p-2 text-purple-400 shrink-0">
+            <div className="rounded-lg bg-amber-500/10 p-2 text-amber-400 shrink-0">
               <Clock className="h-4 w-4" />
             </div>
           </div>
@@ -200,7 +200,7 @@ export function FinancialSummaryKPIs(props: FinancialSummaryKPIsProps = {}) {
             <span className="text-[11px] font-semibold text-text-light/60 uppercase tracking-wider truncate">
               Nuevos Clientes
             </span>
-            <div className="rounded-lg bg-blue-500/10 p-2 text-blue-400 shrink-0">
+            <div className="rounded-lg bg-primary/10 p-2 text-primary shrink-0">
               <UserPlus className="h-4 w-4" />
             </div>
           </div>

@@ -61,8 +61,8 @@ export function OperationSection(props?: OperationSectionProps) {
           href="/asistencia"
           icon={Clock}
           badge="Turnos"
-          themeClass="bg-purple-500/10 text-purple-400"
-          hoverColor="#a855f7"
+          themeClass="bg-primary/10 text-primary"
+          hoverColor="var(--color-primary)"
         />
       </div>
     </CollapsibleSection>

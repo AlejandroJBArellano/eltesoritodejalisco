@@ -180,9 +180,9 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
           <button
             type="button"
             onClick={onToggleCutsArchive}
-            className={`rounded-lg px-3 py-2 text-xs font-black uppercase tracking-wider border transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-wider border transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98] ${
               showCutsArchive
-                ? "bg-blue-500/20 text-blue-300 border-blue-500/40"
+                ? "bg-primary/20 text-primary border-primary/40"
                 : "bg-dark/40 text-text-light/70 border-border hover:bg-card-light"
             }`}
           >
@@ -194,7 +194,7 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
             <button
               type="button"
               onClick={onFinalizeDayClick}
-              className="rounded-lg bg-success px-4 py-2 text-xs font-black text-white hover:brightness-110 transition-all uppercase tracking-wider shadow-lg shadow-success/20 flex items-center gap-1.5 cursor-pointer"
+              className="rounded-lg bg-emerald-500 px-4 py-2 text-xs font-bold text-dark hover:opacity-90 transition-all uppercase tracking-wider shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
             >
               <CheckCircle2 className="h-4 w-4" />
               Finalizar Día
@@ -251,7 +251,7 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
                 $0.00
               </span>
             </div>
-            <div className="bg-dark/40 p-3.5 rounded-lg border border-blue-500/20">
+            <div className="bg-dark/40 p-3.5 rounded-lg border border-primary/20">
               <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                 Caja Final (Tarjeta)
               </span>
@@ -306,7 +306,7 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
               <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                 Propinas (Tarjeta)
               </span>
-              <span className="text-blue-400 text-xl font-mono tabular-nums font-bold">
+              <span className="text-primary text-xl font-mono tabular-nums font-bold">
                 ${todayTotals.propinasTarjeta.toFixed(2)}
               </span>
             </div>
@@ -321,15 +321,15 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
                 ${todayTotals.cajaEfectivo.toFixed(2)}
               </span>
             </div>
-            <div className="bg-dark/40 p-3.5 rounded-lg border border-blue-500/20">
+            <div className="bg-dark/40 p-3.5 rounded-lg border border-primary/20">
               <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
                 Caja Final (Tarjeta)
               </span>
-              <span className="text-blue-400 text-xl font-mono tabular-nums font-bold">
+              <span className="text-primary text-xl font-mono tabular-nums font-bold">
                 ${todayTotals.cajaTarjeta.toFixed(2)}
               </span>
               {todayTotals.comisionTarjeta > 0 && (
-                <span className="text-[10px] text-blue-300/70 font-mono tabular-nums block mt-1">
+                <span className="text-[10px] text-primary/70 font-mono tabular-nums block mt-1">
                   Comisión: -${todayTotals.comisionTarjeta.toFixed(2)} · Neto: $
                   {todayTotals.cajaTarjetaNeta.toFixed(2)}
                 </span>
@@ -337,11 +337,11 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
             </div>
           </div>
 
-          <div className="bg-dark/40 p-4 rounded-lg border border-red-500/20 flex flex-col justify-center">
+          <div className="bg-dark/40 p-4 rounded-lg border border-rose-500/20 flex flex-col justify-center">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Gastos del Día
             </span>
-            <span className="text-red-400 text-2xl font-mono tabular-nums font-black">
+            <span className="text-rose-400 text-2xl font-mono tabular-nums font-black">
               -${todayExpenses.toFixed(2)}
             </span>
             <span className="text-text-light/40 text-[10px] mt-1 uppercase font-bold">
@@ -349,22 +349,22 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
             </span>
           </div>
 
-          <div className="bg-blue-950/30 p-4 rounded-xl flex flex-col justify-center items-center shadow-lg border border-blue-500/30">
-            <span className="text-blue-300 text-[10px] font-black uppercase tracking-widest mb-1">
+          <div className="bg-card p-4 rounded-xl flex flex-col justify-center items-center shadow-xs border border-border">
+            <span className="text-text-light/60 text-[10px] font-bold uppercase tracking-widest mb-1">
               Utilidad Real
             </span>
-            <span className="text-text-light text-2xl font-black font-mono tabular-nums">
+            <span className="text-text-light text-2xl font-bold font-mono tabular-nums">
               ${todayTotals.utilidadReal.toFixed(2)}
             </span>
-            <div className="mt-2 pt-2 border-t border-blue-500/20 w-full text-center">
-              <span className="text-blue-300 text-[10px] font-black uppercase tracking-widest block mb-0.5">
+            <div className="mt-2 pt-2 border-t border-border w-full text-center">
+              <span className="text-text-light/60 text-[10px] font-bold uppercase tracking-widest block mb-0.5">
                 Utilidad Final
               </span>
               <span
-                className={`text-xl font-black font-mono tabular-nums ${
+                className={`text-xl font-bold font-mono tabular-nums ${
                   todayTotals.utilidadFinal >= 0
                     ? "text-emerald-400"
-                    : "text-red-400"
+                    : "text-rose-400"
                 }`}
               >
                 ${todayTotals.utilidadFinal.toFixed(2)}
@@ -381,13 +381,13 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
 
       {/* CRÉDITOS OTORGADOS HOY (INFORMATIVO) */}
       {!finalizeSuccess && todayTotals.creditoOtorgadoHoy > 0 && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg border border-violet-500/30 bg-violet-500/10 p-4 text-xs">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-xs">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-violet-500/20 text-violet-300 flex items-center justify-center shrink-0">
+            <div className="h-9 w-9 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
               <CreditCard className="h-5 w-5" />
             </div>
             <div>
-              <span className="font-black text-violet-300 uppercase tracking-wider text-xs block">
+              <span className="font-bold text-amber-400 uppercase tracking-wider text-xs block">
                 Créditos Otorgados Hoy (Cuentas por Cobrar)
               </span>
               <span className="text-text-light/60 text-[11px]">
@@ -397,7 +397,7 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
             </div>
           </div>
           <div className="text-right sm:self-center">
-            <span className="text-violet-300 text-xl font-black font-mono tabular-nums">
+            <span className="text-amber-400 text-xl font-bold font-mono tabular-nums">
               ${todayTotals.creditoOtorgadoHoy.toFixed(2)}
             </span>
           </div>
@@ -413,7 +413,7 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-dark/40 p-4 rounded-lg border border-border flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
+              <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                 <Receipt className="h-5 w-5" />
               </div>
               <div>
@@ -422,7 +422,7 @@ export function DailyCutBanner(props: DailyCutBannerProps = {}) {
                 </p>
                 <p className="text-lg font-black text-text-light font-mono tabular-nums">
                   {todayOrdersCount}{" "}
-                  <span className="text-xs font-normal text-blue-400 font-sans">
+                  <span className="text-xs font-normal text-primary font-sans">
                     órdenes hoy
                   </span>
                 </p>

@@ -178,7 +178,7 @@ export function HistoryCharts(props: HistoryChartsProps = {}) {
   return (
     <section className="space-y-4">
       <h2 className="text-xs font-extrabold text-text-light/50 uppercase tracking-widest flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+        <span className="h-2 w-2 rounded-full bg-primary"></span>
         Análisis y Tendencias
       </h2>
 
@@ -186,7 +186,7 @@ export function HistoryCharts(props: HistoryChartsProps = {}) {
         {/* Venta Diaria */}
         <div className="rounded-xl bg-card p-6 shadow-xs border border-border lg:col-span-2 space-y-4">
           <h3 className="text-sm font-black text-text-light uppercase tracking-wider flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-blue-400" />
+            <BarChart3 className="h-4 w-4 text-primary" />
             Venta Diaria ({format(new Date(), "MMMM", { locale: es })})
           </h3>
           <div className="h-64 w-full">

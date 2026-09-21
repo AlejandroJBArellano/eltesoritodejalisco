@@ -123,7 +123,7 @@ export function SalesAnalyticsView() {
       <PageHeader
         title="Analítica de Ventas y Productos"
         subtitle={`Exploración visual de tendencias y comportamiento de compra (${PERIOD_LABELS[period]})`}
-        badgeColor="bg-purple-500"
+        badgeColor="bg-primary"
         actions={
           <button
             type="button"
@@ -135,7 +135,7 @@ export function SalesAnalyticsView() {
               )
             }
             disabled={isLoading}
-            className="inline-flex items-center gap-2 rounded-xl bg-purple-500/10 border border-purple-500/30 px-3.5 py-2 text-xs font-black text-purple-400 hover:bg-purple-500/20 transition-all active:scale-95 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary/10 border border-primary/20 px-3.5 py-2 text-xs font-bold text-primary hover:bg-primary/20 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
           >
             <RefreshCw
               className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
@@ -150,24 +150,24 @@ export function SalesAnalyticsView() {
         <AnalyticsNav activeTab="sales" />
 
         {/* Selector de Períodos */}
-        <section className="rounded-xl bg-card p-6 shadow-sm border border-border">
+        <section className="rounded-xl bg-card p-6 shadow-xs border border-border">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-purple-400" /> Período de
+            <h2 className="text-xs font-bold text-text-light/60 uppercase tracking-wider flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-primary" /> Período de
               Análisis
             </h2>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             {(Object.keys(PERIOD_LABELS) as Period[]).map((p) => (
               <button
                 type="button"
                 key={p}
                 onClick={() => handlePeriodChange(p)}
-                className={`rounded-lg px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer ${
+                className={`rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all active:scale-[0.98] cursor-pointer ${
                   period === p
-                    ? "bg-purple-600 text-white shadow-md shadow-purple-600/20 scale-[1.02]"
-                    : "bg-dark/40 text-text-light/60 hover:bg-border/60 hover:text-text-light border border-border"
+                    ? "bg-primary text-dark shadow-xs"
+                    : "bg-dark/40 text-text-light/60 hover:bg-card-light hover:text-text-light border border-border"
                 }`}
               >
                 {PERIOD_LABELS[p]}
@@ -189,7 +189,7 @@ export function SalesAnalyticsView() {
                   type="date"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="rounded-lg border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-purple-400"
+                  className="rounded-lg border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-primary"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -204,14 +204,14 @@ export function SalesAnalyticsView() {
                   type="date"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="rounded-lg border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-purple-400"
+                  className="rounded-lg border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-primary"
                 />
               </div>
               <button
                 type="button"
                 onClick={handleApplyCustomDates}
                 disabled={!customStartDate}
-                className="rounded-lg bg-emerald-500 px-5 py-2 text-xs font-black text-background uppercase tracking-wider hover:bg-emerald-400 disabled:opacity-40 cursor-pointer"
+                className="rounded-lg bg-primary px-5 py-2 text-xs font-bold text-dark uppercase tracking-wider hover:opacity-90 active:scale-[0.98] disabled:opacity-40 cursor-pointer shadow-xs"
               >
                 Aplicar Rango
               </button>
@@ -222,21 +222,21 @@ export function SalesAnalyticsView() {
         {isLoading ? (
           <div className="flex py-24 items-center justify-center text-text-light/60 text-xs font-bold uppercase tracking-wider">
             <div className="flex items-center gap-3">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-purple-500 border-t-transparent"></div>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
               Cargando analítica y tendencias...
             </div>
           </div>
         ) : errorMessage ? (
-          <div className="rounded-xl bg-card p-8 shadow-sm border border-red-500/20 text-center max-w-md mx-auto">
-            <AlertTriangle className="mx-auto h-10 w-10 text-red-400 mb-3" />
-            <h3 className="text-base font-black text-text-light uppercase mb-2">
+          <div className="rounded-xl bg-card p-8 shadow-xs border border-rose-500/20 text-center max-w-md mx-auto">
+            <AlertTriangle className="mx-auto h-10 w-10 text-rose-400 mb-3" />
+            <h3 className="text-base font-bold text-text-light uppercase mb-2">
               Error al Cargar Gráficas
             </h3>
             <p className="text-xs text-text-light/60 mb-5">{errorMessage}</p>
             <button
               type="button"
               onClick={() => fetchData(period)}
-              className="rounded-lg bg-purple-600 px-5 py-2 text-xs font-black text-white uppercase tracking-wider hover:bg-purple-500 transition-all cursor-pointer"
+              className="rounded-lg bg-primary px-5 py-2 text-xs font-bold text-dark uppercase tracking-wider hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
             >
               Reintentar
             </button>

@@ -133,7 +133,7 @@ export function ProductModal({
               <button
                 type="button"
                 onClick={onAddIngredient}
-                className="text-[10px] text-purple-400 font-extrabold uppercase tracking-widest hover:underline cursor-pointer"
+                className="text-[10px] text-primary font-extrabold uppercase tracking-widest hover:underline cursor-pointer"
               >
                 + Nuevo Ingrediente
               </button>
@@ -155,25 +155,25 @@ export function ProductModal({
           </select>
         </div>
 
-        <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 overflow-hidden">
+        <div className="rounded-lg border border-primary/20 bg-primary/5 overflow-hidden">
           <button
             type="button"
             onClick={onToggleTranslations}
             className="w-full flex items-center justify-between px-4 py-3 text-left cursor-pointer"
           >
-            <span className="text-xs font-extrabold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+            <span className="text-xs font-extrabold text-primary uppercase tracking-wider flex items-center gap-2">
               <Globe className="h-3.5 w-3.5" />
               Traducción al Inglés (EN)
               {(formState.nameEn || formState.descriptionEn) && (
-                <span className="rounded-full bg-blue-500 h-1.5 w-1.5" />
+                <span className="rounded-full bg-primary h-1.5 w-1.5" />
               )}
             </span>
             <ChevronDown
-              className={`h-3.5 w-3.5 text-blue-400 transition-transform ${showTranslations ? "rotate-180" : ""}`}
+              className={`h-3.5 w-3.5 text-primary transition-transform ${showTranslations ? "rotate-180" : ""}`}
             />
           </button>
           {showTranslations && (
-            <div className="px-4 pb-4 space-y-3 border-t border-blue-500/10">
+            <div className="px-4 pb-4 space-y-3 border-t border-primary/10">
               <div className="pt-3">
                 <label className="text-[10px] font-extrabold text-text-light/40 uppercase tracking-wider block mb-1">
                   Nombre en Inglés
@@ -182,7 +182,7 @@ export function ProductModal({
                   type="text"
                   value={formState.nameEn}
                   onChange={(e) => onFormChange("nameEn", e.target.value)}
-                  className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-blue-500"
+                  className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-primary"
                   placeholder="e.g. Drowned Sandwich"
                 />
               </div>
@@ -196,7 +196,7 @@ export function ProductModal({
                   onChange={(e) =>
                     onFormChange("descriptionEn", e.target.value)
                   }
-                  className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-blue-500"
+                  className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-primary"
                   placeholder="e.g. Slow-cooked pork, chipotle sauce..."
                 />
               </div>

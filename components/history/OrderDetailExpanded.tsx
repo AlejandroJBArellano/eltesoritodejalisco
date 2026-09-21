@@ -63,13 +63,13 @@ function getActionBadgeConfig(actionType: string): ActionBadgeConfig {
       };
     case "PAID":
       return {
-        badgeClass: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+        badgeClass: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
         label: "Comanda pagada",
         icon: CheckCircle2,
       };
     case "REOPENED":
       return {
-        badgeClass: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+        badgeClass: "bg-amber-500/10 text-amber-400 border-amber-500/20",
         label: "Cuenta reabierta",
         icon: RotateCcw,
       };
@@ -220,7 +220,7 @@ export function OrderDetailExpanded({
             e.stopPropagation();
             onBillOrder(order);
           }}
-          className="flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 text-[10px] font-black text-blue-400 hover:bg-blue-500/20 transition-all uppercase tracking-wider cursor-pointer"
+          className="flex items-center gap-1.5 rounded-lg bg-primary/10 border border-primary/20 px-3 py-1.5 text-[10px] font-black text-primary hover:bg-primary/20 transition-all uppercase tracking-wider cursor-pointer active:scale-[0.98]"
         >
           <Receipt className="h-3.5 w-3.5" /> Facturar Orden
         </button>

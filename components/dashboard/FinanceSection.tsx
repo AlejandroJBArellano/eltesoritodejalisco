@@ -17,7 +17,7 @@ export function FinanceSection(props?: FinanceSectionProps) {
   if (!isAdmin) return null;
 
   return (
-    <CollapsibleSection title="Finanzas y Reportes" dotColorClass="bg-blue-500">
+    <CollapsibleSection title="Finanzas y Reportes" dotColorClass="bg-primary">
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <ModuleCard
           title="Historial"
@@ -25,8 +25,8 @@ export function FinanceSection(props?: FinanceSectionProps) {
           href="/history"
           icon={BookOpen}
           badge="Registro"
-          themeClass="bg-blue-500/10 text-blue-400"
-          hoverColor="#3b82f6"
+          themeClass="bg-primary/10 text-primary"
+          hoverColor="var(--color-primary)"
         />
         <ModuleCard
           title="Gastos"

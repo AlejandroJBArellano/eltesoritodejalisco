@@ -88,7 +88,7 @@ export function CampaignsHistoryTable({
       default:
         return {
           label: "Personalizado",
-          color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+          color: "text-primary bg-primary/10 border-primary/20",
         };
     }
   };
@@ -104,7 +104,7 @@ export function CampaignsHistoryTable({
         );
       case "SENDING":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 text-[11px] font-black text-blue-400 animate-pulse">
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-black text-primary animate-pulse">
             <RefreshCw className="h-3 w-3 animate-spin" />
             Enviando...
           </span>
@@ -118,7 +118,7 @@ export function CampaignsHistoryTable({
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-zinc-500/10 border border-zinc-500/20 px-2.5 py-0.5 text-[11px] font-black text-zinc-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-white/5 border border-border px-2.5 py-0.5 text-[11px] font-black text-text-light/70">
             <Clock className="h-3 w-3" />
             Borrador
           </span>

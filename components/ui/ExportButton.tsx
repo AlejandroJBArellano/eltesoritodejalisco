@@ -156,7 +156,7 @@ export function ExportButton<T>({
             onClick={handleExportCSV}
             className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-white/5 group cursor-pointer"
           >
-            <div className="rounded-md bg-blue-500/10 p-1.5 text-blue-400 group-hover:bg-blue-500/20 transition-colors shrink-0">
+            <div className="rounded-md bg-primary/10 p-1.5 text-primary group-hover:bg-primary/20 transition-colors shrink-0">
               <FileText className="h-4 w-4" />
             </div>
             <div>

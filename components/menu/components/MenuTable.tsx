@@ -173,7 +173,7 @@ export function MenuTable({
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => onOpenRecipe(item.id)}
-                      className="rounded-lg bg-purple-500/10 border border-purple-500/20 p-2 text-purple-400 hover:bg-purple-500/20 transition-colors cursor-pointer"
+                      className="rounded-lg bg-primary/10 border border-primary/20 p-2 text-primary hover:bg-primary/20 transition-colors cursor-pointer active:scale-[0.98]"
                       title="Gestionar Receta"
                     >
                       <BookOpen className="h-4 w-4" />

@@ -407,7 +407,7 @@ export function NewCampaignModal({
             {/* Frequency filter */}
             <div className="space-y-2">
               <label className="text-xs font-extrabold text-text-light/60 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
                 Frecuencia de Compra
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -424,7 +424,7 @@ export function NewCampaignModal({
                     onClick={() => setFrequency(item.value)}
                     className={`rounded-xl border py-2 text-xs font-bold transition-all cursor-pointer ${
                       frequency === item.value
-                        ? "border-purple-400 bg-purple-500/15 text-purple-300 shadow-sm"
+                        ? "border-primary/40 bg-primary/15 text-primary shadow-sm"
                         : "border-border bg-card text-text-light/70 hover:bg-white/5"
                     }`}
                   >

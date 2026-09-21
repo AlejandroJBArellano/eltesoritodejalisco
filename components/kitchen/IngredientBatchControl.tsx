@@ -258,15 +258,15 @@ export function IngredientBatchControl({
           </div>
         ) : (
           <div className="flex flex-1 flex-col justify-between space-y-4">
-            <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-5 text-center shadow-inner">
-              <span className="flex items-center justify-center gap-1 text-[10px] font-black uppercase tracking-widest text-blue-400">
+            <div className="rounded-xl border border-primary/20 bg-primary/10 p-5 text-center shadow-inner">
+              <span className="flex items-center justify-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary">
                 <Clock className="h-3.5 w-3.5" />
                 Tiempo Transcurrido
               </span>
-              <div className="my-2 font-mono text-3xl font-black text-blue-300">
+              <div className="my-2 font-mono tabular-nums text-3xl font-black text-text-light">
                 {getDuration(activeBatch.startedAt)}
               </div>
-              <span className="text-[11px] font-medium text-blue-300/60">
+              <span className="text-[11px] font-medium text-text-light/60">
                 Iniciado a las{" "}
                 {new Date(activeBatch.startedAt).toLocaleTimeString([], {
                   hour: "2-digit",

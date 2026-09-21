@@ -28,8 +28,8 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
       <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border lg:col-span-2">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
           <div>
-            <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+            <h2 className="text-lg font-bold text-text-light tracking-tight uppercase flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-primary"></span>
               Ventas por Producto (Detallado)
             </h2>
             <p className="text-xs text-text-light/60 mt-1 font-medium">
@@ -132,7 +132,7 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
               index === 0
                 ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
                 : index === 1
-                  ? "bg-slate-400/20 text-slate-300 border-slate-400/30"
+                  ? "bg-primary/20 text-primary border-primary/30"
                   : index === 2
                     ? "bg-amber-700/20 text-amber-500 border-amber-700/30"
                     : "bg-dark/40 text-text-light/60 border-border";

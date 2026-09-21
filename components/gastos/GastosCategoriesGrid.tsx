@@ -23,14 +23,14 @@ export function GastosCategoriesGrid(props: GastosCategoriesGridProps = {}) {
   return (
     <section className="rounded-xl bg-card p-6 shadow-xs border border-border space-y-4">
       <div className="flex items-center justify-between border-b border-border pb-3">
-        <h2 className="text-sm font-black text-text-light uppercase tracking-wider flex items-center gap-2">
-          <Tag className="h-4 w-4 text-purple-400" />
+        <h2 className="text-sm font-bold text-text-light uppercase tracking-wider flex items-center gap-2">
+          <Tag className="h-4 w-4 text-primary" />
           Categorías Registradas
         </h2>
         <button
           type="button"
           onClick={onOpenCreateCategory}
-          className="text-xs text-primary hover:underline font-black uppercase tracking-wider flex items-center gap-1 active:scale-95"
+          className="text-xs text-primary hover:underline font-bold uppercase tracking-wider flex items-center gap-1 active:scale-[0.98] cursor-pointer"
         >
           <Plus className="h-3.5 w-3.5" /> Nueva Categoría
         </button>

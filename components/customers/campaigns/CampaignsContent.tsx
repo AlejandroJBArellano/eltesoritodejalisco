@@ -106,7 +106,7 @@ export function CampaignsContent({
                 </p>
               )}
             </div>
-            <div className="rounded-lg bg-blue-500/10 p-3 text-blue-400">
+            <div className="rounded-lg bg-primary/10 p-3 text-primary">
               <Send className="h-5 w-5" />
             </div>
           </div>
@@ -116,11 +116,11 @@ export function CampaignsContent({
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Efectividad
               </p>
-              <p className="mt-1 text-2xl font-black text-purple-400 font-mono tabular-nums">
+              <p className="mt-1 text-2xl font-black text-primary font-mono tabular-nums">
                 {stats.successRate}%
               </p>
             </div>
-            <div className="rounded-lg bg-purple-500/10 p-3 text-purple-400">
+            <div className="rounded-lg bg-primary/10 p-3 text-primary">
               <TrendingUp className="h-5 w-5" />
             </div>
           </div>

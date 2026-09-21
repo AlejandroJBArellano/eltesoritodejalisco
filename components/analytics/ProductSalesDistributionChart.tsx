@@ -36,11 +36,11 @@ export function ProductSalesDistributionChart({
   const maxVal = rawMax > 0 ? rawMax : 1;
 
   return (
-    <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border">
+    <section className="rounded-xl bg-card p-6 sm:p-8 shadow-xs border border-border">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
         <div>
-          <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+          <h2 className="text-lg font-bold text-text-light tracking-tight uppercase flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-primary"></span>
             Distribución de Ventas por Producto
           </h2>
           <p className="text-xs text-text-light/60 mt-1 font-medium">
@@ -52,7 +52,7 @@ export function ProductSalesDistributionChart({
         <div className="flex flex-wrap items-center gap-3">
           {/* Category Filter Dropdown */}
           <div className="flex items-center gap-2 bg-dark/40 px-3 py-1.5 rounded-lg border border-border text-xs">
-            <Layers className="h-3.5 w-3.5 text-purple-400" />
+            <Layers className="h-3.5 w-3.5 text-primary" />
             <span className="text-text-light/60 font-bold uppercase tracking-wider">
               Cat:
             </span>
@@ -60,7 +60,7 @@ export function ProductSalesDistributionChart({
               value={selectedCategory}
               onChange={(e) => onSelectCategory(e.target.value)}
               aria-label="Filtrar por categoría"
-              className="bg-transparent text-text-light text-xs font-bold uppercase tracking-wider outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none rounded px-1"
+              className="bg-transparent text-text-light text-xs font-bold uppercase tracking-wider outline-none cursor-pointer focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none rounded px-1"
             >
               {categoriesList.map((cat) => (
                 <option
@@ -79,9 +79,9 @@ export function ProductSalesDistributionChart({
             <button
               type="button"
               onClick={() => onSelectMetric("revenue")}
-              className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-success focus-visible:outline-none ${
+              className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all active:scale-[0.98] cursor-pointer focus-visible:ring-1 focus-visible:ring-success focus-visible:outline-none ${
                 productMetric === "revenue"
-                  ? "bg-emerald-500 text-background shadow-md"
+                  ? "bg-emerald-500 text-dark shadow-xs"
                   : "text-text-light/60 hover:text-text-light"
               }`}
             >
@@ -90,9 +90,9 @@ export function ProductSalesDistributionChart({
             <button
               type="button"
               onClick={() => onSelectMetric("quantity")}
-              className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:outline-none ${
+              className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all active:scale-[0.98] cursor-pointer focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none ${
                 productMetric === "quantity"
-                  ? "bg-purple-600 text-white shadow-md"
+                  ? "bg-primary text-dark shadow-xs"
                   : "text-text-light/60 hover:text-text-light"
               }`}
             >
@@ -105,10 +105,10 @@ export function ProductSalesDistributionChart({
       {/* Quick Summary Badges */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-dark/40 p-4 rounded-xl border border-border">
-          <span className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-wider block">
+          <span className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider block">
             Total Recaudado ({selectedCategory})
           </span>
-          <span className="text-lg font-black text-emerald-400 mt-1 block font-mono tabular-nums">
+          <span className="text-lg font-bold text-emerald-400 mt-1 block font-mono tabular-nums">
             $
             {totalCategoryRevenue.toLocaleString(undefined, {
               minimumFractionDigits: 2,
@@ -116,18 +116,18 @@ export function ProductSalesDistributionChart({
           </span>
         </div>
         <div className="bg-dark/40 p-4 rounded-xl border border-border">
-          <span className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-wider block">
+          <span className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider block">
             Unidades Vendidas
           </span>
-          <span className="text-lg font-black text-purple-400 mt-1 block font-mono tabular-nums">
+          <span className="text-lg font-bold text-primary mt-1 block font-mono tabular-nums">
             {totalCategoryQuantity.toLocaleString()} u.
           </span>
         </div>
         <div className="col-span-2 sm:col-span-1 bg-dark/40 p-4 rounded-xl border border-border">
-          <span className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-wider block">
+          <span className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider block">
             Top Producto
           </span>
-          <span className="text-sm font-black text-text-light mt-1 block truncate">
+          <span className="text-sm font-bold text-text-light mt-1 block truncate">
             {productChartData[0]?.name || "N/A"}
           </span>
         </div>
@@ -142,7 +142,7 @@ export function ProductSalesDistributionChart({
             const val = product[productMetric] || 0;
             const percentage = Math.max(Math.min((val / maxVal) * 100, 100), 1);
             const isRevenue = productMetric === "revenue";
-            const barColor = isRevenue ? "bg-emerald-500" : "bg-purple-500";
+            const barColor = isRevenue ? "bg-emerald-500" : "bg-primary";
             const isHovered = hoveredProduct?.id === product.id;
 
             return (
@@ -162,8 +162,8 @@ export function ProductSalesDistributionChart({
                     </span>
                   </div>
                   <span
-                    className={`font-black shrink-0 font-mono tabular-nums ${
-                      isRevenue ? "text-emerald-400" : "text-purple-400"
+                    className={`font-bold shrink-0 font-mono tabular-nums ${
+                      isRevenue ? "text-emerald-400" : "text-primary"
                     }`}
                   >
                     {isRevenue
@@ -177,22 +177,22 @@ export function ProductSalesDistributionChart({
                 {/* Progress bar track */}
                 <div className="h-3 w-full bg-dark/40 border border-border/60 rounded-full overflow-hidden p-0.5">
                   <div
-                    className={`h-full ${barColor} rounded-full transition-all duration-500 ease-out`}
+                    className={`h-full ${barColor} rounded-full transition-all duration-300 ease-out`}
                     style={{ width: `${percentage}%` }}
                   />
                 </div>
 
                 {/* Interactive hover card */}
                 {isHovered && (
-                  <div className="absolute right-0 bottom-full mb-1 z-20 pointer-events-none rounded-xl border border-border bg-card p-3 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap">
-                    <p className="font-black text-text-light">{product.name}</p>
+                  <div className="absolute right-0 bottom-full mb-1 z-20 pointer-events-none rounded-xl border border-border bg-card p-3 shadow-lg backdrop-blur-md text-xs whitespace-nowrap">
+                    <p className="font-bold text-text-light">{product.name}</p>
                     <p className="text-[11px] text-emerald-400 font-bold mt-0.5 font-mono tabular-nums">
                       Ingresos: $
                       {(product.revenue || 0).toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                       })}
                     </p>
-                    <p className="text-[11px] text-purple-400 font-bold font-mono tabular-nums">
+                    <p className="text-[11px] text-primary font-bold font-mono tabular-nums">
                       Unidades: {(product.quantity || 0).toLocaleString()}
                     </p>
                   </div>

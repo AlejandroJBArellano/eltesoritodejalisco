@@ -61,8 +61,8 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
     <>
       <section className="rounded-xl bg-card p-6 shadow-xs border border-border space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
-          <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
-            <Folder className="h-5 w-5 text-blue-400" />
+          <h2 className="text-lg font-bold text-text-light tracking-tight uppercase flex items-center gap-2">
+            <Folder className="h-5 w-5 text-primary" />
             Archivo de Cortes Diarios
           </h2>
           {dailyCuts.length > 0 && (
@@ -159,10 +159,10 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
                       <td className="py-3.5 px-3 text-right font-mono tabular-nums text-amber-400/80">
                         ${Number(cut.iva_acumulado).toFixed(2)}
                       </td>
-                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-red-400">
+                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-rose-400">
                         -${Number(cut.total_gastos).toFixed(2)}
                       </td>
-                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-blue-400/80">
+                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-primary/80">
                         {Number(cut.comision_tarjeta || 0) > 0
                           ? `-$${Number(cut.comision_tarjeta).toFixed(2)}`
                           : "$0.00"}
@@ -171,7 +171,7 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
                         className={`py-3.5 px-3 text-right font-mono tabular-nums font-black ${
                           Number(cut.utilidad_final) >= 0
                             ? "text-emerald-400"
-                            : "text-red-400"
+                            : "text-rose-400"
                         }`}
                       >
                         ${Number(cut.utilidad_final).toFixed(2)}
@@ -180,9 +180,9 @@ export function DailyCutsArchiveTable(props: DailyCutsArchiveTableProps = {}) {
                         <button
                           type="button"
                           onClick={() => onViewCutDetail(cut)}
-                          className="inline-flex items-center gap-1 bg-white/5 hover:bg-white/10 text-text-light px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 bg-white/5 hover:bg-white/10 text-text-light px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer active:scale-[0.98]"
                         >
-                          <Receipt className="h-3 w-3 text-blue-400" />
+                          <Receipt className="h-3 w-3 text-primary" />
                           Ver
                         </button>
                       </td>

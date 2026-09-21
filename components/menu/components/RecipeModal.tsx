@@ -38,7 +38,7 @@ export function RecipeModal({
       onClose={onClose}
       title="Gestión de Recetas e Ingredientes"
       subtitle="Asigna ingredientes a cada platillo para control de inventario"
-      icon={<BookOpen className="h-5 w-5 text-purple-400" />}
+      icon={<BookOpen className="h-5 w-5 text-primary" />}
       maxWidth="xl"
     >
       <div className="space-y-6">
@@ -79,7 +79,7 @@ export function RecipeModal({
                     <button
                       type="button"
                       onClick={onAddIngredient}
-                      className="text-[9px] text-purple-400 font-extrabold uppercase tracking-widest hover:underline cursor-pointer"
+                      className="text-[9px] text-primary font-extrabold uppercase tracking-widest hover:underline cursor-pointer"
                     >
                       + Nuevo Ingrediente
                     </button>
@@ -130,7 +130,7 @@ export function RecipeModal({
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="rounded-lg bg-purple-500 px-3 py-2 text-xs font-bold text-white hover:bg-purple-600 shrink-0 cursor-pointer shadow-sm"
+                    className="rounded-lg bg-primary px-3 py-2 text-xs font-black text-dark hover:opacity-90 active:scale-[0.98] shrink-0 cursor-pointer shadow-sm"
                   >
                     <Plus className="h-4 w-4" />
                   </button>

@@ -308,7 +308,7 @@ export default function OrdersPOS({
                           ${order.total.toFixed(2)}
                         </span>
                         {!isWaiter && tipAmt > 0 && (
-                          <span className="text-[10px] font-bold text-blue-400/80">
+                          <span className="text-[10px] font-bold text-primary font-mono tabular-nums">
                             +${tipAmt.toFixed(2)} propina
                           </span>
                         )}
@@ -328,7 +328,7 @@ export default function OrdersPOS({
                               setPaymentMethod("CASH");
                               setReceivedAmount("");
                             }}
-                            className="rounded-lg bg-success/15 hover:bg-success/25 text-success border border-success/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+                            className="rounded-lg bg-success/15 hover:bg-success/25 text-success border border-success/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer active:scale-[0.98]"
                           >
                             <DollarSign className="h-3 w-3" />
                             Cobrar
@@ -341,7 +341,7 @@ export default function OrdersPOS({
                             setShowKitchenTicket(true);
                             setShowTicket(false);
                           }}
-                          className="rounded-lg bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+                          className="rounded-lg bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer active:scale-[0.98]"
                         >
                           <ChefHat className="h-3 w-3" />
                           Comanda
@@ -350,7 +350,7 @@ export default function OrdersPOS({
                           <button
                             type="button"
                             onClick={() => setEditingOrder(order)}
-                            className="rounded-lg bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+                            className="rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer active:scale-[0.98]"
                           >
                             <Plus className="h-3 w-3" />
                             Agregar
@@ -360,7 +360,7 @@ export default function OrdersPOS({
                           <button
                             type="button"
                             onClick={() => openModifyModal(order)}
-                            className="rounded-lg bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 border border-orange-500/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+                            className="rounded-lg bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 border border-orange-500/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer active:scale-[0.98]"
                           >
                             <Edit3 className="h-3 w-3" />
                             Editar
@@ -377,7 +377,7 @@ export default function OrdersPOS({
                                   "0",
                               );
                             }}
-                            className="rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-blue-400 border border-blue-500/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+                            className="rounded-lg bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer active:scale-[0.98]"
                           >
                             <HandCoins className="h-3 w-3" />
                             Propina

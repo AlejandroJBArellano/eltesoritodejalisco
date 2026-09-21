@@ -70,14 +70,14 @@ export function AdminTareasNav(props: AdminTareasNavProps) {
             <>
               <button
                 onClick={onOpenCategoryModal}
-                className="rounded-lg border border-border bg-card px-3.5 py-2 text-xs font-bold text-text-light hover:bg-white/5 flex items-center gap-1.5 uppercase tracking-wider active:scale-[0.98] transition-all"
+                className="rounded-lg border border-border bg-card px-3.5 py-2 text-xs font-bold text-text-light hover:bg-white/5 flex items-center gap-1.5 uppercase tracking-wider active:scale-[0.98] transition-all cursor-pointer"
               >
-                <FolderPlus className="h-4 w-4 text-purple-400" />
+                <FolderPlus className="h-4 w-4 text-primary" />
                 Nueva Categoría
               </button>
               <button
                 onClick={onOpenNewTaskModal}
-                className="rounded-lg bg-primary px-3.5 py-2 text-xs font-black text-background hover:bg-primary-hover flex items-center gap-1.5 uppercase tracking-wider shadow-sm active:scale-[0.98] transition-all"
+                className="rounded-lg bg-primary px-3.5 py-2 text-xs font-black text-dark hover:opacity-90 flex items-center gap-1.5 uppercase tracking-wider shadow-sm active:scale-[0.98] transition-all cursor-pointer"
               >
                 <Plus className="h-4 w-4" />
                 Nueva Tarea

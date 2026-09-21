@@ -23,14 +23,14 @@ const CATEGORY_CONFIG: Record<
   "PLATILLOS FUERTES": {
     label: "Platillos Fuertes",
     color: "#E6E6FA",
-    badgeBg: "bg-purple-500/10 text-purple-300 border-purple-500/20",
-    text: "#C084FC",
+    badgeBg: "bg-primary/10 text-primary border-primary/20",
+    text: "var(--color-primary)",
   },
   BEBIDAS: {
     label: "Bebidas",
     color: "#89CFF0",
-    badgeBg: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    text: "#60A5FA",
+    badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+    text: "#22D3EE",
   },
   EXTRAS: {
     label: "Extras",
