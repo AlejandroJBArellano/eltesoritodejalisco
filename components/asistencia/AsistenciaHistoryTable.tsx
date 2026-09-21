@@ -100,7 +100,7 @@ export function AsistenciaHistoryTable() {
               {paginatedAttendances.map((rec) => (
                 <tr
                   key={rec.id}
-                  className="hover:bg-secondary/40 transition-colors"
+                  className="hover:bg-dark/40 transition-colors"
                 >
                   <td className="py-3 px-3">
                     <span className="font-bold text-text-light">
@@ -108,7 +108,7 @@ export function AsistenciaHistoryTable() {
                     </span>
                   </td>
                   <td className="py-3 px-3">
-                    <span className="rounded-md bg-secondary border border-border px-2 py-0.5 text-[10px] font-bold text-text-light/60 uppercase tracking-wider">
+                    <span className="rounded-md bg-dark/40 border border-border px-2 py-0.5 text-[10px] font-bold text-text-light/60 uppercase tracking-wider">
                       {rec.users?.role || "N/A"}
                     </span>
                   </td>
@@ -131,7 +131,7 @@ export function AsistenciaHistoryTable() {
                         En Turno
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary border border-border px-2.5 py-0.5 text-[10px] font-bold text-text-light/50 uppercase tracking-wider">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-dark/40 border border-border px-2.5 py-0.5 text-[10px] font-bold text-text-light/50 uppercase tracking-wider">
                         Finalizado
                       </span>
                     )}

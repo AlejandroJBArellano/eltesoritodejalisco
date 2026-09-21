@@ -41,7 +41,7 @@ export function StaffAttendanceCard({
           <h4 className="font-bold text-base text-text-light tracking-tight">
             {user.name}
           </h4>
-          <span className="rounded-md bg-secondary border border-border px-2 py-0.5 text-[10px] font-bold text-text-light/60 uppercase tracking-wider">
+          <span className="rounded-md bg-dark/40 border border-border px-2 py-0.5 text-[10px] font-bold text-text-light/60 uppercase tracking-wider">
             {user.role}
           </span>
         </div>
@@ -63,7 +63,7 @@ export function StaffAttendanceCard({
           </div>
         ) : (
           <div className="mb-4">
-            <span className="inline-flex items-center gap-1.5 py-0.5 px-2.5 rounded-full text-[11px] font-bold bg-secondary text-text-light/50 border border-border uppercase tracking-wider">
+            <span className="inline-flex items-center gap-1.5 py-0.5 px-2.5 rounded-full text-[11px] font-bold bg-dark/40 text-text-light/50 border border-border uppercase tracking-wider">
               Fuera de Turno
             </span>
           </div>

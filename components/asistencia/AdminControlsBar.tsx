@@ -33,7 +33,7 @@ export function AdminControlsBar(props: AdminControlsBarProps) {
           type="time"
           value={customTime}
           onChange={(e) => onCustomTimeChange(e.target.value)}
-          className="bg-secondary border border-border text-text-light px-3.5 py-2 rounded-lg text-xs outline-none focus:border-primary font-mono tabular-nums transition-colors"
+          className="bg-dark/40 border border-border text-text-light px-3.5 py-2 rounded-lg text-xs outline-none focus:border-primary font-mono tabular-nums transition-colors"
         />
       </div>
     </div>

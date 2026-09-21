@@ -60,7 +60,7 @@ export function AsistenciaFilterBar() {
           <select
             value={selectedUserId}
             onChange={(e) => setSelectedUserId(e.target.value)}
-            className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
+            className="w-full rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
           >
             <option value="ALL">Todos los Empleados</option>
             {users.map((u) => (
@@ -79,7 +79,7 @@ export function AsistenciaFilterBar() {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary scheme-dark transition-colors tabular-nums"
+            className="w-full rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary scheme-dark transition-colors tabular-nums"
           />
         </div>
 
@@ -91,7 +91,7 @@ export function AsistenciaFilterBar() {
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary scheme-dark transition-colors tabular-nums"
+            className="w-full rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary scheme-dark transition-colors tabular-nums"
           />
         </div>
 

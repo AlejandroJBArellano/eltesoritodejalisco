@@ -78,7 +78,7 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
           )}
         </div>
       ) : (
-        <div className="mb-6 rounded-lg bg-secondary border border-border p-3 text-left">
+        <div className="mb-6 rounded-lg bg-dark/40 border border-border p-3 text-left">
           <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/50">
             Turno de Hoy
           </span>
@@ -134,7 +134,7 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
         </div>
       ) : (
         <div>
-          <div className="w-28 h-28 mx-auto rounded-full bg-secondary border-2 border-border flex flex-col items-center justify-center mb-4">
+          <div className="w-28 h-28 mx-auto rounded-full bg-dark/40 border-2 border-border flex flex-col items-center justify-center mb-4">
             <UserX className="h-7 w-7 text-text-light/40 mb-1" />
             <span className="text-text-light/50 font-bold text-xs uppercase tracking-wider">
               Fuera de Turno

@@ -20,7 +20,7 @@ export function StaffAttendanceGrid() {
       {/* Section Header */}
       <div className="flex items-center justify-between border-b border-border pb-3">
         <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-secondary" />
+          <span className="h-2 w-2 rounded-full bg-dark/40" />
           Personal & Estado de Turnos Hoy
         </h2>
         <Link
