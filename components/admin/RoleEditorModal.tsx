@@ -144,13 +144,13 @@ function RoleEditorModalContent({
       aria-labelledby="role-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
     >
-      <div className="bg-surface border border-border w-full max-w-3xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden text-white">
+      <div className="bg-card border border-border w-full max-w-3xl max-h-[90vh] rounded-xl flex flex-col shadow-2xl overflow-hidden text-text-light">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-dark/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-secondary/60">
           <div>
             <h2
               id="role-modal-title"
-              className="text-lg font-black tracking-tight text-white"
+              className="text-lg font-black tracking-tight text-text-light"
             >
               {isDuplicating
                 ? `Duplicar Rol: ${roleToEdit?.name}`
@@ -168,7 +168,7 @@ function RoleEditorModalContent({
             type="button"
             onClick={onClose}
             aria-label="Cerrar modal"
-            className="text-text-light/50 hover:text-white p-2 rounded-lg hover:bg-white/5 transition-colors"
+            className="text-text-light/50 hover:text-text-light p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
           >
             <svg
               className="w-5 h-5"
@@ -195,7 +195,7 @@ function RoleEditorModalContent({
             {errorMsg && (
               <div
                 role="alert"
-                className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-2"
+                className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-2 font-bold"
               >
                 <svg
                   className="w-4 h-4 shrink-0"
@@ -231,7 +231,7 @@ function RoleEditorModalContent({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="ej. Capitán de Meseros"
-                  className="w-full bg-dark/80 border border-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-text-light/30 focus:outline-none focus:border-primary transition-colors disabled:opacity-60"
+                  className="w-full bg-secondary border border-border rounded-lg px-3.5 py-2.5 text-sm text-text-light placeholder-text-light/30 focus:outline-none focus:border-primary transition-colors disabled:opacity-60 font-medium"
                 />
               </div>
 
@@ -249,7 +249,7 @@ function RoleEditorModalContent({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="ej. Autorizaciones de descuentos y supervisión de sala"
-                  className="w-full bg-dark/80 border border-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-text-light/30 focus:outline-none focus:border-primary transition-colors disabled:opacity-60"
+                  className="w-full bg-secondary border border-border rounded-lg px-3.5 py-2.5 text-sm text-text-light placeholder-text-light/30 focus:outline-none focus:border-primary transition-colors disabled:opacity-60 font-medium"
                 />
               </div>
             </div>
@@ -258,7 +258,7 @@ function RoleEditorModalContent({
             <div className="pt-2 border-t border-border">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-text-light">
                     Matriz de Permisos ({selectedPermissions.size}{" "}
                     seleccionados)
                   </h3>
@@ -272,14 +272,14 @@ function RoleEditorModalContent({
                     <button
                       type="button"
                       onClick={selectAll}
-                      className="px-2.5 py-1 text-xs font-bold bg-white/5 hover:bg-white/10 text-text-light rounded-lg border border-border transition-colors"
+                      className="px-2.5 py-1 text-xs font-bold bg-white/5 hover:bg-white/10 text-text-light rounded-lg border border-border transition-colors cursor-pointer"
                     >
                       Todos
                     </button>
                     <button
                       type="button"
                       onClick={deselectAll}
-                      className="px-2.5 py-1 text-xs font-bold bg-white/5 hover:bg-white/10 text-text-light/70 rounded-lg border border-border transition-colors"
+                      className="px-2.5 py-1 text-xs font-bold bg-white/5 hover:bg-white/10 text-text-light/70 rounded-lg border border-border transition-colors cursor-pointer"
                     >
                       Ninguno
                     </button>
@@ -300,15 +300,15 @@ function RoleEditorModalContent({
                   return (
                     <div
                       key={module.id}
-                      className="bg-dark/40 border border-border/80 rounded-xl p-4 transition-all"
+                      className="bg-secondary/50 border border-border/80 rounded-xl p-4 transition-all"
                     >
                       <div className="flex items-center justify-between pb-3 mb-3 border-b border-border/50">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-white">
+                            <span className="text-sm font-bold text-text-light">
                               {module.name}
                             </span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-text-light/60 border border-white/5">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-text-light/60 border border-white/5 font-mono">
                               {selectedInModule}/{moduleKeys.length}
                             </span>
                           </div>
@@ -320,7 +320,7 @@ function RoleEditorModalContent({
                           <button
                             type="button"
                             onClick={() => toggleModuleAll(moduleKeys)}
-                            className="text-xs font-bold text-primary hover:underline"
+                            className="text-xs font-bold text-primary hover:underline cursor-pointer"
                           >
                             {isAllModuleSelected
                               ? "Deseleccionar"
@@ -336,10 +336,10 @@ function RoleEditorModalContent({
                             <label
                               key={perm.key}
                               htmlFor={`perm-check-${perm.key}`}
-                              className={`flex items-start gap-3 p-2.5 rounded-xl border transition-all cursor-pointer ${
+                              className={`flex items-start gap-3 p-2.5 rounded-lg border transition-all cursor-pointer ${
                                 isChecked
-                                  ? "bg-primary/10 border-primary/30 text-white"
-                                  : "bg-dark/60 border-border/50 text-text-light/70 hover:bg-white/5"
+                                  ? "bg-primary/10 border-primary/30 text-text-light"
+                                  : "bg-card border-border/50 text-text-light/70 hover:bg-white/5"
                               } ${isEditingSystem ? "opacity-60 cursor-not-allowed" : ""}`}
                             >
                               <input
@@ -348,7 +348,7 @@ function RoleEditorModalContent({
                                 disabled={isEditingSystem}
                                 checked={isChecked}
                                 onChange={() => togglePermission(perm.key)}
-                                className="mt-0.5 rounded border-border text-primary focus:ring-primary h-4 w-4 bg-dark"
+                                className="mt-0.5 rounded border-border text-primary focus:ring-primary h-4 w-4 bg-secondary cursor-pointer"
                               />
                               <div className="flex-1 min-w-0">
                                 <span className="block text-xs font-bold leading-tight">
@@ -370,11 +370,11 @@ function RoleEditorModalContent({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-dark/60">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-secondary/60">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-text-light/70 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
+              className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-text-light/70 hover:text-text-light bg-white/5 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
             >
               {isEditingSystem ? "Cerrar" : "Cancelar"}
             </button>
@@ -383,7 +383,7 @@ function RoleEditorModalContent({
               <button
                 type="submit"
                 disabled={isPending}
-                className="px-5 py-2.5 text-xs font-black uppercase tracking-wider bg-primary hover:bg-primary/90 text-dark rounded-xl shadow-lg shadow-primary/20 transition-all disabled:opacity-50 flex items-center gap-2"
+                className="px-5 py-2.5 text-xs font-black uppercase tracking-wider bg-primary hover:bg-primary/90 text-background rounded-lg shadow-lg shadow-primary/20 transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
               >
                 {isPending ? (
                   <>
@@ -424,7 +424,7 @@ function RoleEditorModalContent({
                   setName(`${roleToEdit.name} (Copia)`);
                   onSaved();
                 }}
-                className="px-4 py-2 text-xs font-black uppercase tracking-wider bg-primary/20 text-primary hover:bg-primary/30 rounded-xl transition-colors"
+                className="px-4 py-2 text-xs font-black uppercase tracking-wider bg-primary/20 text-primary hover:bg-primary/30 rounded-lg transition-colors cursor-pointer"
               >
                 Duplicar como Rol Personalizado
               </button>

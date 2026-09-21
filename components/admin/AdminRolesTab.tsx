@@ -111,9 +111,9 @@ export function AdminRolesTab() {
   return (
     <div className="space-y-6">
       {/* Barra superior */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface p-4 sm:p-5 rounded-2xl border border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-5 rounded-xl border border-border">
         <div>
-          <h2 className="text-base font-black tracking-tight text-white">
+          <h2 className="text-base font-black tracking-tight text-text-light">
             Roles y Permisos Operativos
           </h2>
           <p className="text-xs text-text-light/60 mt-0.5">
@@ -125,7 +125,7 @@ export function AdminRolesTab() {
           <button
             type="button"
             onClick={handleCreateNew}
-            className="px-4 py-2 text-xs font-black uppercase tracking-wider bg-primary hover:bg-primary/90 text-dark rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center gap-2"
+            className="px-4 py-2 text-xs font-black uppercase tracking-wider bg-primary hover:bg-primary/90 text-background rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center gap-2 cursor-pointer"
           >
             <svg
               className="w-4 h-4"
@@ -149,13 +149,13 @@ export function AdminRolesTab() {
       {errorMsg && (
         <div
           role="alert"
-          className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center justify-between"
+          className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center justify-between font-bold"
         >
           <span>{errorMsg}</span>
           <button
             type="button"
             onClick={() => setErrorMsg("")}
-            className="text-red-400 hover:text-white"
+            className="text-red-400 hover:text-text-light cursor-pointer"
           >
             ✕
           </button>
@@ -165,13 +165,13 @@ export function AdminRolesTab() {
       {successMsg && (
         <div
           role="status"
-          className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-xl flex items-center justify-between"
+          className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-xl flex items-center justify-between font-bold"
         >
           <span>{successMsg}</span>
           <button
             type="button"
             onClick={() => setSuccessMsg("")}
-            className="text-emerald-400 hover:text-white"
+            className="text-emerald-400 hover:text-text-light cursor-pointer"
           >
             ✕
           </button>
@@ -185,7 +185,7 @@ export function AdminRolesTab() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Buscar rol por nombre o descripción..."
-          className="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-text-light/40 focus:outline-none focus:border-primary transition-colors"
+          className="w-full bg-secondary border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-text-light placeholder-text-light/40 focus:outline-none focus:border-primary transition-colors font-medium"
         />
         <svg
           className="w-4 h-4 text-text-light/40 absolute left-3.5 top-3"
@@ -203,7 +203,7 @@ export function AdminRolesTab() {
       </div>
 
       {isLoading ? (
-        <div className="p-12 text-center text-text-light/40 text-xs">
+        <div className="p-12 text-center text-text-light/40 text-xs font-medium">
           Cargando roles y permisos...
         </div>
       ) : (
@@ -220,7 +220,7 @@ export function AdminRolesTab() {
             </div>
 
             {customRoles.length === 0 ? (
-              <div className="p-8 text-center bg-surface/50 border border-dashed border-border rounded-2xl">
+              <div className="p-8 text-center bg-card/50 border border-dashed border-border rounded-xl">
                 <p className="text-xs text-text-light/60 font-medium">
                   No hay roles personalizados creados aún.
                 </p>
@@ -232,7 +232,7 @@ export function AdminRolesTab() {
                 <button
                   type="button"
                   onClick={handleCreateNew}
-                  className="mt-4 px-3 py-1.5 text-xs font-bold text-primary hover:underline"
+                  className="mt-4 px-3 py-1.5 text-xs font-bold text-primary hover:underline cursor-pointer"
                 >
                   + Crear primer rol personalizado
                 </button>
@@ -293,9 +293,9 @@ export function AdminRolesTab() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
         >
-          <div className="bg-surface border border-border w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-5 text-white">
+          <div className="bg-card border border-border w-full max-w-md rounded-xl p-6 shadow-2xl space-y-5 text-text-light">
             <div className="space-y-2">
-              <h3 className="text-base font-black text-white">
+              <h3 className="text-base font-black text-text-light">
                 Eliminar Rol: {roleToDelete.name}
               </h3>
               <p className="text-xs text-text-light/70">
@@ -306,7 +306,7 @@ export function AdminRolesTab() {
 
             {/* Si tiene colaboradores asignados */}
             {roleToDelete.user_count && roleToDelete.user_count > 0 ? (
-              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl space-y-2 text-xs text-amber-300">
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl space-y-2 text-xs text-amber-300 font-medium">
                 <p className="font-bold">
                   ⚠️ Hay {roleToDelete.user_count} colaborador(es) con este rol
                   asignado.
@@ -318,7 +318,7 @@ export function AdminRolesTab() {
                 <select
                   value={reassignRoleId}
                   onChange={(e) => setReassignRoleId(e.target.value)}
-                  className="w-full bg-dark border border-border rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-primary"
+                  className="w-full bg-secondary border border-border rounded-lg px-2.5 py-1.5 text-xs text-text-light focus:border-primary"
                 >
                   {roles
                     .filter((r) => r.id !== roleToDelete.id)
@@ -336,7 +336,7 @@ export function AdminRolesTab() {
                 type="button"
                 onClick={() => setRoleToDelete(null)}
                 disabled={isDeleting}
-                className="px-4 py-2 text-xs font-bold text-text-light/70 hover:text-white bg-white/5 rounded-xl"
+                className="px-4 py-2 text-xs font-bold text-text-light/70 hover:text-text-light bg-white/5 rounded-xl cursor-pointer"
               >
                 Cancelar
               </button>
@@ -344,7 +344,7 @@ export function AdminRolesTab() {
                 type="button"
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 text-xs font-black bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-xs font-black bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isDeleting ? "Eliminando..." : "Confirmar Eliminación"}
               </button>
@@ -371,11 +371,11 @@ function RoleCard({ role, onEdit, onDuplicate, onDelete }: RoleCardProps) {
     : 0;
 
   return (
-    <div className="bg-surface border border-border rounded-2xl p-5 flex flex-col justify-between hover:border-text-light/20 transition-all group">
+    <div className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between hover:border-text-light/20 transition-all group shadow-sm">
       <div>
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1">
-            <h4 className="text-sm font-black text-white group-hover:text-primary transition-colors">
+            <h4 className="text-sm font-black text-text-light group-hover:text-primary transition-colors">
               {role.name}
             </h4>
             <div className="flex items-center gap-2">
@@ -409,7 +409,7 @@ function RoleCard({ role, onEdit, onDuplicate, onDelete }: RoleCardProps) {
         <button
           type="button"
           onClick={onEdit}
-          className="flex-1 py-1.5 px-2 text-xs font-bold bg-white/5 hover:bg-white/10 text-white rounded-lg border border-border/80 transition-colors text-center"
+          className="flex-1 py-1.5 px-2 text-xs font-bold bg-white/5 hover:bg-white/10 text-text-light rounded-lg border border-border/80 transition-colors text-center cursor-pointer"
         >
           {role.is_system ? "Ver Permisos" : "Editar"}
         </button>
@@ -417,7 +417,7 @@ function RoleCard({ role, onEdit, onDuplicate, onDelete }: RoleCardProps) {
           type="button"
           onClick={onDuplicate}
           title="Duplicar como nuevo rol"
-          className="py-1.5 px-2.5 text-xs font-bold bg-white/5 hover:bg-white/10 text-text-light/70 hover:text-white rounded-lg border border-border/80 transition-colors"
+          className="py-1.5 px-2.5 text-xs font-bold bg-white/5 hover:bg-white/10 text-text-light/70 hover:text-text-light rounded-lg border border-border/80 transition-colors cursor-pointer"
         >
           Duplicar
         </button>
@@ -426,7 +426,7 @@ function RoleCard({ role, onEdit, onDuplicate, onDelete }: RoleCardProps) {
             type="button"
             onClick={onDelete}
             title="Eliminar rol"
-            className="py-1.5 px-2.5 text-xs font-bold bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/20 transition-colors"
+            className="py-1.5 px-2.5 text-xs font-bold bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/20 transition-colors cursor-pointer"
           >
             ✕
           </button>

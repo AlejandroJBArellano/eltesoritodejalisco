@@ -534,7 +534,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
 
           <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-left text-xs">
-              <thead className="bg-dark/40 uppercase tracking-wider text-text-light/60 border-b border-border">
+              <thead className="bg-secondary uppercase tracking-wider text-text-light/60 border-b border-border">
                 <tr>
                   <TableHeaderSortCell
                     field="name"
@@ -744,7 +744,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
               type="text"
               value={formState.name}
               onChange={(e) => handleFormChange("name", e.target.value)}
-              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-emerald-500 transition-colors duration-200"
+              className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors duration-200"
               placeholder="Ej. Juan Pérez"
             />
             {formErrors.name && (
@@ -762,7 +762,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
               type="tel"
               value={formState.phone}
               onChange={(e) => handleFormChange("phone", e.target.value)}
-              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-emerald-500 transition-colors duration-200"
+              className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors duration-200 font-mono tabular-nums"
               placeholder="Ej. 3312345678"
             />
             {formErrors.phone && (
@@ -780,7 +780,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
               type="email"
               value={formState.email}
               onChange={(e) => handleFormChange("email", e.target.value)}
-              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-emerald-500 transition-colors duration-200"
+              className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors duration-200"
               placeholder="ejemplo@correo.com"
             />
             {formErrors.email && (
@@ -798,7 +798,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
               type="date"
               value={formState.birthday}
               onChange={(e) => handleFormChange("birthday", e.target.value)}
-              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-emerald-500 scheme-dark transition-colors duration-200"
+              className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-500 scheme-dark transition-colors duration-200 font-mono tabular-nums"
             />
           </div>
 
@@ -806,14 +806,14 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-white/5 transition-colors duration-200 cursor-pointer"
+              className="rounded-lg border border-border px-4 py-2 text-xs font-bold text-text-light/70 hover:bg-white/5 transition-colors duration-200 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-black text-black hover:brightness-105 disabled:opacity-50"
+              className="rounded-lg bg-emerald-500 px-5 py-2 text-xs font-bold uppercase tracking-wider text-background hover:bg-emerald-400 transition-all duration-200 shadow-md shadow-emerald-500/10 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting
                 ? "Guardando..."

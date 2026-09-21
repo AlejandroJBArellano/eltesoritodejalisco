@@ -88,7 +88,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-dark/85 backdrop-blur-md border-b border-border/80 text-white sticky top-0 z-40 no-print">
+    <nav className="bg-background/85 backdrop-blur-md border-b border-border/80 text-white sticky top-0 z-40 no-print">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-14 sm:h-16 items-center gap-4">
           {/* Logo */}

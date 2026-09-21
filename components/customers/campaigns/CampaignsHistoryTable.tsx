@@ -184,7 +184,7 @@ export function CampaignsHistoryTable({
 
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-left text-xs">
-          <thead className="bg-dark/40 uppercase tracking-wider text-text-light/60 border-b border-border">
+          <thead className="bg-secondary uppercase tracking-wider text-text-light/60 border-b border-border">
             <tr>
               <th className="py-3 px-4 font-bold">Campaña / Asunto</th>
               <th className="py-3 px-4 font-bold">Plantilla</th>
@@ -291,21 +291,21 @@ export function CampaignsHistoryTable({
           <div className="space-y-4">
             {/* Metadata bar */}
             <div className="grid grid-cols-3 gap-3 text-xs">
-              <div className="rounded-xl bg-dark/40 p-3 border border-border">
+              <div className="rounded-xl bg-secondary p-3 border border-border">
                 <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                   Total Enviados
                 </span>
-                <strong className="text-emerald-400 text-sm font-bold">
+                <strong className="text-emerald-400 text-sm font-bold font-mono tabular-nums">
                   {selectedCampaign.sent_count} /{" "}
                   {selectedCampaign.total_recipients}
                 </strong>
               </div>
-              <div className="rounded-xl bg-dark/40 p-3 border border-border">
+              <div className="rounded-xl bg-secondary p-3 border border-border">
                 <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                   Fallidos
                 </span>
                 <strong
-                  className={`text-sm font-bold ${
+                  className={`text-sm font-bold font-mono tabular-nums ${
                     selectedCampaign.failed_count > 0
                       ? "text-red-400"
                       : "text-text-light/60"
@@ -314,7 +314,7 @@ export function CampaignsHistoryTable({
                   {selectedCampaign.failed_count}
                 </strong>
               </div>
-              <div className="rounded-xl bg-dark/40 p-3 border border-border">
+              <div className="rounded-xl bg-secondary p-3 border border-border">
                 <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                   Fecha
                 </span>
@@ -337,7 +337,7 @@ export function CampaignsHistoryTable({
                 {(selectedCampaign.recipients || []).map((r) => (
                   <div
                     key={r.id}
-                    className="p-3 flex items-center justify-between text-xs bg-dark/20 hover:bg-white/2"
+                    className="p-3 flex items-center justify-between text-xs bg-secondary/40 hover:bg-white/2"
                   >
                     <div>
                       <p className="font-bold text-white">{r.customer_name}</p>

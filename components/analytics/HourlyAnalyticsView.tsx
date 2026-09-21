@@ -130,7 +130,7 @@ export function HourlyAnalyticsView() {
           <div className="flex items-center gap-3">
             <Link
               href="/reports"
-              className="inline-flex items-center gap-2 rounded-xl bg-dark/60 border border-border px-3.5 py-2 text-xs font-black text-text-light hover:text-white hover:bg-white/10 transition-all active:scale-95"
+              className="inline-flex items-center gap-2 rounded-lg bg-card border border-border px-3.5 py-2 text-xs font-black text-text-light hover:text-white hover:bg-white/10 transition-all active:scale-95"
             >
               <ArrowLeft className="h-4 w-4" />
               Volver a Reportes

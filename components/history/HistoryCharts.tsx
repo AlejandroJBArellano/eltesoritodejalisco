@@ -374,7 +374,7 @@ export function HistoryCharts(props: HistoryChartsProps = {}) {
                   {donutSlices.map((slice, i) => (
                     <div
                       key={`legend-${i}`}
-                      className="flex items-center gap-1.5 bg-dark/40 px-2 py-0.5 rounded-md border border-border"
+                      className="flex items-center gap-1.5 bg-secondary px-2 py-0.5 rounded-md border border-border"
                     >
                       <span
                         className="w-2 h-2 rounded-full shrink-0"

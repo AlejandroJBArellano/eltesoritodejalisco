@@ -292,7 +292,7 @@ export function CustomerAccountModal({
 
                           {/* Detalle expandible de platillos y abonos */}
                           {isExpanded && (
-                            <div className="pt-2 border-t border-border/50 text-xs space-y-2 bg-dark/30 p-2.5 rounded-lg">
+                            <div className="pt-2 border-t border-border/50 text-xs space-y-2 bg-secondary/40 p-2.5 rounded-lg">
                               <div className="flex justify-between text-[11px] text-text-light/60 pb-1 border-b border-border/30">
                                 <span>
                                   Total Original: ${note.total.toFixed(2)}

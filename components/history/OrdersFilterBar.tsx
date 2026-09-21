@@ -57,7 +57,7 @@ export function OrdersFilterBar(props: OrdersFilterBarProps = {}) {
             placeholder="Buscar por folio (#1001)..."
             value={filters.searchQuery}
             onChange={(e) => onFilterChange("searchQuery", e.target.value)}
-            className="w-full bg-dark/40 border border-border rounded-xl pl-10 pr-4 py-2 text-xs text-text-light placeholder:text-text-light/30 focus:border-primary focus:outline-none transition-all"
+            className="w-full bg-secondary border border-border rounded-lg pl-10 pr-4 py-2 text-xs text-text-light placeholder:text-text-light/30 focus:border-primary focus:outline-none transition-all font-medium"
           />
         </div>
 
@@ -69,7 +69,7 @@ export function OrdersFilterBar(props: OrdersFilterBarProps = {}) {
               type="date"
               value={filters.dateFilter}
               onChange={(e) => onFilterChange("dateFilter", e.target.value)}
-              className="bg-dark/40 border border-border rounded-xl px-3 py-2 text-xs text-text-light focus:border-primary focus:outline-none transition-all cursor-pointer"
+              className="bg-secondary border border-border rounded-lg px-3 py-2 text-xs text-text-light focus:border-primary focus:outline-none transition-all cursor-pointer font-mono"
             />
           </div>
 
@@ -77,7 +77,7 @@ export function OrdersFilterBar(props: OrdersFilterBarProps = {}) {
           <select
             value={filters.tableFilter}
             onChange={(e) => onFilterChange("tableFilter", e.target.value)}
-            className="bg-dark/40 border border-border rounded-xl px-3 py-2 text-xs text-text-light focus:border-primary focus:outline-none transition-all cursor-pointer"
+            className="bg-secondary border border-border rounded-lg px-3 py-2 text-xs text-text-light focus:border-primary focus:outline-none transition-all cursor-pointer font-medium"
           >
             <option value="">Todas las Mesas</option>
             {availableTables.map((t) => (
@@ -93,7 +93,7 @@ export function OrdersFilterBar(props: OrdersFilterBarProps = {}) {
             onChange={(e) =>
               onFilterChange("paymentMethodFilter", e.target.value)
             }
-            className="bg-dark/40 border border-border rounded-xl px-3 py-2 text-xs text-text-light focus:border-primary focus:outline-none transition-all cursor-pointer"
+            className="bg-secondary border border-border rounded-lg px-3 py-2 text-xs text-text-light focus:border-primary focus:outline-none transition-all cursor-pointer font-medium"
           >
             <option value="">Todos los Métodos</option>
             <option value={PaymentMethod.CASH}>Efectivo</option>
@@ -105,7 +105,7 @@ export function OrdersFilterBar(props: OrdersFilterBarProps = {}) {
           <select
             value={filters.sourceFilter}
             onChange={(e) => onFilterChange("sourceFilter", e.target.value)}
-            className="bg-dark/40 border border-border rounded-xl px-3 py-2 text-xs text-text-light focus:border-primary focus:outline-none transition-all cursor-pointer"
+            className="bg-secondary border border-border rounded-lg px-3 py-2 text-xs text-text-light focus:border-primary focus:outline-none transition-all cursor-pointer font-medium"
           >
             <option value="">Todos los Canales</option>
             <option value="POS">Punto de Venta (POS)</option>

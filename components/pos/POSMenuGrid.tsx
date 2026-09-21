@@ -142,7 +142,7 @@ export function POSMenuGrid() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar producto..."
-            className="w-full rounded-lg border border-border bg-dark/60 pl-8 pr-7 py-1.5 text-xs text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all placeholder:text-text-light/30"
+            className="w-full rounded-lg border border-border bg-secondary pl-8 pr-7 py-1.5 text-xs text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all placeholder:text-text-light/30"
           />
           {searchQuery && (
             <button
@@ -264,7 +264,7 @@ const MenuItemCard = memo(function MenuItemCard({
       </div>
 
       <div className="mt-2 flex items-center justify-between w-full gap-1 flex-wrap">
-        <span className="rounded-md bg-dark/60 border border-border px-2 py-0.5 text-xs font-mono font-bold text-text-light tabular-nums">
+        <span className="rounded-md bg-secondary border border-border px-2 py-0.5 text-xs font-mono font-bold text-text-light tabular-nums">
           ${m.price.toFixed(2)}
         </span>
 

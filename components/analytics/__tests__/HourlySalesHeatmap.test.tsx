@@ -79,7 +79,7 @@ describe("HourlySalesHeatmap Component", () => {
     expect(salesBtn).toHaveClass("bg-amber-500");
 
     await user.click(ordersBtn);
-    expect(ordersBtn).toHaveClass("bg-orange-500");
+    expect(ordersBtn).toHaveClass("bg-amber-500");
 
     await user.click(salesBtn);
     expect(salesBtn).toHaveClass("bg-amber-500");

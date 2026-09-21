@@ -238,7 +238,7 @@ export function POSCartSidebar() {
                 type="text"
                 value={formState.table}
                 onChange={(e) => handleFormChange("table", e.target.value)}
-                className="w-full rounded-lg border border-border bg-dark/40 px-3 py-1.5 text-xs text-text-light outline-none focus:border-amber-400 transition-colors placeholder:text-text-light/30 font-medium"
+                className="w-full rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs text-text-light outline-none focus:border-amber-400 transition-colors placeholder:text-text-light/30 font-medium"
                 placeholder="Ej. 4, Terraza..."
               />
             </div>
@@ -251,7 +251,7 @@ export function POSCartSidebar() {
             <select
               value={formState.customerId}
               onChange={(e) => handleFormChange("customerId", e.target.value)}
-              className="w-full rounded-lg border border-border bg-dark/40 px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
+              className="w-full rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
             >
               <option value="">General</option>
               {customers.map((c) => (
@@ -269,7 +269,7 @@ export function POSCartSidebar() {
             <select
               value={formState.source}
               onChange={(e) => handleFormChange("source", e.target.value)}
-              className={`w-full rounded-lg border bg-dark/40 px-3 py-1.5 text-xs text-text-light outline-none transition-colors ${
+              className={`w-full rounded-lg border bg-secondary px-3 py-1.5 text-xs text-text-light outline-none transition-colors ${
                 formErrors.source
                   ? "border-red-500/50 focus:border-red-400"
                   : "border-border focus:border-primary"
@@ -291,7 +291,7 @@ export function POSCartSidebar() {
               type="text"
               value={formState.notes}
               onChange={(e) => handleFormChange("notes", e.target.value)}
-              className="w-full rounded-lg border border-border bg-dark/40 px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
+              className="w-full rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
               placeholder="Sin cebolla, salsa aparte..."
             />
           </div>
@@ -397,7 +397,7 @@ export function POSCartSidebar() {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1 bg-dark/40 rounded-lg p-0.5 border border-border">
+                    <div className="flex items-center gap-1 bg-secondary rounded-lg p-0.5 border border-border">
                       <button
                         type="button"
                         onClick={() => handleQuantityChange(index, -1)}
@@ -486,7 +486,7 @@ export function POSCartSidebar() {
                           handleItemNoteChange(index, e.target.value)
                         }
                         placeholder="Nota especial (sin cebolla, extra salsa...)"
-                        className="w-full rounded-lg border border-border bg-dark/40 px-2.5 py-1 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/25"
+                        className="w-full rounded-lg border border-border bg-secondary px-2.5 py-1 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/25"
                         autoFocus
                       />
                     </div>

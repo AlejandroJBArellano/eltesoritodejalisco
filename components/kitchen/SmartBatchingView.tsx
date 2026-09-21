@@ -108,7 +108,7 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
                 {item.orders.map((orderRef) => (
                   <div
                     key={orderRef.orderId}
-                    className="flex items-center justify-between rounded-lg bg-dark/40 px-3 py-1.5 text-xs font-medium border border-border"
+                    className="flex items-center justify-between rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium border border-border"
                   >
                     <span className="text-text-light/80">
                       Orden #{orderRef.orderNumber}

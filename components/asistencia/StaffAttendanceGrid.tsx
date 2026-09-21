@@ -25,7 +25,7 @@ export function StaffAttendanceGrid() {
         </h2>
         <Link
           href="/asistencia/history"
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 transition-all shadow-md active:scale-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-background uppercase tracking-wider hover:brightness-105 transition-all shadow-md active:scale-95 cursor-pointer"
         >
           <FileText className="h-4 w-4" /> Historial Completo
         </Link>

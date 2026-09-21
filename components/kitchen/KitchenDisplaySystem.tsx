@@ -101,7 +101,7 @@ function KanbanColumn({
           />
         ))}
         {orders.length === 0 && (
-          <div className="py-12 text-center rounded-lg border border-dashed border-border bg-dark/30 p-5">
+          <div className="py-12 text-center rounded-lg border border-dashed border-border bg-secondary/30 p-5">
             <EmptyIcon className="mx-auto h-7 w-7 text-text-light/30 mb-2" />
             <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
               {emptyTitle}

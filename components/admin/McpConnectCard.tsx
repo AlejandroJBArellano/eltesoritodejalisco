@@ -155,7 +155,7 @@ export function McpConnectCard() {
   };
 
   return (
-    <div className="bg-surface border border-border/80 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
+    <div className="bg-card border border-border rounded-xl p-6 sm:p-8 space-y-6 shadow-sm">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div className="flex items-center gap-3">
@@ -164,10 +164,10 @@ export function McpConnectCard() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-text-light">
+              <h3 className="text-base font-black text-text-light">
                 Conectar con Asistentes de IA (MCP)
               </h3>
-              <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-extrabold uppercase rounded-md tracking-wider border border-primary/20">
+              <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black uppercase rounded-md tracking-wider border border-primary/20">
                 1-Click Setup
               </span>
             </div>
@@ -182,7 +182,7 @@ export function McpConnectCard() {
           type="button"
           onClick={handleCreateKey}
           disabled={loading}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-dark font-extrabold text-xs uppercase tracking-wider rounded-xl hover:opacity-90 transition active:scale-95 cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-background font-black text-xs uppercase tracking-wider rounded-xl hover:opacity-90 transition active:scale-95 cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
         >
           {loading ? (
             <RefreshCw className="h-4 w-4 animate-spin" />
@@ -194,7 +194,7 @@ export function McpConnectCard() {
       </div>
 
       {errorMsg && (
-        <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400 font-medium">
+        <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400 font-bold">
           {errorMsg}
         </div>
       )}
@@ -210,8 +210,8 @@ export function McpConnectCard() {
             Copia esta clave ahora. Por seguridad, no se volverá a mostrar
             completa.
           </p>
-          <div className="flex items-center gap-2 bg-dark/40 border border-emerald-500/30 rounded-lg p-2.5">
-            <code className="font-mono text-xs text-emerald-300 flex-1 break-all">
+          <div className="flex items-center gap-2 bg-secondary border border-emerald-500/30 rounded-lg p-2.5">
+            <code className="font-mono text-xs text-emerald-300 flex-1 break-all font-bold">
               {createdKey}
             </code>
             <button
@@ -232,38 +232,38 @@ export function McpConnectCard() {
 
       {/* Guía en 3 Pasos */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="bg-dark/20 border border-border/50 rounded-xl p-3.5 space-y-1">
-          <div className="text-[10px] font-extrabold uppercase text-primary tracking-wider">
+        <div className="bg-secondary/40 border border-border rounded-xl p-3.5 space-y-1">
+          <div className="text-[10px] font-black uppercase text-primary tracking-wider font-mono">
             Paso 1
           </div>
           <div className="text-xs font-bold text-text-light">
             Genera tu clave
           </div>
-          <p className="text-[11px] text-text-light/50">
+          <p className="text-[11px] text-text-light/50 font-medium">
             Crea una API Key segura con acceso de solo lectura a tus métricas.
           </p>
         </div>
 
-        <div className="bg-dark/20 border border-border/50 rounded-xl p-3.5 space-y-1">
-          <div className="text-[10px] font-extrabold uppercase text-primary tracking-wider">
+        <div className="bg-secondary/40 border border-border rounded-xl p-3.5 space-y-1">
+          <div className="text-[10px] font-black uppercase text-primary tracking-wider font-mono">
             Paso 2
           </div>
           <div className="text-xs font-bold text-text-light">
             Pega la configuración
           </div>
-          <p className="text-[11px] text-text-light/50">
+          <p className="text-[11px] text-text-light/50 font-medium">
             Copia el bloque JSON para Claude Desktop o Cursor con 1 clic.
           </p>
         </div>
 
-        <div className="bg-dark/20 border border-border/50 rounded-xl p-3.5 space-y-1">
-          <div className="text-[10px] font-extrabold uppercase text-primary tracking-wider">
+        <div className="bg-secondary/40 border border-border rounded-xl p-3.5 space-y-1">
+          <div className="text-[10px] font-black uppercase text-primary tracking-wider font-mono">
             Paso 3
           </div>
           <div className="text-xs font-bold text-text-light">
             Pregúntale a tu IA
           </div>
-          <p className="text-[11px] text-text-light/50">
+          <p className="text-[11px] text-text-light/50 font-medium">
             Pide reportes como: &quot;¿Cuáles fueron las ventas de hoy y qué
             platillo se vendió más?&quot;
           </p>
@@ -273,13 +273,13 @@ export function McpConnectCard() {
       {/* Snippet de Configuración con Pestañas */}
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1 bg-dark/30 p-1 rounded-xl border border-border/50">
+          <div className="flex items-center gap-1 bg-secondary p-1 rounded-xl border border-border">
             <button
               type="button"
               onClick={() => setActiveTab("claude")}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                 activeTab === "claude"
-                  ? "bg-primary text-dark shadow-sm"
+                  ? "bg-primary text-background shadow-sm"
                   : "text-text-light/60 hover:text-text-light"
               }`}
             >
@@ -290,7 +290,7 @@ export function McpConnectCard() {
               onClick={() => setActiveTab("cursor")}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                 activeTab === "cursor"
-                  ? "bg-primary text-dark shadow-sm"
+                  ? "bg-primary text-background shadow-sm"
                   : "text-text-light/60 hover:text-text-light"
               }`}
             >
@@ -301,7 +301,7 @@ export function McpConnectCard() {
               onClick={() => setActiveTab("cli")}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                 activeTab === "cli"
-                  ? "bg-primary text-dark shadow-sm"
+                  ? "bg-primary text-background shadow-sm"
                   : "text-text-light/60 hover:text-text-light"
               }`}
             >
@@ -312,7 +312,7 @@ export function McpConnectCard() {
           <button
             type="button"
             onClick={handleCopySnippet}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-surface-elevated hover:bg-surface-elevated/80 border border-border text-xs font-bold text-text-light rounded-xl transition active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-secondary hover:bg-card-light border border-border text-xs font-bold text-text-light rounded-xl transition active:scale-95 cursor-pointer"
           >
             {copiedSnippet ? (
               <>
@@ -335,7 +335,7 @@ export function McpConnectCard() {
         </div>
 
         <div className="relative group">
-          <pre className="p-4 bg-dark/60 border border-border/80 rounded-xl font-mono text-xs text-text-light/80 overflow-x-auto selection:bg-primary/20">
+          <pre className="p-4 bg-secondary border border-border rounded-xl font-mono text-xs text-text-light/80 overflow-x-auto selection:bg-primary/20">
             {getActiveSnippet()}
           </pre>
         </div>
@@ -343,7 +343,7 @@ export function McpConnectCard() {
 
       {/* Lista de Claves Activas */}
       <div className="border-t border-border pt-5 space-y-3">
-        <h4 className="text-xs font-extrabold uppercase text-text-light/60 tracking-wider flex items-center gap-2">
+        <h4 className="text-xs font-black uppercase text-text-light/60 tracking-wider flex items-center gap-2">
           <Key className="h-3.5 w-3.5" />
           Claves de Conexión Activas ({keys.length})
         </h4>
@@ -358,7 +358,7 @@ export function McpConnectCard() {
             IA&quot; para generar tu primera clave.
           </div>
         ) : (
-          <div className="divide-y divide-border/40">
+          <div className="divide-y divide-border">
             {keys.map((k) => (
               <div
                 key={k.id}
@@ -367,11 +367,11 @@ export function McpConnectCard() {
                 <div className="space-y-0.5">
                   <div className="font-bold text-text-light flex items-center gap-2">
                     <span>{k.name}</span>
-                    <code className="text-[11px] font-mono text-text-light/50 bg-dark/30 px-1.5 py-0.5 rounded">
+                    <code className="text-[11px] font-mono text-text-light/50 bg-secondary px-1.5 py-0.5 rounded border border-border">
                       {k.key_prefix}
                     </code>
                   </div>
-                  <div className="text-[10px] text-text-light/40">
+                  <div className="text-[10px] text-text-light/40 font-mono">
                     Creada el {new Date(k.created_at).toLocaleDateString()} •{" "}
                     {k.last_used_at
                       ? `Último uso: ${new Date(k.last_used_at).toLocaleDateString()}`

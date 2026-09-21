@@ -106,7 +106,7 @@ export default function OrdersPOS({
       {/* Filter Buttons */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Status Tabs: Pendientes / Pagadas / Todas */}
-        <div className="flex items-center gap-1.5 bg-dark/40 p-1 rounded-xl border border-border">
+        <div className="flex items-center gap-1.5 bg-secondary p-1 rounded-xl border border-border">
           <button
             type="button"
             onClick={() => setStatusFilter("ALL")}
@@ -166,7 +166,7 @@ export default function OrdersPOS({
         </div>
 
         {/* Source Filter: Todos / POS Directo / Kittn Pickup */}
-        <div className="flex items-center gap-1.5 bg-dark/40 p-1 rounded-xl border border-border">
+        <div className="flex items-center gap-1.5 bg-secondary p-1 rounded-xl border border-border">
           <button
             type="button"
             onClick={() => setSourceFilter("ALL")}

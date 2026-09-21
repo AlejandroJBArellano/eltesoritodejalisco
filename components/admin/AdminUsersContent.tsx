@@ -434,7 +434,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           activeTab === "team" ? (
             <button
               onClick={() => setIsModalOpen(true)}
-              className="rounded-xl bg-blue-500 px-4 py-2 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-blue-500/20"
+              className="rounded-xl bg-blue-500 px-4 py-2 text-xs font-black text-background hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-blue-500/20 cursor-pointer"
             >
               <UserPlus className="h-4 w-4" />
               Nuevo Usuario
@@ -449,7 +449,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           <button
             type="button"
             onClick={() => setActiveTab("team")}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "team"
                 ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
                 : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
@@ -462,7 +462,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           <button
             type="button"
             onClick={() => setActiveTab("roles")}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "roles"
                 ? "bg-primary/15 text-primary border border-primary/30"
                 : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
@@ -481,20 +481,20 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           <div className="space-y-6">
             {/* Mensajes de notificación */}
             {errorMsg && (
-              <div className="flex items-center gap-3 rounded-2xl bg-red-500/10 border border-red-500/20 p-4 text-red-400 text-xs font-bold shadow-sm">
+              <div className="flex items-center gap-3 rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-red-400 text-xs font-bold shadow-sm">
                 <AlertTriangle className="h-5 w-5 shrink-0" />
                 <span>{errorMsg}</span>
               </div>
             )}
             {successMsg && (
-              <div className="flex items-center gap-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-emerald-400 text-xs font-bold shadow-sm">
+              <div className="flex items-center gap-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-emerald-400 text-xs font-bold shadow-sm">
                 <CheckCircle2 className="h-5 w-5 shrink-0" />
                 <span>{successMsg}</span>
               </div>
             )}
 
             {/* TABLA DE USUARIOS */}
-            <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
+            <section className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
               <div className="p-4 sm:p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <h2 className="text-base font-black text-text-light">
@@ -503,7 +503,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                   <button
                     onClick={fetchProfiles}
                     disabled={isLoading}
-                    className="p-1.5 rounded-lg text-text-light/40 hover:text-text-light hover:bg-white/5 transition-all"
+                    className="p-1.5 rounded-lg text-text-light/40 hover:text-text-light hover:bg-white/5 transition-all cursor-pointer"
                     title="Actualizar lista"
                   >
                     <RefreshCw
@@ -528,7 +528,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                       setRoleFilter(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-blue-500"
+                    className="rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-blue-500 cursor-pointer"
                   >
                     <option value="ALL">Todos los roles</option>
                     <optgroup label="Roles del Sistema">
@@ -555,7 +555,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-dark/60 text-xs font-bold uppercase tracking-wider text-text-light/40 border-b border-border">
+                  <thead className="bg-secondary/60 text-xs font-bold uppercase tracking-wider text-text-light/40 border-b border-border">
                     <tr>
                       <TableHeaderSortCell
                         label="Colaborador"
@@ -632,7 +632,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                               onChange={(e) =>
                                 handleRoleChange(p.id, e.target.value)
                               }
-                              className={`rounded-xl border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card ${roleConfig.badgeBg} ${roleConfig.color} ${roleConfig.badgeBorder}`}
+                              className={`rounded-lg border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card ${roleConfig.badgeBg} ${roleConfig.color} ${roleConfig.badgeBorder}`}
                             >
                               {availableRoles.length > 0 ? (
                                 <>
@@ -701,7 +701,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                               )}
                             </select>
                           </td>
-                          <td className="py-3 px-4 text-xs text-text-light/50">
+                          <td className="py-3 px-4 text-xs font-mono text-text-light/50">
                             {new Date(p.created_at).toLocaleDateString(
                               "es-MX",
                               {
@@ -721,7 +721,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                                     setNewPin(p.pin || "1234");
                                     setPinError(null);
                                   }}
-                                  className="rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 px-2 py-1.5 text-xs font-black flex items-center gap-1 transition-all"
+                                  className="rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 px-2 py-1.5 text-xs font-black flex items-center gap-1 transition-all cursor-pointer"
                                   title="Configurar PIN de Autorización"
                                 >
                                   <ShieldCheck className="h-3.5 w-3.5" />
@@ -735,7 +735,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                                 onClick={() =>
                                   handleDelete(p.id, p.full_name || p.email)
                                 }
-                                className={`rounded-lg border p-2 transition-all text-xs font-black ${
+                                className={`rounded-lg border p-2 transition-all text-xs font-black cursor-pointer ${
                                   deleteArmedId === p.id
                                     ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
                                     : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
@@ -798,7 +798,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
       >
         <form onSubmit={handleCreateUser} className="space-y-4">
           <div>
-            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider block mb-1">
               Nombre Completo *
             </label>
             <div className="relative">
@@ -807,14 +807,14 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 type="text"
                 name="full_name"
                 required
-                className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-medium"
                 placeholder="Ej. María García"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider block mb-1">
               Correo Electrónico *
             </label>
             <div className="relative">
@@ -823,14 +823,14 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 type="email"
                 name="email"
                 required
-                className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
                 placeholder="maria@eltesoritodejalisco.com"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider block mb-1">
               Contraseña de Acceso (Opcional)
             </label>
             <div className="relative">
@@ -839,7 +839,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 type="password"
                 name="password"
                 minLength={6}
-                className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
                 placeholder="Mínimo 6 caracteres o vacío si usará Google"
               />
             </div>
@@ -849,14 +849,14 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           </div>
 
           <div>
-            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider block mb-1">
               Rol Inicial Asignado
             </label>
             <select
               name="role"
               value={selectedFormRole}
               onChange={(e) => setSelectedFormRole(e.target.value)}
-              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-blue-500"
+              className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-blue-500 cursor-pointer"
             >
               <optgroup label="Roles del Sistema">
                 <option value="WAITER">Mesero (WAITER)</option>
@@ -895,7 +895,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             availableRoles.find((r) => r.id === selectedFormRole)
               ?.system_slug === "MANAGER") && (
             <div>
-              <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
+              <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider block mb-1">
                 PIN de Autorización (4 a 6 dígitos)
               </label>
               <div className="relative">
@@ -906,7 +906,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                   name="pin"
                   defaultValue="1234"
                   maxLength={6}
-                  className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
+                  className="w-full rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
                   placeholder="1234"
                 />
               </div>
@@ -935,14 +935,14 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-white/5"
+              className="rounded-lg border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-white/5 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-xl bg-blue-500 px-5 py-2.5 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider disabled:opacity-50"
+              className="rounded-lg bg-blue-500 px-5 py-2.5 text-xs font-black text-background hover:brightness-105 transition-all uppercase tracking-wider disabled:opacity-50 cursor-pointer shadow-md"
             >
               {isPending ? "Guardando..." : "Crear Usuario"}
             </button>
@@ -961,7 +961,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
       >
         <form onSubmit={handleSavePin} className="space-y-4">
           <div>
-            <label className="text-xs font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider block mb-1">
               Nuevo PIN Numérico (4 a 6 dígitos)
             </label>
             <div className="relative">
@@ -973,7 +973,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 maxLength={6}
                 value={newPin}
                 onChange={(e) => setNewPin(e.target.value)}
-                className="w-full rounded-xl border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-amber-400 font-mono tracking-widest text-center"
+                className="w-full rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-amber-400 font-mono tracking-widest text-center"
                 placeholder="••••"
                 autoFocus
               />
@@ -993,14 +993,14 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
             <button
               type="button"
               onClick={() => setEditingPinUser(null)}
-              className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-white/5"
+              className="rounded-lg border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-white/5 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isUpdatingPin}
-              className="rounded-xl bg-amber-400 px-5 py-2.5 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider disabled:opacity-50"
+              className="rounded-lg bg-amber-400 px-5 py-2.5 text-xs font-black text-background hover:brightness-105 transition-all uppercase tracking-wider disabled:opacity-50 cursor-pointer shadow-md"
             >
               {isUpdatingPin ? "Guardando..." : "Guardar PIN"}
             </button>

@@ -219,7 +219,7 @@ export function TareasClient({
             <div className="flex flex-col space-y-2 pt-1">
               <button
                 onClick={() => setTimeoutAlert(null)}
-                className="bg-primary hover:bg-secondary text-dark font-bold text-xs uppercase tracking-wider py-2.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer shadow-xs"
+                className="bg-primary hover:bg-secondary text-background font-bold text-xs uppercase tracking-wider py-2.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer shadow-xs"
               >
                 Sí, sigo trabajando
               </button>
@@ -228,7 +228,7 @@ export function TareasClient({
                   handleComplete(timeoutAlert.exec, timeoutAlert.task);
                   setTimeoutAlert(null);
                 }}
-                className="bg-dark/60 border border-border hover:bg-white/10 text-text-light font-semibold text-xs uppercase tracking-wider py-2.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer"
+                className="bg-secondary border border-border hover:bg-white/10 text-text-light font-semibold text-xs uppercase tracking-wider py-2.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer"
               >
                 Olvidé cerrarla, Completar Ahora
               </button>
@@ -334,7 +334,7 @@ export function TareasClient({
 
                     {activeExecution ? (
                       <div className="mt-4 border-t border-border pt-3.5 space-y-3.5">
-                        <div className="flex justify-between items-center bg-dark/60 px-3.5 py-2.5 rounded-lg border border-border">
+                        <div className="flex justify-between items-center bg-secondary px-3.5 py-2.5 rounded-lg border border-border">
                           <span className="text-xs font-semibold text-text-light/60 uppercase tracking-wider flex items-center gap-1.5">
                             {activeExecution.status === "PAUSED" ? (
                               <>

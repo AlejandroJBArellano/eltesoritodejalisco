@@ -502,7 +502,7 @@ export function NewCampaignModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ej. Reactivación Clientes Septiembre"
-                className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
+                className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
                 data-testid="campaign-name-input"
               />
             </div>
@@ -521,7 +521,7 @@ export function NewCampaignModal({
                         key={key}
                         type="button"
                         onClick={() => handleTemplateSelect(key)}
-                        className={`rounded-xl border p-3 text-left transition-all cursor-pointer ${
+                        className={`rounded-lg border p-3 text-left transition-all cursor-pointer ${
                           templateKey === key
                             ? "border-emerald-500 bg-emerald-500/15 shadow-sm"
                             : "border-border bg-card text-text-light/70 hover:bg-white/5"
@@ -569,7 +569,7 @@ export function NewCampaignModal({
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
+                className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
                 placeholder="Asunto llamativo..."
                 data-testid="campaign-subject-input"
               />
@@ -603,7 +603,7 @@ export function NewCampaignModal({
                 rows={4}
                 value={messageContent}
                 onChange={(e) => setMessageContent(e.target.value)}
-                className="w-full rounded-xl border border-border bg-dark/40 p-3 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
+                className="w-full rounded-lg border border-border bg-secondary p-3 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
                 placeholder="Escribe el mensaje..."
                 data-testid="campaign-message-input"
               />
@@ -711,7 +711,7 @@ export function NewCampaignModal({
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="rounded-xl bg-dark/40 p-3 border border-border">
+                <div className="rounded-xl bg-secondary p-3 border border-border">
                   <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                     Campaña
                   </span>
@@ -720,16 +720,16 @@ export function NewCampaignModal({
                   </strong>
                 </div>
 
-                <div className="rounded-xl bg-dark/40 p-3 border border-border">
+                <div className="rounded-xl bg-secondary p-3 border border-border">
                   <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                     Destinatarios Estimados
                   </span>
-                  <strong className="text-emerald-400 font-bold text-sm">
+                  <strong className="text-emerald-400 font-bold text-sm font-mono tabular-nums">
                     {audienceCount} cliente(s)
                   </strong>
                 </div>
 
-                <div className="rounded-xl bg-dark/40 p-3 border border-border">
+                <div className="rounded-xl bg-secondary p-3 border border-border">
                   <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                     Plantilla
                   </span>
@@ -738,7 +738,7 @@ export function NewCampaignModal({
                   </span>
                 </div>
 
-                <div className="rounded-xl bg-dark/40 p-3 border border-border">
+                <div className="rounded-xl bg-secondary p-3 border border-border">
                   <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                     Remitente Oficial
                   </span>
@@ -748,7 +748,7 @@ export function NewCampaignModal({
                 </div>
               </div>
 
-              <div className="rounded-xl bg-dark/40 p-3 border border-border space-y-1">
+              <div className="rounded-xl bg-secondary p-3 border border-border space-y-1">
                 <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                   Asunto
                 </span>
