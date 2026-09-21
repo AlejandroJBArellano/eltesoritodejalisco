@@ -9,7 +9,6 @@ export interface StatCardProps {
 
 export interface ModuleCardProps {
   title: string;
-  description: string;
   href: string;
   icon: React.ElementType;
   themeClass: string;

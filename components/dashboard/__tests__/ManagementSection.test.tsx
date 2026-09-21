@@ -52,7 +52,7 @@ describe("ManagementSection Component", () => {
 
     const pickupLink = screen.getByRole("link", { name: /kittn pickup/i });
     expect(pickupLink).toHaveAttribute("href", "/admin/settings#pickup");
-    expect(screen.getByText("Inactivo")).toBeInTheDocument();
+    expect(screen.queryByText("Inactivo")).not.toBeInTheDocument();
 
     // Admin-only modules should be hidden
     expect(screen.queryByText("Gestión de Menú")).not.toBeInTheDocument();
@@ -71,7 +71,7 @@ describe("ManagementSection Component", () => {
 
     expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
     expect(screen.getByText("Kittn Pickup")).toBeInTheDocument();
-    expect(screen.getByText("Online")).toBeInTheDocument();
+    expect(screen.queryByText("Online")).not.toBeInTheDocument();
 
     const pickupLink = screen.getByRole("link", { name: /kittn pickup/i });
     expect(pickupLink).toHaveAttribute(
@@ -101,7 +101,6 @@ describe("ManagementSection Component", () => {
 
     expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
     expect(screen.getByText("Kittn Pickup")).toBeInTheDocument();
-    expect(screen.getByText("Online")).toBeInTheDocument();
     expect(screen.getByText("Configuración")).toBeInTheDocument();
   });
 

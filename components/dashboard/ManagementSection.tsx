@@ -53,11 +53,6 @@ export function ManagementSection(props?: ManagementSectionProps) {
         {(isAdmin || isWaiter) && (
           <ModuleCard
             title="Kittn Pickup"
-            description={
-              isStripeEnabled
-                ? "Portal de pedidos para clientes en línea."
-                : "Activar tienda online y cobros con Stripe."
-            }
             href={
               isStripeEnabled
                 ? `https://${slug}.trykittn.com`
@@ -65,7 +60,6 @@ export function ManagementSection(props?: ManagementSectionProps) {
             }
             target={isStripeEnabled ? "_blank" : undefined}
             icon={ShoppingBag}
-            badge={isStripeEnabled ? "Online" : "Inactivo"}
             themeClass={
               isStripeEnabled
                 ? "bg-emerald-500/10 text-emerald-400"
@@ -77,10 +71,8 @@ export function ManagementSection(props?: ManagementSectionProps) {
         {(isAdmin || isWaiter) && (
           <ModuleCard
             title="Clientes"
-            description="Lealtad y fuentes de visita."
             href="/customers"
             icon={Users}
-            badge="CRM"
             themeClass="bg-emerald-500/10 text-emerald-400"
             hoverColor="var(--color-success)"
           />
@@ -88,7 +80,6 @@ export function ManagementSection(props?: ManagementSectionProps) {
         {isAdmin && (
           <ModuleCard
             title="Gestión de Menú"
-            description="Productos y recetas técnicas."
             href="/menu"
             icon={UtensilsCrossed}
             themeClass="bg-primary/10 text-primary"
@@ -98,10 +89,8 @@ export function ManagementSection(props?: ManagementSectionProps) {
         {(isAdmin || isInventory) && (
           <ModuleCard
             title="Inventario"
-            description="Control de stock, alertas de bajo inventario y ajustes."
             href="/inventario"
             icon={Package}
-            badge="Stock"
             themeClass="bg-emerald-500/10 text-emerald-400"
             hoverColor="#10b981"
           />
@@ -109,10 +98,8 @@ export function ManagementSection(props?: ManagementSectionProps) {
         {isAdmin && (
           <ModuleCard
             title="Historial de Asistencia"
-            description="Filtros de horas trabajadas y registros de turno por empleado."
             href="/asistencia/history"
             icon={ReceiptText}
-            badge="Historial"
             themeClass="bg-primary/10 text-primary"
             hoverColor="var(--color-primary)"
           />
@@ -120,10 +107,8 @@ export function ManagementSection(props?: ManagementSectionProps) {
         {isAdmin && (
           <ModuleCard
             title="Control de Tareas"
-            description="Aprobación de tareas críticas y monitoreo de tiempos netos."
             href="/admin/tareas"
             icon={ClipboardCheck}
-            badge="Control"
             themeClass="bg-amber-500/10 text-amber-400"
             hoverColor="#f59e0b"
           />
@@ -131,7 +116,6 @@ export function ManagementSection(props?: ManagementSectionProps) {
         {isAdmin && (
           <ModuleCard
             title="Usuarios"
-            description="Gestión de personal y roles."
             href="/admin/users"
             icon={UserCog}
             themeClass="bg-primary/10 text-primary"
@@ -141,10 +125,8 @@ export function ManagementSection(props?: ManagementSectionProps) {
         {isAdmin && (
           <ModuleCard
             title="Horarios del Portal"
-            description="Días y horas para programar pedidos."
             href="/admin/horarios"
             icon={Clock}
-            badge="Config"
             themeClass="bg-amber-500/10 text-amber-400"
             hoverColor="#f59e0b"
           />
@@ -152,10 +134,8 @@ export function ManagementSection(props?: ManagementSectionProps) {
         {isAdmin && (
           <ModuleCard
             title="Configuración"
-            description="Ajustes de marca, colores del portal, datos fiscales y ticket."
             href="/admin/settings"
             icon={Settings}
-            badge="Empresa"
             themeClass="bg-dark/40 text-text-light/80 border border-border"
             hoverColor="var(--color-primary)"
           />
