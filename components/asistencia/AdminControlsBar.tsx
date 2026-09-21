@@ -15,9 +15,9 @@ export function AdminControlsBar(props: AdminControlsBarProps) {
     props.onCustomTimeChange ?? context?.setCustomTime ?? (() => {});
 
   return (
-    <div className="rounded-2xl bg-card p-6 border border-border flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="rounded-xl bg-card p-6 border border-border flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between shadow-xs">
       <div>
-        <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
+        <h3 className="text-sm font-bold text-text-light tracking-tight flex items-center gap-2">
           <ShieldAlert className="h-4 w-4 text-primary" /> Modo Administrador
         </h3>
         <p className="text-xs text-text-light/60 mt-1 font-medium">
@@ -33,7 +33,7 @@ export function AdminControlsBar(props: AdminControlsBarProps) {
           type="time"
           value={customTime}
           onChange={(e) => onCustomTimeChange(e.target.value)}
-          className="bg-dark/40 border border-border text-text-light px-3.5 py-2 rounded-xl text-xs outline-none focus:border-primary font-mono"
+          className="bg-secondary border border-border text-text-light px-3.5 py-2 rounded-lg text-xs outline-none focus:border-primary font-mono tabular-nums transition-colors"
         />
       </div>
     </div>

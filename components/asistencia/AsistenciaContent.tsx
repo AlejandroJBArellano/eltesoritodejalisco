@@ -72,12 +72,12 @@ function AsistenciaContentInner() {
               <div className="space-y-6">
                 {/* Employee Navigation Tabs */}
                 <div className="flex justify-center">
-                  <div className="inline-flex p-1 rounded-2xl bg-card border border-border shadow-sm">
+                  <div className="inline-flex p-1 rounded-xl bg-card border border-border shadow-sm">
                     <button
                       onClick={() => setEmployeeTab("checkin")}
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                         employeeTab === "checkin"
-                          ? "bg-primary text-black shadow-md shadow-primary/20"
+                          ? "bg-primary text-background shadow-md shadow-primary/20"
                           : "text-text-light/70 hover:text-text-light"
                       }`}
                     >
@@ -85,9 +85,9 @@ function AsistenciaContentInner() {
                     </button>
                     <button
                       onClick={() => setEmployeeTab("schedule")}
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                         employeeTab === "schedule"
-                          ? "bg-primary text-black shadow-md shadow-primary/20"
+                          ? "bg-primary text-background shadow-md shadow-primary/20"
                           : "text-text-light/70 hover:text-text-light"
                       }`}
                     >

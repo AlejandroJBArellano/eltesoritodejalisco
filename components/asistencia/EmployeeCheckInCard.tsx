@@ -46,8 +46,8 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
     : null;
 
   return (
-    <div className="max-w-md mx-auto bg-card p-8 rounded-2xl border border-border shadow-sm text-center">
-      <h2 className="text-xl font-black text-text-light uppercase tracking-tight mb-1">
+    <div className="max-w-md mx-auto bg-card p-6 sm:p-8 rounded-xl border border-border shadow-xs text-center">
+      <h2 className="text-xl font-bold text-text-light tracking-tight mb-1">
         Control de Asistencia
       </h2>
       <p className="text-xs text-text-light/60 mb-6 font-medium">
@@ -56,18 +56,18 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
 
       {/* Programmed Shift Info Card */}
       {scheduledShift ? (
-        <div className="mb-6 rounded-xl bg-primary/10 border border-primary/20 p-3.5 text-left">
+        <div className="mb-6 rounded-lg bg-primary/10 border border-primary/20 p-3.5 text-left">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider text-primary">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
               Turno Programado Hoy
             </span>
             {scheduledShift.area && (
-              <span className="rounded-md bg-white/10 px-2 py-0.5 text-[9px] font-black text-text-light uppercase tracking-wider">
+              <span className="rounded-md bg-white/10 px-2 py-0.5 text-[9px] font-bold text-text-light uppercase tracking-wider">
                 {scheduledShift.area}
               </span>
             )}
           </div>
-          <p className="mt-1 font-mono text-sm font-bold text-text-light">
+          <p className="mt-1 font-mono text-sm font-bold text-text-light tabular-nums">
             {scheduledShift.start_time.slice(0, 5)} -{" "}
             {scheduledShift.end_time.slice(0, 5)}
           </p>
@@ -78,8 +78,8 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
           )}
         </div>
       ) : (
-        <div className="mb-6 rounded-xl bg-white/5 border border-border p-3 text-left">
-          <span className="text-[10px] font-black uppercase tracking-wider text-text-light/50">
+        <div className="mb-6 rounded-lg bg-secondary border border-border p-3 text-left">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/50">
             Turno de Hoy
           </span>
           <p className="mt-0.5 text-xs font-bold text-text-light/70">
@@ -90,9 +90,9 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
 
       {activeAttendance ? (
         <div>
-          <div className="w-32 h-32 mx-auto rounded-full bg-emerald-500/10 border-4 border-emerald-500 flex flex-col items-center justify-center mb-4 shadow-lg shadow-emerald-500/10">
-            <UserCheck className="h-8 w-8 text-emerald-400 mb-1" />
-            <span className="text-emerald-400 font-black text-xs uppercase tracking-wider">
+          <div className="w-28 h-28 mx-auto rounded-full bg-emerald-500/10 border-2 border-emerald-500 flex flex-col items-center justify-center mb-4 shadow-xs">
+            <UserCheck className="h-7 w-7 text-emerald-400 mb-1" />
+            <span className="text-emerald-400 font-bold text-xs uppercase tracking-wider">
               Turno Activo
             </span>
           </div>
@@ -100,7 +100,7 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
           <p className="text-xs text-text-light/60 font-bold uppercase tracking-wider mb-1">
             Hora de entrada
           </p>
-          <p className="text-3xl font-mono font-black text-emerald-400 mb-2">
+          <p className="text-3xl font-mono font-bold text-emerald-400 mb-2 tabular-nums">
             {format(new Date(activeAttendance.check_in), "HH:mm", {
               timeZone: ATTENDANCE_TIMEZONE,
             })}
@@ -110,11 +110,11 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
           {scheduledShift && punctuality && (
             <div className="mb-6">
               {punctuality.status === "ON_TIME" ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-black text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-3 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
                   ✓ {punctuality.label}
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-3 py-1 text-[11px] font-black text-amber-400 border border-amber-500/30 uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-3 py-0.5 text-[11px] font-bold text-amber-400 border border-amber-500/30 uppercase tracking-wider">
                   ⚠ {punctuality.label}
                 </span>
               )}
@@ -126,7 +126,7 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
           <button
             onClick={() => onAction("CHECK_OUT")}
             disabled={isLoading}
-            className="w-full inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-black py-4 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-red-500/20 transition-all active:scale-95 cursor-pointer"
+            className="w-full inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold py-3.5 px-6 rounded-lg text-xs uppercase tracking-wider shadow-xs transition-all active:scale-[0.98] cursor-pointer"
           >
             <LogOut className="h-4 w-4" />{" "}
             {isLoading ? "Registrando..." : "Registrar Salida"}
@@ -134,9 +134,9 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
         </div>
       ) : (
         <div>
-          <div className="w-32 h-32 mx-auto rounded-full bg-white/5 border-4 border-border flex flex-col items-center justify-center mb-4">
-            <UserX className="h-8 w-8 text-text-light/40 mb-1" />
-            <span className="text-text-light/50 font-black text-xs uppercase tracking-wider">
+          <div className="w-28 h-28 mx-auto rounded-full bg-secondary border-2 border-border flex flex-col items-center justify-center mb-4">
+            <UserX className="h-7 w-7 text-text-light/40 mb-1" />
+            <span className="text-text-light/50 font-bold text-xs uppercase tracking-wider">
               Fuera de Turno
             </span>
           </div>
@@ -146,7 +146,7 @@ export function EmployeeCheckInCard(props: EmployeeCheckInCardProps) {
           <button
             onClick={() => onAction("CHECK_IN")}
             disabled={isLoading}
-            className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-black py-4 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer"
+            className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-3.5 px-6 rounded-lg text-xs uppercase tracking-wider shadow-xs transition-all active:scale-[0.98] cursor-pointer"
           >
             <LogIn className="h-4 w-4" />{" "}
             {isLoading ? "Registrando..." : "Registrar Entrada"}

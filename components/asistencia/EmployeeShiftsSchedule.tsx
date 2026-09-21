@@ -80,7 +80,7 @@ export function EmployeeShiftsSchedule({
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header with Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 rounded-xl border border-border shadow-sm">
         <div className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-primary" />
           <h2 className="text-base font-black text-text-light uppercase tracking-tight">
@@ -91,7 +91,7 @@ export function EmployeeShiftsSchedule({
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrevWeek}
-            className="p-2 rounded-xl border border-border hover:bg-white/5 text-text-light/70 hover:text-text-light transition-colors"
+            className="p-2 rounded-lg border border-border hover:bg-card-light text-text-light/70 hover:text-text-light transition-colors cursor-pointer"
             title="Semana anterior"
             aria-label="Semana anterior"
           >
@@ -100,21 +100,21 @@ export function EmployeeShiftsSchedule({
 
           <button
             onClick={handleCurrentWeek}
-            className="px-3 py-1.5 rounded-xl border border-border text-xs font-bold text-text-light hover:bg-white/5 transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-border text-xs font-bold text-text-light hover:bg-card-light transition-colors cursor-pointer"
           >
             Semana actual
           </button>
 
           <button
             onClick={handleNextWeek}
-            className="p-2 rounded-xl border border-border hover:bg-white/5 text-text-light/70 hover:text-text-light transition-colors"
+            className="p-2 rounded-lg border border-border hover:bg-card-light text-text-light/70 hover:text-text-light transition-colors cursor-pointer"
             title="Semana siguiente"
             aria-label="Semana siguiente"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
 
-          <span className="text-xs font-bold text-text-light/70 uppercase ml-2">
+          <span className="text-xs font-bold text-text-light/70 uppercase ml-2 font-mono tabular-nums">
             {format(weekStart, "d MMM", { locale: es })} -{" "}
             {format(weekEnd, "d MMM yyyy", { locale: es })}
           </span>
@@ -144,7 +144,7 @@ export function EmployeeShiftsSchedule({
             return (
               <div
                 key={dayStr}
-                className={`flex flex-col p-4 rounded-2xl border transition-all ${
+                className={`flex flex-col p-4 rounded-xl border transition-all ${
                   isToday
                     ? "bg-primary/5 border-primary/40 shadow-sm shadow-primary/10"
                     : "bg-card border-border"
