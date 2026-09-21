@@ -150,7 +150,7 @@ export const OrderCard = memo(
             <div
               className={`-mx-3 -mt-3 mb-3 px-3.5 py-2 rounded-t-xl border-b flex items-center justify-between gap-2 ${
                 serviceType === "domicilio"
-                  ? "bg-sky-500/15 border-sky-500/30 text-sky-300"
+                  ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
                   : serviceType === "para_llevar"
                     ? "bg-primary/15 border-primary/30 text-primary"
                     : "bg-amber-500/20 border-amber-500/35 text-amber-300"
@@ -158,7 +158,7 @@ export const OrderCard = memo(
             >
               <div className="flex items-center gap-2 min-w-0">
                 {serviceType === "domicilio" ? (
-                  <Bike className="h-4 w-4 shrink-0 text-sky-400" />
+                  <Bike className="h-4 w-4 shrink-0 text-emerald-400" />
                 ) : serviceType === "para_llevar" ? (
                   <ShoppingBag className="h-4 w-4 shrink-0 text-primary" />
                 ) : (

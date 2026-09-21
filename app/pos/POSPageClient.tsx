@@ -318,7 +318,7 @@ function POSPageContent() {
                 type="button"
                 onClick={handleDownloadImage}
                 disabled={isDownloadingImage}
-                className="bg-sky-600 disabled:opacity-50 text-white px-5 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider shadow-sm hover:bg-sky-500 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+                className="bg-card border border-border disabled:opacity-50 text-text-light px-5 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider shadow-sm hover:bg-secondary hover:text-white active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Download className="h-4 w-4" />
                 {isDownloadingImage ? "Descargando..." : "Descargar Imagen"}

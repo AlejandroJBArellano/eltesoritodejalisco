@@ -132,14 +132,14 @@ export function calculateTax(subtotal: number, taxRate: number = 0.16): number {
  */
 export function getStatusColor(status: string): string {
   const colors: Record<string, string> = {
-    PENDING: "bg-yellow-500",
-    PREPARING: "bg-blue-500",
-    READY: "bg-green-500",
-    DELIVERED: "bg-gray-500",
-    PAID: "bg-purple-500",
-    CANCELLED: "bg-red-500",
+    PENDING: "bg-amber-500",
+    PREPARING: "bg-[var(--color-primary)]",
+    READY: "bg-emerald-500",
+    DELIVERED: "bg-text-light/40",
+    PAID: "bg-[var(--color-primary)]",
+    CANCELLED: "bg-rose-500",
   };
-  return colors[status] || "bg-gray-300";
+  return colors[status] || "bg-border";
 }
 
 /**

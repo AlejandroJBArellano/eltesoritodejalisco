@@ -407,7 +407,7 @@ export default function OrdersPOS({
                                             <button
                                                 type="button"
                                                 onClick={() => setBillingOrder(order)}
-                                                className="rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                                                className="rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
                                             >
                                                 <FileText className="h-3 w-3" />
                                                 Factura

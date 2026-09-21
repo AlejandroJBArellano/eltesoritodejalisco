@@ -149,7 +149,7 @@ export function HourlyBreakdownTable({
                         Pico de Pedidos 🔥
                       </span>
                     ) : row.isHighActivity ? (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/25">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-primary/15 text-primary border border-primary/25">
                         Alta Actividad
                       </span>
                     ) : row.rawOrders > 0 ? (

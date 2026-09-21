@@ -28,9 +28,9 @@ const CATEGORY_CONFIG: Record<
   },
   BEBIDAS: {
     label: "Bebidas",
-    color: "#89CFF0",
-    badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-    text: "#22D3EE",
+    color: "#34D399",
+    badgeBg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    text: "#34D399",
   },
   EXTRAS: {
     label: "Extras",
@@ -60,28 +60,28 @@ const CATEGORY_CONFIG: Record<
 
 const CUSTOM_PALETTES = [
   {
-    badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-    color: "#22D3EE",
+    badgeBg: "bg-primary/10 text-primary border-primary/20",
+    color: "var(--color-primary)",
   },
   {
-    badgeBg: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-    color: "#A78BFA",
+    badgeBg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    color: "#34D399",
   },
   {
-    badgeBg: "bg-pink-500/10 text-pink-400 border-pink-500/20",
-    color: "#F472B6",
+    badgeBg: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    color: "#FBBF24",
   },
   {
-    badgeBg: "bg-lime-500/10 text-lime-400 border-lime-500/20",
-    color: "#A3E635",
+    badgeBg: "bg-primary/20 text-primary border-primary/30",
+    color: "var(--color-primary)",
   },
   {
-    badgeBg: "bg-teal-500/10 text-teal-400 border-teal-500/20",
-    color: "#2DD4BF",
+    badgeBg: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+    color: "#FB7185",
   },
   {
-    badgeBg: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
-    color: "#818CF8",
+    badgeBg: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+    color: "#FB923C",
   },
 ];
 

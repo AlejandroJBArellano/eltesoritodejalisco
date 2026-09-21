@@ -77,7 +77,7 @@ export default function MenuLoading() {
                 <div className="h-3 w-14 rounded bg-primary/20 font-mono" />
                 <div className="h-6 w-24 rounded-md bg-emerald-500/10 border border-emerald-500/20" />
                 <div className="ml-auto flex gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-purple-500/10" />
+                  <div className="h-8 w-8 rounded-lg bg-primary/10" />
                   <div className="h-8 w-8 rounded-lg bg-secondary border border-border" />
                   <div className="h-8 w-8 rounded-lg bg-rose-500/10" />
                 </div>

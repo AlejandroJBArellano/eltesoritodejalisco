@@ -611,7 +611,7 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
                     <td className="py-3 px-4 text-text-light/70">
                       {c.birthday ? (
                         <span className="inline-flex items-center gap-1">
-                          <Cake className="h-3.5 w-3.5 text-pink-400" />
+                          <Cake className="h-3.5 w-3.5 text-primary" />
                           {new Date(c.birthday).toLocaleDateString("es-MX", {
                             day: "numeric",
                             month: "short",
