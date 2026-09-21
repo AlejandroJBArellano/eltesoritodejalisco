@@ -53,7 +53,7 @@ export function RecipeModal({
               setSelectedRecipeMenuItemId(val);
               if (val) fetchRecipes(val);
             }}
-            className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-bold cursor-pointer"
+            className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-bold cursor-pointer"
           >
             <option value="">-- Seleccionar Producto --</option>
             {items.map((i) => (
@@ -68,7 +68,7 @@ export function RecipeModal({
           <>
             <form
               onSubmit={onSubmit}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-secondary/50 p-4 rounded-xl border border-border"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border"
             >
               <div className="sm:col-span-2">
                 <div className="flex justify-between items-center mb-1">
@@ -151,7 +151,7 @@ export function RecipeModal({
                 {recipeItems.map((rec) => (
                   <div
                     key={rec.id}
-                    className="flex items-center justify-between bg-secondary p-3 rounded-lg border border-border text-xs"
+                    className="flex items-center justify-between bg-dark/40 p-3 rounded-lg border border-border text-xs"
                   >
                     <span className="font-bold text-text-light">
                       {rec.ingredientName}

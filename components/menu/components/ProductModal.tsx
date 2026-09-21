@@ -54,7 +54,7 @@ export function ProductModal({
             type="text"
             value={formState.name}
             onChange={(e) => onFormChange("name", e.target.value)}
-            className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-primary"
+            className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-primary"
             placeholder="Ej. Torta Ahogada Sencilla"
           />
           {formErrors.name && (
@@ -73,7 +73,7 @@ export function ProductModal({
               type="text"
               value={formState.price}
               onChange={(e) => onFormChange("price", e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono tabular-nums"
+              className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono tabular-nums"
               placeholder="0.00"
             />
             {formErrors.price && (
@@ -99,7 +99,7 @@ export function ProductModal({
             <select
               value={formState.category}
               onChange={(e) => onFormChange("category", e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-primary cursor-pointer"
+              className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-primary cursor-pointer"
             >
               <option value="">-- Sin Categoría --</option>
               {categories.map((c) => (
@@ -119,7 +119,7 @@ export function ProductModal({
             rows={2}
             value={formState.description}
             onChange={(e) => onFormChange("description", e.target.value)}
-            className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-primary"
+            className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-primary"
             placeholder="Ingredientes principales, preparación, etc."
           />
         </div>
@@ -142,7 +142,7 @@ export function ProductModal({
           <select
             value={formState.ingredientId || ""}
             onChange={(e) => onFormChange("ingredientId", e.target.value)}
-            className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-bold cursor-pointer"
+            className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-bold cursor-pointer"
           >
             <option value="">
               -- No trackear directamente (usar recetas si existen) --
@@ -182,7 +182,7 @@ export function ProductModal({
                   type="text"
                   value={formState.nameEn}
                   onChange={(e) => onFormChange("nameEn", e.target.value)}
-                  className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-blue-500"
+                  className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-blue-500"
                   placeholder="e.g. Drowned Sandwich"
                 />
               </div>
@@ -196,7 +196,7 @@ export function ProductModal({
                   onChange={(e) =>
                     onFormChange("descriptionEn", e.target.value)
                   }
-                  className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-blue-500"
+                  className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-blue-500"
                   placeholder="e.g. Slow-cooked pork, chipotle sauce..."
                 />
               </div>
@@ -217,7 +217,7 @@ export function ProductModal({
                 className="h-16 w-16 rounded-lg object-cover border border-border"
               />
             ) : (
-              <div className="h-16 w-16 rounded-lg bg-secondary border border-border flex items-center justify-center text-text-light/30">
+              <div className="h-16 w-16 rounded-lg bg-dark/40 border border-border flex items-center justify-center text-text-light/30">
                 <ImageIcon className="h-6 w-6" />
               </div>
             )}
@@ -226,7 +226,7 @@ export function ProductModal({
               type="file"
               accept="image/*"
               onChange={onFileChange}
-              className="text-xs text-text-light/60 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-secondary file:text-text-light hover:file:bg-border/60 cursor-pointer"
+              className="text-xs text-text-light/60 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-dark/40 file:text-text-light hover:file:bg-border/60 cursor-pointer"
             />
           </div>
         </div>
@@ -237,7 +237,7 @@ export function ProductModal({
             id="isAvailable"
             checked={formState.isAvailable}
             onChange={(e) => onFormChange("isAvailable", e.target.checked)}
-            className="h-4 w-4 rounded border-border bg-secondary text-primary focus:ring-primary cursor-pointer"
+            className="h-4 w-4 rounded border-border bg-dark/40 text-primary focus:ring-primary cursor-pointer"
           />
           <label
             htmlFor="isAvailable"
@@ -258,7 +258,7 @@ export function ProductModal({
                 id="showInDineIn"
                 checked={formState.showInDineIn}
                 onChange={(e) => onFormChange("showInDineIn", e.target.checked)}
-                className="h-4 w-4 rounded border-border bg-secondary text-primary focus:ring-primary cursor-pointer"
+                className="h-4 w-4 rounded border-border bg-dark/40 text-primary focus:ring-primary cursor-pointer"
               />
               <label
                 htmlFor="showInDineIn"
@@ -275,7 +275,7 @@ export function ProductModal({
                 onChange={(e) =>
                   onFormChange("showInTakeaway", e.target.checked)
                 }
-                className="h-4 w-4 rounded border-border bg-secondary text-primary focus:ring-primary cursor-pointer"
+                className="h-4 w-4 rounded border-border bg-dark/40 text-primary focus:ring-primary cursor-pointer"
               />
               <label
                 htmlFor="showInTakeaway"
@@ -291,7 +291,7 @@ export function ProductModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-secondary cursor-pointer"
+            className="rounded-lg border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-dark/40 cursor-pointer"
           >
             Cancelar
           </button>

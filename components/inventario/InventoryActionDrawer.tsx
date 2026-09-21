@@ -208,7 +208,7 @@ export function InventoryActionDrawer({
     >
       <div className="w-full max-w-lg rounded-t-2xl sm:rounded-xl bg-card border border-border shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in slide-in-from-bottom-6 duration-200">
         {/* Header con Insumo y Cerrar */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-secondary/30">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-dark/40">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
               <Package className="h-5 w-5" />
@@ -237,7 +237,7 @@ export function InventoryActionDrawer({
 
         <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 custom-scrollbar">
           {/* Selector de Modo de Acción */}
-          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-lg bg-secondary border border-border">
+          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-lg bg-dark/40 border border-border">
             <button
               type="button"
               onClick={() => handleActionChange("ENTRADA")}
@@ -277,7 +277,7 @@ export function InventoryActionDrawer({
           </div>
 
           {/* Banner de Previsualización de Stock */}
-          <div className="rounded-lg p-4 bg-secondary border border-border space-y-2">
+          <div className="rounded-lg p-4 bg-dark/40 border border-border space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-text-light/50 font-bold uppercase tracking-wider">
                 Stock actual
@@ -353,7 +353,7 @@ export function InventoryActionDrawer({
                   setError(null);
                 }}
                 placeholder="Ej. Se cayó al servir, producto caducado..."
-                className="w-full h-11 rounded-lg border border-border bg-secondary px-4 text-xs text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/30"
+                className="w-full h-11 rounded-lg border border-border bg-dark/40 px-4 text-xs text-text-light outline-none focus:border-primary transition-all placeholder:text-text-light/30"
               />
 
               {/* Chips de sugerencias */}
@@ -366,7 +366,7 @@ export function InventoryActionDrawer({
                       setReason(sug);
                       setError(null);
                     }}
-                    className="text-[10px] font-bold text-text-light/60 bg-secondary border border-border px-2.5 py-1 rounded-md hover:text-text-light hover:bg-card-light active:scale-95 transition-all"
+                    className="text-[10px] font-bold text-text-light/60 bg-dark/40 border border-border px-2.5 py-1 rounded-md hover:text-text-light hover:bg-card-light active:scale-95 transition-all"
                   >
                     {sug}
                   </button>
@@ -393,7 +393,7 @@ export function InventoryActionDrawer({
               </button>
             </div>
 
-            <div className="flex items-center justify-between h-14 rounded-lg border border-border bg-secondary px-4">
+            <div className="flex items-center justify-between h-14 rounded-lg border border-border bg-dark/40 px-4">
               <span
                 data-testid="keypad-display"
                 className="text-2xl sm:text-3xl font-black text-text-light tabular-nums font-mono tracking-wider"
@@ -413,7 +413,7 @@ export function InventoryActionDrawer({
                 key={preset}
                 type="button"
                 onClick={() => handleQuickAdd(preset)}
-                className="py-2.5 rounded-lg bg-secondary border border-border text-xs font-black text-text-light hover:bg-card-light hover:border-primary/40 active:scale-95 transition-all font-mono tabular-nums"
+                className="py-2.5 rounded-lg bg-dark/40 border border-border text-xs font-black text-text-light hover:bg-card-light hover:border-primary/40 active:scale-95 transition-all font-mono tabular-nums"
               >
                 +{preset} <span className="font-sans">{ingredient.unit}</span>
               </button>
@@ -428,7 +428,7 @@ export function InventoryActionDrawer({
                   key={key}
                   type="button"
                   onClick={() => handleDigit(key)}
-                  className="h-12 rounded-lg bg-secondary border border-border text-lg font-black text-text-light hover:bg-card-light hover:border-border/80 active:scale-95 active:bg-primary/20 transition-all flex items-center justify-center select-none font-mono tabular-nums"
+                  className="h-12 rounded-lg bg-dark/40 border border-border text-lg font-black text-text-light hover:bg-card-light hover:border-border/80 active:scale-95 active:bg-primary/20 transition-all flex items-center justify-center select-none font-mono tabular-nums"
                 >
                   {key}
                 </button>
@@ -438,7 +438,7 @@ export function InventoryActionDrawer({
               type="button"
               onClick={handleBackspace}
               aria-label="Borrar último dígito"
-              className="h-12 rounded-lg bg-secondary border border-border text-base font-black text-text-light/70 hover:text-text-light hover:bg-card-light active:scale-95 transition-all flex items-center justify-center select-none"
+              className="h-12 rounded-lg bg-dark/40 border border-border text-base font-black text-text-light/70 hover:text-text-light hover:bg-card-light active:scale-95 transition-all flex items-center justify-center select-none"
             >
               <Delete className="h-5 w-5" />
             </button>
@@ -452,11 +452,11 @@ export function InventoryActionDrawer({
         </div>
 
         {/* Botones de Acción Final */}
-        <div className="p-4 sm:p-6 bg-secondary/30 border-t border-border flex gap-3">
+        <div className="p-4 sm:p-6 bg-dark/40 border-t border-border flex gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 h-12 rounded-lg border border-border bg-secondary text-xs font-black text-text-light/60 uppercase tracking-wider hover:text-text-light hover:bg-card-light active:scale-95 transition-all"
+            className="flex-1 h-12 rounded-lg border border-border bg-dark/40 text-xs font-black text-text-light/60 uppercase tracking-wider hover:text-text-light hover:bg-card-light active:scale-95 transition-all"
           >
             Cancelar
           </button>

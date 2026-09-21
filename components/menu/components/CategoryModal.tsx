@@ -47,7 +47,7 @@ export function CategoryModal() {
               const val = e.target.value;
               setCategoryForm((p) => ({ ...p, name: val }));
             }}
-            className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-primary"
+            className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-primary"
             placeholder="Ej. ANTOJITOS"
           />
           {categoryErrors.name && (
@@ -68,7 +68,7 @@ export function CategoryModal() {
               const val = e.target.value;
               setCategoryForm((p) => ({ ...p, nameEn: val }));
             }}
-            className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-blue-500"
+            className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-blue-500"
             placeholder="e.g. Snacks"
           />
         </div>
@@ -81,7 +81,7 @@ export function CategoryModal() {
               const checked = e.target.checked;
               setCategoryForm((p) => ({ ...p, showInPickup: checked }));
             }}
-            className="h-4 w-4 rounded border-border bg-secondary text-amber-500 focus:ring-amber-500 cursor-pointer"
+            className="h-4 w-4 rounded border-border bg-dark/40 text-amber-500 focus:ring-amber-500 cursor-pointer"
           />
           <label
             htmlFor="showInPickup"
@@ -94,7 +94,7 @@ export function CategoryModal() {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-secondary cursor-pointer"
+            className="rounded-lg border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-dark/40 cursor-pointer"
           >
             Cancelar
           </button>

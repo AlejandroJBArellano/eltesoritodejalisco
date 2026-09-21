@@ -34,7 +34,7 @@ export function CategoriesPanel() {
           .map((cat, index, arr) => (
             <div
               key={cat.id}
-              className="flex items-center justify-between bg-secondary border border-border rounded-xl px-4 py-3"
+              className="flex items-center justify-between bg-dark/40 border border-border rounded-xl px-4 py-3"
             >
               <div className="flex items-center gap-3">
                 <span className="text-[10px] font-black text-text-light/30 font-mono tabular-nums w-5 text-right">

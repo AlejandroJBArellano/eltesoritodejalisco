@@ -60,7 +60,7 @@ export function MenuFilters() {
 
   return (
     <div
-      className={`grid grid-cols-1 sm:grid-cols-3 gap-3 bg-secondary/50 p-4 rounded-xl border border-border ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}
+      className={`grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}
     >
       <form
         onSubmit={(e) => {

@@ -187,21 +187,21 @@ function MenuContentInner({
                 setIngredientErrors({});
                 setIsIngredientModalOpen(true);
               }}
-              className="rounded-lg border border-border bg-card px-4 py-2 text-xs font-bold text-text-light hover:bg-secondary transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm focus-visible:ring-2 focus-visible:ring-primary outline-none"
+              className="rounded-lg border border-border bg-card px-4 py-2 text-xs font-bold text-text-light hover:bg-dark/40 transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm focus-visible:ring-2 focus-visible:ring-primary outline-none"
             >
               <Plus className="h-4 w-4 text-purple-400" />
               Nuevo Ingrediente
             </button>
             <button
               onClick={() => openRecipeModal()}
-              className="rounded-lg border border-border bg-card px-4 py-2 text-xs font-bold text-text-light hover:bg-secondary transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm focus-visible:ring-2 focus-visible:ring-primary outline-none"
+              className="rounded-lg border border-border bg-card px-4 py-2 text-xs font-bold text-text-light hover:bg-dark/40 transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm focus-visible:ring-2 focus-visible:ring-primary outline-none"
             >
               <BookOpen className="h-4 w-4 text-purple-400" />
               Recetas e Ingredientes
             </button>
             <button
               onClick={() => openCategoryModal()}
-              className="rounded-lg border border-border bg-card px-4 py-2 text-xs font-bold text-text-light hover:bg-secondary transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm focus-visible:ring-2 focus-visible:ring-primary outline-none"
+              className="rounded-lg border border-border bg-card px-4 py-2 text-xs font-bold text-text-light hover:bg-dark/40 transition-all duration-200 ease-out uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm focus-visible:ring-2 focus-visible:ring-primary outline-none"
             >
               <Tag className="h-4 w-4 text-amber-400" />
               Categorías

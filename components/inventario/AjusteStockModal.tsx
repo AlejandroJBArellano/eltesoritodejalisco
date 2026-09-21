@@ -179,7 +179,7 @@ export function AjusteStockModal({
                 onClick={() =>
                   setCantidad((p) => String(Math.max(0, (Number(p) || 0) - 1)))
                 }
-                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-secondary border border-border text-text-light hover:bg-secondary/80 active:scale-[0.98] transition-all"
+                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-dark/40 border border-border text-text-light hover:bg-dark/40 active:scale-[0.98] transition-all"
               >
                 <Minus className="h-4 w-4" />
               </button>
@@ -195,7 +195,7 @@ export function AjusteStockModal({
               <button
                 type="button"
                 onClick={() => setCantidad((p) => String((Number(p) || 0) + 1))}
-                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-secondary border border-border text-text-light hover:bg-secondary/80 active:scale-[0.98] transition-all"
+                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-dark/40 border border-border text-text-light hover:bg-dark/40 active:scale-[0.98] transition-all"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -238,7 +238,7 @@ export function AjusteStockModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 h-10 rounded-lg border border-border bg-secondary text-xs font-black text-text-light/70 uppercase tracking-wider hover:text-text-light hover:bg-secondary/80 active:scale-[0.98] transition-all"
+              className="flex-1 h-10 rounded-lg border border-border bg-dark/40 text-xs font-black text-text-light/70 uppercase tracking-wider hover:text-text-light hover:bg-dark/40 active:scale-[0.98] transition-all"
             >
               Cancelar
             </button>

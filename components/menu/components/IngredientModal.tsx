@@ -40,7 +40,7 @@ export function IngredientModal({
             type="text"
             value={ingredientForm.name}
             onChange={(e) => onFormChange("name", e.target.value)}
-            className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-primary font-medium"
+            className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light placeholder-text-light/40 outline-none focus:border-primary font-medium"
             placeholder="Ej. Jitomate Sliced o Pan Telera"
           />
           {ingredientErrors.name && (
@@ -58,7 +58,7 @@ export function IngredientModal({
             <select
               value={ingredientForm.unit}
               onChange={(e) => onFormChange("unit", e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-primary cursor-pointer"
+              className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-primary cursor-pointer"
             >
               <option value="unit">Unidad (pz / pza)</option>
               <option value="kg">Kilogramo (kg)</option>
@@ -75,7 +75,7 @@ export function IngredientModal({
             <select
               value={ingredientForm.trackingType}
               onChange={(e) => onFormChange("trackingType", e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-primary cursor-pointer"
+              className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-primary cursor-pointer"
             >
               <option value="MEASURABLE">
                 Medible (Admite decimales, ej: 0.5 kg)
@@ -99,7 +99,7 @@ export function IngredientModal({
               }
               value={ingredientForm.currentStock}
               onChange={(e) => onFormChange("currentStock", e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono tabular-nums"
+              className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono tabular-nums"
               placeholder="0"
             />
           </div>
@@ -115,7 +115,7 @@ export function IngredientModal({
               }
               value={ingredientForm.minimumStock}
               onChange={(e) => onFormChange("minimumStock", e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono tabular-nums"
+              className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono tabular-nums"
               placeholder="0"
             />
           </div>
@@ -129,7 +129,7 @@ export function IngredientModal({
               step="0.01"
               value={ingredientForm.costPerUnit}
               onChange={(e) => onFormChange("costPerUnit", e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono tabular-nums"
+              className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono tabular-nums"
               placeholder="Opcional"
             />
           </div>
@@ -139,7 +139,7 @@ export function IngredientModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-secondary cursor-pointer"
+            className="rounded-lg border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-dark/40 cursor-pointer"
           >
             Cancelar
           </button>

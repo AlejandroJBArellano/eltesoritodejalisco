@@ -77,7 +77,7 @@ export function MenuTable({
     >
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
         <table className="w-full text-left text-sm">
-          <thead className="bg-secondary text-xs uppercase tracking-wider text-text-light/60 border-b border-border">
+          <thead className="bg-dark/40 text-xs uppercase tracking-wider text-text-light/60 border-b border-border">
             <tr>
               <th className="py-3 px-4 font-bold">Imagen</th>
               <TableHeaderSortCell
@@ -115,7 +115,7 @@ export function MenuTable({
             {paginatedItems.map((item) => (
               <tr
                 key={item.id}
-                className="hover:bg-secondary/40 transition-colors"
+                className="hover:bg-dark/40 transition-colors"
               >
                 <td className="py-3 px-4">
                   {item.imageUrl ? (
@@ -127,7 +127,7 @@ export function MenuTable({
                       className="h-10 w-10 rounded-lg object-cover border border-border"
                     />
                   ) : (
-                    <div className="h-10 w-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-text-light/30">
+                    <div className="h-10 w-10 rounded-lg bg-dark/40 border border-border flex items-center justify-center text-text-light/30">
                       <ImageIcon className="h-5 w-5" />
                     </div>
                   )}
@@ -141,7 +141,7 @@ export function MenuTable({
                   )}
                 </td>
                 <td className="py-3 px-4">
-                  <span className="rounded-md bg-secondary border border-border px-2.5 py-1 text-xs font-bold text-text-light/80">
+                  <span className="rounded-md bg-dark/40 border border-border px-2.5 py-1 text-xs font-bold text-text-light/80">
                     {item.category || "Sin categoría"}
                   </span>
                 </td>
@@ -180,7 +180,7 @@ export function MenuTable({
                     </button>
                     <button
                       onClick={() => openEditProductModal(item)}
-                      className="rounded-lg bg-secondary border border-border p-2 text-text-light/80 hover:text-white hover:bg-border/60 transition-colors cursor-pointer"
+                      className="rounded-lg bg-dark/40 border border-border p-2 text-text-light/80 hover:text-white hover:bg-border/60 transition-colors cursor-pointer"
                       title="Editar Producto"
                     >
                       <Pencil className="h-4 w-4" />
