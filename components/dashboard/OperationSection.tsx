@@ -31,7 +31,7 @@ export function OperationSection(props?: OperationSectionProps) {
             href="/pos"
             icon={Receipt}
             badge="Activo"
-            themeClass="bg-secondary/10 text-secondary"
+            themeClass="bg-dark/40 text-secondary"
             hoverColor="var(--color-secondary)"
           />
         )}

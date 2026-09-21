@@ -84,9 +84,9 @@ export function ExportButton<T>({
   // Base button style variants
   const variantStyles = {
     default:
-      "bg-secondary border border-border text-text-light hover:bg-card hover:text-white focus-visible:ring-primary/40",
+      "bg-dark/40 border border-border text-text-light hover:bg-card hover:text-white focus-visible:ring-primary/40",
     primary:
-      "bg-primary text-background hover:bg-secondary shadow-xs focus-visible:ring-primary/40",
+      "bg-primary text-background hover:brightness-110 shadow-xs focus-visible:ring-primary/40",
     ghost:
       "bg-transparent text-text-light/70 hover:bg-white/5 hover:text-text-light border border-transparent focus-visible:ring-primary/40",
     outline:

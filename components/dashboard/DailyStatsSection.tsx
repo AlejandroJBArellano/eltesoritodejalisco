@@ -31,7 +31,7 @@ export function DailyStatsSection({ stats }: DailyStatsSectionProps) {
           title="Venta Bruta"
           icon={DollarSign}
           value={currencyFormatter.format(stats.salesToday)}
-          themeClass="bg-secondary/10 text-secondary"
+          themeClass="bg-dark/40 text-secondary"
         />
         <StatCard
           title="Clientes"

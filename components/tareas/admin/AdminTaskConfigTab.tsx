@@ -96,7 +96,7 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-secondary/40 p-4 rounded-lg border border-border">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-lg border border-border">
           <div>
             <label className="text-[10px] font-bold text-text-light/60 uppercase tracking-wider block mb-1">
               Buscar Tarea
@@ -115,7 +115,7 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
             <select
               value={categoryFilter}
               onChange={(e) => onCategoryFilterChange(e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
+              className="w-full rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
             >
               <option value="ALL">Todas las Categorías</option>
               {categories.map((c) => (
@@ -133,7 +133,7 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
             <select
               value={frequencyFilter}
               onChange={(e) => onFrequencyFilterChange(e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
+              className="w-full rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
             >
               <option value="ALL">Todas las Frecuencias</option>
               <option value="DAILY">Diario</option>
@@ -148,7 +148,7 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
 
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-left text-sm text-text-light/80">
-            <thead className="bg-secondary/60 text-xs font-bold text-text-light uppercase tracking-wider border-b border-border">
+            <thead className="bg-dark/40 text-xs font-bold text-text-light uppercase tracking-wider border-b border-border">
               <tr>
                 <TableHeaderSortCell
                   field="name"
@@ -179,13 +179,13 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
               {paginatedTasks.map((t) => (
                 <tr
                   key={t.id}
-                  className="hover:bg-secondary/40 transition-colors"
+                  className="hover:bg-dark/40 transition-colors"
                 >
                   <td className="py-3 px-4 font-bold text-text-light">
                     {t.name}
                   </td>
                   <td className="py-3 px-4">
-                    <span className="rounded-md bg-secondary border border-border px-2.5 py-1 text-xs font-medium text-text-light/80">
+                    <span className="rounded-md bg-dark/40 border border-border px-2.5 py-1 text-xs font-medium text-text-light/80">
                       {t.category?.name || "Sin categoría"}
                     </span>
                   </td>

@@ -77,7 +77,7 @@ export default async function LoginPage({
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2.5 text-sm text-text-light outline-none transition-all placeholder:text-text-light/30 focus:border-primary focus:ring-1 focus:ring-primary/40"
+                className="w-full rounded-lg border border-border bg-dark/40 px-3.5 py-2.5 text-sm text-text-light outline-none transition-all placeholder:text-text-light/30 focus:border-primary focus:ring-1 focus:ring-primary/40"
                 placeholder="usuario@ejemplo.com"
               />
             </div>
@@ -94,7 +94,7 @@ export default async function LoginPage({
                 type="password"
                 autoComplete="current-password"
                 required
-                className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2.5 text-sm text-text-light outline-none transition-all placeholder:text-text-light/30 focus:border-primary focus:ring-1 focus:ring-primary/40"
+                className="w-full rounded-lg border border-border bg-dark/40 px-3.5 py-2.5 text-sm text-text-light outline-none transition-all placeholder:text-text-light/30 focus:border-primary focus:ring-1 focus:ring-primary/40"
                 placeholder="••••••••"
               />
             </div>
@@ -125,7 +125,7 @@ export default async function LoginPage({
         <form action={loginWithGoogle}>
           <button
             type="submit"
-            className="w-full flex justify-center items-center gap-2.5 rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-medium text-text-light hover:bg-border/60 active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full flex justify-center items-center gap-2.5 rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm font-medium text-text-light hover:bg-white/5 active:scale-[0.98] transition-all cursor-pointer"
           >
             <svg
               viewBox="0 0 24 24"

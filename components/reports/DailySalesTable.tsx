@@ -41,7 +41,7 @@ export function DailySalesTable(props: DailySalesTableProps = {}) {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-border text-xs font-black text-text-light/60 uppercase tracking-wider bg-secondary">
+            <tr className="border-b border-border text-xs font-black text-text-light/60 uppercase tracking-wider bg-dark/40">
               <th scope="col" className="py-3 px-3">
                 Fecha
               </th>
@@ -69,7 +69,7 @@ export function DailySalesTable(props: DailySalesTableProps = {}) {
             {dailySalesData.map((row) => (
               <tr
                 key={row.date}
-                className="hover:bg-secondary/40 transition-colors"
+                className="hover:bg-dark/40 transition-colors"
               >
                 <td className="py-3.5 px-3 font-mono text-xs font-bold text-text-light">
                   {row.date}

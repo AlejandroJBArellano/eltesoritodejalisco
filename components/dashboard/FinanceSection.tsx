@@ -42,7 +42,7 @@ export function FinanceSection(props?: FinanceSectionProps) {
           description="Ventas y métricas de negocio."
           href="/reports"
           icon={BarChart3}
-          themeClass="bg-secondary text-text-light/80 border border-border"
+          themeClass="bg-dark/40 text-text-light/80 border border-border"
           hoverColor="var(--color-primary)"
         />
         <ModuleCard

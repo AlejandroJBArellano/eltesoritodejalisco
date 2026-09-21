@@ -28,10 +28,10 @@ export function SalesSourceCard(props: SalesSourceCardProps = {}) {
         {sources.map(([source, stats]) => (
           <div
             key={source}
-            className="p-4 rounded-xl bg-secondary border border-border flex items-center justify-between"
+            className="p-4 rounded-xl bg-dark/40 border border-border flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-secondary/10 p-2.5 text-secondary">
+              <div className="rounded-lg bg-dark/40 p-2.5 text-secondary">
                 <Store className="h-4 w-4" />
               </div>
               <div>

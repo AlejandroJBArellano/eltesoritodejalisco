@@ -31,7 +31,7 @@ export function TableSearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-border bg-secondary pl-9 pr-8 py-2 text-xs font-normal text-text-light placeholder:text-text-light/30 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
+        className="w-full rounded-lg border border-border bg-dark/40 pl-9 pr-8 py-2 text-xs font-normal text-text-light placeholder:text-text-light/30 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
       />
       {value && (
         <button
@@ -138,7 +138,7 @@ export function TablePagination({
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="rounded-lg border border-border bg-secondary px-2 py-1 text-xs text-text-light outline-none focus:border-primary font-mono tabular-nums cursor-pointer"
+              className="rounded-lg border border-border bg-dark/40 px-2 py-1 text-xs text-text-light outline-none focus:border-primary font-mono tabular-nums cursor-pointer"
             >
               {pageSizeOptions.map((opt) => (
                 <option key={opt} value={opt}>
@@ -154,7 +154,7 @@ export function TablePagination({
         <button
           onClick={() => onPageChange(safeCurrentPage - 1)}
           disabled={safeCurrentPage <= 1}
-          className="flex items-center gap-1 rounded-lg border border-border bg-secondary px-3 py-1.5 font-semibold text-xs hover:bg-card hover:text-white disabled:opacity-30 disabled:hover:bg-secondary transition-all active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+          className="flex items-center gap-1 rounded-lg border border-border bg-dark/40 px-3 py-1.5 font-semibold text-xs hover:bg-card hover:text-white disabled:opacity-30 disabled:hover:bg-dark/40 transition-all active:scale-95 cursor-pointer disabled:cursor-not-allowed"
         >
           <ChevronLeft className="h-4 w-4" />
           <span>Anterior</span>
@@ -167,7 +167,7 @@ export function TablePagination({
         <button
           onClick={() => onPageChange(safeCurrentPage + 1)}
           disabled={safeCurrentPage >= safeTotalPages}
-          className="flex items-center gap-1 rounded-lg border border-border bg-secondary px-3 py-1.5 font-semibold text-xs hover:bg-card hover:text-white disabled:opacity-30 disabled:hover:bg-secondary transition-all active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+          className="flex items-center gap-1 rounded-lg border border-border bg-dark/40 px-3 py-1.5 font-semibold text-xs hover:bg-card hover:text-white disabled:opacity-30 disabled:hover:bg-dark/40 transition-all active:scale-95 cursor-pointer disabled:cursor-not-allowed"
         >
           <span>Siguiente</span>
           <ChevronRight className="h-4 w-4" />

@@ -37,7 +37,7 @@ export function TopCustomersTable(props: TopCustomersTableProps = {}) {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-border text-xs font-black text-text-light/60 uppercase tracking-wider bg-secondary">
+            <tr className="border-b border-border text-xs font-black text-text-light/60 uppercase tracking-wider bg-dark/40">
               <th scope="col" className="py-3 px-3">
                 Cliente
               </th>
@@ -65,7 +65,7 @@ export function TopCustomersTable(props: TopCustomersTableProps = {}) {
               return (
                 <tr
                   key={index}
-                  className="hover:bg-secondary/40 transition-colors"
+                  className="hover:bg-dark/40 transition-colors"
                 >
                   <td className="py-3.5 px-3">
                     <div className="flex items-center gap-3">

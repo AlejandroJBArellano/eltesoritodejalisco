@@ -69,7 +69,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
             themeClass={
               isStripeEnabled
                 ? "bg-emerald-500/10 text-emerald-400"
-                : "bg-secondary text-text-light/50 border border-border"
+                : "bg-dark/40 text-text-light/50 border border-border"
             }
             hoverColor={isStripeEnabled ? "#10b981" : "var(--color-primary)"}
           />
@@ -156,7 +156,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
             href="/admin/settings"
             icon={Settings}
             badge="Empresa"
-            themeClass="bg-secondary text-text-light/80 border border-border"
+            themeClass="bg-dark/40 text-text-light/80 border border-border"
             hoverColor="var(--color-primary)"
           />
         )}

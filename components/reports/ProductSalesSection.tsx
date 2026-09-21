@@ -47,7 +47,7 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-border text-xs font-black text-text-light/60 uppercase tracking-wider bg-secondary">
+              <tr className="border-b border-border text-xs font-black text-text-light/60 uppercase tracking-wider bg-dark/40">
                 <th scope="col" className="py-3 px-3">
                   Rank
                 </th>
@@ -75,7 +75,7 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
               {enrichedProductSales.map((product) => (
                 <tr
                   key={product.id}
-                  className="hover:bg-secondary/40 transition-colors"
+                  className="hover:bg-dark/40 transition-colors"
                 >
                   <td className="py-3.5 px-3 font-mono text-xs font-bold text-text-light/50 tabular-nums">
                     #{product.rank}
@@ -84,7 +84,7 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
                     {product.name}
                   </td>
                   <td className="py-3.5 px-3">
-                    <span className="inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-[11px] font-bold text-text-light/70 border border-border">
+                    <span className="inline-flex items-center rounded-md bg-dark/40 px-2 py-0.5 text-[11px] font-bold text-text-light/70 border border-border">
                       {product.category || "General"}
                     </span>
                   </td>
@@ -135,12 +135,12 @@ export function ProductSalesSection(props: ProductSalesSectionProps = {}) {
                   ? "bg-slate-400/20 text-slate-300 border-slate-400/30"
                   : index === 2
                     ? "bg-amber-700/20 text-amber-500 border-amber-700/30"
-                    : "bg-secondary text-text-light/60 border-border";
+                    : "bg-dark/40 text-text-light/60 border-border";
 
             return (
               <div
                 key={index}
-                className="flex items-center justify-between p-3 rounded-xl bg-secondary border border-border"
+                className="flex items-center justify-between p-3 rounded-xl bg-dark/40 border border-border"
               >
                 <div className="flex items-center gap-3">
                   <span

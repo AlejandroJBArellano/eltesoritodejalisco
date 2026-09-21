@@ -108,7 +108,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 bg-secondary/40 p-4 rounded-lg border border-border">
+      <div className="flex flex-col gap-3 bg-dark/40 p-4 rounded-lg border border-border">
         <div className="flex items-center gap-1.5 bg-background p-1 rounded-lg border border-border w-fit">
           <button
             type="button"
@@ -116,7 +116,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
             className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-[0.98] ${
               complianceFilter === "ALL"
                 ? "bg-primary text-background shadow-xs"
-                : "text-text-light/60 hover:text-text-light hover:bg-secondary"
+                : "text-text-light/60 hover:text-text-light hover:bg-white/5"
             }`}
           >
             Todas
@@ -127,7 +127,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
             className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-[0.98] ${
               complianceFilter === "COMPLETED"
                 ? "bg-primary text-background shadow-xs"
-                : "text-text-light/60 hover:text-text-light hover:bg-secondary"
+                : "text-text-light/60 hover:text-text-light hover:bg-white/5"
             }`}
           >
             Completadas
@@ -138,7 +138,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
             className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-[0.98] ${
               complianceFilter === "NOT_DONE"
                 ? "bg-primary text-background shadow-xs"
-                : "text-text-light/60 hover:text-text-light hover:bg-secondary"
+                : "text-text-light/60 hover:text-text-light hover:bg-white/5"
             }`}
           >
             No Realizadas
@@ -163,7 +163,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
             <select
               value={userFilter}
               onChange={(e) => onUserFilterChange(e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
+              className="w-full rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
             >
               <option value="ALL">Todos los Colaboradores</option>
               <option value="UNASSIGNED">Sin Asignar</option>
@@ -181,7 +181,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
             <select
               value={statusFilter}
               onChange={(e) => onStatusFilterChange(e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
+              className="w-full rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
             >
               <option value="ALL">Todos los Estados</option>
               <option value="COMPLETED">Listo para Aprobar</option>
@@ -195,7 +195,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
 
       <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-left text-sm text-text-light/80">
-          <thead className="bg-secondary/60 text-xs font-bold text-text-light uppercase tracking-wider border-b border-border">
+          <thead className="bg-dark/40 text-xs font-bold text-text-light uppercase tracking-wider border-b border-border">
             <tr>
               <TableHeaderSortCell
                 field="task"
@@ -234,7 +234,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
             {paginatedExecutions.map((exec) => (
               <tr
                 key={exec.id}
-                className="hover:bg-secondary/40 transition-colors"
+                className="hover:bg-dark/40 transition-colors"
               >
                 <td className="py-3 px-4 text-text-light font-bold">
                   {exec.task?.name || "Desconocida"}
@@ -255,7 +255,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
                             ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                             : exec.status === "NOT_DONE"
                               ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                              : "bg-secondary text-text-light/60 border border-border"
+                              : "bg-dark/40 text-text-light/60 border border-border"
                     }`}
                   >
                     {exec.status === "COMPLETED"

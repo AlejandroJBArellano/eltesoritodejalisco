@@ -239,7 +239,7 @@ export function PushNotificationPrompt({
           disabled={loading}
           className={`px-3.5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer active:scale-[0.98] ${
             isSubscribed
-              ? "bg-secondary text-text-light/80 hover:bg-secondary/80 border border-border"
+              ? "bg-dark/40 text-text-light/80 hover:bg-dark/40 border border-border"
               : permission === "denied"
                 ? "bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30"
                 : "bg-primary text-background hover:bg-primary-hover shadow-sm"
