@@ -502,7 +502,7 @@ export function NewCampaignModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ej. Reactivación Clientes Septiembre"
-                className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
+                className="w-full rounded-lg border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
                 data-testid="campaign-name-input"
               />
             </div>
@@ -569,7 +569,7 @@ export function NewCampaignModal({
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
+                className="w-full rounded-lg border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
                 placeholder="Asunto llamativo..."
                 data-testid="campaign-subject-input"
               />
@@ -603,7 +603,7 @@ export function NewCampaignModal({
                 rows={4}
                 value={messageContent}
                 onChange={(e) => setMessageContent(e.target.value)}
-                className="w-full rounded-lg border border-border bg-secondary p-3 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
+                className="w-full rounded-lg border border-border bg-dark/40 p-3 text-xs text-text-light outline-none focus:border-emerald-500 transition-colors"
                 placeholder="Escribe el mensaje..."
                 data-testid="campaign-message-input"
               />
@@ -644,7 +644,7 @@ export function NewCampaignModal({
                 </div>
 
                 {minPoints > 0 && (
-                  <div className="rounded-lg border border-border bg-secondary p-3 text-center">
+                  <div className="rounded-lg border border-border bg-dark/40 p-3 text-center">
                     <span className="text-[10px] font-bold text-amber-400 block">
                       ⭐ Tu Saldo de Puntos
                     </span>
@@ -654,7 +654,7 @@ export function NewCampaignModal({
                   </div>
                 )}
 
-                <div className="whitespace-pre-line text-xs text-text-light/90 leading-relaxed bg-secondary/50 p-3 rounded-lg">
+                <div className="whitespace-pre-line text-xs text-text-light/90 leading-relaxed bg-dark/40 p-3 rounded-lg">
                   {previewBody}
                 </div>
 
@@ -711,7 +711,7 @@ export function NewCampaignModal({
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="rounded-xl bg-secondary p-3 border border-border">
+                <div className="rounded-xl bg-dark/40 p-3 border border-border">
                   <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                     Campaña
                   </span>
@@ -720,7 +720,7 @@ export function NewCampaignModal({
                   </strong>
                 </div>
 
-                <div className="rounded-xl bg-secondary p-3 border border-border">
+                <div className="rounded-xl bg-dark/40 p-3 border border-border">
                   <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                     Destinatarios Estimados
                   </span>
@@ -729,7 +729,7 @@ export function NewCampaignModal({
                   </strong>
                 </div>
 
-                <div className="rounded-xl bg-secondary p-3 border border-border">
+                <div className="rounded-xl bg-dark/40 p-3 border border-border">
                   <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                     Plantilla
                   </span>
@@ -738,7 +738,7 @@ export function NewCampaignModal({
                   </span>
                 </div>
 
-                <div className="rounded-xl bg-secondary p-3 border border-border">
+                <div className="rounded-xl bg-dark/40 p-3 border border-border">
                   <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                     Remitente Oficial
                   </span>
@@ -748,7 +748,7 @@ export function NewCampaignModal({
                 </div>
               </div>
 
-              <div className="rounded-xl bg-secondary p-3 border border-border space-y-1">
+              <div className="rounded-xl bg-dark/40 p-3 border border-border space-y-1">
                 <span className="text-text-light/50 block text-[10px] font-bold uppercase">
                   Asunto
                 </span>

@@ -123,13 +123,13 @@ export function CustomerQRModal({
         {/* Acciones del Modal */}
         <div className="space-y-3">
           {/* Enlace directo y botón de copiar */}
-          <div className="flex items-center gap-2 rounded-lg bg-secondary border border-border p-2">
+          <div className="flex items-center gap-2 rounded-lg bg-dark/40 border border-border p-2">
             <span className="text-xs font-mono text-text-light/70 truncate flex-1 px-2 select-all">
               {registrationUrl}
             </span>
             <button
               onClick={handleCopyLink}
-              className="rounded-md bg-secondary hover:bg-card-light px-3 py-1.5 text-xs font-bold text-text-light transition flex items-center gap-1.5 cursor-pointer border border-border"
+              className="rounded-md bg-dark/40 hover:bg-card-light px-3 py-1.5 text-xs font-bold text-text-light transition flex items-center gap-1.5 cursor-pointer border border-border"
             >
               {copied ? (
                 <>
@@ -150,7 +150,7 @@ export function CustomerQRModal({
             <button
               onClick={handleDownloadQR}
               disabled={isDownloading}
-              className="rounded-lg border border-border bg-secondary hover:bg-card-light px-4 py-2.5 text-xs font-bold text-text-light transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="rounded-lg border border-border bg-dark/40 hover:bg-card-light px-4 py-2.5 text-xs font-bold text-text-light transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <Download className="h-4 w-4 text-emerald-400" />
               <span>{isDownloading ? "Descargando..." : "Descargar PNG"}</span>

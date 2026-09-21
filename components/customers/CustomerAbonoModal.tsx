@@ -153,7 +153,7 @@ export function CustomerAbonoModal({
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
               autoFocus
-              className="w-full bg-secondary border border-border rounded-lg pl-8 pr-4 py-2.5 text-lg font-black font-mono tabular-nums text-text-light placeholder:text-text-light/30 focus:border-amber-400 focus:outline-none"
+              className="w-full bg-dark/40 border border-border rounded-lg pl-8 pr-4 py-2.5 text-lg font-black font-mono tabular-nums text-text-light placeholder:text-text-light/30 focus:border-amber-400 focus:outline-none"
             />
           </div>
         </div>
@@ -175,7 +175,7 @@ export function CustomerAbonoModal({
                   className={`py-2.5 px-3 rounded-lg font-bold text-xs flex flex-col items-center gap-1.5 border transition-all cursor-pointer ${
                     isSelected
                       ? "bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm"
-                      : "bg-secondary border-border text-text-light/60 hover:bg-card-light hover:text-text-light"
+                      : "bg-dark/40 border-border text-text-light/60 hover:bg-card-light hover:text-text-light"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -188,7 +188,7 @@ export function CustomerAbonoModal({
 
         {/* Efectivo Recibido y Cambio */}
         {method === PaymentMethod.CASH && (
-          <div className="space-y-3 bg-secondary p-3.5 rounded-xl border border-border">
+          <div className="space-y-3 bg-dark/40 p-3.5 rounded-xl border border-border">
             <div className="space-y-1">
               <label
                 htmlFor="received-amount"
@@ -207,7 +207,7 @@ export function CustomerAbonoModal({
                   value={receivedAmount}
                   onChange={(e) => setReceivedAmount(e.target.value)}
                   placeholder="0.00"
-                  className="w-full bg-secondary border border-border rounded-lg pl-7 pr-3 py-2 text-sm font-bold font-mono tabular-nums text-text-light placeholder:text-text-light/30 focus:border-amber-400 focus:outline-none"
+                  className="w-full bg-dark/40 border border-border rounded-lg pl-7 pr-3 py-2 text-sm font-bold font-mono tabular-nums text-text-light placeholder:text-text-light/30 focus:border-amber-400 focus:outline-none"
                 />
               </div>
             </div>
@@ -231,7 +231,7 @@ export function CustomerAbonoModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex-1 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider border border-border bg-secondary text-text-light/60 hover:bg-card-light hover:text-text-light transition-all cursor-pointer"
+            className="flex-1 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider border border-border bg-dark/40 text-text-light/60 hover:bg-card-light hover:text-text-light transition-all cursor-pointer"
           >
             Cancelar
           </button>

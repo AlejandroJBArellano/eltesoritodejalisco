@@ -188,7 +188,7 @@ export function CustomerAccountModal({
             <div className="space-y-4">
               {/* Tarjeta de Saldo Deudor y Acciones */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="bg-secondary border border-border p-4 rounded-lg flex flex-col justify-between">
+                <div className="bg-dark/40 border border-border p-4 rounded-lg flex flex-col justify-between">
                   <span className="text-[10px] font-black text-text-light/50 uppercase tracking-widest">
                     Saldo Deudor Total
                   </span>
@@ -199,7 +199,7 @@ export function CustomerAccountModal({
                   </span>
                 </div>
 
-                <div className="bg-secondary border border-border p-4 rounded-lg flex flex-col justify-between">
+                <div className="bg-dark/40 border border-border p-4 rounded-lg flex flex-col justify-between">
                   <span className="text-[10px] font-black text-text-light/50 uppercase tracking-widest">
                     Notas Pendientes
                   </span>
@@ -220,7 +220,7 @@ export function CustomerAccountModal({
                   <button
                     type="button"
                     onClick={() => setActiveTab("ticket")}
-                    className="w-full bg-secondary border border-border hover:bg-card-light text-text-light py-2 px-3 rounded-lg font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    className="w-full bg-dark/40 border border-border hover:bg-card-light text-text-light py-2 px-3 rounded-lg font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <Printer className="h-4 w-4" /> Imprimir Ticket
                   </button>
@@ -239,7 +239,7 @@ export function CustomerAccountModal({
                     Cargando notas pendientes...
                   </div>
                 ) : pendingNotes.length === 0 ? (
-                  <div className="py-8 text-center bg-secondary/50 rounded-xl border border-border text-xs text-text-light/40">
+                  <div className="py-8 text-center bg-dark/40 rounded-xl border border-border text-xs text-text-light/40">
                     Este cliente está al corriente. No tiene notas pendientes.
                   </div>
                 ) : (
@@ -292,7 +292,7 @@ export function CustomerAccountModal({
 
                           {/* Detalle expandible de platillos y abonos */}
                           {isExpanded && (
-                            <div className="pt-2 border-t border-border/50 text-xs space-y-2 bg-secondary/40 p-2.5 rounded-lg">
+                            <div className="pt-2 border-t border-border/50 text-xs space-y-2 bg-dark/40 p-2.5 rounded-lg">
                               <div className="flex justify-between text-[11px] text-text-light/60 pb-1 border-b border-border/30">
                                 <span>
                                   Total Original: ${note.total.toFixed(2)}
