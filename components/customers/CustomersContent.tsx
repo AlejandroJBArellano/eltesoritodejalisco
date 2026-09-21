@@ -385,34 +385,34 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         {errorMessage && (
-          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-xs font-bold text-red-400">
+          <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-xs font-bold text-red-400">
             {errorMessage}
           </div>
         )}
 
         {/* Tarjetas de Métricas de CRM */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+          <div className="rounded-xl bg-card p-5 border border-border flex items-center justify-between shadow-xs">
             <div>
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Total Registrados
               </p>
-              <p className="mt-1 text-2xl font-black text-text-light">
+              <p className="mt-1 text-2xl font-black text-text-light font-mono tabular-nums">
                 {customers.length}
               </p>
             </div>
-            <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
+            <div className="rounded-lg bg-blue-500/10 p-3 text-blue-400">
               <Users className="h-5 w-5" />
             </div>
           </div>
 
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+          <div className="rounded-xl bg-card p-5 border border-border flex items-center justify-between shadow-xs">
             <div>
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Total por Cobrar
               </p>
               <p
-                className={`mt-1 text-2xl font-black ${totalDebtSum > 0 ? "text-amber-400" : "text-emerald-400"}`}
+                className={`mt-1 text-2xl font-black font-mono tabular-nums ${totalDebtSum > 0 ? "text-amber-400" : "text-emerald-400"}`}
               >
                 $
                 {totalDebtSum.toLocaleString(undefined, {
@@ -425,60 +425,60 @@ export function CustomersContent({ initialCustomers }: CustomersContentProps) {
               </p>
             </div>
             <div
-              className={`rounded-xl p-3 ${totalDebtSum > 0 ? "bg-amber-500/10 text-amber-400" : "bg-emerald-500/10 text-emerald-400"}`}
+              className={`rounded-lg p-3 ${totalDebtSum > 0 ? "bg-amber-500/10 text-amber-400" : "bg-emerald-500/10 text-emerald-400"}`}
             >
               <ReceiptText className="h-5 w-5" />
             </div>
           </div>
 
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+          <div className="rounded-xl bg-card p-5 border border-border flex items-center justify-between shadow-xs">
             <div>
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Puntos de Lealtad
               </p>
-              <p className="mt-1 text-2xl font-black text-amber-400">
+              <p className="mt-1 text-2xl font-black text-amber-400 font-mono tabular-nums">
                 {totalLoyaltyPoints}
               </p>
             </div>
-            <div className="rounded-xl bg-amber-500/10 p-3 text-amber-400">
+            <div className="rounded-lg bg-amber-500/10 p-3 text-amber-400">
               <Award className="h-5 w-5" />
             </div>
           </div>
 
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+          <div className="rounded-xl bg-card p-5 border border-border flex items-center justify-between shadow-xs">
             <div>
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Consumo Acumulado
               </p>
-              <p className="mt-1 text-2xl font-black text-emerald-400">
+              <p className="mt-1 text-2xl font-black text-emerald-400 font-mono tabular-nums">
                 $
                 {totalSpendSum.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                 })}
               </p>
             </div>
-            <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
+            <div className="rounded-lg bg-emerald-500/10 p-3 text-emerald-400">
               <DollarSign className="h-5 w-5" />
             </div>
           </div>
 
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+          <div className="rounded-xl bg-card p-5 border border-border flex items-center justify-between shadow-xs">
             <div>
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Prom. Puntos/Cliente
               </p>
-              <p className="mt-1 text-2xl font-black text-purple-400">
+              <p className="mt-1 text-2xl font-black text-purple-400 font-mono tabular-nums">
                 {avgPointsPerCustomer}
               </p>
             </div>
-            <div className="rounded-xl bg-purple-500/10 p-3 text-purple-400">
+            <div className="rounded-lg bg-purple-500/10 p-3 text-purple-400">
               <Gift className="h-5 w-5" />
             </div>
           </div>
         </div>
 
         {/* TABLA DE CLIENTES */}
-        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+        <section className="rounded-xl bg-card p-6 shadow-xs border border-border space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
             <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />

@@ -320,18 +320,18 @@ export function NewCampaignModal({
         {step === 1 && (
           <div className="space-y-5">
             {/* Live Audience Banner */}
-            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex items-center justify-between">
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-emerald-500/20 p-2.5 text-emerald-400">
+                <div className="rounded-lg bg-emerald-500/20 p-2.5 text-emerald-400">
                   <Users className="h-5 w-5" />
                 </div>
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
                     Audiencia Objetivo
                   </span>
-                  <p className="text-xl font-black text-text-light">
+                  <p className="text-xl font-black text-text-light font-mono tabular-nums">
                     {isLoadingAudience ? (
-                      <span className="flex items-center gap-2 text-sm text-text-light/60">
+                      <span className="flex items-center gap-2 text-sm text-text-light/60 font-sans">
                         <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />
                         Calculando clientes...
                       </span>
@@ -610,13 +610,13 @@ export function NewCampaignModal({
             </div>
 
             {/* Live Visual Preview */}
-            <div className="rounded-2xl border border-border bg-card/40 p-4 space-y-3">
+            <div className="rounded-xl border border-border bg-card/40 p-4 space-y-3">
               <div className="flex items-center gap-2 text-xs font-extrabold text-text-light/70 uppercase tracking-wider">
                 <Eye className="h-4 w-4 text-emerald-400" />
                 Vista Previa del Cliente
               </div>
 
-              <div className="rounded-xl border border-border bg-[#18181b] p-4 text-xs space-y-3 text-text-light">
+              <div className="rounded-lg border border-border bg-[#18181b] p-4 text-xs space-y-3 text-text-light">
                 <div className="border-b border-border pb-2 flex items-center justify-between">
                   <span className="font-bold text-text-light/60">
                     Asunto:{" "}
@@ -644,23 +644,23 @@ export function NewCampaignModal({
                 </div>
 
                 {minPoints > 0 && (
-                  <div className="rounded-xl border border-border bg-dark/60 p-3 text-center">
+                  <div className="rounded-lg border border-border bg-secondary p-3 text-center">
                     <span className="text-[10px] font-bold text-amber-400 block">
                       ⭐ Tu Saldo de Puntos
                     </span>
-                    <strong className="text-lg text-amber-300">
+                    <strong className="text-lg text-amber-300 font-mono tabular-nums">
                       150 puntos
                     </strong>
                   </div>
                 )}
 
-                <div className="whitespace-pre-line text-xs text-text-light/90 leading-relaxed bg-dark/20 p-3 rounded-lg">
+                <div className="whitespace-pre-line text-xs text-text-light/90 leading-relaxed bg-secondary/50 p-3 rounded-lg">
                   {previewBody}
                 </div>
 
                 <div className="pt-2 text-center">
                   <span
-                    className="inline-block rounded-xl px-4 py-2 text-xs font-black text-black shadow-md cursor-default"
+                    className="inline-block rounded-lg px-4 py-2 text-xs font-black text-background shadow-md cursor-default"
                     style={{ backgroundColor: primaryColor }}
                   >
                     🍽️ Ver Menú y Ordenar →
@@ -673,7 +673,7 @@ export function NewCampaignModal({
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-white/5 transition-all flex items-center gap-2 cursor-pointer"
+                className="rounded-lg border border-border px-4 py-2.5 text-xs font-bold text-text-light/70 hover:bg-card-light transition-all flex items-center gap-2 cursor-pointer"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Atrás
@@ -682,7 +682,7 @@ export function NewCampaignModal({
                 type="button"
                 onClick={() => setStep(3)}
                 disabled={!subject.trim() || !messageContent.trim()}
-                className="rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-black text-black hover:brightness-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40"
+                className="rounded-lg bg-emerald-500 px-5 py-2.5 text-xs font-black text-background hover:brightness-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40"
                 data-testid="go-to-confirm-button"
               >
                 Siguiente: Confirmar
@@ -695,9 +695,9 @@ export function NewCampaignModal({
         {/* PASO 3: CONFIRMACIÓN Y ENVÍO */}
         {step === 3 && (
           <div className="space-y-5">
-            <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+            <div className="rounded-xl border border-border bg-card p-5 space-y-4">
               <div className="flex items-center gap-3 border-b border-border pb-3">
-                <div className="rounded-xl bg-emerald-500/20 p-2.5 text-emerald-400">
+                <div className="rounded-lg bg-emerald-500/20 p-2.5 text-emerald-400">
                   <CheckCircle2 className="h-5 w-5" />
                 </div>
                 <div>

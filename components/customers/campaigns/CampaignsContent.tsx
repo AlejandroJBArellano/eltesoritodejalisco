@@ -78,63 +78,63 @@ export function CampaignsContent({
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         {/* KPI CARDS */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+          <div className="rounded-xl bg-card p-5 border border-border flex items-center justify-between shadow-xs">
             <div>
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Total Campañas
               </p>
-              <p className="mt-1 text-2xl font-black text-text-light">
+              <p className="mt-1 text-2xl font-black text-text-light font-mono tabular-nums">
                 {stats.totalCampaigns}
               </p>
             </div>
-            <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
+            <div className="rounded-lg bg-emerald-500/10 p-3 text-emerald-400">
               <Mail className="h-5 w-5" />
             </div>
           </div>
 
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+          <div className="rounded-xl bg-card p-5 border border-border flex items-center justify-between shadow-xs">
             <div>
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Correos Enviados
               </p>
-              <p className="mt-1 text-2xl font-black text-emerald-400">
+              <p className="mt-1 text-2xl font-black text-emerald-400 font-mono tabular-nums">
                 {stats.totalSent}
               </p>
               {stats.totalFailed > 0 && (
-                <p className="text-[10px] font-bold text-red-400 mt-0.5">
+                <p className="text-[10px] font-bold text-red-400 mt-0.5 font-mono tabular-nums">
                   {stats.totalFailed} fallidos
                 </p>
               )}
             </div>
-            <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
+            <div className="rounded-lg bg-blue-500/10 p-3 text-blue-400">
               <Send className="h-5 w-5" />
             </div>
           </div>
 
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+          <div className="rounded-xl bg-card p-5 border border-border flex items-center justify-between shadow-xs">
             <div>
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Efectividad
               </p>
-              <p className="mt-1 text-2xl font-black text-purple-400">
+              <p className="mt-1 text-2xl font-black text-purple-400 font-mono tabular-nums">
                 {stats.successRate}%
               </p>
             </div>
-            <div className="rounded-xl bg-purple-500/10 p-3 text-purple-400">
+            <div className="rounded-lg bg-purple-500/10 p-3 text-purple-400">
               <TrendingUp className="h-5 w-5" />
             </div>
           </div>
 
-          <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between">
+          <div className="rounded-xl bg-card p-5 border border-border flex items-center justify-between shadow-xs">
             <div>
               <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
                 Clientes Alcanzados
               </p>
-              <p className="mt-1 text-2xl font-black text-amber-400">
+              <p className="mt-1 text-2xl font-black text-amber-400 font-mono tabular-nums">
                 {stats.uniqueCustomersReached}
               </p>
             </div>
-            <div className="rounded-xl bg-amber-500/10 p-3 text-amber-400">
+            <div className="rounded-lg bg-amber-500/10 p-3 text-amber-400">
               <Users className="h-5 w-5" />
             </div>
           </div>

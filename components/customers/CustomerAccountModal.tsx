@@ -188,22 +188,22 @@ export function CustomerAccountModal({
             <div className="space-y-4">
               {/* Tarjeta de Saldo Deudor y Acciones */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="bg-dark/50 border border-border p-4 rounded-2xl flex flex-col justify-between">
+                <div className="bg-secondary border border-border p-4 rounded-lg flex flex-col justify-between">
                   <span className="text-[10px] font-black text-text-light/50 uppercase tracking-widest">
                     Saldo Deudor Total
                   </span>
                   <span
-                    className={`text-2xl font-black mt-1 ${totalDebt > 0 ? "text-amber-400" : "text-emerald-400"}`}
+                    className={`text-2xl font-black font-mono tabular-nums mt-1 ${totalDebt > 0 ? "text-amber-400" : "text-emerald-400"}`}
                   >
                     ${totalDebt.toFixed(2)}
                   </span>
                 </div>
 
-                <div className="bg-dark/50 border border-border p-4 rounded-2xl flex flex-col justify-between">
+                <div className="bg-secondary border border-border p-4 rounded-lg flex flex-col justify-between">
                   <span className="text-[10px] font-black text-text-light/50 uppercase tracking-widest">
                     Notas Pendientes
                   </span>
-                  <span className="text-2xl font-black text-text-light mt-1">
+                  <span className="text-2xl font-black text-text-light font-mono tabular-nums mt-1">
                     {pendingNotes.length}
                   </span>
                 </div>
@@ -213,14 +213,14 @@ export function CustomerAccountModal({
                     type="button"
                     onClick={() => setIsAbonoOpen(true)}
                     disabled={totalDebt <= 0 || isLoading}
-                    className="w-full bg-amber-500 hover:bg-amber-400 text-black py-2.5 px-3 rounded-xl font-black text-xs uppercase tracking-wider shadow-md transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-1.5"
+                    className="w-full bg-amber-500 hover:bg-amber-400 text-background py-2.5 px-3 rounded-lg font-black text-xs uppercase tracking-wider shadow-md transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <DollarSign className="h-4 w-4" /> Registrar Abono
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveTab("ticket")}
-                    className="w-full bg-white/5 border border-border hover:bg-white/10 text-text-light py-2 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    className="w-full bg-secondary border border-border hover:bg-card-light text-text-light py-2 px-3 rounded-lg font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <Printer className="h-4 w-4" /> Imprimir Ticket
                   </button>
@@ -239,7 +239,7 @@ export function CustomerAccountModal({
                     Cargando notas pendientes...
                   </div>
                 ) : pendingNotes.length === 0 ? (
-                  <div className="py-8 text-center bg-dark/30 rounded-2xl border border-border text-xs text-text-light/40">
+                  <div className="py-8 text-center bg-secondary/50 rounded-xl border border-border text-xs text-text-light/40">
                     Este cliente está al corriente. No tiene notas pendientes.
                   </div>
                 ) : (

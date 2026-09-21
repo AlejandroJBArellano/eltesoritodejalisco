@@ -79,9 +79,9 @@ export function CustomerQRModal({
         {/* Contenedor imprimible y visual */}
         <div
           ref={printableAreaRef}
-          className="printable-qr-card rounded-2xl border border-border bg-white text-black p-6 flex flex-col items-center text-center shadow-inner"
+          className="printable-qr-card rounded-xl border border-border bg-white text-black p-6 flex flex-col items-center text-center shadow-inner"
         >
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+          <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
             <QrCode className="h-6 w-6" />
           </div>
 
@@ -93,13 +93,13 @@ export function CustomerQRModal({
           </p>
 
           {/* Imagen del QR */}
-          <div className="mt-4 p-3 bg-white rounded-xl border border-zinc-200 shadow-sm inline-block">
+          <div className="mt-4 p-3 bg-white rounded-lg border border-zinc-200 shadow-xs inline-block">
             <img
               src={qrImageUrl}
               alt="Código QR de Registro"
               width={220}
               height={220}
-              className="size-52 rounded-lg"
+              className="size-52 rounded-md"
               data-testid="qr-registration-img"
             />
           </div>
@@ -123,13 +123,13 @@ export function CustomerQRModal({
         {/* Acciones del Modal */}
         <div className="space-y-3">
           {/* Enlace directo y botón de copiar */}
-          <div className="flex items-center gap-2 rounded-xl bg-dark/40 border border-border p-2">
-            <span className="text-xs font-mono text-text-light/70 truncate flex-1 px-2 select-all">
+          <div className="flex items-center gap-2 rounded-lg bg-secondary border border-border p-2">
+            <span className="text-xs font-mono text-text-light/70 truncate flex-1 px-2 select-all font-mono">
               {registrationUrl}
             </span>
             <button
               onClick={handleCopyLink}
-              className="rounded-lg bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs font-bold text-text-light transition flex items-center gap-1.5 cursor-pointer"
+              className="rounded-md bg-secondary hover:bg-card-light px-3 py-1.5 text-xs font-bold text-text-light transition flex items-center gap-1.5 cursor-pointer border border-border"
             >
               {copied ? (
                 <>
@@ -150,7 +150,7 @@ export function CustomerQRModal({
             <button
               onClick={handleDownloadQR}
               disabled={isDownloading}
-              className="rounded-xl border border-border bg-card hover:bg-white/5 px-4 py-2.5 text-xs font-bold text-text-light transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="rounded-lg border border-border bg-secondary hover:bg-card-light px-4 py-2.5 text-xs font-bold text-text-light transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <Download className="h-4 w-4 text-emerald-400" />
               <span>{isDownloading ? "Descargando..." : "Descargar PNG"}</span>
@@ -158,7 +158,7 @@ export function CustomerQRModal({
 
             <button
               onClick={handlePrint}
-              className="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2.5 text-xs font-black uppercase tracking-wider transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20"
+              className="rounded-lg bg-emerald-500 hover:bg-emerald-400 text-background px-4 py-2.5 text-xs font-black uppercase tracking-wider transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20"
             >
               <Printer className="h-4 w-4" />
               <span>Imprimir</span>

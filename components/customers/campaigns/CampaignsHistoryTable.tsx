@@ -127,7 +127,7 @@ export function CampaignsHistoryTable({
   };
 
   return (
-    <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+    <section className="rounded-xl bg-card p-6 shadow-xs border border-border space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
@@ -136,7 +136,7 @@ export function CampaignsHistoryTable({
 
         <div className="flex items-center gap-2.5 flex-wrap">
           {/* Status filter chips */}
-          <div className="flex items-center gap-1.5 bg-dark/40 p-1 rounded-xl border border-border">
+          <div className="flex items-center gap-1.5 bg-secondary p-1 rounded-lg border border-border">
             {[
               { label: "Todas", value: "all" },
               { label: "Enviadas", value: "SENT" },
@@ -149,9 +149,9 @@ export function CampaignsHistoryTable({
                   setStatusFilter(f.value);
                   setCurrentPage(1);
                 }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                   statusFilter === f.value
-                    ? "bg-white/10 text-white shadow-sm"
+                    ? "bg-card text-text-light shadow-xs border border-border"
                     : "text-text-light/50 hover:text-text-light"
                 }`}
               >
