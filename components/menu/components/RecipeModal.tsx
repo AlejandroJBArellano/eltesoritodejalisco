@@ -53,7 +53,7 @@ export function RecipeModal({
               setSelectedRecipeMenuItemId(val);
               if (val) fetchRecipes(val);
             }}
-            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-bold"
+            className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-bold cursor-pointer"
           >
             <option value="">-- Seleccionar Producto --</option>
             {items.map((i) => (
@@ -68,7 +68,7 @@ export function RecipeModal({
           <>
             <form
               onSubmit={onSubmit}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-secondary/50 p-4 rounded-xl border border-border"
             >
               <div className="sm:col-span-2">
                 <div className="flex justify-between items-center mb-1">
@@ -93,7 +93,7 @@ export function RecipeModal({
                       ingredientId: e.target.value,
                     })
                   }
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs text-text-light outline-none focus:border-primary font-bold"
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-xs text-text-light outline-none focus:border-primary font-bold cursor-pointer"
                 >
                   <option value="">-- Seleccionar Ingrediente --</option>
                   {ingredients.map((ing) => (
@@ -124,13 +124,13 @@ export function RecipeModal({
                         quantityRequired: e.target.value,
                       })
                     }
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs text-text-light outline-none focus:border-primary"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-xs text-text-light outline-none focus:border-primary font-mono tabular-nums"
                     placeholder="1"
                   />
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="rounded-xl bg-purple-500 px-3 py-2 text-xs font-bold text-white hover:bg-purple-600 shrink-0"
+                    className="rounded-lg bg-purple-500 px-3 py-2 text-xs font-bold text-white hover:bg-purple-600 shrink-0 cursor-pointer shadow-sm"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
@@ -151,22 +151,22 @@ export function RecipeModal({
                 {recipeItems.map((rec) => (
                   <div
                     key={rec.id}
-                    className="flex items-center justify-between bg-dark/40 p-3 rounded-xl border border-border text-xs"
+                    className="flex items-center justify-between bg-secondary p-3 rounded-lg border border-border text-xs"
                   >
                     <span className="font-bold text-text-light">
                       {rec.ingredientName}
                     </span>
                     <div className="flex items-center gap-3">
-                      <span className="text-text-light/60 font-mono font-bold">
+                      <span className="text-text-light/60 font-mono tabular-nums font-bold">
                         {rec.quantityRequired} unidad(es)
                       </span>
                       <button
                         type="button"
                         onClick={() => onDeleteRecipe(rec.id)}
-                        className={`text-xs font-black transition-all p-1 rounded ${
+                        className={`text-xs font-black transition-all p-1.5 rounded-lg cursor-pointer ${
                           deleteArmedRecipeId === rec.id
                             ? "text-red-300 bg-red-500/30 px-2"
-                            : "text-red-400 hover:text-red-300"
+                            : "text-red-400 hover:text-red-300 hover:bg-red-500/10"
                         }`}
                         title={
                           deleteArmedRecipeId === rec.id

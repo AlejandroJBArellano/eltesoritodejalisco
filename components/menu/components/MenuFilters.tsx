@@ -60,7 +60,7 @@ export function MenuFilters() {
 
   return (
     <div
-      className={`grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}
+      className={`grid grid-cols-1 sm:grid-cols-3 gap-3 bg-secondary/50 p-4 rounded-xl border border-border ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}
     >
       <form
         onSubmit={(e) => {
@@ -85,7 +85,7 @@ export function MenuFilters() {
         <select
           value={categoryFilter}
           onChange={(e) => updateSearchParam({ category: e.target.value })}
-          className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary cursor-pointer transition-colors duration-200"
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary cursor-pointer transition-colors duration-200"
         >
           <option value="all">Todas las Categorías</option>
           {categories.map((cat) => (
@@ -109,7 +109,7 @@ export function MenuFilters() {
                 "all" | "available" | "unavailable",
             })
           }
-          className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary cursor-pointer transition-colors duration-200"
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary cursor-pointer transition-colors duration-200"
         >
           <option value="all">Todos los Estados</option>
           <option value="available">Disponibles</option>

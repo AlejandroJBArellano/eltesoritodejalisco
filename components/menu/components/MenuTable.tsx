@@ -75,9 +75,9 @@ export function MenuTable({
     <div
       className={`space-y-4 ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}
     >
-      <div className="overflow-x-auto rounded-xl border border-border">
+      <div className="overflow-x-auto rounded-xl border border-border bg-card">
         <table className="w-full text-left text-sm">
-          <thead className="bg-dark/40 text-xs uppercase tracking-wider text-text-light/60 border-b border-border">
+          <thead className="bg-secondary text-xs uppercase tracking-wider text-text-light/60 border-b border-border">
             <tr>
               <th className="py-3 px-4 font-bold">Imagen</th>
               <TableHeaderSortCell
@@ -113,7 +113,7 @@ export function MenuTable({
           </thead>
           <tbody className="divide-y divide-border">
             {paginatedItems.map((item) => (
-              <tr key={item.id} className="hover:bg-white/2 transition-colors">
+              <tr key={item.id} className="hover:bg-secondary/40 transition-colors">
                 <td className="py-3 px-4">
                   {item.imageUrl ? (
                     <Image
@@ -121,10 +121,10 @@ export function MenuTable({
                       alt={item.name}
                       width={40}
                       height={40}
-                      className="h-10 w-10 rounded-xl object-cover border border-border"
+                      className="h-10 w-10 rounded-lg object-cover border border-border"
                     />
                   ) : (
-                    <div className="h-10 w-10 rounded-xl bg-dark/40 border border-border flex items-center justify-center text-text-light/30">
+                    <div className="h-10 w-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-text-light/30">
                       <ImageIcon className="h-5 w-5" />
                     </div>
                   )}
@@ -138,16 +138,16 @@ export function MenuTable({
                   )}
                 </td>
                 <td className="py-3 px-4">
-                  <span className="rounded-lg bg-white/5 border border-border px-2.5 py-1 text-xs font-bold text-text-light/80">
+                  <span className="rounded-md bg-secondary border border-border px-2.5 py-1 text-xs font-bold text-text-light/80">
                     {item.category || "Sin categoría"}
                   </span>
                 </td>
-                <td className="py-3 px-4 font-black text-primary">
+                <td className="py-3 px-4 font-black font-mono tabular-nums text-primary">
                   ${Number(item.price).toFixed(2)}
                 </td>
                 <td className="py-3 px-4">
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                    className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 text-xs font-bold ${
                       item.isAvailable
                         ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                         : "bg-red-500/10 text-red-400 border border-red-500/20"
@@ -170,21 +170,21 @@ export function MenuTable({
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => onOpenRecipe(item.id)}
-                      className="rounded-lg bg-purple-500/10 border border-purple-500/20 p-2 text-purple-400 hover:bg-purple-500/20 transition-colors"
+                      className="rounded-lg bg-purple-500/10 border border-purple-500/20 p-2 text-purple-400 hover:bg-purple-500/20 transition-colors cursor-pointer"
                       title="Gestionar Receta"
                     >
                       <BookOpen className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => openEditProductModal(item)}
-                      className="rounded-lg bg-white/5 border border-border p-2 text-text-light/80 hover:text-white hover:bg-white/10 transition-colors"
+                      className="rounded-lg bg-secondary border border-border p-2 text-text-light/80 hover:text-white hover:bg-border/60 transition-colors cursor-pointer"
                       title="Editar Producto"
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => onDelete(item.id)}
-                      className={`rounded-lg border p-2 transition-all text-xs font-black ${
+                      className={`rounded-lg border p-2 transition-all text-xs font-black cursor-pointer ${
                         deleteArmedItemId === item.id
                           ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
                           : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"

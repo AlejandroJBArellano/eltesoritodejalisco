@@ -12,7 +12,7 @@ export function CategoriesPanel() {
   } = useMenuCategories();
 
   return (
-    <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+    <section className="rounded-xl bg-card p-6 shadow-sm border border-border space-y-4">
       <div className="flex items-center justify-between border-b border-border pb-4">
         <h2 className="text-base font-black text-text-light tracking-tight uppercase flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-amber-400" />
@@ -34,10 +34,10 @@ export function CategoriesPanel() {
           .map((cat, index, arr) => (
             <div
               key={cat.id}
-              className="flex items-center justify-between bg-dark/40 border border-border rounded-xl px-4 py-3"
+              className="flex items-center justify-between bg-secondary border border-border rounded-xl px-4 py-3"
             >
               <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black text-text-light/30 tabular-nums w-5 text-right">
+                <span className="text-[10px] font-black text-text-light/30 font-mono tabular-nums w-5 text-right">
                   {index + 1}
                 </span>
                 <div>
@@ -57,7 +57,7 @@ export function CategoriesPanel() {
                 <button
                   onClick={() => onMoveOrder(index, "up")}
                   disabled={index === 0 || isSubmitting}
-                  className="rounded-lg p-1.5 text-text-light/40 hover:text-text-light hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 cursor-pointer"
+                  className="rounded-lg p-1.5 text-text-light/40 hover:text-text-light hover:bg-border/60 disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 cursor-pointer"
                   title="Mover arriba"
                 >
                   <ArrowUp className="h-3.5 w-3.5" />
@@ -65,7 +65,7 @@ export function CategoriesPanel() {
                 <button
                   onClick={() => onMoveOrder(index, "down")}
                   disabled={index === arr.length - 1 || isSubmitting}
-                  className="rounded-lg p-1.5 text-text-light/40 hover:text-text-light hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 cursor-pointer"
+                  className="rounded-lg p-1.5 text-text-light/40 hover:text-text-light hover:bg-border/60 disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 cursor-pointer"
                   title="Mover abajo"
                 >
                   <ArrowDown className="h-3.5 w-3.5" />
@@ -73,7 +73,7 @@ export function CategoriesPanel() {
                 {/* Edit */}
                 <button
                   onClick={() => openCategoryModal(cat)}
-                  className="rounded-lg p-1.5 text-text-light/60 hover:text-text-light hover:bg-white/10 transition-all duration-150 active:scale-95 cursor-pointer"
+                  className="rounded-lg p-1.5 text-text-light/60 hover:text-text-light hover:bg-border/60 transition-all duration-150 active:scale-95 cursor-pointer"
                   title="Editar"
                 >
                   <Pencil className="h-3.5 w-3.5" />
