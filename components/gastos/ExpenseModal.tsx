@@ -128,7 +128,7 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
                   onChange={(e) => setCategoryId(e.target.value)}
                   required
                   aria-label="Categoría"
-                  className="w-full rounded-lg border border-border bg-secondary pl-9 pr-3 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
+                  className="w-full rounded-lg border border-border bg-dark/40 pl-9 pr-3 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
                 >
                   <option value="" disabled className="bg-card">
                     Selecciona un rubro...
@@ -163,7 +163,7 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
                 placeholder="Ej. 1500.00"
                 required
                 aria-label="Monto"
-                className="w-full rounded-lg border border-border bg-secondary pl-9 pr-4 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30 font-mono tabular-nums"
+                className="w-full rounded-lg border border-border bg-dark/40 pl-9 pr-4 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30 font-mono tabular-nums"
               />
             </div>
           </div>
@@ -186,7 +186,7 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
                 placeholder="Ej. Compra de insumos a proveedor"
                 required
                 aria-label="Descripción"
-                className="w-full rounded-lg border border-border bg-secondary pl-9 pr-4 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
+                className="w-full rounded-lg border border-border bg-dark/40 pl-9 pr-4 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
               />
             </div>
           </div>
@@ -207,7 +207,7 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
                 onChange={(e) => setDate(e.target.value)}
                 required
                 aria-label="Fecha"
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors scheme-dark"
+                className="w-full rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs text-text-light outline-none focus:border-primary transition-colors scheme-dark"
               />
             </div>
             <div>
@@ -223,7 +223,7 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
                     onChange={(e) => setHasInvoice(e.target.checked)}
                     aria-label="¿Facturado?"
                   />
-                  <div className="peer h-6 w-11 rounded-full bg-secondary border border-border after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-border after:bg-text-light after:transition-all after:content-[''] peer-checked:bg-blue-500 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
+                  <div className="peer h-6 w-11 rounded-full bg-dark/40 border border-border after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-border after:bg-text-light after:transition-all after:content-[''] peer-checked:bg-blue-500 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
                   <span className="ml-2.5 text-xs font-black uppercase text-text-light/70">
                     {hasInvoice ? "Sí" : "No"}
                   </span>
@@ -237,7 +237,7 @@ export function ExpenseModal(props: ExpenseModalProps = {}) {
             <button
               type="button"
               onClick={onClose}
-              className="w-full bg-secondary text-text-light/60 py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider active:scale-95 border border-border"
+              className="w-full bg-dark/40 text-text-light/60 py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider active:scale-95 border border-border"
             >
               Cancelar
             </button>

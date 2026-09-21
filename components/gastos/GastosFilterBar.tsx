@@ -39,7 +39,7 @@ export function GastosFilterBar(props: GastosFilterBarProps = {}) {
   const onTypeFilterChange =
     props.onTypeFilterChange ?? context?.handleTypeFilterChange ?? (() => {});
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-secondary/60 p-4 rounded-lg border border-border">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-dark/40 p-4 rounded-lg border border-border">
       {/* Buscador por texto */}
       <div>
         <label

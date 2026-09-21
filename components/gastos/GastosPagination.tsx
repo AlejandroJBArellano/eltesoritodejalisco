@@ -33,7 +33,7 @@ export function GastosPagination(props: GastosPaginationProps = {}) {
           value={pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
           aria-label="Filas por página"
-          className="bg-secondary border border-border rounded-lg px-2 py-1 text-xs text-text-light outline-none"
+          className="bg-dark/40 border border-border rounded-lg px-2 py-1 text-xs text-text-light outline-none"
         >
           <option value={10}>10</option>
           <option value={25}>25</option>
@@ -52,7 +52,7 @@ export function GastosPagination(props: GastosPaginationProps = {}) {
             type="button"
             onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
             disabled={currentPage === 1}
-            className="p-1.5 rounded-lg bg-secondary hover:bg-card-light disabled:opacity-30 disabled:hover:bg-secondary transition-all active:scale-95 border border-border"
+            className="p-1.5 rounded-lg bg-dark/40 hover:bg-card-light disabled:opacity-30 disabled:hover:bg-dark/40 transition-all active:scale-95 border border-border"
             title="Página anterior"
             aria-label="Página anterior"
           >
@@ -63,7 +63,7 @@ export function GastosPagination(props: GastosPaginationProps = {}) {
             type="button"
             onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
             disabled={currentPage === totalPages}
-            className="p-1.5 rounded-lg bg-secondary hover:bg-card-light disabled:opacity-30 disabled:hover:bg-secondary transition-all active:scale-95 border border-border"
+            className="p-1.5 rounded-lg bg-dark/40 hover:bg-card-light disabled:opacity-30 disabled:hover:bg-dark/40 transition-all active:scale-95 border border-border"
             title="Página siguiente"
             aria-label="Página siguiente"
           >

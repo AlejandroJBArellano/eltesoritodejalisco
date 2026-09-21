@@ -40,7 +40,7 @@ export function GastosCategoriesGrid(props: GastosCategoriesGridProps = {}) {
         {categories.map((cat) => (
           <div
             key={cat.id}
-            className="flex items-center justify-between p-3.5 rounded-lg bg-secondary border border-border hover:border-border/80 transition-colors"
+            className="flex items-center justify-between p-3.5 rounded-lg bg-dark/40 border border-border hover:border-border/80 transition-colors"
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <span

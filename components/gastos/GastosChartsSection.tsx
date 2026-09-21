@@ -112,7 +112,7 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
 
           {/* Leyendas con totales */}
           <div className="flex flex-wrap items-center gap-4 text-xs font-mono tabular-nums">
-            <div className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-lg border border-border">
+            <div className="flex items-center gap-2 bg-dark/40 px-3 py-1.5 rounded-lg border border-border">
               <span className="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
               <div>
                 <span className="text-text-light/40 font-bold uppercase text-[9px] block">
@@ -124,7 +124,7 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-lg border border-border">
+            <div className="flex items-center gap-2 bg-dark/40 px-3 py-1.5 rounded-lg border border-border">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
               <div>
                 <span className="text-text-light/40 font-bold uppercase text-[9px] block">
@@ -351,7 +351,7 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
                     </div>
 
                     {/* Progress track */}
-                    <div className="h-2 w-full bg-secondary border border-border rounded-full overflow-hidden p-0.5">
+                    <div className="h-2 w-full bg-dark/40 border border-border rounded-full overflow-hidden p-0.5">
                       <div
                         className="h-full rounded-full transition-all duration-500 ease-out"
                         style={{

@@ -130,7 +130,7 @@ export function CategoryModal(props: CategoryModalProps = {}) {
               placeholder="Ej. Publicidad, Gasolina, Mantenimiento"
               required
               aria-label="Nombre de la Categoría"
-              className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
+              className="w-full rounded-lg border border-border bg-dark/40 px-3.5 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
             />
           </div>
 
@@ -142,7 +142,7 @@ export function CategoryModal(props: CategoryModalProps = {}) {
             >
               Color Distintivo
             </label>
-            <div className="flex items-center gap-3 bg-secondary p-2 rounded-lg border border-border">
+            <div className="flex items-center gap-3 bg-dark/40 p-2 rounded-lg border border-border">
               <input
                 id="category-color-input"
                 type="color"
@@ -169,7 +169,7 @@ export function CategoryModal(props: CategoryModalProps = {}) {
                 className={`py-2.5 px-3 rounded-lg border font-black text-xs uppercase tracking-wider transition-all active:scale-95 ${
                   tipoGasto === "variable"
                     ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
-                    : "bg-secondary border-border text-text-light/50 hover:text-text-light"
+                    : "bg-dark/40 border-border text-text-light/50 hover:text-text-light"
                 }`}
               >
                 Variable
@@ -180,7 +180,7 @@ export function CategoryModal(props: CategoryModalProps = {}) {
                 className={`py-2.5 px-3 rounded-lg border font-black text-xs uppercase tracking-wider transition-all active:scale-95 ${
                   tipoGasto === "fijo"
                     ? "bg-amber-500/20 border-amber-500 text-amber-400"
-                    : "bg-secondary border-border text-text-light/50 hover:text-text-light"
+                    : "bg-dark/40 border-border text-text-light/50 hover:text-text-light"
                 }`}
               >
                 Fijo
@@ -198,7 +198,7 @@ export function CategoryModal(props: CategoryModalProps = {}) {
             <button
               type="button"
               onClick={onClose}
-              className="w-full bg-secondary text-text-light/60 py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider active:scale-95 border border-border"
+              className="w-full bg-dark/40 text-text-light/60 py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider active:scale-95 border border-border"
             >
               Cancelar
             </button>

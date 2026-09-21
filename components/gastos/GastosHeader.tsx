@@ -35,7 +35,7 @@ export function GastosHeader(props: GastosHeaderProps = {}) {
           <button
             type="button"
             onClick={onOpenCategoryModal}
-            className="rounded-lg bg-secondary border border-border px-4 py-2 text-xs font-bold text-text-light hover:bg-card-light transition-all uppercase tracking-wider flex items-center gap-1.5 active:scale-95"
+            className="rounded-lg bg-dark/40 border border-border px-4 py-2 text-xs font-bold text-text-light hover:bg-card-light transition-all uppercase tracking-wider flex items-center gap-1.5 active:scale-95"
           >
             <Plus className="h-4 w-4 text-primary" />
             Nueva Categoría
