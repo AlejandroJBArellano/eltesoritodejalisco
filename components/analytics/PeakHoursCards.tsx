@@ -25,26 +25,26 @@ export function PeakHoursCards({ summary, mode = "sum" }: PeakHoursCardsProps) {
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
     >
       {/* 1. Hora Pico de Ventas */}
-      <div className="relative overflow-hidden rounded-2xl bg-card border border-amber-500/20 p-5 shadow-sm transition-all hover:border-amber-500/40">
+      <div className="relative overflow-hidden rounded-xl bg-card border border-amber-500/20 p-5 shadow-sm transition-all hover:border-amber-500/40">
         <div className="flex items-center justify-between gap-3 mb-3">
           <span className="text-xs font-black uppercase tracking-wider text-text-light/60">
             {isAvg ? "Pico Ventas (Prom.)" : "Pico de Facturación"}
           </span>
-          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
+          <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
             <Zap className="h-4 w-4" />
           </div>
         </div>
         {peakSales ? (
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-white">
+              <span className="text-2xl font-black text-text-light font-mono tabular-nums">
                 {peakSales.label}
               </span>
-              <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+              <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 font-mono tabular-nums">
                 {peakSales.percentage}% del total
               </span>
             </div>
-            <p className="mt-1 text-sm font-semibold text-text-light/70">
+            <p className="mt-1 text-sm font-semibold text-text-light/70 font-mono tabular-nums">
               $
               {peakSales.amount.toLocaleString("es-MX", {
                 minimumFractionDigits: 2,
@@ -60,26 +60,26 @@ export function PeakHoursCards({ summary, mode = "sum" }: PeakHoursCardsProps) {
       </div>
 
       {/* 2. Hora Pico de Volumen */}
-      <div className="relative overflow-hidden rounded-2xl bg-card border border-orange-500/20 p-5 shadow-sm transition-all hover:border-orange-500/40">
+      <div className="relative overflow-hidden rounded-xl bg-card border border-orange-500/20 p-5 shadow-sm transition-all hover:border-orange-500/40">
         <div className="flex items-center justify-between gap-3 mb-3">
           <span className="text-xs font-black uppercase tracking-wider text-text-light/60">
             {isAvg ? "Pico Pedidos (Prom.)" : "Pico de Pedidos"}
           </span>
-          <div className="p-2 rounded-xl bg-orange-500/10 text-orange-400">
+          <div className="p-2 rounded-lg bg-orange-500/10 text-orange-400">
             <Flame className="h-4 w-4" />
           </div>
         </div>
         {peakOrders ? (
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-white">
+              <span className="text-2xl font-black text-text-light font-mono tabular-nums">
                 {peakOrders.label}
               </span>
-              <span className="text-xs font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
+              <span className="text-xs font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20 font-mono tabular-nums">
                 {peakOrders.percentage}% pedidos
               </span>
             </div>
-            <p className="mt-1 text-sm font-semibold text-text-light/70">
+            <p className="mt-1 text-sm font-semibold text-text-light/70 font-mono tabular-nums">
               {peakOrders.count} pedidos {isAvg ? " / día" : ""}
             </p>
           </div>
@@ -91,26 +91,26 @@ export function PeakHoursCards({ summary, mode = "sum" }: PeakHoursCardsProps) {
       </div>
 
       {/* 3. Franja Más Activa (Rush Window) */}
-      <div className="relative overflow-hidden rounded-2xl bg-card border border-purple-500/20 p-5 shadow-sm transition-all hover:border-purple-500/40">
+      <div className="relative overflow-hidden rounded-xl bg-card border border-purple-500/20 p-5 shadow-sm transition-all hover:border-purple-500/40">
         <div className="flex items-center justify-between gap-3 mb-3">
           <span className="text-xs font-black uppercase tracking-wider text-text-light/60">
             Ventana Rush (3h)
           </span>
-          <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400">
+          <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400">
             <TrendingUp className="h-4 w-4" />
           </div>
         </div>
         {rush ? (
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-white">
+              <span className="text-2xl font-black text-text-light font-mono tabular-nums">
                 {rush.label}
               </span>
-              <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+              <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20 font-mono tabular-nums">
                 {rush.percentage}% del día
               </span>
             </div>
-            <p className="mt-1 text-sm font-semibold text-text-light/70">
+            <p className="mt-1 text-sm font-semibold text-text-light/70 font-mono tabular-nums">
               $
               {rush.sales.toLocaleString("es-MX", { minimumFractionDigits: 2 })}{" "}
               ({rush.orders} ped.)
@@ -124,19 +124,19 @@ export function PeakHoursCards({ summary, mode = "sum" }: PeakHoursCardsProps) {
       </div>
 
       {/* 4. Mayor Ticket Promedio */}
-      <div className="relative overflow-hidden rounded-2xl bg-card border border-emerald-500/20 p-5 shadow-sm transition-all hover:border-emerald-500/40">
+      <div className="relative overflow-hidden rounded-xl bg-card border border-emerald-500/20 p-5 shadow-sm transition-all hover:border-emerald-500/40">
         <div className="flex items-center justify-between gap-3 mb-3">
           <span className="text-xs font-black uppercase tracking-wider text-text-light/60">
             Mayor Ticket Promedio
           </span>
-          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+          <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
             <Award className="h-4 w-4" />
           </div>
         </div>
         {peakTicket ? (
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-white">
+              <span className="text-2xl font-black text-emerald-400 font-mono tabular-nums">
                 $
                 {peakTicket.averageTicket.toLocaleString("es-MX", {
                   minimumFractionDigits: 2,
@@ -146,7 +146,7 @@ export function PeakHoursCards({ summary, mode = "sum" }: PeakHoursCardsProps) {
                 a las {peakTicket.label}
               </span>
             </div>
-            <p className="mt-1 text-sm font-semibold text-text-light/70">
+            <p className="mt-1 text-sm font-semibold text-text-light/70 font-mono tabular-nums">
               Base de {peakTicket.ordersCount} pedidos
             </p>
           </div>

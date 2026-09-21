@@ -70,13 +70,13 @@ export function WeekdayContextualComparison({
   return (
     <div
       data-testid="weekday-contextual-comparison"
-      className="mt-6 rounded-2xl bg-dark/60 border border-amber-500/30 p-5 sm:p-6 shadow-xl transition-all"
+      className="mt-6 rounded-xl bg-secondary border border-amber-500/30 p-5 sm:p-6 shadow-xl transition-all"
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
         <div className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-          <h3 className="text-sm font-black text-white uppercase tracking-wider">
+          <h3 className="text-sm font-black text-text-light uppercase tracking-wider">
             Comparativa Contextual: {day.name}
           </h3>
           <span className="text-[10px] font-bold text-text-light/50 hidden sm:inline">
@@ -88,7 +88,7 @@ export function WeekdayContextualComparison({
             type="button"
             onClick={onClose}
             aria-label="Cerrar comparativa"
-            className="rounded-lg p-1 text-text-light/60 hover:text-white hover:bg-white/10 transition-all active:scale-95"
+            className="rounded-lg p-1 text-text-light/60 hover:text-text-light hover:bg-border/60 transition-all active:scale-95 cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -108,10 +108,10 @@ export function WeekdayContextualComparison({
                 type="button"
                 key={occ.date}
                 onClick={() => setSelectedDate(occ.date)}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all active:scale-95 ${
+                className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all active:scale-95 cursor-pointer ${
                   isSelected
-                    ? "bg-amber-500 text-black shadow-md shadow-amber-500/20 font-black"
-                    : "bg-dark/40 text-text-light/70 hover:bg-white/10 hover:text-white border border-border"
+                    ? "bg-amber-500 text-background shadow-md shadow-amber-500/20 font-black"
+                    : "bg-card text-text-light/70 hover:bg-border/60 hover:text-text-light border border-border"
                 }`}
               >
                 {occ.label}
@@ -130,12 +130,12 @@ export function WeekdayContextualComparison({
               Ticket Promedio
             </span>
             <div className="flex items-baseline gap-2">
-              <span className="text-xl font-black text-white">
+              <span className="text-xl font-black text-text-light font-mono tabular-nums">
                 {formatCurrency(activeOccurrence.averageTicket)}
               </span>
               {ticketDiff && (
                 <span
-                  className={`inline-flex items-center text-[10px] font-black px-1.5 py-0.5 rounded-full ${
+                  className={`inline-flex items-center text-[10px] font-black px-1.5 py-0.5 rounded-full font-mono tabular-nums ${
                     ticketDiff.isPositive
                       ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
                       : "text-red-400 bg-red-500/10 border border-red-500/20"
@@ -150,12 +150,12 @@ export function WeekdayContextualComparison({
                 </span>
               )}
             </div>
-            <p className="mt-1.5 text-[11px] text-text-light/60 font-semibold">
+            <p className="mt-1.5 text-[11px] text-text-light/60 font-semibold font-mono tabular-nums">
               Habitual: {formatCurrency(baseline.averageTicket)}
             </p>
             {ticketDiff && (
               <p
-                className={`text-[10px] font-bold mt-0.5 ${
+                className={`text-[10px] font-bold mt-0.5 font-mono tabular-nums ${
                   ticketDiff.isPositive ? "text-emerald-400" : "text-red-400"
                 }`}
               >
@@ -170,12 +170,12 @@ export function WeekdayContextualComparison({
               Facturación
             </span>
             <div className="flex items-baseline gap-2">
-              <span className="text-xl font-black text-white">
+              <span className="text-xl font-black text-emerald-400 font-mono tabular-nums">
                 {formatCurrency(activeOccurrence.sales)}
               </span>
               {salesDiff && (
                 <span
-                  className={`inline-flex items-center text-[10px] font-black px-1.5 py-0.5 rounded-full ${
+                  className={`inline-flex items-center text-[10px] font-black px-1.5 py-0.5 rounded-full font-mono tabular-nums ${
                     salesDiff.isPositive
                       ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
                       : "text-red-400 bg-red-500/10 border border-red-500/20"
@@ -190,12 +190,12 @@ export function WeekdayContextualComparison({
                 </span>
               )}
             </div>
-            <p className="mt-1.5 text-[11px] text-text-light/60 font-semibold">
+            <p className="mt-1.5 text-[11px] text-text-light/60 font-semibold font-mono tabular-nums">
               Habitual: {formatCurrency(baseline.averageSales)}
             </p>
             {salesDiff && (
               <p
-                className={`text-[10px] font-bold mt-0.5 ${
+                className={`text-[10px] font-bold mt-0.5 font-mono tabular-nums ${
                   salesDiff.isPositive ? "text-emerald-400" : "text-red-400"
                 }`}
               >
@@ -210,12 +210,12 @@ export function WeekdayContextualComparison({
               Pedidos
             </span>
             <div className="flex items-baseline gap-2">
-              <span className="text-xl font-black text-white">
+              <span className="text-xl font-black text-text-light font-mono tabular-nums">
                 {activeOccurrence.orders} órdenes
               </span>
               {ordersDiff && (
                 <span
-                  className={`inline-flex items-center text-[10px] font-black px-1.5 py-0.5 rounded-full ${
+                  className={`inline-flex items-center text-[10px] font-black px-1.5 py-0.5 rounded-full font-mono tabular-nums ${
                     ordersDiff.isPositive
                       ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
                       : "text-red-400 bg-red-500/10 border border-red-500/20"
@@ -230,12 +230,12 @@ export function WeekdayContextualComparison({
                 </span>
               )}
             </div>
-            <p className="mt-1.5 text-[11px] text-text-light/60 font-semibold">
+            <p className="mt-1.5 text-[11px] text-text-light/60 font-semibold font-mono tabular-nums">
               Habitual: {baseline.averageOrders} órdenes
             </p>
             {ordersDiff && (
               <p
-                className={`text-[10px] font-bold mt-0.5 ${
+                className={`text-[10px] font-bold mt-0.5 font-mono tabular-nums ${
                   ordersDiff.isPositive ? "text-emerald-400" : "text-red-400"
                 }`}
               >
@@ -248,11 +248,11 @@ export function WeekdayContextualComparison({
         <div className="rounded-xl bg-card border border-border p-4 text-center">
           <p className="text-xs font-bold text-text-light/50">
             No hubo órdenes en este día durante el período. Promedio histórico:{" "}
-            <span className="text-white font-black">
+            <span className="text-text-light font-black font-mono tabular-nums">
               {formatCurrency(baseline.averageTicket)}
             </span>{" "}
             de ticket y{" "}
-            <span className="text-white font-black">
+            <span className="text-text-light font-black font-mono tabular-nums">
               {formatCurrency(baseline.averageSales)}
             </span>{" "}
             de ventas ({baseline.averageOrders} órdenes/día).

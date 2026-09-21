@@ -99,9 +99,9 @@ export function PerformanceAnalyticsView() {
         <AnalyticsNav activeTab="performance" />
 
         {/* Selector de Períodos */}
-        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border">
+        <section className="rounded-xl bg-card p-6 shadow-sm border border-border">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-extrabold text-text-light/50 uppercase tracking-widest flex items-center gap-2">
+            <h2 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2">
               <Calendar className="h-4 w-4 text-emerald-400" /> Período de
               Análisis
             </h2>
@@ -113,10 +113,10 @@ export function PerformanceAnalyticsView() {
                 type="button"
                 key={p}
                 onClick={() => handlePeriodChange(p)}
-                className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 ${
+                className={`rounded-lg px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer ${
                   period === p
                     ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20 scale-[1.02]"
-                    : "bg-dark/40 text-text-light/60 hover:bg-white/10 hover:text-white border border-border"
+                    : "bg-secondary text-text-light/60 hover:bg-border/60 hover:text-text-light border border-border"
                 }`}
               >
                 {PERIOD_LABELS[p]}
@@ -138,7 +138,7 @@ export function PerformanceAnalyticsView() {
                   type="date"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="rounded-xl border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-400"
+                  className="rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-400"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -153,14 +153,14 @@ export function PerformanceAnalyticsView() {
                   type="date"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="rounded-xl border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-400"
+                  className="rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-400"
                 />
               </div>
               <button
                 type="button"
                 onClick={handleApplyCustomDates}
                 disabled={!customStartDate}
-                className="rounded-xl bg-success px-5 py-2 text-xs font-black text-white uppercase tracking-wider hover:bg-success/90 disabled:opacity-40"
+                className="rounded-lg bg-emerald-500 px-5 py-2 text-xs font-black text-background uppercase tracking-wider hover:bg-emerald-400 disabled:opacity-40 cursor-pointer"
               >
                 Aplicar Rango
               </button>
@@ -176,7 +176,7 @@ export function PerformanceAnalyticsView() {
             </div>
           </div>
         ) : errorMessage ? (
-          <div className="rounded-2xl bg-card p-8 shadow-sm border border-red-500/20 text-center max-w-md mx-auto">
+          <div className="rounded-xl bg-card p-8 shadow-sm border border-red-500/20 text-center max-w-md mx-auto">
             <AlertTriangle className="mx-auto h-10 w-10 text-red-400 mb-3" />
             <h3 className="text-base font-black text-text-light uppercase mb-2">
               Error al Cargar Rendimiento
@@ -185,7 +185,7 @@ export function PerformanceAnalyticsView() {
             <button
               type="button"
               onClick={() => fetchData(period)}
-              className="rounded-xl bg-emerald-600 px-5 py-2 text-xs font-black text-white uppercase tracking-wider hover:bg-emerald-500 transition-all"
+              className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-black text-white uppercase tracking-wider hover:bg-emerald-500 transition-all cursor-pointer"
             >
               Reintentar
             </button>

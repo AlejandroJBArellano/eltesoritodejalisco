@@ -60,7 +60,7 @@ export function AverageTicketTrendChart({
       : null;
 
   return (
-    <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
+    <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
         <div>
           <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
@@ -73,7 +73,7 @@ export function AverageTicketTrendChart({
           </p>
         </div>
         {periodAverageTicket > 0 && (
-          <div className="inline-flex items-center gap-2 rounded-xl bg-dark/60 border border-emerald-500/30 px-3 py-1.5 text-xs font-bold text-emerald-400 self-start sm:self-auto">
+          <div className="inline-flex items-center gap-2 rounded-lg bg-background border border-emerald-500/30 px-3 py-1.5 text-xs font-mono font-bold text-emerald-400 self-start sm:self-auto tabular-nums">
             <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
             Promedio Período: ${periodAverageTicket.toFixed(2)}
           </div>
@@ -225,20 +225,20 @@ export function AverageTicketTrendChart({
                 left: `${(points[hoveredIndex].x / svgWidth) * 100}%`,
                 top: `${Math.max(10, (points[hoveredIndex].y / svgHeight) * 100 - 28)}%`,
               }}
-              className="absolute pointer-events-none -translate-x-1/2 -translate-y-full z-20 rounded-2xl border border-border bg-dark/95 p-3.5 shadow-2xl backdrop-blur-md whitespace-nowrap"
+              className="absolute pointer-events-none -translate-x-1/2 -translate-y-full z-20 rounded-xl border border-border bg-card/95 p-3.5 shadow-2xl backdrop-blur-md whitespace-nowrap"
             >
               <div className="flex items-center justify-between gap-3 border-b border-border pb-1.5 mb-1.5">
-                <span className="text-xs font-black text-white">
+                <span className="text-xs font-mono font-black text-text-light tabular-nums">
                   ${points[hoveredIndex].item.averageTicket.toFixed(2)}
                 </span>
-                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
                   Ticket Promedio
                 </span>
               </div>
               <p className="text-[11px] text-text-light font-medium">
                 {points[hoveredIndex].item.label}
               </p>
-              <div className="mt-1 flex gap-4 text-[10px] text-text-light/70 font-semibold">
+              <div className="mt-1 flex gap-4 text-[10px] font-mono text-text-light/70 font-semibold tabular-nums">
                 <span>
                   Ventas: $
                   {points[hoveredIndex].item.sales.toLocaleString("es-MX")}

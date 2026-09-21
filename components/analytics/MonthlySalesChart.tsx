@@ -28,7 +28,7 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
   const recordMonth = data.find((d) => d.isRecordMonth);
 
   return (
-    <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border flex flex-col justify-between">
+    <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border flex flex-col justify-between">
       <div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
           <div>
@@ -42,10 +42,10 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
             </p>
           </div>
           {recordMonth && recordMonth.totalSales > 0 && (
-            <div className="inline-flex items-center gap-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 px-3 py-1.5 text-xs font-bold text-purple-400 self-start sm:self-auto">
+            <div className="inline-flex items-center gap-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 px-3 py-1.5 text-xs font-bold text-purple-400 self-start sm:self-auto">
               <Trophy className="h-3.5 w-3.5" />
               Mes Récord:{" "}
-              <span className="text-white font-black">
+              <span className="text-text-light font-black">
                 {recordMonth.monthName}
               </span>
             </div>
@@ -167,14 +167,14 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
                   }%`,
                   top: "12%",
                 }}
-                className="absolute pointer-events-none -translate-x-1/2 z-20 rounded-2xl border border-border bg-dark/95 p-3.5 shadow-2xl backdrop-blur-md whitespace-nowrap"
+                className="absolute pointer-events-none -translate-x-1/2 z-20 rounded-xl border border-border bg-card p-3.5 shadow-2xl backdrop-blur-md whitespace-nowrap"
               >
                 <div className="flex items-center justify-between gap-3 border-b border-border pb-1 mb-2">
-                  <span className="text-xs font-black text-white">
+                  <span className="text-xs font-black text-text-light">
                     {data[hoveredIndex].monthName}
                   </span>
                   {data[hoveredIndex].isRecordMonth && (
-                    <span className="text-[10px] font-black uppercase text-purple-300 bg-purple-500/20 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-black uppercase text-purple-300 bg-purple-500/20 px-1.5 py-0.5 rounded-md border border-purple-500/30">
                       Récord 🏆
                     </span>
                   )}

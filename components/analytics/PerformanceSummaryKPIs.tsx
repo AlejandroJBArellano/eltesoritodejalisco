@@ -20,18 +20,18 @@ export function PerformanceSummaryKPIs({ kpis }: PerformanceSummaryKPIsProps) {
       className="grid grid-cols-1 sm:grid-cols-3 gap-4"
     >
       {/* 1. Ticket Promedio */}
-      <div className="relative overflow-hidden rounded-2xl bg-card border border-emerald-500/20 p-5 shadow-sm transition-all hover:border-emerald-500/40">
+      <div className="relative overflow-hidden rounded-xl bg-card border border-emerald-500/20 p-5 shadow-sm transition-all hover:border-emerald-500/40">
         <div className="flex items-center justify-between gap-3 mb-3">
           <span className="text-xs font-black uppercase tracking-wider text-text-light/60">
             Ticket Promedio
           </span>
-          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+          <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
             <DollarSign className="h-4 w-4" />
           </div>
         </div>
         <div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-white">
+            <span className="text-2xl font-black text-text-light font-mono tabular-nums">
               $
               {avgTicket.toLocaleString("es-MX", {
                 minimumFractionDigits: 2,
@@ -39,7 +39,7 @@ export function PerformanceSummaryKPIs({ kpis }: PerformanceSummaryKPIsProps) {
               })}
             </span>
           </div>
-          <p className="mt-1 text-xs font-semibold text-text-light/70">
+          <p className="mt-1 text-xs font-semibold text-text-light/70 font-mono tabular-nums">
             {totalOrders > 0
               ? `${totalOrders} pedidos • Total $${totalSales.toLocaleString("es-MX")}`
               : "Sin pedidos registrados"}
@@ -48,26 +48,26 @@ export function PerformanceSummaryKPIs({ kpis }: PerformanceSummaryKPIsProps) {
       </div>
 
       {/* 2. Mejor Día de la Semana */}
-      <div className="relative overflow-hidden rounded-2xl bg-card border border-amber-500/20 p-5 shadow-sm transition-all hover:border-amber-500/40">
+      <div className="relative overflow-hidden rounded-xl bg-card border border-amber-500/20 p-5 shadow-sm transition-all hover:border-amber-500/40">
         <div className="flex items-center justify-between gap-3 mb-3">
           <span className="text-xs font-black uppercase tracking-wider text-text-light/60">
             Mejor Día de la Semana
           </span>
-          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
+          <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
             <Sparkles className="h-4 w-4" />
           </div>
         </div>
         {bestDay ? (
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-white">
+              <span className="text-2xl font-black text-text-light">
                 {bestDay.name}
               </span>
               <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                 Líder
               </span>
             </div>
-            <p className="mt-1 text-xs font-semibold text-text-light/70">
+            <p className="mt-1 text-xs font-semibold text-text-light/70 font-mono tabular-nums">
               Promedio $
               {bestDay.averageSales.toLocaleString("es-MX", {
                 minimumFractionDigits: 2,
@@ -83,26 +83,26 @@ export function PerformanceSummaryKPIs({ kpis }: PerformanceSummaryKPIsProps) {
       </div>
 
       {/* 3. Mes Récord */}
-      <div className="relative overflow-hidden rounded-2xl bg-card border border-purple-500/20 p-5 shadow-sm transition-all hover:border-purple-500/40">
+      <div className="relative overflow-hidden rounded-xl bg-card border border-purple-500/20 p-5 shadow-sm transition-all hover:border-purple-500/40">
         <div className="flex items-center justify-between gap-3 mb-3">
           <span className="text-xs font-black uppercase tracking-wider text-text-light/60">
             Mes Récord (Último Año)
           </span>
-          <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400">
+          <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400">
             <Trophy className="h-4 w-4" />
           </div>
         </div>
         {recordMonth ? (
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-white">
+              <span className="text-2xl font-black text-text-light">
                 {recordMonth.monthName}
               </span>
               <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
                 Récord
               </span>
             </div>
-            <p className="mt-1 text-xs font-semibold text-text-light/70">
+            <p className="mt-1 text-xs font-semibold text-text-light/70 font-mono tabular-nums">
               Facturación $
               {recordMonth.totalSales.toLocaleString("es-MX", {
                 minimumFractionDigits: 2,

@@ -46,7 +46,7 @@ export function SalesTrendChart({
   const yTicks = [0, maxVal * 0.25, maxVal * 0.5, maxVal * 0.75, maxVal];
 
   return (
-    <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border">
+    <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
         <div>
           <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
@@ -62,7 +62,7 @@ export function SalesTrendChart({
           <button
             type="button"
             onClick={() => onSelectDay(null)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-dark/60 border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition-all active:scale-95 self-start sm:self-auto"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-secondary border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition-all active:scale-95 self-start sm:self-auto cursor-pointer"
           >
             <X className="h-3.5 w-3.5" />
             Limpiar Selección ({selectedDay})
@@ -174,9 +174,9 @@ export function SalesTrendChart({
                 }%`,
                 top: "15%",
               }}
-              className="absolute pointer-events-none -translate-x-1/2 z-20 rounded-2xl border border-border bg-dark/95 p-3 shadow-2xl backdrop-blur-md whitespace-nowrap"
+              className="absolute pointer-events-none -translate-x-1/2 z-20 rounded-xl border border-border bg-card p-3 shadow-2xl backdrop-blur-md whitespace-nowrap"
             >
-              <p className="text-xs font-black text-white">
+              <p className="text-xs font-black text-text-light font-mono tabular-nums">
                 $
                 {chartData[hoveredIndex].total.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
@@ -196,7 +196,7 @@ export function SalesTrendChart({
 
       {/* Day Drill-Down Panel */}
       {selectedDay && (
-        <div className="mt-6 rounded-2xl bg-dark/40 border border-amber-500/30 p-6">
+        <div className="mt-6 rounded-xl bg-secondary border border-amber-500/30 p-6">
           <h3 className="text-sm font-black text-amber-400 mb-4 uppercase tracking-wider flex items-center gap-2">
             <BarChart3 className="h-4 w-4" /> Top Productos —{" "}
             {new Date(`${selectedDay}T12:00:00-06:00`).toLocaleDateString(

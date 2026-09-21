@@ -32,7 +32,7 @@ export function HourlyBreakdownTable({
     return (
       <div
         data-testid="hourly-table-empty"
-        className="rounded-2xl bg-card border border-border p-8 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest"
+        className="rounded-xl bg-card border border-border p-8 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest"
       >
         No hay registros disponibles para la tabla de horas
       </div>
@@ -42,12 +42,12 @@ export function HourlyBreakdownTable({
   return (
     <div
       data-testid="hourly-breakdown-table"
-      className="rounded-2xl bg-card border border-border p-6 shadow-sm overflow-hidden"
+      className="rounded-xl bg-card border border-border p-6 shadow-sm overflow-hidden"
     >
       {/* Table Header Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-base font-black text-white flex items-center gap-2">
+          <h3 className="text-base font-black text-text-light flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
             Desglose Detallado por Hora
           </h3>
@@ -69,7 +69,7 @@ export function HourlyBreakdownTable({
       {/* Table */}
       <div className="overflow-x-auto -mx-6">
         <table className="w-full text-left text-sm">
-          <thead className="bg-dark/60 text-xs font-black uppercase tracking-wider text-text-light/60 border-y border-border">
+          <thead className="bg-secondary text-xs font-black uppercase tracking-wider text-text-light/60 border-y border-border">
             <tr>
               <th className="py-3 px-6">Rango Horario</th>
               <th className="py-3 px-6 text-right">
@@ -89,7 +89,7 @@ export function HourlyBreakdownTable({
               const isPeak = row.isPeakSales || row.isPeakOrders;
               const rowClass = isPeak
                 ? "bg-amber-500/5 hover:bg-amber-500/10"
-                : "hover:bg-white/2";
+                : "hover:bg-card-light";
 
               return (
                 <tr
@@ -97,14 +97,14 @@ export function HourlyBreakdownTable({
                   data-testid={`hourly-table-row-${row.hour}`}
                   className={`transition-colors ${rowClass}`}
                 >
-                  <td className="py-3.5 px-6 font-bold text-white flex items-center gap-2">
-                    <span className="text-xs text-text-light/60">
+                  <td className="py-3.5 px-6 font-bold text-text-light flex items-center gap-2">
+                    <span className="text-xs text-text-light/60 font-mono tabular-nums">
                       {String(row.hour).padStart(2, "0")}:00
                     </span>
                     <span>{formatHourRangeLabel(row.hour)}</span>
                   </td>
 
-                  <td className="py-3.5 px-6 text-right font-black text-white">
+                  <td className="py-3.5 px-6 text-right font-black text-emerald-400 font-mono tabular-nums">
                     $
                     {row.sales.toLocaleString("es-MX", {
                       minimumFractionDigits: 2,
@@ -113,7 +113,7 @@ export function HourlyBreakdownTable({
 
                   <td className="py-3.5 px-6 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <div className="w-16 bg-white/10 rounded-full h-1.5 overflow-hidden hidden sm:block">
+                      <div className="w-16 bg-secondary rounded-full h-1.5 overflow-hidden hidden sm:block">
                         <div
                           className="bg-amber-400 h-full rounded-full"
                           style={{
@@ -121,17 +121,17 @@ export function HourlyBreakdownTable({
                           }}
                         />
                       </div>
-                      <span className="font-bold text-text-light/80 text-xs w-10">
+                      <span className="font-bold text-text-light/80 text-xs w-10 font-mono tabular-nums">
                         {row.percentageOfSales.toFixed(1)}%
                       </span>
                     </div>
                   </td>
 
-                  <td className="py-3.5 px-6 text-right font-bold text-text-light">
+                  <td className="py-3.5 px-6 text-right font-bold text-text-light font-mono tabular-nums">
                     {row.orders}
                   </td>
 
-                  <td className="py-3.5 px-6 text-right font-semibold text-text-light/90">
+                  <td className="py-3.5 px-6 text-right font-semibold text-text-light/90 font-mono tabular-nums">
                     ${row.averageTicket.toFixed(2)}
                   </td>
 

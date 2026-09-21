@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Calendar, DollarSign, ShoppingBag } from "lucide-react";
+import { Calendar, DollarSign, Users } from "lucide-react";
 import {
   DAYS_OF_WEEK,
   formatHourLabel,
@@ -55,7 +55,7 @@ export function HourlySalesHeatmap({
     return (
       <div
         data-testid="hourly-heatmap-empty"
-        className="rounded-2xl bg-card border border-border p-8 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest"
+        className="rounded-xl bg-card border border-border p-8 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest"
       >
         No hay datos suficientes para generar el mapa de calor semanal
       </div>
@@ -67,12 +67,12 @@ export function HourlySalesHeatmap({
   return (
     <div
       data-testid="hourly-heatmap"
-      className="rounded-2xl bg-card border border-border p-6 shadow-sm"
+      className="rounded-xl bg-card border border-border p-6 shadow-sm"
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-base font-black text-white flex items-center gap-2">
+          <h3 className="text-base font-black text-text-light flex items-center gap-2">
             <Calendar className="h-5 w-5 text-amber-400" />
             Mapa de Calor Semanal (Día vs Hora)
           </h3>
@@ -83,15 +83,15 @@ export function HourlySalesHeatmap({
         </div>
 
         {/* Metric Selector */}
-        <div className="flex items-center bg-dark/60 p-1 rounded-xl border border-border self-start sm:self-auto">
+        <div className="flex items-center bg-secondary p-1 rounded-xl border border-border self-start sm:self-auto">
           <button
             type="button"
             data-testid="heatmap-metric-sales"
             onClick={() => setMetric("sales")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
               metric === "sales"
-                ? "bg-amber-500 text-black shadow-sm"
-                : "text-text-light/60 hover:text-white"
+                ? "bg-amber-500 text-background shadow-sm"
+                : "text-text-light/60 hover:text-text-light"
             }`}
           >
             <DollarSign className="h-3.5 w-3.5" />
@@ -101,14 +101,14 @@ export function HourlySalesHeatmap({
             type="button"
             data-testid="heatmap-metric-orders"
             onClick={() => setMetric("orders")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
               metric === "orders"
-                ? "bg-orange-500 text-white shadow-sm"
-                : "text-text-light/60 hover:text-white"
+                ? "bg-amber-500 text-background shadow-sm"
+                : "text-text-light/60 hover:text-text-light"
             }`}
           >
-            <ShoppingBag className="h-3.5 w-3.5" />
-            Pedidos (#)
+            <Users className="h-3.5 w-3.5" />
+            Pedidos
           </button>
         </div>
       </div>

@@ -44,7 +44,7 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
       : null;
 
   return (
-    <section className="rounded-2xl bg-card p-6 sm:p-8 shadow-sm border border-border flex flex-col justify-between">
+    <section className="rounded-xl bg-card p-6 sm:p-8 shadow-sm border border-border flex flex-col justify-between">
       <div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 border-b border-border pb-4">
           <div>
@@ -59,14 +59,14 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
           </div>
 
           {/* Metric Toggle */}
-          <div className="flex flex-wrap items-center gap-1 bg-dark/60 p-1 rounded-xl border border-border self-start sm:self-auto">
+          <div className="flex flex-wrap items-center gap-1 bg-secondary p-1 rounded-xl border border-border self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setMetric("ticket")}
-              className={`px-2.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${
+              className={`px-2.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 cursor-pointer ${
                 metric === "ticket"
-                  ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/20"
-                  : "text-text-light/60 hover:text-white"
+                  ? "bg-emerald-500 text-background shadow-md shadow-emerald-500/20"
+                  : "text-text-light/60 hover:text-text-light"
               }`}
             >
               Ticket Promedio
@@ -74,10 +74,10 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
             <button
               type="button"
               onClick={() => setMetric("average")}
-              className={`px-2.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${
+              className={`px-2.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 cursor-pointer ${
                 metric === "average"
-                  ? "bg-amber-500 text-black shadow-md shadow-amber-500/20"
-                  : "text-text-light/60 hover:text-white"
+                  ? "bg-amber-500 text-background shadow-md shadow-amber-500/20"
+                  : "text-text-light/60 hover:text-text-light"
               }`}
             >
               Promedio / Día
@@ -85,10 +85,10 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
             <button
               type="button"
               onClick={() => setMetric("total")}
-              className={`px-2.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${
+              className={`px-2.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 cursor-pointer ${
                 metric === "total"
-                  ? "bg-amber-500 text-black shadow-md shadow-amber-500/20"
-                  : "text-text-light/60 hover:text-white"
+                  ? "bg-amber-500 text-background shadow-md shadow-amber-500/20"
+                  : "text-text-light/60 hover:text-text-light"
               }`}
             >
               Total Facturado
@@ -98,10 +98,10 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
 
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           {bestDay && bestDay.totalSales > 0 && (
-            <div className="inline-flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 text-xs font-bold text-amber-400">
+            <div className="inline-flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 text-xs font-bold text-amber-400">
               <Sparkles className="h-3.5 w-3.5" />
               Día más fuerte en ventas:{" "}
-              <span className="text-white font-black">{bestDay.name}</span> ( $
+              <span className="text-text-light font-black">{bestDay.name}</span> ( $
               {bestDay.averageSales.toLocaleString("es-MX", {
                 minimumFractionDigits: 2,
               })}{" "}
@@ -113,7 +113,7 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
             <button
               type="button"
               onClick={() => setSelectedDayIndex(null)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-dark/60 border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition-all active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-secondary border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition-all active:scale-95 cursor-pointer"
             >
               <X className="h-3.5 w-3.5" />
               Limpiar Selección
@@ -250,14 +250,14 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
                   }%`,
                   top: "12%",
                 }}
-                className="absolute pointer-events-none -translate-x-1/2 z-20 rounded-2xl border border-border bg-dark/95 p-3.5 shadow-2xl backdrop-blur-md whitespace-nowrap"
+                className="absolute pointer-events-none -translate-x-1/2 z-20 rounded-xl border border-border bg-card p-3.5 shadow-2xl backdrop-blur-md whitespace-nowrap"
               >
                 <div className="flex items-center justify-between gap-3 border-b border-border pb-1 mb-2">
-                  <span className="text-xs font-black text-white">
+                  <span className="text-xs font-black text-text-light">
                     {data[hoveredIndex].name}
                   </span>
                   {data[hoveredIndex].isBestDay && metric !== "ticket" && (
-                    <span className="text-[10px] font-black uppercase text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-black uppercase text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded-md border border-amber-500/30">
                       Líder Ventas ⚡
                     </span>
                   )}

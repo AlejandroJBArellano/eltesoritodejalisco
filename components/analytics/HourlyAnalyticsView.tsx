@@ -164,7 +164,7 @@ export function HourlyAnalyticsView() {
         <AnalyticsNav activeTab="hourly" />
 
         {/* Controls Bar: Period + View Filters */}
-        <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-6">
+        <section className="rounded-xl bg-card p-6 shadow-sm border border-border space-y-6">
           {/* Periods */}
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -190,10 +190,10 @@ export function HourlyAnalyticsView() {
                   type="button"
                   data-testid={`period-btn-${p}`}
                   onClick={() => handlePeriodChange(p)}
-                  className={`rounded-xl px-4 py-2 text-xs font-black uppercase tracking-wider transition-all active:scale-95 ${
+                  className={`rounded-lg px-4 py-2 text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer ${
                     period === p
-                      ? "bg-amber-500 text-black shadow-md shadow-amber-500/20 scale-[1.02]"
-                      : "bg-dark/40 text-text-light/60 hover:bg-white/10 hover:text-white border border-border"
+                      ? "bg-amber-500 text-background shadow-md shadow-amber-500/20 scale-[1.02]"
+                      : "bg-secondary text-text-light/60 hover:bg-border/60 hover:text-text-light border border-border"
                   }`}
                 >
                   {PERIOD_LABELS[p]}
@@ -211,7 +211,7 @@ export function HourlyAnalyticsView() {
                     type="date"
                     value={customStartDate}
                     onChange={(e) => setCustomStartDate(e.target.value)}
-                    className="rounded-xl border border-border bg-dark/50 px-3 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs text-text-light focus:border-amber-500 focus:outline-none"
                   />
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-text-light">
@@ -221,13 +221,13 @@ export function HourlyAnalyticsView() {
                     type="date"
                     value={customEndDate}
                     onChange={(e) => setCustomEndDate(e.target.value)}
-                    className="rounded-xl border border-border bg-dark/50 px-3 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs text-text-light focus:border-amber-500 focus:outline-none"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleApplyCustomDates}
-                  className="rounded-xl bg-amber-500 px-4 py-1.5 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 active:scale-95"
+                  className="rounded-lg bg-amber-500 px-4 py-1.5 text-xs font-black text-background uppercase tracking-wider hover:bg-amber-400 active:scale-95 cursor-pointer"
                 >
                   Aplicar Rango
                 </button>
@@ -238,15 +238,15 @@ export function HourlyAnalyticsView() {
           {/* Secondary Controls: View Tab, Mode Switch, Active Hours Switch */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-border">
             {/* View Tabs */}
-            <div className="flex items-center bg-dark/60 p-1 rounded-xl border border-border">
+            <div className="flex items-center bg-secondary p-1 rounded-xl border border-border">
               <button
                 type="button"
                 data-testid="tab-btn-bar"
                 onClick={() => setActiveTab("bar")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                   activeTab === "bar"
-                    ? "bg-amber-500 text-black shadow-sm"
-                    : "text-text-light/60 hover:text-white"
+                    ? "bg-amber-500 text-background shadow-sm"
+                    : "text-text-light/60 hover:text-text-light"
                 }`}
               >
                 <BarChart3 className="h-4 w-4" />
@@ -256,10 +256,10 @@ export function HourlyAnalyticsView() {
                 type="button"
                 data-testid="tab-btn-heatmap"
                 onClick={() => setActiveTab("heatmap")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                   activeTab === "heatmap"
-                    ? "bg-amber-500 text-black shadow-sm"
-                    : "text-text-light/60 hover:text-white"
+                    ? "bg-amber-500 text-background shadow-sm"
+                    : "text-text-light/60 hover:text-text-light"
                 }`}
               >
                 <Calendar className="h-4 w-4" />
@@ -271,15 +271,15 @@ export function HourlyAnalyticsView() {
             <div className="flex flex-wrap items-center gap-3">
               {/* Aggregation Mode (only relevant if multiple days) */}
               {isMultiDay && (
-                <div className="flex items-center bg-dark/60 p-1 rounded-xl border border-border">
+                <div className="flex items-center bg-secondary p-1 rounded-xl border border-border">
                   <button
                     type="button"
                     data-testid="mode-btn-sum"
                     onClick={() => setMode("sum")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       mode === "sum"
-                        ? "bg-white/15 text-white"
-                        : "text-text-light/50 hover:text-white"
+                        ? "bg-white/15 text-text-light"
+                        : "text-text-light/50 hover:text-text-light"
                     }`}
                   >
                     Total Acumulado
@@ -288,10 +288,10 @@ export function HourlyAnalyticsView() {
                     type="button"
                     data-testid="mode-btn-average"
                     onClick={() => setMode("average")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       mode === "average"
-                        ? "bg-white/15 text-white"
-                        : "text-text-light/50 hover:text-white"
+                        ? "bg-white/15 text-text-light"
+                        : "text-text-light/50 hover:text-text-light"
                     }`}
                   >
                     Promedio / Día
@@ -304,10 +304,10 @@ export function HourlyAnalyticsView() {
                 type="button"
                 data-testid="toggle-active-hours"
                 onClick={() => setOnlyActiveHours((prev) => !prev)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                   onlyActiveHours
                     ? "bg-amber-500/15 border-amber-500/40 text-amber-300"
-                    : "bg-dark/40 border-border text-text-light/60 hover:text-white"
+                    : "bg-secondary border-border text-text-light/60 hover:text-text-light"
                 }`}
               >
                 <Filter className="h-3.5 w-3.5" />
@@ -319,7 +319,7 @@ export function HourlyAnalyticsView() {
 
         {/* Error message */}
         {errorMessage && (
-          <div className="rounded-2xl bg-red-500/10 border border-red-500/30 p-4 text-xs font-bold text-red-400">
+          <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 text-xs font-bold text-red-400">
             {errorMessage}
           </div>
         )}

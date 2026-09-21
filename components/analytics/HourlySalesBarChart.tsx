@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { DollarSign, Flame, ShoppingBag } from "lucide-react";
+import { DollarSign, Flame, Users } from "lucide-react";
 import type {
   HourlyAggregationMode,
   HourlySalesRow,
@@ -34,12 +34,12 @@ export function HourlyBarChartTooltip({
   return (
     <div
       data-testid="hourly-chart-tooltip"
-      className="rounded-xl border border-border bg-dark/95 p-3.5 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap z-30"
+      className="rounded-xl border border-border bg-card p-3.5 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap z-30"
     >
-      <div className="font-black text-white text-sm mb-2 flex items-center justify-between gap-3 border-b border-border pb-1.5">
+      <div className="font-black text-text-light text-sm mb-2 flex items-center justify-between gap-3 border-b border-border pb-1.5">
         <span>{formatHourRangeLabel(row.hour)}</span>
         {row.isPeakSales && metric === "sales" && (
-          <span className="text-[10px] font-black uppercase text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded border border-amber-500/30">
+          <span className="text-[10px] font-black uppercase text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded-md border border-amber-500/30">
             Pico ⚡
           </span>
         )}
@@ -107,7 +107,7 @@ export function HourlySalesBarChart({
     return (
       <div
         data-testid="hourly-bar-chart-empty"
-        className="rounded-2xl bg-card border border-border p-8 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest"
+        className="rounded-xl bg-card border border-border p-8 text-center text-xs font-bold text-text-light/40 uppercase tracking-widest"
       >
         No hay datos de ventas por hora para este período
       </div>
@@ -132,12 +132,12 @@ export function HourlySalesBarChart({
   return (
     <div
       data-testid="hourly-bar-chart"
-      className="rounded-2xl bg-card border border-border p-6 shadow-sm"
+      className="rounded-xl bg-card border border-border p-6 shadow-sm"
     >
       {/* Header with Title and Metric Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-base font-black text-white flex items-center gap-2">
+          <h3 className="text-base font-black text-text-light flex items-center gap-2">
             <Flame className="h-5 w-5 text-amber-400" />
             Flujo por Hora del Día
           </h3>
@@ -149,15 +149,15 @@ export function HourlySalesBarChart({
         </div>
 
         {/* Metric Selector Toggle */}
-        <div className="flex items-center bg-dark/60 p-1 rounded-xl border border-border self-start sm:self-auto">
+        <div className="flex items-center bg-secondary p-1 rounded-xl border border-border self-start sm:self-auto">
           <button
             type="button"
             data-testid="metric-btn-sales"
             onClick={() => handleMetricChange("sales")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
               metric === "sales"
-                ? "bg-amber-500 text-black shadow-sm"
-                : "text-text-light/60 hover:text-white"
+                ? "bg-amber-500 text-background shadow-sm"
+                : "text-text-light/60 hover:text-text-light"
             }`}
           >
             <DollarSign className="h-3.5 w-3.5" />
@@ -167,14 +167,14 @@ export function HourlySalesBarChart({
             type="button"
             data-testid="metric-btn-orders"
             onClick={() => handleMetricChange("orders")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
               metric === "orders"
-                ? "bg-orange-500 text-white shadow-sm"
-                : "text-text-light/60 hover:text-white"
+                ? "bg-amber-500 text-background shadow-sm"
+                : "text-text-light/60 hover:text-text-light"
             }`}
           >
-            <ShoppingBag className="h-3.5 w-3.5" />
-            Pedidos (#)
+            <Users className="h-3.5 w-3.5" />
+            Pedidos
           </button>
         </div>
       </div>
