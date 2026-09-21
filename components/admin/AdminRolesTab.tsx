@@ -185,7 +185,7 @@ export function AdminRolesTab() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Buscar rol por nombre o descripción..."
-          className="w-full bg-secondary border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-text-light placeholder-text-light/40 focus:outline-none focus:border-primary transition-colors font-medium"
+          className="w-full bg-dark/40 border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-text-light placeholder-text-light/40 focus:outline-none focus:border-primary transition-colors font-medium"
         />
         <svg
           className="w-4 h-4 text-text-light/40 absolute left-3.5 top-3"
@@ -318,7 +318,7 @@ export function AdminRolesTab() {
                 <select
                   value={reassignRoleId}
                   onChange={(e) => setReassignRoleId(e.target.value)}
-                  className="w-full bg-secondary border border-border rounded-lg px-2.5 py-1.5 text-xs text-text-light focus:border-primary"
+                  className="w-full bg-dark/40 border border-border rounded-lg px-2.5 py-1.5 text-xs text-text-light focus:border-primary"
                 >
                   {roles
                     .filter((r) => r.id !== roleToDelete.id)

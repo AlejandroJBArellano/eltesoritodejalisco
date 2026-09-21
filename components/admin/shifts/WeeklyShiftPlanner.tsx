@@ -347,7 +347,7 @@ export function WeeklyShiftPlanner({
           <button
             onClick={handleDuplicatePreviousWeek}
             disabled={isDuplicating || isLoading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary hover:bg-secondary/80 text-xs font-black uppercase tracking-wider text-text-light border border-border/50 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-dark/40 hover:bg-dark/40 text-xs font-black uppercase tracking-wider text-text-light border border-border/50 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
             title="Copiar turnos de la semana anterior"
           >
             {isDuplicating ? (
@@ -362,7 +362,7 @@ export function WeeklyShiftPlanner({
           <button
             onClick={handleExportImage}
             disabled={isExporting || isLoading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary hover:bg-secondary/80 text-xs font-black uppercase tracking-wider text-text-light border border-border/50 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-dark/40 hover:bg-dark/40 text-xs font-black uppercase tracking-wider text-text-light border border-border/50 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
             title="Descargar imagen para imprimir o WhatsApp"
           >
             {isExporting ? (
@@ -416,7 +416,7 @@ export function WeeklyShiftPlanner({
             </p>
             <Link
               href="/admin/users"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-secondary border border-border text-xs font-bold text-primary hover:border-primary/50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-dark/40 border border-border text-xs font-bold text-primary hover:border-primary/50 transition-colors"
             >
               <Plus className="h-3.5 w-3.5" /> Registrar Colaboradores
             </Link>
@@ -459,7 +459,7 @@ export function WeeklyShiftPlanner({
                       {/* Collaborator Name & Role */}
                       <td className="p-3.5 sticky left-0 bg-card z-10 border-r border-border font-bold">
                         <div className="flex items-center gap-2">
-                          <div className="h-7 w-7 rounded-full bg-secondary flex items-center justify-center text-text-light/80 shrink-0">
+                          <div className="h-7 w-7 rounded-full bg-dark/40 flex items-center justify-center text-text-light/80 shrink-0">
                             <User className="h-3.5 w-3.5" />
                           </div>
                           <div>

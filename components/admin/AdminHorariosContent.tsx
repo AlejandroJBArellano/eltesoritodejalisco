@@ -203,7 +203,7 @@ export function AdminHorariosContent({
                             id={`closed-${dayHours.id}`}
                             checked={!dayHours.is_closed}
                             onChange={() => handleToggleClosed(idx)}
-                            className="h-4.5 w-4.5 rounded border-border bg-secondary text-amber-500 focus:ring-amber-500 cursor-pointer"
+                            className="h-4.5 w-4.5 rounded border-border bg-dark/40 text-amber-500 focus:ring-amber-500 cursor-pointer"
                           />
                           <label
                             htmlFor={`closed-${dayHours.id}`}
@@ -239,7 +239,7 @@ export function AdminHorariosContent({
                                   e.target.value,
                                 )
                               }
-                              className="rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-text-light focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed font-mono tabular-nums"
+                              className="rounded-lg border border-border bg-dark/40 px-3 py-2 text-sm text-text-light focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed font-mono tabular-nums"
                             />
                           </div>
 
@@ -258,7 +258,7 @@ export function AdminHorariosContent({
                                   e.target.value,
                                 )
                               }
-                              className="rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-text-light focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed font-mono tabular-nums"
+                              className="rounded-lg border border-border bg-dark/40 px-3 py-2 text-sm text-text-light focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed font-mono tabular-nums"
                             />
                           </div>
                         </div>

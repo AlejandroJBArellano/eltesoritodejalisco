@@ -210,7 +210,7 @@ export function McpConnectCard() {
             Copia esta clave ahora. Por seguridad, no se volverá a mostrar
             completa.
           </p>
-          <div className="flex items-center gap-2 bg-secondary border border-emerald-500/30 rounded-lg p-2.5">
+          <div className="flex items-center gap-2 bg-dark/40 border border-emerald-500/30 rounded-lg p-2.5">
             <code className="font-mono text-xs text-emerald-300 flex-1 break-all font-bold">
               {createdKey}
             </code>
@@ -232,7 +232,7 @@ export function McpConnectCard() {
 
       {/* Guía en 3 Pasos */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="bg-secondary/40 border border-border rounded-xl p-3.5 space-y-1">
+        <div className="bg-dark/40 border border-border rounded-xl p-3.5 space-y-1">
           <div className="text-[10px] font-black uppercase text-primary tracking-wider font-mono">
             Paso 1
           </div>
@@ -244,7 +244,7 @@ export function McpConnectCard() {
           </p>
         </div>
 
-        <div className="bg-secondary/40 border border-border rounded-xl p-3.5 space-y-1">
+        <div className="bg-dark/40 border border-border rounded-xl p-3.5 space-y-1">
           <div className="text-[10px] font-black uppercase text-primary tracking-wider font-mono">
             Paso 2
           </div>
@@ -256,7 +256,7 @@ export function McpConnectCard() {
           </p>
         </div>
 
-        <div className="bg-secondary/40 border border-border rounded-xl p-3.5 space-y-1">
+        <div className="bg-dark/40 border border-border rounded-xl p-3.5 space-y-1">
           <div className="text-[10px] font-black uppercase text-primary tracking-wider font-mono">
             Paso 3
           </div>
@@ -273,7 +273,7 @@ export function McpConnectCard() {
       {/* Snippet de Configuración con Pestañas */}
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1 bg-secondary p-1 rounded-xl border border-border">
+          <div className="flex items-center gap-1 bg-dark/40 p-1 rounded-xl border border-border">
             <button
               type="button"
               onClick={() => setActiveTab("claude")}
@@ -312,7 +312,7 @@ export function McpConnectCard() {
           <button
             type="button"
             onClick={handleCopySnippet}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-secondary hover:bg-card-light border border-border text-xs font-bold text-text-light rounded-xl transition active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-dark/40 hover:bg-card-light border border-border text-xs font-bold text-text-light rounded-xl transition active:scale-95 cursor-pointer"
           >
             {copiedSnippet ? (
               <>
@@ -335,7 +335,7 @@ export function McpConnectCard() {
         </div>
 
         <div className="relative group">
-          <pre className="p-4 bg-secondary border border-border rounded-xl font-mono text-xs text-text-light/80 overflow-x-auto selection:bg-primary/20">
+          <pre className="p-4 bg-dark/40 border border-border rounded-xl font-mono text-xs text-text-light/80 overflow-x-auto selection:bg-primary/20">
             {getActiveSnippet()}
           </pre>
         </div>
@@ -367,7 +367,7 @@ export function McpConnectCard() {
                 <div className="space-y-0.5">
                   <div className="font-bold text-text-light flex items-center gap-2">
                     <span>{k.name}</span>
-                    <code className="text-[11px] font-mono text-text-light/50 bg-secondary px-1.5 py-0.5 rounded border border-border">
+                    <code className="text-[11px] font-mono text-text-light/50 bg-dark/40 px-1.5 py-0.5 rounded border border-border">
                       {k.key_prefix}
                     </code>
                   </div>

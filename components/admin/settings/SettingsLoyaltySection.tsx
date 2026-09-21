@@ -13,7 +13,7 @@ export function SettingsLoyaltySection() {
         <Gift className="h-4 w-4 text-primary" /> Programa de Lealtad (CRM)
       </h3>
 
-      <div className="flex items-center justify-between p-4 rounded-xl bg-secondary border border-border/50">
+      <div className="flex items-center justify-between p-4 rounded-xl bg-dark/40 border border-border/50">
         <div className="space-y-1">
           <span className="text-sm font-bold text-text-light block">
             Activar Programa de Lealtad
@@ -34,7 +34,7 @@ export function SettingsLoyaltySection() {
           type="button"
           onClick={() => setLoyaltyEnabled(!loyaltyEnabled)}
           className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
-            loyaltyEnabled ? "bg-primary" : "bg-secondary"
+            loyaltyEnabled ? "bg-primary" : "bg-dark/40"
           } border border-border`}
         >
           <span
@@ -62,7 +62,7 @@ export function SettingsLoyaltySection() {
                 onChange={(e) =>
                   setLoyaltyRatio(Math.max(1, parseInt(e.target.value) || 1))
                 }
-                className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary transition font-mono tabular-nums"
+                className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary transition font-mono tabular-nums"
               />
             </div>
             <p className="text-[10px] text-text-light/40 mt-1.5">

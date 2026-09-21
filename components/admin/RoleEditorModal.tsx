@@ -146,7 +146,7 @@ function RoleEditorModalContent({
     >
       <div className="bg-card border border-border w-full max-w-3xl max-h-[90vh] rounded-xl flex flex-col shadow-2xl overflow-hidden text-text-light">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-secondary/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-dark/40">
           <div>
             <h2
               id="role-modal-title"
@@ -231,7 +231,7 @@ function RoleEditorModalContent({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="ej. Capitán de Meseros"
-                  className="w-full bg-secondary border border-border rounded-lg px-3.5 py-2.5 text-sm text-text-light placeholder-text-light/30 focus:outline-none focus:border-primary transition-colors disabled:opacity-60 font-medium"
+                  className="w-full bg-dark/40 border border-border rounded-lg px-3.5 py-2.5 text-sm text-text-light placeholder-text-light/30 focus:outline-none focus:border-primary transition-colors disabled:opacity-60 font-medium"
                 />
               </div>
 
@@ -249,7 +249,7 @@ function RoleEditorModalContent({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="ej. Autorizaciones de descuentos y supervisión de sala"
-                  className="w-full bg-secondary border border-border rounded-lg px-3.5 py-2.5 text-sm text-text-light placeholder-text-light/30 focus:outline-none focus:border-primary transition-colors disabled:opacity-60 font-medium"
+                  className="w-full bg-dark/40 border border-border rounded-lg px-3.5 py-2.5 text-sm text-text-light placeholder-text-light/30 focus:outline-none focus:border-primary transition-colors disabled:opacity-60 font-medium"
                 />
               </div>
             </div>
@@ -300,7 +300,7 @@ function RoleEditorModalContent({
                   return (
                     <div
                       key={module.id}
-                      className="bg-secondary/50 border border-border/80 rounded-xl p-4 transition-all"
+                      className="bg-dark/40 border border-border/80 rounded-xl p-4 transition-all"
                     >
                       <div className="flex items-center justify-between pb-3 mb-3 border-b border-border/50">
                         <div>
@@ -348,7 +348,7 @@ function RoleEditorModalContent({
                                 disabled={isEditingSystem}
                                 checked={isChecked}
                                 onChange={() => togglePermission(perm.key)}
-                                className="mt-0.5 rounded border-border text-primary focus:ring-primary h-4 w-4 bg-secondary cursor-pointer"
+                                className="mt-0.5 rounded border-border text-primary focus:ring-primary h-4 w-4 bg-dark/40 cursor-pointer"
                               />
                               <div className="flex-1 min-w-0">
                                 <span className="block text-xs font-bold leading-tight">
@@ -370,7 +370,7 @@ function RoleEditorModalContent({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-secondary/60">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-dark/40">
             <button
               type="button"
               onClick={onClose}

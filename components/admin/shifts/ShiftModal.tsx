@@ -309,7 +309,7 @@ export function ShiftModal({
                   key={commonArea}
                   type="button"
                   onClick={() => setArea(commonArea)}
-                  className="px-2 py-0.5 rounded-md bg-secondary text-[9px] font-bold text-text-light/70 hover:text-text-light transition-colors cursor-pointer"
+                  className="px-2 py-0.5 rounded-md bg-dark/40 text-[9px] font-bold text-text-light/70 hover:text-text-light transition-colors cursor-pointer"
                 >
                   +{commonArea}
                 </button>

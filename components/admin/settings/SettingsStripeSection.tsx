@@ -61,7 +61,7 @@ export function SettingsStripeSection() {
           </button>
         </div>
       ) : (
-        <div className="bg-secondary border border-border/50 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-dark/40 border border-border/50 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h4 className="text-sm font-bold text-text-light">
               Conecta tu cuenta bancaria con Stripe

@@ -528,7 +528,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                       setRoleFilter(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-blue-500 cursor-pointer"
+                    className="rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-blue-500 cursor-pointer"
                   >
                     <option value="ALL">Todos los roles</option>
                     <optgroup label="Roles del Sistema">
@@ -555,7 +555,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-secondary/60 text-xs font-bold uppercase tracking-wider text-text-light/40 border-b border-border">
+                  <thead className="bg-dark/40 text-xs font-bold uppercase tracking-wider text-text-light/40 border-b border-border">
                     <tr>
                       <TableHeaderSortCell
                         label="Colaborador"
@@ -807,7 +807,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 type="text"
                 name="full_name"
                 required
-                className="w-full rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-medium"
+                className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-medium"
                 placeholder="Ej. María García"
               />
             </div>
@@ -823,7 +823,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 type="email"
                 name="email"
                 required
-                className="w-full rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
+                className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
                 placeholder="maria@eltesoritodejalisco.com"
               />
             </div>
@@ -839,7 +839,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 type="password"
                 name="password"
                 minLength={6}
-                className="w-full rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
+                className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
                 placeholder="Mínimo 6 caracteres o vacío si usará Google"
               />
             </div>
@@ -856,7 +856,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
               name="role"
               value={selectedFormRole}
               onChange={(e) => setSelectedFormRole(e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-blue-500 cursor-pointer"
+              className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-blue-500 cursor-pointer"
             >
               <optgroup label="Roles del Sistema">
                 <option value="WAITER">Mesero (WAITER)</option>
@@ -906,7 +906,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                   name="pin"
                   defaultValue="1234"
                   maxLength={6}
-                  className="w-full rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
+                  className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-blue-500 font-mono"
                   placeholder="1234"
                 />
               </div>
@@ -973,7 +973,7 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                 maxLength={6}
                 value={newPin}
                 onChange={(e) => setNewPin(e.target.value)}
-                className="w-full rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-amber-400 font-mono tracking-widest text-center"
+                className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-amber-400 font-mono tracking-widest text-center"
                 placeholder="••••"
                 autoFocus
               />
