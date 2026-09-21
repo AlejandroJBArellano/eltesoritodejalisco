@@ -207,18 +207,18 @@ export function PushNotificationPrompt({
 
   return (
     <div
-      className={`p-4 rounded-xl border border-zinc-800 bg-zinc-900/60 backdrop-blur-sm ${className}`}
+      className={`p-4 rounded-xl border border-border bg-card shadow-sm ${className}`}
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-lg shrink-0">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-lg shrink-0">
             {isSubscribed ? "🔔" : permission === "denied" ? "🚫" : "🔕"}
           </div>
           <div>
-            <h4 className="text-sm font-black text-white">
+            <h4 className="text-sm font-black text-text-light">
               Notificaciones Web Push
             </h4>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-text-light/60">
               {permission === "denied"
                 ? "Permiso bloqueado en tu navegador. Habilítalo en los ajustes/candado del sitio en la barra de URL."
                 : isSubscribed
@@ -237,12 +237,12 @@ export function PushNotificationPrompt({
           type="button"
           onClick={isSubscribed ? handleUnsubscribe : handleSubscribe}
           disabled={loading}
-          className={`px-3.5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer ${
+          className={`px-3.5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer active:scale-[0.98] ${
             isSubscribed
-              ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700"
+              ? "bg-secondary text-text-light/80 hover:bg-secondary/80 border border-border"
               : permission === "denied"
                 ? "bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30"
-                : "bg-primary text-zinc-950 hover:opacity-90 shadow-md shadow-primary/20"
+                : "bg-primary text-background hover:bg-primary-hover shadow-sm"
           }`}
         >
           {loading

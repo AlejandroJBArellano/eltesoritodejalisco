@@ -25,18 +25,18 @@ export function TableSearchInput({
 }: TableSearchInputProps) {
   return (
     <div className="relative w-full sm:w-64">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-light/40" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-light/40 pointer-events-none" />
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-border bg-dark/40 pl-9 pr-8 py-2 text-xs font-medium text-text-light placeholder-[#666666] outline-none focus:border-primary transition-all"
+        className="w-full rounded-lg border border-border bg-secondary pl-9 pr-8 py-2 text-xs font-normal text-text-light placeholder:text-text-light/30 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
       />
       {value && (
         <button
           onClick={() => onChange("")}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-light/40 hover:text-text-light"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-light/40 hover:text-text-light p-0.5 rounded cursor-pointer"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -67,12 +67,12 @@ export function TableHeaderSortCell<T extends string>({
 
   return (
     <th
-      className={`py-3 px-4 font-bold text-text-light/70 select-none ${className}`}
+      className={`py-3 px-4 font-semibold text-xs text-text-light/70 select-none uppercase tracking-wider ${className}`}
     >
       <button
         type="button"
         onClick={() => onSort(field)}
-        className="group flex items-center gap-1.5 hover:text-white transition-colors focus:outline-none"
+        className="group flex items-center gap-1.5 hover:text-white transition-colors focus:outline-none cursor-pointer"
       >
         <span>{label}</span>
         {isSelected ? (
@@ -120,10 +120,14 @@ export function TablePagination({
       <div className="flex items-center gap-3">
         <span>
           Mostrando{" "}
-          <strong className="text-text-light">
+          <strong className="text-text-light font-semibold font-mono tabular-nums">
             {startItem}-{endItem}
           </strong>{" "}
-          de <strong className="text-text-light">{totalItems}</strong> registros
+          de{" "}
+          <strong className="text-text-light font-semibold font-mono tabular-nums">
+            {totalItems}
+          </strong>{" "}
+          registros
         </span>
 
         {onPageSizeChange && (
@@ -134,7 +138,7 @@ export function TablePagination({
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="rounded-lg border border-border bg-dark/40 px-2 py-1 text-xs text-text-light outline-none focus:border-primary"
+              className="rounded-lg border border-border bg-secondary px-2 py-1 text-xs text-text-light outline-none focus:border-primary font-mono tabular-nums cursor-pointer"
             >
               {pageSizeOptions.map((opt) => (
                 <option key={opt} value={opt}>
@@ -150,22 +154,22 @@ export function TablePagination({
         <button
           onClick={() => onPageChange(safeCurrentPage - 1)}
           disabled={safeCurrentPage <= 1}
-          className="flex items-center gap-1 rounded-xl border border-border bg-dark/40 px-3 py-1.5 font-bold hover:bg-card hover:text-white disabled:opacity-30 disabled:hover:bg-dark/40 transition-all"
+          className="flex items-center gap-1 rounded-lg border border-border bg-secondary px-3 py-1.5 font-semibold text-xs hover:bg-card hover:text-white disabled:opacity-30 disabled:hover:bg-secondary transition-all active:scale-95 cursor-pointer disabled:cursor-not-allowed"
         >
           <ChevronLeft className="h-4 w-4" />
-          Anterior
+          <span>Anterior</span>
         </button>
 
-        <span className="px-2 font-bold text-text-light">
+        <span className="px-2 font-mono font-bold text-text-light text-xs tabular-nums">
           {safeCurrentPage} / {safeTotalPages}
         </span>
 
         <button
           onClick={() => onPageChange(safeCurrentPage + 1)}
           disabled={safeCurrentPage >= safeTotalPages}
-          className="flex items-center gap-1 rounded-xl border border-border bg-dark/40 px-3 py-1.5 font-bold hover:bg-card hover:text-white disabled:opacity-30 disabled:hover:bg-dark/40 transition-all"
+          className="flex items-center gap-1 rounded-lg border border-border bg-secondary px-3 py-1.5 font-semibold text-xs hover:bg-card hover:text-white disabled:opacity-30 disabled:hover:bg-secondary transition-all active:scale-95 cursor-pointer disabled:cursor-not-allowed"
         >
-          Siguiente
+          <span>Siguiente</span>
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>

@@ -88,23 +88,27 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-dark border-b border-border text-white sticky top-0 z-40 no-print">
+    <nav className="bg-dark/85 backdrop-blur-md border-b border-border/80 text-white sticky top-0 z-40 no-print">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center gap-4">
+        <div className="flex justify-between h-14 sm:h-16 items-center gap-4">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 text-xl font-black tracking-tighter shrink-0 group"
+            className="flex items-center gap-2.5 text-lg sm:text-xl font-bold tracking-tight shrink-0 group"
           >
             <img
               src="/logo-icon-orange.svg"
               alt="Logo"
-              className="w-7 h-7 object-contain transition-transform group-hover:scale-105"
+              className="w-6 h-6 sm:w-7 sm:h-7 object-contain transition-transform duration-150 group-hover:scale-105"
             />
             <div className="flex items-center">
-              <span className="text-white">{prefix.toUpperCase()}</span>
+              <span className="text-white font-black">
+                {prefix.toUpperCase()}
+              </span>
               {suffix && (
-                <span className="text-warning">{suffix.toUpperCase()}</span>
+                <span className="text-warning font-black">
+                  {suffix.toUpperCase()}
+                </span>
               )}
             </div>
           </Link>
@@ -118,10 +122,10 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-150 ${
                     isActive
-                      ? "bg-primary/15 text-primary"
-                      : "text-text-light/50 hover:text-text-light hover:bg-white/5"
+                      ? "bg-primary/15 text-primary border border-primary/25"
+                      : "text-text-light/60 hover:text-text-light hover:bg-white/5 border border-transparent"
                   }`}
                 >
                   {link.label}
@@ -152,7 +156,7 @@ export default function Navbar() {
             <form action={logout}>
               <button
                 type="submit"
-                className="text-xs font-black uppercase tracking-wider text-text-light/50 hover:text-red-400 bg-white/5 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 px-3 py-1.5 rounded-lg transition-all duration-200 ease-out"
+                className="text-xs font-semibold text-text-light/60 hover:text-rose-400 bg-white/4 hover:bg-rose-500/10 border border-border/60 hover:border-rose-500/20 px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-[0.98] cursor-pointer"
               >
                 Salir
               </button>
