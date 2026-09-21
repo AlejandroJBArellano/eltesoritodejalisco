@@ -279,13 +279,13 @@ export function WeeklyShiftPlanner({
       )}
 
       {/* Control Bar: Week Navigator & Actions */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800 backdrop-blur-sm">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-card p-4 rounded-xl border border-border shadow-sm">
         {/* Week navigation */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+          <div className="flex items-center gap-1.5 bg-background p-1 rounded-lg border border-border">
             <button
               onClick={handlePrevWeek}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-colors cursor-pointer"
+              className="p-1.5 rounded-md text-text-light/60 hover:text-text-light hover:bg-white/5 active:scale-[0.98] transition-colors cursor-pointer"
               title="Semana anterior"
               aria-label="Semana anterior"
             >
@@ -293,13 +293,13 @@ export function WeeklyShiftPlanner({
             </button>
             <button
               onClick={handleCurrentWeek}
-              className="px-3 py-1 rounded-lg text-xs font-bold text-zinc-300 hover:text-white hover:bg-zinc-800/80 transition-colors cursor-pointer"
+              className="px-3 py-1 rounded-md text-xs font-bold text-text-light/80 hover:text-text-light hover:bg-white/5 active:scale-[0.98] transition-colors cursor-pointer"
             >
               Hoy
             </button>
             <button
               onClick={handleNextWeek}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-colors cursor-pointer"
+              className="p-1.5 rounded-md text-text-light/60 hover:text-text-light hover:bg-white/5 active:scale-[0.98] transition-colors cursor-pointer"
               title="Semana siguiente"
               aria-label="Semana siguiente"
             >
@@ -309,7 +309,7 @@ export function WeeklyShiftPlanner({
 
           <div className="flex items-center gap-2 ml-2">
             <Calendar className="h-4 w-4 text-primary" />
-            <span className="text-xs font-black uppercase tracking-wider text-zinc-200">
+            <span className="text-xs font-black uppercase tracking-wider text-text-light">
               {format(weekStart, "d MMM", { locale: es })} -{" "}
               {format(weekEnd, "d MMM yyyy", { locale: es })}
             </span>
@@ -319,9 +319,9 @@ export function WeeklyShiftPlanner({
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Tolerance Input */}
-          <div className="flex items-center gap-1.5 bg-zinc-950 px-3 py-1.5 rounded-xl border border-zinc-800 text-xs">
-            <Settings className="h-3.5 w-3.5 text-zinc-500" />
-            <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">
+          <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-lg border border-border text-xs">
+            <Settings className="h-3.5 w-3.5 text-text-light/40" />
+            <span className="text-[10px] font-black uppercase tracking-wider text-text-light/60">
               Tolerancia:
             </span>
             <input
@@ -330,9 +330,9 @@ export function WeeklyShiftPlanner({
               max={60}
               value={toleranceMinutes}
               onChange={(e) => setToleranceMinutes(Number(e.target.value))}
-              className="w-12 bg-transparent text-center font-mono font-bold text-zinc-100 outline-none border-b border-zinc-700 focus:border-primary"
+              className="w-12 bg-transparent text-center font-mono font-bold text-text-light outline-none border-b border-border focus:border-primary"
             />
-            <span className="text-[10px] text-zinc-500">min</span>
+            <span className="text-[10px] text-text-light/40">min</span>
             <button
               onClick={handleSaveTolerance}
               disabled={savingTolerance}
@@ -347,7 +347,7 @@ export function WeeklyShiftPlanner({
           <button
             onClick={handleDuplicatePreviousWeek}
             disabled={isDuplicating || isLoading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-black uppercase tracking-wider text-zinc-200 transition-colors cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary hover:bg-secondary/80 text-xs font-black uppercase tracking-wider text-text-light border border-border/50 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
             title="Copiar turnos de la semana anterior"
           >
             {isDuplicating ? (
@@ -362,13 +362,13 @@ export function WeeklyShiftPlanner({
           <button
             onClick={handleExportImage}
             disabled={isExporting || isLoading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-black uppercase tracking-wider text-zinc-200 transition-colors cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary hover:bg-secondary/80 text-xs font-black uppercase tracking-wider text-text-light border border-border/50 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
             title="Descargar imagen para imprimir o WhatsApp"
           >
             {isExporting ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Download className="h-3.5 w-3.5 text-emerald-400" />
+              <Download className="h-3.5 w-3.5 text-success" />
             )}
             Exportar Rol
           </button>
@@ -376,7 +376,7 @@ export function WeeklyShiftPlanner({
           {/* New Shift Button */}
           <button
             onClick={() => handleOpenNewShift()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-xs font-black uppercase tracking-wider text-black hover:brightness-105 transition-all shadow-lg shadow-primary/20 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-xs font-black uppercase tracking-wider text-background hover:bg-primary-hover active:scale-[0.98] transition-all shadow-sm cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" /> Asignar Turno
           </button>
@@ -386,16 +386,16 @@ export function WeeklyShiftPlanner({
       {/* Weekly Schedule Grid */}
       <div
         ref={printRef}
-        className="rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-sm"
+        className="rounded-xl border border-border bg-card overflow-hidden shadow-sm"
       >
-        <div className="p-4 bg-zinc-900/60 border-b border-zinc-800 flex items-center justify-between">
+        <div className="p-4 bg-background/50 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-zinc-200">
+            <h3 className="text-xs font-black uppercase tracking-wider text-text-light">
               Programación Semanal de Colaboradores
             </h3>
           </div>
-          <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
+          <span className="text-[11px] font-bold text-text-light/50 uppercase tracking-widest">
             {format(weekStart, "d MMMM", { locale: es })} -{" "}
             {format(weekEnd, "d MMMM yyyy", { locale: es })}
           </span>
@@ -404,19 +404,19 @@ export function WeeklyShiftPlanner({
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
             <Loader2 className="h-7 w-7 animate-spin text-primary" />
-            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+            <span className="text-xs font-bold text-text-light/50 uppercase tracking-widest">
               Cargando cuadrícula de turnos...
             </span>
           </div>
         ) : users.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center gap-3">
-            <Users className="h-8 w-8 text-zinc-600" />
-            <p className="text-zinc-400 text-xs font-bold uppercase tracking-wider">
+            <Users className="h-8 w-8 text-text-light/40" />
+            <p className="text-text-light/70 text-xs font-bold uppercase tracking-wider">
               No hay colaboradores registrados en este restaurante.
             </p>
             <Link
               href="/admin/users"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-primary hover:border-primary/50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-secondary border border-border text-xs font-bold text-primary hover:border-primary/50 transition-colors"
             >
               <Plus className="h-3.5 w-3.5" /> Registrar Colaboradores
             </Link>
@@ -425,8 +425,8 @@ export function WeeklyShiftPlanner({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-225">
               <thead>
-                <tr className="border-b border-zinc-800 bg-zinc-900/30 text-[11px] font-black uppercase tracking-wider text-zinc-400">
-                  <th className="p-3.5 min-w-42.5 sticky left-0 bg-zinc-950 z-10 border-r border-zinc-800/80">
+                <tr className="border-b border-border bg-background/30 text-[11px] font-black uppercase tracking-wider text-text-light/60">
+                  <th className="p-3.5 min-w-42.5 sticky left-0 bg-card z-10 border-r border-border">
                     Colaborador
                   </th>
                   {daysOfWeek.map((day) => {
@@ -434,14 +434,14 @@ export function WeeklyShiftPlanner({
                     return (
                       <th
                         key={day.toISOString()}
-                        className={`p-3 text-center min-w-32.5 border-r border-zinc-800/40 last:border-r-0 ${
+                        className={`p-3 text-center min-w-32.5 border-r border-border/40 last:border-r-0 ${
                           isToday ? "bg-primary/10 text-primary" : ""
                         }`}
                       >
                         <div className="font-black">
                           {format(day, "EEEE", { locale: es })}
                         </div>
-                        <div className="text-[10px] font-mono text-zinc-500 font-medium">
+                        <div className="text-[10px] font-mono text-text-light/50 font-medium">
                           {format(day, "d MMM", { locale: es })}
                         </div>
                       </th>
@@ -449,25 +449,25 @@ export function WeeklyShiftPlanner({
                   })}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60 text-xs">
+              <tbody className="divide-y divide-border/60 text-xs">
                 {users.map((u) => {
                   return (
                     <tr
                       key={u.id}
-                      className="hover:bg-zinc-900/20 transition-colors"
+                      className="hover:bg-white/2 transition-colors"
                     >
                       {/* Collaborator Name & Role */}
-                      <td className="p-3.5 sticky left-0 bg-zinc-950 z-10 border-r border-zinc-800/80 font-bold">
+                      <td className="p-3.5 sticky left-0 bg-card z-10 border-r border-border font-bold">
                         <div className="flex items-center gap-2">
-                          <div className="h-7 w-7 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
+                          <div className="h-7 w-7 rounded-full bg-secondary flex items-center justify-center text-text-light/80 shrink-0">
                             <User className="h-3.5 w-3.5" />
                           </div>
                           <div>
-                            <div className="text-zinc-200 text-xs font-bold leading-tight">
+                            <div className="text-text-light text-xs font-bold leading-tight">
                               {u.name}
                             </div>
                             {u.role && (
-                              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">
+                              <span className="text-[9px] font-black text-text-light/50 uppercase tracking-wider">
                                 {u.role}
                               </span>
                             )}
@@ -486,7 +486,7 @@ export function WeeklyShiftPlanner({
                         return (
                           <td
                             key={dayStr}
-                            className={`p-2 align-top border-r border-zinc-800/40 last:border-r-0 ${
+                            className={`p-2 align-top border-r border-border/40 last:border-r-0 ${
                               isToday ? "bg-primary/5" : ""
                             }`}
                           >
@@ -496,10 +496,10 @@ export function WeeklyShiftPlanner({
                                   <div
                                     key={s.id}
                                     onClick={() => handleEditShift(s)}
-                                    className="rounded-lg bg-zinc-900 border border-zinc-800 hover:border-primary/60 p-2 text-left transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
+                                    className="rounded-lg bg-background border border-border hover:border-primary/60 p-2 text-left transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
                                     title="Haz clic para editar o eliminar"
                                   >
-                                    <div className="font-mono text-[11px] font-black text-zinc-200 flex items-center gap-1">
+                                    <div className="font-mono text-[11px] font-black text-text-light flex items-center gap-1">
                                       <Clock className="h-2.5 w-2.5 text-primary shrink-0" />
                                       <span>
                                         {s.start_time.slice(0, 5)} -{" "}
@@ -507,12 +507,12 @@ export function WeeklyShiftPlanner({
                                       </span>
                                     </div>
                                     {s.area && (
-                                      <span className="inline-block mt-1 rounded bg-primary/15 text-primary text-[8px] font-black uppercase px-1 py-0.2 tracking-wider">
+                                      <span className="inline-block mt-1 rounded-md bg-primary/15 text-primary text-[8px] font-black uppercase px-1.5 py-0.5 tracking-wider">
                                         {s.area}
                                       </span>
                                     )}
                                     {s.notes && (
-                                      <p className="mt-0.5 text-[9px] text-zinc-500 truncate">
+                                      <p className="mt-0.5 text-[9px] text-text-light/50 truncate">
                                         {s.notes}
                                       </p>
                                     )}
@@ -521,7 +521,7 @@ export function WeeklyShiftPlanner({
 
                                 {userDayShifts.length === 0 && (
                                   <div className="text-center py-4">
-                                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">
+                                    <span className="text-[10px] font-bold text-text-light/40 uppercase tracking-wider">
                                       Descanso
                                     </span>
                                   </div>
@@ -531,7 +531,7 @@ export function WeeklyShiftPlanner({
                               {/* Add shift shortcut button on cell */}
                               <button
                                 onClick={() => handleOpenNewShift(dayStr, u.id)}
-                                className="mt-1 w-full py-1 rounded bg-zinc-900/60 hover:bg-primary/20 text-zinc-500 hover:text-primary border border-dashed border-zinc-800 hover:border-primary/40 text-[9px] font-bold uppercase transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 cursor-pointer"
+                                className="mt-1 w-full py-1 rounded-md bg-background/60 hover:bg-primary/20 text-text-light/50 hover:text-primary border border-dashed border-border hover:border-primary/40 text-[9px] font-bold uppercase transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 cursor-pointer"
                                 title="Agregar turno a este día"
                               >
                                 <Plus className="h-2.5 w-2.5" /> Turno

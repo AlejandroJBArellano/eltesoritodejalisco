@@ -38,11 +38,11 @@ export function SettingsHeaderActions() {
         <button
           type="submit"
           disabled={loading}
-          className="px-6 py-2.5 rounded-xl bg-primary text-black text-xs font-black uppercase tracking-wider hover:brightness-105 active:scale-95 transition disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-primary/20 cursor-pointer"
+          className="px-6 py-2.5 rounded-lg bg-primary text-background text-xs font-black uppercase tracking-wider hover:bg-primary-hover active:scale-95 transition disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-primary/20 cursor-pointer"
         >
           {loading ? (
             <>
-              <span className="h-3.5 w-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              <span className="h-3.5 w-3.5 border-2 border-background border-t-transparent rounded-full animate-spin" />
               Guardando...
             </>
           ) : (

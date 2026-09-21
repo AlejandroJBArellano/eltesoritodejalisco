@@ -111,13 +111,13 @@ export function AdminHorariosContent({
   };
 
   return (
-    <div className="min-h-screen bg-background text-zinc-100 pb-16">
+    <div className="min-h-screen bg-background text-text-light pb-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6">
         {/* Back Link */}
         <div className="mb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-text-light/60 hover:text-text-light transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Volver al Panel
@@ -140,13 +140,13 @@ export function AdminHorariosContent({
 
         {/* Tab Navigation */}
         <div className="mt-6 mb-8 flex justify-center sm:justify-start">
-          <div className="inline-flex p-1 rounded-2xl bg-zinc-900/80 border border-zinc-800 shadow-sm">
+          <div className="inline-flex p-1 rounded-2xl bg-card border border-border shadow-xs">
             <button
               onClick={() => setActiveTab("shifts")}
               className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === "shifts"
                   ? "bg-primary text-black shadow-md shadow-primary/20"
-                  : "text-zinc-400 hover:text-white"
+                  : "text-text-light/60 hover:text-text-light"
               }`}
             >
               <Users className="h-4 w-4" /> Turnos de Personal
@@ -156,7 +156,7 @@ export function AdminHorariosContent({
               className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === "business_hours"
                   ? "bg-amber-500 text-black shadow-md shadow-amber-500/20"
-                  : "text-zinc-400 hover:text-white"
+                  : "text-text-light/60 hover:text-text-light"
               }`}
             >
               <Clock className="h-4 w-4" /> Horarios de Atención
@@ -187,14 +187,14 @@ export function AdminHorariosContent({
             )}
 
             <form onSubmit={handleSave} className="space-y-6">
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-sm overflow-hidden">
-                <div className="divide-y divide-zinc-800/80">
+              <div className="rounded-2xl border border-border bg-card overflow-hidden">
+                <div className="divide-y divide-border">
                   {hoursList.map((dayHours, idx) => {
                     const dayName = DAYS_OF_WEEK_NAMES[dayHours.day_of_week];
                     return (
                       <div
                         key={dayHours.id}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 hover:bg-zinc-900/10 transition-all"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 hover:bg-white/5 transition-all"
                       >
                         {/* Day & Closed Toggle */}
                         <div className="flex items-center gap-4 min-w-50">
@@ -203,14 +203,14 @@ export function AdminHorariosContent({
                             id={`closed-${dayHours.id}`}
                             checked={!dayHours.is_closed}
                             onChange={() => handleToggleClosed(idx)}
-                            className="h-4.5 w-4.5 rounded border-zinc-700 bg-zinc-950 text-amber-500 focus:ring-amber-500 cursor-pointer"
+                            className="h-4.5 w-4.5 rounded border-border bg-dark text-amber-500 focus:ring-amber-500 cursor-pointer"
                           />
                           <label
                             htmlFor={`closed-${dayHours.id}`}
                             className={`text-sm font-black uppercase tracking-wider cursor-pointer transition-colors ${
                               dayHours.is_closed
-                                ? "text-zinc-600 line-through"
-                                : "text-zinc-200"
+                                ? "text-text-light/30 line-through"
+                                : "text-text-light"
                             }`}
                           >
                             {dayName}
@@ -225,7 +225,7 @@ export function AdminHorariosContent({
                         {/* Time Selectors */}
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">
+                            <span className="text-[10px] font-black text-text-light/50 uppercase tracking-wider">
                               Apertura:
                             </span>
                             <input
@@ -239,12 +239,12 @@ export function AdminHorariosContent({
                                   e.target.value,
                                 )
                               }
-                              className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="rounded-xl border border-border bg-dark px-3 py-2 text-sm text-text-light focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed"
                             />
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">
+                            <span className="text-[10px] font-black text-text-light/50 uppercase tracking-wider">
                               Cierre:
                             </span>
                             <input
@@ -258,7 +258,7 @@ export function AdminHorariosContent({
                                   e.target.value,
                                 )
                               }
-                              className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="rounded-xl border border-border bg-dark px-3 py-2 text-sm text-text-light focus:border-amber-500 outline-none transition disabled:opacity-30 disabled:cursor-not-allowed"
                             />
                           </div>
                         </div>
@@ -271,14 +271,14 @@ export function AdminHorariosContent({
               <div className="flex justify-end gap-3">
                 <Link
                   href="/"
-                  className="rounded-xl border border-zinc-800 px-5 py-3 text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-zinc-900/30 transition-all"
+                  className="rounded-xl border border-border px-5 py-3 text-xs font-black uppercase tracking-wider text-text-light/60 hover:text-text-light hover:bg-white/5 transition-all"
                 >
                   Cancelar
                 </Link>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="rounded-xl bg-amber-500 px-6 py-3 text-xs font-black uppercase tracking-wider text-zinc-950 hover:brightness-105 transition-all shadow-lg shadow-amber-500/10 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  className="rounded-xl bg-amber-500 px-6 py-3 text-xs font-black uppercase tracking-wider text-black hover:brightness-105 transition-all shadow-lg shadow-amber-500/10 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {isSaving ? (
                     <>

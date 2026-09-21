@@ -9,8 +9,8 @@ export function SettingsGeneralSection() {
   return (
     <div className="space-y-6">
       {/* Información General */}
-      <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20">
-        <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
+      <div className="rounded-xl bg-card border border-border p-6 space-y-6 transition hover:border-border/80 shadow-sm">
+        <h3 className="text-xs font-black text-text-light/60 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
           <Building className="h-4 w-4 text-primary" /> Información General
         </h3>
 
@@ -25,7 +25,7 @@ export function SettingsGeneralSection() {
               required
               defaultValue={initialTenant.name}
               placeholder="El Tesorito de Jalisco"
-              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition"
             />
             <p className="text-[10px] text-text-light/40 mt-1.5">
               Nombre comercial que aparecerá en el encabezado de los tickets y
@@ -42,7 +42,7 @@ export function SettingsGeneralSection() {
               name="systemName"
               defaultValue={initialTenant.system_name || "KittnOS"}
               placeholder="KittnOS"
-              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition"
             />
             <p className="text-[10px] text-text-light/40 mt-1.5">
               Nombre que se muestra en la barra de navegación superior (ej.
@@ -53,8 +53,8 @@ export function SettingsGeneralSection() {
       </div>
 
       {/* Códigos QR y Redes del Ticket */}
-      <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20">
-        <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
+      <div className="rounded-xl bg-card border border-border p-6 space-y-6 transition hover:border-border/80 shadow-sm">
+        <h3 className="text-xs font-black text-text-light/60 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
           <QrCode className="h-4 w-4 text-primary" /> Personalización de QRs y
           Redes en el Ticket
         </h3>
@@ -79,7 +79,7 @@ export function SettingsGeneralSection() {
               name="googleReviewsUrl"
               defaultValue={initialTenant.google_reviews_url || ""}
               placeholder="https://g.page/r/CbXxExample/review o https://maps.app.goo.gl/..."
-              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary transition font-mono"
+              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition font-mono"
             />
             <p className="text-[10px] text-text-light/40 mt-1.5">
               Al ingresar este enlace, tu ticket imprimirá 2 códigos QR en
@@ -99,7 +99,7 @@ export function SettingsGeneralSection() {
               name="ticketFooterText"
               defaultValue={initialTenant.ticket_footer_text || ""}
               placeholder="📸 @el_tesorito_jalisco • 🎵 @tesorito • 💬 33 1234 5678"
-              className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition"
             />
             <p className="text-[10px] text-text-light/40 mt-1.5">
               Línea de texto personalizada que se imprimirá debajo de los

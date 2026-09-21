@@ -32,7 +32,7 @@ export function SettingsStripeSection() {
             type="button"
             onClick={handleStripeLogin}
             disabled={connectingStripe}
-            className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold rounded-xl border border-emerald-500/40 transition flex items-center gap-2 shrink-0 cursor-pointer"
+            className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold rounded-lg border border-emerald-500/40 transition flex items-center gap-2 shrink-0 cursor-pointer"
           >
             <ExternalLink className="h-3.5 w-3.5" />
             Ver Saldo y Depósitos
@@ -54,14 +54,14 @@ export function SettingsStripeSection() {
             type="button"
             onClick={handleStripeConnect}
             disabled={connectingStripe}
-            className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold rounded-xl border border-amber-500/40 transition flex items-center gap-2 shrink-0 cursor-pointer"
+            className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold rounded-lg border border-amber-500/40 transition flex items-center gap-2 shrink-0 cursor-pointer"
           >
             {connectingStripe ? "Cargando..." : "Completar Registro en Stripe"}
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>
       ) : (
-        <div className="bg-dark/20 border border-border/50 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-secondary border border-border/50 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h4 className="text-sm font-bold text-text-light">
               Conecta tu cuenta bancaria con Stripe
@@ -75,7 +75,7 @@ export function SettingsStripeSection() {
             type="button"
             onClick={handleStripeConnect}
             disabled={connectingStripe}
-            className="px-5 py-2.5 bg-primary text-dark font-extrabold text-xs uppercase tracking-wider rounded-xl hover:opacity-90 transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md"
+            className="px-5 py-2.5 bg-primary text-background font-black text-xs uppercase tracking-wider rounded-lg hover:bg-primary-hover transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md"
           >
             {connectingStripe
               ? "Generando liga..."

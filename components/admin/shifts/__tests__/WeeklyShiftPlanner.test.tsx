@@ -101,7 +101,7 @@ describe("WeeklyShiftPlanner Component", () => {
 
     render(
       <WeeklyShiftPlanner
-        initialDate={new Date("2026-09-07T12:00:00Z")}
+        initialDate={new Date("2026-08-01T12:00:00Z")}
         initialUsers={mockUsers}
       />,
     );

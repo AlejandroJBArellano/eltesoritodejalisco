@@ -10,7 +10,7 @@ export function SettingsPickupSection() {
   return (
     <div
       id="pickup"
-      className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20 scroll-mt-6"
+      className="rounded-xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20 scroll-mt-6"
     >
       <div className="flex items-center justify-between border-b border-border pb-3">
         <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2">
@@ -23,7 +23,7 @@ export function SettingsPickupSection() {
             Online
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-800 text-text-light/40 border border-border">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-secondary text-text-light/40 border border-border">
             Inactivo
           </span>
         )}
@@ -39,7 +39,7 @@ export function SettingsPickupSection() {
       </p>
 
       {/* Enlace de tu Menú Pickup */}
-      <div className="rounded-xl bg-dark/30 border border-border/70 p-4 space-y-3">
+      <div className="rounded-xl bg-secondary border border-border/70 p-4 space-y-3">
         <div className="flex items-center justify-between">
           <label className="text-[11px] font-bold text-text-light/50 uppercase tracking-wider flex items-center gap-1.5">
             <Globe className="h-3.5 w-3.5 text-primary" /> Enlace de tu Menú

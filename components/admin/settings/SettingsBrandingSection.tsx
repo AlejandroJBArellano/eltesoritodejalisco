@@ -26,8 +26,8 @@ export function SettingsBrandingSection() {
   return (
     <div className="space-y-6">
       {/* Logotipo e Identidad Visual */}
-      <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20">
-        <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
+      <div className="rounded-xl bg-card border border-border p-6 space-y-6 transition hover:border-border/80 shadow-sm">
+        <h3 className="text-xs font-black text-text-light/60 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
           <Upload className="h-4 w-4 text-primary" /> Logotipo e Identidad
           Visual
         </h3>
@@ -40,7 +40,7 @@ export function SettingsBrandingSection() {
             className={`relative flex flex-col items-center justify-center p-8 rounded-xl border-2 border-dashed transition-all duration-300 ${
               isDragging
                 ? "border-primary bg-primary/5"
-                : "border-border bg-dark/20 hover:bg-dark/30 hover:border-text-light/20"
+                : "border-border bg-background hover:border-primary/40"
             }`}
           >
             <input
@@ -54,7 +54,7 @@ export function SettingsBrandingSection() {
 
             {logoPreview ? (
               <div className="flex flex-col items-center gap-4 text-center">
-                <div className="h-24 w-24 rounded-xl border border-border bg-background overflow-hidden flex items-center justify-center p-2 relative group shadow-inner">
+                <div className="h-24 w-24 rounded-lg border border-border bg-background overflow-hidden flex items-center justify-center p-2 relative group shadow-inner">
                   <img
                     src={logoPreview}
                     alt="Logo preview"
@@ -72,14 +72,14 @@ export function SettingsBrandingSection() {
                 <button
                   type="button"
                   onClick={handleRemoveLogo}
-                  className="relative z-20 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition cursor-pointer"
+                  className="relative z-20 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 active:scale-[0.98] transition cursor-pointer"
                 >
                   Eliminar Logo
                 </button>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3 text-center py-4">
-                <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-1">
                   <Upload className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
@@ -103,14 +103,14 @@ export function SettingsBrandingSection() {
       </div>
 
       {/* Colores de Marca */}
-      <div className="rounded-2xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20">
-        <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
+      <div className="rounded-xl bg-card border border-border p-6 space-y-6 transition hover:border-border/80 shadow-sm">
+        <h3 className="text-xs font-black text-text-light/60 uppercase tracking-widest flex items-center gap-2 border-b border-border pb-3">
           <Sliders className="h-4 w-4 text-primary" /> Colores de Marca
         </h3>
 
         {/* Paletas Recomendadas */}
         <div className="space-y-3">
-          <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider flex items-center gap-1">
+          <label className="text-xs font-bold text-text-light/60 uppercase tracking-wider flex items-center gap-1">
             <Sparkles className="h-3 w-3 text-primary animate-pulse" /> Paletas
             Recomendadas
           </label>
@@ -127,10 +127,10 @@ export function SettingsBrandingSection() {
                   type="button"
                   onClick={() => handleApplyPreset(preset)}
                   aria-pressed={isSelected}
-                  className={`flex items-center gap-3 p-2.5 rounded-xl border text-left transition duration-200 cursor-pointer ${
+                  className={`flex items-center gap-3 p-2.5 rounded-lg border text-left transition duration-200 cursor-pointer active:scale-[0.98] ${
                     isSelected
                       ? "border-primary bg-primary/10 ring-1 ring-primary/30"
-                      : "border-border bg-dark/20 hover:bg-dark/40 hover:border-text-light/20"
+                      : "border-border bg-background hover:bg-white/5 hover:border-border/80"
                   }`}
                 >
                   <div className="flex -space-x-1 shrink-0">
@@ -165,12 +165,12 @@ export function SettingsBrandingSection() {
         {/* Pickers Personalizados */}
         <div className="space-y-4 pt-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider block">
+            <label className="text-xs font-bold text-text-light/60 uppercase tracking-wider block">
               Color Primario
             </label>
             <div className="flex gap-2.5 items-center">
               <div
-                className="h-10 w-10 shrink-0 cursor-pointer rounded-xl border border-border relative overflow-hidden transition-transform hover:scale-105 active:scale-95 shadow-sm"
+                className="h-10 w-10 shrink-0 cursor-pointer rounded-lg border border-border relative overflow-hidden transition-transform hover:scale-105 active:scale-95 shadow-sm"
                 style={{ backgroundColor: primaryColor }}
               >
                 <input
@@ -186,18 +186,18 @@ export function SettingsBrandingSection() {
                 name="primaryColor"
                 value={primaryColor}
                 onChange={(e) => setPrimaryColor(e.target.value)}
-                className="flex-1 rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono transition"
+                className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 font-mono transition"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider block">
+            <label className="text-xs font-bold text-text-light/60 uppercase tracking-wider block">
               Color Secundario
             </label>
             <div className="flex gap-2.5 items-center">
               <div
-                className="h-10 w-10 shrink-0 cursor-pointer rounded-xl border border-border relative overflow-hidden transition-transform hover:scale-105 active:scale-95 shadow-sm"
+                className="h-10 w-10 shrink-0 cursor-pointer rounded-lg border border-border relative overflow-hidden transition-transform hover:scale-105 active:scale-95 shadow-sm"
                 style={{ backgroundColor: secondaryColor }}
               >
                 <input
@@ -213,18 +213,18 @@ export function SettingsBrandingSection() {
                 name="secondaryColor"
                 value={secondaryColor}
                 onChange={(e) => setSecondaryColor(e.target.value)}
-                className="flex-1 rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono transition"
+                className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 font-mono transition"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider block">
+            <label className="text-xs font-bold text-text-light/60 uppercase tracking-wider block">
               Fondo Oscuro
             </label>
             <div className="flex gap-2.5 items-center">
               <div
-                className="h-10 w-10 shrink-0 cursor-pointer rounded-xl border border-border relative overflow-hidden transition-transform hover:scale-105 active:scale-95 shadow-sm"
+                className="h-10 w-10 shrink-0 cursor-pointer rounded-lg border border-border relative overflow-hidden transition-transform hover:scale-105 active:scale-95 shadow-sm"
                 style={{ backgroundColor: darkBgColor }}
               >
                 <input
@@ -240,20 +240,20 @@ export function SettingsBrandingSection() {
                 name="darkBgColor"
                 value={darkBgColor}
                 onChange={(e) => setDarkBgColor(e.target.value)}
-                className="flex-1 rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono transition"
+                className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 font-mono transition"
               />
             </div>
           </div>
         </div>
 
         {/* Live Preview Box */}
-        <div className="border border-border rounded-xl p-4 bg-black/30 text-center space-y-3 mt-2">
+        <div className="border border-border rounded-lg p-4 bg-background/50 text-center space-y-3 mt-2">
           <span className="text-[10px] font-bold text-text-light/40 uppercase tracking-widest block">
             Vista Previa de Botón
           </span>
           <button
             type="button"
-            className="w-full py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg transition active:scale-95 pointer-events-none"
+            className="w-full py-2.5 rounded-lg font-black text-xs uppercase tracking-wider shadow-lg transition active:scale-95 pointer-events-none"
             style={{
               background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`,
               color: getContrastColor(primaryColor),

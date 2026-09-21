@@ -162,18 +162,18 @@ export function ShiftModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-6 text-zinc-100 space-y-5">
+      <div className="relative w-full max-w-lg bg-card border border-border rounded-xl shadow-2xl p-6 text-text-light space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+        <div className="flex items-center justify-between pb-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
-            <h3 className="text-base font-black uppercase tracking-tight">
+            <h3 className="text-base font-black uppercase tracking-tight text-text-light">
               {initialShift ? "Editar Turno" : "Asignar Nuevo Turno"}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-1.5 rounded-lg text-text-light/60 hover:text-text-light hover:bg-white/5 transition-colors"
             aria-label="Cerrar modal"
           >
             <X className="h-5 w-5" />
@@ -181,7 +181,7 @@ export function ShiftModal({
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs font-bold text-red-400">
+          <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs font-bold text-rose-400">
             {error}
           </div>
         )}
@@ -189,12 +189,12 @@ export function ShiftModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* User selection */}
           <div>
-            <label className="block text-[11px] font-black uppercase tracking-wider text-zinc-400 mb-1.5">
+            <label className="block text-[11px] font-black uppercase tracking-wider text-text-light/60 mb-1.5">
               Colaborador
             </label>
             {users.length === 0 ? (
               <div className="space-y-2">
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-start gap-2">
+                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
                   <div className="flex-1">
                     <p className="font-bold">
@@ -209,7 +209,7 @@ export function ShiftModal({
                 <select
                   disabled
                   aria-label="Colaborador"
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs font-bold text-zinc-500 opacity-50 outline-none cursor-not-allowed"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-xs font-bold text-text-light/40 opacity-50 outline-none cursor-not-allowed"
                 >
                   <option value="">No hay opciones</option>
                 </select>
@@ -220,7 +220,7 @@ export function ShiftModal({
                 onChange={(e) => setUserId(e.target.value)}
                 disabled={Boolean(initialShift)}
                 aria-label="Seleccionar colaborador"
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs font-bold text-zinc-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition disabled:opacity-50"
+                className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-xs font-bold text-text-light focus:border-primary focus:ring-1 focus:ring-primary/40 outline-none transition disabled:opacity-50"
               >
                 {users.map((u) => (
                   <option key={u.id} value={u.id}>
@@ -233,20 +233,20 @@ export function ShiftModal({
 
           {/* Date selection */}
           <div>
-            <label className="block text-[11px] font-black uppercase tracking-wider text-zinc-400 mb-1.5">
+            <label className="block text-[11px] font-black uppercase tracking-wider text-text-light/60 mb-1.5">
               Fecha del Turno
             </label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs font-bold text-zinc-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition"
+              className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-xs font-bold text-text-light focus:border-primary focus:ring-1 focus:ring-primary/40 outline-none transition"
             />
           </div>
 
           {/* Preset Buttons */}
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-1.5">
+            <label className="block text-[10px] font-black uppercase tracking-wider text-text-light/60 mb-1.5">
               Atajos Rápidos de Horario
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -255,7 +255,7 @@ export function ShiftModal({
                   key={preset.label}
                   type="button"
                   onClick={() => handleApplyPreset(preset)}
-                  className="px-2.5 py-1 rounded-lg border border-zinc-800 bg-zinc-950 text-[10px] font-bold text-zinc-300 hover:border-primary hover:text-primary transition-colors cursor-pointer"
+                  className="px-2.5 py-1 rounded-md border border-border bg-background text-[10px] font-bold text-text-light/80 hover:border-primary hover:text-primary active:scale-[0.98] transition-colors cursor-pointer"
                 >
                   {preset.label} ({preset.start}-{preset.end})
                 </button>
@@ -266,7 +266,7 @@ export function ShiftModal({
           {/* Times */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-black uppercase tracking-wider text-zinc-400 mb-1.5">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-text-light/60 mb-1.5">
                 Hora Inicio
               </label>
               <input
@@ -274,11 +274,11 @@ export function ShiftModal({
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
                 required
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs font-mono font-bold text-zinc-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition"
+                className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-xs font-mono font-bold text-text-light focus:border-primary focus:ring-1 focus:ring-primary/40 outline-none transition"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-black uppercase tracking-wider text-zinc-400 mb-1.5">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-text-light/60 mb-1.5">
                 Hora Fin
               </label>
               <input
@@ -286,14 +286,14 @@ export function ShiftModal({
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
                 required
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs font-mono font-bold text-zinc-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition"
+                className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-xs font-mono font-bold text-text-light focus:border-primary focus:ring-1 focus:ring-primary/40 outline-none transition"
               />
             </div>
           </div>
 
           {/* Area / Station */}
           <div>
-            <label className="block text-[11px] font-black uppercase tracking-wider text-zinc-400 mb-1.5">
+            <label className="block text-[11px] font-black uppercase tracking-wider text-text-light/60 mb-1.5">
               Área o Estación (Opcional)
             </label>
             <input
@@ -301,7 +301,7 @@ export function ShiftModal({
               value={area}
               onChange={(e) => setArea(e.target.value)}
               placeholder="Ej. Cocina, Barra, Caja, Piso..."
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition"
+              className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-xs text-text-light placeholder:text-text-light/40 focus:border-primary focus:ring-1 focus:ring-primary/40 outline-none transition"
             />
             <div className="flex flex-wrap gap-1 mt-1.5">
               {COMMON_AREAS.map((commonArea) => (
@@ -309,7 +309,7 @@ export function ShiftModal({
                   key={commonArea}
                   type="button"
                   onClick={() => setArea(commonArea)}
-                  className="px-2 py-0.5 rounded bg-zinc-800/80 text-[9px] font-bold text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
+                  className="px-2 py-0.5 rounded-md bg-secondary text-[9px] font-bold text-text-light/70 hover:text-text-light transition-colors cursor-pointer"
                 >
                   +{commonArea}
                 </button>
@@ -319,7 +319,7 @@ export function ShiftModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-[11px] font-black uppercase tracking-wider text-zinc-400 mb-1.5">
+            <label className="block text-[11px] font-black uppercase tracking-wider text-text-light/60 mb-1.5">
               Notas / Instrucciones (Opcional)
             </label>
             <textarea
@@ -327,18 +327,18 @@ export function ShiftModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Observaciones particulares para el turno..."
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-600 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition resize-none"
+              className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs text-text-light placeholder:text-text-light/40 focus:border-primary focus:ring-1 focus:ring-primary/40 outline-none transition resize-none"
             />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-between pt-3 border-t border-zinc-800">
+          <div className="flex items-center justify-between pt-3 border-t border-border">
             {initialShift && onDelete ? (
               <button
                 type="button"
                 onClick={handleDelete}
                 disabled={isDeleting || isSubmitting}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-xs font-black text-red-400 hover:bg-red-500/20 transition-all cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs font-black text-rose-400 hover:bg-rose-500/20 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
               >
                 {isDeleting ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -356,7 +356,7 @@ export function ShiftModal({
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting || isDeleting}
-                className="px-4 py-2 rounded-xl border border-zinc-800 text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-lg border border-border text-xs font-black uppercase tracking-wider text-text-light/70 hover:text-text-light hover:bg-white/5 active:scale-[0.98] transition-all cursor-pointer"
               >
                 Cancelar
               </button>
@@ -364,7 +364,7 @@ export function ShiftModal({
                 type="submit"
                 disabled={isSubmitting || isDeleting}
                 aria-label="Guardar turno"
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-xs font-black uppercase tracking-wider text-black hover:brightness-105 transition-all shadow-lg shadow-primary/20 cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-xs font-black uppercase tracking-wider text-background hover:bg-primary-hover active:scale-[0.98] transition-all shadow-sm cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <>
