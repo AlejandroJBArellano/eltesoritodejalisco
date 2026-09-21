@@ -32,33 +32,33 @@ export function AdminTareasNav(props: AdminTareasNavProps) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
-        <div className="flex gap-2 bg-card p-1 rounded-xl border border-border">
+        <div className="flex gap-1.5 bg-card p-1 rounded-xl border border-border">
           <button
             onClick={() => onTabChange("history")}
-            className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all active:scale-[0.98] ${
               activeTab === "history"
-                ? "bg-primary text-black shadow-lg"
-                : "text-gray-400 hover:text-white"
+                ? "bg-primary text-background shadow-sm"
+                : "text-text-light/60 hover:text-text-light hover:bg-white/5"
             }`}
           >
             📋 Historial
           </button>
           <button
             onClick={() => onTabChange("performance")}
-            className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all active:scale-[0.98] ${
               activeTab === "performance"
-                ? "bg-primary text-black shadow-lg"
-                : "text-gray-400 hover:text-white"
+                ? "bg-primary text-background shadow-sm"
+                : "text-text-light/60 hover:text-text-light hover:bg-white/5"
             }`}
           >
             📊 Rendimiento
           </button>
           <button
             onClick={() => onTabChange("config")}
-            className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all active:scale-[0.98] ${
               activeTab === "config"
-                ? "bg-primary text-black shadow-lg"
-                : "text-gray-400 hover:text-white"
+                ? "bg-primary text-background shadow-sm"
+                : "text-text-light/60 hover:text-text-light hover:bg-white/5"
             }`}
           >
             ⚙️ Configuración
@@ -70,14 +70,14 @@ export function AdminTareasNav(props: AdminTareasNavProps) {
             <>
               <button
                 onClick={onOpenCategoryModal}
-                className="rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-bold text-white hover:bg-white/10 flex items-center gap-1.5 uppercase tracking-wider"
+                className="rounded-lg border border-border bg-card px-3.5 py-2 text-xs font-bold text-text-light hover:bg-white/5 flex items-center gap-1.5 uppercase tracking-wider active:scale-[0.98] transition-all"
               >
                 <FolderPlus className="h-4 w-4 text-purple-400" />
                 Nueva Categoría
               </button>
               <button
                 onClick={onOpenNewTaskModal}
-                className="rounded-xl bg-primary px-3.5 py-2 text-xs font-black text-black hover:brightness-105 flex items-center gap-1.5 uppercase tracking-wider shadow-lg shadow-primary/20"
+                className="rounded-lg bg-primary px-3.5 py-2 text-xs font-black text-background hover:bg-primary-hover flex items-center gap-1.5 uppercase tracking-wider shadow-sm active:scale-[0.98] transition-all"
               >
                 <Plus className="h-4 w-4" />
                 Nueva Tarea
@@ -87,14 +87,14 @@ export function AdminTareasNav(props: AdminTareasNavProps) {
 
           {activeTab !== "config" && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              <span className="text-xs font-bold text-text-light/60 uppercase tracking-wider">
                 Fecha:
               </span>
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => onDateChange(e.target.value)}
-                className="bg-card border border-border text-white rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-primary font-bold scheme-dark"
+                className="bg-card border border-border text-text-light rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-primary font-bold scheme-dark"
               />
             </div>
           )}

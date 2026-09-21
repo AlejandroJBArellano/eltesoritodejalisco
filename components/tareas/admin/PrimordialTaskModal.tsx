@@ -53,7 +53,7 @@ export function PrimordialTaskModal(props: PrimordialTaskModalProps) {
     >
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="text-xs font-extrabold text-gray-400 uppercase tracking-wider block mb-1">
+          <label className="text-xs font-extrabold text-text-light/60 uppercase tracking-wider block mb-1">
             Nombre de la Tarea *
           </label>
           <input
@@ -61,7 +61,7 @@ export function PrimordialTaskModal(props: PrimordialTaskModalProps) {
             value={formData.name}
             onChange={(e) => onFormChange({ name: e.target.value })}
             placeholder="Ej. Limpieza de Freidoras"
-            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-white outline-none focus:border-primary font-bold"
+            className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm text-text-light outline-none focus:border-primary font-bold"
             required
             autoFocus
           />
@@ -69,13 +69,13 @@ export function PrimordialTaskModal(props: PrimordialTaskModalProps) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-extrabold text-gray-400 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-extrabold text-text-light/60 uppercase tracking-wider block mb-1">
               Categoría
             </label>
             <select
               value={formData.categoryId}
               onChange={(e) => onFormChange({ categoryId: e.target.value })}
-              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2.5 text-xs font-bold text-white outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary"
             >
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -86,7 +86,7 @@ export function PrimordialTaskModal(props: PrimordialTaskModalProps) {
           </div>
 
           <div>
-            <label className="text-xs font-extrabold text-gray-400 uppercase tracking-wider block mb-1">
+            <label className="text-xs font-extrabold text-text-light/60 uppercase tracking-wider block mb-1">
               Frecuencia
             </label>
             <select
@@ -94,7 +94,7 @@ export function PrimordialTaskModal(props: PrimordialTaskModalProps) {
               onChange={(e) =>
                 onFormChange({ frequencyType: e.target.value as TaskFrequency })
               }
-              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2.5 text-xs font-bold text-white outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary"
             >
               <option value="DAILY">Diario</option>
               <option value="CONTINUOUS">Continuo</option>
@@ -106,31 +106,33 @@ export function PrimordialTaskModal(props: PrimordialTaskModalProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-3 rounded-xl bg-dark/40 border border-border">
-          <label className="text-xs font-bold text-white flex items-center gap-2 cursor-pointer">
+        <div className="flex items-center justify-between p-3 rounded-lg bg-card border border-border">
+          <label className="text-xs font-bold text-text-light flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={formData.requiresPhoto}
               onChange={(e) =>
                 onFormChange({ requiresPhoto: e.target.checked })
               }
-              className="h-4 w-4 rounded border-border bg-card text-primary focus:ring-primary"
+              className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary"
             />
             Requiere foto de evidencia
           </label>
 
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-bold text-gray-400">Timeout:</span>
+            <span className="text-xs font-bold text-text-light/60">
+              Timeout:
+            </span>
             <input
               type="number"
               value={formData.timeoutMinutes}
               onChange={(e) =>
                 onFormChange({ timeoutMinutes: Number(e.target.value) })
               }
-              className="w-16 rounded-lg border border-border bg-card px-2 py-1 text-xs font-bold text-white text-center"
+              className="w-16 rounded-md border border-border bg-background px-2 py-1 text-xs font-mono font-bold text-text-light text-center"
               min={1}
             />
-            <span className="text-xs text-gray-500">min</span>
+            <span className="text-xs text-text-light/40">min</span>
           </div>
         </div>
 
@@ -138,14 +140,14 @@ export function PrimordialTaskModal(props: PrimordialTaskModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-gray-300 hover:bg-white/5"
+            className="rounded-lg border border-border px-4 py-2 text-xs font-bold text-text-light/70 hover:bg-white/5 active:scale-[0.98] transition-all"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="rounded-xl bg-primary px-5 py-2.5 text-xs font-black text-black hover:brightness-105 disabled:opacity-50 transition-all"
+            className="rounded-lg bg-primary px-5 py-2 text-xs font-black uppercase tracking-wider text-background hover:bg-primary-hover disabled:opacity-50 active:scale-[0.98] transition-all shadow-sm"
           >
             {isLoading
               ? "Guardando..."

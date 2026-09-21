@@ -87,9 +87,9 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
   const onApprove = props.onApprove ?? context?.handleApprove ?? (() => {});
 
   return (
-    <div className="space-y-4 rounded-2xl bg-card p-6 border border-border">
+    <div className="space-y-4 rounded-xl bg-card p-6 border border-border shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
-        <h2 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+        <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-primary" />
           Ejecución de Tareas - {selectedDate}
         </h2>
@@ -108,15 +108,15 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 bg-dark/40 p-4 rounded-xl border border-border">
-        <div className="flex items-center gap-1.5 bg-dark/60 p-1 rounded-xl border border-border w-fit">
+      <div className="flex flex-col gap-3 bg-secondary/40 p-4 rounded-lg border border-border">
+        <div className="flex items-center gap-1.5 bg-background p-1 rounded-lg border border-border w-fit">
           <button
             type="button"
             onClick={() => onComplianceFilterChange("ALL")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-[0.98] ${
               complianceFilter === "ALL"
-                ? "bg-primary text-black shadow-md"
-                : "text-gray-400 hover:text-white"
+                ? "bg-primary text-background shadow-xs"
+                : "text-text-light/60 hover:text-text-light hover:bg-secondary"
             }`}
           >
             Todas
@@ -124,10 +124,10 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
           <button
             type="button"
             onClick={() => onComplianceFilterChange("COMPLETED")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-[0.98] ${
               complianceFilter === "COMPLETED"
-                ? "bg-primary text-black shadow-md"
-                : "text-gray-400 hover:text-white"
+                ? "bg-primary text-background shadow-xs"
+                : "text-text-light/60 hover:text-text-light hover:bg-secondary"
             }`}
           >
             Completadas
@@ -135,10 +135,10 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
           <button
             type="button"
             onClick={() => onComplianceFilterChange("NOT_DONE")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-[0.98] ${
               complianceFilter === "NOT_DONE"
-                ? "bg-primary text-black shadow-md"
-                : "text-gray-400 hover:text-white"
+                ? "bg-primary text-background shadow-xs"
+                : "text-text-light/60 hover:text-text-light hover:bg-secondary"
             }`}
           >
             No Realizadas
@@ -147,7 +147,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
+            <label className="text-[10px] font-bold text-text-light/60 uppercase tracking-wider block mb-1">
               Buscar Ejecución
             </label>
             <TableSearchInput
@@ -157,13 +157,13 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
             />
           </div>
           <div>
-            <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
+            <label className="text-[10px] font-bold text-text-light/60 uppercase tracking-wider block mb-1">
               Colaborador
             </label>
             <select
               value={userFilter}
               onChange={(e) => onUserFilterChange(e.target.value)}
-              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
             >
               <option value="ALL">Todos los Colaboradores</option>
               <option value="UNASSIGNED">Sin Asignar</option>
@@ -175,13 +175,13 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
             </select>
           </div>
           <div>
-            <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
+            <label className="text-[10px] font-bold text-text-light/60 uppercase tracking-wider block mb-1">
               Estado
             </label>
             <select
               value={statusFilter}
               onChange={(e) => onStatusFilterChange(e.target.value)}
-              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
             >
               <option value="ALL">Todos los Estados</option>
               <option value="COMPLETED">Listo para Aprobar</option>
@@ -193,9 +193,9 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-border">
-        <table className="w-full text-left text-sm text-gray-300">
-          <thead className="bg-dark/40 text-xs font-black text-white uppercase tracking-wider border-b border-border">
+      <div className="overflow-x-auto rounded-lg border border-border">
+        <table className="w-full text-left text-sm text-text-light/80">
+          <thead className="bg-secondary/60 text-xs font-bold text-text-light uppercase tracking-wider border-b border-border">
             <tr>
               <TableHeaderSortCell
                 field="task"
@@ -232,27 +232,27 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
           </thead>
           <tbody className="divide-y divide-border">
             {paginatedExecutions.map((exec) => (
-              <tr key={exec.id} className="hover:bg-white/2 transition-colors">
-                <td className="py-3 px-4 text-white font-bold">
+              <tr key={exec.id} className="hover:bg-secondary/40 transition-colors">
+                <td className="py-3 px-4 text-text-light font-bold">
                   {exec.task?.name || "Desconocida"}
                 </td>
-                <td className="py-3 px-4 text-gray-400">
+                <td className="py-3 px-4 text-text-light/60">
                   {exec.status === "NOT_DONE"
                     ? "Sin Asignar"
                     : exec.user?.full_name || "Sin Asignar"}
                 </td>
                 <td className="py-3 px-4">
                   <span
-                    className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                    className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
                       exec.status === "COMPLETED"
-                        ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                         : exec.status === "APPROVED"
                           ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
                           : exec.status === "IN_PROGRESS"
-                            ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                             : exec.status === "NOT_DONE"
-                              ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                              : "bg-gray-500/10 text-gray-400 border border-gray-500/20"
+                              ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                              : "bg-secondary text-text-light/60 border border-border"
                     }`}
                   >
                     {exec.status === "COMPLETED"
@@ -266,7 +266,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
                             : exec.status}
                   </span>
                 </td>
-                <td className="py-3 px-4 font-mono text-xs text-gray-400">
+                <td className="py-3 px-4 font-mono text-xs text-text-light/60 tabular-nums">
                   {exec.start_time
                     ? new Date(exec.start_time).toLocaleTimeString("es-MX", {
                         hour: "2-digit",
@@ -274,7 +274,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
                       })
                     : "-"}
                 </td>
-                <td className="py-3 px-4 font-bold text-white">
+                <td className="py-3 px-4 font-bold text-text-light font-mono tabular-nums">
                   {exec.status === "NOT_DONE"
                     ? "-"
                     : exec.net_duration_minutes !== undefined
@@ -292,7 +292,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
                       Ver Foto
                     </a>
                   ) : (
-                    <span className="text-gray-600">-</span>
+                    <span className="text-text-light/30">-</span>
                   )}
                 </td>
                 <td className="py-3 px-4 text-right">
@@ -300,7 +300,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
                     <button
                       onClick={() => onApprove(exec.id)}
                       disabled={loading === exec.id}
-                      className="bg-primary hover:bg-primary/95 text-black text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-lg transition-all"
+                      className="bg-primary hover:brightness-110 text-background text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg active:scale-[0.98] transition-all shadow-xs cursor-pointer"
                     >
                       Aprobar
                     </button>
@@ -312,7 +312,7 @@ export function AdminTaskHistoryTab(props: AdminTaskHistoryTabProps) {
               <tr>
                 <td
                   colSpan={7}
-                  className="py-8 text-center text-xs text-gray-500 italic"
+                  className="py-8 text-center text-xs text-text-light/40 italic"
                 >
                   No hay ejecuciones registradas.
                 </td>

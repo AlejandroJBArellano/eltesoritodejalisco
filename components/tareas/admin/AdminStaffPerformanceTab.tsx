@@ -18,9 +18,9 @@ export function AdminStaffPerformanceTab(props: AdminStaffPerformanceTabProps) {
   const metrics = props.metrics ?? context?.metrics ?? [];
 
   return (
-    <div className="space-y-4 rounded-2xl bg-card p-6 border border-border">
+    <div className="space-y-4 rounded-xl bg-card p-6 border border-border">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
-        <h2 className="text-base font-black text-white uppercase tracking-wider">
+        <h2 className="text-base font-black text-text-light uppercase tracking-wider">
           Resumen de Rendimiento de Personal - {selectedDate}
         </h2>
         {metrics.length > 0 && (
@@ -33,8 +33,8 @@ export function AdminStaffPerformanceTab(props: AdminStaffPerformanceTabProps) {
         )}
       </div>
       <div className="overflow-x-auto rounded-xl border border-border">
-        <table className="w-full text-left text-sm text-gray-300">
-          <thead className="bg-dark/40 text-xs font-black text-white uppercase tracking-wider border-b border-border">
+        <table className="w-full text-left text-sm text-text-light/80">
+          <thead className="bg-background/50 text-xs font-black text-text-light uppercase tracking-wider border-b border-border">
             <tr>
               <th className="py-3 px-4">Colaborador</th>
               <th className="py-3 px-4">Tareas Completadas</th>
@@ -44,13 +44,13 @@ export function AdminStaffPerformanceTab(props: AdminStaffPerformanceTabProps) {
           <tbody className="divide-y divide-border">
             {metrics.map((collab) => (
               <tr key={collab.userId} className="hover:bg-white/2">
-                <td className="py-3 px-4 text-white font-bold">
+                <td className="py-3 px-4 text-text-light font-bold">
                   {collab.name}
                 </td>
-                <td className="py-3 px-4 text-gray-400 font-mono">
+                <td className="py-3 px-4 text-text-light/60 font-mono tabular-nums">
                   {collab.completedCount} tareas
                 </td>
-                <td className="py-3 px-4 font-bold text-white font-mono">
+                <td className="py-3 px-4 font-bold text-text-light font-mono tabular-nums">
                   {collab.avgDurationMinutes} min / tarea
                 </td>
               </tr>
@@ -59,7 +59,7 @@ export function AdminStaffPerformanceTab(props: AdminStaffPerformanceTabProps) {
               <tr>
                 <td
                   colSpan={3}
-                  className="py-8 text-center text-xs text-gray-500 italic"
+                  className="py-8 text-center text-xs text-text-light/40 italic"
                 >
                   No hay métricas registradas para esta fecha.
                 </td>

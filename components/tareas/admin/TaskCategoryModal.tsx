@@ -40,7 +40,7 @@ export function TaskCategoryModal(props: TaskCategoryModalProps) {
     >
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="text-xs font-extrabold text-gray-400 uppercase tracking-wider block mb-1">
+          <label className="text-xs font-extrabold text-text-light/60 uppercase tracking-wider block mb-1">
             Nombre de la Categoría *
           </label>
           <input
@@ -48,7 +48,7 @@ export function TaskCategoryModal(props: TaskCategoryModalProps) {
             value={newCategoryName}
             onChange={(e) => onCategoryNameChange(e.target.value)}
             placeholder="Ej. Cocina, Barra, Limpieza"
-            className="w-full rounded-xl border border-border bg-dark/40 px-4 py-2.5 text-sm text-white outline-none focus:border-purple-400 font-bold"
+            className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm text-text-light outline-none focus:border-primary font-bold"
             required
             autoFocus
           />
@@ -58,14 +58,14 @@ export function TaskCategoryModal(props: TaskCategoryModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-border px-4 py-2.5 text-xs font-bold text-gray-300 hover:bg-white/5"
+            className="rounded-lg border border-border px-4 py-2 text-xs font-bold text-text-light/70 hover:bg-white/5 active:scale-[0.98] transition-all"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="rounded-xl bg-purple-500 px-5 py-2.5 text-xs font-black text-white hover:bg-purple-600 disabled:opacity-50 transition-all"
+            className="rounded-lg bg-primary px-5 py-2 text-xs font-black uppercase tracking-wider text-background hover:bg-primary-hover disabled:opacity-50 active:scale-[0.98] transition-all shadow-sm"
           >
             {isLoading ? "Guardando..." : "Crear Categoría"}
           </button>

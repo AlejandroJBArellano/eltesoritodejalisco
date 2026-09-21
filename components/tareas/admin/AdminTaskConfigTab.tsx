@@ -80,9 +80,9 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl bg-card p-6 border border-border space-y-4">
+      <div className="rounded-xl bg-card p-6 border border-border space-y-4 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
-          <h2 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+          <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-primary" />
             Catálogo de Tareas Primordiales ({filteredTasks.length})
           </h2>
@@ -96,9 +96,9 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-secondary/40 p-4 rounded-lg border border-border">
           <div>
-            <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
+            <label className="text-[10px] font-bold text-text-light/60 uppercase tracking-wider block mb-1">
               Buscar Tarea
             </label>
             <TableSearchInput
@@ -109,13 +109,13 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
           </div>
 
           <div>
-            <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
+            <label className="text-[10px] font-bold text-text-light/60 uppercase tracking-wider block mb-1">
               Categoría
             </label>
             <select
               value={categoryFilter}
               onChange={(e) => onCategoryFilterChange(e.target.value)}
-              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
             >
               <option value="ALL">Todas las Categorías</option>
               {categories.map((c) => (
@@ -127,13 +127,13 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
           </div>
 
           <div>
-            <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">
+            <label className="text-[10px] font-bold text-text-light/60 uppercase tracking-wider block mb-1">
               Frecuencia
             </label>
             <select
               value={frequencyFilter}
               onChange={(e) => onFrequencyFilterChange(e.target.value)}
-              className="w-full rounded-xl border border-border bg-dark/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
             >
               <option value="ALL">Todas las Frecuencias</option>
               <option value="DAILY">Diario</option>
@@ -146,9 +146,9 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-left text-sm text-gray-300">
-            <thead className="bg-dark/40 text-xs font-black text-white uppercase tracking-wider border-b border-border">
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <table className="w-full text-left text-sm text-text-light/80">
+            <thead className="bg-secondary/60 text-xs font-bold text-text-light uppercase tracking-wider border-b border-border">
               <tr>
                 <TableHeaderSortCell
                   field="name"
@@ -177,17 +177,19 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
             </thead>
             <tbody className="divide-y divide-border">
               {paginatedTasks.map((t) => (
-                <tr key={t.id} className="hover:bg-white/2">
-                  <td className="py-3 px-4 font-bold text-white">{t.name}</td>
+                <tr key={t.id} className="hover:bg-secondary/40 transition-colors">
+                  <td className="py-3 px-4 font-bold text-text-light">
+                    {t.name}
+                  </td>
                   <td className="py-3 px-4">
-                    <span className="rounded-lg bg-white/5 border border-border px-2.5 py-1 text-xs font-bold text-gray-300">
+                    <span className="rounded-md bg-secondary border border-border px-2.5 py-1 text-xs font-medium text-text-light/80">
                       {t.category?.name || "Sin categoría"}
                     </span>
                   </td>
-                  <td className="py-3 px-4 font-mono text-xs uppercase text-primary font-bold">
+                  <td className="py-3 px-4 font-mono text-xs uppercase text-primary font-bold tabular-nums">
                     {t.frequency_type}
                   </td>
-                  <td className="py-3 px-4 text-xs text-gray-400">
+                  <td className="py-3 px-4 text-xs text-text-light/60 font-mono tabular-nums">
                     {t.requires_photo ? "📷 Requiere Foto" : "Sin Foto"} |{" "}
                     {t.timeout_minutes} min
                   </td>
@@ -195,17 +197,17 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => onEditTask(t)}
-                        className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-2 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                        className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-2 text-blue-400 hover:bg-blue-500/20 transition-colors cursor-pointer"
                         title="Editar Tarea"
                       >
                         <Edit3 className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => onDeleteTask(t.id)}
-                        className={`rounded-lg border p-2 transition-colors ${
+                        className={`rounded-lg border p-2 transition-colors cursor-pointer ${
                           armedTaskId === t.id
-                            ? "bg-red-500 text-white border-red-600 animate-pulse"
-                            : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                            ? "bg-rose-500 text-white border-rose-600 animate-pulse"
+                            : "bg-rose-500/10 border-rose-500/20 text-rose-400 hover:bg-rose-500/20"
                         }`}
                         title={
                           armedTaskId === t.id
@@ -223,7 +225,7 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
                 <tr>
                   <td
                     colSpan={5}
-                    className="py-8 text-center text-xs text-gray-500 italic"
+                    className="py-8 text-center text-xs text-text-light/40 italic"
                   >
                     No hay tareas configuradas.
                   </td>

@@ -197,28 +197,29 @@ export function TareasClient({
   return (
     <div className="space-y-8">
       {/* Timeout Alert Modal */}
+      {/* Modal de Alerta de Timeout */}
       {timeoutAlert && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-card border border-red-500/30 p-6 rounded-2xl max-w-sm w-full space-y-4 shadow-2xl">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-card border border-rose-500/30 p-5 sm:p-6 rounded-xl max-w-sm w-full space-y-4 shadow-2xl">
             <div className="text-center">
-              <div className="rounded-2xl bg-red-500/10 p-4 text-red-400 w-16 h-16 mx-auto flex items-center justify-center mb-3 border border-red-500/20">
-                <Clock className="h-8 w-8 animate-pulse" />
+              <div className="rounded-lg bg-rose-500/10 p-3 text-rose-400 w-12 h-12 mx-auto flex items-center justify-center mb-2.5 border border-rose-500/20">
+                <Clock className="h-6 w-6 animate-pulse" />
               </div>
-              <h3 className="text-lg font-black text-text-light uppercase tracking-tight">
+              <h3 className="text-base font-bold text-text-light uppercase tracking-tight">
                 ¿Sigues trabajando en esto?
               </h3>
-              <p className="text-text-light/60 text-xs mt-2 font-medium">
+              <p className="text-text-light/60 text-xs mt-1.5 font-normal">
                 La tarea{" "}
-                <strong className="text-red-400 font-bold">
+                <strong className="text-rose-400 font-semibold">
                   &ldquo;{timeoutAlert.task.name}&rdquo;
                 </strong>{" "}
                 lleva activa más de {timeoutAlert.task.timeout_minutes} minutos.
               </p>
             </div>
-            <div className="flex flex-col space-y-2 pt-2">
+            <div className="flex flex-col space-y-2 pt-1">
               <button
                 onClick={() => setTimeoutAlert(null)}
-                className="bg-primary hover:bg-primary/90 text-white font-black text-xs uppercase tracking-wider py-3 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+                className="bg-primary hover:bg-secondary text-dark font-bold text-xs uppercase tracking-wider py-2.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer shadow-xs"
               >
                 Sí, sigo trabajando
               </button>
@@ -227,7 +228,7 @@ export function TareasClient({
                   handleComplete(timeoutAlert.exec, timeoutAlert.task);
                   setTimeoutAlert(null);
                 }}
-                className="bg-dark/40 border border-border hover:bg-white/10 text-text-light font-black text-xs uppercase tracking-wider py-3 rounded-xl transition-all active:scale-95 cursor-pointer"
+                className="bg-dark/60 border border-border hover:bg-white/10 text-text-light font-semibold text-xs uppercase tracking-wider py-2.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer"
               >
                 Olvidé cerrarla, Completar Ahora
               </button>
@@ -237,8 +238,8 @@ export function TareasClient({
       )}
 
       {/* Header Bar with Export */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-4 rounded-2xl border border-border">
-        <span className="text-xs font-black text-text-light uppercase tracking-wider">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3.5 sm:p-4 rounded-xl border border-border shadow-xs">
+        <span className="text-xs font-bold text-text-light uppercase tracking-wider">
           Checklist de Turno ({initialTasks.length} tareas)
         </span>
         <ExportButton
@@ -274,7 +275,7 @@ export function TareasClient({
       </div>
 
       {/* Task List Grouped by Category */}
-      <div className="space-y-10">
+      <div className="space-y-8">
         {Object.entries(
           initialTasks.reduce(
             (acc, task) => {
@@ -288,13 +289,14 @@ export function TareasClient({
             {} as { [categoryName: string]: PrimordialTask[] },
           ),
         ).map(([categoryName, tasks]) => (
-          <div key={categoryName} className="space-y-4">
-            <h2 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2.5 border-b border-border pb-3">
-              <span className="h-2 w-2 rounded-full bg-primary"></span>
-              <Folder className="h-4 w-4 text-primary" /> {categoryName}
+          <div key={categoryName} className="space-y-3.5">
+            <h2 className="text-sm sm:text-base font-bold text-text-light uppercase tracking-tight flex items-center gap-2 border-b border-border pb-2.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              <Folder className="h-4 w-4 text-primary" />
+              <span>{categoryName}</span>
             </h2>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               {tasks.map((task) => {
                 const activeExecution = executions.find(
                   (e) =>
@@ -305,23 +307,23 @@ export function TareasClient({
                 return (
                   <div
                     key={task.id}
-                    className={`p-6 rounded-2xl border transition-all duration-300 ${
+                    className={`p-4 sm:p-5 rounded-xl border transition-all duration-150 ${
                       activeExecution
-                        ? "bg-card border-primary/40 shadow-lg shadow-primary/5"
-                        : "bg-card border-border hover:border-border"
+                        ? "bg-card border-primary/50 shadow-xs"
+                        : "bg-card border-border hover:border-border/80"
                     }`}
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h3 className="text-lg font-black text-text-light tracking-tight uppercase">
+                        <h3 className="text-sm sm:text-base font-bold text-text-light tracking-tight">
                           {task.name}
                         </h3>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          <span className="rounded-full bg-white/5 border border-border px-3 py-1 text-[10px] font-black text-text-light/60 uppercase tracking-widest">
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                          <span className="rounded-md bg-white/5 border border-border px-2 py-0.5 text-[10px] font-semibold text-text-light/60 uppercase tracking-wider">
                             {task.frequency_type}
                           </span>
                           {task.requires_photo && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-[10px] font-black text-amber-400 uppercase tracking-widest">
+                            <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-300 uppercase tracking-wider">
                               <Camera className="h-3 w-3 text-amber-400" />{" "}
                               Evidencia Foto
                             </span>
@@ -331,9 +333,9 @@ export function TareasClient({
                     </div>
 
                     {activeExecution ? (
-                      <div className="mt-6 border-t border-border pt-4 space-y-4">
-                        <div className="flex justify-between items-center bg-dark/40 px-4 py-3 rounded-xl border border-border">
-                          <span className="text-xs font-black text-text-light/50 uppercase tracking-wider flex items-center gap-1.5">
+                      <div className="mt-4 border-t border-border pt-3.5 space-y-3.5">
+                        <div className="flex justify-between items-center bg-dark/60 px-3.5 py-2.5 rounded-lg border border-border">
+                          <span className="text-xs font-semibold text-text-light/60 uppercase tracking-wider flex items-center gap-1.5">
                             {activeExecution.status === "PAUSED" ? (
                               <>
                                 <Pause className="h-3.5 w-3.5 text-amber-400" />{" "}
@@ -365,7 +367,7 @@ export function TareasClient({
                                   e.target.files?.[0] || null,
                                 )
                               }
-                              className="block w-full text-xs text-text-light/60 file:mr-3 file:rounded-xl file:border-0 file:bg-white/10 file:px-4 file:py-2.5 file:text-xs file:font-black file:text-text-light hover:file:bg-white/20 file:transition-all cursor-pointer"
+                              className="block w-full text-xs text-text-light/60 file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-4 file:py-2.5 file:text-xs file:font-bold file:text-text-light hover:file:bg-secondary/80 file:transition-all cursor-pointer"
                             />
                             {photoErrors[activeExecution.id] && (
                               <p className="text-xs font-bold text-red-400 mt-1">
@@ -380,7 +382,7 @@ export function TareasClient({
                             <button
                               onClick={() => handlePause(activeExecution.id)}
                               disabled={loadingTaskId === activeExecution.id}
-                              className="inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-black text-xs uppercase tracking-wider py-3 px-4 rounded-xl flex-1 transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-md"
+                              className="inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg flex-1 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-xs"
                             >
                               <Pause className="h-4 w-4" /> Pausar
                             </button>
@@ -388,7 +390,7 @@ export function TareasClient({
                             <button
                               onClick={() => handleResume(activeExecution.id)}
                               disabled={loadingTaskId === activeExecution.id}
-                              className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-wider py-3 px-4 rounded-xl flex-1 transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-md"
+                              className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg flex-1 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-xs"
                             >
                               <RotateCcw className="h-4 w-4" /> Reanudar
                             </button>
@@ -399,7 +401,7 @@ export function TareasClient({
                               handleComplete(activeExecution, task)
                             }
                             disabled={loadingTaskId === activeExecution.id}
-                            className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider py-3 px-4 rounded-xl flex-1 transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-md"
+                            className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg flex-1 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-xs"
                           >
                             <CheckCircle2 className="h-4 w-4" /> Completar
                           </button>
@@ -409,7 +411,7 @@ export function TareasClient({
                       <button
                         onClick={() => handleStart(task.id)}
                         disabled={loadingTaskId === task.id}
-                        className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-black text-xs uppercase tracking-wider py-3 px-4 rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
+                        className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-primary hover:brightness-110 text-background font-bold text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg transition-all shadow-xs active:scale-[0.98] disabled:opacity-50 cursor-pointer"
                       >
                         <Play className="h-4 w-4 fill-current" />{" "}
                         {loadingTaskId === task.id
