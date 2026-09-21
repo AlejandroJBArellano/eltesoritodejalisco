@@ -257,12 +257,13 @@ export function createKittnMcpServer(config: KittnMcpConfig = {}) {
           },
         ],
       };
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
       return {
         content: [
           {
             type: "text",
-            text: `Error de conexión con KittnOS Gateway (${apiUrl}): ${err?.message || err}`,
+            text: `Error de conexión con KittnOS Gateway (${apiUrl}): ${errMsg}`,
           },
         ],
         isError: true,

@@ -8,7 +8,8 @@ export interface McpToolContext {
 export interface McpToolDefinition {
   name: string;
   description: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   execute: (args: any, ctx: McpToolContext) => Promise<any>;
 }
 
@@ -125,7 +126,24 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         throw new Error(`Error al obtener órdenes activas: ${error.message}`);
 
       const now = Date.now();
-      const formatted = (orders || []).map((o: any) => {
+      const formatted = (
+        (orders || []) as unknown as Array<{
+          id: string;
+          order_number: string | number;
+          table_number: string | number | null;
+          order_type: string;
+          status: string;
+          total: number;
+          created_at: string;
+          order_items?: Array<{
+            quantity: number;
+            notes?: string | null;
+            unit_price: number;
+            total_price: number;
+            menu_items?: { name: string } | null;
+          }>;
+        }>
+      ).map((o) => {
         const createdTime = new Date(o.created_at).getTime();
         const elapsedMinutes = Math.floor((now - createdTime) / 60000);
 
@@ -138,7 +156,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
           total: o.total,
           elapsed_minutes: elapsedMinutes,
           created_at: o.created_at,
-          items: (o.order_items || []).map((item: any) => ({
+          items: (o.order_items || []).map((item) => ({
             name: item.menu_items?.name || "Platillo",
             quantity: item.quantity,
             notes: item.notes,
@@ -352,7 +370,14 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         { id: string; name: string; quantity: number; revenue: number }
       > = {};
 
-      (items || []).forEach((row: any) => {
+      (
+        (items || []) as unknown as Array<{
+          menu_item_id?: string | null;
+          quantity?: number | string | null;
+          total_price?: number | string | null;
+          menu_items?: { name: string } | null;
+        }>
+      ).forEach((row) => {
         const id = row.menu_item_id || "unknown";
         const name = row.menu_items?.name || "Sin nombre";
         if (!itemMap[id]) {
@@ -480,7 +505,17 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         throw new Error(`Error al obtener receta: ${recipeError.message}`);
 
       let calculatedCost = 0;
-      const ingredients = (recipes || []).map((r: any) => {
+      const ingredients = (
+        (recipes || []) as unknown as Array<{
+          quantity?: number | string | null;
+          ingredients?: {
+            id: string;
+            name: string;
+            unit: string;
+            cost: number | string | null;
+          } | null;
+        }>
+      ).map((r) => {
         const unitCost = Number(r.ingredients?.cost) || 0;
         const qty = Number(r.quantity) || 0;
         const totalCost = unitCost * qty;
@@ -593,7 +628,12 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
       const categoryTotals: Record<string, number> = {};
       let totalAmount = 0;
 
-      (expenses || []).forEach((e: any) => {
+      (
+        (expenses || []) as unknown as Array<{
+          amount?: number | string | null;
+          expense_categories?: { name: string } | null;
+        }>
+      ).forEach((e) => {
         const cat = e.expense_categories?.name || "Sin categoría";
         const amt = Number(e.amount) || 0;
         categoryTotals[cat] = (categoryTotals[cat] || 0) + amt;

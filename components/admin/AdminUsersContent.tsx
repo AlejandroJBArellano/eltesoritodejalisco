@@ -359,31 +359,6 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
     }
   };
 
-  // Stats calculation
-  const totalAdmins = profiles.filter((p) => {
-    if (p.role === "ADMIN" || p.role === "MANAGER") return true;
-    const r = availableRoles.find((ar) => ar.id === p.role_id);
-    return r?.system_slug === "ADMIN" || r?.system_slug === "MANAGER";
-  }).length;
-
-  const totalWaiters = profiles.filter((p) => {
-    if (p.role === "WAITER") return true;
-    const r = availableRoles.find((ar) => ar.id === p.role_id);
-    return r?.system_slug === "WAITER";
-  }).length;
-
-  const totalChefs = profiles.filter((p) => {
-    if (p.role === "CHEF") return true;
-    const r = availableRoles.find((ar) => ar.id === p.role_id);
-    return r?.system_slug === "CHEF";
-  }).length;
-
-  const totalInventory = profiles.filter((p) => {
-    if (p.role === "INVENTORY") return true;
-    const r = availableRoles.find((ar) => ar.id === p.role_id);
-    return r?.system_slug === "INVENTORY";
-  }).length;
-
   const currentRoleInfo = getRoleBadgeConfig(
     selectedFormRole,
     availableRoles,

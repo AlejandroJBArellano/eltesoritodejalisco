@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import {
   PERMISSION_MODULES,
   ALL_PERMISSION_KEYS,
@@ -21,52 +21,43 @@ interface RoleEditorModalProps {
   onSaved: () => void;
 }
 
-export function RoleEditorModal({
-  isOpen,
+function RoleEditorModalContent({
   onClose,
   roleToEdit,
   isDuplicating = false,
   onSaved,
-}: RoleEditorModalProps) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+}: Omit<RoleEditorModalProps, "isOpen">) {
+  const [name, setName] = useState(() => {
+    if (!roleToEdit) return "";
+    return isDuplicating ? `${roleToEdit.name} (Copia)` : roleToEdit.name;
+  });
+
+  const [description, setDescription] = useState(() => {
+    if (!roleToEdit) return "";
+    if (isDuplicating) {
+      return roleToEdit.description
+        ? `Copia basada en ${roleToEdit.name}. ${roleToEdit.description}`
+        : `Copia personalizada de ${roleToEdit.name}`;
+    }
+    return roleToEdit.description || "";
+  });
+
   const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(
-    new Set(),
+    () => {
+      if (roleToEdit) {
+        const initialPerms = Array.isArray(roleToEdit.permissions)
+          ? (roleToEdit.permissions as string[]).includes("*")
+            ? ALL_PERMISSION_KEYS
+            : (roleToEdit.permissions as string[])
+          : [];
+        return new Set(initialPerms);
+      }
+      return new Set(["pos.view", "pos.create_order"]);
+    },
   );
+
   const [errorMsg, setErrorMsg] = useState("");
   const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    if (roleToEdit) {
-      if (isDuplicating) {
-        setName(`${roleToEdit.name} (Copia)`);
-        setDescription(
-          roleToEdit.description
-            ? `Copia basada en ${roleToEdit.name}. ${roleToEdit.description}`
-            : `Copia personalizada de ${roleToEdit.name}`,
-        );
-      } else {
-        setName(roleToEdit.name);
-        setDescription(roleToEdit.description || "");
-      }
-
-      const initialPerms = Array.isArray(roleToEdit.permissions)
-        ? (roleToEdit.permissions as string[]).includes("*")
-          ? ALL_PERMISSION_KEYS
-          : (roleToEdit.permissions as string[])
-        : [];
-      setSelectedPermissions(new Set(initialPerms));
-    } else {
-      setName("");
-      setDescription("");
-      setSelectedPermissions(new Set(["pos.view", "pos.create_order"]));
-    }
-    setErrorMsg("");
-  }, [isOpen, roleToEdit, isDuplicating]);
-
-  if (!isOpen) return null;
 
   const togglePermission = (key: PermissionKey) => {
     setSelectedPermissions((prev) => {
@@ -442,5 +433,29 @@ export function RoleEditorModal({
         </form>
       </div>
     </div>
+  );
+}
+
+export function RoleEditorModal({
+  isOpen,
+  onClose,
+  roleToEdit,
+  isDuplicating = false,
+  onSaved,
+}: RoleEditorModalProps) {
+  if (!isOpen) return null;
+
+  const modalKey = roleToEdit
+    ? `${roleToEdit.id}-${isDuplicating ? "copy" : "edit"}`
+    : "new-role";
+
+  return (
+    <RoleEditorModalContent
+      key={modalKey}
+      onClose={onClose}
+      roleToEdit={roleToEdit}
+      isDuplicating={isDuplicating}
+      onSaved={onSaved}
+    />
   );
 }

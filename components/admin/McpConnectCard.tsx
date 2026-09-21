@@ -7,11 +7,9 @@ import {
   Check,
   Key,
   ShieldCheck,
-  Terminal,
   Trash2,
   Sparkles,
   RefreshCw,
-  ExternalLink,
 } from "lucide-react";
 import {
   createTenantApiKeyAction,
@@ -69,8 +67,10 @@ export function McpConnectCard() {
         setCreatedKey(res.key.rawKey);
         await fetchKeys();
       }
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Error al generar la clave");
+    } catch (err: unknown) {
+      setErrorMsg(
+        err instanceof Error ? err.message : "Error al generar la clave",
+      );
     } finally {
       setLoading(false);
     }
@@ -90,8 +90,10 @@ export function McpConnectCard() {
         if (createdKey) setCreatedKey(null);
         await fetchKeys();
       }
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Error al revocar la clave");
+    } catch (err: unknown) {
+      setErrorMsg(
+        err instanceof Error ? err.message : "Error al revocar la clave",
+      );
     }
   };
 

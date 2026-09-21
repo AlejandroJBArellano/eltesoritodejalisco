@@ -27,14 +27,15 @@ export async function getProfile() {
   if (!profile) return null;
 
   // Fallback si la relación de foreign key no se resolvió automáticamente
-  if (!profile.role_data && (profile as any).role_id) {
+  const profileRecord = profile as Record<string, unknown>;
+  if (!profile.role_data && profileRecord.role_id) {
     const { data: roleData } = await supabase
       .from("roles")
       .select("*")
-      .eq("id", (profile as any).role_id)
+      .eq("id", profileRecord.role_id as string)
       .maybeSingle();
     if (roleData) {
-      (profile as any).role_data = roleData;
+      profileRecord.role_data = roleData;
     }
   }
 
@@ -59,7 +60,8 @@ export async function verifyManagerPin(tenantId: string, pin: string) {
 
   // Validar autorización de manager por rol tradicional o por permisos granulares
   const roleSlug = (manager.role || "").toUpperCase();
-  const perms = (manager.role_data as any)?.permissions || [];
+  const perms = (manager.role_data as { permissions?: string[] } | null)
+    ?.permissions || [];
   const isManagerOrAdmin =
     roleSlug === "ADMIN" ||
     roleSlug === "MANAGER" ||

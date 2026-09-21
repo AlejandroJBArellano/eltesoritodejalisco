@@ -89,12 +89,7 @@ export function SettingsProvider({
   const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  let router: ReturnType<typeof useRouter> | null = null;
-  try {
-    router = useRouter();
-  } catch {
-    // In testing environments without AppRouter context
-  }
+  const router = useRouter();
 
   const pickupUrl =
     typeof window !== "undefined" &&

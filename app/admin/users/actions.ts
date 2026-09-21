@@ -45,7 +45,11 @@ export async function createUser(formData: FormData) {
     let resolvedRoleId: string | null = rawRoleId || null;
 
     try {
-      let roleRecord: any = null;
+      let roleRecord: {
+        id: string;
+        name: string;
+        system_slug: string | null;
+      } | null = null;
       if (rawRoleId) {
         const res = await adminClient
           .from("roles")
@@ -142,7 +146,7 @@ export async function createUser(formData: FormData) {
       rawPin ||
       (resolvedRole === "ADMIN" || resolvedRole === "MANAGER" ? "1234" : null);
 
-    const profileUpsert: any = {
+    const profileUpsert: Record<string, unknown> = {
       id: userId,
       email: cleanEmail,
       full_name: fullName,
@@ -196,7 +200,11 @@ export async function updateUserRole(id: string, newRole: string) {
     let resolvedRoleId: string | null = null;
 
     try {
-      let roleRecord: any = null;
+      let roleRecord: {
+        id: string;
+        name: string;
+        system_slug: string | null;
+      } | null = null;
       if (isUUID) {
         const res = await adminClient
           .from("roles")
@@ -234,7 +242,7 @@ export async function updateUserRole(id: string, newRole: string) {
     }
 
     // 2. Actualizamos perfil
-    const updatePayload: any = { role: resolvedRole };
+    const updatePayload: Record<string, unknown> = { role: resolvedRole };
     if (resolvedRoleId) {
       updatePayload.role_id = resolvedRoleId;
     }

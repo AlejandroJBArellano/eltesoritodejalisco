@@ -183,9 +183,11 @@ export async function createCustomRole(data: {
 
     revalidatePath("/admin/users");
     return { success: true, role: newRole as RoleData };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[createCustomRole] Error:", err);
-    return { error: err.message || "Error al crear el rol." };
+    return {
+      error: err instanceof Error ? err.message : "Error al crear el rol.",
+    };
   }
 }
 
@@ -270,9 +272,11 @@ export async function updateCustomRole(
 
     revalidatePath("/admin/users");
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[updateCustomRole] Error:", err);
-    return { error: err.message || "Error al actualizar el rol." };
+    return {
+      error: err instanceof Error ? err.message : "Error al actualizar el rol.",
+    };
   }
 }
 
@@ -310,9 +314,11 @@ export async function duplicateRole(
         ? sourceRole.permissions
         : [],
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[duplicateRole] Error:", err);
-    return { error: err.message || "Error al duplicar el rol." };
+    return {
+      error: err instanceof Error ? err.message : "Error al duplicar el rol.",
+    };
   }
 }
 
@@ -402,8 +408,10 @@ export async function deleteCustomRole(
 
     revalidatePath("/admin/users");
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[deleteCustomRole] Error:", err);
-    return { error: err.message || "Error al eliminar el rol." };
+    return {
+      error: err instanceof Error ? err.message : "Error al eliminar el rol.",
+    };
   }
 }

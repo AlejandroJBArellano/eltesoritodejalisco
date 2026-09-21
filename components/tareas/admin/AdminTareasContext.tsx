@@ -21,7 +21,6 @@ import type {
   TaskExecution,
   TaskCategory,
   PrimordialTask,
-  TaskFrequency,
 } from "@/types";
 import type {
   AdminTareasTab,

@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { Award, DollarSign, Sparkles, Trophy } from "lucide-react";
+import { DollarSign, Sparkles, Trophy } from "lucide-react";
 import type { PerformanceKPIs } from "@/lib/services/performanceAnalytics";
 
 interface PerformanceSummaryKPIsProps {

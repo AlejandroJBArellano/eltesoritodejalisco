@@ -19,7 +19,6 @@ import type {
   CategoryExpenseItem,
   DailyExpenseTrendItem,
   Expense,
-  ExpenseCategoryType,
   ExpenseSortField,
   ExpenseTypeFilter,
   GastosSummary,

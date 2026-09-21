@@ -411,15 +411,17 @@ export function NewCampaignModal({
                 Frecuencia de Compra
               </label>
               <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: "Todos", value: "all" },
-                  { label: "Recurrentes (3+)", value: "recurrent" },
-                  { label: "Solo Inactivos", value: "inactive" },
-                ].map((item) => (
+                {(
+                  [
+                    { label: "Todos", value: "all" },
+                    { label: "Recurrentes (3+)", value: "recurrent" },
+                    { label: "Solo Inactivos", value: "inactive" },
+                  ] as const
+                ).map((item) => (
                   <button
                     key={item.value}
                     type="button"
-                    onClick={() => setFrequency(item.value as any)}
+                    onClick={() => setFrequency(item.value)}
                     className={`rounded-xl border py-2 text-xs font-bold transition-all cursor-pointer ${
                       frequency === item.value
                         ? "border-purple-400 bg-purple-500/15 text-purple-300 shadow-sm"

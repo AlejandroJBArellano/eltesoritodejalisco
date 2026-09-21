@@ -44,11 +44,14 @@ export async function POST(req: NextRequest) {
       tool,
       result,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error en MCP Gateway:", error);
     return NextResponse.json(
       {
-        error: error?.message || "Error interno al ejecutar la herramienta",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Error interno al ejecutar la herramienta",
       },
       { status: 500 },
     );

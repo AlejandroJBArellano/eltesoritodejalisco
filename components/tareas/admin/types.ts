@@ -1,9 +1,4 @@
-import type {
-  PrimordialTask,
-  TaskCategory,
-  TaskExecution,
-  TaskFrequency,
-} from "@/types";
+import type { TaskFrequency } from "@/types";
 
 export type AdminTareasTab = "history" | "performance" | "config";
 

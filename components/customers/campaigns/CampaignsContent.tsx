@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import {
@@ -9,7 +9,6 @@ import {
   ArrowLeft,
   Send,
   Users,
-  CheckCircle2,
   TrendingUp,
 } from "lucide-react";
 import {
