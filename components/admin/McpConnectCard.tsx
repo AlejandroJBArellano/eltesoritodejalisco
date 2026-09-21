@@ -17,7 +17,7 @@ import {
   createTenantApiKeyAction,
   listTenantApiKeysAction,
   revokeTenantApiKeyAction,
-} from "@/lib/mcp/auth";
+} from "@/lib/mcp/actions";
 
 interface ApiKeyItem {
   id: string;

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { McpConnectCard } from "../McpConnectCard";
-import * as authModule from "@/lib/mcp/auth";
+import * as actionsModule from "@/lib/mcp/actions";
 
-vi.mock("@/lib/mcp/auth", () => ({
+vi.mock("@/lib/mcp/actions", () => ({
   createTenantApiKeyAction: vi.fn(),
   listTenantApiKeysAction: vi.fn(),
   revokeTenantApiKeyAction: vi.fn(),
@@ -20,7 +20,7 @@ describe("McpConnectCard Component", () => {
   });
 
   it("should render header, 3-step guide and tabs", async () => {
-    vi.mocked(authModule.listTenantApiKeysAction).mockResolvedValueOnce({
+    vi.mocked(actionsModule.listTenantApiKeysAction).mockResolvedValueOnce({
       success: true,
       keys: [],
     });
@@ -38,7 +38,7 @@ describe("McpConnectCard Component", () => {
   });
 
   it("should list active keys when present", async () => {
-    vi.mocked(authModule.listTenantApiKeysAction).mockResolvedValueOnce({
+    vi.mocked(actionsModule.listTenantApiKeysAction).mockResolvedValueOnce({
       success: true,
       keys: [
         {
@@ -61,11 +61,11 @@ describe("McpConnectCard Component", () => {
   });
 
   it("should generate a new API key on click and show success banner", async () => {
-    vi.mocked(authModule.listTenantApiKeysAction).mockResolvedValue({
+    vi.mocked(actionsModule.listTenantApiKeysAction).mockResolvedValue({
       success: true,
       keys: [],
     });
-    vi.mocked(authModule.createTenantApiKeyAction).mockResolvedValueOnce({
+    vi.mocked(actionsModule.createTenantApiKeyAction).mockResolvedValueOnce({
       success: true,
       key: {
         id: "key-new",
@@ -93,7 +93,7 @@ describe("McpConnectCard Component", () => {
   });
 
   it("should switch tabs and copy snippet", async () => {
-    vi.mocked(authModule.listTenantApiKeysAction).mockResolvedValueOnce({
+    vi.mocked(actionsModule.listTenantApiKeysAction).mockResolvedValueOnce({
       success: true,
       keys: [],
     });
@@ -114,7 +114,7 @@ describe("McpConnectCard Component", () => {
 
   it("should revoke key when clicking delete button", async () => {
     vi.spyOn(window, "confirm").mockReturnValueOnce(true);
-    vi.mocked(authModule.listTenantApiKeysAction).mockResolvedValue({
+    vi.mocked(actionsModule.listTenantApiKeysAction).mockResolvedValue({
       success: true,
       keys: [
         {
@@ -127,7 +127,7 @@ describe("McpConnectCard Component", () => {
         },
       ],
     });
-    vi.mocked(authModule.revokeTenantApiKeyAction).mockResolvedValueOnce({
+    vi.mocked(actionsModule.revokeTenantApiKeyAction).mockResolvedValueOnce({
       success: true,
     });
 
@@ -141,7 +141,7 @@ describe("McpConnectCard Component", () => {
     fireEvent.click(deleteBtn);
 
     await waitFor(() => {
-      expect(authModule.revokeTenantApiKeyAction).toHaveBeenCalledWith("key-to-del");
+      expect(actionsModule.revokeTenantApiKeyAction).toHaveBeenCalledWith("key-to-del");
     });
   });
 });
