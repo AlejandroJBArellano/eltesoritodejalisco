@@ -17,22 +17,22 @@ export default function FloatingMobileBarPOS({
           setActiveTab("cart");
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}
-        className="w-full bg-card/95 backdrop-blur-md hover:bg-[#262626]/95 border border-primary/20 text-white rounded-2xl p-4 flex items-center justify-between shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
+        className="w-full bg-card/95 backdrop-blur-md hover:bg-card border border-primary/30 text-white rounded-xl p-3.5 flex items-center justify-between shadow-2xl transition-all active:scale-[0.99] cursor-pointer"
       >
         <div className="flex items-center gap-3">
-          <div className="bg-primary/20 border border-primary/30 h-10 w-10 rounded-xl flex items-center justify-center text-primary">
-            <ShoppingBag className="h-5 w-5" />
+          <div className="bg-primary/15 border border-primary/30 h-9 w-9 rounded-lg flex items-center justify-center text-primary">
+            <ShoppingBag className="h-4 w-4" />
           </div>
           <div className="text-left">
-            <p className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest leading-none mb-1">
+            <p className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider leading-none mb-1">
               Ver Pedido ({totalCartItems} items)
             </p>
-            <p className="text-lg font-black text-text-light">
+            <p className="text-base font-mono font-bold text-text-light tabular-nums">
               ${cartTotal.toFixed(2)}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 font-black text-xs text-primary uppercase tracking-wider">
+        <div className="flex items-center gap-1 font-bold text-xs text-primary uppercase tracking-wider">
           Continuar <ChevronRight className="h-4 w-4" />
         </div>
       </button>

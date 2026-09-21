@@ -96,14 +96,14 @@ export function POSManagerAuthModal({
 
   return (
     <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 z-50 no-print animate-in fade-in duration-200">
-      <div className="bg-card rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-border space-y-5">
+      <div className="bg-card rounded-xl max-w-sm w-full p-5 shadow-2xl border border-border space-y-4">
         <div className="flex justify-between items-center border-b border-border pb-3">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
               <ShieldCheck className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-text-light uppercase tracking-tight">
+              <h3 className="text-sm font-bold text-text-light uppercase tracking-tight">
                 {title}
               </h3>
               <p className="text-[10px] text-text-light/50 font-medium">
@@ -115,7 +115,7 @@ export function POSManagerAuthModal({
             type="button"
             onClick={onClose}
             disabled={isBusy}
-            className="text-text-light/40 hover:text-text-light transition-colors p-1 rounded-lg hover:bg-white/5 disabled:opacity-40"
+            className="text-text-light/40 hover:text-text-light transition-colors p-1.5 rounded-lg hover:bg-white/5 disabled:opacity-40 cursor-pointer"
             aria-label="Cerrar"
           >
             <X className="h-4 w-4" />
@@ -132,7 +132,7 @@ export function POSManagerAuthModal({
           <div>
             <label
               htmlFor="manager-pin-input"
-              className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-1.5 text-center"
+              className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider block mb-1.5 text-center"
             >
               Ingresa el PIN de 4 dígitos
             </label>
@@ -149,13 +149,13 @@ export function POSManagerAuthModal({
                 setPin(e.target.value.replace(/\D/g, ""));
               }}
               placeholder="••••"
-              className="w-full text-center text-2xl tracking-[0.4em] font-black p-3 border border-border bg-dark/60 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none text-text-light transition-all placeholder:tracking-normal placeholder:text-text-light/20"
+              className="w-full text-center text-2xl tracking-[0.4em] font-mono font-bold p-3 border border-border bg-secondary rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-text-light transition-all placeholder:tracking-normal placeholder:text-text-light/20"
             />
           </div>
 
           {reasonPresets.length > 0 && (
             <div>
-              <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-widest block mb-2">
+              <label className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider block mb-2">
                 Motivo (opcional)
               </label>
               <div className="flex flex-wrap gap-1.5 mb-2">
@@ -170,7 +170,7 @@ export function POSManagerAuthModal({
                         setSelectedReason(isSelected ? "" : r);
                         if (r !== "Otro") setCustomReason("");
                       }}
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${
+                      className={`text-[10px] font-bold px-2.5 py-1 rounded-md border transition-all cursor-pointer ${
                         isSelected
                           ? "bg-amber-500/20 border-amber-500/50 text-amber-300"
                           : "bg-white/5 border-border text-text-light/60 hover:text-text-light hover:bg-white/10"
@@ -186,7 +186,7 @@ export function POSManagerAuthModal({
                   onClick={() => {
                     setSelectedReason(selectedReason === "Otro" ? "" : "Otro");
                   }}
-                  className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${
+                  className={`text-[10px] font-bold px-2.5 py-1 rounded-md border transition-all cursor-pointer ${
                     selectedReason === "Otro"
                       ? "bg-amber-500/20 border-amber-500/50 text-amber-300"
                       : "bg-white/5 border-border text-text-light/60 hover:text-text-light hover:bg-white/10"
@@ -204,14 +204,14 @@ export function POSManagerAuthModal({
                   disabled={isBusy}
                   onChange={(e) => setCustomReason(e.target.value)}
                   placeholder="Especifica el motivo..."
-                  className="w-full text-xs font-medium p-2 border border-border bg-dark/40 rounded-xl focus:border-primary outline-none text-text-light placeholder:text-text-light/30"
+                  className="w-full text-xs font-medium p-2 border border-border bg-secondary rounded-lg focus:border-primary outline-none text-text-light placeholder:text-text-light/30"
                 />
               )}
             </div>
           )}
 
           {error && (
-            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold">
+            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold">
               <AlertTriangle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -222,14 +222,14 @@ export function POSManagerAuthModal({
               type="button"
               disabled={isBusy}
               onClick={onClose}
-              className="flex-1 py-2.5 text-xs rounded-xl font-black uppercase tracking-wider border border-border bg-white/5 text-text-light/60 hover:bg-white/10 hover:text-text-light transition-all"
+              className="flex-1 py-2.5 text-xs rounded-lg font-bold uppercase tracking-wider border border-border bg-white/5 text-text-light/60 hover:bg-white/10 hover:text-text-light transition-all active:scale-[0.98] cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isBusy || !pin.trim()}
-              className="flex-1 py-2.5 text-xs rounded-xl font-black uppercase tracking-wider bg-primary text-black hover:brightness-110 transition-all disabled:opacity-40 shadow-lg shadow-primary/10"
+              className="flex-1 py-2.5 text-xs rounded-lg font-bold uppercase tracking-wider bg-primary text-background hover:brightness-110 transition-all active:scale-[0.98] disabled:opacity-40 shadow-sm cursor-pointer"
             >
               {isBusy ? "Verificando..." : "Autorizar"}
             </button>

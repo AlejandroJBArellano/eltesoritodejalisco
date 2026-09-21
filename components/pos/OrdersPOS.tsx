@@ -328,7 +328,7 @@ export default function OrdersPOS({
                               setPaymentMethod("CASH");
                               setReceivedAmount("");
                             }}
-                            className="rounded-xl bg-success/10 hover:bg-success/20 text-success border border-success/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            className="rounded-lg bg-success/15 hover:bg-success/25 text-success border border-success/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
                           >
                             <DollarSign className="h-3 w-3" />
                             Cobrar
@@ -341,7 +341,7 @@ export default function OrdersPOS({
                             setShowKitchenTicket(true);
                             setShowTicket(false);
                           }}
-                          className="rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                          className="rounded-lg bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <ChefHat className="h-3 w-3" />
                           Comanda
@@ -350,7 +350,7 @@ export default function OrdersPOS({
                           <button
                             type="button"
                             onClick={() => setEditingOrder(order)}
-                            className="rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            className="rounded-lg bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
                           >
                             <Plus className="h-3 w-3" />
                             Agregar
@@ -360,7 +360,7 @@ export default function OrdersPOS({
                           <button
                             type="button"
                             onClick={() => openModifyModal(order)}
-                            className="rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            className="rounded-lg bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 border border-orange-500/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
                           >
                             <Edit3 className="h-3 w-3" />
                             Editar
@@ -377,7 +377,7 @@ export default function OrdersPOS({
                                   "0",
                               );
                             }}
-                            className="rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                            className="rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-blue-400 border border-blue-500/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
                           >
                             <HandCoins className="h-3 w-3" />
                             Propina
@@ -393,7 +393,7 @@ export default function OrdersPOS({
                                 handleUndoPayment(order.id);
                               }
                             }}
-                            className="rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95"
+                            className="rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                             title="Revertir pago (ventana de 3 min)"
                           >
                             <Undo2 className="h-3 w-3" />
@@ -420,7 +420,7 @@ export default function OrdersPOS({
                             setShowTicket(true);
                             setShowKitchenTicket(false);
                           }}
-                          className="rounded-xl bg-card-light hover:bg-card-light/80 text-text-light/70 border border-border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                          className="rounded-lg bg-card-light hover:bg-card-light/80 text-text-light/70 border border-border px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <Printer className="h-3 w-3" />
                           Ticket
@@ -433,9 +433,9 @@ export default function OrdersPOS({
                               disabled={
                                 isSubmittingCart || isSubmittingCheckout
                               }
-                              className={`rounded-xl p-1 text-[10px] font-black uppercase transition-all disabled:opacity-50 ${
+                              className={`rounded-lg p-1.5 text-[11px] font-bold uppercase transition-all disabled:opacity-50 cursor-pointer ${
                                 cancelArmedId === order.id
-                                  ? "bg-red-500/30 border border-red-500/50 text-red-300 px-2"
+                                  ? "bg-red-500/30 border border-red-500/50 text-red-300 px-2.5"
                                   : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
                               }`}
                               title={

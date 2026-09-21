@@ -218,16 +218,16 @@ export function SplitBillModal({
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-60 no-print">
-      <div className="bg-card rounded-[2.5rem] max-w-lg w-full p-8 shadow-2xl border border-border max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <div className="bg-card rounded-xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-border max-h-[92vh] overflow-y-auto custom-scrollbar">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
-            <Scissors className="h-5 w-5" /> Dividir Cuenta
+          <h3 className="text-lg font-bold text-text-light tracking-tight flex items-center gap-2">
+            <Scissors className="h-5 w-5 text-primary" /> Dividir Cuenta
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-600 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+            className="text-text-light/50 hover:text-text-light transition-colors p-1 rounded-md hover:bg-secondary cursor-pointer"
             aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
@@ -235,24 +235,24 @@ export function SplitBillModal({
         </div>
 
         {/* Total */}
-        <div className="text-center bg-white/5 py-4 rounded-2xl border border-border mb-6">
-          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+        <div className="text-center bg-secondary py-4 rounded-lg border border-border mb-6">
+          <p className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider">
             Total a dividir
           </p>
-          <p className="text-4xl font-black text-white tabular-nums">
+          <p className="text-3xl sm:text-4xl font-bold font-mono text-text-light tabular-nums">
             ${order.total.toFixed(2)}
           </p>
         </div>
 
         {/* Mode selector */}
-        <div className="flex gap-2 p-1 bg-white/5 rounded-2xl mb-6">
+        <div className="flex gap-2 p-1 bg-secondary rounded-lg mb-6">
           <button
             type="button"
             onClick={() => setMode("EQUAL")}
-            className={`flex-1 py-2 rounded-xl text-xs font-black uppercase transition-all ${
+            className={`flex-1 py-2 rounded-md text-xs font-bold uppercase transition-all cursor-pointer ${
               mode === "EQUAL"
-                ? "bg-[#89CFF0] text-black shadow-md"
-                : "text-zinc-500 hover:text-white"
+                ? "bg-primary text-background shadow-xs"
+                : "text-text-light/60 hover:text-text-light"
             }`}
           >
             Partes Iguales
@@ -260,10 +260,10 @@ export function SplitBillModal({
           <button
             type="button"
             onClick={() => setMode("ITEMS")}
-            className={`flex-1 py-2 rounded-xl text-xs font-black uppercase transition-all ${
+            className={`flex-1 py-2 rounded-md text-xs font-bold uppercase transition-all cursor-pointer ${
               mode === "ITEMS"
-                ? "bg-[#89CFF0] text-black shadow-md"
-                : "text-zinc-500 hover:text-white"
+                ? "bg-primary text-background shadow-xs"
+                : "text-text-light/60 hover:text-text-light"
             }`}
           >
             Por Artículos
@@ -272,7 +272,7 @@ export function SplitBillModal({
 
         {/* Part count */}
         <div className="mb-6">
-          <label className="text-[10px] font-black text-zinc-600 uppercase tracking-wider mb-2 block">
+          <label className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider mb-2 block">
             Número de Personas
           </label>
           <div className="flex items-center gap-3 justify-center">
@@ -280,18 +280,18 @@ export function SplitBillModal({
               type="button"
               onClick={() => handlePartCountChange(partCount - 1)}
               disabled={partCount <= 2}
-              className="w-10 h-10 rounded-xl bg-white/5 text-white font-black text-lg hover:bg-white/10 disabled:opacity-30 transition-all"
+              className="w-10 h-10 rounded-lg bg-secondary text-text-light font-bold text-lg hover:bg-secondary/80 disabled:opacity-30 transition-all cursor-pointer"
             >
               −
             </button>
-            <span className="text-3xl font-black text-white w-12 text-center tabular-nums">
+            <span className="text-2xl font-bold font-mono text-text-light w-12 text-center tabular-nums">
               {partCount}
             </span>
             <button
               type="button"
               onClick={() => handlePartCountChange(partCount + 1)}
               disabled={partCount >= 8}
-              className="w-10 h-10 rounded-xl bg-white/5 text-white font-black text-lg hover:bg-white/10 disabled:opacity-30 transition-all"
+              className="w-10 h-10 rounded-lg bg-secondary text-text-light font-bold text-lg hover:bg-secondary/80 disabled:opacity-30 transition-all cursor-pointer"
             >
               +
             </button>
@@ -301,12 +301,12 @@ export function SplitBillModal({
         {/* Items mode: assignment */}
         {mode === "ITEMS" && (
           <div className="mb-6 space-y-2">
-            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-wider mb-3">
+            <p className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider mb-3">
               Asignar Artículos
             </p>
             {!allItemsAssigned && (
-              <p className="text-[10px] text-yellow-400 font-black bg-yellow-500/10 p-2 rounded-xl border border-yellow-500/20 text-center mb-2 flex items-center justify-center gap-1.5">
-                <AlertTriangle className="h-3 w-3 shrink-0" /> Todos los
+              <p className="text-[11px] text-amber-400 font-bold bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20 text-center mb-2 flex items-center justify-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" /> Todos los
                 artículos deben asignarse
               </p>
             )}
@@ -323,13 +323,13 @@ export function SplitBillModal({
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 bg-white/5 p-3 rounded-2xl"
+                  className="flex items-center gap-3 bg-secondary/50 p-3 rounded-lg border border-border"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-black text-white text-xs uppercase truncate">
+                    <p className="font-bold text-text-light text-xs truncate">
                       {item.menuItem?.name || "Producto"}
                     </p>
-                    <p className="text-[10px] text-zinc-500 font-bold">
+                    <p className="text-[10px] text-text-light/50 font-mono tabular-nums">
                       {item.quantity > 1 ? `${item.quantity}× ` : ""}$
                       {(item.unitPrice * item.quantity).toFixed(2)}
                     </p>
@@ -344,7 +344,7 @@ export function SplitBillModal({
                             key={i}
                             className="flex flex-col items-center gap-0.5"
                           >
-                            <span className="text-[8px] text-zinc-500 font-black">
+                            <span className="text-[8px] text-text-light/50 font-bold">
                               {i + 1}
                             </span>
                             <input
@@ -374,22 +374,22 @@ export function SplitBillModal({
                                   },
                                 );
                               }}
-                              className={`w-10 h-8 text-center text-xs font-black rounded-lg border-2 bg-white/5 text-white outline-none transition-all ${
+                              className={`w-10 h-8 text-center text-xs font-mono font-bold rounded-lg border bg-secondary text-text-light outline-none transition-all tabular-nums ${
                                 isExact
-                                  ? "border-[#B2FBA5]"
-                                  : "border-border focus:border-white/30"
+                                  ? "border-emerald-500 text-emerald-400"
+                                  : "border-border focus:border-primary"
                               }`}
                             />
                           </div>
                         ),
                       )}
                       <div className="flex flex-col items-center gap-0.5 justify-end">
-                        <span className="text-[8px] text-zinc-500 font-black">
+                        <span className="text-[8px] text-text-light/50 font-bold">
                           ✓
                         </span>
                         <span
-                          className={`text-xs font-black tabular-nums h-8 flex items-center ${
-                            isExact ? "text-[#B2FBA5]" : "text-yellow-400"
+                          className={`text-xs font-mono font-bold tabular-nums h-8 flex items-center ${
+                            isExact ? "text-emerald-400" : "text-amber-400"
                           }`}
                         >
                           {assignedTotal}/{item.quantity}
@@ -412,10 +412,10 @@ export function SplitBillModal({
                                 }),
                               )
                             }
-                            className={`w-8 h-8 rounded-lg text-xs font-black transition-all ${
+                            className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                               singleAssignments[item.id] === n
-                                ? "bg-[#B2FBA5] text-black shadow-md"
-                                : "bg-white/10 text-zinc-500 hover:bg-white/20"
+                                ? "bg-emerald-500 text-background shadow-xs"
+                                : "bg-secondary text-text-light/60 hover:bg-secondary/80 hover:text-text-light"
                             }`}
                           >
                             {n}
@@ -446,14 +446,14 @@ export function SplitBillModal({
             return (
               <div
                 key={i}
-                className="bg-white/5 rounded-2xl p-4 border border-border space-y-3"
+                className="bg-secondary/40 rounded-xl p-4 border border-border space-y-3"
               >
                 {/* Part header */}
                 <div className="flex justify-between items-center">
-                  <span className="font-black text-white text-sm uppercase tracking-widest">
+                  <span className="font-bold text-text-light text-xs uppercase tracking-wider">
                     Persona {i + 1}
                   </span>
-                  <span className="font-black text-[#B2FBA5] text-lg tabular-nums">
+                  <span className="font-bold font-mono text-emerald-400 text-base tabular-nums">
                     ${amount.toFixed(2)}
                   </span>
                 </div>
@@ -465,10 +465,10 @@ export function SplitBillModal({
                       key={m.value}
                       type="button"
                       onClick={() => updatePart(i, "paymentMethod", m.value)}
-                      className={`py-2 text-[10px] rounded-xl font-black uppercase border-2 transition-all ${
+                      className={`py-2 text-[10px] rounded-lg font-bold uppercase border transition-all cursor-pointer ${
                         part.paymentMethod === m.value
-                          ? "border-[#89CFF0] bg-[#89CFF0] text-black shadow-md"
-                          : "border-border text-zinc-600 bg-white/5"
+                          ? "border-primary bg-primary/20 text-primary shadow-xs"
+                          : "border-border text-text-light/60 bg-secondary hover:text-text-light"
                       }`}
                     >
                       {m.label}
@@ -485,21 +485,21 @@ export function SplitBillModal({
                         updatePart(i, "tipType", "NONE");
                         updatePart(i, "tipInput", "");
                       }}
-                      className={`flex-1 py-1.5 text-[9px] rounded-lg font-black uppercase border-2 transition-all ${
+                      className={`flex-1 py-1 text-[10px] rounded-md font-bold uppercase border transition-all cursor-pointer ${
                         part.tipType === "NONE"
-                          ? "border-[#FFB7C5] bg-[#FFB7C5] text-black"
-                          : "border-border text-zinc-600 bg-white/5"
+                          ? "border-primary bg-primary/20 text-primary"
+                          : "border-border text-text-light/50 bg-secondary hover:text-text-light"
                       }`}
                     >
-                      Sin propina
+                      Sin Propina
                     </button>
                     <button
                       type="button"
                       onClick={() => updatePart(i, "tipType", "PERCENTAGE")}
-                      className={`flex-1 py-1.5 text-[9px] rounded-lg font-black uppercase border-2 transition-all ${
+                      className={`flex-1 py-1 text-[10px] rounded-md font-bold uppercase border transition-all cursor-pointer ${
                         part.tipType === "PERCENTAGE"
-                          ? "border-[#FFB7C5] bg-[#FFB7C5] text-black"
-                          : "border-border text-zinc-600 bg-white/5"
+                          ? "border-primary bg-primary/20 text-primary"
+                          : "border-border text-text-light/50 bg-secondary hover:text-text-light"
                       }`}
                     >
                       %
@@ -507,10 +507,10 @@ export function SplitBillModal({
                     <button
                       type="button"
                       onClick={() => updatePart(i, "tipType", "FIXED")}
-                      className={`flex-1 py-1.5 text-[9px] rounded-lg font-black uppercase border-2 transition-all ${
+                      className={`flex-1 py-1 text-[10px] rounded-md font-bold uppercase border transition-all cursor-pointer ${
                         part.tipType === "FIXED"
-                          ? "border-[#FFB7C5] bg-[#FFB7C5] text-black"
-                          : "border-border text-zinc-600 bg-white/5"
+                          ? "border-primary bg-primary/20 text-primary"
+                          : "border-border text-text-light/50 bg-secondary hover:text-text-light"
                       }`}
                     >
                       $ Fijo
@@ -524,10 +524,10 @@ export function SplitBillModal({
                           key={pct}
                           type="button"
                           onClick={() => updatePart(i, "tipInput", pct)}
-                          className={`flex-1 py-1.5 text-[9px] rounded-lg font-black uppercase border-2 transition-all ${
+                          className={`flex-1 py-1 text-[10px] rounded-md font-bold uppercase border transition-all cursor-pointer ${
                             part.tipInput === pct
-                              ? "border-[#B2FBA5] bg-[#B2FBA5] text-black"
-                              : "border-border text-zinc-600 bg-white/5"
+                              ? "border-emerald-500/40 bg-emerald-500/20 text-emerald-300"
+                              : "border-border text-text-light/50 bg-secondary hover:text-text-light"
                           }`}
                         >
                           {pct}%
@@ -547,10 +547,10 @@ export function SplitBillModal({
                         placeholder={
                           part.tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"
                         }
-                        className="flex-1 text-sm font-black p-2 border border-border bg-white/5 rounded-xl focus:border-[#FFB7C5] outline-none text-center text-white transition-all placeholder:text-zinc-800"
+                        className="flex-1 text-xs font-mono font-bold p-2 border border-border bg-secondary rounded-lg focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
                       />
                       {!isWaiter && tip > 0 && (
-                        <span className="text-[10px] font-black text-blue-400/60 whitespace-nowrap">
+                        <span className="text-[10px] font-mono font-bold text-blue-400 whitespace-nowrap tabular-nums">
                           +${tip.toFixed(2)}
                         </span>
                       )}
@@ -568,15 +568,15 @@ export function SplitBillModal({
                         updatePart(i, "receivedAmount", e.target.value)
                       }
                       placeholder="Efectivo recibido..."
-                      className="w-full text-lg font-black p-3 border border-border bg-white/5 rounded-2xl focus:border-[#B2FBA5] outline-none text-center text-white transition-all placeholder:text-zinc-800"
+                      className="w-full text-sm font-mono font-bold p-2.5 border border-border bg-secondary rounded-lg focus:border-emerald-400 outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
                     />
                     {part.receivedAmount &&
                       Number(part.receivedAmount) >= total && (
-                        <div className="flex justify-between items-center bg-white/5 p-2 rounded-xl border border-border">
-                          <span className="font-black text-zinc-600 text-[10px] uppercase">
+                        <div className="flex justify-between items-center bg-secondary p-2 rounded-lg border border-border">
+                          <span className="font-bold text-text-light/50 text-[10px] uppercase">
                             Cambio
                           </span>
-                          <span className="font-black text-[#B2FBA5] text-sm tabular-nums">
+                          <span className="font-mono font-bold text-emerald-400 text-xs tabular-nums">
                             ${change.toFixed(2)}
                           </span>
                         </div>
@@ -587,10 +587,10 @@ export function SplitBillModal({
                 {/* Total with tip */}
                 {tip > 0 && (
                   <div className="flex justify-between items-center pt-2 border-t border-border">
-                    <span className="text-[10px] font-black text-zinc-600 uppercase">
+                    <span className="text-[10px] font-bold text-text-light/50 uppercase">
                       {isWaiter ? "Total a pagar" : "Total con propina"}
                     </span>
-                    <span className="font-black text-white tabular-nums">
+                    <span className="font-mono font-bold text-text-light tabular-nums text-xs">
                       ${total.toFixed(2)}
                     </span>
                   </div>
@@ -601,19 +601,19 @@ export function SplitBillModal({
         </div>
 
         {/* Actions */}
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-2">
           <button
             type="button"
             onClick={handleConfirm}
             disabled={isSubmitting || !canConfirm}
-            className="w-full bg-[#B2FBA5] text-[#000000] py-4 rounded-full font-black text-lg hover:brightness-105 active:scale-[0.98] transition-all shadow-[0_0_20px_#B2FBA544] disabled:opacity-30 uppercase"
+            className="w-full bg-primary text-background py-3 rounded-lg font-bold text-xs hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-30 uppercase tracking-wider cursor-pointer shadow-xs"
           >
-            {isSubmitting ? "PROCESANDO..." : "REGISTRAR PAGOS"}
+            {isSubmitting ? "Procesando..." : "Registrar Pagos"}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="w-full bg-white/5 text-zinc-500 py-3 rounded-2xl font-black text-[10px] hover:bg-white/10 transition-all uppercase tracking-widest"
+            className="w-full bg-secondary text-text-light/60 py-2 rounded-lg font-bold text-xs hover:bg-secondary/80 hover:text-text-light transition-all uppercase tracking-wider cursor-pointer"
           >
             Cancelar
           </button>

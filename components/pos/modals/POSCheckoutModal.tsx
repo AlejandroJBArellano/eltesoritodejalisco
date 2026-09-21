@@ -277,20 +277,20 @@ export function POSCheckoutModal() {
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 md:p-6 z-50 no-print">
       <form
         onSubmit={handleSubmit}
-        className="bg-card rounded-2xl max-w-md md:max-w-4xl lg:max-w-5xl w-full p-4 sm:p-6 shadow-2xl border border-border max-h-[95vh] md:max-h-[90vh] flex flex-col overflow-hidden"
+        className="bg-card rounded-xl max-w-md md:max-w-4xl lg:max-w-5xl w-full p-4 sm:p-5 shadow-2xl border border-border max-h-[95vh] md:max-h-[90vh] flex flex-col overflow-hidden"
       >
         {/* Header */}
         <div className="flex justify-between items-center border-b border-border pb-3 shrink-0">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <span className="h-2.5 w-2.5 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse"></span>
-            <h2 className="text-base sm:text-lg font-black text-text-light uppercase tracking-tight">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <h2 className="text-base sm:text-lg font-bold text-text-light uppercase tracking-tight">
               Cobrar Orden #{checkoutOrder!.orderNumber}
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/5 border border-border text-text-light/80">
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-white/5 border border-border text-text-light/80">
               {formatServiceLabel(checkoutOrder.table)}
             </span>
             {checkoutOrder.customer?.name && (
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 border border-amber-500/30 text-amber-400">
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 border border-amber-500/30 text-amber-400">
                 Cliente: {checkoutOrder.customer.name}
               </span>
             )}
@@ -299,16 +299,16 @@ export function POSCheckoutModal() {
             type="button"
             onClick={() => setCheckoutOrder(null)}
             disabled={isSubmittingCheckout}
-            className="text-text-light/40 hover:text-text-light focus-visible:text-text-light focus-visible:bg-white/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-30 disabled:pointer-events-none transition-all p-1.5 rounded-lg hover:bg-white/10"
+            className="text-text-light/40 hover:text-text-light focus-visible:text-text-light focus-visible:bg-white/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-30 disabled:pointer-events-none transition-all p-1.5 rounded-lg hover:bg-white/10 cursor-pointer"
             aria-label="Cerrar"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Inline error */}
         {checkoutError && (
-          <div className="rounded-xl bg-red-500/10 p-3.5 border border-red-500/20 text-xs font-bold text-red-400 flex items-center gap-2.5 mt-3 shrink-0">
+          <div className="rounded-lg bg-red-500/10 p-3 border border-red-500/20 text-xs font-semibold text-red-400 flex items-center gap-2.5 mt-3 shrink-0">
             <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
             <span>{checkoutError}</span>
           </div>
@@ -316,14 +316,14 @@ export function POSCheckoutModal() {
 
         {/* Unusual tip confirmation banner */}
         {unusualTipInfo && (
-          <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3.5 space-y-2.5 mt-3 shrink-0">
+          <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 p-3 space-y-2.5 mt-3 shrink-0">
             <div className="flex items-start gap-2.5">
               <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-black text-amber-400 uppercase tracking-wide">
+                <p className="text-xs font-bold text-amber-400 uppercase tracking-wide">
                   Propina inusual
                 </p>
-                <p className="text-[11px] font-bold text-amber-400/80 mt-0.5">
+                <p className="text-[11px] font-semibold text-amber-400/80 mt-0.5 font-mono">
                   ${unusualTipInfo.amount.toFixed(2)} (
                   {unusualTipInfo.percentage.toFixed(1)}%) — ¿es correcto?
                 </p>
@@ -333,7 +333,7 @@ export function POSCheckoutModal() {
               <button
                 type="button"
                 onClick={() => setUnusualTipInfo(null)}
-                className="flex-1 py-1.5 text-[10px] rounded-xl font-black uppercase border border-border bg-white/5 text-text-light/60 hover:bg-white/10 hover:text-text-light hover:border-text-light/30 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none transition-all duration-200"
+                className="flex-1 py-1.5 text-[10px] rounded-lg font-bold uppercase border border-border bg-white/5 text-text-light/60 hover:bg-white/10 hover:text-text-light hover:border-text-light/30 focus-visible:ring-2 focus-visible:ring-primary outline-none transition-all cursor-pointer"
               >
                 Corregir
               </button>
@@ -341,7 +341,7 @@ export function POSCheckoutModal() {
                 type="button"
                 onClick={() => handleProcessPayment(true)}
                 disabled={isSubmittingCheckout}
-                className="flex-1 py-1.5 text-[10px] rounded-xl font-black uppercase border border-amber-500/40 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none transition-all duration-200 disabled:opacity-50"
+                className="flex-1 py-1.5 text-[10px] rounded-lg font-bold uppercase border border-amber-500/40 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500 outline-none transition-all disabled:opacity-50 cursor-pointer"
               >
                 Sí, confirmar
               </button>
@@ -355,13 +355,13 @@ export function POSCheckoutModal() {
           <div className="order-2 md:order-1 md:col-span-5 flex flex-col justify-between space-y-4 border-t md:border-t-0 md:border-r border-border pt-4 md:pt-0 md:pr-6">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-black text-text-light/70 uppercase tracking-wider flex items-center gap-1.5">
+                <h3 className="text-xs font-bold text-text-light/70 uppercase tracking-wider flex items-center gap-1.5">
                   <Receipt className="h-3.5 w-3.5 text-text-light/50" />
                   Resumen de la Orden
                 </h3>
                 {checkoutOrder.orderItems &&
                   checkoutOrder.orderItems.length > 0 && (
-                    <span className="text-[10px] font-bold text-text-light/40">
+                    <span className="text-[10px] font-mono font-semibold text-text-light/40">
                       {checkoutOrder.orderItems.length}{" "}
                       {checkoutOrder.orderItems.length === 1 ? "ítem" : "ítems"}
                     </span>
@@ -369,7 +369,7 @@ export function POSCheckoutModal() {
               </div>
 
               {/* Lista de productos */}
-              <div className="rounded-xl border border-border/60 bg-dark/30 p-2.5 max-h-45 md:max-h-55 overflow-y-auto custom-scrollbar divide-y divide-border/30">
+              <div className="rounded-lg border border-border bg-secondary/40 p-2.5 max-h-45 md:max-h-55 overflow-y-auto custom-scrollbar divide-y divide-border/30">
                 {checkoutOrder.orderItems &&
                 checkoutOrder.orderItems.length > 0 ? (
                   checkoutOrder.orderItems.map((item, idx) => (
@@ -379,8 +379,8 @@ export function POSCheckoutModal() {
                     >
                       <div className="flex justify-between items-start gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-black text-text-light truncate">
-                            <span className="text-primary font-black mr-1">
+                          <p className="text-xs font-semibold text-text-light truncate">
+                            <span className="text-primary font-bold mr-1">
                               {item.quantity}x
                             </span>
                             {item.menuItem?.name || "Producto"}
@@ -418,7 +418,7 @@ export function POSCheckoutModal() {
                               0;
                             if (itDiscount <= 0) return null;
                             return (
-                              <span className="text-[9px] font-bold text-emerald-400 block">
+                              <span className="text-[9px] font-mono font-bold text-emerald-400 block tabular-nums">
                                 -
                                 {formatDiscountBadge(
                                   item.discountType || rawIt.discount_type,
@@ -441,7 +441,7 @@ export function POSCheckoutModal() {
               </div>
 
               {/* Desglose Financiero */}
-              <div className="space-y-1.5 text-xs bg-white/5 p-3 rounded-xl border border-border">
+              <div className="space-y-1.5 text-xs bg-secondary/50 p-3 rounded-lg border border-border font-mono">
                 <div className="flex justify-between text-text-light/60">
                   <span>Subtotal bruto</span>
                   <span className="tabular-nums">
@@ -457,7 +457,7 @@ export function POSCheckoutModal() {
                   </div>
                 )}
                 {orderDiscount > 0 && (
-                  <div className="flex justify-between text-emerald-400 font-black">
+                  <div className="flex justify-between text-emerald-400 font-bold">
                     <span>
                       Descuento orden{" "}
                       {formatDiscountBadge(
@@ -475,7 +475,7 @@ export function POSCheckoutModal() {
                   </div>
                 )}
                 {tipAmountCalculated > 0 && (
-                  <div className="flex justify-between text-blue-400 font-bold">
+                  <div className="flex justify-between text-primary font-bold">
                     <span>Propina agregada</span>
                     <span className="tabular-nums">
                       +${tipAmountCalculated.toFixed(2)}
@@ -489,7 +489,7 @@ export function POSCheckoutModal() {
                     type="button"
                     onClick={() => setShowDiscountModal(true)}
                     disabled={isSubmittingCheckout || isApplyingDiscount}
-                    className={`text-[11px] font-black uppercase tracking-wider py-1 px-2.5 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
+                    className={`text-[11px] font-bold uppercase tracking-wider py-1 px-2.5 rounded-md border transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                       checkoutOrder.discountType ||
                       rawCheckoutOrder.discount_type
                         ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/25"
@@ -509,7 +509,7 @@ export function POSCheckoutModal() {
                       type="button"
                       disabled={isSubmittingCheckout || isApplyingDiscount}
                       onClick={handleRemoveOrderDiscount}
-                      className="text-[10px] font-black text-red-400/70 hover:text-red-400 uppercase tracking-wider cursor-pointer"
+                      className="text-[10px] font-bold text-red-400/70 hover:text-red-400 uppercase tracking-wider cursor-pointer"
                     >
                       Quitar
                     </button>
@@ -520,7 +520,7 @@ export function POSCheckoutModal() {
 
             {/* Opciones de Comanda */}
             <div className="space-y-2 pt-1">
-              <p className="text-[10px] font-black text-text-light/40 uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-text-light/40 uppercase tracking-wider">
                 Opciones de Comanda
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -528,7 +528,7 @@ export function POSCheckoutModal() {
                   type="button"
                   onClick={() => setShowSplitBill(true)}
                   disabled={isSubmittingCheckout}
-                  className="bg-blue-500/10 text-blue-400 border border-blue-500/20 py-2 rounded-xl font-black text-xs hover:bg-blue-500/20 hover:border-blue-500/30 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
+                  className="bg-primary/10 text-primary border border-primary/20 py-2 rounded-lg font-bold text-xs hover:bg-primary/20 hover:border-primary/30 outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
                 >
                   <Scissors className="h-3.5 w-3.5" /> Dividir Cuenta
                 </button>
@@ -540,7 +540,7 @@ export function POSCheckoutModal() {
                     openModifyModal(checkoutOrder!);
                     setCheckoutOrder(null);
                   }}
-                  className="bg-white/5 text-text-light/60 border border-border py-2 rounded-xl font-black text-xs hover:bg-white/10 hover:text-text-light hover:border-text-light/30 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="bg-white/5 text-text-light/60 border border-border py-2 rounded-lg font-bold text-xs hover:bg-white/10 hover:text-text-light hover:border-text-light/30 outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
                 >
                   Regresar a Editar
                 </button>
@@ -565,7 +565,7 @@ export function POSCheckoutModal() {
                     setShowCreditPrompt(true);
                   }}
                   disabled={isSubmittingCheckout}
-                  className="w-full bg-amber-500/10 text-amber-400 border border-amber-500/30 py-2 rounded-xl font-black text-xs hover:bg-amber-500/20 hover:border-amber-500/40 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
+                  className="w-full bg-amber-500/10 text-amber-400 border border-amber-500/30 py-2 rounded-lg font-bold text-xs hover:bg-amber-500/20 hover:border-amber-500/40 outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
                 >
                   <UserCheck className="h-3.5 w-3.5" /> A Crédito
                 </button>
@@ -574,8 +574,8 @@ export function POSCheckoutModal() {
                 {!Boolean(
                   checkoutOrder.customer || checkoutOrder.customerId,
                 ) && (
-                  <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-2.5 space-y-2">
-                    <p className="text-[10px] font-extrabold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 p-2.5 space-y-2">
+                    <p className="text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
                       <UserCheck className="h-3 w-3 text-amber-400" />
                       Asignar cliente a la comanda
                     </p>
@@ -585,7 +585,7 @@ export function POSCheckoutModal() {
                         value={selectedCustomerId}
                         onChange={(e) => setSelectedCustomerId(e.target.value)}
                         disabled={isAssigningCustomer || isSubmittingCheckout}
-                        className="flex-1 rounded-xl border border-border bg-dark/60 px-2.5 py-1.5 text-xs text-text-light outline-none focus:border-amber-400"
+                        className="flex-1 rounded-lg border border-border bg-secondary px-2.5 py-1.5 text-xs text-text-light outline-none focus:border-amber-400 cursor-pointer"
                       >
                         <option value="">Selecciona un cliente...</option>
                         {customers.map((c) => (
@@ -602,7 +602,7 @@ export function POSCheckoutModal() {
                           isSubmittingCheckout
                         }
                         onClick={handleAssignCustomer}
-                        className="rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs px-3 py-1.5 uppercase tracking-wider disabled:opacity-50 transition-all cursor-pointer shadow-sm"
+                        className="rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs px-3 py-1.5 uppercase tracking-wider disabled:opacity-50 transition-all cursor-pointer shadow-sm active:scale-[0.98]"
                       >
                         {isAssigningCustomer ? "..." : "Asignar"}
                       </button>
@@ -613,21 +613,21 @@ export function POSCheckoutModal() {
 
               {/* Prompt de Autorización de Crédito / PIN */}
               {showCreditPrompt && (
-                <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3.5 space-y-2.5">
+                <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 p-3.5 space-y-2.5">
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-black text-amber-400 uppercase tracking-wide">
+                      <p className="text-xs font-bold text-amber-400 uppercase tracking-wide">
                         {isWaiter
                           ? "Autorización de Gerencia Requerida"
                           : "Confirmar Venta a Crédito"}
                       </p>
-                      <p className="text-[11px] font-bold text-text-light/70 mt-0.5">
+                      <p className="text-[11px] font-semibold text-text-light/70 mt-0.5">
                         Cliente:{" "}
                         <span className="text-amber-400">
                           {checkoutOrder.customer?.name || "Asignado"}
                         </span>{" "}
-                        — ${checkoutOrder.total.toFixed(2)}
+                        — <span className="font-mono tabular-nums">${checkoutOrder.total.toFixed(2)}</span>
                       </p>
                     </div>
                   </div>
@@ -644,7 +644,7 @@ export function POSCheckoutModal() {
                           setManagerPin(e.target.value);
                         }}
                         placeholder="Ingresa PIN de 4 dígitos"
-                        className="w-full text-center text-base tracking-widest font-black p-2 border border-border bg-dark/60 rounded-xl focus:border-amber-400 outline-none text-text-light"
+                        className="w-full text-center text-base tracking-widest font-mono font-bold p-2 border border-border bg-secondary rounded-lg focus:border-amber-400 outline-none text-text-light"
                         autoFocus
                       />
                     </div>
@@ -665,7 +665,7 @@ export function POSCheckoutModal() {
                         setCreditAuthError(null);
                         setManagerPin("");
                       }}
-                      className="flex-1 py-1.5 text-[10px] rounded-xl font-black uppercase border border-border bg-white/5 text-text-light/60 hover:bg-white/10 hover:text-text-light transition-all"
+                      className="flex-1 py-1.5 text-[10px] rounded-lg font-bold uppercase border border-border bg-white/5 text-text-light/60 hover:bg-white/10 hover:text-text-light transition-all cursor-pointer"
                     >
                       Cancelar
                     </button>
@@ -705,7 +705,7 @@ export function POSCheckoutModal() {
                           handleCreditPayment();
                         }
                       }}
-                      className="flex-1 py-1.5 text-[10px] rounded-xl font-black uppercase border border-amber-500/50 bg-amber-500 text-black hover:brightness-110 transition-all disabled:opacity-50"
+                      className="flex-1 py-1.5 text-[10px] rounded-lg font-bold uppercase border border-amber-500/50 bg-amber-500 text-black hover:brightness-110 transition-all disabled:opacity-50 cursor-pointer active:scale-[0.98]"
                     >
                       {isVerifyingPin ? "Verificando..." : "Confirmar Crédito"}
                     </button>
@@ -714,7 +714,7 @@ export function POSCheckoutModal() {
               )}
 
               {creditAuthError && !showCreditPrompt && (
-                <div className="rounded-xl bg-red-500/10 p-2.5 border border-red-500/20 text-xs font-bold text-red-400 text-center">
+                <div className="rounded-lg bg-red-500/10 p-2.5 border border-red-500/20 text-xs font-semibold text-red-400 text-center">
                   {creditAuthError}
                 </div>
               )}
@@ -723,7 +723,7 @@ export function POSCheckoutModal() {
                 type="button"
                 onClick={() => handleFailedPayment()}
                 disabled={isSubmittingCheckout}
-                className="w-full bg-red-500/10 text-red-400 border border-red-500/20 py-2 rounded-xl font-black text-xs hover:bg-red-500/20 hover:border-red-500/30 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider cursor-pointer"
+                className="w-full bg-red-500/10 text-red-400 border border-red-500/20 py-2 rounded-lg font-bold text-xs hover:bg-red-500/20 hover:border-red-500/30 outline-none disabled:opacity-50 disabled:pointer-events-none transition-all uppercase tracking-wider cursor-pointer active:scale-[0.98]"
               >
                 Marcar como Pago Fallido
               </button>
@@ -734,15 +734,15 @@ export function POSCheckoutModal() {
           <div className="order-1 md:order-2 md:col-span-7 flex flex-col justify-between space-y-4">
             <div className="space-y-4">
               {/* Tarjeta de Total a Pagar */}
-              <div className="text-center bg-dark/50 py-4 sm:py-5 rounded-2xl border border-border/80 shadow-inner space-y-1">
-                <p className="text-text-light/40 text-[10px] font-black uppercase tracking-widest">
+              <div className="text-center bg-secondary/50 py-4 sm:py-5 rounded-xl border border-border shadow-inner space-y-1">
+                <p className="text-text-light/40 text-[10px] font-bold uppercase tracking-wider">
                   Total a Pagar
                 </p>
-                <p className="text-3xl sm:text-4xl font-black text-text-light tabular-nums tracking-tight">
+                <p className="text-3xl sm:text-4xl font-mono font-bold text-text-light tabular-nums tracking-tight">
                   ${exactTotalDue.toFixed(2)}
                 </p>
                 {!isWaiter && tipAmountCalculated > 0 && (
-                  <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/10 text-blue-400 border border-blue-500/25 uppercase tracking-wider">
+                  <span className="inline-block mt-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-primary/10 text-primary border border-primary/25 uppercase tracking-wider font-mono tabular-nums">
                     Incluye ${tipAmountCalculated.toFixed(2)} de propina
                   </span>
                 )}
@@ -751,8 +751,8 @@ export function POSCheckoutModal() {
               {/* Flujo de Cortesía ($0.00) vs Cobro Estándar */}
               {checkoutOrder.total === 0 && tipAmountCalculated === 0 ? (
                 <div className="space-y-3 pt-2">
-                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-center space-y-1">
-                    <p className="text-xs font-black text-emerald-400 uppercase tracking-wider">
+                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 text-center space-y-1">
+                    <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
                       Orden 100% Bonificada / Cortesía
                     </p>
                     <p className="text-[11px] font-medium text-emerald-400/80">
@@ -769,7 +769,7 @@ export function POSCheckoutModal() {
                         handleCourtesyPayment();
                       }
                     }}
-                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 py-3.5 rounded-xl font-black text-base transition-all uppercase tracking-wider shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 py-3.5 rounded-lg font-bold text-base transition-all uppercase tracking-wider shadow-sm cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98]"
                   >
                     {isSubmittingCheckout
                       ? "Procesando..."
@@ -780,7 +780,7 @@ export function POSCheckoutModal() {
                 <>
                   {/* Selector de Propina */}
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-text-light/40 uppercase tracking-widest block">
+                    <label className="text-[10px] font-bold text-text-light/40 uppercase tracking-wider block">
                       Propina
                     </label>
                     <div className="flex gap-2">
@@ -791,7 +791,7 @@ export function POSCheckoutModal() {
                           setTipType("NONE");
                           setTipInput("");
                         }}
-                        className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${
+                        className={`flex-1 py-2 text-[10px] rounded-lg font-bold uppercase border outline-none transition-all cursor-pointer active:scale-[0.98] ${
                           tipType === "NONE"
                             ? "bg-primary/20 border-primary text-primary"
                             : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
@@ -803,7 +803,7 @@ export function POSCheckoutModal() {
                         type="button"
                         disabled={isSubmittingCheckout}
                         onClick={() => setTipType("PERCENTAGE")}
-                        className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${
+                        className={`flex-1 py-2 text-[10px] rounded-lg font-bold uppercase border outline-none transition-all cursor-pointer active:scale-[0.98] ${
                           tipType === "PERCENTAGE"
                             ? "bg-primary/20 border-primary text-primary"
                             : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
@@ -815,7 +815,7 @@ export function POSCheckoutModal() {
                         type="button"
                         disabled={isSubmittingCheckout}
                         onClick={() => setTipType("FIXED")}
-                        className={`flex-1 py-2 text-[10px] rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${
+                        className={`flex-1 py-2 text-[10px] rounded-lg font-bold uppercase border outline-none transition-all cursor-pointer active:scale-[0.98] ${
                           tipType === "FIXED"
                             ? "bg-primary/20 border-primary text-primary"
                             : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
@@ -825,7 +825,7 @@ export function POSCheckoutModal() {
                       </button>
                     </div>
 
-                    <p className="text-[10px] font-black text-text-light/30 uppercase tracking-widest pt-1">
+                    <p className="text-[10px] font-bold text-text-light/30 uppercase tracking-wider pt-1">
                       Acceso Rápido
                     </p>
                     <div className="grid grid-cols-3 gap-2">
@@ -838,9 +838,9 @@ export function POSCheckoutModal() {
                             setTipType("PERCENTAGE");
                             setTipInput(pct);
                           }}
-                          className={`py-2 text-xs rounded-xl font-black uppercase border outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 ${
+                          className={`py-2 text-xs rounded-lg font-mono font-bold uppercase border outline-none transition-all cursor-pointer active:scale-[0.98] ${
                             tipType === "PERCENTAGE" && tipInput === pct
-                              ? "bg-primary text-black border-primary shadow-lg shadow-primary/10"
+                              ? "bg-primary text-background border-primary shadow-sm"
                               : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
                           }`}
                         >
@@ -860,14 +860,14 @@ export function POSCheckoutModal() {
                             ? "% Ej. 10"
                             : "$ Monto propina"
                         }
-                        className="w-full text-base font-black p-2.5 border border-border bg-dark/40 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-center text-text-light transition-all duration-200 placeholder:text-text-light/30 disabled:opacity-50"
+                        className="w-full text-base font-mono font-bold p-2.5 border border-border bg-secondary rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-center text-text-light transition-all placeholder:text-text-light/30 disabled:opacity-50"
                       />
                     )}
                   </div>
 
                   {/* Método de Pago */}
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-text-light/40 uppercase tracking-widest block">
+                    <label className="text-[10px] font-bold text-text-light/40 uppercase tracking-wider block">
                       Método de Pago
                     </label>
                     <div className="grid grid-cols-3 gap-2">
@@ -879,9 +879,9 @@ export function POSCheckoutModal() {
                             type="button"
                             disabled={isSubmittingCheckout}
                             onClick={() => setPaymentMethod(m.value)}
-                            className={`py-2.5 text-xs rounded-xl font-black uppercase border flex flex-col items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-card transition-all duration-200 disabled:opacity-50 ${
+                            className={`py-2.5 text-xs rounded-lg font-bold uppercase border flex flex-col items-center gap-1.5 outline-none transition-all disabled:opacity-50 cursor-pointer active:scale-[0.98] ${
                               paymentMethod === m.value
-                                ? "border-blue-400 bg-blue-500/10 text-blue-400 shadow-lg shadow-blue-500/5"
+                                ? "border-primary bg-primary/15 text-primary shadow-sm"
                                 : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
                             }`}
                           >
@@ -901,7 +901,7 @@ export function POSCheckoutModal() {
                         value={receivedAmount}
                         disabled={isSubmittingCheckout}
                         onChange={(e) => setReceivedAmount(e.target.value)}
-                        className="w-full text-2xl sm:text-3xl font-black p-3 border border-border bg-dark/40 rounded-xl focus:border-success focus:ring-2 focus:ring-success/20 outline-none text-center text-text-light transition-all duration-200 placeholder:text-text-light/20 disabled:opacity-50"
+                        className="w-full text-2xl sm:text-3xl font-mono font-bold p-3 border border-border bg-secondary rounded-lg focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-center text-text-light transition-all placeholder:text-text-light/20 disabled:opacity-50"
                         placeholder="Monto recibido ($)..."
                         autoFocus
                       />
@@ -914,7 +914,7 @@ export function POSCheckoutModal() {
                           onClick={() =>
                             setReceivedAmount(exactTotalDue.toFixed(2))
                           }
-                          className="flex-1 py-1.5 px-2 rounded-lg bg-white/5 hover:bg-white/10 border border-border text-[10px] font-black uppercase text-text-light/70 hover:text-text-light transition-all"
+                          className="flex-1 py-1.5 px-2 rounded-lg bg-white/5 hover:bg-white/10 border border-border text-[10px] font-mono font-bold uppercase text-text-light/70 hover:text-text-light transition-all cursor-pointer active:scale-[0.98]"
                         >
                           Exacto (${exactTotalDue.toFixed(2)})
                         </button>
@@ -924,19 +924,19 @@ export function POSCheckoutModal() {
                             type="button"
                             disabled={isSubmittingCheckout}
                             onClick={() => setReceivedAmount(preset.toString())}
-                            className="py-1.5 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-border text-[10px] font-black uppercase text-text-light/70 hover:text-text-light transition-all"
+                            className="py-1.5 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-border text-[10px] font-mono font-bold uppercase text-text-light/70 hover:text-text-light transition-all cursor-pointer active:scale-[0.98]"
                           >
                             ${preset}
                           </button>
                         ))}
                       </div>
 
-                      <div className="flex justify-between items-center bg-dark/45 p-3 rounded-xl border border-border/80 shadow-inner">
-                        <span className="font-black text-text-light/40 text-xs uppercase tracking-widest">
+                      <div className="flex justify-between items-center bg-secondary p-3 rounded-lg border border-border">
+                        <span className="font-bold text-text-light/40 text-xs uppercase tracking-wider">
                           Cambio a Entregar
                         </span>
                         <span
-                          className={`text-xl sm:text-2xl font-black tabular-nums transition-all duration-200 ${change > 0 ? "text-success" : "text-text-light/40"}`}
+                          className={`text-xl sm:text-2xl font-mono font-bold tabular-nums transition-all ${change > 0 ? "text-emerald-400" : "text-text-light/40"}`}
                         >
                           ${change.toFixed(2)}
                         </span>
@@ -952,7 +952,7 @@ export function POSCheckoutModal() {
               <button
                 type="submit"
                 disabled={isSubmitDisabled}
-                className="w-full bg-success text-white py-3.5 sm:py-4 rounded-xl font-black text-base hover:brightness-110 active:scale-[0.98] shadow-lg shadow-success/20 focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-2 focus-visible:ring-offset-card outline-none disabled:opacity-30 disabled:pointer-events-none transition-all uppercase tracking-wider cursor-pointer"
+                className="w-full bg-primary text-background py-3.5 sm:py-4 rounded-lg font-bold text-base hover:brightness-110 active:scale-[0.98] shadow-sm outline-none disabled:opacity-30 disabled:pointer-events-none transition-all uppercase tracking-wider cursor-pointer"
               >
                 {isSubmittingCheckout ? "Procesando..." : "Registrar Pago"}
               </button>
