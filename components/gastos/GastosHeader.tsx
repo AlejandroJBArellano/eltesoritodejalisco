@@ -27,7 +27,7 @@ export function GastosHeader(props: GastosHeaderProps = {}) {
           <button
             type="button"
             onClick={onOpenExpenseModal}
-            className="rounded-xl bg-primary px-4 py-2 text-xs font-black text-black hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-primary/20 active:scale-95"
+            className="rounded-lg bg-primary px-4 py-2 text-xs font-black text-background hover:brightness-105 transition-all uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-primary/20 active:scale-95"
           >
             <Plus className="h-4 w-4" />
             Registrar Gasto
@@ -35,7 +35,7 @@ export function GastosHeader(props: GastosHeaderProps = {}) {
           <button
             type="button"
             onClick={onOpenCategoryModal}
-            className="rounded-xl bg-white/5 border border-border px-4 py-2 text-xs font-bold text-text-light hover:bg-white/10 transition-all uppercase tracking-wider flex items-center gap-1.5 active:scale-95"
+            className="rounded-lg bg-secondary border border-border px-4 py-2 text-xs font-bold text-text-light hover:bg-card-light transition-all uppercase tracking-wider flex items-center gap-1.5 active:scale-95"
           >
             <Plus className="h-4 w-4 text-primary" />
             Nueva Categoría

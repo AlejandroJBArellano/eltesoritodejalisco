@@ -39,7 +39,7 @@ function GastosMainView() {
   if (errorMessage && expenses.length === 0 && categories.length === 0) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
-        <div className="rounded-2xl bg-card p-8 shadow-sm border border-red-500/20 max-w-md">
+        <div className="rounded-xl bg-card p-8 shadow-xs border border-red-500/20 max-w-md">
           <AlertTriangle className="mx-auto h-12 w-12 text-red-400 mb-4" />
           <h2 className="text-lg font-black text-text-light uppercase tracking-tight mb-2">
             Error al Cargar Gastos
@@ -48,7 +48,7 @@ function GastosMainView() {
           <button
             type="button"
             onClick={() => fetchData(currentMonth)}
-            className="rounded-xl bg-primary px-6 py-2.5 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 transition-all"
+            className="rounded-lg bg-primary px-6 py-2.5 text-xs font-black text-background uppercase tracking-wider hover:brightness-105 transition-all"
           >
             Reintentar
           </button>

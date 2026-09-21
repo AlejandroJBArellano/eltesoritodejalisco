@@ -103,7 +103,7 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
   return (
     <div className="space-y-8">
       {/* 1. Gráfica Lineal: Gastos Fijos vs Gastos Variables */}
-      <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-6">
+      <section className="rounded-xl bg-card p-6 shadow-xs border border-border space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
           <h2 className="text-base font-black text-text-light uppercase tracking-wider flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-amber-400" />
@@ -111,8 +111,8 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
           </h2>
 
           {/* Leyendas con totales */}
-          <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
-            <div className="flex items-center gap-2 bg-dark/40 px-3 py-1.5 rounded-xl border border-border">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-mono tabular-nums">
+            <div className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-lg border border-border">
               <span className="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
               <div>
                 <span className="text-text-light/40 font-bold uppercase text-[9px] block">
@@ -124,7 +124,7 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 bg-dark/40 px-3 py-1.5 rounded-xl border border-border">
+            <div className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-lg border border-border">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
               <div>
                 <span className="text-text-light/40 font-bold uppercase text-[9px] block">
@@ -269,18 +269,18 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
                       }%`,
                       top: "5%",
                     }}
-                    className="absolute pointer-events-none -translate-x-1/2 z-20 rounded-xl border border-border bg-dark/95 p-3 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap"
+                    className="absolute pointer-events-none -translate-x-1/2 z-20 rounded-lg border border-border bg-card p-3 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap"
                   >
-                    <p className="font-bold text-white mb-1">
+                    <p className="font-bold text-text-light mb-1">
                       {dailyExpensesData[hoveredDailyIndex].date}
                     </p>
-                    <p className="text-amber-400 font-extrabold flex justify-between gap-3">
+                    <p className="text-amber-400 font-extrabold flex justify-between gap-3 font-mono tabular-nums">
                       <span>Fijos:</span>
                       <span>
                         ${dailyExpensesData[hoveredDailyIndex].fijos.toFixed(2)}
                       </span>
                     </p>
-                    <p className="text-emerald-400 font-extrabold flex justify-between gap-3">
+                    <p className="text-emerald-400 font-extrabold flex justify-between gap-3 font-mono tabular-nums">
                       <span>Variables:</span>
                       <span>
                         $
@@ -301,7 +301,7 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
       </section>
 
       {/* 2. Gráfica de Distribución por Categoría de Gasto */}
-      <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-6">
+      <section className="rounded-xl bg-card p-6 shadow-xs border border-border space-y-6">
         <div className="flex items-center justify-between border-b border-border pb-4">
           <h2 className="text-base font-black text-text-light uppercase tracking-wider flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-purple-400" />
@@ -336,7 +336,7 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
                           {cat.name}
                         </span>
                         <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase ${
+                          className={`text-[9px] px-1.5 py-0.5 rounded-md font-black uppercase ${
                             cat.tipo === "fijo"
                               ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                               : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
@@ -345,13 +345,13 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
                           {cat.tipo}
                         </span>
                       </div>
-                      <span className="font-black text-text-light shrink-0">
+                      <span className="font-black text-text-light shrink-0 font-mono tabular-nums">
                         ${cat.value.toFixed(2)}
                       </span>
                     </div>
 
                     {/* Progress track */}
-                    <div className="h-2.5 w-full bg-dark/60 border border-border/60 rounded-full overflow-hidden p-0.5">
+                    <div className="h-2 w-full bg-secondary border border-border rounded-full overflow-hidden p-0.5">
                       <div
                         className="h-full rounded-full transition-all duration-500 ease-out"
                         style={{
@@ -363,8 +363,8 @@ export function GastosChartsSection(props: GastosChartsSectionProps = {}) {
 
                     {/* Tooltip on hover */}
                     {isHovered && (
-                      <div className="absolute right-0 bottom-full mb-1 z-20 pointer-events-none rounded-xl border border-border bg-dark/95 p-2.5 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap">
-                        <p className="font-black text-white">{cat.name}</p>
+                      <div className="absolute right-0 bottom-full mb-1 z-20 pointer-events-none rounded-lg border border-border bg-card p-2.5 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap font-mono tabular-nums">
+                        <p className="font-black text-text-light font-sans">{cat.name}</p>
                         <p className="text-[11px] text-text-light/70 font-medium">
                           Gasto Acumulado: ${cat.value.toFixed(2)}
                         </p>

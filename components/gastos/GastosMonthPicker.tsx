@@ -35,7 +35,7 @@ export function GastosMonthPicker(props: GastosMonthPickerProps = {}) {
           value={currentMonth}
           onChange={(e) => onMonthChange?.(e.target.value)}
           aria-label="Seleccionar mes"
-          className="rounded-xl border border-border bg-card px-4 py-2 text-xs font-bold text-text-light outline-none focus:border-primary transition-all scheme-dark cursor-pointer"
+          className="rounded-lg border border-border bg-secondary px-4 py-2 text-xs font-bold text-text-light outline-none focus:border-primary transition-all scheme-dark cursor-pointer font-mono tabular-nums"
         />
       </div>
     </div>

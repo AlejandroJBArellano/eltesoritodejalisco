@@ -21,7 +21,7 @@ export function GastosCategoriesGrid(props: GastosCategoriesGridProps = {}) {
   const onEditCategory =
     props.onEditCategory ?? context?.handleOpenEditCategory ?? (() => {});
   return (
-    <section className="rounded-2xl bg-card p-6 shadow-sm border border-border space-y-4">
+    <section className="rounded-xl bg-card p-6 shadow-xs border border-border space-y-4">
       <div className="flex items-center justify-between border-b border-border pb-3">
         <h2 className="text-sm font-black text-text-light uppercase tracking-wider flex items-center gap-2">
           <Tag className="h-4 w-4 text-purple-400" />
@@ -40,11 +40,11 @@ export function GastosCategoriesGrid(props: GastosCategoriesGridProps = {}) {
         {categories.map((cat) => (
           <div
             key={cat.id}
-            className="flex items-center justify-between p-3.5 rounded-xl bg-dark/40 border border-border hover:border-border transition-colors"
+            className="flex items-center justify-between p-3.5 rounded-lg bg-secondary border border-border hover:border-border/80 transition-colors"
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <span
-                className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
+                className="w-3 h-3 rounded-full shrink-0 shadow-xs"
                 style={{ backgroundColor: cat.color }}
               />
               <span className="text-xs text-text-light font-black uppercase truncate">
@@ -53,7 +53,7 @@ export function GastosCategoriesGrid(props: GastosCategoriesGridProps = {}) {
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <span
-                className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider ${
+                className={`text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-wider ${
                   cat.tipo_gasto === "fijo"
                     ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                     : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
@@ -64,7 +64,7 @@ export function GastosCategoriesGrid(props: GastosCategoriesGridProps = {}) {
               <button
                 type="button"
                 onClick={() => onEditCategory(cat)}
-                className="text-xs text-text-light/40 hover:text-text-light p-1 transition-colors rounded-lg hover:bg-white/10"
+                className="text-xs text-text-light/40 hover:text-text-light p-1 transition-colors rounded-md hover:bg-card-light"
                 title={`Editar categoría ${cat.name}`}
                 aria-label={`Editar categoría ${cat.name}`}
               >

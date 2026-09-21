@@ -39,7 +39,7 @@ export function GastosFilterBar(props: GastosFilterBarProps = {}) {
   const onTypeFilterChange =
     props.onTypeFilterChange ?? context?.handleTypeFilterChange ?? (() => {});
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-secondary/60 p-4 rounded-lg border border-border">
       {/* Buscador por texto */}
       <div>
         <label
@@ -56,14 +56,14 @@ export function GastosFilterBar(props: GastosFilterBarProps = {}) {
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Descripción o categoría..."
-            className="w-full rounded-xl border border-border bg-dark/40 pl-8 pr-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
+            className="w-full rounded-lg border border-border bg-card pl-8 pr-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
           />
           {search && (
             <button
               type="button"
               onClick={() => onSearchChange("")}
               aria-label="Limpiar búsqueda"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-text-light/40 hover:text-white"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-text-light/40 hover:text-text-light"
             >
               <X className="h-3 w-3" />
             </button>
@@ -84,7 +84,7 @@ export function GastosFilterBar(props: GastosFilterBarProps = {}) {
           value={categoryFilter}
           onChange={(e) => onCategoryFilterChange(e.target.value)}
           aria-label="Filtrar por categoría"
-          className="w-full rounded-xl border border-border bg-dark/40 px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
+          className="w-full rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
         >
           <option value="">Todas las Categorías</option>
           {categories.map((cat) => (
@@ -112,7 +112,7 @@ export function GastosFilterBar(props: GastosFilterBarProps = {}) {
             )
           }
           aria-label="Filtrar por factura"
-          className="w-full rounded-xl border border-border bg-dark/40 px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
+          className="w-full rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
         >
           <option value="all">Todas</option>
           <option value="invoiced">Solo Facturados (FAC)</option>
@@ -135,7 +135,7 @@ export function GastosFilterBar(props: GastosFilterBarProps = {}) {
             onTypeFilterChange(e.target.value as "all" | "fijo" | "variable")
           }
           aria-label="Filtrar por tipo de gasto"
-          className="w-full rounded-xl border border-border bg-dark/40 px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
+          className="w-full rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-text-light outline-none focus:border-primary transition-colors"
         >
           <option value="all">Todos los Tipos</option>
           <option value="fijo">Solo Fijos</option>

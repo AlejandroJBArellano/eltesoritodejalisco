@@ -87,7 +87,7 @@ export function CategoryModal(props: CategoryModalProps = {}) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 no-print">
-      <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl border border-border space-y-5">
+      <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-2xl border border-border space-y-5">
         <div className="flex justify-between items-center border-b border-border pb-3">
           <h3 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2">
             <Tag className="h-4 w-4 text-purple-400" />
@@ -98,7 +98,7 @@ export function CategoryModal(props: CategoryModalProps = {}) {
               setError(null);
               onClose();
             }}
-            className="text-text-light/40 hover:text-text-light transition-colors p-1 rounded-lg hover:bg-white/10"
+            className="text-text-light/40 hover:text-text-light transition-colors p-1 rounded-lg hover:bg-card-light"
             type="button"
             aria-label="Cerrar modal de categoría"
           >
@@ -108,7 +108,7 @@ export function CategoryModal(props: CategoryModalProps = {}) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 p-3 text-xs font-bold flex items-center gap-2">
+            <div className="rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 p-3 text-xs font-bold flex items-center gap-2">
               <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
               {error}
             </div>
@@ -130,7 +130,7 @@ export function CategoryModal(props: CategoryModalProps = {}) {
               placeholder="Ej. Publicidad, Gasolina, Mantenimiento"
               required
               aria-label="Nombre de la Categoría"
-              className="w-full rounded-xl border border-border bg-dark/40 px-3.5 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
+              className="w-full rounded-lg border border-border bg-secondary px-3.5 py-2.5 text-xs text-text-light outline-none focus:border-primary transition-colors placeholder:text-text-light/30"
             />
           </div>
 
@@ -142,16 +142,16 @@ export function CategoryModal(props: CategoryModalProps = {}) {
             >
               Color Distintivo
             </label>
-            <div className="flex items-center gap-3 bg-dark/40 p-2 rounded-xl border border-border">
+            <div className="flex items-center gap-3 bg-secondary p-2 rounded-lg border border-border">
               <input
                 id="category-color-input"
                 type="color"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
                 aria-label="Color Distintivo"
-                className="h-8 w-12 cursor-pointer rounded-lg border-0 bg-transparent p-0"
+                className="h-8 w-12 cursor-pointer rounded-md border-0 bg-transparent p-0"
               />
-              <span className="text-xs font-mono font-bold text-text-light/70">
+              <span className="text-xs font-mono font-bold text-text-light/70 tabular-nums">
                 {color}
               </span>
             </div>
@@ -166,10 +166,10 @@ export function CategoryModal(props: CategoryModalProps = {}) {
               <button
                 type="button"
                 onClick={() => setTipoGasto("variable")}
-                className={`py-2.5 px-3 rounded-xl border font-black text-xs uppercase tracking-wider transition-all active:scale-95 ${
+                className={`py-2.5 px-3 rounded-lg border font-black text-xs uppercase tracking-wider transition-all active:scale-95 ${
                   tipoGasto === "variable"
                     ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
-                    : "bg-dark/40 border-border text-text-light/50 hover:text-text-light"
+                    : "bg-secondary border-border text-text-light/50 hover:text-text-light"
                 }`}
               >
                 Variable
@@ -177,10 +177,10 @@ export function CategoryModal(props: CategoryModalProps = {}) {
               <button
                 type="button"
                 onClick={() => setTipoGasto("fijo")}
-                className={`py-2.5 px-3 rounded-xl border font-black text-xs uppercase tracking-wider transition-all active:scale-95 ${
+                className={`py-2.5 px-3 rounded-lg border font-black text-xs uppercase tracking-wider transition-all active:scale-95 ${
                   tipoGasto === "fijo"
                     ? "bg-amber-500/20 border-amber-500 text-amber-400"
-                    : "bg-dark/40 border-border text-text-light/50 hover:text-text-light"
+                    : "bg-secondary border-border text-text-light/50 hover:text-text-light"
                 }`}
               >
                 Fijo
@@ -198,14 +198,14 @@ export function CategoryModal(props: CategoryModalProps = {}) {
             <button
               type="button"
               onClick={onClose}
-              className="w-full bg-white/5 text-text-light/60 py-3 rounded-xl font-black hover:bg-white/10 transition-colors uppercase text-xs tracking-wider active:scale-95"
+              className="w-full bg-secondary text-text-light/60 py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider active:scale-95 border border-border"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-primary text-black py-3 rounded-xl font-black hover:brightness-105 transition-all uppercase text-xs tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50 active:scale-95"
+              className="w-full bg-primary text-background py-3 rounded-lg font-black hover:brightness-105 transition-all uppercase text-xs tracking-wider shadow-lg shadow-primary/10 disabled:opacity-50 active:scale-95"
             >
               {isSubmitting
                 ? "Guardando..."

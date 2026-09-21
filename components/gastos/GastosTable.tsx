@@ -44,7 +44,7 @@ export function GastosTable(props: GastosTableProps = {}) {
   };
 
   return (
-    <section className="rounded-2xl bg-card p-6 shadow-sm border border-border overflow-hidden space-y-4">
+    <section className="rounded-xl bg-card p-6 shadow-xs border border-border overflow-hidden space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-red-500"></span>
@@ -119,14 +119,14 @@ export function GastosTable(props: GastosTableProps = {}) {
           </thead>
           <tbody className="divide-y divide-border">
             {expenses.map((exp) => (
-              <tr key={exp.id} className="hover:bg-white/5 transition-colors">
-                <td className="py-3.5 px-3 font-mono text-xs font-bold text-text-light/80 whitespace-nowrap">
+              <tr key={exp.id} className="hover:bg-card-light transition-colors">
+                <td className="py-3.5 px-3 font-mono text-xs font-bold text-text-light/80 whitespace-nowrap tabular-nums">
                   {exp.date}
                 </td>
                 <td className="py-3.5 px-3">
                   <div className="flex items-center gap-2">
                     <span
-                      className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                      className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
                       style={{
                         backgroundColor:
                           exp.expense_categories?.color || "#FFB7CE",
@@ -136,7 +136,7 @@ export function GastosTable(props: GastosTableProps = {}) {
                       {exp.expense_categories?.name || "Sin Categoría"}
                     </span>
                     <span
-                      className={`text-[9px] px-1.5 py-0.2 rounded font-black uppercase tracking-wider ${
+                      className={`text-[9px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-wider ${
                         exp.expense_categories?.tipo_gasto === "fijo"
                           ? "bg-amber-500/10 text-amber-400"
                           : "bg-emerald-500/10 text-emerald-400"
@@ -160,7 +160,7 @@ export function GastosTable(props: GastosTableProps = {}) {
                     <span className="text-text-light/30 font-bold">—</span>
                   )}
                 </td>
-                <td className="py-3.5 px-3 text-right font-mono font-black text-red-400">
+                <td className="py-3.5 px-3 text-right font-mono font-black text-red-400 tabular-nums">
                   - ${exp.amount.toFixed(2)}
                 </td>
               </tr>
