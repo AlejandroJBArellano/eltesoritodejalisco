@@ -200,7 +200,7 @@ export function OrdersHistoryTable(props: OrdersHistoryTableProps = {}) {
                 {/* FILA EXPANDIDA */}
                 {isExpanded && (
                   <tr
-                    className="bg-secondary/40"
+                    className="bg-dark/40"
                     data-testid={`order-expanded-${order.id}`}
                   >
                     <td colSpan={8} className="px-6 py-4">

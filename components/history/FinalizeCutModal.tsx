@@ -133,7 +133,7 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
           iniciará un nuevo ciclo.
         </p>
 
-        <div className="space-y-3 bg-secondary rounded-lg p-4 border border-border text-xs">
+        <div className="space-y-3 bg-dark/40 rounded-lg p-4 border border-border text-xs">
           <div className="flex justify-between items-center bg-card p-2.5 rounded-lg border border-border">
             <span className="text-text-light/60 font-bold">
               Venta Neta (sin IVA)
@@ -232,7 +232,7 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
         </div>
 
         {/* DISTRIBUCIÓN DE PROPINAS */}
-        <div className="bg-secondary p-4 rounded-lg border border-border space-y-2">
+        <div className="bg-dark/40 p-4 rounded-lg border border-border space-y-2">
           <h4 className="text-xs font-black text-text-light uppercase tracking-wider flex items-center justify-between">
             <span>Distribución de Propinas</span>
             {isCalculatingTips && (
@@ -283,7 +283,7 @@ export function FinalizeCutModal(props: FinalizeCutModalProps = {}) {
             type="button"
             onClick={onClose}
             disabled={isFinalizing}
-            className="w-full bg-secondary text-text-light/60 border border-border py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider disabled:opacity-50 cursor-pointer"
+            className="w-full bg-dark/40 text-text-light/60 border border-border py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider disabled:opacity-50 cursor-pointer"
           >
             Cancelar
           </button>

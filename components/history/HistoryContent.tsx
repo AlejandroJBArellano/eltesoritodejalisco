@@ -95,7 +95,7 @@ function HistoryMainView() {
               <button
                 type="button"
                 onClick={closeDailySummaryTicket}
-                className="bg-secondary text-text-light border border-border px-5 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider hover:bg-card-light active:scale-95 transition-all cursor-pointer"
+                className="bg-dark/40 text-text-light border border-border px-5 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider hover:bg-card-light active:scale-95 transition-all cursor-pointer"
               >
                 Cerrar
               </button>
@@ -134,7 +134,7 @@ export function HistoryContent() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 w-full py-3 bg-secondary text-text-light border border-border rounded-lg font-black text-sm uppercase tracking-wider hover:bg-card-light transition-all shadow-xs"
+            className="inline-flex items-center justify-center gap-2 w-full py-3 bg-dark/40 text-text-light border border-border rounded-lg font-black text-sm uppercase tracking-wider hover:bg-card-light transition-all shadow-xs"
           >
             <ArrowLeft className="h-4 w-4" /> Volver al Dashboard
           </Link>

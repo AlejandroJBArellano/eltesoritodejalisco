@@ -53,7 +53,7 @@ export function DailyCutDetailModal({
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-secondary p-3 rounded-lg border border-border">
+          <div className="bg-dark/40 p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Venta Neta (Sin IVA)
             </span>
@@ -61,7 +61,7 @@ export function DailyCutDetailModal({
               ${Number(cut.venta_neta).toFixed(2)}
             </span>
           </div>
-          <div className="bg-secondary p-3 rounded-lg border border-border">
+          <div className="bg-dark/40 p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               IVA Acumulado
             </span>
@@ -69,7 +69,7 @@ export function DailyCutDetailModal({
               ${Number(cut.iva_acumulado).toFixed(2)}
             </span>
           </div>
-          <div className="bg-secondary p-3 rounded-lg border border-border">
+          <div className="bg-dark/40 p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Propinas (Efectivo)
             </span>
@@ -77,7 +77,7 @@ export function DailyCutDetailModal({
               ${Number(cut.propinas_efectivo).toFixed(2)}
             </span>
           </div>
-          <div className="bg-secondary p-3 rounded-lg border border-border">
+          <div className="bg-dark/40 p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Propinas (Tarjeta)
             </span>
@@ -85,7 +85,7 @@ export function DailyCutDetailModal({
               ${Number(cut.propinas_tarjeta).toFixed(2)}
             </span>
           </div>
-          <div className="bg-secondary p-3 rounded-lg border border-border">
+          <div className="bg-dark/40 p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Caja Final (Efectivo)
             </span>
@@ -93,7 +93,7 @@ export function DailyCutDetailModal({
               ${Number(cut.caja_efectivo).toFixed(2)}
             </span>
           </div>
-          <div className="bg-secondary p-3 rounded-lg border border-border">
+          <div className="bg-dark/40 p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Caja Final (Tarjeta)
             </span>
@@ -109,7 +109,7 @@ export function DailyCutDetailModal({
               </span>
             )}
           </div>
-          <div className="bg-secondary p-3 rounded-lg border border-border">
+          <div className="bg-dark/40 p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Total Gastos
             </span>
@@ -117,7 +117,7 @@ export function DailyCutDetailModal({
               -${Number(cut.total_gastos).toFixed(2)}
             </span>
           </div>
-          <div className="bg-secondary p-3 rounded-lg border border-border">
+          <div className="bg-dark/40 p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Utilidad Final
             </span>
@@ -143,7 +143,7 @@ export function DailyCutDetailModal({
               {cut.expenses_detail.map((exp, idx) => (
                 <div
                   key={idx}
-                  className="flex justify-between items-center bg-secondary p-2 rounded-lg border border-border text-xs"
+                  className="flex justify-between items-center bg-dark/40 p-2 rounded-lg border border-border text-xs"
                 >
                   <div>
                     <span className="font-bold text-text-light">
@@ -183,7 +183,7 @@ export function DailyCutDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full bg-secondary text-text-light/60 border border-border py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider cursor-pointer"
+            className="w-full bg-dark/40 text-text-light/60 border border-border py-3 rounded-lg font-black hover:bg-card-light transition-colors uppercase text-xs tracking-wider cursor-pointer"
           >
             Cerrar
           </button>
