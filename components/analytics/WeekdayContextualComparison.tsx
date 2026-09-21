@@ -70,7 +70,7 @@ export function WeekdayContextualComparison({
   return (
     <div
       data-testid="weekday-contextual-comparison"
-      className="mt-6 rounded-xl bg-secondary border border-amber-500/30 p-5 sm:p-6 shadow-xl transition-all"
+      className="mt-6 rounded-xl bg-dark/40 border border-amber-500/30 p-5 sm:p-6 shadow-xl transition-all"
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border pb-3 mb-4">

@@ -193,7 +193,7 @@ export function HourlyAnalyticsView() {
                   className={`rounded-lg px-4 py-2 text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer ${
                     period === p
                       ? "bg-amber-500 text-background shadow-md shadow-amber-500/20 scale-[1.02]"
-                      : "bg-secondary text-text-light/60 hover:bg-border/60 hover:text-text-light border border-border"
+                      : "bg-dark/40 text-text-light/60 hover:bg-border/60 hover:text-text-light border border-border"
                   }`}
                 >
                   {PERIOD_LABELS[p]}
@@ -211,7 +211,7 @@ export function HourlyAnalyticsView() {
                     type="date"
                     value={customStartDate}
                     onChange={(e) => setCustomStartDate(e.target.value)}
-                    className="rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs text-text-light focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-border bg-dark/40 px-3 py-1.5 text-xs text-text-light focus:border-amber-500 focus:outline-none"
                   />
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-text-light">
@@ -221,7 +221,7 @@ export function HourlyAnalyticsView() {
                     type="date"
                     value={customEndDate}
                     onChange={(e) => setCustomEndDate(e.target.value)}
-                    className="rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs text-text-light focus:border-amber-500 focus:outline-none"
+                    className="rounded-lg border border-border bg-dark/40 px-3 py-1.5 text-xs text-text-light focus:border-amber-500 focus:outline-none"
                   />
                 </div>
                 <button
@@ -238,7 +238,7 @@ export function HourlyAnalyticsView() {
           {/* Secondary Controls: View Tab, Mode Switch, Active Hours Switch */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-border">
             {/* View Tabs */}
-            <div className="flex items-center bg-secondary p-1 rounded-xl border border-border">
+            <div className="flex items-center bg-dark/40 p-1 rounded-xl border border-border">
               <button
                 type="button"
                 data-testid="tab-btn-bar"
@@ -271,7 +271,7 @@ export function HourlyAnalyticsView() {
             <div className="flex flex-wrap items-center gap-3">
               {/* Aggregation Mode (only relevant if multiple days) */}
               {isMultiDay && (
-                <div className="flex items-center bg-secondary p-1 rounded-xl border border-border">
+                <div className="flex items-center bg-dark/40 p-1 rounded-xl border border-border">
                   <button
                     type="button"
                     data-testid="mode-btn-sum"
@@ -307,7 +307,7 @@ export function HourlyAnalyticsView() {
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                   onlyActiveHours
                     ? "bg-amber-500/15 border-amber-500/40 text-amber-300"
-                    : "bg-secondary border-border text-text-light/60 hover:text-text-light"
+                    : "bg-dark/40 border-border text-text-light/60 hover:text-text-light"
                 }`}
               >
                 <Filter className="h-3.5 w-3.5" />

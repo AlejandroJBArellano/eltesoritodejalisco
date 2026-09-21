@@ -69,7 +69,7 @@ export function HourlyBreakdownTable({
       {/* Table */}
       <div className="overflow-x-auto -mx-6">
         <table className="w-full text-left text-sm">
-          <thead className="bg-secondary text-xs font-black uppercase tracking-wider text-text-light/60 border-y border-border">
+          <thead className="bg-dark/40 text-xs font-black uppercase tracking-wider text-text-light/60 border-y border-border">
             <tr>
               <th className="py-3 px-6">Rango Horario</th>
               <th className="py-3 px-6 text-right">
@@ -113,7 +113,7 @@ export function HourlyBreakdownTable({
 
                   <td className="py-3.5 px-6 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <div className="w-16 bg-secondary rounded-full h-1.5 overflow-hidden hidden sm:block">
+                      <div className="w-16 bg-dark/40 rounded-full h-1.5 overflow-hidden hidden sm:block">
                         <div
                           className="bg-amber-400 h-full rounded-full"
                           style={{

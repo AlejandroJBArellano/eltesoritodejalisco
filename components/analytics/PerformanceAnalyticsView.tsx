@@ -116,7 +116,7 @@ export function PerformanceAnalyticsView() {
                 className={`rounded-lg px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer ${
                   period === p
                     ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20 scale-[1.02]"
-                    : "bg-secondary text-text-light/60 hover:bg-border/60 hover:text-text-light border border-border"
+                    : "bg-dark/40 text-text-light/60 hover:bg-border/60 hover:text-text-light border border-border"
                 }`}
               >
                 {PERIOD_LABELS[p]}
@@ -138,7 +138,7 @@ export function PerformanceAnalyticsView() {
                   type="date"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-400"
+                  className="rounded-lg border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-400"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -153,7 +153,7 @@ export function PerformanceAnalyticsView() {
                   type="date"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="rounded-lg border border-border bg-secondary px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-400"
+                  className="rounded-lg border border-border bg-dark/40 px-3.5 py-2 text-xs text-text-light outline-none focus:border-emerald-400"
                 />
               </div>
               <button

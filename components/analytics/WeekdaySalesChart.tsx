@@ -59,7 +59,7 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
           </div>
 
           {/* Metric Toggle */}
-          <div className="flex flex-wrap items-center gap-1 bg-secondary p-1 rounded-xl border border-border self-start sm:self-auto">
+          <div className="flex flex-wrap items-center gap-1 bg-dark/40 p-1 rounded-xl border border-border self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setMetric("ticket")}
@@ -116,7 +116,7 @@ export function WeekdaySalesChart({ data }: WeekdaySalesChartProps) {
             <button
               type="button"
               onClick={() => setSelectedDayIndex(null)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-secondary border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition-all active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-dark/40 border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition-all active:scale-95 cursor-pointer"
             >
               <X className="h-3.5 w-3.5" />
               Limpiar Selección

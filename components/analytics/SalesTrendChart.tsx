@@ -62,7 +62,7 @@ export function SalesTrendChart({
           <button
             type="button"
             onClick={() => onSelectDay(null)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-secondary border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition-all active:scale-95 self-start sm:self-auto cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-dark/40 border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition-all active:scale-95 self-start sm:self-auto cursor-pointer"
           >
             <X className="h-3.5 w-3.5" />
             Limpiar Selección ({selectedDay})
@@ -196,7 +196,7 @@ export function SalesTrendChart({
 
       {/* Day Drill-Down Panel */}
       {selectedDay && (
-        <div className="mt-6 rounded-xl bg-secondary border border-amber-500/30 p-6">
+        <div className="mt-6 rounded-xl bg-dark/40 border border-amber-500/30 p-6">
           <h3 className="text-sm font-black text-amber-400 mb-4 uppercase tracking-wider flex items-center gap-2">
             <BarChart3 className="h-4 w-4" /> Top Productos —{" "}
             {new Date(`${selectedDay}T12:00:00-06:00`).toLocaleDateString(

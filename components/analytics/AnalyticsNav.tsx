@@ -16,14 +16,14 @@ export function AnalyticsNav({ activeTab }: AnalyticsNavProps) {
       <div className="flex items-center gap-2">
         <Link
           href="/reports"
-          className="inline-flex items-center gap-2 rounded-xl bg-secondary border border-border px-3.5 py-2 text-xs font-black text-text-light hover:text-white hover:bg-card-light transition-all active:scale-95 shadow-sm"
+          className="inline-flex items-center gap-2 rounded-xl bg-dark/40 border border-border px-3.5 py-2 text-xs font-black text-text-light hover:text-white hover:bg-card-light transition-all active:scale-95 shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" />
           Volver a Reportes
         </Link>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 bg-secondary p-1 rounded-xl border border-border">
+      <div className="flex flex-wrap items-center gap-2 bg-dark/40 p-1 rounded-xl border border-border">
         <Link
           href="/analytics/sales"
           className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 ${

@@ -83,7 +83,7 @@ export function HourlySalesHeatmap({
         </div>
 
         {/* Metric Selector */}
-        <div className="flex items-center bg-secondary p-1 rounded-xl border border-border self-start sm:self-auto">
+        <div className="flex items-center bg-dark/40 p-1 rounded-xl border border-border self-start sm:self-auto">
           <button
             type="button"
             data-testid="heatmap-metric-sales"
