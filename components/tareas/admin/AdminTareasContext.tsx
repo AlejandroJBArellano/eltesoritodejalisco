@@ -17,11 +17,7 @@ import {
   updatePrimordialTask,
   deletePrimordialTask,
 } from "@/lib/actions/tasks";
-import type {
-  TaskExecution,
-  TaskCategory,
-  PrimordialTask,
-} from "@/types";
+import type { TaskExecution, TaskCategory, PrimordialTask } from "@/types";
 import type {
   AdminTareasTab,
   StaffPerformanceMetric,

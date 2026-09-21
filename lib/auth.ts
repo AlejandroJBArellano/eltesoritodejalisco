@@ -60,8 +60,8 @@ export async function verifyManagerPin(tenantId: string, pin: string) {
 
   // Validar autorización de manager por rol tradicional o por permisos granulares
   const roleSlug = (manager.role || "").toUpperCase();
-  const perms = (manager.role_data as { permissions?: string[] } | null)
-    ?.permissions || [];
+  const perms =
+    (manager.role_data as { permissions?: string[] } | null)?.permissions || [];
   const isManagerOrAdmin =
     roleSlug === "ADMIN" ||
     roleSlug === "MANAGER" ||

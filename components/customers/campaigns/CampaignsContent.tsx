@@ -3,14 +3,7 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
-import {
-  Mail,
-  Plus,
-  ArrowLeft,
-  Send,
-  Users,
-  TrendingUp,
-} from "lucide-react";
+import { Mail, Plus, ArrowLeft, Send, Users, TrendingUp } from "lucide-react";
 import {
   CampaignsHistoryTable,
   type CampaignWithRecipients,

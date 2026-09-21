@@ -225,8 +225,9 @@ export function AdminRolesTab() {
                   No hay roles personalizados creados aún.
                 </p>
                 <p className="text-[11px] text-text-light/40 mt-1">
-                  Crea perfiles como &ldquo;Capitán de Meseros&rdquo;, &ldquo;Barman&rdquo; o &ldquo;Cajero&rdquo;
-                  con permisos a la medida.
+                  Crea perfiles como &ldquo;Capitán de Meseros&rdquo;,
+                  &ldquo;Barman&rdquo; o &ldquo;Cajero&rdquo; con permisos a la
+                  medida.
                 </p>
                 <button
                   type="button"
