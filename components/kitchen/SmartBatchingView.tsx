@@ -60,8 +60,8 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
 
   if (batchedItems.length === 0) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-12 text-center animate-in fade-in-0 zoom-in-95 duration-300">
-        <p className="text-xs font-bold text-text-light/40 uppercase tracking-widest">
+      <div className="rounded-xl border border-border bg-card p-10 text-center animate-in fade-in-0 duration-200">
+        <p className="text-xs font-bold text-text-light/40 uppercase tracking-wider">
           No hay órdenes activas en este momento
         </p>
       </div>
@@ -69,51 +69,51 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between border-b border-border pb-3">
-        <h2 className="text-lg font-black text-text-light tracking-tight uppercase flex items-center gap-2">
+        <h2 className="text-sm font-black text-text-light tracking-tight uppercase flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-secondary"></span>
           Resumen de Preparación en Lote (Smart Batching)
         </h2>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {batchedItems.map((item) => (
           <div
             key={item.menuItemId}
-            className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:border-border/80 hover:shadow-md transition-all duration-300 flex flex-col justify-between animate-in fade-in-0 slide-in-from-bottom-3 ease-out"
+            className="rounded-xl border border-border bg-card p-5 shadow-xs transition-all duration-200 flex flex-col justify-between"
           >
             <div>
               {/* Item Header */}
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-black text-text-light uppercase tracking-tight flex items-center gap-2">
+              <div className="mb-3.5 flex items-center justify-between">
+                <h3 className="text-base font-bold text-text-light uppercase tracking-tight flex items-center gap-2">
                   <Utensils className="h-4 w-4 text-secondary" />
                   {item.menuItemName}
                 </h3>
-                <div className="rounded-xl bg-secondary/10 border border-secondary/20 px-4 py-2 text-center">
-                  <span className="text-2xl font-black text-secondary">
+                <div className="rounded-lg bg-secondary/15 border border-secondary/30 px-3 py-1 text-center">
+                  <span className="text-xl font-mono font-bold text-secondary tabular-nums">
                     {item.totalQuantity}{" "}
-                    <span className="text-xs font-bold uppercase text-secondary/70">
-                      en total
+                    <span className="text-[10px] font-sans font-bold uppercase text-secondary/70">
+                      total
                     </span>
                   </span>
                 </div>
               </div>
 
               {/* Order Breakdown */}
-              <div className="space-y-2">
-                <p className="text-xs font-extrabold text-text-light/50 uppercase tracking-widest mb-2">
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider mb-1.5">
                   Desglose por orden:
                 </p>
                 {item.orders.map((orderRef) => (
                   <div
                     key={orderRef.orderId}
-                    className="flex items-center justify-between rounded-xl bg-dark/40 px-3.5 py-2 text-xs font-bold border border-border"
+                    className="flex items-center justify-between rounded-lg bg-dark/40 px-3 py-1.5 text-xs font-medium border border-border"
                   >
                     <span className="text-text-light/80">
                       Orden #{orderRef.orderNumber}
                     </span>
-                    <span className="font-black text-secondary">
+                    <span className="font-mono font-bold text-secondary tabular-nums">
                       {orderRef.quantity}x
                     </span>
                   </div>
@@ -122,7 +122,7 @@ export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
             </div>
 
             {/* Footer Summary */}
-            <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs text-text-light/40 font-medium">
+            <div className="mt-4 pt-2.5 border-t border-border flex items-center justify-between text-xs text-text-light/40 font-medium">
               <span>
                 Presente en {item.orders.length}{" "}
                 {item.orders.length === 1 ? "orden" : "órdenes"}

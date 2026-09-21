@@ -78,21 +78,19 @@ function KanbanColumn({
   const theme = colorMap[colorClass];
 
   return (
-    <div className="flex flex-col gap-2 w-[85vw] sm:w-87.5 md:w-auto shrink-0 snap-start md:h-[calc(100vh-170px)] rounded-2xl bg-card p-3 shadow-lg border border-border backdrop-blur-sm">
-      <div className="flex items-center justify-between border-b border-border mb-5 shrink-0">
-        <h2 className="text-base font-black text-text-light uppercase tracking-tight flex items-center gap-2.5">
-          <span
-            className={`h-3 w-3 rounded-full ${theme.bg} shadow-sm ${theme.shadow}`}
-          ></span>
+    <div className="flex flex-col gap-2 w-[85vw] sm:w-87.5 md:w-auto shrink-0 snap-start md:h-[calc(100vh-170px)] rounded-xl bg-card p-3.5 shadow-xs border border-border">
+      <div className="flex items-center justify-between border-b border-border pb-3 mb-2 shrink-0">
+        <h2 className="text-sm font-black text-text-light uppercase tracking-tight flex items-center gap-2">
+          <span className={`h-2 w-2 rounded-full ${theme.bg}`}></span>
           {title}
         </h2>
         <span
-          className={`rounded-full ${theme.badgeBg} px-3 py-1 text-xs font-black ${theme.text} uppercase tracking-widest border ${theme.border}`}
+          className={`rounded-md ${theme.badgeBg} px-2.5 py-0.5 text-xs font-mono font-bold ${theme.text} border ${theme.border} tabular-nums`}
         >
           {count}
         </span>
       </div>
-      <div className="space-y-4 md:flex-1 md:overflow-y-auto pr-1.5 custom-scrollbar pb-2">
+      <div className="space-y-3 md:flex-1 md:overflow-y-auto pr-1 custom-scrollbar pb-2">
         {orders.map((order) => (
           <OrderCard
             key={order.id}
@@ -103,9 +101,9 @@ function KanbanColumn({
           />
         ))}
         {orders.length === 0 && (
-          <div className="py-14 text-center rounded-xl border border-dashed border-border bg-dark/40 p-6">
-            <EmptyIcon className="mx-auto h-8 w-8 text-text-light/30 mb-2" />
-            <p className="text-xs font-black text-text-light/50 uppercase tracking-widest">
+          <div className="py-12 text-center rounded-lg border border-dashed border-border bg-dark/30 p-5">
+            <EmptyIcon className="mx-auto h-7 w-7 text-text-light/30 mb-2" />
+            <p className="text-xs font-bold text-text-light/50 uppercase tracking-wider">
               {emptyTitle}
             </p>
             <p className="text-[11px] text-text-light/40 mt-1">

@@ -147,7 +147,7 @@ export function IngredientBatchControl({
 
   if (loading && !activeBatch && !summaryData) {
     return (
-      <div className="flex h-full min-h-55 flex-col items-center justify-center rounded-2xl border border-border bg-card p-6 text-text-light/60">
+      <div className="flex h-full min-h-55 flex-col items-center justify-center rounded-xl border border-border bg-card p-6 text-text-light/60">
         <RefreshCw className="h-6 w-6 animate-spin text-emerald-400 mb-2" />
         <span className="text-xs font-bold uppercase tracking-wider">
           Cargando inventario...
@@ -157,9 +157,9 @@ export function IngredientBatchControl({
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all hover:border-border/80">
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-lg transition-all hover:border-border/80">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border bg-dark/40 p-4">
+      <div className="flex items-center justify-between border-b border-border bg-secondary p-4">
         <h3 className="flex items-center gap-2 font-black text-text-light">
           <Package className="h-5 w-5 text-emerald-400" />
           <span>{ingredientName}</span>
@@ -206,7 +206,7 @@ export function IngredientBatchControl({
                         <span className="truncate pr-2 text-text-light/80">
                           {item}
                         </span>
-                        <span className="font-mono font-bold text-amber-300">
+                        <span className="font-mono font-bold text-amber-300 tabular-nums">
                           {count}
                         </span>
                       </div>
@@ -220,13 +220,13 @@ export function IngredientBatchControl({
                 </div>
                 <div className="mt-3 flex justify-between border-t border-amber-500/20 pt-2 font-black text-amber-300">
                   <span>Total Producido:</span>
-                  <span>{summaryData.totalItems} platillos</span>
+                  <span className="font-mono tabular-nums">{summaryData.totalItems} platillos</span>
                 </div>
               </div>
             )}
 
             <div className="my-auto py-4 text-center">
-              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-card-light border border-border text-text-light/40">
+              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-card-light border border-border text-text-light/40">
                 <UtensilsCrossed className="h-6 w-6" />
               </div>
               <p className="text-xs font-medium text-text-light/60">
