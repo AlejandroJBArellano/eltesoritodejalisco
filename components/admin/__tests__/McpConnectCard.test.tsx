@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { McpConnectCard } from "../McpConnectCard";
 import * as actionsModule from "@/lib/mcp/actions";
 
@@ -144,7 +150,9 @@ describe("McpConnectCard Component", () => {
 
     expect(
       screen.getByText((content) =>
-        content.includes('KITTN_API_KEY="kt_live_TU_API_KEY" npx -y @trykittn/mcp'),
+        content.includes(
+          'KITTN_API_KEY="kt_live_TU_API_KEY" npx -y @trykittn/mcp',
+        ),
       ),
     ).toBeInTheDocument();
   });
@@ -188,4 +196,3 @@ describe("McpConnectCard Component", () => {
     });
   });
 });
-

@@ -98,10 +98,7 @@ export function AsistenciaHistoryTable() {
             </thead>
             <tbody className="divide-y divide-border">
               {paginatedAttendances.map((rec) => (
-                <tr
-                  key={rec.id}
-                  className="hover:bg-dark/40 transition-colors"
-                >
+                <tr key={rec.id} className="hover:bg-dark/40 transition-colors">
                   <td className="py-3 px-3">
                     <span className="font-bold text-text-light">
                       {rec.users?.name || "Desconocido"}

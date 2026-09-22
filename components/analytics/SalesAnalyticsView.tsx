@@ -153,8 +153,7 @@ export function SalesAnalyticsView() {
         <section className="rounded-xl bg-card p-6 shadow-xs border border-border">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-bold text-text-light/60 uppercase tracking-wider flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-primary" /> Período de
-              Análisis
+              <Calendar className="h-4 w-4 text-primary" /> Período de Análisis
             </h2>
           </div>
 

@@ -254,7 +254,12 @@ describe("lib/mcp/tools", () => {
             {
               id: "r-2",
               quantity_required: 0.1,
-              ingredients: { id: "ing-2", name: "Salsa", cost_per_unit: 50, unit: "l" },
+              ingredients: {
+                id: "ing-2",
+                name: "Salsa",
+                cost_per_unit: 50,
+                unit: "l",
+              },
             }, // 5
           ],
           error: null,

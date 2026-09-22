@@ -61,4 +61,3 @@ export function AnalyticsNav({ activeTab }: AnalyticsNavProps) {
     </div>
   );
 }
-

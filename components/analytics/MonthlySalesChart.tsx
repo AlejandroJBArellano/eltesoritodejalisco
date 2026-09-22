@@ -130,7 +130,12 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
 
                     {/* Record month indicator dot */}
                     {m.isRecordMonth && (
-                      <circle cx={xCenter} cy={barY - 7} r={3} fill="var(--color-primary)" />
+                      <circle
+                        cx={xCenter}
+                        cy={barY - 7}
+                        r={3}
+                        fill="var(--color-primary)"
+                      />
                     )}
 
                     {/* X Axis Label */}
@@ -181,7 +186,9 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
                 </div>
                 <div className="space-y-1 text-[11px] text-text-light font-medium font-mono tabular-nums">
                   <div className="flex justify-between gap-4">
-                    <span className="font-sans font-normal text-text-light/70">Ventas del mes:</span>
+                    <span className="font-sans font-normal text-text-light/70">
+                      Ventas del mes:
+                    </span>
                     <span className="font-bold text-white">
                       $
                       {data[hoveredIndex].totalSales.toLocaleString("es-MX", {
@@ -190,20 +197,26 @@ export function MonthlySalesChart({ data }: MonthlySalesChartProps) {
                     </span>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <span className="font-sans font-normal text-text-light/70">Pedidos:</span>
+                    <span className="font-sans font-normal text-text-light/70">
+                      Pedidos:
+                    </span>
                     <span className="font-bold text-white">
                       {data[hoveredIndex].totalOrders}
                     </span>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <span className="font-sans font-normal text-text-light/70">Ticket promedio:</span>
+                    <span className="font-sans font-normal text-text-light/70">
+                      Ticket promedio:
+                    </span>
                     <span className="font-bold text-emerald-400">
                       ${data[hoveredIndex].averageTicket.toFixed(2)}
                     </span>
                   </div>
                   {data[hoveredIndex].growthPercentage !== null && (
                     <div className="flex justify-between items-center gap-4 pt-1 border-t border-border font-mono">
-                      <span className="font-sans font-normal text-text-light/70">Vs mes anterior:</span>
+                      <span className="font-sans font-normal text-text-light/70">
+                        Vs mes anterior:
+                      </span>
                       <span
                         className={`font-bold flex items-center gap-0.5 ${
                           data[hoveredIndex].growthPercentage! >= 0

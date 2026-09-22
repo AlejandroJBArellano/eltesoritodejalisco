@@ -28,7 +28,7 @@ describe("IngredientModal Component", () => {
         ingredientErrors={{}}
         isSubmitting={false}
         onFormChange={handleFormChange}
-      />
+      />,
     );
 
     expect(screen.getByText("Nuevo Ingrediente / Insumo")).toBeInTheDocument();

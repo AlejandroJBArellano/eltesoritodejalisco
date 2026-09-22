@@ -125,8 +125,7 @@ export function OrdersHistoryTable(props: OrdersHistoryTableProps = {}) {
               primaryPaymentMethod === "CARD" ||
               primaryPaymentMethod === "TRANSFER"
             ) {
-              methodBadgeClass =
-                "bg-primary/10 text-primary border-primary/20";
+              methodBadgeClass = "bg-primary/10 text-primary border-primary/20";
             } else if (paymentMethods.length > 1) {
               methodBadgeClass =
                 "bg-amber-500/10 text-amber-300 border-amber-500/20";

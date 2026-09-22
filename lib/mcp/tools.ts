@@ -412,7 +412,9 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
       const supabase = createAdminClient();
       const { data: ingredients, error } = await supabase
         .from("ingredients")
-        .select("id, name, current_stock, minimum_stock, unit, cost_per_unit, tracking_type")
+        .select(
+          "id, name, current_stock, minimum_stock, unit, cost_per_unit, tracking_type",
+        )
         .eq("tenant_id", ctx.tenantId)
         .order("name", { ascending: true });
 
@@ -672,7 +674,9 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
 
       let itemQuery = supabase
         .from("menu_items")
-        .select("id, name, description, price, is_available, category, image_url")
+        .select(
+          "id, name, description, price, is_available, category, image_url",
+        )
         .eq("tenant_id", ctx.tenantId)
         .order("name", { ascending: true });
 

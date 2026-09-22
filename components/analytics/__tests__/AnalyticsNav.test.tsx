@@ -40,4 +40,3 @@ describe("AnalyticsNav Component", () => {
     expect(perfLink.className).toContain("bg-emerald-500");
   });
 });
-

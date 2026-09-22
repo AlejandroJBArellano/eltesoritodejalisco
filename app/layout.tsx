@@ -1,11 +1,11 @@
+import Navbar from "@/components/Navbar";
+import { TenantProvider } from "@/components/TenantProvider";
+import { UserProvider } from "@/components/UserProvider";
+import { getProfile } from "@/lib/auth";
+import { getTenantContext } from "@/lib/tenant";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import { getTenantContext } from "@/lib/tenant";
-import { getProfile } from "@/lib/auth";
-import { TenantProvider } from "@/components/TenantProvider";
-import { UserProvider } from "@/components/UserProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

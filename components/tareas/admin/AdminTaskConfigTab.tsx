@@ -177,10 +177,7 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
             </thead>
             <tbody className="divide-y divide-border">
               {paginatedTasks.map((t) => (
-                <tr
-                  key={t.id}
-                  className="hover:bg-dark/40 transition-colors"
-                >
+                <tr key={t.id} className="hover:bg-dark/40 transition-colors">
                   <td className="py-3 px-4 font-bold text-text-light">
                     {t.name}
                   </td>
