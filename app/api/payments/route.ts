@@ -10,6 +10,10 @@ type PaymentInput = {
   tipAmount: number;
   receivedAmount?: number;
   change?: number;
+  terminalId?: string | null;
+  terminalName?: string | null;
+  terminalCommissionRate?: number | null;
+  terminalCommissionAmount?: number | null;
 };
 
 const CENTS_PER_PESO = 100;
@@ -18,17 +22,35 @@ const toPaymentInsert = (
   orderId: string,
   payment: PaymentInput,
   tenantId: string,
-) => ({
-  id: crypto.randomUUID(),
-  order_id: orderId,
-  tenant_id: tenantId,
-  method: payment.method,
-  amount: Number(payment.amount),
-  received_amount:
-    payment.receivedAmount != null ? Number(payment.receivedAmount) : null,
-  change: payment.change != null ? Number(payment.change) : null,
-  tip_amount: payment.tipAmount ? Number(payment.tipAmount) : 0,
-});
+) => {
+  const isCard = payment.method === "CARD" || payment.method === "TRANSFER";
+  const rate =
+    isCard && payment.terminalCommissionRate != null
+      ? Number(payment.terminalCommissionRate)
+      : 0;
+  const commissionAmount =
+    payment.terminalCommissionAmount != null
+      ? Number(payment.terminalCommissionAmount)
+      : isCard && rate > 0
+        ? Number(((Number(payment.amount) * rate) / 100).toFixed(2))
+        : 0;
+
+  return {
+    id: crypto.randomUUID(),
+    order_id: orderId,
+    tenant_id: tenantId,
+    method: payment.method,
+    amount: Number(payment.amount),
+    received_amount:
+      payment.receivedAmount != null ? Number(payment.receivedAmount) : null,
+    change: payment.change != null ? Number(payment.change) : null,
+    tip_amount: payment.tipAmount ? Number(payment.tipAmount) : 0,
+    terminal_id: payment.terminalId || null,
+    terminal_name: payment.terminalName || null,
+    terminal_commission_rate: rate,
+    terminal_commission_amount: commissionAmount,
+  };
+};
 
 const getDistributedTipCents = ({
   index,
@@ -184,7 +206,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Standard single-payment flow
-    const { method, amount, receivedAmount, change, tipAmount } = body;
+    const {
+      method,
+      amount,
+      receivedAmount,
+      change,
+      tipAmount,
+      terminalId,
+      terminalName,
+      terminalCommissionRate,
+    } = body;
 
     if (!method || amount == null || isNaN(Number(amount))) {
       return NextResponse.json(
@@ -205,6 +236,9 @@ export async function POST(request: NextRequest) {
             receivedAmount,
             change,
             tipAmount,
+            terminalId,
+            terminalName,
+            terminalCommissionRate,
           },
           tenant.id,
         ),
@@ -234,6 +268,10 @@ export async function POST(request: NextRequest) {
         method,
         amount: Number(amount),
         tipAmount: Number(tipAmount || 0),
+        terminalId: payment.terminal_id,
+        terminalName: payment.terminal_name,
+        terminalCommissionRate: payment.terminal_commission_rate,
+        terminalCommissionAmount: payment.terminal_commission_amount,
       },
     });
 

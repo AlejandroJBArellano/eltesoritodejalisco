@@ -264,6 +264,45 @@ describe("useDailyCutManager", () => {
     expect(result.current.todayTotals.cajaTarjetaNeta).toBeCloseTo(248.9, 1);
   });
 
+  it("calculates accurate commissions based on individual payment terminal commission amounts", () => {
+    const ordersWithCustomTerminal: OrderWithDetails[] = [
+      {
+        id: "ord-term-1",
+        orderNumber: "105",
+        source: "POS",
+        status: OrderStatus.PAID,
+        table: "Mesa 1",
+        subtotal: 1000,
+        tax: 0,
+        total: 1000,
+        createdAt: new Date(`${mxToday}T12:00:00`),
+        updatedAt: new Date(),
+        orderItems: [],
+        payments: [
+          {
+            id: "pay-term-1",
+            orderId: "ord-term-1",
+            method: PaymentMethod.CARD,
+            amount: 1000,
+            tipAmount: 0,
+            terminalId: "term-clip",
+            terminalName: "Clip",
+            terminalCommissionRate: 4,
+            terminalCommissionAmount: 40,
+            createdAt: new Date(`${mxToday}T12:00:00`),
+          },
+        ],
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useDailyCutManager({ orders: ordersWithCustomTerminal }),
+    );
+
+    expect(result.current.todayTotals.comisionTarjeta).toBe(40);
+    expect(result.current.todayTotals.cajaTarjetaNeta).toBe(960);
+  });
+
   it("excludes uncollected credit orders from caja and ventaNeta, tracking them in creditoOtorgadoHoy", () => {
     const ordersWithCredit: OrderWithDetails[] = [
       ...mockTodayOrders,

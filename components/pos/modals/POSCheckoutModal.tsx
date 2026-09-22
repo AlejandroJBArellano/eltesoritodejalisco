@@ -14,7 +14,7 @@ import {
   UserCheck,
   X,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { POSDiscountModal, DiscountData } from "./POSDiscountModal";
 import { POSManagerAuthModal } from "./POSManagerAuthModal";
 import {
@@ -38,7 +38,8 @@ export function POSCheckoutModal() {
   const isWaiter = user?.isWaiter ?? false;
   const [isCourtesyAuthModalOpen, setIsCourtesyAuthModalOpen] = useState(false);
 
-  const { availableMenuItems, customers, refreshOrders } = usePOSData();
+  const { availableMenuItems, customers, refreshOrders, terminals } =
+    usePOSData();
 
   const { openModifyModal } = usePOSCart(availableMenuItems, refreshOrders);
 
@@ -49,6 +50,8 @@ export function POSCheckoutModal() {
     setCheckoutOrder,
     paymentMethod,
     setPaymentMethod,
+    selectedTerminalId,
+    setSelectedTerminalId,
     receivedAmount,
     setReceivedAmount,
     tipType,
@@ -65,6 +68,21 @@ export function POSCheckoutModal() {
     handleFailedPayment,
     handleCreditPayment,
   } = usePOSCheckout(refreshOrders);
+
+  const activeTerminals = useMemo(
+    () => (terminals || []).filter((t) => t.is_active),
+    [terminals],
+  );
+
+  useEffect(() => {
+    if (activeTerminals.length > 0 && !selectedTerminalId) {
+      const defaultTerm =
+        activeTerminals.find((t) => t.is_default) || activeTerminals[0];
+      if (defaultTerm) {
+        setSelectedTerminalId(defaultTerm.id);
+      }
+    }
+  }, [activeTerminals, selectedTerminalId, setSelectedTerminalId]);
 
   const [showCreditPrompt, setShowCreditPrompt] = useState(false);
   const [managerPin, setManagerPin] = useState("");
@@ -894,6 +912,42 @@ export function POSCheckoutModal() {
                         );
                       })}
                     </div>
+
+                    {/* Selector de Terminal Bancaria (solo si hay más de 1 terminal activa) */}
+                    {(paymentMethod === "CARD" ||
+                      paymentMethod === "TRANSFER") &&
+                      activeTerminals.length > 1 && (
+                        <div className="space-y-1.5 pt-1.5 animate-in fade-in duration-150">
+                          <label className="text-[10px] font-bold text-text-light/40 uppercase tracking-wider block">
+                            Terminal / Tarjeta
+                          </label>
+                          <div className="flex flex-wrap gap-1.5">
+                            {activeTerminals.map((term) => {
+                              const isSelected =
+                                selectedTerminalId === term.id ||
+                                (!selectedTerminalId && term.is_default);
+                              return (
+                                <button
+                                  key={term.id}
+                                  type="button"
+                                  disabled={isSubmittingCheckout}
+                                  onClick={() => setSelectedTerminalId(term.id)}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 active:scale-[0.98] ${
+                                    isSelected
+                                      ? "border-primary bg-primary/20 text-primary shadow-sm"
+                                      : "border-border text-text-light/70 bg-white/5 hover:bg-white/10 hover:text-text-light"
+                                  }`}
+                                >
+                                  <span>{term.short_name}</span>
+                                  <span className="text-[10px] font-mono font-normal opacity-70">
+                                    ({Number(term.commission_rate).toFixed(1)}%)
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                   </div>
 
                   {/* Pago en Efectivo */}

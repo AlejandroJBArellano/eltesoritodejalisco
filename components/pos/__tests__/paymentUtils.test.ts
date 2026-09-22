@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
 import {
   getOrderTipAmount,
   getOrderPaymentMethods,
   getPaymentMethodLabel,
   getOrderPaymentLabel,
+  getPaymentTerminalLabel,
 } from "../paymentUtils";
 import { OrderWithDetails, PaymentMethod } from "@/types";
 
@@ -74,6 +74,31 @@ describe("paymentUtils", () => {
         ],
       } as unknown as OrderWithDetails;
       expect(getOrderPaymentLabel(order)).toBe("Mixto (Efectivo + Tarjeta)");
+    });
+  });
+
+  describe("getPaymentTerminalLabel", () => {
+    it("should return empty string for null/undefined payment", () => {
+      expect(getPaymentTerminalLabel(null)).toBe("");
+      expect(getPaymentTerminalLabel(undefined)).toBe("");
+    });
+
+    it("should return terminalName if present", () => {
+      expect(
+        getPaymentTerminalLabel({
+          terminalName: "Clip Pro Barra",
+          method: PaymentMethod.CARD,
+        }),
+      ).toBe("Clip Pro Barra");
+    });
+
+    it("should fallback to method label if terminalName is absent", () => {
+      expect(
+        getPaymentTerminalLabel({
+          terminalName: null,
+          method: PaymentMethod.CARD,
+        }),
+      ).toBe("Tarjeta");
     });
   });
 });

@@ -9,7 +9,7 @@ import React, {
   createContext,
   useContext,
 } from "react";
-import { MenuItem, Customer, Order } from "@/types/pos";
+import { MenuItem, Customer, Order, PaymentTerminal } from "@/types/pos";
 import { mapOrderData } from "@/lib/mappers/orders";
 import type { DbOrderPayload } from "@/lib/mappers/orders";
 import { createClient } from "@/lib/supabase/client";
@@ -78,6 +78,7 @@ function usePOSDataInternal(tenantId?: string) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [terminals, setTerminals] = useState<PaymentTerminal[]>([]);
   const [menuLoading, setMenuLoading] = useState(true);
   const [customersLoading, setCustomersLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true); // non-blocking: orders section only
@@ -209,6 +210,17 @@ function usePOSDataInternal(tenantId?: string) {
     setCustomers(data.customers || []);
   }, []);
 
+  const fetchTerminals = useCallback(async () => {
+    try {
+      const response = await fetch("/api/terminals");
+      if (!response.ok) return;
+      const data = await response.json();
+      setTerminals(data.terminals || []);
+    } catch (err) {
+      console.error("[POS] Error fetching terminals:", err);
+    }
+  }, []);
+
   const fetchOrders = useCallback(async () => {
     const response = await fetch("/api/orders?pos=true");
     const data = await response.json();
@@ -239,11 +251,12 @@ function usePOSDataInternal(tenantId?: string) {
         setMenuLoading(true);
         setCustomersLoading(true);
         setOrdersLoading(true);
-        // Menu, categories and customers gate the main UI; orders are non-blocking
+        // Menu, categories, customers and terminals gate the main UI; orders are non-blocking
         await Promise.all([
           fetchMenu().finally(() => setMenuLoading(false)),
           fetchCategories(),
           fetchCustomers().finally(() => setCustomersLoading(false)),
+          fetchTerminals(),
           fetchOrders().finally(() => setOrdersLoading(false)),
         ]);
       } catch (err) {
@@ -253,7 +266,7 @@ function usePOSDataInternal(tenantId?: string) {
       }
     }
     load();
-  }, [fetchOrders, fetchMenu, fetchCategories, fetchCustomers]);
+  }, [fetchOrders, fetchMenu, fetchCategories, fetchCustomers, fetchTerminals]);
 
   // Realtime subscription: any INSERT/UPDATE/DELETE on orders, ingredients,
   // menu_items or menu_categories for this tenant triggers a debounced refetch.
@@ -395,5 +408,6 @@ function usePOSDataInternal(tenantId?: string) {
     filteredMenuItems,
     todayStats,
     lowStockItems,
+    terminals,
   };
 }

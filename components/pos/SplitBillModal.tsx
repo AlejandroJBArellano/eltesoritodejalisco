@@ -4,11 +4,13 @@ import React, { useState, useMemo } from "react";
 import { X, Scissors, AlertTriangle } from "lucide-react";
 import { OrderWithDetails } from "@/types";
 import { useOptionalUser } from "@/components/UserProvider";
+import { usePOSData } from "@/hooks/pos/usePOSData";
 
 type SplitMode = "EQUAL" | "ITEMS";
 
 type SplitPart = {
   paymentMethod: string;
+  terminalId?: string;
   tipType: "NONE" | "PERCENTAGE" | "FIXED";
   tipInput: string;
   receivedAmount: string;
@@ -20,6 +22,10 @@ export type SplitPayment = {
   tipAmount: number;
   receivedAmount?: number;
   change?: number;
+  terminalId?: string | null;
+  terminalName?: string | null;
+  terminalCommissionRate?: number | null;
+  terminalCommissionAmount?: number | null;
 };
 
 type SplitBillModalProps = {
@@ -50,6 +56,12 @@ export function SplitBillModal({
 }: SplitBillModalProps) {
   const user = useOptionalUser();
   const isWaiter = user?.isWaiter ?? false;
+  const posData = usePOSData();
+  const terminals = posData?.terminals || [];
+  const activeTerminals = useMemo(
+    () => terminals.filter((t) => t.is_active),
+    [terminals],
+  );
   const [mode, setMode] = useState<SplitMode>("EQUAL");
   const [partCount, setPartCount] = useState(2);
   // For items with quantity === 1: maps itemId → person number (1-N)
@@ -202,6 +214,21 @@ export function SplitBillModal({
       const total = amount + tip;
       const received =
         part.paymentMethod === "CASH" ? Number(part.receivedAmount) : total;
+
+      const isCard =
+        part.paymentMethod === "CARD" || part.paymentMethod === "TRANSFER";
+      const selectedTerm = isCard
+        ? activeTerminals.find((t) => t.id === part.terminalId) ||
+          activeTerminals.find((t) => t.is_default) ||
+          activeTerminals[0]
+        : undefined;
+
+      const rate = selectedTerm ? Number(selectedTerm.commission_rate) : 0;
+      const commissionAmount =
+        isCard && rate > 0
+          ? Number(((amount * rate) / 100).toFixed(2))
+          : 0;
+
       return {
         amount,
         method: part.paymentMethod,
@@ -211,6 +238,10 @@ export function SplitBillModal({
           part.paymentMethod === "CASH"
             ? Math.max(0, Math.round((received - total) * 100) / 100)
             : 0,
+        terminalId: selectedTerm?.id || null,
+        terminalName: selectedTerm?.name || null,
+        terminalCommissionRate: selectedTerm ? rate : null,
+        terminalCommissionAmount: isCard ? commissionAmount : null,
       };
     });
     onConfirm(splits);
@@ -475,6 +506,36 @@ export function SplitBillModal({
                     </button>
                   ))}
                 </div>
+
+                {/* Terminal selection for Card (if multiple active terminals) */}
+                {(part.paymentMethod === "CARD" ||
+                  part.paymentMethod === "TRANSFER") &&
+                  activeTerminals.length > 1 && (
+                    <div className="flex flex-wrap gap-1 pt-0.5 animate-in fade-in duration-150">
+                      {activeTerminals.map((term) => {
+                        const isSelected =
+                          part.terminalId === term.id ||
+                          (!part.terminalId && term.is_default);
+                        return (
+                          <button
+                            key={term.id}
+                            type="button"
+                            onClick={() => updatePart(i, "terminalId", term.id)}
+                            className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+                              isSelected
+                                ? "border-primary bg-primary/20 text-primary shadow-xs"
+                                : "border-border text-text-light/60 bg-white/5 hover:text-text-light"
+                            }`}
+                          >
+                            <span>{term.short_name}</span>
+                            <span className="text-[9px] font-mono opacity-70">
+                              ({Number(term.commission_rate).toFixed(1)}%)
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
 
                 {/* Tip */}
                 <div>

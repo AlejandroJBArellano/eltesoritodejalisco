@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     // 2. Propinas Totales y Comisiones de Tarjeta (Payments)
     let paymentsQuery = supabase
       .from("payments")
-      .select("amount, tip_amount, method")
+      .select("amount, tip_amount, method, terminal_commission_rate, terminal_commission_amount")
       .eq("tenant_id", tenant.id)
       .gte("created_at", startDate.toISOString());
     if (endDate) {
@@ -88,12 +88,29 @@ export async function GET(request: NextRequest) {
     );
 
     const terminalRate = Number(tenant.terminal_commission_rate || 0);
+    let totalCardCommissions = 0;
+    let hasExplicitPaymentCommissions = false;
+
     const totalCardProcessed = (payments || []).reduce((sum, p) => {
       const isCard = p.method === "CARD" || p.method === "TRANSFER";
       if (!isCard) return sum;
-      return sum + Number(p.amount || 0) + Number(p.tip_amount || 0);
+      const totalP = Number(p.amount || 0) + Number(p.tip_amount || 0);
+
+      if (p.terminal_commission_amount != null) {
+        totalCardCommissions += Number(p.terminal_commission_amount);
+        hasExplicitPaymentCommissions = true;
+      } else if (p.terminal_commission_rate != null) {
+        totalCardCommissions +=
+          (Number(p.amount || 0) * Number(p.terminal_commission_rate)) / 100;
+        hasExplicitPaymentCommissions = true;
+      }
+
+      return sum + totalP;
     }, 0);
-    const totalCardCommissions = (totalCardProcessed * terminalRate) / 100;
+
+    if (!hasExplicitPaymentCommissions) {
+      totalCardCommissions = (totalCardProcessed * terminalRate) / 100;
+    }
 
     // 3. Customer Insights
     const { data: customers, error: custError } = await supabase

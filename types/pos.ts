@@ -1,4 +1,5 @@
-import { OrderWithDetails } from "./index";
+import { OrderWithDetails, PaymentTerminal } from "./index";
+export type { PaymentTerminal };
 
 export type MenuItem = {
   id: string;

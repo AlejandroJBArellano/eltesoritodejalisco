@@ -85,6 +85,8 @@ describe("POSCheckoutModal", () => {
     discountReason: null,
   };
 
+  const mockSetSelectedTerminalId = vi.fn();
+
   const baseCheckoutState = {
     isSubmittingCheckout: false,
     checkoutError: null,
@@ -92,6 +94,8 @@ describe("POSCheckoutModal", () => {
     setCheckoutOrder: mockSetCheckoutOrder,
     paymentMethod: "CASH",
     setPaymentMethod: mockSetPaymentMethod,
+    selectedTerminalId: null,
+    setSelectedTerminalId: mockSetSelectedTerminalId,
     receivedAmount: "700",
     setReceivedAmount: mockSetReceivedAmount,
     tipType: "NONE",
@@ -206,6 +210,80 @@ describe("POSCheckoutModal", () => {
     const transferBtn = screen.getByRole("button", { name: /Transferencia/i });
     fireEvent.click(transferBtn);
     expect(mockSetPaymentMethod).toHaveBeenCalledWith("TRANSFER");
+  });
+
+  it("does not show terminal chips when only 1 terminal is active", () => {
+    vi.mocked(usePOSData).mockReturnValue({
+      availableMenuItems: [],
+      customers: [],
+      refreshOrders: mockRefreshOrders,
+      terminals: [
+        {
+          id: "t1",
+          tenant_id: "ten-1",
+          name: "Terminal Principal",
+          short_name: "General",
+          commission_rate: 3.5,
+          is_default: true,
+          is_active: true,
+        },
+      ],
+    } as any);
+
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...baseCheckoutState,
+      paymentMethod: "CARD",
+    } as any);
+
+    render(<POSCheckoutModal />);
+
+    // No debe haber chips de selección de terminal
+    expect(screen.queryByText("Terminal / Tarjeta")).toBeNull();
+  });
+
+  it("shows terminal chips and allows selection when multiple terminals are active", () => {
+    vi.mocked(usePOSData).mockReturnValue({
+      availableMenuItems: [],
+      customers: [],
+      refreshOrders: mockRefreshOrders,
+      terminals: [
+        {
+          id: "t1",
+          tenant_id: "ten-1",
+          name: "Terminal Principal",
+          short_name: "General",
+          commission_rate: 3.5,
+          is_default: true,
+          is_active: true,
+        },
+        {
+          id: "t2",
+          tenant_id: "ten-1",
+          name: "Clip Pro Barra",
+          short_name: "Clip",
+          commission_rate: 4.06,
+          is_default: false,
+          is_active: true,
+        },
+      ],
+    } as any);
+
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...baseCheckoutState,
+      paymentMethod: "CARD",
+      selectedTerminalId: "t1",
+      setSelectedTerminalId: mockSetSelectedTerminalId,
+    } as any);
+
+    render(<POSCheckoutModal />);
+
+    expect(screen.getByText("Terminal / Tarjeta")).toBeInTheDocument();
+    expect(screen.getByText("General")).toBeInTheDocument();
+    expect(screen.getByText("Clip")).toBeInTheDocument();
+
+    const clipChip = screen.getByRole("button", { name: /Clip/i });
+    fireEvent.click(clipChip);
+    expect(mockSetSelectedTerminalId).toHaveBeenCalledWith("t2");
   });
 
   it("changes tip options and quick percentage presets", () => {

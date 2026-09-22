@@ -3,10 +3,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { SplitBillModal } from "../SplitBillModal";
 import { useOptionalUser } from "@/components/UserProvider";
+import { usePOSData } from "@/hooks/pos/usePOSData";
 import { OrderStatus, type OrderWithDetails } from "@/types";
 
 vi.mock("@/components/UserProvider", () => ({
   useOptionalUser: vi.fn(),
+}));
+
+vi.mock("@/hooks/pos/usePOSData", () => ({
+  usePOSData: vi.fn(() => ({
+    terminals: [],
+  })),
 }));
 
 const mockOrder: OrderWithDetails = {
@@ -167,5 +174,47 @@ describe("SplitBillModal Component", () => {
     expect(confirmBtn).not.toBeDisabled();
     fireEvent.click(confirmBtn);
     expect(onConfirm).toHaveBeenCalled();
+  });
+
+  it("shows terminal chips when multiple terminals exist and card is selected", () => {
+    vi.mocked(usePOSData).mockReturnValue({
+      terminals: [
+        {
+          id: "t1",
+          tenant_id: "ten-1",
+          name: "Terminal Principal",
+          short_name: "General",
+          commission_rate: 3.5,
+          is_default: true,
+          is_active: true,
+        },
+        {
+          id: "t2",
+          tenant_id: "ten-1",
+          name: "Clip Pro Barra",
+          short_name: "Clip",
+          commission_rate: 4.06,
+          is_default: false,
+          is_active: true,
+        },
+      ],
+    } as any);
+
+    const onConfirm = vi.fn();
+    render(
+      <SplitBillModal
+        order={mockOrder}
+        onConfirm={onConfirm}
+        onClose={vi.fn()}
+      />,
+    );
+
+    // Switch person 1 to Tarjeta
+    const cardButtons = screen.getAllByRole("button", { name: "Tarjeta" });
+    fireEvent.click(cardButtons[0]);
+
+    // Should render terminal chips
+    expect(screen.getByText("General")).toBeInTheDocument();
+    expect(screen.getByText("Clip")).toBeInTheDocument();
   });
 });

@@ -41,6 +41,9 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
   // Checkout & Print State
   const [checkoutOrder, setCheckoutOrder] = useState<Order | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>("CASH");
+  const [selectedTerminalId, setSelectedTerminalId] = useState<string | null>(
+    null,
+  );
   const [receivedAmount, setReceivedAmount] = useState<string>("");
   const [showTicket, setShowTicket] = useState(false);
   const [showKitchenTicket, setShowKitchenTicket] = useState(false);
@@ -104,7 +107,14 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     return diff > 0 ? diff : 0;
   }, [checkoutOrderTotal, receivedAmount, tipAmountCalculated]);
 
-  const handleProcessPayment = async (forceConfirmed = false) => {
+  const handleProcessPayment = async (
+    forceConfirmed = false,
+    terminalOverride?: {
+      id?: string;
+      name?: string;
+      commissionRate?: number;
+    },
+  ) => {
     if (!checkoutOrder) return;
 
     const percentage = (tipAmountCalculated / checkoutOrder.total) * 100;
@@ -121,6 +131,8 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     try {
       setIsSubmitting(true);
       setCheckoutError(null);
+      const isCardPayment =
+        paymentMethod === "CARD" || paymentMethod === "TRANSFER";
       const response = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -134,6 +146,15 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
               : checkoutOrder.total + tipAmountCalculated,
           change: paymentMethod === "CASH" ? change : 0,
           tipAmount: tipAmountCalculated,
+          ...(isCardPayment
+            ? {
+                terminalId:
+                  terminalOverride?.id || selectedTerminalId || undefined,
+                terminalName: terminalOverride?.name || undefined,
+                terminalCommissionRate:
+                  terminalOverride?.commissionRate || undefined,
+              }
+            : {}),
         }),
       });
       if (!response.ok) throw new Error("Error al procesar el pago");
@@ -444,6 +465,8 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     setCheckoutOrder,
     paymentMethod,
     setPaymentMethod,
+    selectedTerminalId,
+    setSelectedTerminalId,
     receivedAmount,
     setReceivedAmount,
     showTicket,

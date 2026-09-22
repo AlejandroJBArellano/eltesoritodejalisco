@@ -109,6 +109,8 @@ export function useDailyCutManager({
     let propinasTarjeta = 0;
     let cajaEfectivo = 0;
     let cajaTarjeta = 0;
+    let totalComisionTarjetaCalculada = 0;
+    let hasExplicitCommissions = false;
 
     const processedPaymentIds = new Set<string>();
 
@@ -154,6 +156,18 @@ export function useDailyCutManager({
             ) {
               propinasTarjeta += tipAmount;
               cajaTarjeta += totalPago;
+
+              if (payment.terminalCommissionAmount != null) {
+                totalComisionTarjetaCalculada += Number(
+                  payment.terminalCommissionAmount,
+                );
+                hasExplicitCommissions = true;
+              } else if (payment.terminalCommissionRate != null) {
+                const comm =
+                  (amount * Number(payment.terminalCommissionRate)) / 100;
+                totalComisionTarjetaCalculada += comm;
+                hasExplicitCommissions = true;
+              }
             } else {
               cajaEfectivo += totalPago;
             }
@@ -187,7 +201,9 @@ export function useDailyCutManager({
       }
     });
 
-    const comisionTarjeta = (cajaTarjeta * terminalCommissionRate) / 100;
+    const comisionTarjeta = hasExplicitCommissions
+      ? totalComisionTarjetaCalculada
+      : (cajaTarjeta * terminalCommissionRate) / 100;
     const cajaTarjetaNeta = Math.max(0, cajaTarjeta - comisionTarjeta);
     const utilidadReal = ventaNeta + propinasEfectivo + propinasTarjeta;
     const utilidadFinal = utilidadReal - todayExpenses - comisionTarjeta;

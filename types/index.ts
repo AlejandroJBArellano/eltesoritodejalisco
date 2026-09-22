@@ -126,7 +126,7 @@ export interface Customer {
 }
 
 // ============================================
-// PAYMENTS TYPES
+// PAYMENTS & TERMINALS TYPES
 // ============================================
 
 export enum PaymentMethod {
@@ -134,6 +134,18 @@ export enum PaymentMethod {
   CARD = "CARD",
   TRANSFER = "TRANSFER",
   OTHER = "OTHER",
+}
+
+export interface PaymentTerminal {
+  id: string;
+  tenant_id: string;
+  name: string;
+  short_name: string;
+  commission_rate: number;
+  is_default: boolean;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Payment {
@@ -144,6 +156,10 @@ export interface Payment {
   receivedAmount?: number;
   change?: number;
   tipAmount?: number;
+  terminalId?: string | null;
+  terminalName?: string | null;
+  terminalCommissionRate?: number | null;
+  terminalCommissionAmount?: number | null;
   createdAt: Date;
 }
 
