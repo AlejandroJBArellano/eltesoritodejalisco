@@ -155,16 +155,16 @@ export function McpConnectCard() {
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl p-6 sm:p-8 space-y-6 shadow-sm">
+    <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3.5">
           <div className="p-2.5 bg-primary/10 border border-primary/20 rounded-xl text-primary shrink-0">
             <Bot className="h-6 w-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-black text-text-light">
+              <h3 className="text-base font-bold text-text-light">
                 Conectar con Asistentes de IA (MCP)
               </h3>
               <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black uppercase rounded-md tracking-wider border border-primary/20">
@@ -201,27 +201,27 @@ export function McpConnectCard() {
 
       {/* Alerta de Clave Recién Creada */}
       {createdKey && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 space-y-2 animate-in fade-in duration-200">
-          <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
-            <ShieldCheck className="h-4 w-4" />
+        <div className="bg-emerald-950/20 border border-emerald-500/30 rounded-2xl p-5 space-y-3 animate-in fade-in duration-200">
+          <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+            <ShieldCheck className="h-5 w-5 shrink-0" />
             ¡Nueva clave generada con éxito!
           </div>
           <p className="text-xs text-emerald-200/70">
             Copia esta clave ahora. Por seguridad, no se volverá a mostrar
             completa.
           </p>
-          <div className="flex items-center gap-2 bg-dark/40 border border-emerald-500/30 rounded-lg p-2.5">
-            <code className="font-mono text-xs text-emerald-300 flex-1 break-all font-bold">
+          <div className="flex items-center justify-between gap-3 bg-[#0a1813] border border-emerald-500/30 rounded-xl px-4 py-3">
+            <code className="font-mono text-xs sm:text-sm text-emerald-400 font-bold tracking-wide break-all flex-1 select-all">
               {createdKey}
             </code>
             <button
               type="button"
               onClick={handleCopyKey}
-              className="p-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-md transition cursor-pointer shrink-0"
+              className="p-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-400 rounded-lg transition cursor-pointer shrink-0"
               title="Copiar Clave"
             >
               {copiedKey ? (
-                <Check className="h-4 w-4" />
+                <Check className="h-4 w-4 text-emerald-300" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}
@@ -231,39 +231,39 @@ export function McpConnectCard() {
       )}
 
       {/* Guía en 3 Pasos */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="bg-dark/40 border border-border rounded-xl p-3.5 space-y-1">
-          <div className="text-[10px] font-black uppercase text-primary tracking-wider font-mono">
-            Paso 1
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        <div className="bg-[#18181b]/70 border border-border/80 rounded-xl p-4 space-y-1.5">
+          <div className="text-[11px] font-black uppercase text-pink-400 tracking-wider font-mono">
+            PASO 1
           </div>
-          <div className="text-xs font-bold text-text-light">
+          <div className="text-sm font-bold text-text-light">
             Genera tu clave
           </div>
-          <p className="text-[11px] text-text-light/50 font-medium">
+          <p className="text-xs text-text-light/60 font-medium leading-relaxed">
             Crea una API Key segura con acceso de solo lectura a tus métricas.
           </p>
         </div>
 
-        <div className="bg-dark/40 border border-border rounded-xl p-3.5 space-y-1">
-          <div className="text-[10px] font-black uppercase text-primary tracking-wider font-mono">
-            Paso 2
+        <div className="bg-[#18181b]/70 border border-border/80 rounded-xl p-4 space-y-1.5">
+          <div className="text-[11px] font-black uppercase text-pink-400 tracking-wider font-mono">
+            PASO 2
           </div>
-          <div className="text-xs font-bold text-text-light">
+          <div className="text-sm font-bold text-text-light">
             Pega la configuración
           </div>
-          <p className="text-[11px] text-text-light/50 font-medium">
+          <p className="text-xs text-text-light/60 font-medium leading-relaxed">
             Copia el bloque JSON para Claude Desktop o Cursor con 1 clic.
           </p>
         </div>
 
-        <div className="bg-dark/40 border border-border rounded-xl p-3.5 space-y-1">
-          <div className="text-[10px] font-black uppercase text-primary tracking-wider font-mono">
-            Paso 3
+        <div className="bg-[#18181b]/70 border border-border/80 rounded-xl p-4 space-y-1.5">
+          <div className="text-[11px] font-black uppercase text-pink-400 tracking-wider font-mono">
+            PASO 3
           </div>
-          <div className="text-xs font-bold text-text-light">
+          <div className="text-sm font-bold text-text-light">
             Pregúntale a tu IA
           </div>
-          <p className="text-[11px] text-text-light/50 font-medium">
+          <p className="text-xs text-text-light/60 font-medium leading-relaxed">
             Pide reportes como: &quot;¿Cuáles fueron las ventas de hoy y qué
             platillo se vendió más?&quot;
           </p>
@@ -271,15 +271,15 @@ export function McpConnectCard() {
       </div>
 
       {/* Snippet de Configuración con Pestañas */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1 bg-dark/40 p-1 rounded-xl border border-border">
+      <div className="space-y-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="inline-flex items-center bg-[#18181b] p-1 rounded-full border border-border/80 gap-1">
             <button
               type="button"
               onClick={() => setActiveTab("claude")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
                 activeTab === "claude"
-                  ? "bg-primary text-background shadow-sm"
+                  ? "bg-pink-300 text-neutral-900 shadow-sm"
                   : "text-text-light/60 hover:text-text-light"
               }`}
             >
@@ -288,9 +288,9 @@ export function McpConnectCard() {
             <button
               type="button"
               onClick={() => setActiveTab("cursor")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
                 activeTab === "cursor"
-                  ? "bg-primary text-background shadow-sm"
+                  ? "bg-pink-300 text-neutral-900 shadow-sm"
                   : "text-text-light/60 hover:text-text-light"
               }`}
             >
@@ -299,9 +299,9 @@ export function McpConnectCard() {
             <button
               type="button"
               onClick={() => setActiveTab("cli")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
                 activeTab === "cli"
-                  ? "bg-primary text-background shadow-sm"
+                  ? "bg-pink-300 text-neutral-900 shadow-sm"
                   : "text-text-light/60 hover:text-text-light"
               }`}
             >
@@ -312,7 +312,7 @@ export function McpConnectCard() {
           <button
             type="button"
             onClick={handleCopySnippet}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-dark/40 hover:bg-card-light border border-border text-xs font-bold text-text-light rounded-xl transition active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#27272a]/70 hover:bg-[#27272a] border border-border/80 text-xs font-bold text-text-light rounded-full transition active:scale-95 cursor-pointer shadow-sm"
           >
             {copiedSnippet ? (
               <>
@@ -326,7 +326,7 @@ export function McpConnectCard() {
                   {activeTab === "claude"
                     ? "Copiar para Claude Desktop"
                     : activeTab === "cursor"
-                      ? "Copiar para Cursor"
+                      ? "Copiar para Cursor IDE"
                       : "Copiar Comando"}
                 </span>
               </>
@@ -335,17 +335,17 @@ export function McpConnectCard() {
         </div>
 
         <div className="relative group">
-          <pre className="p-4 bg-dark/40 border border-border rounded-xl font-mono text-xs text-text-light/80 overflow-x-auto selection:bg-primary/20">
+          <pre className="p-5 sm:p-6 bg-[#121214] border border-border/80 rounded-2xl font-mono text-xs sm:text-sm text-text-light/85 overflow-x-auto selection:bg-primary/20 leading-relaxed">
             {getActiveSnippet()}
           </pre>
         </div>
       </div>
 
       {/* Lista de Claves Activas */}
-      <div className="border-t border-border pt-5 space-y-3">
-        <h4 className="text-xs font-black uppercase text-text-light/60 tracking-wider flex items-center gap-2">
-          <Key className="h-3.5 w-3.5" />
-          Claves de Conexión Activas ({keys.length})
+      <div className="border-t border-border pt-5 space-y-3.5">
+        <h4 className="text-xs font-black uppercase text-text-light/70 tracking-wider flex items-center gap-2">
+          <Key className="h-3.5 w-3.5 text-text-light/70" />
+          CLAVES DE CONEXIÓN ACTIVAS ({keys.length})
         </h4>
 
         {fetchingKeys ? (
@@ -358,20 +358,20 @@ export function McpConnectCard() {
             IA&quot; para generar tu primera clave.
           </div>
         ) : (
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border/60">
             {keys.map((k) => (
               <div
                 key={k.id}
-                className="py-2.5 flex items-center justify-between gap-4 text-xs"
+                className="py-3 flex items-center justify-between gap-4 text-xs"
               >
-                <div className="space-y-0.5">
+                <div className="space-y-1">
                   <div className="font-bold text-text-light flex items-center gap-2">
-                    <span>{k.name}</span>
-                    <code className="text-[11px] font-mono text-text-light/50 bg-dark/40 px-1.5 py-0.5 rounded border border-border">
+                    <span className="text-sm text-text-light">{k.name}</span>
+                    <code className="text-xs font-mono text-text-light/60 bg-[#27272a] px-2 py-0.5 rounded border border-border/60">
                       {k.key_prefix}
                     </code>
                   </div>
-                  <div className="text-[10px] text-text-light/40 font-mono">
+                  <div className="text-xs text-text-light/50 font-medium">
                     Creada el {new Date(k.created_at).toLocaleDateString()} •{" "}
                     {k.last_used_at
                       ? `Último uso: ${new Date(k.last_used_at).toLocaleDateString()}`
@@ -382,7 +382,7 @@ export function McpConnectCard() {
                 <button
                   type="button"
                   onClick={() => handleRevokeKey(k.id)}
-                  className="p-1.5 text-red-400/80 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition cursor-pointer"
+                  className="p-2 text-red-400/80 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition cursor-pointer"
                   title="Revocar Clave"
                 >
                   <Trash2 className="h-4 w-4" />

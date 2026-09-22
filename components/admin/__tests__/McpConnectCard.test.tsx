@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { McpConnectCard } from "../McpConnectCard";
 import * as actionsModule from "@/lib/mcp/actions";
 
@@ -25,15 +25,17 @@ describe("McpConnectCard Component", () => {
       keys: [],
     });
 
-    render(<McpConnectCard />);
+    await act(async () => {
+      render(<McpConnectCard />);
+    });
 
     expect(
       screen.getByText("Conectar con Asistentes de IA (MCP)"),
     ).toBeInTheDocument();
     expect(screen.getByText("1-Click Setup")).toBeInTheDocument();
-    expect(screen.getByText("Paso 1")).toBeInTheDocument();
-    expect(screen.getByText("Paso 2")).toBeInTheDocument();
-    expect(screen.getByText("Paso 3")).toBeInTheDocument();
+    expect(screen.getByText("PASO 1")).toBeInTheDocument();
+    expect(screen.getByText("PASO 2")).toBeInTheDocument();
+    expect(screen.getByText("PASO 3")).toBeInTheDocument();
     expect(screen.getByText("Claude Desktop")).toBeInTheDocument();
     expect(screen.getByText("Cursor IDE")).toBeInTheDocument();
     expect(screen.getByText("Terminal / NPX")).toBeInTheDocument();
@@ -54,7 +56,9 @@ describe("McpConnectCard Component", () => {
       ],
     });
 
-    render(<McpConnectCard />);
+    await act(async () => {
+      render(<McpConnectCard />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Claude Assistant")).toBeInTheDocument();
@@ -78,10 +82,14 @@ describe("McpConnectCard Component", () => {
       },
     });
 
-    render(<McpConnectCard />);
+    await act(async () => {
+      render(<McpConnectCard />);
+    });
 
     const generateBtn = screen.getByText("Activar Conexión IA");
-    fireEvent.click(generateBtn);
+    await act(async () => {
+      fireEvent.click(generateBtn);
+    });
 
     await waitFor(() => {
       expect(
@@ -94,30 +102,51 @@ describe("McpConnectCard Component", () => {
 
     // Test copy raw key
     const copyKeyBtn = screen.getByTitle("Copiar Clave");
-    fireEvent.click(copyKeyBtn);
+    await act(async () => {
+      fireEvent.click(copyKeyBtn);
+    });
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       "kt_live_abcd1234567890abcdef12345678",
     );
   });
 
-  it("should switch tabs and copy snippet", async () => {
+  it("should switch tabs and copy snippet for Cursor and CLI", async () => {
     vi.mocked(actionsModule.listTenantApiKeysAction).mockResolvedValueOnce({
       success: true,
       keys: [],
     });
 
-    render(<McpConnectCard />);
+    await act(async () => {
+      render(<McpConnectCard />);
+    });
 
+    // Test Cursor tab
     const cursorTab = screen.getByText("Cursor IDE");
-    fireEvent.click(cursorTab);
+    await act(async () => {
+      fireEvent.click(cursorTab);
+    });
 
-    const copySnippetBtn = screen.getByText("Copiar para Cursor");
-    fireEvent.click(copySnippetBtn);
+    const copySnippetBtn = screen.getByText("Copiar para Cursor IDE");
+    await act(async () => {
+      fireEvent.click(copySnippetBtn);
+    });
 
     expect(navigator.clipboard.writeText).toHaveBeenCalled();
     await waitFor(() => {
       expect(screen.getByText("¡Copiado!")).toBeInTheDocument();
     });
+
+    // Test Terminal / NPX tab with a fresh render or click
+    const cliTab = screen.getByText("Terminal / NPX");
+    await act(async () => {
+      fireEvent.click(cliTab);
+    });
+
+    expect(
+      screen.getByText((content) =>
+        content.includes('KITTN_API_KEY="kt_live_TU_API_KEY" npx -y @trykittn/mcp'),
+      ),
+    ).toBeInTheDocument();
   });
 
   it("should revoke key when clicking delete button", async () => {
@@ -139,14 +168,18 @@ describe("McpConnectCard Component", () => {
       success: true,
     });
 
-    render(<McpConnectCard />);
+    await act(async () => {
+      render(<McpConnectCard />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Old Key")).toBeInTheDocument();
     });
 
     const deleteBtn = screen.getByTitle("Revocar Clave");
-    fireEvent.click(deleteBtn);
+    await act(async () => {
+      fireEvent.click(deleteBtn);
+    });
 
     await waitFor(() => {
       expect(actionsModule.revokeTenantApiKeyAction).toHaveBeenCalledWith(
@@ -155,3 +188,4 @@ describe("McpConnectCard Component", () => {
     });
   });
 });
+
