@@ -76,12 +76,10 @@ export interface HistoryContextValue {
   handleGeneratePendingCut: () => Promise<void>;
   terminalCommissionRate: number;
 
-  // Archive & Billing State
+  // Archive State
   showCutsArchive: boolean;
   setShowCutsArchive: (show: boolean) => void;
   toggleCutsArchive: () => void;
-  billingOrder: Order | null;
-  setBillingOrder: (order: Order | null) => void;
 
   // Summary Ticket State
   showDailySummaryTicket: boolean;
@@ -118,7 +116,6 @@ export function HistoryProvider({
   autoFetch = true,
 }: HistoryProviderProps) {
   const [showCutsArchive, setShowCutsArchive] = useState(false);
-  const [billingOrder, setBillingOrder] = useState<Order | null>(null);
   const [showDailySummaryTicket, setShowDailySummaryTicket] = useState(false);
   const [dailySummaryTicketCut, setDailySummaryTicketCut] =
     useState<DailyCut | null>(null);
@@ -208,8 +205,6 @@ export function HistoryProvider({
       showCutsArchive,
       setShowCutsArchive,
       toggleCutsArchive,
-      billingOrder,
-      setBillingOrder,
 
       showDailySummaryTicket,
       setShowDailySummaryTicket,
@@ -223,7 +218,6 @@ export function HistoryProvider({
       cutManagerHook,
       showCutsArchive,
       toggleCutsArchive,
-      billingOrder,
       showDailySummaryTicket,
       dailySummaryTicketCut,
       openDailySummaryTicket,

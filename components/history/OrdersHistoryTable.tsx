@@ -28,7 +28,6 @@ export interface OrdersHistoryTableProps {
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
   onToggleRow?: (orderId: string) => void;
-  onBillOrder?: (order: Order) => void;
 }
 
 export function OrdersHistoryTable(props: OrdersHistoryTableProps = {}) {
@@ -61,8 +60,6 @@ export function OrdersHistoryTable(props: OrdersHistoryTableProps = {}) {
   const onPageSizeChange =
     props.onPageSizeChange ?? context?.setOrdersPageSize ?? (() => {});
   const onToggleRow = props.onToggleRow ?? context?.toggleRow ?? (() => {});
-  const onBillOrder =
-    props.onBillOrder ?? context?.setBillingOrder ?? (() => {});
 
   return (
     <div className="overflow-x-auto space-y-4">
@@ -205,7 +202,6 @@ export function OrdersHistoryTable(props: OrdersHistoryTableProps = {}) {
                     <td colSpan={8} className="px-6 py-4">
                       <OrderDetailExpanded
                         order={order}
-                        onBillOrder={onBillOrder}
                       />
                     </td>
                   </tr>

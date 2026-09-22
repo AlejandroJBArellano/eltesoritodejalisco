@@ -78,7 +78,6 @@ describe("OrdersHistoryTable Component", () => {
         onPageChange={vi.fn()}
         onPageSizeChange={vi.fn()}
         onToggleRow={vi.fn()}
-        onBillOrder={vi.fn()}
       />,
     );
 
@@ -104,7 +103,6 @@ describe("OrdersHistoryTable Component", () => {
         onPageChange={vi.fn()}
         onPageSizeChange={vi.fn()}
         onToggleRow={onToggleRow}
-        onBillOrder={vi.fn()}
       />,
     );
 
@@ -128,7 +126,6 @@ describe("OrdersHistoryTable Component", () => {
         onPageChange={vi.fn()}
         onPageSizeChange={vi.fn()}
         onToggleRow={vi.fn()}
-        onBillOrder={vi.fn()}
       />,
     );
 
@@ -151,7 +148,6 @@ describe("OrdersHistoryTable Component", () => {
         onPageChange={vi.fn()}
         onPageSizeChange={vi.fn()}
         onToggleRow={vi.fn()}
-        onBillOrder={vi.fn()}
       />,
     );
 

@@ -17,15 +17,6 @@ vi.mock("@/hooks/usePendingCut", () => ({
   }),
 }));
 
-vi.mock("@/components/pos/FacturacionModal", () => ({
-  FacturacionModal: ({ onClose }: { onClose: () => void }) => (
-    <div data-testid="facturacion-modal">
-      <span>Modal de Facturación</span>
-      <button onClick={onClose}>Cerrar Factura</button>
-    </div>
-  ),
-}));
-
 describe("HistoryContent Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -85,7 +76,7 @@ describe("HistoryContent Component", () => {
     ).toBeDefined();
   });
 
-  it("renders full history view for ADMIN role, toggles archive, finalize modal, and billing modal", async () => {
+  it("renders full history view for ADMIN role, toggles archive, and finalize modal", async () => {
     render(<HistoryContent />);
 
     await waitFor(() => {
@@ -122,29 +113,6 @@ describe("HistoryContent Component", () => {
 
     await waitFor(() => {
       expect(screen.queryByText("Efectivo Caja")).toBeNull();
-    });
-
-    // Expand order row to trigger Facturar Orden
-    const row = screen.getByTestId("order-row-ord-1");
-    fireEvent.click(row);
-
-    await waitFor(() => {
-      expect(screen.getByText("Facturar Orden")).toBeDefined();
-    });
-
-    const facturarBtn = screen.getByText("Facturar Orden");
-    fireEvent.click(facturarBtn);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("facturacion-modal")).toBeDefined();
-    });
-
-    // Close facturacion modal
-    const closeFacturaBtn = screen.getByText("Cerrar Factura");
-    fireEvent.click(closeFacturaBtn);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId("facturacion-modal")).toBeNull();
     });
   });
 

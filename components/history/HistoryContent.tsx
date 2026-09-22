@@ -4,7 +4,6 @@ import React from "react";
 import Link from "next/link";
 import { ArrowLeft, Printer, ShieldAlert } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { FacturacionModal } from "@/components/pos/FacturacionModal";
 import { useOptionalUser } from "@/components/UserProvider";
 
 import { HistoryProvider, useHistoryContext } from "./HistoryContext";
@@ -19,8 +18,6 @@ import { DailySummaryTicket } from "./DailySummaryTicket";
 function HistoryMainView() {
   const {
     showCutsArchive,
-    billingOrder,
-    setBillingOrder,
     isLoadingOrders,
     showDailySummaryTicket,
     dailySummaryTicketCut,
@@ -69,13 +66,6 @@ function HistoryMainView() {
       {/* MODAL DE CIERRE DE CAJA (0 PROPS) */}
       <FinalizeCutModal />
 
-      {/* MODAL DE FACTURACIÓN */}
-      {billingOrder && (
-        <FacturacionModal
-          order={billingOrder}
-          onClose={() => setBillingOrder(null)}
-        />
-      )}
 
       {/* MODAL / CONTENEDOR DE IMPRESIÓN DE TICKET CONGLOMERADO */}
       {showDailySummaryTicket && (

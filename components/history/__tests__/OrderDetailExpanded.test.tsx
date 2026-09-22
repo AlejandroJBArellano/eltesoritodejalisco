@@ -69,7 +69,6 @@ describe("OrderDetailExpanded Component", () => {
     render(
       <OrderDetailExpanded
         order={mockOrder}
-        onBillOrder={vi.fn()}
         initialAuditLogs={[]}
       />,
     );
@@ -84,26 +83,11 @@ describe("OrderDetailExpanded Component", () => {
     expect(screen.getAllByText("Producto").length).toBe(2); // Table header + fallback item name
   });
 
-  it("calls onBillOrder when Facturar button is clicked", () => {
-    const onBillOrder = vi.fn();
-    render(
-      <OrderDetailExpanded
-        order={mockOrder}
-        onBillOrder={onBillOrder}
-        initialAuditLogs={[]}
-      />,
-    );
-
-    const billBtn = screen.getByText("Facturar Orden");
-    fireEvent.click(billBtn);
-    expect(onBillOrder).toHaveBeenCalledWith(mockOrder);
-  });
 
   it("shows empty state when there are no audit logs", () => {
     render(
       <OrderDetailExpanded
         order={mockOrder}
-        onBillOrder={vi.fn()}
         initialAuditLogs={[]}
       />,
     );
@@ -265,7 +249,6 @@ describe("OrderDetailExpanded Component", () => {
     render(
       <OrderDetailExpanded
         order={mockOrder}
-        onBillOrder={vi.fn()}
         initialAuditLogs={sampleLogs}
       />,
     );
@@ -337,7 +320,7 @@ describe("OrderDetailExpanded Component", () => {
       json: async () => ({ logs: apiLogs }),
     } as Response);
 
-    render(<OrderDetailExpanded order={mockOrder} onBillOrder={vi.fn()} />);
+    render(<OrderDetailExpanded order={mockOrder} />);
 
     expect(screen.getByText("Cargando historial...")).toBeDefined();
 
@@ -357,7 +340,7 @@ describe("OrderDetailExpanded Component", () => {
       .spyOn(global, "fetch")
       .mockRejectedValueOnce(new Error("Network failure"));
 
-    render(<OrderDetailExpanded order={mockOrder} onBillOrder={vi.fn()} />);
+    render(<OrderDetailExpanded order={mockOrder} />);
 
     await waitFor(() => {
       expect(screen.getByText("Sin modificaciones registradas")).toBeDefined();
@@ -382,7 +365,7 @@ describe("OrderDetailExpanded Component", () => {
       json: async () => ({ error: "Server error" }),
     } as Response);
 
-    render(<OrderDetailExpanded order={mockOrder} onBillOrder={vi.fn()} />);
+    render(<OrderDetailExpanded order={mockOrder} />);
 
     await waitFor(() => {
       expect(screen.getByText("Sin modificaciones registradas")).toBeDefined();
@@ -425,7 +408,6 @@ describe("OrderDetailExpanded Component", () => {
     render(
       <OrderDetailExpanded
         order={mockOrder}
-        onBillOrder={vi.fn()}
         initialAuditLogs={adminLogs}
       />,
     );

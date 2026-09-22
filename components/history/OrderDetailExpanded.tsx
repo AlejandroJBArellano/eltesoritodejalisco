@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Receipt,
   ShoppingBag,
   User,
   History,
@@ -19,7 +18,6 @@ import type { OrderAuditLog } from "@/types";
 
 export interface OrderDetailExpandedProps {
   order: Order;
-  onBillOrder: (order: Order) => void;
   initialAuditLogs?: OrderAuditLog[];
 }
 
@@ -160,7 +158,6 @@ function formatLogTime(dateString: string): string {
 
 export function OrderDetailExpanded({
   order,
-  onBillOrder,
   initialAuditLogs,
 }: OrderDetailExpandedProps) {
   const [fetchedLogs, setFetchedLogs] = useState<OrderAuditLog[] | null>(null);
@@ -213,17 +210,6 @@ export function OrderDetailExpanded({
             </span>
           )}
         </div>
-
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onBillOrder(order);
-          }}
-          className="flex items-center gap-1.5 rounded-lg bg-primary/10 border border-primary/20 px-3 py-1.5 text-[10px] font-black text-primary hover:bg-primary/20 transition-all uppercase tracking-wider cursor-pointer active:scale-[0.98]"
-        >
-          <Receipt className="h-3.5 w-3.5" /> Facturar Orden
-        </button>
       </div>
 
       <div className="overflow-x-auto">
