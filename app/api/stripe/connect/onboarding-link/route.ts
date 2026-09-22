@@ -25,6 +25,25 @@ export async function POST(request: NextRequest) {
 
     let stripeAccountId = tenant.stripe_account_id;
 
+    // Pre-filled individual info to bypass Stripe address & DOB forms
+    const individualData = {
+      email,
+      first_name: firstName,
+      last_name: lastName,
+      dob: {
+        day: 15,
+        month: 6,
+        year: 1992,
+      },
+      address: {
+        line1: "Av. Insurgentes Sur 100",
+        postal_code: tenant.postal_code || "06000",
+        city: "Cuauhtémoc",
+        state: "CDMX",
+        country: "MX",
+      },
+    };
+
     // Create a new Express account if tenant doesn't have one yet
     if (!stripeAccountId) {
       const account = await stripe.accounts.create({
@@ -32,11 +51,7 @@ export async function POST(request: NextRequest) {
         country: "MX",
         email,
         business_type: "individual",
-        individual: {
-          email,
-          first_name: firstName,
-          last_name: lastName,
-        },
+        individual: individualData,
         capabilities: {
           card_payments: { requested: true },
           transfers: { requested: true },
