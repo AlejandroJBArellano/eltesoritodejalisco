@@ -1,12 +1,12 @@
 import { stripe } from "@/lib/stripe";
-import { getProfile } from "@/lib/auth";
+import { getProfile, getUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext, invalidateTenantCache } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const profile = await getProfile();
+    const [user, profile] = await Promise.all([getUser(), getProfile()]);
     if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
       return NextResponse.json(
         { error: "No autorizado para configurar pagos" },
@@ -17,6 +17,12 @@ export async function POST(request: NextRequest) {
     const tenant = await getTenantContext();
     const supabase = createAdminClient();
 
+    const email = user?.email || profile?.email || undefined;
+    const nameParts = (profile.full_name || "").trim().split(/\s+/);
+    const firstName = nameParts[0] || undefined;
+    const lastName =
+      nameParts.length > 1 ? nameParts.slice(1).join(" ") : undefined;
+
     let stripeAccountId = tenant.stripe_account_id;
 
     // Create a new Express account if tenant doesn't have one yet
@@ -24,8 +30,13 @@ export async function POST(request: NextRequest) {
       const account = await stripe.accounts.create({
         type: "express",
         country: "MX",
-        email: profile.email || undefined,
+        email,
         business_type: "individual",
+        individual: {
+          email,
+          first_name: firstName,
+          last_name: lastName,
+        },
         capabilities: {
           card_payments: { requested: true },
           transfers: { requested: true },
