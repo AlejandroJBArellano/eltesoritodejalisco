@@ -25,26 +25,14 @@ export async function POST(_request: NextRequest) {
 
     let stripeAccountId = tenant.stripe_account_id;
 
-    // Pre-filled individual info to bypass Stripe address & DOB forms
+    // Only pre-fill authentic data that exists in our database
     const individualData = {
       email,
       first_name: firstName,
       last_name: lastName,
-      dob: {
-        day: 15,
-        month: 6,
-        year: 1992,
-      },
-      address: {
-        line1: "Av. Insurgentes Sur 100",
-        postal_code: tenant.postal_code || "06000",
-        city: "Cuauhtémoc",
-        state: "CDMX",
-        country: "MX",
-      },
     };
 
-    // Create a new Express account if tenant doesn't have one yet, with pre-filled metadata
+    // Create a new Express account if tenant doesn't have one yet, with real DB metadata
     if (!stripeAccountId) {
       const account = await stripe.accounts.create({
         type: "express",
@@ -87,7 +75,7 @@ export async function POST(_request: NextRequest) {
 
       invalidateTenantCache(tenant.slug);
     } else {
-      // Sync pre-filled metadata to existing account so email and address are populated
+      // Sync real metadata to existing account
       try {
         await stripe.accounts.update(stripeAccountId, {
           email,
@@ -105,7 +93,7 @@ export async function POST(_request: NextRequest) {
         });
       } catch (syncErr) {
         console.warn(
-          "Could not sync pre-filled data to existing Stripe account:",
+          "Could not sync real data to existing Stripe account:",
           syncErr,
         );
       }
