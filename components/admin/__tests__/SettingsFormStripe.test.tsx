@@ -9,6 +9,18 @@ vi.mock("@/app/admin/settings/actions", () => ({
   updateTenantSettings: vi.fn().mockResolvedValue({ success: true }),
 }));
 
+// Mock Stripe Connect JS
+vi.mock("@stripe/connect-js", () => ({
+  loadConnectAndInitialize: vi.fn().mockReturnValue({}),
+}));
+
+vi.mock("@stripe/react-connect-js", () => ({
+  ConnectComponentsProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  ConnectAccountOnboarding: () => <div>Stripe Onboarding Embedded</div>,
+}));
+
 const mockBaseTenant: TenantContextType = {
   id: "tenant-123",
   name: "Tacos El Guero",
@@ -39,9 +51,10 @@ const mockBaseTenant: TenantContextType = {
 describe("SettingsForm - Kittn Pickup & Stripe Integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_123456";
   });
 
-  it("renders Inactive state when tenant has no Stripe account", () => {
+  it("renders Inactive state when tenant has no Stripe account and opens embedded modal on click", async () => {
     render(<SettingsForm initialTenant={mockBaseTenant} />);
 
     expect(
@@ -52,9 +65,17 @@ describe("SettingsForm - Kittn Pickup & Stripe Integration", () => {
       screen.getByText("https://tacos-el-guero.trykittn.com"),
     ).toBeInTheDocument();
     expect(screen.getByText("Requiere activar Stripe")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Conectar Stripe y Activar Pickup/i }),
-    ).toBeInTheDocument();
+    
+    const connectBtn = screen.getByRole("button", {
+      name: /Conectar Stripe y Activar Pickup/i,
+    });
+    expect(connectBtn).toBeInTheDocument();
+
+    fireEvent.click(connectBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText("Conectar Pagos con Stripe")).toBeInTheDocument();
+    });
   });
 
   it("renders Pending Verification state when tenant has stripe_account_id but charges are not enabled", () => {

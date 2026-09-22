@@ -31,6 +31,11 @@ interface SettingsContextValue {
   setIsDragging: (val: boolean) => void;
   connectingStripe: boolean;
   copied: boolean;
+  isStripeModalOpen: boolean;
+  setIsStripeModalOpen: (val: boolean) => void;
+  handleOpenStripeModal: () => void;
+  handleCloseStripeModal: () => void;
+  handleStripeOnboardingSuccess: () => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   pickupUrl: string;
   handleCopyLink: () => Promise<void>;
@@ -86,10 +91,23 @@ export function SettingsProvider({
 
   const [isDragging, setIsDragging] = useState(false);
   const [connectingStripe, setConnectingStripe] = useState(false);
+  const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
+
+  const handleOpenStripeModal = () => {
+    setIsStripeModalOpen(true);
+  };
+
+  const handleCloseStripeModal = () => {
+    setIsStripeModalOpen(false);
+  };
+
+  const handleStripeOnboardingSuccess = () => {
+    router?.refresh();
+  };
 
   const pickupUrl =
     typeof window !== "undefined" &&
@@ -263,6 +281,11 @@ export function SettingsProvider({
     setIsDragging,
     connectingStripe,
     copied,
+    isStripeModalOpen,
+    setIsStripeModalOpen,
+    handleOpenStripeModal,
+    handleCloseStripeModal,
+    handleStripeOnboardingSuccess,
     fileInputRef,
     pickupUrl,
     handleCopyLink,

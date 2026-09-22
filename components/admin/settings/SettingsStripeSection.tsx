@@ -2,13 +2,17 @@
 
 import { ArrowRight, CheckCircle2, ExternalLink } from "lucide-react";
 import { useSettingsContext } from "./SettingsContext";
+import { StripeEmbeddedOnboardingModal } from "./StripeEmbeddedOnboardingModal";
 
 export function SettingsStripeSection() {
   const {
     initialTenant,
     connectingStripe,
-    handleStripeConnect,
     handleStripeLogin,
+    isStripeModalOpen,
+    handleOpenStripeModal,
+    handleCloseStripeModal,
+    handleStripeOnboardingSuccess,
   } = useSettingsContext();
 
   return (
@@ -52,7 +56,7 @@ export function SettingsStripeSection() {
           </div>
           <button
             type="button"
-            onClick={handleStripeConnect}
+            onClick={handleOpenStripeModal}
             disabled={connectingStripe}
             className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold rounded-lg border border-amber-500/40 transition flex items-center gap-2 shrink-0 cursor-pointer"
           >
@@ -73,16 +77,24 @@ export function SettingsStripeSection() {
           </div>
           <button
             type="button"
-            onClick={handleStripeConnect}
+            onClick={handleOpenStripeModal}
             disabled={connectingStripe}
             className="px-5 py-2.5 bg-primary text-background font-black text-xs uppercase tracking-wider rounded-lg hover:bg-primary-hover transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md"
           >
             {connectingStripe
-              ? "Generando liga..."
+              ? "Cargando..."
               : "Conectar Stripe y Activar Pickup"}
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>
+      )}
+
+      {isStripeModalOpen && (
+        <StripeEmbeddedOnboardingModal
+          isOpen={isStripeModalOpen}
+          onClose={handleCloseStripeModal}
+          onSuccess={handleStripeOnboardingSuccess}
+        />
       )}
     </div>
   );

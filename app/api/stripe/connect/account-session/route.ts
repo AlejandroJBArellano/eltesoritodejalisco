@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext, invalidateTenantCache } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const profile = await getProfile();
     if (!profile || (profile.role !== "ADMIN" && profile.role !== "MANAGER")) {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     let stripeAccountId = tenant.stripe_account_id;
 
-    // Create a new Express account if tenant doesn't have one yet
+    // Create a new Express account if tenant doesn't have one yet, with pre-filled metadata
     if (!stripeAccountId) {
       const account = await stripe.accounts.create({
         type: "express",
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         },
         business_profile: {
           name: tenant.name,
-          mcc: "5812",
+          mcc: "5812", // Eating places, Restaurants
           url: tenant.custom_domain
             ? `https://${tenant.custom_domain}`
             : `https://${tenant.slug}.trykittn.com`,
@@ -62,23 +62,45 @@ export async function POST(request: NextRequest) {
       invalidateTenantCache(tenant.slug);
     }
 
-    const referer = request.headers.get("referer");
-    const origin = referer
-      ? new URL(referer).origin
-      : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
-    const accountLink = await stripe.accountLinks.create({
+    // Create AccountSession for Embedded Onboarding
+    const accountSession = await stripe.accountSessions.create({
       account: stripeAccountId,
-      refresh_url: `${origin}/admin/settings?stripe=refresh`,
-      return_url: `${origin}/admin/settings?stripe=return`,
-      type: "account_onboarding",
+      components: {
+        account_onboarding: {
+          enabled: true,
+          features: {
+            external_account_collection: true,
+          },
+        },
+        account_management: {
+          enabled: true,
+          features: {
+            external_account_collection: true,
+          },
+        },
+        balances: {
+          enabled: true,
+          features: {
+            instant_payouts: true,
+            standard_payouts: true,
+            edit_payout_schedule: true,
+          },
+        },
+      },
     });
 
-    return NextResponse.json({ url: accountLink.url });
+    return NextResponse.json({
+      client_secret: accountSession.client_secret,
+      stripe_account_id: stripeAccountId,
+      publishable_key:
+        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
+        process.env.STRIPE_PUBLISHABLE_KEY ||
+        null,
+    });
   } catch (error) {
-    console.error("Error creating Stripe Connect onboarding link:", error);
+    console.error("Error creating Stripe Connect account session:", error);
     return NextResponse.json(
-      { error: "Error al generar la liga de configuración con Stripe" },
+      { error: "Error al generar la sesión embebida de Stripe" },
       { status: 500 },
     );
   }
