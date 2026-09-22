@@ -124,8 +124,6 @@ const defaultCheckoutValue = {
   editTipAmountCalculated: 0,
   showSplitBill: false,
   setShowSplitBill: vi.fn(),
-  billingOrder: null,
-  setBillingOrder: vi.fn(),
   handleProcessPayment: vi.fn(),
   handleSplitPayment: vi.fn(),
   handleUpdateTip: vi.fn(),

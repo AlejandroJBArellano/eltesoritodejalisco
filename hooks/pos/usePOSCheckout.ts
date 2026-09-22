@@ -72,8 +72,6 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
   // Split bill State
   const [showSplitBill, setShowSplitBill] = useState(false);
 
-  // Facturacion State
-  const [billingOrder, setBillingOrder] = useState<Order | null>(null);
 
   const checkoutOrderTotal = checkoutOrder?.total ?? 0;
   const editingTipOrderTotal = editingTipOrder?.total ?? 0;
@@ -499,8 +497,6 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
 
     showSplitBill,
     setShowSplitBill,
-    billingOrder,
-    setBillingOrder,
 
     handleProcessPayment,
     handleCourtesyPayment,

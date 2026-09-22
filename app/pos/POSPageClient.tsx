@@ -17,7 +17,6 @@ import { POSModifyOrderModal } from "@/components/pos/modals/POSModifyOrderModal
 import { POSTipModal } from "@/components/pos/modals/POSTipModal";
 
 import { PageHeader } from "@/components/PageHeader";
-import { FacturacionModal } from "@/components/pos/FacturacionModal";
 import { KitchenTicket } from "@/components/pos/KitchenTicket";
 import { LowStockBanner } from "@/components/pos/LowStockBanner";
 import { OrderTicket } from "@/components/pos/OrderTicket";
@@ -114,8 +113,6 @@ function POSPageContent() {
     editingTipOrder,
     showSplitBill,
     setShowSplitBill,
-    billingOrder,
-    setBillingOrder,
     handleSplitPayment,
   } = usePOSCheckout();
 
@@ -373,13 +370,6 @@ function POSPageContent() {
             setShowKitchenTicket(false);
             setWhatsappNumber("");
           }}
-        />
-      )}
-
-      {billingOrder && (
-        <FacturacionModal
-          order={billingOrder}
-          onClose={() => setBillingOrder(null)}
         />
       )}
 

@@ -403,16 +403,6 @@ export default function OrdersPOS({
                             </span>
                           </button>
                         )}
-                        {/* {order.status === "PAID" && (
-                                            <button
-                                                type="button"
-                                                onClick={() => setBillingOrder(order)}
-                                                className="rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
-                                            >
-                                                <FileText className="h-3 w-3" />
-                                                Factura
-                                            </button>
-                                        )} */}
                         <button
                           type="button"
                           onClick={() => {

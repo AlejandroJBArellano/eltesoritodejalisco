@@ -103,7 +103,6 @@ describe("OrdersPOS component", () => {
       setEditingTipOrder: vi.fn(),
       setEditTipType: vi.fn(),
       setEditTipInput: vi.fn(),
-      setBillingOrder: vi.fn(),
       handleUndoPayment: vi.fn(),
     } as unknown as ReturnType<typeof usePOSCheckout>);
   });
