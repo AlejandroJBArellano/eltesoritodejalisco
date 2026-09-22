@@ -35,7 +35,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
 
       const { data: orders, error } = await supabase
         .from("orders")
-        .select("id, total, status, payment_status, created_at")
+        .select("id, total, status, created_at")
         .eq("tenant_id", ctx.tenantId)
         .gte("created_at", startIso)
         .lte("created_at", endIso);
@@ -43,32 +43,32 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
       if (error) throw new Error(`Error consultando órdenes: ${error.message}`);
 
       const validOrders = (orders || []).filter(
-        (o) => o.status !== "CANCELADO" && o.status !== "CANCELLED",
+        (o) => o.status !== "CANCELLED",
       );
 
-      const totalSales = validOrders
-        .filter(
-          (o) => o.payment_status === "PAID" || o.payment_status === "PAGADO",
-        )
-        .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+      const paidOrders = validOrders.filter(
+        (o) => o.status === "PAID" || o.status === "DELIVERED",
+      );
 
-      const paidCount = validOrders.filter(
-        (o) => o.payment_status === "PAID" || o.payment_status === "PAGADO",
-      ).length;
+      const totalSales = paidOrders.reduce(
+        (sum, o) => sum + (Number(o.total) || 0),
+        0,
+      );
 
       const activeOrders = validOrders.filter(
         (o) =>
-          o.status !== "COMPLETADO" &&
-          o.status !== "COMPLETED" &&
-          o.status !== "ENTREGADO",
+          o.status === "PENDING" ||
+          o.status === "PREPARING" ||
+          o.status === "READY",
       );
 
-      const avgTicket = paidCount > 0 ? totalSales / paidCount : 0;
+      const avgTicket =
+        paidOrders.length > 0 ? totalSales / paidOrders.length : 0;
 
       return {
         date: targetDate,
         total_sales: Math.round(totalSales * 100) / 100,
-        completed_orders_count: paidCount,
+        completed_orders_count: paidOrders.length,
         active_orders_count: activeOrders.length,
         average_ticket: Math.round(avgTicket * 100) / 100,
         total_orders_recorded: validOrders.length,
@@ -99,8 +99,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
           `
           id,
           order_number,
-          table_number,
-          order_type,
+          table,
+          source,
           status,
           total,
           notes,
@@ -110,7 +110,6 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
             quantity,
             notes,
             unit_price,
-            total_price,
             menu_items (
               name
             )
@@ -118,7 +117,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         `,
         )
         .eq("tenant_id", ctx.tenantId)
-        .not("status", "in", '("COMPLETADO","CANCELADO","CANCELLED")')
+        .in("status", ["PENDING", "PREPARING", "READY"])
         .order("created_at", { ascending: true })
         .limit(limit);
 
@@ -129,9 +128,9 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
       const formatted = (
         (orders || []) as unknown as Array<{
           id: string;
-          order_number: string | number;
-          table_number: string | number | null;
-          order_type: string;
+          order_number: string;
+          table: string | null;
+          source: string;
           status: string;
           total: number;
           created_at: string;
@@ -139,7 +138,6 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
             quantity: number;
             notes?: string | null;
             unit_price: number;
-            total_price: number;
             menu_items?: { name: string } | null;
           }>;
         }>
@@ -150,8 +148,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         return {
           id: o.id,
           order_number: o.order_number,
-          table_number: o.table_number,
-          order_type: o.order_type,
+          table: o.table,
+          source: o.source,
           status: o.status,
           total: o.total,
           elapsed_minutes: elapsedMinutes,
@@ -161,7 +159,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
             quantity: item.quantity,
             notes: item.notes,
             unit_price: item.unit_price,
-            total_price: item.total_price,
+            total_price:
+              Math.round(item.quantity * item.unit_price * 100) / 100,
           })),
         };
       });
@@ -176,7 +175,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
   get_order_details: {
     name: "get_order_details",
     description:
-      "Obtiene el detalle completo de una orden específica (platillos, pagos, notas y auditoría).",
+      "Obtiene el detalle completo de una orden específica (platillos, pagos, notas y desglose).",
     parameters: {
       type: "object",
       properties: {
@@ -197,21 +196,18 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
           `
           id,
           order_number,
-          table_number,
-          order_type,
+          table,
+          source,
           status,
-          payment_status,
           total,
           subtotal,
           tax,
-          tip,
           notes,
           created_at,
           order_items (
             id,
             quantity,
             unit_price,
-            total_price,
             notes,
             menu_items (
               name
@@ -220,8 +216,8 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
           payments (
             id,
             amount,
-            payment_method,
-            status,
+            method,
+            tip_amount,
             created_at
           )
         `,
@@ -245,7 +241,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
   get_sales_report: {
     name: "get_sales_report",
     description:
-      "Genera un reporte consolidado de ventas por rango de fechas, métodos de pago y métricas de rendimiento.",
+      "Genera un reporte consolidado de ventas por rango de fechas y desglose diario.",
     parameters: {
       type: "object",
       properties: {
@@ -271,7 +267,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
 
       const { data: orders, error } = await supabase
         .from("orders")
-        .select("id, total, status, payment_status, created_at")
+        .select("id, total, status, created_at")
         .eq("tenant_id", ctx.tenantId)
         .gte("created_at", startIso)
         .lte("created_at", endIso);
@@ -279,9 +275,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
       if (error) throw new Error(`Error al generar reporte: ${error.message}`);
 
       const validOrders = (orders || []).filter(
-        (o) =>
-          o.status !== "CANCELADO" &&
-          (o.payment_status === "PAID" || o.payment_status === "PAGADO"),
+        (o) => o.status === "PAID" || o.status === "DELIVERED",
       );
 
       const totalRevenue = validOrders.reduce(
@@ -343,7 +337,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
           `
           menu_item_id,
           quantity,
-          total_price,
+          unit_price,
           menu_items (
             id,
             name,
@@ -358,7 +352,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         )
         .eq("orders.tenant_id", ctx.tenantId)
         .gte("orders.created_at", dateLimit.toISOString())
-        .not("orders.status", "in", '("CANCELADO","CANCELLED")');
+        .not("orders.status", "in", '("CANCELLED")');
 
       if (error)
         throw new Error(
@@ -374,17 +368,19 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         (items || []) as unknown as Array<{
           menu_item_id?: string | null;
           quantity?: number | string | null;
-          total_price?: number | string | null;
+          unit_price?: number | string | null;
           menu_items?: { name: string } | null;
         }>
       ).forEach((row) => {
         const id = row.menu_item_id || "unknown";
         const name = row.menu_items?.name || "Sin nombre";
+        const qty = Number(row.quantity) || 0;
+        const price = Number(row.unit_price) || 0;
         if (!itemMap[id]) {
           itemMap[id] = { id, name, quantity: 0, revenue: 0 };
         }
-        itemMap[id].quantity += Number(row.quantity) || 0;
-        itemMap[id].revenue += Number(row.total_price) || 0;
+        itemMap[id].quantity += qty;
+        itemMap[id].revenue += qty * price;
       });
 
       const sorted = Object.values(itemMap)
@@ -401,7 +397,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
   get_inventory_status: {
     name: "get_inventory_status",
     description:
-      "Consulta el stock actual de insumos e ingredientes, costos y alertas de stock bajo mínimo.",
+      "Consulta el stock actual de insumos e ingredientes, costos y alertas de stock bajo nivel mínimo.",
     parameters: {
       type: "object",
       properties: {
@@ -416,7 +412,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
       const supabase = createAdminClient();
       const { data: ingredients, error } = await supabase
         .from("ingredients")
-        .select("id, name, current_stock, min_stock, unit, cost, category")
+        .select("id, name, current_stock, minimum_stock, unit, cost_per_unit, tracking_type")
         .eq("tenant_id", ctx.tenantId)
         .order("name", { ascending: true });
 
@@ -424,15 +420,15 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         throw new Error(`Error al consultar inventario: ${error.message}`);
 
       const processed = (ingredients || []).map((i) => {
-        const isLow = Number(i.current_stock) <= Number(i.min_stock);
+        const isLow = Number(i.current_stock) <= Number(i.minimum_stock);
         return {
           id: i.id,
           name: i.name,
           current_stock: i.current_stock,
-          min_stock: i.min_stock,
+          minimum_stock: i.minimum_stock,
           unit: i.unit,
-          cost: i.cost,
-          category: i.category,
+          cost_per_unit: i.cost_per_unit,
+          tracking_type: i.tracking_type,
           is_low_stock: isLow,
         };
       });
@@ -490,12 +486,12 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
         .select(
           `
           id,
-          quantity,
+          quantity_required,
           ingredients (
             id,
             name,
             unit,
-            cost
+            cost_per_unit
           )
         `,
         )
@@ -507,26 +503,26 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
       let calculatedCost = 0;
       const ingredients = (
         (recipes || []) as unknown as Array<{
-          quantity?: number | string | null;
+          quantity_required?: number | string | null;
           ingredients?: {
             id: string;
             name: string;
             unit: string;
-            cost: number | string | null;
+            cost_per_unit: number | string | null;
           } | null;
         }>
       ).map((r) => {
-        const unitCost = Number(r.ingredients?.cost) || 0;
-        const qty = Number(r.quantity) || 0;
+        const unitCost = Number(r.ingredients?.cost_per_unit) || 0;
+        const qty = Number(r.quantity_required) || 0;
         const totalCost = unitCost * qty;
         calculatedCost += totalCost;
 
         return {
           ingredient_id: r.ingredients?.id,
           name: r.ingredients?.name,
-          quantity: qty,
+          quantity_required: qty,
           unit: r.ingredients?.unit,
-          unit_cost: unitCost,
+          cost_per_unit: unitCost,
           total_cost: Math.round(totalCost * 100) / 100,
         };
       });
@@ -656,9 +652,9 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
     parameters: {
       type: "object",
       properties: {
-        categoryId: {
+        category: {
           type: "string",
-          description: "Filtrar por ID de categoría específico.",
+          description: "Filtrar por nombre de categoría específico.",
         },
       },
     },
@@ -667,7 +663,7 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
 
       const { data: categories, error: catError } = await supabase
         .from("menu_categories")
-        .select("id, name, sort_order")
+        .select("id, name, sort_order, is_active")
         .eq("tenant_id", ctx.tenantId)
         .order("sort_order", { ascending: true });
 
@@ -676,12 +672,12 @@ export const MCP_TOOLS: Record<string, McpToolDefinition> = {
 
       let itemQuery = supabase
         .from("menu_items")
-        .select("id, name, description, price, is_available, category_id")
+        .select("id, name, description, price, is_available, category, image_url")
         .eq("tenant_id", ctx.tenantId)
         .order("name", { ascending: true });
 
-      if (args?.categoryId) {
-        itemQuery = itemQuery.eq("category_id", args.categoryId);
+      if (args?.category) {
+        itemQuery = itemQuery.eq("category", args.category);
       }
 
       const { data: items, error: itemError } = await itemQuery;

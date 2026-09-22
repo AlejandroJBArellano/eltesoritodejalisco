@@ -21,6 +21,7 @@ describe("lib/mcp/tools", () => {
 
     mockChain.select = vi.fn().mockReturnValue(mockChain);
     mockChain.eq = vi.fn().mockReturnValue(mockChain);
+    mockChain.in = vi.fn().mockReturnValue(mockChain);
     mockChain.gte = vi.fn().mockReturnValue(mockChain);
     mockChain.lte = vi.fn().mockReturnValue(mockChain);
     mockChain.not = vi.fn().mockReturnValue(mockChain);
@@ -39,22 +40,19 @@ describe("lib/mcp/tools", () => {
         {
           id: "o-1",
           total: 250,
-          status: "COMPLETADO",
-          payment_status: "PAID",
+          status: "PAID",
           created_at: "2026-09-21T12:00:00Z",
         },
         {
           id: "o-2",
           total: 150,
-          status: "EN_PREPARACION",
-          payment_status: "PENDING",
+          status: "PREPARING",
           created_at: "2026-09-21T13:00:00Z",
         },
         {
           id: "o-3",
           total: 100,
-          status: "CANCELADO",
-          payment_status: "CANCELLED",
+          status: "CANCELLED",
           created_at: "2026-09-21T14:00:00Z",
         },
       ],
@@ -78,9 +76,9 @@ describe("lib/mcp/tools", () => {
         {
           id: "o-1",
           order_number: "CMD-101",
-          table_number: "Mesa 4",
-          order_type: "DINE_IN",
-          status: "EN_PREPARACION",
+          table: "Mesa 4",
+          source: "DINE_IN",
+          status: "PREPARING",
           total: 300,
           created_at: new Date(Date.now() - 15 * 60000).toISOString(),
           order_items: [
@@ -89,7 +87,6 @@ describe("lib/mcp/tools", () => {
               quantity: 2,
               notes: "Sin cebolla",
               unit_price: 150,
-              total_price: 300,
               menu_items: { name: "Tacos de Ribeye" },
             },
           ],
@@ -102,6 +99,7 @@ describe("lib/mcp/tools", () => {
     expect(res.active_count).toBe(1);
     expect(res.orders[0].elapsed_minutes).toBeGreaterThanOrEqual(14);
     expect(res.orders[0].items[0].name).toBe("Tacos de Ribeye");
+    expect(res.orders[0].items[0].total_price).toBe(300);
   });
 
   it("get_order_details: should return order details by orderId", async () => {
@@ -109,7 +107,7 @@ describe("lib/mcp/tools", () => {
       data: {
         id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         order_number: "CMD-202",
-        status: "EN_PREPARACION",
+        status: "PREPARING",
         total: 500,
         order_items: [],
       },
@@ -130,22 +128,19 @@ describe("lib/mcp/tools", () => {
         {
           id: "o-1",
           total: 200,
-          status: "ENTREGADO",
-          payment_status: "PAID",
+          status: "DELIVERED",
           created_at: "2026-09-20T10:00:00Z",
         },
         {
           id: "o-2",
           total: 300,
-          status: "ENTREGADO",
-          payment_status: "PAID",
+          status: "PAID",
           created_at: "2026-09-20T15:00:00Z",
         },
         {
           id: "o-3",
           total: 400,
-          status: "ENTREGADO",
-          payment_status: "PAID",
+          status: "PAID",
           created_at: "2026-09-21T11:00:00Z",
         },
       ],
@@ -169,19 +164,19 @@ describe("lib/mcp/tools", () => {
         {
           menu_item_id: "m-1",
           quantity: 5,
-          total_price: 500,
+          unit_price: 100,
           menu_items: { name: "Hamburguesa" },
         },
         {
           menu_item_id: "m-1",
           quantity: 3,
-          total_price: 300,
+          unit_price: 100,
           menu_items: { name: "Hamburguesa" },
         },
         {
           menu_item_id: "m-2",
           quantity: 2,
-          total_price: 100,
+          unit_price: 50,
           menu_items: { name: "Papas" },
         },
       ],
@@ -202,17 +197,19 @@ describe("lib/mcp/tools", () => {
           id: "ing-1",
           name: "Carne",
           current_stock: 2,
-          min_stock: 5,
+          minimum_stock: 5,
           unit: "kg",
-          cost: 120,
+          cost_per_unit: 120,
+          tracking_type: "MANUAL",
         },
         {
           id: "ing-2",
           name: "Queso",
           current_stock: 10,
-          min_stock: 5,
+          minimum_stock: 5,
           unit: "kg",
-          cost: 90,
+          cost_per_unit: 90,
+          tracking_type: "MANUAL",
         },
       ],
       error: null,
@@ -240,24 +237,24 @@ describe("lib/mcp/tools", () => {
       error: null,
     });
 
-    mockChain.eq.mockImplementation((field: string, val: any) => {
+    mockChain.eq.mockImplementation((field: string) => {
       if (field === "menu_item_id") {
         return Promise.resolve({
           data: [
             {
               id: "r-1",
-              quantity: 0.2,
+              quantity_required: 0.2,
               ingredients: {
                 id: "ing-1",
                 name: "Queso",
-                cost: 100,
+                cost_per_unit: 100,
                 unit: "kg",
               },
             }, // 20
             {
               id: "r-2",
-              quantity: 0.1,
-              ingredients: { id: "ing-2", name: "Salsa", cost: 50, unit: "l" },
+              quantity_required: 0.1,
+              ingredients: { id: "ing-2", name: "Salsa", cost_per_unit: 50, unit: "l" },
             }, // 5
           ],
           error: null,
@@ -279,9 +276,8 @@ describe("lib/mcp/tools", () => {
       data: [
         {
           id: "cut-1",
-          total_sales: 15000,
-          cash_expected: 5000,
-          card_sales: 10000,
+          total_cash: 5000,
+          total_card: 10000,
         },
       ],
       error: null,
@@ -330,7 +326,7 @@ describe("lib/mcp/tools", () => {
             name: "Limonada",
             price: 45,
             is_available: true,
-            category_id: "cat-1",
+            category: "Bebidas",
           },
         ],
         error: null,
