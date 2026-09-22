@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useId } from "react";
-import { TrendingUp, Clock, DollarSign, Activity } from "lucide-react";
 import type { HourlySalesRow } from "@/lib/services/hourlyAnalytics";
+import { Activity, Clock, DollarSign, TrendingUp } from "lucide-react";
+import { useId, useState } from "react";
 
 export interface TodaySalesChartProps {
   hourlyRows: HourlySalesRow[];
@@ -67,9 +67,8 @@ export function TodaySalesChart({
 
   const areaPath =
     points.length > 0
-      ? `${linePath} L ${points[points.length - 1].x} ${
-          paddingTop + innerHeight
-        } L ${points[0].x} ${paddingTop + innerHeight} Z`
+      ? `${linePath} L ${points[points.length - 1].x} ${paddingTop + innerHeight
+      } L ${points[0].x} ${paddingTop + innerHeight} Z`
       : "";
 
   const activePoint =
@@ -84,14 +83,6 @@ export function TodaySalesChart({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border/80 pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
-              En Vivo
-            </span>
-            <span className="text-[10px] font-mono text-text-light/40">|</span>
             <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/50">
               Ventas Intradía
             </span>

@@ -1,23 +1,22 @@
+import {
+  DailyStatsSection,
+  FinanceSection,
+  InventoryAlertBanner,
+  ManagementSection,
+  OperationSection,
+  TodaySalesChart,
+  type DashboardStats,
+  type LowStockIngredient,
+} from "@/components/dashboard";
 import { getProfile } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
-import { getTenantContext } from "@/lib/tenant";
-import { getMexicoDateStr } from "@/lib/services/reports";
 import {
   aggregateHourlySales,
   type HourlySalesRow,
 } from "@/lib/services/hourlyAnalytics";
+import { getMexicoDateStr } from "@/lib/services/reports";
+import { createClient } from "@/lib/supabase/server";
+import { getTenantContext } from "@/lib/tenant";
 import { redirect } from "next/navigation";
-import React from "react";
-import {
-  InventoryAlertBanner,
-  DailyStatsSection,
-  TodaySalesChart,
-  OperationSection,
-  ManagementSection,
-  FinanceSection,
-  type LowStockIngredient,
-  type DashboardStats,
-} from "@/components/dashboard";
 
 export default async function Home() {
   const profile = await getProfile();
@@ -61,10 +60,10 @@ export default async function Home() {
           .order("current_stock", { ascending: true }),
         isAdmin
           ? supabase
-              .from("orders")
-              .select("id, total, created_at, status, is_paid")
-              .eq("tenant_id", tenant.id)
-              .gte("created_at", todayStartIso)
+            .from("orders")
+            .select("id, total, created_at, status, is_paid")
+            .eq("tenant_id", tenant.id)
+            .gte("created_at", todayStartIso)
           : Promise.resolve({ data: null, error: null }),
       ]);
 
