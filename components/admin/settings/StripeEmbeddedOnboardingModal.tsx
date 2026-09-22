@@ -102,7 +102,7 @@ export function StripeEmbeddedOnboardingModal({
       title="Conectar Pagos con Stripe"
       subtitle="Configura tu cuenta bancaria y datos para depósitos directos"
       icon={<CreditCard className="h-5 w-5 text-primary" />}
-      maxWidth="2xl"
+      maxWidth="3xl"
     >
       <div className="min-h-[480px] flex flex-col justify-center">
         {loading && (

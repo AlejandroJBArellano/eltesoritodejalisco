@@ -9,7 +9,7 @@ interface ModalProps {
   title: string;
   subtitle?: string;
   icon?: React.ReactNode;
-  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl";
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
   children: React.ReactNode;
 }
 
@@ -19,6 +19,7 @@ const maxWidthMap = {
   lg: "max-w-lg",
   xl: "max-w-xl",
   "2xl": "max-w-2xl",
+  "3xl": "max-w-3xl",
 };
 
 export function Modal({
@@ -52,10 +53,10 @@ export function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md overflow-y-auto animate-in fade-in duration-150">
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
       <div
-        className={`relative bg-card border border-border rounded-xl w-full ${maxWidthMap[maxWidth]} shadow-2xl overflow-hidden my-6 z-10`}
+        className={`relative bg-card border border-border rounded-xl w-full ${maxWidthMap[maxWidth]} max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-6 z-10`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-card">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-card shrink-0">
           <div className="flex items-center gap-2.5">
             {icon}
             <div>
@@ -79,7 +80,7 @@ export function Modal({
         </div>
 
         {/* Content */}
-        <div className="p-5">{children}</div>
+        <div className="p-5 overflow-y-auto flex-1">{children}</div>
       </div>
     </div>
   );
