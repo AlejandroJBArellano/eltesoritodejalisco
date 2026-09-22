@@ -6,3 +6,4 @@ export * from "./DailyStatsSection";
 export * from "./OperationSection";
 export * from "./ManagementSection";
 export * from "./FinanceSection";
+export * from "./TodaySalesChart";

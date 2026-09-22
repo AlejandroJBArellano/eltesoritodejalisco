@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Copy, ExternalLink, Globe, ShoppingBag } from "lucide-react";
+import Link from "next/link";
 import { useSettingsContext } from "./SettingsContext";
 
 export function SettingsPickupSection() {
@@ -78,11 +79,18 @@ export function SettingsPickupSection() {
                 </>
               )}
             </button>
+            <Link
+              href="/admin/pickup"
+              className="px-3.5 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-primary/25"
+            >
+              <ShoppingBag className="h-3.5 w-3.5" />
+              <span>Configurar Pickup y Horarios</span>
+            </Link>
             <a
               href={pickupUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3.5 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-primary/25"
+              className="px-3.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-text-light text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-border/50"
             >
               <ExternalLink className="h-3.5 w-3.5" />
               <span>Abrir Tienda</span>

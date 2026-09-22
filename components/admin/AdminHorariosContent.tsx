@@ -1,6 +1,6 @@
 "use client";
 
-import type { DbBusinessHours } from "@/app/admin/horarios/page";
+import type { DbBusinessHours } from "@/components/admin/pickup/AdminPickupContent";
 import { PageHeader } from "@/components/PageHeader";
 import {
   AlertCircle,

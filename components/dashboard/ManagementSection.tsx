@@ -7,7 +7,6 @@ import {
   Users,
   UtensilsCrossed,
   Package,
-  ReceiptText,
   ClipboardCheck,
   UserCog,
   Clock,
@@ -52,13 +51,15 @@ export function ManagementSection(props?: ManagementSectionProps) {
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
         {(isAdmin || isWaiter) && (
           <ModuleCard
-            title="Kittn Pickup"
+            title="Kittn Pickup & Horarios"
             href={
-              isStripeEnabled
-                ? `https://${slug}.trykittn.com`
-                : "/admin/settings#pickup"
+              isAdmin
+                ? "/admin/pickup"
+                : isStripeEnabled
+                  ? `https://${slug}.trykittn.com`
+                  : "/admin/pickup"
             }
-            target={isStripeEnabled ? "_blank" : undefined}
+            target={!isAdmin && isStripeEnabled ? "_blank" : undefined}
             icon={ShoppingBag}
             themeClass={
               isStripeEnabled
@@ -97,26 +98,8 @@ export function ManagementSection(props?: ManagementSectionProps) {
         )}
         {isAdmin && (
           <ModuleCard
-            title="Historial de Asistencia"
-            href="/asistencia/history"
-            icon={ReceiptText}
-            themeClass="bg-primary/10 text-primary"
-            hoverColor="var(--color-primary)"
-          />
-        )}
-        {isAdmin && (
-          <ModuleCard
-            title="Control de Tareas"
-            href="/admin/tareas"
-            icon={ClipboardCheck}
-            themeClass="bg-amber-500/10 text-amber-400"
-            hoverColor="#f59e0b"
-          />
-        )}
-        {isAdmin && (
-          <ModuleCard
-            title="Usuarios"
-            href="/admin/users"
+            title="Colaboradores y Roles"
+            href="/admin/users/list"
             icon={UserCog}
             themeClass="bg-primary/10 text-primary"
             hoverColor="var(--color-primary)"
@@ -124,9 +107,18 @@ export function ManagementSection(props?: ManagementSectionProps) {
         )}
         {isAdmin && (
           <ModuleCard
-            title="Horarios del Portal"
-            href="/admin/horarios"
+            title="Horarios y Turnos"
+            href="/admin/users/horarios"
             icon={Clock}
+            themeClass="bg-primary/10 text-primary"
+            hoverColor="var(--color-primary)"
+          />
+        )}
+        {isAdmin && (
+          <ModuleCard
+            title="Control de Tareas"
+            href="/admin/users/tareas"
+            icon={ClipboardCheck}
             themeClass="bg-amber-500/10 text-amber-400"
             hoverColor="#f59e0b"
           />

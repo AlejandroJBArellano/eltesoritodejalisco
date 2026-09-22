@@ -4,7 +4,9 @@ import { logout } from "@/app/login/actions";
 import { useTenant } from "@/components/TenantProvider";
 import { useOptionalUser } from "@/components/UserProvider";
 import { PushNotificationPrompt } from "@/components/notifications/PushNotificationPrompt";
+import { SidebarDrawer } from "@/components/SidebarDrawer";
 import { createClient } from "@/lib/supabase/client";
+import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,6 +14,7 @@ import { useEffect, useState } from "react";
 export default function Navbar() {
   const pathname = usePathname();
   const user = useOptionalUser();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(
     user?.profile?.email ?? null,
   );
@@ -88,82 +91,102 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-background/85 backdrop-blur-md border-b border-border/80 text-white sticky top-0 z-40 no-print">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-14 sm:h-16 items-center gap-4">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2.5 text-lg sm:text-xl font-bold tracking-tight shrink-0 group"
-          >
-            <img
-              src="/logo-icon-orange.svg"
-              alt="Logo"
-              className="w-6 h-6 sm:w-7 sm:h-7 object-contain transition-transform duration-150 group-hover:scale-105"
-            />
-            <div className="flex items-center">
-              <span className="text-white font-black">
-                {prefix.toUpperCase()}
-              </span>
-              {suffix && (
-                <span className="text-warning font-black">
-                  {suffix.toUpperCase()}
+    <>
+      <nav className="bg-background/85 backdrop-blur-md border-b border-border/80 text-white sticky top-0 z-40 no-print">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-14 sm:h-16 items-center gap-4">
+            {/* Left: Menu button + Logo */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                type="button"
+                data-testid="navbar-menu-button"
+                onClick={() => setIsDrawerOpen(true)}
+                aria-label="Abrir menú de navegación"
+                className="p-1.5 sm:p-2 rounded-lg text-text-light/80 hover:text-white hover:bg-white/10 border border-border/50 transition-colors cursor-pointer"
+              >
+                <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+
+              <Link
+                href="/"
+                className="flex items-center gap-2.5 text-lg sm:text-xl font-bold tracking-tight shrink-0 group"
+              >
+                <img
+                  src="/logo-icon-orange.svg"
+                  alt="Logo"
+                  className="w-6 h-6 sm:w-7 sm:h-7 object-contain transition-transform duration-150 group-hover:scale-105"
+                />
+                <div className="flex items-center">
+                  <span className="text-white font-black">
+                    {prefix.toUpperCase()}
+                  </span>
+                  {suffix && (
+                    <span className="text-warning font-black">
+                      {suffix.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            </div>
+
+            {/* Quick nav links */}
+            <div className="hidden sm:flex items-center gap-1">
+              {navLinks.map((link) => {
+                const isActive =
+                  pathname === link.href ||
+                  pathname.startsWith(link.href + "/");
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-150 ${
+                      isActive
+                        ? "bg-primary/15 text-primary border border-primary/25"
+                        : "text-text-light/60 hover:text-text-light hover:bg-white/5 border border-transparent"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Right: notifications + email + logout */}
+            <div className="flex items-center gap-3 shrink-0">
+              <PushNotificationPrompt
+                compact
+                role={
+                  user?.role === "CHEF"
+                    ? "KITCHEN"
+                    : ((user?.role as
+                        "ADMIN" | "MANAGER" | "WAITER" | undefined) ?? "ADMIN")
+                }
+              />
+              {email && (
+                <span
+                  className="hidden sm:block text-xs font-medium text-text-light/40 max-w-45 truncate"
+                  title={email}
+                >
+                  {email}
                 </span>
               )}
-            </div>
-          </Link>
-
-          {/* Quick nav links */}
-          <div className="hidden sm:flex items-center gap-1">
-            {navLinks.map((link) => {
-              const isActive =
-                pathname === link.href || pathname.startsWith(link.href + "/");
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-150 ${
-                    isActive
-                      ? "bg-primary/15 text-primary border border-primary/25"
-                      : "text-text-light/60 hover:text-text-light hover:bg-white/5 border border-transparent"
-                  }`}
+              <form action={logout}>
+                <button
+                  type="submit"
+                  className="text-xs font-semibold text-text-light/60 hover:text-rose-400 bg-white/4 hover:bg-rose-500/10 border border-border/60 hover:border-rose-500/20 px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-[0.98] cursor-pointer"
                 >
-                  {link.label}
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Right: notifications + email + logout */}
-          <div className="flex items-center gap-3 shrink-0">
-            <PushNotificationPrompt
-              compact
-              role={
-                user?.role === "CHEF"
-                  ? "KITCHEN"
-                  : ((user?.role as
-                      "ADMIN" | "MANAGER" | "WAITER" | undefined) ?? "ADMIN")
-              }
-            />
-            {email && (
-              <span
-                className="hidden sm:block text-xs font-medium text-text-light/40 max-w-45 truncate"
-                title={email}
-              >
-                {email}
-              </span>
-            )}
-            <form action={logout}>
-              <button
-                type="submit"
-                className="text-xs font-semibold text-text-light/60 hover:text-rose-400 bg-white/4 hover:bg-rose-500/10 border border-border/60 hover:border-rose-500/20 px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-[0.98] cursor-pointer"
-              >
-                Salir
-              </button>
-            </form>
+                  Salir
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      <SidebarDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
+    </>
   );
 }

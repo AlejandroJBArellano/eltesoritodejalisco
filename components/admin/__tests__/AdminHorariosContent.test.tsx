@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AdminHorariosContent } from "../AdminHorariosContent";
-import type { DbBusinessHours } from "@/app/admin/horarios/page";
+import type { DbBusinessHours } from "@/components/admin/pickup/AdminPickupContent";
 import type { ShiftUserOption } from "../shifts/ShiftModal";
 
 const mockHours: DbBusinessHours[] = [

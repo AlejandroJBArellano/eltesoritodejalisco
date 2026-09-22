@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, fireEvent } from "@testing-library/react";
 import Navbar from "../Navbar";
 import { usePathname } from "next/navigation";
 import { useOptionalUser } from "@/components/UserProvider";
@@ -195,5 +195,14 @@ describe("Navbar Component", () => {
 
     unmount();
     expect(unsubscribeMock).toHaveBeenCalled();
+  });
+
+  it("opens sidebar drawer when menu button is clicked", () => {
+    render(<Navbar />);
+
+    const menuBtn = screen.getByTestId("navbar-menu-button");
+    fireEvent.click(menuBtn);
+
+    expect(screen.getByTestId("sidebar-drawer-panel")).toBeInTheDocument();
   });
 });

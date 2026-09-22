@@ -47,20 +47,19 @@ describe("ManagementSection Component", () => {
     );
 
     expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
-    expect(screen.getByText("Kittn Pickup")).toBeInTheDocument();
+    expect(screen.getByText("Kittn Pickup & Horarios")).toBeInTheDocument();
     expect(screen.getByText("Clientes")).toBeInTheDocument();
 
     const pickupLink = screen.getByRole("link", { name: /kittn pickup/i });
-    expect(pickupLink).toHaveAttribute("href", "/admin/settings#pickup");
-    expect(screen.queryByText("Inactivo")).not.toBeInTheDocument();
+    expect(pickupLink).toHaveAttribute("href", "/admin/pickup");
 
     // Admin-only modules should be hidden
     expect(screen.queryByText("Gestión de Menú")).not.toBeInTheDocument();
     expect(screen.queryByText("Inventario")).not.toBeInTheDocument();
-    expect(screen.queryByText("Usuarios")).not.toBeInTheDocument();
+    expect(screen.queryByText("Colaboradores y Roles")).not.toBeInTheDocument();
   });
 
-  it("renders full admin modules with Stripe enabled external link", () => {
+  it("renders full admin modules with Pickup hub link", () => {
     render(
       <ManagementSection
         isAdmin={true}
@@ -70,23 +69,17 @@ describe("ManagementSection Component", () => {
     );
 
     expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
-    expect(screen.getByText("Kittn Pickup")).toBeInTheDocument();
-    expect(screen.queryByText("Online")).not.toBeInTheDocument();
+    expect(screen.getByText("Kittn Pickup & Horarios")).toBeInTheDocument();
 
     const pickupLink = screen.getByRole("link", { name: /kittn pickup/i });
-    expect(pickupLink).toHaveAttribute(
-      "href",
-      "https://tacos-al-pastor.trykittn.com",
-    );
-    expect(pickupLink).toHaveAttribute("target", "_blank");
+    expect(pickupLink).toHaveAttribute("href", "/admin/pickup");
 
     // Check all admin cards
     expect(screen.getByText("Gestión de Menú")).toBeInTheDocument();
     expect(screen.getByText("Inventario")).toBeInTheDocument();
-    expect(screen.getByText("Historial de Asistencia")).toBeInTheDocument();
+    expect(screen.getByText("Colaboradores y Roles")).toBeInTheDocument();
+    expect(screen.getByText("Horarios y Turnos")).toBeInTheDocument();
     expect(screen.getByText("Control de Tareas")).toBeInTheDocument();
-    expect(screen.getByText("Usuarios")).toBeInTheDocument();
-    expect(screen.getByText("Horarios del Portal")).toBeInTheDocument();
     expect(screen.getByText("Configuración")).toBeInTheDocument();
   });
 
@@ -100,7 +93,7 @@ describe("ManagementSection Component", () => {
     );
 
     expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
-    expect(screen.getByText("Kittn Pickup")).toBeInTheDocument();
+    expect(screen.getByText("Kittn Pickup & Horarios")).toBeInTheDocument();
     expect(screen.getByText("Configuración")).toBeInTheDocument();
   });
 
@@ -116,9 +109,11 @@ describe("ManagementSection Component", () => {
 
     expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
     expect(screen.getByText("Inventario")).toBeInTheDocument();
-    expect(screen.queryByText("Kittn Pickup")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Kittn Pickup & Horarios"),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("Clientes")).not.toBeInTheDocument();
     expect(screen.queryByText("Gestión de Menú")).not.toBeInTheDocument();
-    expect(screen.queryByText("Usuarios")).not.toBeInTheDocument();
+    expect(screen.queryByText("Colaboradores y Roles")).not.toBeInTheDocument();
   });
 });
