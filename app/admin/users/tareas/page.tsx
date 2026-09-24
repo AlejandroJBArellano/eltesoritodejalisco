@@ -8,9 +8,8 @@ import { getUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "Control de Tareas | KittnOS",
-  description:
-    "Monitoreo, historial y configuración de checklist operativo diario",
+  title: "Tareas | KittnOS",
+  description: "Monitoreo y checklist operativo",
 };
 
 export default async function AdminUsersTareasPage() {

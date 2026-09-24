@@ -13,7 +13,7 @@ import type { Ingredient } from "@/types";
 
 export const metadata = {
   title: "Inventario | KittnOS",
-  description: "Gestión y control de inventario de ingredientes",
+  description: "Control de inventario e insumos",
 };
 
 export default async function InventarioPage() {

@@ -9,9 +9,8 @@ import {
 } from "@/components/admin/pickup/AdminPickupContent";
 
 export const metadata = {
-  title: "Kittn Pickup & Horarios | KittnOS",
-  description:
-    "Administración del portal web de comensales y horarios de atención al público",
+  title: "Pickup y Horarios | KittnOS",
+  description: "Portal de pedidos y horarios",
 };
 
 export default async function AdminPickupPage() {

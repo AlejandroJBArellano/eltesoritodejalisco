@@ -5,9 +5,8 @@ import { getTenantCollaborators } from "@/lib/users";
 import { AdminHorariosTurnosTab } from "@/components/admin/shifts/AdminHorariosTurnosTab";
 
 export const metadata = {
-  title: "Horarios y Asistencia | KittnOS",
-  description:
-    "Planeación semanal de turnos y registro de asistencias del personal",
+  title: "Horarios | KittnOS",
+  description: "Planeación de turnos y asistencia",
 };
 
 export default async function AdminUsersHorariosPage() {

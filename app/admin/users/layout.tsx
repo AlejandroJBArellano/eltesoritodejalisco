@@ -6,9 +6,8 @@ import { Users } from "lucide-react";
 import React from "react";
 
 export const metadata = {
-  title: "Gestión de Equipo | KittnOS",
-  description:
-    "Administración centralizada de colaboradores, roles, horarios, turnos y control de tareas",
+  title: "Equipo | KittnOS",
+  description: "Gestión de colaboradores y roles",
 };
 
 export default async function AdminUsersLayout({

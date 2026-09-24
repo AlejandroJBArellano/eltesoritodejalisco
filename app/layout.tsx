@@ -21,8 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenantContext();
   const faviconUrl = tenant.logo_url || "/favicon.ico";
   return {
-    title: `${tenant.system_name} - Restaurant Management`,
-    description: `Sistema de gestión integral para ${tenant.name}`,
+    title: tenant.system_name || "KittnOS",
+    description: `Gestión para ${tenant.name}`,
     icons: {
       icon: faviconUrl,
       shortcut: faviconUrl,
