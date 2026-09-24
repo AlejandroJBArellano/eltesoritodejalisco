@@ -121,7 +121,7 @@ export function PrimordialTaskModal(props: PrimordialTaskModalProps) {
 
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-bold text-text-light/60">
-              Timeout:
+              Tiempo límite:
             </span>
             <input
               type="number"

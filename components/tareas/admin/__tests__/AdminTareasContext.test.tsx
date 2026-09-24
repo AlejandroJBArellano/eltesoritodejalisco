@@ -171,12 +171,12 @@ describe("AdminTareasContext and Provider", () => {
     );
 
     // Check header tabs render
-    expect(screen.getByText(/📋 Historial/i)).toBeInTheDocument();
-    expect(screen.getByText(/📊 Rendimiento/i)).toBeInTheDocument();
-    expect(screen.getByText(/⚙️ Configuración/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /historial/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /rendimiento/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /configuración/i })).toBeInTheDocument();
 
     // Click config tab
-    fireEvent.click(screen.getByText(/⚙️ Configuración/i));
+    fireEvent.click(screen.getByRole("button", { name: /configuración/i }));
     expect(
       screen.getByText(/Catálogo de Tareas Primordiales/i),
     ).toBeInTheDocument();

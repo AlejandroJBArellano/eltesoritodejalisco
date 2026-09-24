@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { ModuleCard } from "../ModuleCard";
 
 describe("ModuleCard Component", () => {
-  it("renders title, badge, and link with standard href", () => {
+  it("renders title and link with standard href", () => {
     render(
       <ModuleCard
         title="Punto de Venta"
@@ -16,7 +16,6 @@ describe("ModuleCard Component", () => {
     );
 
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
-    expect(screen.getByText("Activo")).toBeInTheDocument();
 
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/pos");

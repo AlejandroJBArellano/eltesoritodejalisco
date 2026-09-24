@@ -13,14 +13,14 @@ describe("AdminTareasNav Component", () => {
       />,
     );
 
-    expect(screen.getByText(/📋 Historial/i)).toBeInTheDocument();
-    expect(screen.getByText(/📊 Rendimiento/i)).toBeInTheDocument();
-    expect(screen.getByText(/⚙️ Configuración/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /historial/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /rendimiento/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /configuración/i })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText(/📊 Rendimiento/i));
+    fireEvent.click(screen.getByRole("button", { name: /rendimiento/i }));
     expect(onTabChangeMock).toHaveBeenCalledWith("performance");
 
-    fireEvent.click(screen.getByText(/⚙️ Configuración/i));
+    fireEvent.click(screen.getByRole("button", { name: /configuración/i }));
     expect(onTabChangeMock).toHaveBeenCalledWith("config");
   });
 

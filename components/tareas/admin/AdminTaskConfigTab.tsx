@@ -171,7 +171,7 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
                   sortDirection={sortDir}
                   onSort={(f) => onSort(f as TaskSortField)}
                 />
-                <th className="py-3 px-4 font-bold">Evidencia / Timeout</th>
+                <th className="py-3 px-4 font-bold">Evidencia / Tiempo Límite</th>
                 <th className="py-3 px-4 font-bold text-right">Acciones</th>
               </tr>
             </thead>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FolderPlus, Plus } from "lucide-react";
+import { ClipboardList, BarChart2, Settings, FolderPlus, Plus } from "lucide-react";
 import { useOptionalAdminTareasContext } from "./AdminTareasContext";
 import type { AdminTareasTab } from "./types";
 
@@ -35,33 +35,36 @@ export function AdminTareasNav(props: AdminTareasNavProps) {
         <div className="flex gap-1.5 bg-card p-1 rounded-xl border border-border">
           <button
             onClick={() => onTabChange("history")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all active:scale-[0.98] ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-[0.98] flex items-center gap-1.5 cursor-pointer ${
               activeTab === "history"
-                ? "bg-primary text-background shadow-sm"
+                ? "bg-primary text-background shadow-xs"
                 : "text-text-light/60 hover:text-text-light hover:bg-white/5"
             }`}
           >
-            📋 Historial
+            <ClipboardList className="h-3.5 w-3.5" />
+            Historial
           </button>
           <button
             onClick={() => onTabChange("performance")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all active:scale-[0.98] ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-[0.98] flex items-center gap-1.5 cursor-pointer ${
               activeTab === "performance"
-                ? "bg-primary text-background shadow-sm"
+                ? "bg-primary text-background shadow-xs"
                 : "text-text-light/60 hover:text-text-light hover:bg-white/5"
             }`}
           >
-            📊 Rendimiento
+            <BarChart2 className="h-3.5 w-3.5" />
+            Rendimiento
           </button>
           <button
             onClick={() => onTabChange("config")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all active:scale-[0.98] ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-[0.98] flex items-center gap-1.5 cursor-pointer ${
               activeTab === "config"
-                ? "bg-primary text-background shadow-sm"
+                ? "bg-primary text-background shadow-xs"
                 : "text-text-light/60 hover:text-text-light hover:bg-white/5"
             }`}
           >
-            ⚙️ Configuración
+            <Settings className="h-3.5 w-3.5" />
+            Configuración
           </button>
         </div>
 
