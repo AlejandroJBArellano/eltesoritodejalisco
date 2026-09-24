@@ -26,79 +26,85 @@ export function StripeEmbeddedOnboardingModal({
   const [stripeConnectInstance, setStripeConnectInstance] =
     useState<StripeConnectInstance | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
 
     let mounted = true;
-    setLoading(true);
-    setError(null);
 
-    const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-    if (!publishableKey) {
-      setError("No disponible");
-      setLoading(false);
-      return;
-    }
+    const initConnect = async () => {
+      const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+      if (!publishableKey) {
+        if (mounted) setError("No disponible");
+        return;
+      }
 
-    try {
-      const instance = loadConnectAndInitialize({
-        publishableKey,
-        fetchClientSecret: async () => {
-          const res = await fetch("/api/stripe/connect/account-session", {
-            method: "POST",
-          });
-          const data = await res.json();
-          if (!res.ok || !data.client_secret) {
-            throw new Error(
-              data.error || "No se pudo obtener la sesión de Stripe",
-            );
-          }
-          return data.client_secret;
-        },
-        appearance: {
-          overlays: "dialog",
-          variables: {
-            colorPrimary: "#F97316",
-            colorBackground: "#1e1e24",
-            colorText: "#f3f4f6",
-            colorDanger: "#ef4444",
-            borderRadius: "10px",
+      try {
+        const instance = loadConnectAndInitialize({
+          publishableKey,
+          fetchClientSecret: async () => {
+            const res = await fetch("/api/stripe/connect/account-session", {
+              method: "POST",
+            });
+            const data = await res.json();
+            if (!res.ok || !data.client_secret) {
+              throw new Error(
+                data.error || "No se pudo obtener la sesión de Stripe",
+              );
+            }
+            return data.client_secret;
           },
-        },
-      });
+          appearance: {
+            overlays: "dialog",
+            variables: {
+              colorPrimary: "#F97316",
+              colorBackground: "#1e1e24",
+              colorText: "#f3f4f6",
+              colorDanger: "#ef4444",
+              borderRadius: "10px",
+            },
+          },
+        });
 
-      if (mounted) {
-        setStripeConnectInstance(instance);
-        setLoading(false);
+        if (mounted) {
+          setStripeConnectInstance(instance);
+        }
+      } catch (err) {
+        if (mounted) {
+          console.error(err);
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Error al inicializar Stripe Connect",
+          );
+        }
       }
-    } catch (err) {
-      if (mounted) {
-        console.error(err);
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Error al inicializar Stripe Connect",
-        );
-        setLoading(false);
-      }
-    }
+    };
+
+    initConnect();
 
     return () => {
       mounted = false;
     };
   }, [isOpen]);
 
+  const loading = isOpen && !stripeConnectInstance && !error;
+
+  const handleClose = () => {
+    setStripeConnectInstance(null);
+    setError(null);
+    onClose();
+  };
+
   const handleExit = () => {
     if (onSuccess) onSuccess();
-    onClose();
+    handleClose();
   };
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title="Conectar Pagos con Stripe"
       subtitle="Configura tu cuenta bancaria y datos para depósitos directos"
       icon={<CreditCard className="h-5 w-5 text-primary" />}

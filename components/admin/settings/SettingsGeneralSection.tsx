@@ -75,7 +75,7 @@ export function SettingsGeneralSection() {
               className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm text-text-light outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition font-mono"
             />
             <p className="text-[10px] text-text-light/40 mt-1.5">
-              Imprime un QR de "Califícanos" junto al menú. Déjalo vacío para no
+              Imprime un QR de &quot;Califícanos&quot; junto al menú. Déjalo vacío para no
               incluirlo.
             </p>
           </div>

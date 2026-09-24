@@ -57,10 +57,9 @@ export function SplitBillModal({
   const user = useOptionalUser();
   const isWaiter = user?.isWaiter ?? false;
   const posData = usePOSData();
-  const terminals = posData?.terminals || [];
   const activeTerminals = useMemo(
-    () => terminals.filter((t) => t.is_active),
-    [terminals],
+    () => (posData?.terminals || []).filter((t) => t.is_active),
+    [posData?.terminals],
   );
   const [mode, setMode] = useState<SplitMode>("EQUAL");
   const [partCount, setPartCount] = useState(2);

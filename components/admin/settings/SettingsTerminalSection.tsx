@@ -1,20 +1,17 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
-import {
-  Calculator,
-  CreditCard,
-  Info,
-  Plus,
-  Trash2,
-  Edit2,
-  CheckCircle2,
-  Star,
-  Loader2,
-  X,
-} from "lucide-react";
-import { useSettingsContext } from "./SettingsContext";
 import type { PaymentTerminal } from "@/types";
+import {
+  CreditCard,
+  Edit2,
+  Loader2,
+  Plus,
+  Star,
+  Trash2,
+  X
+} from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useSettingsContext } from "./SettingsContext";
 
 export function SettingsTerminalSection() {
   const { terminalCommissionRate, setTerminalCommissionRate } =
@@ -34,9 +31,6 @@ export function SettingsTerminalSection() {
   const [formRate, setFormRate] = useState("0");
   const [formIsDefault, setFormIsDefault] = useState(false);
 
-  // Simulator selected terminal ID or custom rate
-  const [simulatedTerminalId, setSimulatedTerminalId] = useState<string>("");
-
   const fetchTerminals = useCallback(async () => {
     try {
       setLoading(true);
@@ -51,7 +45,6 @@ export function SettingsTerminalSection() {
         list.find((t) => t.is_default && t.is_active) || list[0];
       if (defaultTerm) {
         setTerminalCommissionRate(String(defaultTerm.commission_rate));
-        setSimulatedTerminalId(defaultTerm.id);
       }
     } catch {
       // Si falla la API (ej. entorno de test o desconectado), usar fallback
@@ -175,18 +168,6 @@ export function SettingsTerminalSection() {
     }
   };
 
-  // Cálculo para el simulador
-  const activeSelectedTerminal = terminals.find(
-    (t) => t.id === simulatedTerminalId,
-  );
-  const simulatedRate = activeSelectedTerminal
-    ? activeSelectedTerminal.commission_rate
-    : parseFloat(terminalCommissionRate) || 0;
-
-  const sampleAmount = 1000;
-  const simulatedFee = (sampleAmount * simulatedRate) / 100;
-  const simulatedNet = Math.max(0, sampleAmount - simulatedFee);
-
   return (
     <div className="rounded-xl bg-card border border-border p-6 space-y-6 transition hover:border-text-light/20 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
@@ -195,10 +176,6 @@ export function SettingsTerminalSection() {
             <CreditCard className="h-4 w-4 text-primary" /> Terminales Bancarias
             y Comisiones
           </h3>
-          <p className="text-[11px] text-text-light/60 mt-0.5">
-            Configura tus terminales físicas o pasarelas de pago con su
-            respectiva comisión.
-          </p>
         </div>
         <button
           type="button"
@@ -239,11 +216,10 @@ export function SettingsTerminalSection() {
             {terminals.map((t) => (
               <div
                 key={t.id}
-                className={`rounded-lg border p-3.5 transition flex flex-col justify-between gap-3 ${
-                  t.is_active
-                    ? "bg-dark/40 border-border hover:border-text-light/20"
-                    : "bg-dark/20 border-border/40 opacity-60"
-                }`}
+                className={`rounded-lg border p-3.5 transition flex flex-col justify-between gap-3 ${t.is_active
+                  ? "bg-dark/40 border-border hover:border-text-light/20"
+                  : "bg-dark/20 border-border/40 opacity-60"
+                  }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-1">
@@ -289,7 +265,7 @@ export function SettingsTerminalSection() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-border/50 pt-2 text-[11px]">
+                <div className="border-t border-border/50 pt-2 text-[11px]">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
@@ -307,85 +283,11 @@ export function SettingsTerminalSection() {
                       {t.is_active ? "Activa para cobro" : "Inactiva"}
                     </span>
                   </label>
-
-                  <button
-                    type="button"
-                    onClick={() => setSimulatedTerminalId(t.id)}
-                    className="text-primary hover:underline text-[10px] font-bold"
-                  >
-                    Simular
-                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
-
-      {/* Simulador en tiempo real */}
-      <div className="rounded-xl bg-dark/40 border border-border/80 p-4 space-y-3 shadow-inner">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-xs font-black text-text-light uppercase tracking-wider">
-            <Calculator className="h-3.5 w-3.5 text-primary" />
-            <span>
-              Simulador{" "}
-              {activeSelectedTerminal
-                ? `(${activeSelectedTerminal.name})`
-                : "($1,000 MXN)"}
-            </span>
-          </div>
-          {terminals.length > 1 && (
-            <select
-              value={simulatedTerminalId}
-              onChange={(e) => setSimulatedTerminalId(e.target.value)}
-              className="text-xs bg-card border border-border rounded px-2 py-1 text-text-light font-medium outline-none focus:border-primary"
-            >
-              {terminals.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.short_name} ({t.commission_rate}%)
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-          <div className="bg-card/70 border border-border rounded-lg p-3">
-            <span className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider block">
-              Cobro
-            </span>
-            <span className="text-base font-black text-text-light font-mono mt-0.5 block">
-              ${sampleAmount.toFixed(2)}
-            </span>
-          </div>
-
-          <div className="bg-card/70 border border-border rounded-lg p-3">
-            <span className="text-[10px] font-bold text-red-400/70 uppercase tracking-wider block">
-              Comisión ({simulatedRate.toFixed(2)}%)
-            </span>
-            <span className="text-base font-black text-red-400 font-mono mt-0.5 block">
-              -${simulatedFee.toFixed(2)}
-            </span>
-          </div>
-
-          <div className="bg-card/70 border border-border rounded-lg p-3">
-            <span className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wider block">
-              Neto
-            </span>
-            <span className="text-base font-black text-emerald-400 font-mono mt-0.5 block">
-              ${simulatedNet.toFixed(2)}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-2 pt-1 text-[11px] text-text-light/60">
-          <Info className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-          <p>
-            {simulatedRate > 0
-              ? "Se descuenta de la utilidad en cortes de caja y reportes financieros."
-              : "Sin deducción en cortes ni reportes."}
-          </p>
-        </div>
       </div>
 
       {/* Modal Agregar / Editar Terminal */}
@@ -432,7 +334,7 @@ export function SettingsTerminalSection() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-text-light/70 block mb-1">
-                    Nombre corto / Botón
+                    Nombre corto para el botón
                   </label>
                   <input
                     type="text"

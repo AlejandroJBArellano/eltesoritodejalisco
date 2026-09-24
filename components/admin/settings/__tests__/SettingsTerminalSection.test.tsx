@@ -95,17 +95,17 @@ describe("SettingsTerminalSection Component", () => {
     expect(screen.getByText("Predeterminada")).toBeInTheDocument();
   });
 
-  it("calculates simulator values based on default terminal rate (3.5%)", async () => {
-    renderWithProvider();
+  it("synchronizes default terminal rate with context and hidden input", async () => {
+    const { container } = renderWithProvider();
 
     await waitFor(() => {
       expect(screen.getByText("Terminal Principal")).toBeInTheDocument();
     });
 
-    // $1,000 MXN base with 3.5% = $35.00 fee, $965.00 net
-    expect(screen.getByText("$1000.00")).toBeInTheDocument();
-    expect(screen.getByText("-$35.00")).toBeInTheDocument();
-    expect(screen.getByText("$965.00")).toBeInTheDocument();
+    const hiddenInput = container.querySelector(
+      'input[name="terminalCommissionRate"]',
+    ) as HTMLInputElement;
+    expect(hiddenInput).toHaveValue("3.5");
   });
 
   it("opens create terminal modal, validates input and creates a terminal", async () => {

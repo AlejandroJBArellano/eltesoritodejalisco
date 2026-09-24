@@ -18,10 +18,6 @@ export function SettingsLoyaltySection() {
           <span className="text-sm font-bold text-text-light block">
             Activar Programa de Lealtad
           </span>
-          <span className="text-xs text-text-light/40">
-            Permite a los clientes acumular puntos por sus compras usando su
-            número telefónico.
-          </span>
         </div>
 
         <input
@@ -33,14 +29,12 @@ export function SettingsLoyaltySection() {
         <button
           type="button"
           onClick={() => setLoyaltyEnabled(!loyaltyEnabled)}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
-            loyaltyEnabled ? "bg-primary" : "bg-dark/40"
-          } border border-border`}
+          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${loyaltyEnabled ? "bg-primary" : "bg-dark/40"
+            } border border-border`}
         >
           <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-text-light shadow ring-0 transition duration-200 ease-in-out ${
-              loyaltyEnabled ? "translate-x-5" : "translate-x-0"
-            }`}
+            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-text-light shadow ring-0 transition duration-200 ease-in-out ${loyaltyEnabled ? "translate-x-5" : "translate-x-0"
+              }`}
           />
         </button>
       </div>
