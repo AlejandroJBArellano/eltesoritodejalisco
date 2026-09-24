@@ -522,7 +522,11 @@ export function useDailyCutManager({
       }
     } catch (err) {
       console.error("Error generating pending cut:", err);
-      setHistoryError("No fue posible generar el corte pendiente.");
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "No fue posible generar el corte pendiente.";
+      setHistoryError(errorMessage);
     } finally {
       setIsGeneratingPendingCut(false);
     }

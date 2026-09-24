@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useMemo } from "react";
+import {
+  getOrderPaymentLabel,
+  getOrderTipAmount,
+} from "@/components/pos/paymentUtils";
 import { useOptionalTenant } from "@/components/TenantProvider";
 import type { TenantContextType } from "@/lib/tenant";
-import {
-  getOrderTipAmount,
-  getOrderPaymentLabel,
-} from "@/components/pos/paymentUtils";
 import { formatServiceTicket } from "@/lib/utils/serviceType";
 import { PaymentMethod } from "@/types";
+import { useMemo } from "react";
 import type {
   DailyCut,
   DailyCutSummaryTotals,
@@ -52,7 +52,7 @@ export function DailySummaryTicket({
   const totalOrdersCount = isHistorical
     ? Number(cut?.total_orders ?? 0)
     : orders.length ||
-      (todayTotals?.ordersAtTable || 0) + (todayTotals?.ordersDelivery || 0);
+    (todayTotals?.ordersAtTable || 0) + (todayTotals?.ordersDelivery || 0);
 
   const ventaNeta = isHistorical
     ? Number(cut?.venta_neta ?? 0)
@@ -99,9 +99,9 @@ export function DailySummaryTicket({
   const utilidadFinal = isHistorical
     ? Number(cut?.utilidad_final ?? 0)
     : Number(
-        todayTotals?.utilidadFinal ??
-          ventaNeta + propinasTotales - totalGastos - comisionTarjeta,
-      );
+      todayTotals?.utilidadFinal ??
+      ventaNeta + propinasTotales - totalGastos - comisionTarjeta,
+    );
 
   // Desglose por método de pago a partir de órdenes si están disponibles
   const paymentBreakdown = useMemo(() => {
@@ -169,7 +169,7 @@ export function DailySummaryTicket({
         )}
         <div className="border-b border-dashed my-2"></div>
         <p className="font-bold text-xs uppercase tracking-wide">
-          *** CORTE / RESUMEN DE CAJA DIARIO ***
+          *** CORTE DE CAJA DIARIO ***
         </p>
         <div className="border-b border-dashed my-2"></div>
       </div>

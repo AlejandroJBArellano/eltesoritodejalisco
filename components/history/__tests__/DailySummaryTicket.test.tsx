@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { DailySummaryTicket } from "../DailySummaryTicket";
 import { OrderStatus, PaymentMethod, type OrderWithDetails } from "@/types";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { DailySummaryTicket } from "../DailySummaryTicket";
 import type {
   DailyCut,
   DailyCutSummaryTotals,
@@ -150,7 +150,7 @@ describe("DailySummaryTicket Component", () => {
     expect(screen.getByTestId("daily-summary-ticket")).toBeDefined();
     expect(screen.getByText("KITTN RESTAURANTE")).toBeDefined();
     expect(
-      screen.getByText("*** CORTE / RESUMEN DE CAJA DIARIO ***"),
+      screen.getByText("*** CORTE DE CAJA DIARIO ***"),
     ).toBeDefined();
     expect(screen.getByText("RESUMEN FINANCIERO")).toBeDefined();
     expect(screen.getByText("ARQUEO DE COBROS")).toBeDefined();

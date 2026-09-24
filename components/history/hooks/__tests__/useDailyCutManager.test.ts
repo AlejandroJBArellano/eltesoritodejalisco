@@ -219,6 +219,62 @@ describe("useDailyCutManager", () => {
     expect(onCutFinalized).toHaveBeenCalled();
   });
 
+  it("handles 409 conflict when pending cut already exists", async () => {
+    global.fetch = vi.fn().mockImplementation(async (url: string) => {
+      if (url === "/api/cortes/extemporaneo") {
+        return {
+          ok: false,
+          status: 409,
+          json: async () => ({ error: "Ya existe corte para esa fecha" }),
+        };
+      }
+      return { ok: true, json: async () => ({}) };
+    });
+
+    const { result } = renderHook(() =>
+      useDailyCutManager({ orders: mockTodayOrders }),
+    );
+
+    await act(async () => {
+      await result.current.handleGeneratePendingCut();
+    });
+    await act(async () => {
+      await result.current.handleGeneratePendingCut();
+    });
+
+    expect(result.current.historyError).toBe(
+      "Ese corte ya existe. Se actualizará la vista.",
+    );
+  });
+
+  it("handles API error when generating pending cut fails", async () => {
+    global.fetch = vi.fn().mockImplementation(async (url: string) => {
+      if (url === "/api/cortes/extemporaneo") {
+        return {
+          ok: false,
+          status: 400,
+          json: async () => ({ error: "Error en el servidor de base de datos" }),
+        };
+      }
+      return { ok: true, json: async () => ({}) };
+    });
+
+    const { result } = renderHook(() =>
+      useDailyCutManager({ orders: mockTodayOrders }),
+    );
+
+    await act(async () => {
+      await result.current.handleGeneratePendingCut();
+    });
+    await act(async () => {
+      await result.current.handleGeneratePendingCut();
+    });
+
+    expect(result.current.historyError).toBe(
+      "Error en el servidor de base de datos",
+    );
+  });
+
   it("finalizes day and records daily cut and tips", async () => {
     const onCutFinalized = vi.fn();
     const { result } = renderHook(() =>
