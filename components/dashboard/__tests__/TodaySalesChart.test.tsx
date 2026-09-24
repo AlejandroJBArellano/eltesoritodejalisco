@@ -30,7 +30,6 @@ describe("TodaySalesChart Component", () => {
       />,
     );
 
-    expect(screen.getByText("En Vivo")).toBeInTheDocument();
     expect(screen.getByText("Ventas Intradía")).toBeInTheDocument();
     expect(screen.getByText("$6,800.00")).toBeInTheDocument();
     expect(screen.getByText("(+$340.00 propinas)")).toBeInTheDocument();

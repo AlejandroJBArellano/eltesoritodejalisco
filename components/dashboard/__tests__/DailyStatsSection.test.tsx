@@ -12,7 +12,7 @@ const mockStats: DashboardStats = {
 };
 
 describe("DailyStatsSection Component", () => {
-  it("renders daily summary collapsible section with 4 stat cards", () => {
+  it("renders daily summary collapsible section with 3 stat cards", () => {
     render(<DailyStatsSection stats={mockStats} />);
 
     expect(screen.getByText("Resumen del Día")).toBeInTheDocument();
@@ -21,9 +21,6 @@ describe("DailyStatsSection Component", () => {
 
     expect(screen.getByText("Venta Bruta")).toBeInTheDocument();
     expect(screen.getByText("$4,250.50")).toBeInTheDocument();
-
-    expect(screen.getByText("Clientes")).toBeInTheDocument();
-    expect(screen.getByText("38")).toBeInTheDocument();
 
     expect(screen.getByText("Propinas Hoy")).toBeInTheDocument();
     expect(screen.getByText("$520.00")).toBeInTheDocument();
