@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
+import { getTenantCollaborators } from "@/lib/users";
 
 export async function GET(request: NextRequest) {
   try {
@@ -72,20 +73,17 @@ export async function GET(request: NextRequest) {
       throw attError;
     }
 
-    // Fetch all profiles to map user info reliably
-    const { data: allProfiles } = await adminSupabase
-      .from("profiles")
-      .select("id, full_name, email, role")
-      .eq("tenant_id", tenant.id);
+    // Fetch all collaborators to map user info reliably
+    const allCollaborators = await getTenantCollaborators(tenant.id);
 
     const profilesMap = new Map(
-      (allProfiles || []).map((p) => [
-        p.id,
+      allCollaborators.map((c) => [
+        c.id,
         {
-          id: p.id,
-          name: p.full_name || "Colaborador",
-          email: p.email || "",
-          role: p.role || "WAITER",
+          id: c.id,
+          name: c.name,
+          email: c.email || "",
+          role: c.role || "WAITER",
         },
       ]),
     );

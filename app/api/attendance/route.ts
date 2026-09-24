@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getTenantCollaborators } from "@/lib/users";
 import { getTenantContext } from "@/lib/tenant";
 import { NextResponse } from "next/server";
 import { format } from "date-fns-tz";
@@ -33,18 +34,14 @@ export async function GET() {
     const isAdmin = role === "ADMIN" || role === "MANAGER";
 
     if (isAdmin) {
-      // If admin, fetch all attendance records for today, non-admin collaborators from profiles, and today's shifts
-      const [attendanceRes, profilesRes, shiftsRes] = await Promise.all([
+      // If admin, fetch all attendance records for today, non-admin collaborators, and today's shifts
+      const [attendanceRes, collaborators, shiftsRes] = await Promise.all([
         supabase
           .from("attendance")
           .select("id, user_id, check_in, check_out, status, date")
           .eq("tenant_id", tenant.id)
           .eq("date", todayDate),
-        supabase
-          .from("profiles")
-          .select("id, full_name, role")
-          .eq("tenant_id", tenant.id)
-          .neq("role", "ADMIN"),
+        getTenantCollaborators(tenant.id),
         supabase
           .from("employee_shifts")
           .select("*")
@@ -53,11 +50,13 @@ export async function GET() {
           .order("start_time", { ascending: true }),
       ]);
 
-      const formattedUsers = (profilesRes.data || []).map((p) => ({
-        id: p.id,
-        name: p.full_name || "Colaborador",
-        role: p.role || "WAITER",
-      }));
+      const formattedUsers = collaborators
+        .filter((c) => c.role !== "ADMIN")
+        .map((c) => ({
+          id: c.id,
+          name: c.name,
+          role: c.role || "WAITER",
+        }));
 
       return NextResponse.json({
         isAdmin: true,

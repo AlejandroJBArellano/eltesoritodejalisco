@@ -1,6 +1,5 @@
-import React from "react";
 import CollapsibleSection from "@/components/CollapsibleSection";
-import { ClipboardList, DollarSign, Users, HandCoins } from "lucide-react";
+import { ClipboardList, DollarSign, HandCoins } from "lucide-react";
 import { StatCard } from "./StatCard";
 import type { DashboardStats } from "./types";
 
@@ -20,7 +19,7 @@ export function DailyStatsSection({ stats }: DailyStatsSectionProps) {
       dotColorClass="bg-primary"
       defaultOpen={true}
     >
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Órdenes Activas"
           icon={ClipboardList}
@@ -32,12 +31,6 @@ export function DailyStatsSection({ stats }: DailyStatsSectionProps) {
           icon={DollarSign}
           value={currencyFormatter.format(stats.salesToday)}
           themeClass="bg-dark/40 text-secondary"
-        />
-        <StatCard
-          title="Clientes"
-          icon={Users}
-          value={stats.customersCount}
-          themeClass="bg-emerald-500/10 text-emerald-400"
         />
         <StatCard
           title="Propinas Hoy"
