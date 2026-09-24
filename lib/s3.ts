@@ -97,12 +97,11 @@ export function getS3PublicUrl(key: string): string {
 }
 
 /**
- * Sube una imagen de platillo a S3 y retorna su URL pública persistente.
- * Genera una ruta sanitizada: ${tenant_id}/menu-items/${Date.now()}-${uuid}.${extension}
+ * Sube un buffer de imagen validado a una ruta específica en AWS S3.
  */
-export async function uploadMenuItemImage(
+async function uploadImageToS3Key(
   imageFile: File,
-  tenantId: string,
+  key: string,
 ): Promise<string> {
   validateImageFile(imageFile);
 
@@ -110,12 +109,6 @@ export async function uploadMenuItemImage(
   if (!bucket) {
     throw new Error("AWS_S3_BUCKET_NAME no configurado");
   }
-
-  const extension = EXTENSION_MAP[imageFile.type];
-
-  const sanitizedTenantId = tenantId.replace(/[^a-zA-Z0-9_-]/g, "");
-  const uniqueId = crypto.randomUUID();
-  const key = `${sanitizedTenantId}/menu-items/${Date.now()}-${uniqueId}.${extension}`;
 
   const arrayBuffer = await imageFile.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
@@ -140,4 +133,57 @@ export async function uploadMenuItemImage(
   }
 
   return getS3PublicUrl(key);
+}
+
+/**
+ * Sube una imagen de platillo a S3 y retorna su URL pública persistente.
+ * Genera una ruta sanitizada: ${tenant_id}/menu-items/${Date.now()}-${uuid}.${extension}
+ */
+export async function uploadMenuItemImage(
+  imageFile: File,
+  tenantId: string,
+): Promise<string> {
+  validateImageFile(imageFile);
+  const extension = EXTENSION_MAP[imageFile.type];
+  const sanitizedTenantId = tenantId.replace(/[^a-zA-Z0-9_-]/g, "");
+  const uniqueId = crypto.randomUUID();
+  const key = `${sanitizedTenantId}/menu-items/${Date.now()}-${uniqueId}.${extension}`;
+
+  return uploadImageToS3Key(imageFile, key);
+}
+
+/**
+ * Sube el logotipo del restaurante a S3 y retorna su URL pública persistente.
+ * Genera una ruta sanitizada: ${tenant_id}/logos/${Date.now()}-${uuid}.${extension}
+ */
+export async function uploadLogoImage(
+  imageFile: File,
+  tenantId: string,
+): Promise<string> {
+  validateImageFile(imageFile);
+  const extension = EXTENSION_MAP[imageFile.type];
+  const sanitizedTenantId = tenantId.replace(/[^a-zA-Z0-9_-]/g, "");
+  const uniqueId = crypto.randomUUID();
+  const key = `${sanitizedTenantId}/logos/${Date.now()}-${uniqueId}.${extension}`;
+
+  return uploadImageToS3Key(imageFile, key);
+}
+
+/**
+ * Sube la foto de evidencia de una tarea a S3 y retorna su URL pública persistente.
+ * Genera una ruta sanitizada: ${tenant_id}/task-photos/${execution_id}-${Date.now()}-${uuid}.${extension}
+ */
+export async function uploadTaskPhotoImage(
+  imageFile: File,
+  tenantId: string,
+  executionId: string,
+): Promise<string> {
+  validateImageFile(imageFile);
+  const extension = EXTENSION_MAP[imageFile.type];
+  const sanitizedTenantId = tenantId.replace(/[^a-zA-Z0-9_-]/g, "");
+  const sanitizedExecutionId = executionId.replace(/[^a-zA-Z0-9_-]/g, "");
+  const uniqueId = crypto.randomUUID();
+  const key = `${sanitizedTenantId}/task-photos/${sanitizedExecutionId}-${Date.now()}-${uniqueId}.${extension}`;
+
+  return uploadImageToS3Key(imageFile, key);
 }

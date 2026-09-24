@@ -7,6 +7,8 @@ import {
   validateImageFile,
   getS3PublicUrl,
   uploadMenuItemImage,
+  uploadLogoImage,
+  uploadTaskPhotoImage,
 } from "../s3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 
@@ -234,6 +236,112 @@ describe("lib/s3", () => {
       await expect(uploadMenuItemImage(file, "tenant-1")).rejects.toThrow(
         "Error al subir la imagen a S3: Error desconocido",
       );
+    });
+  });
+
+  describe("uploadLogoImage", () => {
+    it("should throw if file validation fails", async () => {
+      const invalidFile = new File(["test"], "test.pdf", {
+        type: "application/pdf",
+      });
+      await expect(uploadLogoImage(invalidFile, "tenant-1")).rejects.toThrow(
+        "Formato de imagen no soportado. Usa JPEG, PNG, WebP o AVIF",
+      );
+      expect(mockSend).not.toHaveBeenCalled();
+    });
+
+    it("should throw if AWS_S3_BUCKET_NAME is not set", async () => {
+      delete process.env.AWS_S3_BUCKET_NAME;
+      const file = new File(["test"], "logo.png", { type: "image/png" });
+      await expect(uploadLogoImage(file, "tenant-1")).rejects.toThrow(
+        "AWS_S3_BUCKET_NAME no configurado",
+      );
+    });
+
+    it("should upload logo image successfully with correct S3 key and parameters", async () => {
+      mockSend.mockResolvedValueOnce({});
+      const file = new File(["dummy logo content"], "logo.png", {
+        type: "image/png",
+      });
+
+      const url = await uploadLogoImage(file, "tenant-alpha");
+
+      expect(mockSend).toHaveBeenCalledTimes(1);
+      const command = mockSend.mock.calls[0][0];
+      expect(command).toBeInstanceOf(PutObjectCommand);
+      expect(command.input.Bucket).toBe("test-bucket");
+      expect(command.input.ContentType).toBe("image/png");
+      expect(command.input.Key).toMatch(
+        /^tenant-alpha\/logos\/\d+-[a-f0-9-]+\.png$/,
+      );
+      expect(url).toContain(
+        "https://test-bucket.s3.us-east-1.amazonaws.com/tenant-alpha/logos/",
+      );
+    });
+
+    it("should handle S3 upload errors for logo", async () => {
+      mockSend.mockRejectedValueOnce(new Error("S3 Service Unavailable"));
+      const file = new File(["data"], "logo.webp", { type: "image/webp" });
+
+      await expect(uploadLogoImage(file, "tenant-1")).rejects.toThrow(
+        "Error al subir la imagen a S3: S3 Service Unavailable",
+      );
+    });
+  });
+
+  describe("uploadTaskPhotoImage", () => {
+    it("should throw if file validation fails", async () => {
+      const invalidFile = new File(["test"], "notes.txt", {
+        type: "text/plain",
+      });
+      await expect(
+        uploadTaskPhotoImage(invalidFile, "tenant-1", "exec-123"),
+      ).rejects.toThrow(
+        "Formato de imagen no soportado. Usa JPEG, PNG, WebP o AVIF",
+      );
+      expect(mockSend).not.toHaveBeenCalled();
+    });
+
+    it("should throw if AWS_S3_BUCKET_NAME is not set", async () => {
+      delete process.env.AWS_S3_BUCKET_NAME;
+      const file = new File(["test"], "evidence.jpg", { type: "image/jpeg" });
+      await expect(
+        uploadTaskPhotoImage(file, "tenant-1", "exec-123"),
+      ).rejects.toThrow("AWS_S3_BUCKET_NAME no configurado");
+    });
+
+    it("should upload task photo successfully with sanitized keys", async () => {
+      mockSend.mockResolvedValueOnce({});
+      const file = new File(["photo evidence"], "photo.avif", {
+        type: "image/avif",
+      });
+
+      const url = await uploadTaskPhotoImage(
+        file,
+        "tenant_special@1",
+        "exec/abc_1",
+      );
+
+      expect(mockSend).toHaveBeenCalledTimes(1);
+      const command = mockSend.mock.calls[0][0];
+      expect(command).toBeInstanceOf(PutObjectCommand);
+      expect(command.input.Bucket).toBe("test-bucket");
+      expect(command.input.ContentType).toBe("image/avif");
+      expect(command.input.Key).toMatch(
+        /^tenant_special1\/task-photos\/execabc_1-\d+-[a-f0-9-]+\.avif$/,
+      );
+      expect(url).toContain(
+        "https://test-bucket.s3.us-east-1.amazonaws.com/tenant_special1/task-photos/execabc_1-",
+      );
+    });
+
+    it("should handle S3 upload errors for task photo", async () => {
+      mockSend.mockRejectedValueOnce(new Error("Write timeout"));
+      const file = new File(["data"], "photo.jpg", { type: "image/jpeg" });
+
+      await expect(
+        uploadTaskPhotoImage(file, "tenant-1", "exec-1"),
+      ).rejects.toThrow("Error al subir la imagen a S3: Write timeout");
     });
   });
 });

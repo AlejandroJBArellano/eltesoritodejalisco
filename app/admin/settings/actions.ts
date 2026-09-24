@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getProfile } from "@/lib/auth";
 import { hasPermission } from "@/lib/permissions";
+import { uploadLogoImage } from "@/lib/s3";
 
 export interface UpdateSettingsState {
   success?: boolean;
@@ -63,30 +64,14 @@ export async function updateTenantSettings(
       typeof logoFile.name === "string" &&
       logoFile.name.length > 0
     ) {
-      // Ensure the "logos" bucket exists and is public
       try {
-        await adminClient.storage.createBucket("logos", { public: true });
-      } catch {
-        // Bucket already exists — safe to ignore
-      }
-
-      const fileExt = logoFile.name.split(".").pop() || "jpg";
-      const fileName = `${tenant.id}-${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await adminClient.storage
-        .from("logos")
-        .upload(fileName, logoFile, { upsert: true });
-
-      if (uploadError) {
+        logoUrl = await uploadLogoImage(logoFile, tenant.id);
+      } catch (uploadError) {
         console.error("Storage upload error for logo:", uploadError);
-        return { error: `Error al subir el logo: ${uploadError.message}` };
+        return {
+          error: `Error al subir el logo: ${uploadError instanceof Error ? uploadError.message : "Error desconocido"}`,
+        };
       }
-
-      const {
-        data: { publicUrl },
-      } = adminClient.storage.from("logos").getPublicUrl(fileName);
-
-      logoUrl = publicUrl;
     }
 
     if (!name || !name.trim()) {
