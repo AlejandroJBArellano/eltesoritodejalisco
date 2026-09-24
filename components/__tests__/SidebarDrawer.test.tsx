@@ -60,20 +60,27 @@ describe("SidebarDrawer Component", () => {
 
     // Groups
     expect(screen.getByText("Operación Diaria")).toBeInTheDocument();
-    expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
+    expect(screen.getByText("Gestión de Equipo")).toBeInTheDocument();
+    expect(screen.getByText("Catálogo y Clientes")).toBeInTheDocument();
     expect(screen.getByText("Finanzas y Reportes")).toBeInTheDocument();
     expect(screen.getAllByText("Configuración").length).toBeGreaterThanOrEqual(1);
 
     // Key links
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
     expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
-    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
-    expect(screen.getByText("Registrar Gasto")).toBeInTheDocument();
-    expect(screen.getByText("Gestión de Equipo")).toBeInTheDocument();
-    expect(screen.getByText("Menú e Inventario")).toBeInTheDocument();
+    expect(screen.getByText("Asistencia")).toBeInTheDocument();
+    expect(screen.getByText("Tareas")).toBeInTheDocument();
+    expect(screen.getByText("Colaboradores y Roles")).toBeInTheDocument();
+    expect(screen.getByText("Gestión de Horarios")).toBeInTheDocument();
+    expect(screen.getByText("Historial de Tareas")).toBeInTheDocument();
+    expect(screen.getByText("Gestión de Menú")).toBeInTheDocument();
+    expect(screen.getByText("Inventario")).toBeInTheDocument();
     expect(screen.getByText("Clientes")).toBeInTheDocument();
     expect(screen.getByText("Kittn Portal")).toBeInTheDocument();
-    expect(screen.getByText("Reportes")).toBeInTheDocument();
+    expect(screen.getByText("Reportes de Ventas")).toBeInTheDocument();
+    expect(screen.getByText("Control de Gastos")).toBeInTheDocument();
+    expect(screen.getByText("Historial de Órdenes")).toBeInTheDocument();
+    expect(screen.getByText("Detector de Horas Pico")).toBeInTheDocument();
     expect(screen.getByText("Admin User")).toBeInTheDocument();
     expect(screen.getByText("ADMIN")).toBeInTheDocument();
   });
@@ -142,8 +149,9 @@ describe("SidebarDrawer Component", () => {
     render(<SidebarDrawer isOpen={true} onClose={onCloseMock} />);
 
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
-    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
-    expect(screen.queryByText("Gestión de Equipo")).not.toBeInTheDocument();
+    expect(screen.getByText("Asistencia")).toBeInTheDocument();
+    expect(screen.getByText("Tareas")).toBeInTheDocument();
+    expect(screen.queryByText("Colaboradores y Roles")).not.toBeInTheDocument();
     expect(screen.queryByText("Configuración")).not.toBeInTheDocument();
   });
 
@@ -151,7 +159,7 @@ describe("SidebarDrawer Component", () => {
     vi.mocked(usePathname).mockReturnValue("/admin/users/list");
     render(<SidebarDrawer isOpen={true} onClose={onCloseMock} />);
 
-    const teamLink = screen.getByText("Gestión de Equipo").closest("a");
+    const teamLink = screen.getByText("Colaboradores y Roles").closest("a");
     expect(teamLink?.className).toContain("text-primary");
   });
 });

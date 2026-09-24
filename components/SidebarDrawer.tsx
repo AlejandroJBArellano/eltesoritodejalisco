@@ -5,10 +5,14 @@ import { useOptionalUser } from "@/components/UserProvider";
 import {
   Activity,
   BarChart3,
+  CalendarDays,
   CheckSquare,
   ChefHat,
   ChevronRight,
+  ClipboardCheck,
+  Clock,
   LayoutDashboard,
+  Package,
   Receipt,
   ReceiptText,
   Settings,
@@ -117,33 +121,56 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
           visible: canAccessKitchen,
         },
         {
-          href: "/tareas",
-          label: "Tareas y Asistencia",
-          icon: CheckSquare,
+          href: "/asistencia",
+          label: "Asistencia",
+          icon: Clock,
           visible: true,
         },
         {
-          href: "/gastos",
-          label: "Registrar Gasto",
-          icon: TrendingDown,
-          visible: canAccessExpenses || isAdmin,
+          href: "/tareas",
+          label: "Tareas",
+          icon: CheckSquare,
+          visible: true,
         },
       ],
     },
     {
-      title: "Gestión y Clientes",
+      title: "Gestión de Equipo",
       items: [
         {
           href: "/admin/users/list",
-          label: "Gestión de Equipo",
+          label: "Colaboradores y Roles",
           icon: Users,
           visible: isAdmin,
         },
         {
+          href: "/admin/users/horarios",
+          label: "Gestión de Horarios",
+          icon: CalendarDays,
+          visible: isAdmin,
+        },
+        {
+          href: "/admin/users/tareas",
+          label: "Historial de Tareas",
+          icon: ClipboardCheck,
+          visible: isAdmin,
+        },
+      ],
+    },
+    {
+      title: "Catálogo y Clientes",
+      items: [
+        {
           href: "/menu",
-          label: "Menú e Inventario",
+          label: "Gestión de Menú",
           icon: UtensilsCrossed,
-          visible: canAccessMenu || canAccessInventory,
+          visible: canAccessMenu,
+        },
+        {
+          href: "/inventario",
+          label: "Inventario",
+          icon: Package,
+          visible: canAccessInventory,
         },
         {
           href: "/customers",
@@ -164,19 +191,25 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
       items: [
         {
           href: "/reports",
-          label: "Reportes",
+          label: "Reportes de Ventas",
           icon: BarChart3,
           visible: canAccessReports,
         },
         {
+          href: "/gastos",
+          label: "Control de Gastos",
+          icon: TrendingDown,
+          visible: canAccessExpenses || isAdmin,
+        },
+        {
           href: "/history",
-          label: "Historial",
+          label: "Historial de Órdenes",
           icon: ReceiptText,
           visible: canAccessReports || !isWaiter,
         },
         {
           href: "/analytics/hourly",
-          label: "Horas Pico",
+          label: "Detector de Horas Pico",
           icon: Activity,
           visible: canAccessReports,
         },
@@ -295,9 +328,9 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                     const Icon = item.icon;
                     const isActive =
                       pathname === item.href ||
-                      (item.href === "/admin/users/list" &&
-                        pathname.startsWith("/admin/users")) ||
-                      (item.href !== "/" && pathname.startsWith(item.href));
+                      (item.href !== "/" &&
+                        (pathname === item.href ||
+                          pathname.startsWith(`${item.href}/`)));
 
                     return (
                       <Link
