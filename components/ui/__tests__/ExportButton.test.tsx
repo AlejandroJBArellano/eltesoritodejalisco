@@ -73,12 +73,29 @@ describe("ExportButton Component", () => {
     await user.click(button);
     expect(screen.getByRole("menu")).toBeInTheDocument();
     expect(screen.getByText("Excel (.xls)")).toBeInTheDocument();
+    expect(screen.getByText("Hoja de cálculo con formato")).toBeInTheDocument();
     expect(screen.getByText("CSV (.csv)")).toBeInTheDocument();
+    expect(screen.getByText("Texto separado por comas")).toBeInTheDocument();
     expect(screen.getByText(/2 filas/i)).toBeInTheDocument();
 
     // Click to close
     await user.click(button);
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it("should render singular '1 fila' when data has 1 item", async () => {
+    const user = userEvent.setup();
+    render(
+      <ExportButton
+        data={[mockData[0]]}
+        columns={mockColumns}
+        filename="un_producto"
+      />,
+    );
+
+    const button = screen.getByRole("button", { name: /Exportar/i });
+    await user.click(button);
+    expect(screen.getByText(/1 fila/i)).toBeInTheDocument();
   });
 
   it("should close dropdown when pressing Escape", async () => {

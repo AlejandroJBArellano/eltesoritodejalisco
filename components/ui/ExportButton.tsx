@@ -128,7 +128,7 @@ export function ExportButton<T>({
           }`}
         >
           <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-text-light/40 border-b border-border/60 mb-1">
-            Formato de Exportación ({data.length} filas)
+            Exportar ({data.length} {data.length === 1 ? "fila" : "filas"})
           </div>
 
           <button
@@ -145,7 +145,7 @@ export function ExportButton<T>({
                 Excel (.xls)
               </p>
               <p className="text-[10px] text-text-light/50 font-normal">
-                Con formato y tipado de celdas
+                Hoja de cálculo con formato
               </p>
             </div>
           </button>
@@ -164,7 +164,7 @@ export function ExportButton<T>({
                 CSV (.csv)
               </p>
               <p className="text-[10px] text-text-light/50 font-normal">
-                Texto plano UTF-8 universal
+                Texto separado por comas
               </p>
             </div>
           </button>
