@@ -54,7 +54,7 @@ describe("ManagementSection Component", () => {
 
     // Admin-only modules should be hidden
     expect(screen.queryByText("Gestión de Equipo")).not.toBeInTheDocument();
-    expect(screen.queryByText("Menú e Inventario")).not.toBeInTheDocument();
+    expect(screen.queryByText("Menú")).not.toBeInTheDocument();
     expect(screen.queryByText("Configuración")).not.toBeInTheDocument();
   });
 
@@ -75,7 +75,7 @@ describe("ManagementSection Component", () => {
 
     // Check all admin cards
     expect(screen.getByText("Gestión de Equipo")).toBeInTheDocument();
-    expect(screen.getByText("Menú e Inventario")).toBeInTheDocument();
+    expect(screen.getByText("Menú")).toBeInTheDocument();
     expect(screen.getByText("Clientes")).toBeInTheDocument();
     expect(screen.getByText("Configuración")).toBeInTheDocument();
   });
@@ -95,7 +95,7 @@ describe("ManagementSection Component", () => {
     expect(screen.getByText("Configuración")).toBeInTheDocument();
   });
 
-  it("renders Menú e Inventario module card when isInventory is true", () => {
+  it("renders Menú module card when isInventory is true", () => {
     render(
       <ManagementSection
         isAdmin={false}
@@ -106,7 +106,7 @@ describe("ManagementSection Component", () => {
     );
 
     expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
-    expect(screen.getByText("Menú e Inventario")).toBeInTheDocument();
+    expect(screen.getByText("Menú")).toBeInTheDocument();
     expect(
       screen.queryByText("Kittn Portal"),
     ).not.toBeInTheDocument();

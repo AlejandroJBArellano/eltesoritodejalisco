@@ -55,7 +55,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
         )}
         {(isAdmin || isInventory) && (
           <ModuleCard
-            title="Menú e Inventario"
+            title="Menú"
             href={isAdmin ? "/menu" : "/inventario"}
             icon={UtensilsCrossed}
             themeClass="bg-primary/10 text-primary"

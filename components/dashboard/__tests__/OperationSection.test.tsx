@@ -1,8 +1,7 @@
-import React from "react";
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { OperationSection } from "../OperationSection";
 import { UserProvider, type UserProfile } from "@/components/UserProvider";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { OperationSection } from "../OperationSection";
 
 const mockAdminProfile: UserProfile = {
   id: "u-1",
@@ -22,8 +21,8 @@ describe("OperationSection Component", () => {
     expect(screen.getByText("Operación Diaria")).toBeInTheDocument();
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
     expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
-    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
-    expect(screen.getByText("Registrar Gasto")).toBeInTheDocument();
+    expect(screen.getByText("Tareas")).toBeInTheDocument();
+    expect(screen.getByText("Asistencia")).toBeInTheDocument();
   });
 
   it("renders all operation cards with 0-props when wrapped in UserProvider", () => {
@@ -35,17 +34,17 @@ describe("OperationSection Component", () => {
 
     expect(screen.getByText("Operación Diaria")).toBeInTheDocument();
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
-    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
-    expect(screen.getByText("Registrar Gasto")).toBeInTheDocument();
+    expect(screen.getByText("Tareas")).toBeInTheDocument();
+    expect(screen.getByText("Asistencia")).toBeInTheDocument();
   });
 
   it("renders all operation cards when isWaiter is true", () => {
     render(<OperationSection isAdmin={false} isWaiter={true} />);
 
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
-    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
+    expect(screen.getByText("Tareas")).toBeInTheDocument();
+    expect(screen.getByText("Asistencia")).toBeInTheDocument();
     expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
-    expect(screen.getByText("Registrar Gasto")).toBeInTheDocument();
   });
 
   it("hides POS, Tareas and Gasto when user is not admin, waiter nor inventory", () => {
@@ -54,8 +53,8 @@ describe("OperationSection Component", () => {
     );
 
     expect(screen.queryByText("Punto de Venta")).not.toBeInTheDocument();
-    expect(screen.queryByText("Tareas y Asistencia")).not.toBeInTheDocument();
-    expect(screen.queryByText("Registrar Gasto")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tareas")).not.toBeInTheDocument();
+    expect(screen.queryByText("Asistencia")).not.toBeInTheDocument();
     expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
   });
 
@@ -65,8 +64,8 @@ describe("OperationSection Component", () => {
     );
 
     expect(screen.queryByText("Punto de Venta")).not.toBeInTheDocument();
-    expect(screen.queryByText("Registrar Gasto")).not.toBeInTheDocument();
-    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
+    expect(screen.queryByText("Tareas")).not.toBeInTheDocument();
+    expect(screen.queryByText("Asistencia")).not.toBeInTheDocument();
     expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
   });
 });

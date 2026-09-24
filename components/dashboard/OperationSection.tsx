@@ -42,7 +42,7 @@ export function OperationSection(props?: OperationSectionProps) {
         />
         {canAccessTasks && (
           <ModuleCard
-            title="Tareas y Asistencia"
+            title="Tareas"
             href="/tareas"
             icon={CheckSquare}
             themeClass="bg-primary/10 text-primary"
@@ -51,8 +51,8 @@ export function OperationSection(props?: OperationSectionProps) {
         )}
         {canAccessExpenses && (
           <ModuleCard
-            title="Registrar Gasto"
-            href="/gastos"
+            title="Asistencia"
+            href="/asistencia"
             icon={TrendingDown}
             themeClass="bg-rose-500/10 text-rose-400"
             hoverColor="#ef4444"
