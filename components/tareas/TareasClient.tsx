@@ -6,9 +6,9 @@ import {
   pauseTask,
   resumeTask,
   completeTask,
+  uploadTaskPhoto,
 } from "@/lib/actions/tasks";
 import { PrimordialTask, TaskExecution } from "@/types";
-import { createClient } from "@/lib/supabase/client";
 import { ExportButton } from "@/components/ui/DataTableControls";
 import { ActiveTaskTimer } from "./ActiveTaskTimer";
 import {
@@ -21,6 +21,15 @@ import {
   Clock,
   Sparkles,
 } from "lucide-react";
+
+const FREQUENCY_LABELS: Record<string, string> = {
+  CONTINUOUS: "Continua",
+  DAILY: "Diaria",
+  ROUTINE: "Rutina",
+  VARIABLE: "Variable",
+  WEEKLY: "Semanal",
+  MONTHLY: "Mensual",
+};
 
 export function TareasClient({
   initialTasks,
@@ -49,8 +58,6 @@ export function TareasClient({
     exec: TaskExecution;
     task: PrimordialTask;
   } | null>(null);
-
-  const supabase = createClient();
 
   // Comprobar periódicamente si hay tareas con Timeout
   useEffect(() => {
@@ -150,23 +157,10 @@ export function TareasClient({
       let photoUrl = "";
 
       if (file) {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${exec.id}-${Date.now()}.${fileExt}`;
-        const filePath = `tasks/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("task-photos")
-          .upload(filePath, file);
-
-        if (uploadError) {
-          throw new Error(`Error subiendo foto: ${uploadError.message}`);
-        }
-
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("task-photos").getPublicUrl(filePath);
-
-        photoUrl = publicUrl;
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("executionId", exec.id);
+        photoUrl = await uploadTaskPhoto(formData);
       }
 
       const updatedExec = await completeTask(exec.id, photoUrl);
@@ -196,10 +190,9 @@ export function TareasClient({
 
   return (
     <div className="space-y-8">
-      {/* Timeout Alert Modal */}
       {/* Modal de Alerta de Timeout */}
       {timeoutAlert && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-card border border-rose-500/30 p-5 sm:p-6 rounded-xl max-w-sm w-full space-y-4 shadow-2xl">
             <div className="text-center">
               <div className="rounded-lg bg-rose-500/10 p-3 text-rose-400 w-12 h-12 mx-auto flex items-center justify-center mb-2.5 border border-rose-500/20">
@@ -228,7 +221,7 @@ export function TareasClient({
                   handleComplete(timeoutAlert.exec, timeoutAlert.task);
                   setTimeoutAlert(null);
                 }}
-                className="bg-dark/40 border border-border hover:bg-white/10 text-text-light font-semibold text-xs uppercase tracking-wider py-2.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer"
+                className="bg-background/80 border border-border hover:bg-white/10 text-text-light font-semibold text-xs uppercase tracking-wider py-2.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer"
               >
                 Olvidé cerrarla, Completar Ahora
               </button>
@@ -238,10 +231,15 @@ export function TareasClient({
       )}
 
       {/* Header Bar with Export */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3.5 sm:p-4 rounded-xl border border-border shadow-xs">
-        <span className="text-xs font-bold text-text-light uppercase tracking-wider">
-          Checklist de Turno ({initialTasks.length} tareas)
-        </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border/80 shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xs font-bold text-text-light uppercase tracking-wider">
+            Checklist de Turno
+          </span>
+          <span className="text-[11px] font-mono font-medium text-text-light/60 px-2 py-0.5 rounded-md bg-white/[0.04] border border-border/60">
+            {initialTasks.length} {initialTasks.length === 1 ? "tarea" : "tareas"}
+          </span>
+        </div>
         <ExportButton
           data={initialTasks}
           columns={[
@@ -250,7 +248,11 @@ export function TareasClient({
               header: "Categoría",
               accessor: (t) => t.category?.name || "Sin Categoría",
             },
-            { header: "Frecuencia", key: "frequency_type" },
+            {
+              header: "Frecuencia",
+              accessor: (t) =>
+                FREQUENCY_LABELS[t.frequency_type] || t.frequency_type,
+            },
             {
               header: "Tiempo Estimado",
               accessor: (t) => `${t.timeout_minutes} min`,
@@ -289,12 +291,20 @@ export function TareasClient({
             {} as { [categoryName: string]: PrimordialTask[] },
           ),
         ).map(([categoryName, tasks]) => (
-          <div key={categoryName} className="space-y-3.5">
-            <h2 className="text-sm sm:text-base font-bold text-text-light uppercase tracking-tight flex items-center gap-2 border-b border-border pb-2.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              <Folder className="h-4 w-4 text-primary" />
-              <span>{categoryName}</span>
-            </h2>
+          <div key={categoryName} className="space-y-4">
+            <div className="flex items-center justify-between gap-3 border-b border-border/70 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary">
+                  <Folder className="h-4 w-4" />
+                </div>
+                <h2 className="text-sm sm:text-base font-bold text-text-light uppercase tracking-wide">
+                  {categoryName}
+                </h2>
+              </div>
+              <span className="text-xs font-mono font-medium text-text-light/50">
+                {tasks.length} {tasks.length === 1 ? "tarea" : "tareas"}
+              </span>
+            </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               {tasks.map((task) => {
@@ -304,57 +314,62 @@ export function TareasClient({
                     (e.status === "IN_PROGRESS" || e.status === "PAUSED"),
                 );
 
+                const frequencyLabel =
+                  FREQUENCY_LABELS[task.frequency_type] || task.frequency_type;
+
                 return (
                   <div
                     key={task.id}
-                    className={`p-4 sm:p-5 rounded-xl border transition-all duration-150 ${
+                    className={`group relative flex flex-col justify-between p-4 sm:p-5 rounded-xl border transition-all duration-150 shadow-xs ${
                       activeExecution
-                        ? "bg-card border-primary/50 shadow-xs"
-                        : "bg-card border-border hover:border-border/80"
+                        ? "bg-card border-primary/50 ring-1 ring-primary/20"
+                        : "bg-card border-border/70 hover:border-border hover:bg-card/90"
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h3 className="text-sm sm:text-base font-bold text-text-light tracking-tight">
-                          {task.name}
-                        </h3>
-                        <div className="flex flex-wrap gap-1.5 mt-1.5">
-                          <span className="rounded-md bg-white/5 border border-border px-2 py-0.5 text-[10px] font-semibold text-text-light/60 uppercase tracking-wider">
-                            {task.frequency_type}
+                    <div>
+                      <h3 className="text-sm sm:text-base font-semibold text-text-light tracking-tight group-hover:text-white transition-colors leading-snug">
+                        {task.name}
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                        <span className="inline-flex items-center gap-1.5 rounded-md bg-white/[0.04] border border-border/60 px-2 py-0.5 text-[11px] font-medium text-text-light/70 uppercase tracking-wider">
+                          <span className="h-1 w-1 rounded-full bg-text-light/40" />
+                          {frequencyLabel}
+                        </span>
+                        {task.requires_photo && (
+                          <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 text-[11px] font-medium text-amber-300 uppercase tracking-wider">
+                            <Camera className="h-3 w-3 text-amber-400" />
+                            Evidencia Foto
                           </span>
-                          {task.requires_photo && (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-300 uppercase tracking-wider">
-                              <Camera className="h-3 w-3 text-amber-400" />{" "}
-                              Evidencia Foto
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
 
                     {activeExecution ? (
-                      <div className="mt-4 border-t border-border pt-3.5 space-y-3.5">
-                        <div className="flex justify-between items-center bg-dark/40 px-3.5 py-2.5 rounded-lg border border-border">
-                          <span className="text-xs font-semibold text-text-light/60 uppercase tracking-wider flex items-center gap-1.5">
+                      <div className="mt-4 border-t border-border/70 pt-3.5 space-y-3.5">
+                        <div className="flex justify-between items-center bg-background/60 px-3.5 py-2.5 rounded-lg border border-border/70">
+                          <span className="text-xs font-semibold text-text-light/70 uppercase tracking-wider flex items-center gap-2">
                             {activeExecution.status === "PAUSED" ? (
                               <>
-                                <Pause className="h-3.5 w-3.5 text-amber-400" />{" "}
-                                Pausado
+                                <Pause className="h-3.5 w-3.5 text-amber-400" />
+                                <span>Pausado</span>
                               </>
                             ) : (
                               <>
-                                <Sparkles className="h-3.5 w-3.5 text-emerald-400 animate-spin" />{" "}
-                                En progreso
+                                <Sparkles className="h-3.5 w-3.5 text-emerald-400 animate-spin" />
+                                <span className="text-emerald-400">En progreso</span>
                               </>
                             )}
                           </span>
-                          <ActiveTaskTimer execution={activeExecution} />
+                          <ActiveTaskTimer
+                            execution={activeExecution}
+                            className="text-base font-mono font-bold text-text-light tabular-nums"
+                          />
                         </div>
 
                         {/* Input Camera / Photo upload if required */}
                         {task.requires_photo && (
-                          <div className="space-y-2">
-                            <label className="text-xs font-bold text-text-light/60 uppercase tracking-wider block">
+                          <div className="space-y-1.5">
+                            <label className="text-[11px] font-semibold text-text-light/70 uppercase tracking-wider block">
                               Subir Foto de Evidencia
                             </label>
                             <input
@@ -367,32 +382,32 @@ export function TareasClient({
                                   e.target.files?.[0] || null,
                                 )
                               }
-                              className="block w-full text-xs text-text-light/60 file:mr-3 file:rounded-lg file:border-0 file:bg-dark/40 file:px-4 file:py-2.5 file:text-xs file:font-bold file:text-text-light hover:file:bg-dark/40 file:transition-all cursor-pointer"
+                              className="block w-full text-xs text-text-light/60 file:mr-3 file:rounded-md file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-text-light hover:file:bg-white/15 file:transition-all cursor-pointer rounded-lg border border-border/60 bg-background/40 p-1"
                             />
                             {photoErrors[activeExecution.id] && (
-                              <p className="text-xs font-bold text-red-400 mt-1">
+                              <p className="text-xs font-medium text-rose-400 mt-1">
                                 ⚠️ {photoErrors[activeExecution.id]}
                               </p>
                             )}
                           </div>
                         )}
 
-                        <div className="flex gap-3">
+                        <div className="flex gap-2.5">
                           {activeExecution.status === "IN_PROGRESS" ? (
                             <button
                               onClick={() => handlePause(activeExecution.id)}
                               disabled={loadingTaskId === activeExecution.id}
-                              className="inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg flex-1 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-xs"
+                              className="inline-flex items-center justify-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold text-xs uppercase tracking-wider py-2.5 px-3 rounded-lg flex-1 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-xs"
                             >
-                              <Pause className="h-4 w-4" /> Pausar
+                              <Pause className="h-3.5 w-3.5" /> Pausar
                             </button>
                           ) : (
                             <button
                               onClick={() => handleResume(activeExecution.id)}
                               disabled={loadingTaskId === activeExecution.id}
-                              className="inline-flex items-center justify-center gap-2 bg-primary hover:opacity-90 text-dark font-black text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg flex-1 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-xs"
+                              className="inline-flex items-center justify-center gap-1.5 bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 font-bold text-xs uppercase tracking-wider py-2.5 px-3 rounded-lg flex-1 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-xs"
                             >
-                              <RotateCcw className="h-4 w-4" /> Reanudar
+                              <RotateCcw className="h-3.5 w-3.5" /> Reanudar
                             </button>
                           )}
 
@@ -401,9 +416,9 @@ export function TareasClient({
                               handleComplete(activeExecution, task)
                             }
                             disabled={loadingTaskId === activeExecution.id}
-                            className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg flex-1 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-xs"
+                            className="inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 px-3 rounded-lg flex-1 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-xs"
                           >
-                            <CheckCircle2 className="h-4 w-4" /> Completar
+                            <CheckCircle2 className="h-3.5 w-3.5" /> Completar
                           </button>
                         </div>
                       </div>
@@ -411,9 +426,9 @@ export function TareasClient({
                       <button
                         onClick={() => handleStart(task.id)}
                         disabled={loadingTaskId === task.id}
-                        className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-primary hover:opacity-90 text-dark font-black text-xs uppercase tracking-wider py-2.5 px-4 rounded-lg transition-all shadow-xs active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                        className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-dark border border-primary/25 hover:border-primary py-2.5 px-4 text-xs font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] disabled:opacity-50 cursor-pointer group-hover:border-primary/50"
                       >
-                        <Play className="h-4 w-4 fill-current" />{" "}
+                        <Play className="h-3.5 w-3.5 fill-current" />
                         {loadingTaskId === task.id
                           ? "Iniciando..."
                           : "Iniciar Tarea"}

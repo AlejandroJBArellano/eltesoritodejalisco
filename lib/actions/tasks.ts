@@ -4,6 +4,7 @@ import { createClient } from "../supabase/server";
 import { getUser, getProfile } from "../auth";
 import { getTenantContext } from "../tenant";
 import { revalidatePath } from "next/cache";
+import { uploadTaskPhotoImage } from "../s3";
 
 export async function getPrimordialTasks() {
   const tenant = await getTenantContext();
@@ -179,6 +180,21 @@ export async function completeTask(executionId: string, photoUrl?: string) {
   revalidatePath("/tareas");
   revalidatePath("/admin/tareas");
   return data;
+}
+
+export async function uploadTaskPhoto(formData: FormData): Promise<string> {
+  const user = await getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const tenant = await getTenantContext();
+  const file = formData.get("file") as File | null;
+  const executionId = (formData.get("executionId") as string) || "unknown";
+
+  if (!file || typeof file === "string") {
+    throw new Error("No se proporcionó ningún archivo válido");
+  }
+
+  return await uploadTaskPhotoImage(file, tenant.id, executionId);
 }
 
 export async function approveTask(executionId: string) {
