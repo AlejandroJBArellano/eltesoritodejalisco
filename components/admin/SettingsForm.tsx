@@ -1,24 +1,23 @@
 "use client";
 
 import type { TenantContextType } from "@/lib/tenant";
+import { SettingsBrandingSection } from "./settings/SettingsBrandingSection";
 import {
   SettingsProvider,
   useSettingsContext,
 } from "./settings/SettingsContext";
-import { SettingsHeaderActions } from "./settings/SettingsHeaderActions";
-import { SettingsGeneralSection } from "./settings/SettingsGeneralSection";
 import { SettingsFiscalSection } from "./settings/SettingsFiscalSection";
+import { SettingsGeneralSection } from "./settings/SettingsGeneralSection";
+import { SettingsHeaderActions } from "./settings/SettingsHeaderActions";
 import { SettingsLoyaltySection } from "./settings/SettingsLoyaltySection";
 import { SettingsTerminalSection } from "./settings/SettingsTerminalSection";
-import { SettingsBrandingSection } from "./settings/SettingsBrandingSection";
-import { McpConnectCard } from "./McpConnectCard";
 import { getContrastColor } from "./settings/types";
 
-export { COLOR_PRESETS, getContrastColor } from "./settings/types";
 export {
   SettingsProvider,
-  useSettingsContext,
+  useSettingsContext
 } from "./settings/SettingsContext";
+export { COLOR_PRESETS, getContrastColor } from "./settings/types";
 
 interface SettingsFormProps {
   initialTenant: TenantContextType;
@@ -40,7 +39,7 @@ function SettingsFormContent() {
           <SettingsTerminalSection />
           <SettingsFiscalSection />
           <SettingsLoyaltySection />
-          <McpConnectCard />
+          {/* <McpConnectCard /> */}
         </div>
 
         {/* Right Column: Branding, Colors and Logo */}
