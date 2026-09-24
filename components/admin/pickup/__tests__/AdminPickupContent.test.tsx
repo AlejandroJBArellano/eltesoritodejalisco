@@ -79,9 +79,7 @@ describe("AdminPickupContent Component", () => {
       />,
     );
 
-    expect(
-      screen.getByText("Kittn Pickup & Horarios"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Kittn Pickup & Horarios")).toBeInTheDocument();
     expect(
       screen.getByText("Cobros y Pagos con Stripe Connect"),
     ).toBeInTheDocument();
@@ -102,7 +100,9 @@ describe("AdminPickupContent Component", () => {
   });
 
   it("calls login-link API when clicking Ver Saldo y Depósitos", async () => {
-    const windowOpenSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+    const windowOpenSpy = vi
+      .spyOn(window, "open")
+      .mockImplementation(() => null);
     vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ url: "https://connect.stripe.com/express" }),
@@ -115,13 +115,18 @@ describe("AdminPickupContent Component", () => {
       />,
     );
 
-    const loginBtn = screen.getByRole("button", { name: /ver saldo y depósitos/i });
+    const loginBtn = screen.getByRole("button", {
+      name: /ver saldo y depósitos/i,
+    });
     fireEvent.click(loginBtn);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith("/api/stripe/connect/login-link", {
-        method: "POST",
-      });
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/stripe/connect/login-link",
+        {
+          method: "POST",
+        },
+      );
       expect(windowOpenSpy).toHaveBeenCalledWith(
         "https://connect.stripe.com/express",
         "_blank",

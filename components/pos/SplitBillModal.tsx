@@ -225,9 +225,7 @@ export function SplitBillModal({
 
       const rate = selectedTerm ? Number(selectedTerm.commission_rate) : 0;
       const commissionAmount =
-        isCard && rate > 0
-          ? Number(((amount * rate) / 100).toFixed(2))
-          : 0;
+        isCard && rate > 0 ? Number(((amount * rate) / 100).toFixed(2)) : 0;
 
       return {
         amount,

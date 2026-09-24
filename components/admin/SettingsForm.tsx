@@ -15,7 +15,7 @@ import { getContrastColor } from "./settings/types";
 
 export {
   SettingsProvider,
-  useSettingsContext
+  useSettingsContext,
 } from "./settings/SettingsContext";
 export { COLOR_PRESETS, getContrastColor } from "./settings/types";
 

@@ -67,8 +67,9 @@ export function TodaySalesChart({
 
   const areaPath =
     points.length > 0
-      ? `${linePath} L ${points[points.length - 1].x} ${paddingTop + innerHeight
-      } L ${points[0].x} ${paddingTop + innerHeight} Z`
+      ? `${linePath} L ${points[points.length - 1].x} ${
+          paddingTop + innerHeight
+        } L ${points[0].x} ${paddingTop + innerHeight} Z`
       : "";
 
   const activePoint =

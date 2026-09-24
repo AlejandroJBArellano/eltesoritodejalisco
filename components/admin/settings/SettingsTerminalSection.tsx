@@ -47,7 +47,8 @@ export function SettingsTerminalSection() {
       setTerminals(list);
 
       // Sincronizar tasa por defecto con el context
-      const defaultTerm = list.find((t) => t.is_default && t.is_active) || list[0];
+      const defaultTerm =
+        list.find((t) => t.is_default && t.is_active) || list[0];
       if (defaultTerm) {
         setTerminalCommissionRate(String(defaultTerm.commission_rate));
         setSimulatedTerminalId(defaultTerm.id);
@@ -158,7 +159,9 @@ export function SettingsTerminalSection() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("¿Seguro que deseas eliminar o desactivar esta terminal?")) {
+    if (
+      !window.confirm("¿Seguro que deseas eliminar o desactivar esta terminal?")
+    ) {
       return;
     }
     try {
@@ -189,10 +192,12 @@ export function SettingsTerminalSection() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
         <div>
           <h3 className="text-xs font-black text-text-light/50 uppercase tracking-widest flex items-center gap-2">
-            <CreditCard className="h-4 w-4 text-primary" /> Terminales Bancarias y Comisiones
+            <CreditCard className="h-4 w-4 text-primary" /> Terminales Bancarias
+            y Comisiones
           </h3>
           <p className="text-[11px] text-text-light/60 mt-0.5">
-            Configura tus terminales físicas o pasarelas de pago con su respectiva comisión.
+            Configura tus terminales físicas o pasarelas de pago con su
+            respectiva comisión.
           </p>
         </div>
         <button
@@ -226,7 +231,8 @@ export function SettingsTerminalSection() {
           </div>
         ) : terminals.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border p-6 text-center text-text-light/50 text-xs">
-            No tienes terminales registradas. Haz clic en &quot;Nueva Terminal&quot; para agregar una.
+            No tienes terminales registradas. Haz clic en &quot;Nueva
+            Terminal&quot; para agregar una.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -250,7 +256,8 @@ export function SettingsTerminalSection() {
                       </span>
                       {t.is_default && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/15 text-primary border border-primary/30">
-                          <Star className="h-2.5 w-2.5 fill-primary" /> Predeterminada
+                          <Star className="h-2.5 w-2.5 fill-primary" />{" "}
+                          Predeterminada
                         </span>
                       )}
                     </div>
@@ -290,7 +297,13 @@ export function SettingsTerminalSection() {
                       onChange={() => handleToggleActive(t)}
                       className="rounded border-border bg-dark/60 text-primary focus:ring-0 cursor-pointer"
                     />
-                    <span className={t.is_active ? "text-emerald-400 font-medium" : "text-text-light/40"}>
+                    <span
+                      className={
+                        t.is_active
+                          ? "text-emerald-400 font-medium"
+                          : "text-text-light/40"
+                      }
+                    >
                       {t.is_active ? "Activa para cobro" : "Inactiva"}
                     </span>
                   </label>
@@ -315,7 +328,10 @@ export function SettingsTerminalSection() {
           <div className="flex items-center gap-2 text-xs font-black text-text-light uppercase tracking-wider">
             <Calculator className="h-3.5 w-3.5 text-primary" />
             <span>
-              Simulador {activeSelectedTerminal ? `(${activeSelectedTerminal.name})` : "($1,000 MXN)"}
+              Simulador{" "}
+              {activeSelectedTerminal
+                ? `(${activeSelectedTerminal.name})`
+                : "($1,000 MXN)"}
             </span>
           </div>
           {terminals.length > 1 && (
@@ -379,7 +395,9 @@ export function SettingsTerminalSection() {
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h4 className="font-bold text-sm text-text-light flex items-center gap-2">
                 <CreditCard className="h-4 w-4 text-primary" />
-                {editingTerminal ? "Editar Terminal" : "Nueva Terminal Bancaria"}
+                {editingTerminal
+                  ? "Editar Terminal"
+                  : "Nueva Terminal Bancaria"}
               </h4>
               <button
                 type="button"

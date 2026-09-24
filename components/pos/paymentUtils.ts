@@ -28,10 +28,12 @@ export const getOrderPaymentLabel = (order?: OrderWithDetails | null) => {
   return `Mixto (${methods.map(getPaymentMethodLabel).join(" + ")})`;
 };
 
-export const getPaymentTerminalLabel = (payment?: {
-  terminalName?: string | null;
-  method?: PaymentMethod | string;
-} | null) => {
+export const getPaymentTerminalLabel = (
+  payment?: {
+    terminalName?: string | null;
+    method?: PaymentMethod | string;
+  } | null,
+) => {
   if (!payment) return "";
   if (payment.terminalName) return payment.terminalName;
   return getPaymentMethodLabel(payment.method || "");

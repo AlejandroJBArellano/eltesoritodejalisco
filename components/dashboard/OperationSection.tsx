@@ -27,7 +27,6 @@ export function OperationSection(props?: OperationSectionProps) {
         {canAccessPOS && (
           <ModuleCard
             title="Punto de Venta"
-            description="Crear órdenes y procesar pagos."
             href="/pos"
             icon={Receipt}
             badge="Activo"
@@ -37,7 +36,6 @@ export function OperationSection(props?: OperationSectionProps) {
         )}
         <ModuleCard
           title="Sistema de Cocina"
-          description="KDS con temporizador y smart batching."
           href="/kitchen"
           icon={ChefHat}
           badge="Real-time"
@@ -47,7 +45,6 @@ export function OperationSection(props?: OperationSectionProps) {
         {canAccessTasks && (
           <ModuleCard
             title="Tareas Diarias"
-            description="Checklist de tareas primordiales y operación diaria."
             href="/tareas"
             icon={CheckSquare}
             badge="Checklist"
@@ -57,7 +54,6 @@ export function OperationSection(props?: OperationSectionProps) {
         )}
         <ModuleCard
           title="Asistencia"
-          description="Registro de entradas y salidas."
           href="/asistencia"
           icon={Clock}
           badge="Turnos"

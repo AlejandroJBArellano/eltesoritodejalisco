@@ -1,15 +1,13 @@
-import React from "react";
-import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Receipt, ShoppingBag } from "lucide-react";
+import { describe, expect, it } from "vitest";
 import { ModuleCard } from "../ModuleCard";
 
 describe("ModuleCard Component", () => {
-  it("renders title, description, badge, and link with standard href", () => {
+  it("renders title, badge, and link with standard href", () => {
     render(
       <ModuleCard
         title="Punto de Venta"
-        description="Crear órdenes y procesar pagos."
         href="/pos"
         icon={Receipt}
         badge="Activo"
@@ -19,9 +17,6 @@ describe("ModuleCard Component", () => {
     );
 
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
-    expect(
-      screen.getByText("Crear órdenes y procesar pagos."),
-    ).toBeInTheDocument();
     expect(screen.getByText("Activo")).toBeInTheDocument();
 
     const link = screen.getByRole("link");
@@ -33,7 +28,6 @@ describe("ModuleCard Component", () => {
     render(
       <ModuleCard
         title="Kittn Pickup"
-        description="Portal de pedidos para clientes en línea."
         href="https://mi-restaurante.trykittn.com"
         target="_blank"
         icon={ShoppingBag}

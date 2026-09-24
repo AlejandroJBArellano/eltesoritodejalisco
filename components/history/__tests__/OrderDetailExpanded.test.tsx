@@ -66,12 +66,7 @@ describe("OrderDetailExpanded Component", () => {
   });
 
   it("renders order item details, customer name and notes", () => {
-    render(
-      <OrderDetailExpanded
-        order={mockOrder}
-        initialAuditLogs={[]}
-      />,
-    );
+    render(<OrderDetailExpanded order={mockOrder} initialAuditLogs={[]} />);
 
     expect(screen.getByText("Detalle de la Orden #1001")).toBeDefined();
     expect(screen.getByText("Alejandro")).toBeDefined();
@@ -83,14 +78,8 @@ describe("OrderDetailExpanded Component", () => {
     expect(screen.getAllByText("Producto").length).toBe(2); // Table header + fallback item name
   });
 
-
   it("shows empty state when there are no audit logs", () => {
-    render(
-      <OrderDetailExpanded
-        order={mockOrder}
-        initialAuditLogs={[]}
-      />,
-    );
+    render(<OrderDetailExpanded order={mockOrder} initialAuditLogs={[]} />);
 
     expect(screen.getByText("Sin modificaciones registradas")).toBeDefined();
   });
@@ -247,10 +236,7 @@ describe("OrderDetailExpanded Component", () => {
     ];
 
     render(
-      <OrderDetailExpanded
-        order={mockOrder}
-        initialAuditLogs={sampleLogs}
-      />,
+      <OrderDetailExpanded order={mockOrder} initialAuditLogs={sampleLogs} />,
     );
 
     expect(screen.getByText("Historial de Modificaciones")).toBeDefined();
@@ -406,10 +392,7 @@ describe("OrderDetailExpanded Component", () => {
     ];
 
     render(
-      <OrderDetailExpanded
-        order={mockOrder}
-        initialAuditLogs={adminLogs}
-      />,
+      <OrderDetailExpanded order={mockOrder} initialAuditLogs={adminLogs} />,
     );
 
     // Debe mostrar los productos exactos

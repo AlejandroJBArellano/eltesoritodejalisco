@@ -71,7 +71,9 @@ export async function GET(request: NextRequest) {
     // 2. Propinas Totales y Comisiones de Tarjeta (Payments)
     let paymentsQuery = supabase
       .from("payments")
-      .select("amount, tip_amount, method, terminal_commission_rate, terminal_commission_amount")
+      .select(
+        "amount, tip_amount, method, terminal_commission_rate, terminal_commission_amount",
+      )
       .eq("tenant_id", tenant.id)
       .gte("created_at", startDate.toISOString());
     if (endDate) {

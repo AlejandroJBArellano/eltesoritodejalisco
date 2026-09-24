@@ -66,7 +66,6 @@ function HistoryMainView() {
       {/* MODAL DE CIERRE DE CAJA (0 PROPS) */}
       <FinalizeCutModal />
 
-
       {/* MODAL / CONTENEDOR DE IMPRESIÓN DE TICKET CONGLOMERADO */}
       {showDailySummaryTicket && (
         <div

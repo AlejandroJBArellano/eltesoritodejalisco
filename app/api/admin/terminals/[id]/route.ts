@@ -130,7 +130,8 @@ export async function DELETE(
 
       return NextResponse.json({
         success: true,
-        message: "Terminal desactivada para preservar los registros de pagos pasados.",
+        message:
+          "Terminal desactivada para preservar los registros de pagos pasados.",
         softDeleted: true,
       });
     }

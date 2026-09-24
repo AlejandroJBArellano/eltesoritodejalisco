@@ -21,7 +21,6 @@ export function FinanceSection(props?: FinanceSectionProps) {
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <ModuleCard
           title="Historial"
-          description="Historial de órdenes y cobros."
           href="/history"
           icon={BookOpen}
           badge="Registro"
@@ -30,7 +29,6 @@ export function FinanceSection(props?: FinanceSectionProps) {
         />
         <ModuleCard
           title="Gastos"
-          description="Registro y control de gastos (insumos, sueldos, etc.)"
           href="/gastos"
           icon={ReceiptText}
           badge="Egresos"
@@ -39,7 +37,6 @@ export function FinanceSection(props?: FinanceSectionProps) {
         />
         <ModuleCard
           title="Reportes"
-          description="Ventas y métricas de negocio."
           href="/reports"
           icon={BarChart3}
           themeClass="bg-dark/40 text-text-light/80 border border-border"
@@ -47,7 +44,6 @@ export function FinanceSection(props?: FinanceSectionProps) {
         />
         <ModuleCard
           title="Horas Pico"
-          description="Ventas por hora y detector inteligente de horas pico."
           href="/analytics/hourly"
           icon={Clock}
           badge="Análisis"

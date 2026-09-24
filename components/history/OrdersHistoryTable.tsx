@@ -200,9 +200,7 @@ export function OrdersHistoryTable(props: OrdersHistoryTableProps = {}) {
                     data-testid={`order-expanded-${order.id}`}
                   >
                     <td colSpan={8} className="px-6 py-4">
-                      <OrderDetailExpanded
-                        order={order}
-                      />
+                      <OrderDetailExpanded order={order} />
                     </td>
                   </tr>
                 )}

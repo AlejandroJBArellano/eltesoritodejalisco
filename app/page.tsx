@@ -60,10 +60,10 @@ export default async function Home() {
           .order("current_stock", { ascending: true }),
         isAdmin
           ? supabase
-            .from("orders")
-            .select("id, total, created_at, status, is_paid")
-            .eq("tenant_id", tenant.id)
-            .gte("created_at", todayStartIso)
+              .from("orders")
+              .select("id, total, created_at, status, is_paid")
+              .eq("tenant_id", tenant.id)
+              .gte("created_at", todayStartIso)
           : Promise.resolve({ data: null, error: null }),
       ]);
 
