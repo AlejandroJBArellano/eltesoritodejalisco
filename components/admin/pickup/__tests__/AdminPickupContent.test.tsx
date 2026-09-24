@@ -80,26 +80,22 @@ describe("AdminPickupContent Component", () => {
     );
 
     expect(screen.getByText("Kittn Portal")).toBeInTheDocument();
+    expect(screen.getByText("Pagos con Stripe")).toBeInTheDocument();
+    expect(screen.getByText("Cuenta activa")).toBeInTheDocument();
     expect(
-      screen.getByText("Cobros y Pagos con Stripe Connect"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Cuenta de Stripe Activa & Cobros Habilitados"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /ver saldo y depósitos/i }),
+      screen.getByRole("button", { name: /ver depósitos/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByText("https://tacos-el-pastor.trykittn.com"),
     ).toBeInTheDocument();
-    expect(screen.getByText("Stripe Activo")).toBeInTheDocument();
+    expect(screen.getByText("Activo")).toBeInTheDocument();
     expect(screen.getByText("Listo para compartir")).toBeInTheDocument();
     expect(screen.getByText("Domingo")).toBeInTheDocument();
     expect(screen.getByText("Lunes")).toBeInTheDocument();
     expect(screen.getByText("Martes")).toBeInTheDocument();
   });
 
-  it("calls login-link API when clicking Ver Saldo y Depósitos", async () => {
+  it("calls login-link API when clicking Ver Depósitos", async () => {
     const windowOpenSpy = vi
       .spyOn(window, "open")
       .mockImplementation(() => null);
@@ -116,7 +112,7 @@ describe("AdminPickupContent Component", () => {
     );
 
     const loginBtn = screen.getByRole("button", {
-      name: /ver saldo y depósitos/i,
+      name: /ver depósitos/i,
     });
     fireEvent.click(loginBtn);
 
@@ -153,11 +149,11 @@ describe("AdminPickupContent Component", () => {
     expect(screen.getByText("Inactivo")).toBeInTheDocument();
     expect(screen.getByText("Requiere activar Stripe")).toBeInTheDocument();
     expect(
-      screen.getByText("Conecta tu cuenta bancaria con Stripe"),
+      screen.getByText("Conecta tu cuenta bancaria"),
     ).toBeInTheDocument();
 
     const connectBtn = screen.getByRole("button", {
-      name: /conectar stripe y activar pickup/i,
+      name: /conectar stripe/i,
     });
     expect(connectBtn).toBeInTheDocument();
 
@@ -192,13 +188,10 @@ describe("AdminPickupContent Component", () => {
       />,
     );
 
-    expect(screen.getByText("Verificación Pendiente")).toBeInTheDocument();
-    expect(
-      screen.getByText("Verificación Pendiente en Stripe"),
-    ).toBeInTheDocument();
+    expect(screen.getAllByText("Verificación Pendiente").length).toBeGreaterThanOrEqual(1);
 
     const completeBtn = screen.getByRole("button", {
-      name: /completar registro en stripe/i,
+      name: /completar registro/i,
     });
     expect(completeBtn).toBeInTheDocument();
 

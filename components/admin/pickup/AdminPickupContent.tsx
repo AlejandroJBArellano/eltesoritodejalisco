@@ -198,11 +198,10 @@ export function AdminPickupContent({
               </div>
               <div>
                 <h2 className="text-base font-bold text-white tracking-tight">
-                  Cobros y Pagos con Stripe Connect
+                  Pagos con Stripe
                 </h2>
                 <p className="text-xs text-text-light/60">
-                  Conexión bancaria requerida para procesar pedidos y depósitos
-                  en línea
+                  Recibe pedidos en línea y depósitos a tu cuenta bancaria
                 </p>
               </div>
             </div>
@@ -210,7 +209,7 @@ export function AdminPickupContent({
             {isStripeEnabled ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 self-start sm:self-auto">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                Stripe Activo
+                Activo
               </span>
             ) : hasStripeAccount ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 self-start sm:self-auto">
@@ -237,13 +236,8 @@ export function AdminPickupContent({
                 <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5 sm:mt-0" />
                 <div>
                   <h4 className="text-sm font-bold text-emerald-300">
-                    Cuenta de Stripe Activa & Cobros Habilitados
+                    Cuenta activa
                   </h4>
-                  <p className="text-xs text-emerald-200/70 mt-0.5 leading-relaxed">
-                    Tus clientes ya pueden ordenar y pagar en línea en Kittn
-                    Pickup. Los cobros se depositan directamente en tu cuenta
-                    bancaria.
-                  </p>
                 </div>
               </div>
               <button
@@ -254,7 +248,7 @@ export function AdminPickupContent({
               >
                 <ExternalLink className="h-4 w-4" />
                 <span>
-                  {connectingStripe ? "Cargando..." : "Ver Saldo y Depósitos"}
+                  {connectingStripe ? "Cargando..." : "Ver Depósitos"}
                 </span>
               </button>
             </div>
@@ -264,11 +258,11 @@ export function AdminPickupContent({
                 <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
                 <div>
                   <h4 className="text-sm font-bold text-amber-300">
-                    Verificación Pendiente en Stripe
+                    Verificación Pendiente
                   </h4>
                   <p className="text-xs text-amber-200/70 mt-0.5 leading-relaxed">
-                    Tu cuenta de Stripe requiere información adicional antes de
-                    poder recibir pagos de comensales.
+                    Stripe requiere información adicional para habilitar tus
+                    cobros.
                   </p>
                 </div>
               </div>
@@ -281,7 +275,7 @@ export function AdminPickupContent({
                 <span>
                   {connectingStripe
                     ? "Cargando..."
-                    : "Completar Registro en Stripe"}
+                    : "Completar Registro"}
                 </span>
                 <ArrowRight className="h-4 w-4" />
               </button>
@@ -290,11 +284,11 @@ export function AdminPickupContent({
             <div className="bg-dark/40 border border-border/70 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <h4 className="text-sm font-bold text-text-light">
-                  Conecta tu cuenta bancaria con Stripe
+                  Conecta tu cuenta bancaria
                 </h4>
                 <p className="text-xs text-text-light/60 leading-relaxed">
-                  Configura tu CLABE y datos fiscales para recibir depósitos
-                  directos y activar tu menú en línea de Kittn Pickup.
+                  Configura tus datos bancarios para recibir pagos y activar tu
+                  menú en línea.
                 </p>
               </div>
               <button
@@ -306,7 +300,7 @@ export function AdminPickupContent({
                 <span>
                   {connectingStripe
                     ? "Cargando..."
-                    : "Conectar Stripe y Activar Pickup"}
+                    : "Conectar Stripe"}
                 </span>
                 <ArrowRight className="h-4 w-4" />
               </button>
@@ -488,8 +482,8 @@ export function AdminPickupContent({
                       type="button"
                       onClick={() => handleToggleClosed(index)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border ${day.is_closed
-                          ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                          : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                        : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                         }`}
                     >
                       {day.is_closed ? "Cerrado" : "Abierto"}
