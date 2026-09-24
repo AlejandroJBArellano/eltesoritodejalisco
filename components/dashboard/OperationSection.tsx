@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
 import CollapsibleSection from "@/components/CollapsibleSection";
-import { Receipt, ChefHat, CheckSquare, Clock } from "lucide-react";
-import { ModuleCard } from "./ModuleCard";
 import { useOptionalUser } from "@/components/UserProvider";
+import { CheckSquare, ChefHat, Clock, Receipt } from "lucide-react";
+import { ModuleCard } from "./ModuleCard";
 
 export interface OperationSectionProps {
   isAdmin?: boolean;
@@ -29,7 +28,6 @@ export function OperationSection(props?: OperationSectionProps) {
             title="Punto de Venta"
             href="/pos"
             icon={Receipt}
-            badge="Activo"
             themeClass="bg-dark/40 text-secondary"
             hoverColor="var(--color-secondary)"
           />
@@ -38,7 +36,6 @@ export function OperationSection(props?: OperationSectionProps) {
           title="Sistema de Cocina"
           href="/kitchen"
           icon={ChefHat}
-          badge="Real-time"
           themeClass="bg-primary/10 text-primary"
           hoverColor="var(--color-primary)"
         />
@@ -47,7 +44,6 @@ export function OperationSection(props?: OperationSectionProps) {
             title="Tareas Diarias"
             href="/tareas"
             icon={CheckSquare}
-            badge="Checklist"
             themeClass="bg-primary/10 text-primary"
             hoverColor="var(--color-primary)"
           />
@@ -56,7 +52,6 @@ export function OperationSection(props?: OperationSectionProps) {
           title="Asistencia"
           href="/asistencia"
           icon={Clock}
-          badge="Turnos"
           themeClass="bg-primary/10 text-primary"
           hoverColor="var(--color-primary)"
         />

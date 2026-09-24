@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
 import CollapsibleSection from "@/components/CollapsibleSection";
-import { BookOpen, ReceiptText, BarChart3, Clock } from "lucide-react";
-import { ModuleCard } from "./ModuleCard";
 import { useOptionalUser } from "@/components/UserProvider";
+import { BarChart3, BookOpen, Clock, ReceiptText } from "lucide-react";
+import { ModuleCard } from "./ModuleCard";
 
 export interface FinanceSectionProps {
   isAdmin?: boolean;
@@ -23,7 +22,6 @@ export function FinanceSection(props?: FinanceSectionProps) {
           title="Historial"
           href="/history"
           icon={BookOpen}
-          badge="Registro"
           themeClass="bg-primary/10 text-primary"
           hoverColor="var(--color-primary)"
         />
@@ -31,7 +29,6 @@ export function FinanceSection(props?: FinanceSectionProps) {
           title="Gastos"
           href="/gastos"
           icon={ReceiptText}
-          badge="Egresos"
           themeClass="bg-rose-500/10 text-rose-400"
           hoverColor="#ef4444"
         />
@@ -46,7 +43,6 @@ export function FinanceSection(props?: FinanceSectionProps) {
           title="Horas Pico"
           href="/analytics/hourly"
           icon={Clock}
-          badge="Análisis"
           themeClass="bg-amber-500/10 text-amber-400"
           hoverColor="#f59e0b"
         />

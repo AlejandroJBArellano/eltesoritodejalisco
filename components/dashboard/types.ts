@@ -13,7 +13,6 @@ export interface ModuleCardProps {
   icon: React.ElementType;
   themeClass: string;
   hoverColor: string;
-  badge?: string;
   target?: string;
 }
 

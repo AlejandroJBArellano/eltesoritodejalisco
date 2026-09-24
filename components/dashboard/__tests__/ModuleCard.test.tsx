@@ -10,7 +10,6 @@ describe("ModuleCard Component", () => {
         title="Punto de Venta"
         href="/pos"
         icon={Receipt}
-        badge="Activo"
         themeClass="bg-dark/40 text-secondary"
         hoverColor="var(--color-secondary)"
       />,
