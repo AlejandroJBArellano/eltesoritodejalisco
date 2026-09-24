@@ -64,8 +64,10 @@ export function SettingsPickupSection() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
+              disabled={!initialTenant.stripe_charges_enabled}
               onClick={handleCopyLink}
-              className="flex-1 sm:flex-none px-3.5 py-2 rounded-lg bg-border/40 hover:bg-border/70 text-text-light text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-border/50"
+              title={!initialTenant.stripe_charges_enabled ? "Conecta Stripe para habilitar el portal" : undefined}
+              className="flex-1 sm:flex-none px-3.5 py-2 rounded-lg bg-border/40 hover:bg-border/70 text-text-light text-xs font-bold transition flex items-center justify-center gap-1.5 border border-border/50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {copied ? (
                 <>
@@ -86,15 +88,27 @@ export function SettingsPickupSection() {
               <ShoppingBag className="h-3.5 w-3.5" />
               <span>Configurar Pickup y Horarios</span>
             </Link>
-            <a
-              href={pickupUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-text-light text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-border/50"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              <span>Abrir Tienda</span>
-            </a>
+            {initialTenant.stripe_charges_enabled ? (
+              <a
+                href={pickupUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-text-light text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-border/50"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>Abrir Tienda</span>
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                title="Conecta Stripe para habilitar el portal"
+                className="px-3.5 py-2 rounded-lg bg-white/5 text-text-light/40 text-xs font-bold flex items-center justify-center gap-1.5 cursor-not-allowed border border-border/30"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>Abrir Tienda</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -172,4 +172,33 @@ describe("AdminPickupContent Component", () => {
       await screen.findByText("Horarios actualizados exitosamente."),
     ).toBeInTheDocument();
   });
+
+  it("renders Inactive Stripe banner and disables share buttons when stripe_charges_enabled is false", () => {
+    const inactiveTenant = {
+      ...mockTenant,
+      stripe_charges_enabled: false,
+    };
+
+    render(
+      <AdminPickupContent
+        initialTenant={inactiveTenant}
+        initialHours={mockHours}
+      />,
+    );
+
+    expect(screen.getByText("Inactivo (Requiere Stripe)")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Tu enlace de Kittn Pickup se activará en cuanto vincules tu cuenta de Stripe para procesar cobros en línea.",
+      ),
+    ).toBeInTheDocument();
+
+    const copyBtn = screen.getByRole("button", { name: /copiar enlace/i });
+    const qrBtn = screen.getByRole("button", { name: /código qr/i });
+    const openBtn = screen.getByRole("button", { name: /abrir portal/i });
+
+    expect(copyBtn).toBeDisabled();
+    expect(qrBtn).toBeDisabled();
+    expect(openBtn).toBeDisabled();
+  });
 });

@@ -175,10 +175,28 @@ export function AdminPickupContent({
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-all self-start sm:self-auto"
               >
                 <CreditCard className="w-3.5 h-3.5" />
-                Activar Stripe
+                Inactivo (Requiere Stripe)
               </Link>
             )}
           </div>
+
+          {!isStripeEnabled && (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start sm:items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
+                <p className="text-xs text-amber-200/90 font-medium leading-relaxed">
+                  Tu enlace de Kittn Pickup se activará en cuanto vincules tu cuenta de Stripe para procesar cobros en línea.
+                </p>
+              </div>
+              <Link
+                href="/admin/settings#stripe"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 text-dark font-bold text-xs hover:brightness-110 transition shrink-0 self-start sm:self-auto"
+              >
+                <CreditCard className="w-3.5 h-3.5" />
+                <span>Conectar Stripe</span>
+              </Link>
+            </div>
+          )}
 
           {/* URL & Action buttons */}
           <div className="space-y-4">
@@ -190,8 +208,10 @@ export function AdminPickupContent({
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
+                  disabled={!isStripeEnabled}
                   onClick={handleCopyLink}
-                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-card hover:bg-white/5 text-text-light text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer border border-border"
+                  title={!isStripeEnabled ? "Conecta Stripe para habilitar el portal" : undefined}
+                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-card hover:bg-white/5 text-text-light text-xs font-bold transition flex items-center justify-center gap-2 border border-border disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {copied ? (
                     <>
@@ -208,22 +228,36 @@ export function AdminPickupContent({
 
                 <button
                   type="button"
+                  disabled={!isStripeEnabled}
                   onClick={() => setShowQrModal(true)}
-                  className="px-4 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer border border-primary/25"
+                  title={!isStripeEnabled ? "Conecta Stripe para habilitar el portal" : undefined}
+                  className="px-4 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition flex items-center justify-center gap-2 border border-primary/25 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <QrCode className="h-4 w-4" />
                   <span>Código QR</span>
                 </button>
 
-                <a
-                  href={pickupUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl bg-primary text-dark hover:brightness-110 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span>Abrir Portal</span>
-                </a>
+                {isStripeEnabled ? (
+                  <a
+                    href={pickupUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2.5 rounded-xl bg-primary text-dark hover:brightness-110 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    <span>Abrir Portal</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    title="Conecta Stripe para habilitar el portal"
+                    className="px-4 py-2.5 rounded-xl bg-primary/30 text-dark/60 text-xs font-bold flex items-center justify-center gap-2 cursor-not-allowed"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    <span>Abrir Portal</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>

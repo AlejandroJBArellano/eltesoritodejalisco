@@ -5,6 +5,7 @@ import { SettingsGeneralSection } from "../SettingsGeneralSection";
 import { SettingsFiscalSection } from "../SettingsFiscalSection";
 import { SettingsLoyaltySection } from "../SettingsLoyaltySection";
 import { SettingsBrandingSection } from "../SettingsBrandingSection";
+import { SettingsPickupSection } from "../SettingsPickupSection";
 import { SettingsHeaderActions } from "../SettingsHeaderActions";
 import { SettingsProvider } from "../SettingsContext";
 import type { TenantContextType } from "@/lib/tenant";
@@ -97,6 +98,34 @@ describe("Settings Subcomponents", () => {
     fireEvent.click(presetBtn);
 
     expect(screen.getByDisplayValue("#10B981")).toBeInTheDocument();
+  });
+
+  it("renders SettingsPickupSection when Stripe is active and inactive", () => {
+    const { rerender } = render(
+      <SettingsProvider initialTenant={mockTenant}>
+        <SettingsPickupSection />
+      </SettingsProvider>,
+    );
+
+    expect(screen.getByText("Online")).toBeInTheDocument();
+    expect(screen.getByText("Listo para compartir")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /copiar link/i })).not.toBeDisabled();
+
+    // Inactive state
+    const inactiveTenant = {
+      ...mockTenant,
+      stripe_charges_enabled: false,
+    };
+
+    rerender(
+      <SettingsProvider initialTenant={inactiveTenant}>
+        <SettingsPickupSection />
+      </SettingsProvider>,
+    );
+
+    expect(screen.getByText("Inactivo")).toBeInTheDocument();
+    expect(screen.getByText("Requiere activar Stripe")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /copiar link/i })).toBeDisabled();
   });
 
   it("renders SettingsHeaderActions and displays titles", () => {
