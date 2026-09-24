@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, Clock, Trash2, Loader2, Save, AlertCircle } from "lucide-react";
 import type { EmployeeShift } from "@/components/asistencia/types";
+import { AlertCircle, Clock, Loader2, Save, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export interface ShiftUserOption {
   id: string;
@@ -247,7 +247,7 @@ export function ShiftModal({
           {/* Preset Buttons */}
           <div>
             <label className="block text-[10px] font-black uppercase tracking-wider text-text-light/60 mb-1.5">
-              Atajos Rápidos de Horario
+              Atajos Rápidos
             </label>
             <div className="flex flex-wrap gap-1.5">
               {SHIFT_PRESETS.map((preset) => (
@@ -320,7 +320,7 @@ export function ShiftModal({
           {/* Notes */}
           <div>
             <label className="block text-[11px] font-black uppercase tracking-wider text-text-light/60 mb-1.5">
-              Notas / Instrucciones (Opcional)
+              Notas (opcional)
             </label>
             <textarea
               rows={2}

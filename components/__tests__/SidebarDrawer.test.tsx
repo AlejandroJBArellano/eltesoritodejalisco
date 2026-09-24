@@ -60,19 +60,20 @@ describe("SidebarDrawer Component", () => {
 
     // Groups
     expect(screen.getByText("Operación Diaria")).toBeInTheDocument();
-    expect(screen.getByText("Gestión de Equipo")).toBeInTheDocument();
-    expect(screen.getByText("Catálogo y Clientes")).toBeInTheDocument();
+    expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
     expect(screen.getByText("Finanzas y Reportes")).toBeInTheDocument();
-    expect(screen.getByText("Configuración")).toBeInTheDocument();
+    expect(screen.getAllByText("Configuración").length).toBeGreaterThanOrEqual(1);
 
     // Key links
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
-    expect(screen.getByText("Sistema de Cocina")).toBeInTheDocument();
-    expect(screen.getByText("Colaboradores y Roles")).toBeInTheDocument();
-    expect(screen.getByText("Horarios y Turnos")).toBeInTheDocument();
-    expect(screen.getByText("Control de Tareas")).toBeInTheDocument();
-    expect(screen.getByText("Portal Kittn Pickup")).toBeInTheDocument();
-    expect(screen.getByText("Configuración General")).toBeInTheDocument();
+    expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
+    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
+    expect(screen.getByText("Registrar Gasto")).toBeInTheDocument();
+    expect(screen.getByText("Gestión de Equipo")).toBeInTheDocument();
+    expect(screen.getByText("Menú e Inventario")).toBeInTheDocument();
+    expect(screen.getByText("Clientes")).toBeInTheDocument();
+    expect(screen.getByText("Kittn Portal")).toBeInTheDocument();
+    expect(screen.getByText("Reportes")).toBeInTheDocument();
     expect(screen.getByText("Admin User")).toBeInTheDocument();
     expect(screen.getByText("ADMIN")).toBeInTheDocument();
   });
@@ -141,17 +142,16 @@ describe("SidebarDrawer Component", () => {
     render(<SidebarDrawer isOpen={true} onClose={onCloseMock} />);
 
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
-    expect(screen.getByText("Asistencia Diaria")).toBeInTheDocument();
-    expect(screen.queryByText("Colaboradores y Roles")).not.toBeInTheDocument();
-    expect(screen.queryByText("Control de Gastos")).not.toBeInTheDocument();
-    expect(screen.queryByText("Configuración General")).not.toBeInTheDocument();
+    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
+    expect(screen.queryByText("Gestión de Equipo")).not.toBeInTheDocument();
+    expect(screen.queryByText("Configuración")).not.toBeInTheDocument();
   });
 
   it("highlights active link properly", () => {
     vi.mocked(usePathname).mockReturnValue("/admin/users/list");
     render(<SidebarDrawer isOpen={true} onClose={onCloseMock} />);
 
-    const teamLink = screen.getByText("Colaboradores y Roles").closest("a");
+    const teamLink = screen.getByText("Gestión de Equipo").closest("a");
     expect(teamLink?.className).toContain("text-primary");
   });
 });

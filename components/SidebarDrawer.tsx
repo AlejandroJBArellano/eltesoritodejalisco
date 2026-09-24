@@ -5,14 +5,10 @@ import { useOptionalUser } from "@/components/UserProvider";
 import {
   Activity,
   BarChart3,
-  CalendarDays,
   CheckSquare,
   ChefHat,
   ChevronRight,
-  ClipboardCheck,
-  Clock,
   LayoutDashboard,
-  Package,
   Receipt,
   ReceiptText,
   Settings,
@@ -116,71 +112,48 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
         },
         {
           href: "/kitchen",
-          label: "Sistema de Cocina",
+          label: "Monitor de Cocina",
           icon: ChefHat,
           visible: canAccessKitchen,
         },
         {
-          href: "/asistencia",
-          label: "Asistencia Diaria",
-          icon: Clock,
+          href: "/tareas",
+          label: "Tareas y Asistencia",
+          icon: CheckSquare,
           visible: true,
         },
         {
-          href: "/tareas",
-          label: "Tareas Diarias",
-          icon: CheckSquare,
-          visible: true,
+          href: "/gastos",
+          label: "Registrar Gasto",
+          icon: TrendingDown,
+          visible: canAccessExpenses || isAdmin,
         },
       ],
     },
     {
-      title: "Gestión de Equipo",
+      title: "Gestión y Clientes",
       items: [
         {
           href: "/admin/users/list",
-          label: "Colaboradores y Roles",
+          label: "Gestión de Equipo",
           icon: Users,
           visible: isAdmin,
         },
         {
-          href: "/admin/users/horarios",
-          label: "Horarios y Turnos",
-          icon: CalendarDays,
-          visible: isAdmin,
-        },
-        {
-          href: "/admin/users/tareas",
-          label: "Control de Tareas",
-          icon: ClipboardCheck,
-          visible: isAdmin,
-        },
-      ],
-    },
-    {
-      title: "Catálogo y Clientes",
-      items: [
-        {
           href: "/menu",
-          label: "Gestión de Menú",
+          label: "Menú e Inventario",
           icon: UtensilsCrossed,
-          visible: canAccessMenu,
-        },
-        {
-          href: "/inventario",
-          label: "Inventario e Insumos",
-          icon: Package,
-          visible: canAccessInventory,
+          visible: canAccessMenu || canAccessInventory,
         },
         {
           href: "/customers",
-          label: "Clientes y Fidelidad",
+          label: "Clientes",
           icon: UserCheck,
           visible: canAccessCustomers,
         },
         {
           href: "/admin/pickup",
-          label: "Portal Kittn Pickup",
+          label: "Kittn Portal",
           icon: ShoppingBag,
           visible: isAdmin,
         },
@@ -190,26 +163,20 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
       title: "Finanzas y Reportes",
       items: [
         {
-          href: "/history",
-          label: "Historial de Órdenes",
-          icon: ReceiptText,
-          visible: canAccessReports || !isWaiter,
-        },
-        {
-          href: "/gastos",
-          label: "Control de Gastos",
-          icon: TrendingDown,
-          visible: canAccessExpenses || isAdmin,
-        },
-        {
           href: "/reports",
-          label: "Reportes de Ventas",
+          label: "Reportes",
           icon: BarChart3,
           visible: canAccessReports,
         },
         {
+          href: "/history",
+          label: "Historial",
+          icon: ReceiptText,
+          visible: canAccessReports || !isWaiter,
+        },
+        {
           href: "/analytics/hourly",
-          label: "Detector de Horas Pico",
+          label: "Horas Pico",
           icon: Activity,
           visible: canAccessReports,
         },
@@ -220,7 +187,7 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
       items: [
         {
           href: "/admin/settings",
-          label: "Configuración General",
+          label: "Configuración",
           icon: Settings,
           visible: isAdmin,
         },
@@ -328,6 +295,8 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                     const Icon = item.icon;
                     const isActive =
                       pathname === item.href ||
+                      (item.href === "/admin/users/list" &&
+                        pathname.startsWith("/admin/users")) ||
                       (item.href !== "/" && pathname.startsWith(item.href));
 
                     return (
@@ -369,6 +338,11 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                 <span className="text-xs font-bold text-text-light truncate">
                   {user.profile.full_name || user.profile.email}
                 </span>
+                {user.profile.role && (
+                  <span className="text-[10px] font-mono text-text-light/50 uppercase">
+                    {user.profile.role}
+                  </span>
+                )}
               </div>
             </div>
           </div>

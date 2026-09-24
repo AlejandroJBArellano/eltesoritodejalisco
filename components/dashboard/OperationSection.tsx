@@ -2,7 +2,7 @@
 
 import CollapsibleSection from "@/components/CollapsibleSection";
 import { useOptionalUser } from "@/components/UserProvider";
-import { CheckSquare, ChefHat, Clock, Receipt } from "lucide-react";
+import { CheckSquare, ChefHat, Receipt, TrendingDown } from "lucide-react";
 import { ModuleCard } from "./ModuleCard";
 
 export interface OperationSectionProps {
@@ -19,6 +19,7 @@ export function OperationSection(props?: OperationSectionProps) {
 
   const canAccessPOS = isAdmin || isWaiter;
   const canAccessTasks = isAdmin || isWaiter || isInventory;
+  const canAccessExpenses = isAdmin || isWaiter;
 
   return (
     <CollapsibleSection title="Operación Diaria" dotColorClass="bg-primary">
@@ -33,7 +34,7 @@ export function OperationSection(props?: OperationSectionProps) {
           />
         )}
         <ModuleCard
-          title="Sistema de Cocina"
+          title="Monitor de Cocina"
           href="/kitchen"
           icon={ChefHat}
           themeClass="bg-primary/10 text-primary"
@@ -41,20 +42,22 @@ export function OperationSection(props?: OperationSectionProps) {
         />
         {canAccessTasks && (
           <ModuleCard
-            title="Tareas Diarias"
+            title="Tareas y Asistencia"
             href="/tareas"
             icon={CheckSquare}
             themeClass="bg-primary/10 text-primary"
             hoverColor="var(--color-primary)"
           />
         )}
-        <ModuleCard
-          title="Asistencia"
-          href="/asistencia"
-          icon={Clock}
-          themeClass="bg-primary/10 text-primary"
-          hoverColor="var(--color-primary)"
-        />
+        {canAccessExpenses && (
+          <ModuleCard
+            title="Registrar Gasto"
+            href="/gastos"
+            icon={TrendingDown}
+            themeClass="bg-rose-500/10 text-rose-400"
+            hoverColor="#ef4444"
+          />
+        )}
       </div>
     </CollapsibleSection>
   );

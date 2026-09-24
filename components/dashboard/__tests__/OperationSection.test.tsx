@@ -21,9 +21,9 @@ describe("OperationSection Component", () => {
 
     expect(screen.getByText("Operación Diaria")).toBeInTheDocument();
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
-    expect(screen.getByText("Sistema de Cocina")).toBeInTheDocument();
-    expect(screen.getByText("Tareas Diarias")).toBeInTheDocument();
-    expect(screen.getByText("Asistencia")).toBeInTheDocument();
+    expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
+    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
+    expect(screen.getByText("Registrar Gasto")).toBeInTheDocument();
   });
 
   it("renders all operation cards with 0-props when wrapped in UserProvider", () => {
@@ -35,37 +35,38 @@ describe("OperationSection Component", () => {
 
     expect(screen.getByText("Operación Diaria")).toBeInTheDocument();
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
-    expect(screen.getByText("Tareas Diarias")).toBeInTheDocument();
+    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
+    expect(screen.getByText("Registrar Gasto")).toBeInTheDocument();
   });
 
   it("renders all operation cards when isWaiter is true", () => {
     render(<OperationSection isAdmin={false} isWaiter={true} />);
 
     expect(screen.getByText("Punto de Venta")).toBeInTheDocument();
-    expect(screen.getByText("Tareas Diarias")).toBeInTheDocument();
-    expect(screen.getByText("Sistema de Cocina")).toBeInTheDocument();
-    expect(screen.getByText("Asistencia")).toBeInTheDocument();
+    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
+    expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
+    expect(screen.getByText("Registrar Gasto")).toBeInTheDocument();
   });
 
-  it("hides POS and Tareas Diarias when user is not admin, waiter nor inventory", () => {
+  it("hides POS, Tareas and Gasto when user is not admin, waiter nor inventory", () => {
     render(
       <OperationSection isAdmin={false} isWaiter={false} isInventory={false} />,
     );
 
     expect(screen.queryByText("Punto de Venta")).not.toBeInTheDocument();
-    expect(screen.queryByText("Tareas Diarias")).not.toBeInTheDocument();
-    expect(screen.getByText("Sistema de Cocina")).toBeInTheDocument();
-    expect(screen.getByText("Asistencia")).toBeInTheDocument();
+    expect(screen.queryByText("Tareas y Asistencia")).not.toBeInTheDocument();
+    expect(screen.queryByText("Registrar Gasto")).not.toBeInTheDocument();
+    expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
   });
 
-  it("shows Tareas Diarias but hides POS when isInventory is true", () => {
+  it("shows Tareas y Asistencia but hides POS and Gasto when isInventory is true", () => {
     render(
       <OperationSection isAdmin={false} isWaiter={false} isInventory={true} />,
     );
 
     expect(screen.queryByText("Punto de Venta")).not.toBeInTheDocument();
-    expect(screen.getByText("Tareas Diarias")).toBeInTheDocument();
-    expect(screen.getByText("Sistema de Cocina")).toBeInTheDocument();
-    expect(screen.getByText("Asistencia")).toBeInTheDocument();
+    expect(screen.queryByText("Registrar Gasto")).not.toBeInTheDocument();
+    expect(screen.getByText("Tareas y Asistencia")).toBeInTheDocument();
+    expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
   });
 });

@@ -53,7 +53,7 @@ export const ROLE_PERMISSIONS: Record<
   }
 > = {
   ADMIN: {
-    title: "Administrador (ADMIN)",
+    title: "Administrador",
     subtitle: "Acceso total a todos los módulos y configuraciones del sistema",
     color: "text-primary",
     badgeBg: "bg-primary/10",
@@ -69,7 +69,7 @@ export const ROLE_PERMISSIONS: Record<
     restrictions: [],
   },
   MANAGER: {
-    title: "Gerente (MANAGER)",
+    title: "Gerente",
     subtitle: "Gestión operativa, inventarios, tareas y cortes de caja",
     color: "text-emerald-400",
     badgeBg: "bg-emerald-500/10",
@@ -84,7 +84,7 @@ export const ROLE_PERMISSIONS: Record<
     restrictions: ["No puede eliminar otros administradores"],
   },
   WAITER: {
-    title: "Mesero (WAITER)",
+    title: "Mesero",
     subtitle: "Punto de venta (POS), toma de pedidos y atención a clientes",
     color: "text-amber-400",
     badgeBg: "bg-amber-500/10",
@@ -103,7 +103,7 @@ export const ROLE_PERMISSIONS: Record<
     ],
   },
   CHEF: {
-    title: "Cocinero / Chef (CHEF)",
+    title: "Cocinero",
     subtitle:
       "Pantalla KDS de cocina, preparación de pedidos y tareas de cocina",
     color: "text-primary",
@@ -122,7 +122,7 @@ export const ROLE_PERMISSIONS: Record<
     ],
   },
   INVENTORY: {
-    title: "Inventario / Almacén (INVENTORY)",
+    title: "Inventario",
     subtitle:
       "Control de stock, registro de entradas, mermas y catálogo de insumos",
     color: "text-teal-400",
@@ -449,11 +449,10 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           <button
             type="button"
             onClick={() => setActiveTab("team")}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === "team"
-                ? "bg-primary/15 text-primary border border-primary/30"
-                : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
-            }`}
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${activeTab === "team"
+              ? "bg-primary/15 text-primary border border-primary/30"
+              : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
+              }`}
           >
             <Users className="h-4 w-4" />
             <span>Equipo de Trabajo ({profiles.length})</span>
@@ -462,11 +461,10 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
           <button
             type="button"
             onClick={() => setActiveTab("roles")}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === "roles"
-                ? "bg-primary/15 text-primary border border-primary/30"
-                : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
-            }`}
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${activeTab === "roles"
+              ? "bg-primary/15 text-primary border border-primary/30"
+              : "text-text-light/60 hover:text-white hover:bg-white/5 border border-transparent"
+              }`}
           >
             <ShieldCheck className="h-4 w-4" />
             <span>Roles y Permisos</span>
@@ -735,11 +733,10 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
                                 onClick={() =>
                                   handleDelete(p.id, p.full_name || p.email)
                                 }
-                                className={`rounded-lg border p-2 transition-all text-xs font-black cursor-pointer ${
-                                  deleteArmedId === p.id
-                                    ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
-                                    : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
-                                }`}
+                                className={`rounded-lg border p-2 transition-all text-xs font-black cursor-pointer ${deleteArmedId === p.id
+                                  ? "bg-red-500/30 border-red-500/50 text-red-300 px-2"
+                                  : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                                  }`}
                                 title={
                                   deleteArmedId === p.id
                                     ? "Confirmar eliminación"
@@ -859,13 +856,11 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
               className="w-full rounded-lg border border-border bg-dark/40 px-4 py-2.5 text-sm font-bold text-text-light outline-none focus:border-primary cursor-pointer"
             >
               <optgroup label="Roles del Sistema">
-                <option value="WAITER">Mesero (WAITER)</option>
-                <option value="CHEF">Cocinero / Chef (CHEF)</option>
-                <option value="INVENTORY">
-                  Inventario / Almacén (INVENTORY)
-                </option>
-                <option value="MANAGER">Gerente (MANAGER)</option>
-                <option value="ADMIN">Administrador (ADMIN)</option>
+                <option value="WAITER">Mesero</option>
+                <option value="CHEF">Cocinero</option>
+                <option value="INVENTORY">Inventario</option>
+                <option value="MANAGER">Gerente</option>
+                <option value="ADMIN">Administrador</option>
               </optgroup>
               {availableRoles.some((r) => !r.is_system) && (
                 <optgroup label="Roles Personalizados">
@@ -894,28 +889,28 @@ export function AdminUsersContent({ initialProfiles }: AdminUsersContentProps) {
               ?.system_slug === "ADMIN" ||
             availableRoles.find((r) => r.id === selectedFormRole)
               ?.system_slug === "MANAGER") && (
-            <div>
-              <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider block mb-1">
-                PIN de Autorización (4 a 6 dígitos)
-              </label>
-              <div className="relative">
-                <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400" />
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  name="pin"
-                  defaultValue="1234"
-                  maxLength={6}
-                  className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono"
-                  placeholder="1234"
-                />
+              <div>
+                <label className="text-xs font-bold text-text-light/50 uppercase tracking-wider block mb-1">
+                  PIN de Autorización (4 a 6 dígitos)
+                </label>
+                <div className="relative">
+                  <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400" />
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    name="pin"
+                    defaultValue="1234"
+                    maxLength={6}
+                    className="w-full rounded-lg border border-border bg-dark/40 pl-10 pr-4 py-2.5 text-sm text-text-light outline-none focus:border-primary font-mono"
+                    placeholder="1234"
+                  />
+                </div>
+                <p className="text-[11px] text-text-light/40 mt-1">
+                  PIN individual para autorizar descuentos, cancelaciones y
+                  reaperturas a meseros.
+                </p>
               </div>
-              <p className="text-[11px] text-text-light/40 mt-1">
-                PIN individual para autorizar descuentos, cancelaciones y
-                reaperturas a meseros.
-              </p>
-            </div>
-          )}
+            )}
 
           {/* Resumen dinámico del rol seleccionado */}
           <div

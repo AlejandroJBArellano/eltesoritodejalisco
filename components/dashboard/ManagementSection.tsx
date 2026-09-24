@@ -4,12 +4,8 @@ import CollapsibleSection from "@/components/CollapsibleSection";
 import { useOptionalTenant } from "@/components/TenantProvider";
 import { useOptionalUser } from "@/components/UserProvider";
 import {
-  ClipboardCheck,
-  Clock,
-  Package,
   Settings,
   ShoppingBag,
-  UserCog,
   Users,
   UtensilsCrossed,
 } from "lucide-react";
@@ -48,6 +44,33 @@ export function ManagementSection(props?: ManagementSectionProps) {
       dotColorClass="bg-emerald-500"
     >
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
+        {isAdmin && (
+          <ModuleCard
+            title="Gestión de Equipo"
+            href="/admin/users/list"
+            icon={Users}
+            themeClass="bg-primary/10 text-primary"
+            hoverColor="var(--color-primary)"
+          />
+        )}
+        {(isAdmin || isInventory) && (
+          <ModuleCard
+            title="Menú e Inventario"
+            href={isAdmin ? "/menu" : "/inventario"}
+            icon={UtensilsCrossed}
+            themeClass="bg-primary/10 text-primary"
+            hoverColor="var(--color-primary)"
+          />
+        )}
+        {(isAdmin || isWaiter) && (
+          <ModuleCard
+            title="Clientes"
+            href="/customers"
+            icon={Users}
+            themeClass="bg-emerald-500/10 text-emerald-400"
+            hoverColor="var(--color-success)"
+          />
+        )}
         {(isAdmin || isWaiter) && (
           <ModuleCard
             title="Kittn Portal"
@@ -66,60 +89,6 @@ export function ManagementSection(props?: ManagementSectionProps) {
                 : "bg-dark/40 text-text-light/50 border border-border"
             }
             hoverColor={isStripeEnabled ? "#10b981" : "var(--color-primary)"}
-          />
-        )}
-        {(isAdmin || isWaiter) && (
-          <ModuleCard
-            title="Clientes"
-            href="/customers"
-            icon={Users}
-            themeClass="bg-emerald-500/10 text-emerald-400"
-            hoverColor="var(--color-success)"
-          />
-        )}
-        {isAdmin && (
-          <ModuleCard
-            title="Gestión de Menú"
-            href="/menu"
-            icon={UtensilsCrossed}
-            themeClass="bg-primary/10 text-primary"
-            hoverColor="var(--color-primary)"
-          />
-        )}
-        {(isAdmin || isInventory) && (
-          <ModuleCard
-            title="Inventario"
-            href="/inventario"
-            icon={Package}
-            themeClass="bg-emerald-500/10 text-emerald-400"
-            hoverColor="#10b981"
-          />
-        )}
-        {isAdmin && (
-          <ModuleCard
-            title="Colaboradores y Roles"
-            href="/admin/users/list"
-            icon={UserCog}
-            themeClass="bg-primary/10 text-primary"
-            hoverColor="var(--color-primary)"
-          />
-        )}
-        {isAdmin && (
-          <ModuleCard
-            title="Horarios y Turnos"
-            href="/admin/users/horarios"
-            icon={Clock}
-            themeClass="bg-primary/10 text-primary"
-            hoverColor="var(--color-primary)"
-          />
-        )}
-        {isAdmin && (
-          <ModuleCard
-            title="Control de Tareas"
-            href="/admin/users/tareas"
-            icon={ClipboardCheck}
-            themeClass="bg-amber-500/10 text-amber-400"
-            hoverColor="#f59e0b"
           />
         )}
         {isAdmin && (
