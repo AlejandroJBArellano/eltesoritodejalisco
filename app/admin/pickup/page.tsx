@@ -1,7 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getProfile } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getTenantContext } from "@/lib/tenant";
+import { getTenantContext, invalidateTenantCache } from "@/lib/tenant";
+import { stripe } from "@/lib/stripe";
 import {
   AdminPickupContent,
   type DbBusinessHours,
@@ -21,6 +22,36 @@ export default async function AdminPickupPage() {
   }
 
   const tenant = await getTenantContext();
+
+  // Auto-sync Stripe Connect account status directly from Stripe API on load
+  if (
+    tenant.stripe_account_id &&
+    (!tenant.stripe_charges_enabled || !tenant.stripe_details_submitted)
+  ) {
+    try {
+      const account = await stripe.accounts.retrieve(tenant.stripe_account_id);
+      if (
+        account.charges_enabled !== tenant.stripe_charges_enabled ||
+        account.details_submitted !== tenant.stripe_details_submitted
+      ) {
+        const supabaseAdmin = createAdminClient();
+        await supabaseAdmin
+          .from("tenants")
+          .update({
+            stripe_charges_enabled: account.charges_enabled,
+            stripe_details_submitted: account.details_submitted,
+          })
+          .eq("id", tenant.id);
+
+        tenant.stripe_charges_enabled = account.charges_enabled;
+        tenant.stripe_details_submitted = account.details_submitted;
+        invalidateTenantCache(tenant.slug);
+      }
+    } catch (err) {
+      console.error("Error auto-syncing Stripe account status:", err);
+    }
+  }
+
   const supabase = createAdminClient();
 
   const { data: hoursData, error: hoursError } = await supabase

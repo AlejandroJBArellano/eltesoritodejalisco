@@ -15,10 +15,12 @@ import {
   Globe,
   CreditCard,
   Download,
+  ArrowRight,
 } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
 import { Modal } from "@/components/ui/Modal";
+import { StripeEmbeddedOnboardingModal } from "@/components/admin/settings/StripeEmbeddedOnboardingModal";
 
 export interface DbBusinessHours {
   id: string;
@@ -33,7 +35,9 @@ export interface AdminPickupContentProps {
     id: string;
     slug?: string | null;
     name?: string | null;
+    stripe_account_id?: string | null;
     stripe_charges_enabled?: boolean | null;
+    stripe_details_submitted?: boolean | null;
   };
   initialHours: DbBusinessHours[];
 }
@@ -52,8 +56,12 @@ export function AdminPickupContent({
   initialTenant,
   initialHours,
 }: AdminPickupContentProps) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
+  const [connectingStripe, setConnectingStripe] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
   const [hoursList, setHoursList] = useState<DbBusinessHours[]>(initialHours);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +70,7 @@ export function AdminPickupContent({
   const slug = initialTenant.slug || "demo";
   const pickupUrl = `https://${slug}.trykittn.com`;
   const isStripeEnabled = Boolean(initialTenant.stripe_charges_enabled);
+  const hasStripeAccount = Boolean(initialTenant.stripe_account_id);
 
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(
     pickupUrl,
@@ -71,6 +80,39 @@ export function AdminPickupContent({
     navigator.clipboard.writeText(pickupUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenStripeModal = () => {
+    setIsStripeModalOpen(true);
+  };
+
+  const handleCloseStripeModal = () => {
+    setIsStripeModalOpen(false);
+  };
+
+  const handleStripeOnboardingSuccess = () => {
+    router.refresh();
+  };
+
+  const handleStripeLogin = async () => {
+    try {
+      setConnectingStripe(true);
+      setStripeError(null);
+      const res = await fetch("/api/stripe/connect/login-link", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.open(data.url, "_blank");
+      } else {
+        setStripeError(data.error || "Error al abrir panel de Stripe");
+      }
+    } catch (err) {
+      console.error(err);
+      setStripeError("Error al conectar con Stripe");
+    } finally {
+      setConnectingStripe(false);
+    }
   };
 
   const handleToggleClosed = (index: number) => {
@@ -140,26 +182,26 @@ export function AdminPickupContent({
   return (
     <div className="min-h-screen bg-background text-text-light pb-16">
       <PageHeader
-        title="Kittn Pickup & Portal Online"
-        subtitle="Configuración del menú digital para llevar y horarios de atención al público"
+        title="Kittn Pickup & Horarios"
+        subtitle="Configuración de pagos con Stripe, menú digital para llevar y horarios de atención"
         badgeColor="bg-primary"
         icon={<ShoppingBag className="h-5 w-5 text-primary" />}
       />
 
       <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
-        {/* Section 1: Kittn Pickup Link & Status */}
+        {/* Section 1: Stripe Integration & Onboarding */}
         <div className="rounded-2xl bg-card border border-border/80 p-6 sm:p-8 space-y-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border/80 pb-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary">
-                <Globe className="w-5 h-5" />
+                <CreditCard className="w-5 h-5" />
               </div>
               <div>
                 <h2 className="text-base font-bold text-white tracking-tight">
-                  Portal Web para Clientes
+                  Cobros y Pagos con Stripe Connect
                 </h2>
                 <p className="text-xs text-text-light/60">
-                  Enlace directo para que tus clientes ordenen y paguen en línea
+                  Conexión bancaria requerida para procesar pedidos y depósitos en línea
                 </p>
               </div>
             </div>
@@ -169,34 +211,121 @@ export function AdminPickupContent({
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                 Stripe Activo
               </span>
+            ) : hasStripeAccount ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 self-start sm:self-auto">
+                <span className="h-2 w-2 rounded-full bg-amber-400" />
+                Verificación Pendiente
+              </span>
             ) : (
-              <Link
-                href="/admin/settings#stripe"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-all self-start sm:self-auto"
-              >
-                <CreditCard className="w-3.5 h-3.5" />
-                Inactivo (Requiere Stripe)
-              </Link>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-dark/40 text-text-light/40 border border-border self-start sm:self-auto">
+                Inactivo
+              </span>
             )}
           </div>
 
-          {!isStripeEnabled && (
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-start sm:items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
-                <p className="text-xs text-amber-200/90 font-medium leading-relaxed">
-                  Tu enlace de Kittn Pickup se activará en cuanto vincules tu cuenta de Stripe para procesar cobros en línea.
-                </p>
-              </div>
-              <Link
-                href="/admin/settings#stripe"
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 text-dark font-bold text-xs hover:brightness-110 transition shrink-0 self-start sm:self-auto"
-              >
-                <CreditCard className="w-3.5 h-3.5" />
-                <span>Conectar Stripe</span>
-              </Link>
+          {stripeError && (
+            <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs font-bold text-rose-400 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{stripeError}</span>
             </div>
           )}
+
+          {isStripeEnabled ? (
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5 sm:mt-0" />
+                <div>
+                  <h4 className="text-sm font-bold text-emerald-300">
+                    Cuenta de Stripe Activa & Cobros Habilitados
+                  </h4>
+                  <p className="text-xs text-emerald-200/70 mt-0.5 leading-relaxed">
+                    Tus clientes ya pueden ordenar y pagar en línea en Kittn Pickup. Los cobros se depositan directamente en tu cuenta bancaria.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleStripeLogin}
+                disabled={connectingStripe}
+                className="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold rounded-xl border border-emerald-500/40 transition flex items-center gap-2 shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                <ExternalLink className="h-4 w-4" />
+                <span>{connectingStripe ? "Cargando..." : "Ver Saldo y Depósitos"}</span>
+              </button>
+            </div>
+          ) : hasStripeAccount ? (
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
+                <div>
+                  <h4 className="text-sm font-bold text-amber-300">
+                    Verificación Pendiente en Stripe
+                  </h4>
+                  <p className="text-xs text-amber-200/70 mt-0.5 leading-relaxed">
+                    Tu cuenta de Stripe requiere información adicional antes de poder recibir pagos de comensales.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenStripeModal}
+                disabled={connectingStripe}
+                className="px-4 py-2.5 bg-amber-400 text-dark text-xs font-bold rounded-xl hover:brightness-110 transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md disabled:opacity-50"
+              >
+                <span>{connectingStripe ? "Cargando..." : "Completar Registro en Stripe"}</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="bg-dark/40 border border-border/70 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-text-light">
+                  Conecta tu cuenta bancaria con Stripe
+                </h4>
+                <p className="text-xs text-text-light/60 leading-relaxed">
+                  Configura tu CLABE y datos fiscales para recibir depósitos directos y activar tu menú en línea de Kittn Pickup.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenStripeModal}
+                disabled={connectingStripe}
+                className="px-5 py-2.5 bg-primary text-dark font-black text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md disabled:opacity-50"
+              >
+                <span>{connectingStripe ? "Cargando..." : "Conectar Stripe y Activar Pickup"}</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Section 2: Kittn Pickup Link & Status */}
+        <div className="rounded-2xl bg-card border border-border/80 p-6 sm:p-8 space-y-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border/80 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary">
+                <Globe className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-white tracking-tight">
+                  Enlace del Menú Digital
+                </h2>
+                <p className="text-xs text-text-light/60">
+                  Enlace directo para que tus clientes ordenen y paguen en línea
+                </p>
+              </div>
+            </div>
+
+            {isStripeEnabled ? (
+              <span className="text-[11px] font-bold text-emerald-400">
+                Listo para compartir
+              </span>
+            ) : (
+              <span className="text-[11px] font-bold text-amber-400/80">
+                Requiere activar Stripe
+              </span>
+            )}
+          </div>
 
           {/* URL & Action buttons */}
           <div className="space-y-4">
@@ -263,7 +392,7 @@ export function AdminPickupContent({
           </div>
         </div>
 
-        {/* Section 2: Horarios de Atención del Portal */}
+        {/* Section 3: Horarios de Atención del Portal */}
         <form
           onSubmit={handleSave}
           className="rounded-2xl bg-card border border-border/80 p-6 sm:p-8 space-y-6 shadow-sm"
@@ -416,6 +545,15 @@ export function AdminPickupContent({
             </a>
           </div>
         </Modal>
+      )}
+
+      {/* Stripe Embedded Onboarding Modal */}
+      {isStripeModalOpen && (
+        <StripeEmbeddedOnboardingModal
+          isOpen={isStripeModalOpen}
+          onClose={handleCloseStripeModal}
+          onSuccess={handleStripeOnboardingSuccess}
+        />
       )}
     </div>
   );

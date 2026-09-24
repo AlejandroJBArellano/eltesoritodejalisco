@@ -1,3 +1,4 @@
+import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import {
@@ -5,11 +6,33 @@ import {
   type DbBusinessHours,
 } from "../AdminPickupContent";
 
+// Mock next/navigation
+const mockRefresh = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    refresh: mockRefresh,
+  }),
+}));
+
+// Mock Stripe Connect JS
+vi.mock("@stripe/connect-js", () => ({
+  loadConnectAndInitialize: vi.fn().mockReturnValue({}),
+}));
+
+vi.mock("@stripe/react-connect-js", () => ({
+  ConnectComponentsProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  ConnectAccountOnboarding: () => <div>Stripe Onboarding Embedded</div>,
+}));
+
 const mockTenant = {
   id: "t-1",
   name: "Tacos El Pastor",
   slug: "tacos-el-pastor",
+  stripe_account_id: "acct_123",
   stripe_charges_enabled: true,
+  stripe_details_submitted: true,
 };
 
 const mockHours: DbBusinessHours[] = [
@@ -39,6 +62,7 @@ const mockHours: DbBusinessHours[] = [
 describe("AdminPickupContent Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_123";
     global.fetch = vi.fn();
     Object.assign(navigator, {
       clipboard: {
@@ -47,7 +71,7 @@ describe("AdminPickupContent Component", () => {
     });
   });
 
-  it("renders pickup portal link, Stripe status, and weekly hours list", () => {
+  it("renders active Stripe status, pickup link, and weekly hours list", () => {
     render(
       <AdminPickupContent
         initialTenant={mockTenant}
@@ -56,16 +80,128 @@ describe("AdminPickupContent Component", () => {
     );
 
     expect(
-      screen.getByText("Kittn Pickup & Portal Online"),
+      screen.getByText("Kittn Pickup & Horarios"),
     ).toBeInTheDocument();
-    expect(screen.getByText("Portal Web para Clientes")).toBeInTheDocument();
+    expect(
+      screen.getByText("Cobros y Pagos con Stripe Connect"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Cuenta de Stripe Activa & Cobros Habilitados"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /ver saldo y depósitos/i }),
+    ).toBeInTheDocument();
     expect(
       screen.getByText("https://tacos-el-pastor.trykittn.com"),
     ).toBeInTheDocument();
     expect(screen.getByText("Stripe Activo")).toBeInTheDocument();
+    expect(screen.getByText("Listo para compartir")).toBeInTheDocument();
     expect(screen.getByText("Domingo")).toBeInTheDocument();
     expect(screen.getByText("Lunes")).toBeInTheDocument();
     expect(screen.getByText("Martes")).toBeInTheDocument();
+  });
+
+  it("calls login-link API when clicking Ver Saldo y Depósitos", async () => {
+    const windowOpenSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ url: "https://connect.stripe.com/express" }),
+    } as any);
+
+    render(
+      <AdminPickupContent
+        initialTenant={mockTenant}
+        initialHours={mockHours}
+      />,
+    );
+
+    const loginBtn = screen.getByRole("button", { name: /ver saldo y depósitos/i });
+    fireEvent.click(loginBtn);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith("/api/stripe/connect/login-link", {
+        method: "POST",
+      });
+      expect(windowOpenSpy).toHaveBeenCalledWith(
+        "https://connect.stripe.com/express",
+        "_blank",
+      );
+    });
+
+    windowOpenSpy.mockRestore();
+  });
+
+  it("renders Inactive Stripe state without account and opens embedded modal on click", async () => {
+    const inactiveTenant = {
+      ...mockTenant,
+      stripe_account_id: null,
+      stripe_charges_enabled: false,
+    };
+
+    render(
+      <AdminPickupContent
+        initialTenant={inactiveTenant}
+        initialHours={mockHours}
+      />,
+    );
+
+    expect(screen.getByText("Inactivo")).toBeInTheDocument();
+    expect(screen.getByText("Requiere activar Stripe")).toBeInTheDocument();
+    expect(
+      screen.getByText("Conecta tu cuenta bancaria con Stripe"),
+    ).toBeInTheDocument();
+
+    const connectBtn = screen.getByRole("button", {
+      name: /conectar stripe y activar pickup/i,
+    });
+    expect(connectBtn).toBeInTheDocument();
+
+    fireEvent.click(connectBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText("Conectar Pagos con Stripe")).toBeInTheDocument();
+    });
+
+    // Sharing buttons should be disabled
+    const copyBtn = screen.getByRole("button", { name: /copiar enlace/i });
+    const qrBtn = screen.getByRole("button", { name: /código qr/i });
+    const openBtn = screen.getByRole("button", { name: /abrir portal/i });
+
+    expect(copyBtn).toBeDisabled();
+    expect(qrBtn).toBeDisabled();
+    expect(openBtn).toBeDisabled();
+  });
+
+  it("renders Pending Verification state when stripe_account_id exists but charges are disabled", async () => {
+    const pendingTenant = {
+      ...mockTenant,
+      stripe_account_id: "acct_pending_123",
+      stripe_charges_enabled: false,
+      stripe_details_submitted: false,
+    };
+
+    render(
+      <AdminPickupContent
+        initialTenant={pendingTenant}
+        initialHours={mockHours}
+      />,
+    );
+
+    expect(screen.getByText("Verificación Pendiente")).toBeInTheDocument();
+    expect(
+      screen.getByText("Verificación Pendiente en Stripe"),
+    ).toBeInTheDocument();
+
+    const completeBtn = screen.getByRole("button", {
+      name: /completar registro en stripe/i,
+    });
+    expect(completeBtn).toBeInTheDocument();
+
+    fireEvent.click(completeBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText("Conectar Pagos con Stripe")).toBeInTheDocument();
+    });
   });
 
   it("copies pickup link to clipboard when clicking copy button", async () => {
@@ -171,34 +307,5 @@ describe("AdminPickupContent Component", () => {
     expect(
       await screen.findByText("Horarios actualizados exitosamente."),
     ).toBeInTheDocument();
-  });
-
-  it("renders Inactive Stripe banner and disables share buttons when stripe_charges_enabled is false", () => {
-    const inactiveTenant = {
-      ...mockTenant,
-      stripe_charges_enabled: false,
-    };
-
-    render(
-      <AdminPickupContent
-        initialTenant={inactiveTenant}
-        initialHours={mockHours}
-      />,
-    );
-
-    expect(screen.getByText("Inactivo (Requiere Stripe)")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Tu enlace de Kittn Pickup se activará en cuanto vincules tu cuenta de Stripe para procesar cobros en línea.",
-      ),
-    ).toBeInTheDocument();
-
-    const copyBtn = screen.getByRole("button", { name: /copiar enlace/i });
-    const qrBtn = screen.getByRole("button", { name: /código qr/i });
-    const openBtn = screen.getByRole("button", { name: /abrir portal/i });
-
-    expect(copyBtn).toBeDisabled();
-    expect(qrBtn).toBeDisabled();
-    expect(openBtn).toBeDisabled();
   });
 });
