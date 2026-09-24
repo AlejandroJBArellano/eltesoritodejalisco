@@ -9,7 +9,6 @@ import { SettingsHeaderActions } from "./settings/SettingsHeaderActions";
 import { SettingsGeneralSection } from "./settings/SettingsGeneralSection";
 import { SettingsFiscalSection } from "./settings/SettingsFiscalSection";
 import { SettingsLoyaltySection } from "./settings/SettingsLoyaltySection";
-import { SettingsPickupSection } from "./settings/SettingsPickupSection";
 import { SettingsTerminalSection } from "./settings/SettingsTerminalSection";
 import { SettingsBrandingSection } from "./settings/SettingsBrandingSection";
 import { McpConnectCard } from "./McpConnectCard";
@@ -41,7 +40,6 @@ function SettingsFormContent() {
           <SettingsTerminalSection />
           <SettingsFiscalSection />
           <SettingsLoyaltySection />
-          <SettingsPickupSection />
           <McpConnectCard />
         </div>
 

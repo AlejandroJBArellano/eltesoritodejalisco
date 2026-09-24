@@ -29,18 +29,7 @@ interface SettingsContextValue {
   setTerminalCommissionRate: (val: string) => void;
   isDragging: boolean;
   setIsDragging: (val: boolean) => void;
-  connectingStripe: boolean;
-  copied: boolean;
-  isStripeModalOpen: boolean;
-  setIsStripeModalOpen: (val: boolean) => void;
-  handleOpenStripeModal: () => void;
-  handleCloseStripeModal: () => void;
-  handleStripeOnboardingSuccess: () => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
-  pickupUrl: string;
-  handleCopyLink: () => Promise<void>;
-  handleStripeConnect: () => Promise<void>;
-  handleStripeLogin: () => Promise<void>;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleDrop: (e: React.DragEvent) => void;
   handleDragOver: (e: React.DragEvent) => void;
@@ -90,84 +79,9 @@ export function SettingsProvider({
   );
 
   const [isDragging, setIsDragging] = useState(false);
-  const [connectingStripe, setConnectingStripe] = useState(false);
-  const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
-
-  const handleOpenStripeModal = () => {
-    setIsStripeModalOpen(true);
-  };
-
-  const handleCloseStripeModal = () => {
-    setIsStripeModalOpen(false);
-  };
-
-  const handleStripeOnboardingSuccess = () => {
-    router?.refresh();
-  };
-
-  const pickupUrl =
-    typeof window !== "undefined" &&
-    window.location.hostname.endsWith(".localhost")
-      ? `http://${initialTenant.slug}.localhost:5173`
-      : `https://${initialTenant.slug}.trykittn.com`;
-
-  const handleCopyLink = async () => {
-    try {
-      if (navigator.clipboard) {
-        await navigator.clipboard.writeText(pickupUrl);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
-    } catch (err) {
-      console.error("Error al copiar enlace:", err);
-    }
-  };
-
-  const handleStripeConnect = async () => {
-    try {
-      setConnectingStripe(true);
-      setError(null);
-      const res = await fetch("/api/stripe/connect/onboarding-link", {
-        method: "POST",
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setError(data.error || "Error al conectar con Stripe");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Error de red al conectar con Stripe");
-    } finally {
-      setConnectingStripe(false);
-    }
-  };
-
-  const handleStripeLogin = async () => {
-    try {
-      setConnectingStripe(true);
-      setError(null);
-      const res = await fetch("/api/stripe/connect/login-link", {
-        method: "POST",
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.open(data.url, "_blank");
-      } else {
-        setError(data.error || "Error al abrir dashboard de Stripe");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Error al conectar con Stripe");
-    } finally {
-      setConnectingStripe(false);
-    }
-  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -279,18 +193,7 @@ export function SettingsProvider({
     setTerminalCommissionRate,
     isDragging,
     setIsDragging,
-    connectingStripe,
-    copied,
-    isStripeModalOpen,
-    setIsStripeModalOpen,
-    handleOpenStripeModal,
-    handleCloseStripeModal,
-    handleStripeOnboardingSuccess,
     fileInputRef,
-    pickupUrl,
-    handleCopyLink,
-    handleStripeConnect,
-    handleStripeLogin,
     handleFileSelect,
     handleDrop,
     handleDragOver,
