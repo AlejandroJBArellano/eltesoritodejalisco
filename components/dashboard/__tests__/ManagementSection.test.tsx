@@ -1,10 +1,9 @@
-import React from "react";
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { ManagementSection } from "../ManagementSection";
-import { UserProvider, type UserProfile } from "@/components/UserProvider";
 import { TenantProvider } from "@/components/TenantProvider";
+import { UserProvider, type UserProfile } from "@/components/UserProvider";
 import type { TenantContextType } from "@/lib/tenant";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { ManagementSection } from "../ManagementSection";
 
 const mockAdminProfile: UserProfile = {
   id: "u-1",
@@ -47,7 +46,7 @@ describe("ManagementSection Component", () => {
     );
 
     expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
-    expect(screen.getByText("Kittn Pickup & Horarios")).toBeInTheDocument();
+    expect(screen.getByText("Kittn Portal")).toBeInTheDocument();
     expect(screen.getByText("Clientes")).toBeInTheDocument();
 
     const pickupLink = screen.getByRole("link", { name: /kittn pickup/i });
@@ -69,7 +68,7 @@ describe("ManagementSection Component", () => {
     );
 
     expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
-    expect(screen.getByText("Kittn Pickup & Horarios")).toBeInTheDocument();
+    expect(screen.getByText("Kittn Portal")).toBeInTheDocument();
 
     const pickupLink = screen.getByRole("link", { name: /kittn pickup/i });
     expect(pickupLink).toHaveAttribute("href", "/admin/pickup");
@@ -93,7 +92,7 @@ describe("ManagementSection Component", () => {
     );
 
     expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
-    expect(screen.getByText("Kittn Pickup & Horarios")).toBeInTheDocument();
+    expect(screen.getByText("Kittn Portal")).toBeInTheDocument();
     expect(screen.getByText("Configuración")).toBeInTheDocument();
   });
 
@@ -110,7 +109,7 @@ describe("ManagementSection Component", () => {
     expect(screen.getByText("Gestión y Clientes")).toBeInTheDocument();
     expect(screen.getByText("Inventario")).toBeInTheDocument();
     expect(
-      screen.queryByText("Kittn Pickup & Horarios"),
+      screen.queryByText("Kittn Portal"),
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Clientes")).not.toBeInTheDocument();
     expect(screen.queryByText("Gestión de Menú")).not.toBeInTheDocument();

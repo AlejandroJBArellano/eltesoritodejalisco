@@ -1,31 +1,31 @@
 "use client";
 
-import React, { useEffect, useTransition } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useTenant } from "@/components/TenantProvider";
 import { useOptionalUser } from "@/components/UserProvider";
 import {
-  X,
-  Receipt,
-  ChefHat,
-  Clock,
-  CheckSquare,
-  Users,
-  CalendarDays,
-  ClipboardCheck,
-  UtensilsCrossed,
-  Package,
-  UserCheck,
-  ShoppingBag,
-  ReceiptText,
-  TrendingDown,
-  BarChart3,
   Activity,
-  Settings,
-  LayoutDashboard,
+  BarChart3,
+  CalendarDays,
+  CheckSquare,
+  ChefHat,
   ChevronRight,
+  ClipboardCheck,
+  Clock,
+  LayoutDashboard,
+  Package,
+  Receipt,
+  ReceiptText,
+  Settings,
+  ShoppingBag,
+  TrendingDown,
+  UserCheck,
+  Users,
+  UtensilsCrossed,
+  X,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React, { useEffect, useTransition } from "react";
 
 export interface SidebarDrawerProps {
   isOpen: boolean;
@@ -299,11 +299,10 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
           <Link
             href="/"
             onClick={handleLinkClick}
-            className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${
-              pathname === "/"
-                ? "bg-primary/20 text-primary border border-primary/30"
-                : "text-text-light hover:text-white hover:bg-white/5 border border-transparent"
-            }`}
+            className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${pathname === "/"
+              ? "bg-primary/20 text-primary border border-primary/30"
+              : "text-text-light hover:text-white hover:bg-white/5 border border-transparent"
+              }`}
           >
             <div className="flex items-center gap-2.5">
               <LayoutDashboard className="w-4 h-4 text-primary" />
@@ -336,17 +335,15 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                         key={item.href}
                         href={item.href}
                         onClick={handleLinkClick}
-                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                          isActive
-                            ? "bg-primary/15 text-primary font-bold border border-primary/25"
-                            : "text-text-light/80 hover:text-white hover:bg-white/5 border border-transparent"
-                        }`}
+                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${isActive
+                          ? "bg-primary/15 text-primary font-bold border border-primary/25"
+                          : "text-text-light/80 hover:text-white hover:bg-white/5 border border-transparent"
+                          }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <Icon
-                            className={`w-4 h-4 shrink-0 ${
-                              isActive ? "text-primary" : "text-text-light/60"
-                            }`}
+                            className={`w-4 h-4 shrink-0 ${isActive ? "text-primary" : "text-text-light/60"
+                              }`}
                           />
                           <span className="truncate">{item.label}</span>
                         </div>
@@ -372,13 +369,7 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                 <span className="text-xs font-bold text-text-light truncate">
                   {user.profile.full_name || user.profile.email}
                 </span>
-                <span className="text-[10px] font-mono text-primary uppercase">
-                  {user.profile.role || "USUARIO"}
-                </span>
               </div>
-              <span className="text-[10px] text-text-light/40 font-mono">
-                ESC para cerrar
-              </span>
             </div>
           </div>
         )}

@@ -1,6 +1,6 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   AdminPickupContent,
   type DbBusinessHours,
@@ -79,7 +79,7 @@ describe("AdminPickupContent Component", () => {
       />,
     );
 
-    expect(screen.getByText("Kittn Pickup & Horarios")).toBeInTheDocument();
+    expect(screen.getByText("Kittn Portal")).toBeInTheDocument();
     expect(
       screen.getByText("Cobros y Pagos con Stripe Connect"),
     ).toBeInTheDocument();

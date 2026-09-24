@@ -1,20 +1,19 @@
 "use client";
 
-import React from "react";
 import CollapsibleSection from "@/components/CollapsibleSection";
+import { useOptionalTenant } from "@/components/TenantProvider";
+import { useOptionalUser } from "@/components/UserProvider";
 import {
+  ClipboardCheck,
+  Clock,
+  Package,
+  Settings,
   ShoppingBag,
+  UserCog,
   Users,
   UtensilsCrossed,
-  Package,
-  ClipboardCheck,
-  UserCog,
-  Clock,
-  Settings,
 } from "lucide-react";
 import { ModuleCard } from "./ModuleCard";
-import { useOptionalUser } from "@/components/UserProvider";
-import { useOptionalTenant } from "@/components/TenantProvider";
 
 export interface ManagementTenantInfo {
   stripe_charges_enabled?: boolean | null;
@@ -51,7 +50,7 @@ export function ManagementSection(props?: ManagementSectionProps) {
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
         {(isAdmin || isWaiter) && (
           <ModuleCard
-            title="Kittn Pickup & Horarios"
+            title="Kittn Portal"
             href={
               isAdmin
                 ? "/admin/pickup"

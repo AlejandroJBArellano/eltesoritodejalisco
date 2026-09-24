@@ -1,26 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  ShoppingBag,
-  ExternalLink,
-  Copy,
-  Check,
-  QrCode,
-  Clock,
-  Save,
-  Loader2,
-  AlertCircle,
-  CheckCircle2,
-  Globe,
-  CreditCard,
-  Download,
-  ArrowRight,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+import { StripeEmbeddedOnboardingModal } from "@/components/admin/settings/StripeEmbeddedOnboardingModal";
 import { PageHeader } from "@/components/PageHeader";
 import { Modal } from "@/components/ui/Modal";
-import { StripeEmbeddedOnboardingModal } from "@/components/admin/settings/StripeEmbeddedOnboardingModal";
+import {
+  AlertCircle,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  Clock,
+  Copy,
+  CreditCard,
+  Download,
+  ExternalLink,
+  Globe,
+  Loader2,
+  QrCode,
+  Save,
+  ShoppingBag,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 
 export interface DbBusinessHours {
   id: string;
@@ -182,7 +182,7 @@ export function AdminPickupContent({
   return (
     <div className="min-h-screen bg-background text-text-light pb-16">
       <PageHeader
-        title="Kittn Pickup & Horarios"
+        title="Kittn Portal"
         subtitle="Configuración de pagos con Stripe, menú digital para llevar y horarios de atención"
         badgeColor="bg-primary"
         icon={<ShoppingBag className="h-5 w-5 text-primary" />}
@@ -487,11 +487,10 @@ export function AdminPickupContent({
                     <button
                       type="button"
                       onClick={() => handleToggleClosed(index)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border ${
-                        day.is_closed
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border ${day.is_closed
                           ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
                           : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                      }`}
+                        }`}
                     >
                       {day.is_closed ? "Cerrado" : "Abierto"}
                     </button>
