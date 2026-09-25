@@ -126,12 +126,27 @@ export const OrderCard = memo(
     const elapsedSeconds = useOrderTimer(timerStartTime, endTime);
     const isOverdue = elapsedSeconds / 60 >= ALERT_THRESHOLD_MINUTES;
 
-    const activeItems = order.orderItems.filter(
-      (item) => item.status !== OrderStatus.DELIVERED,
-    );
+    const isPreparingOrPending =
+      order.status === OrderStatus.PENDING ||
+      order.status === OrderStatus.PREPARING;
+
+    const activeItems = isPreparingOrPending
+      ? order.orderItems.filter(
+          (item) =>
+            item.status !== OrderStatus.READY &&
+            item.status !== OrderStatus.DELIVERED,
+        )
+      : order.orderItems.filter(
+          (item) => item.status !== OrderStatus.DELIVERED,
+        );
+
     const allReady =
-      activeItems.length > 0 &&
-      activeItems.every((item) => item.status === OrderStatus.READY);
+      order.orderItems.length > 0 &&
+      order.orderItems.every(
+        (item) =>
+          item.status === OrderStatus.READY ||
+          item.status === OrderStatus.DELIVERED,
+      );
 
     return (
       <div
@@ -218,19 +233,33 @@ export const OrderCard = memo(
         </div>
 
         {/* Order Items List */}
-        <div className="mb-3 space-y-2">
-          {activeItems.map((item) => (
-            <OrderItemRow
-              key={item.id}
-              item={item}
-              orderId={order.id}
-              orderStatus={order.status}
-              timerStartTime={timerStartTime}
-              onItemReady={onItemReady}
-              isUpdating={!!updatingItemIds?.has(item.id)}
-            />
-          ))}
-        </div>
+        {activeItems.length > 0 ? (
+          <div className="mb-3 space-y-2">
+            {activeItems.map((item) => (
+              <OrderItemRow
+                key={item.id}
+                item={item}
+                orderId={order.id}
+                orderStatus={order.status}
+                timerStartTime={timerStartTime}
+                onItemReady={onItemReady}
+                isUpdating={!!updatingItemIds?.has(item.id)}
+              />
+            ))}
+          </div>
+        ) : allReady ? (
+          <div className="mb-3 py-3 px-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-center">
+            <p className="text-xs font-bold text-emerald-400 flex items-center justify-center gap-1.5 uppercase tracking-wide">
+              <CheckCircle2 className="h-4 w-4" /> Todos los platillos listos
+            </p>
+          </div>
+        ) : (
+          <div className="mb-3 py-3 px-3 rounded-lg border border-border bg-card text-center">
+            <p className="text-xs font-medium text-text-light/50">
+              Sin platillos pendientes
+            </p>
+          </div>
+        )}
 
         {/* Order Level Notes */}
         {order.notes && (
@@ -291,6 +320,7 @@ export const OrderCard = memo(
       const prevUpdating = !!prevProps.updatingItemIds?.has(prevItems[i].id);
       const nextUpdating = !!nextProps.updatingItemIds?.has(nextItems[i].id);
       if (prevUpdating !== nextUpdating) return false;
+      if (prevItems[i].status !== nextItems[i].status) return false;
     }
 
     return true;

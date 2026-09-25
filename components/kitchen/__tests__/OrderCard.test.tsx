@@ -150,27 +150,57 @@ describe("OrderCard Component", () => {
     expect(handleItemReady).toHaveBeenCalledWith("order-123", "item-1");
   });
 
-  it("renders order notes and item notes correctly", () => {
-    render(<OrderCard order={mockBaseOrder} onStatusChange={vi.fn()} />);
-
-    expect(screen.getByText(/Nota: Bien dorados/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/Nota de Orden: Sin picante por favor/i),
-    ).toBeInTheDocument();
-  });
-
-  it("handles pickupTime timer calculation", () => {
-    const orderWithPickup: OrderWithDetails = {
+  it("hides ready sub-items in PREPARING status and shows only non-ready items", () => {
+    const multiItemOrder: OrderWithDetails = {
       ...mockBaseOrder,
-      pickupTime: new Date("2026-08-08T13:00:00Z"),
+      status: OrderStatus.PREPARING,
+      orderItems: [
+        {
+          id: "item-1",
+          orderId: "order-123",
+          menuItemId: "menu-1",
+          quantity: 2,
+          unitPrice: 40,
+          status: OrderStatus.READY,
+          menuItem: {
+            id: "menu-1",
+            name: "Tacos al Pastor",
+            price: 40,
+            isAvailable: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          createdAt: new Date(),
+        },
+        {
+          id: "item-2",
+          orderId: "order-123",
+          menuItemId: "menu-2",
+          quantity: 1,
+          unitPrice: 50,
+          status: OrderStatus.PENDING,
+          menuItem: {
+            id: "menu-2",
+            name: "Gringa de Asada",
+            price: 50,
+            isAvailable: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          createdAt: new Date(),
+        },
+      ],
     };
 
-    render(<OrderCard order={orderWithPickup} onStatusChange={vi.fn()} />);
+    render(<OrderCard order={multiItemOrder} onStatusChange={vi.fn()} />);
 
-    expect(screen.getByText("#0042")).toBeInTheDocument();
+    // Ready item should be hidden (disappear from kitchen view)
+    expect(screen.queryByText("Tacos al Pastor")).not.toBeInTheDocument();
+    // Non-ready item should be visible
+    expect(screen.getByText("Gringa de Asada")).toBeInTheDocument();
   });
 
-  it("handles closing order when all items are ready", () => {
+  it("shows all ready banner when all items are ready in PREPARING status", () => {
     const handleStatusChange = vi.fn();
     const preparingAllReadyOrder: OrderWithDetails = {
       ...mockBaseOrder,
@@ -204,6 +234,9 @@ describe("OrderCard Component", () => {
       />,
     );
 
+    expect(screen.getByText("Todos los platillos listos")).toBeInTheDocument();
+    expect(screen.queryByText("Tacos")).not.toBeInTheDocument();
+
     const closeButton = screen.getByRole("button", { name: /cerrar orden/i });
     expect(closeButton).not.toBeDisabled();
     fireEvent.click(closeButton);
@@ -212,6 +245,68 @@ describe("OrderCard Component", () => {
       "order-123",
       OrderStatus.READY,
     );
+  });
+
+  it("shows 'Sin platillos pendientes' when order has no items", () => {
+    const emptyOrder: OrderWithDetails = {
+      ...mockBaseOrder,
+      orderItems: [],
+    };
+
+    render(<OrderCard order={emptyOrder} onStatusChange={vi.fn()} />);
+
+    expect(screen.getByText("Sin platillos pendientes")).toBeInTheDocument();
+  });
+
+  it("renders all items in READY status for expediters to verify delivery", () => {
+    const readyOrder: OrderWithDetails = {
+      ...mockBaseOrder,
+      status: OrderStatus.READY,
+      completedAt: new Date(),
+      orderItems: [
+        {
+          id: "item-1",
+          orderId: "order-123",
+          menuItemId: "menu-1",
+          quantity: 3,
+          unitPrice: 40,
+          status: OrderStatus.READY,
+          menuItem: {
+            id: "menu-1",
+            name: "Tacos al Pastor",
+            price: 40,
+            isAvailable: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          createdAt: new Date(),
+        },
+      ],
+    };
+
+    render(<OrderCard order={readyOrder} onStatusChange={vi.fn()} />);
+
+    expect(screen.getByText("Tacos al Pastor")).toBeInTheDocument();
+  });
+
+  it("renders order notes and item notes correctly", () => {
+    render(<OrderCard order={mockBaseOrder} onStatusChange={vi.fn()} />);
+
+    expect(screen.getByText(/Nota: Bien dorados/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Nota de Orden: Sin picante por favor/i),
+    ).toBeInTheDocument();
+  });
+
+  it("handles pickupTime timer calculation", () => {
+    const orderWithPickup: OrderWithDetails = {
+      ...mockBaseOrder,
+      pickupTime: new Date("2026-08-08T13:00:00Z"),
+    };
+
+    render(<OrderCard order={orderWithPickup} onStatusChange={vi.fn()} />);
+
+    expect(screen.getByText("#0042")).toBeInTheDocument();
   });
 
   it("handles marking delivered when order is in READY status", () => {
@@ -290,13 +385,31 @@ describe("OrderCard Component", () => {
       />,
     );
 
-    // Re-render with different onItemReady (triggers line 277)
+    // Re-render with different onItemReady
     rerender(
       <OrderCard
         order={mockBaseOrder}
         onStatusChange={onStatusChange}
         onItemReady={vi.fn()}
         updatingItemIds={updatingItemIds}
+      />,
+    );
+
+    // Re-render with different item status in same order reference
+    const orderWithChangedItemStatus = {
+      ...mockBaseOrder,
+      orderItems: [
+        {
+          ...mockBaseOrder.orderItems[0],
+          status: OrderStatus.READY,
+        },
+      ],
+    };
+    rerender(
+      <OrderCard
+        order={orderWithChangedItemStatus}
+        onStatusChange={onStatusChange}
+        onItemReady={onItemReady}
       />,
     );
 

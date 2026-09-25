@@ -1,6 +1,6 @@
 "use client";
 
-import type { BatchedMenuItem, OrderWithDetails } from "@/types";
+import { OrderStatus, type BatchedMenuItem, type OrderWithDetails } from "@/types";
 import { useMemo } from "react";
 import { Utensils } from "lucide-react";
 
@@ -10,22 +10,27 @@ interface SmartBatchingViewProps {
 
 /**
  * Smart Batching Component
- * Groups identical menu items across all active orders
+ * Groups identical menu items across active orders pending preparation
  * Helps kitchen staff prepare items in batches for efficiency
  */
 export function SmartBatchingView({ orders }: SmartBatchingViewProps) {
   const batchedItems = useMemo<BatchedMenuItem[]>(() => {
     const activeOrders = orders.filter(
       (order) =>
-        order.status === "PENDING" ||
-        order.status === "PREPARING" ||
-        order.status === "READY",
+        order.status === OrderStatus.PENDING ||
+        order.status === OrderStatus.PREPARING,
     );
 
     const itemsMap = new Map<string, BatchedMenuItem>();
 
     activeOrders.forEach((order) => {
-      order.orderItems.forEach((orderItem) => {
+      order.orderItems
+        .filter(
+          (orderItem) =>
+            orderItem.status !== OrderStatus.READY &&
+            orderItem.status !== OrderStatus.DELIVERED,
+        )
+        .forEach((orderItem) => {
         const { menuItemId, menuItem, quantity } = orderItem;
 
         if (itemsMap.has(menuItemId)) {
