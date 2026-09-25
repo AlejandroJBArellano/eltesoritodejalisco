@@ -58,13 +58,13 @@ describe("OperationSection Component", () => {
     expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
   });
 
-  it("shows Tareas y Asistencia but hides POS and Gasto when isInventory is true", () => {
+  it("shows Tareas but hides POS and Asistencia when isInventory is true", () => {
     render(
       <OperationSection isAdmin={false} isWaiter={false} isInventory={true} />,
     );
 
     expect(screen.queryByText("Punto de Venta")).not.toBeInTheDocument();
-    expect(screen.queryByText("Tareas")).not.toBeInTheDocument();
+    expect(screen.getByText("Tareas")).toBeInTheDocument();
     expect(screen.queryByText("Asistencia")).not.toBeInTheDocument();
     expect(screen.getByText("Monitor de Cocina")).toBeInTheDocument();
   });
