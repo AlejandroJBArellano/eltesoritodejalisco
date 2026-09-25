@@ -27,6 +27,7 @@ import { useOptionalUser } from "@/components/UserProvider";
 import { POSManagerAuthModal } from "@/components/pos/modals/POSManagerAuthModal";
 import {
   ChefHat,
+  ChevronDown,
   Download,
   MessageCircle,
   Printer,
@@ -126,6 +127,8 @@ function POSPageContent() {
   const [activeTab, setActiveTab] = useState<"menu" | "cart">("menu");
   const [isDownloadingImage, setIsDownloadingImage] = useState(false);
 
+  const [isCatalogCollapsed, setIsCatalogCollapsed] = useState(false);
+
   const handleDownloadImage = async () => {
     if (!checkoutOrder) return;
     setIsDownloadingImage(true);
@@ -201,39 +204,81 @@ function POSPageContent() {
       <PageHeader
         title="Punto de Venta"
         icon={<Receipt className="h-5 w-5 text-primary" />}
+        actions={
+          <button
+            type="button"
+            onClick={() => setIsCatalogCollapsed((prev) => !prev)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card text-xs font-bold text-text-light hover:bg-card-light transition cursor-pointer active:scale-95 shadow-2xs"
+            title={
+              isCatalogCollapsed
+                ? "Mostrar catálogo y pedido"
+                : "Contraer catálogo y pedido"
+            }
+          >
+            <span>
+              {isCatalogCollapsed ? "Mostrar Catálogo" : "Contraer Catálogo"}
+            </span>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${
+                isCatalogCollapsed ? "-rotate-90" : "rotate-0"
+              }`}
+            />
+          </button>
+        }
       />
 
-      {/* Selector de pestañas para móvil/tablet */}
-      <TabSelectorPOS
-        totalCartItems={totalCartItems}
-        cartTotal={cartTotal}
-        setActiveTab={setActiveTab}
-        activeTab={activeTab}
-      />
-
-      <main className="grid gap-6 lg:grid-cols-12 items-start mx-2 md:mx-4 lg:mx-6">
-        {/* SECCIÓN DEL MENÚ */}
-        <div
-          className={`lg:col-span-7 xl:col-span-8 w-full min-w-0 space-y-4 ${activeTab === "menu" ? "block" : "hidden lg:block"}`}
-        >
-          <LowStockBanner items={lowStockItems} />
-          <POSMenuGrid />
+      {isCatalogCollapsed ? (
+        <div className="mx-2 md:mx-4 lg:mx-6 p-3 bg-card/60 border border-dashed border-border rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <p className="text-xs font-semibold text-text-light/70">
+              Catálogo y pedido contraídos
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsCatalogCollapsed(false)}
+            className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+          >
+            <span>Mostrar Catálogo</span>
+            <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
+          </button>
         </div>
+      ) : (
+        <>
+          {/* Selector de pestañas para móvil/tablet */}
+          <TabSelectorPOS
+            totalCartItems={totalCartItems}
+            cartTotal={cartTotal}
+            setActiveTab={setActiveTab}
+            activeTab={activeTab}
+          />
 
-        {/* SECCIÓN DEL CARRITO */}
-        <form
-          onSubmit={(e) =>
-            handleCheckoutSubmit(e, (order) => {
-              setCheckoutOrder(order);
-              setShowKitchenTicket(true);
-              setShowTicket(false);
-            })
-          }
-          className={`lg:col-span-5 xl:col-span-4 h-full w-full min-w-0 ${activeTab === "cart" ? "block" : "hidden lg:block"}`}
-        >
-          <POSCartSidebar />
-        </form>
-      </main>
+          <main className="grid gap-6 lg:grid-cols-12 items-start mx-2 md:mx-4 lg:mx-6">
+            {/* SECCIÓN DEL MENÚ */}
+            <div
+              className={`lg:col-span-7 xl:col-span-8 w-full min-w-0 space-y-4 ${activeTab === "menu" ? "block" : "hidden lg:block"}`}
+            >
+              <LowStockBanner items={lowStockItems} />
+              <POSMenuGrid />
+            </div>
+
+            {/* SECCIÓN DEL CARRITO */}
+            <form
+              onSubmit={(e) =>
+                handleCheckoutSubmit(e, (order) => {
+                  setCheckoutOrder(order);
+                  setShowKitchenTicket(true);
+                  setShowTicket(false);
+                })
+              }
+              className={`lg:col-span-5 xl:col-span-4 h-full w-full min-w-0 ${activeTab === "cart" ? "block" : "hidden lg:block"}`}
+            >
+              <POSCartSidebar />
+            </form>
+          </main>
+        </>
+      )}
 
       {/* SECCIÓN: Últimas Órdenes */}
       <section className="rounded-xl bg-card p-4 sm:p-6 shadow-sm border border-border overflow-hidden mx-2 md:mx-4 lg:mx-6">
@@ -385,7 +430,7 @@ function POSPageContent() {
       {editingTipOrder && <POSTipModal />}
 
       {/* Barra flotante para móviles cuando el carrito tiene ítems y estamos en la pestaña del catálogo */}
-      {totalCartItems > 0 && activeTab === "menu" && (
+      {totalCartItems > 0 && activeTab === "menu" && !isCatalogCollapsed && (
         <FloatingMobileBarPOS
           totalCartItems={totalCartItems}
           cartTotal={cartTotal}

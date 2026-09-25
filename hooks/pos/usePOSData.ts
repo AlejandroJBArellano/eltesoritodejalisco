@@ -229,16 +229,13 @@ function usePOSDataInternal(tenantId?: string) {
       mapOrderData(dbOrder),
     ) as Order[];
 
-    // Only display today's orders or active (not archived) orders from previous days
-    const todayDateStr = getTodayDateStr();
-    const activeAndTodayOrders = mappedOrders.filter(
-      (order) =>
-        (!order.corteId && order.closeStatus !== "ARCHIVED") ||
-        getOrderDateStr(order.createdAt) === todayDateStr,
+    // Only display unarchived orders (orders active or created after the latest cash cut)
+    const activeOrders = mappedOrders.filter(
+      (order) => !order.corteId && order.closeStatus !== "ARCHIVED",
     );
 
-    setOrders(activeAndTodayOrders);
-    return activeAndTodayOrders;
+    setOrders(activeOrders);
+    return activeOrders;
   }, []);
 
   const refreshOrders = useCallback(() => {

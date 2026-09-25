@@ -16,9 +16,10 @@ import {
   Undo2,
   Utensils,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatServiceLabel, getServiceType } from "@/lib/utils/serviceType";
 import { POSManagerAuthModal } from "./modals/POSManagerAuthModal";
+import { TablePagination } from "@/components/ui/DataTableControls";
 import type { Order } from "@/types";
 
 export default function OrdersPOS({
@@ -39,6 +40,13 @@ export default function OrdersPOS({
   const [sourceFilter, setSourceFilter] = useState<
     "ALL" | "POS" | "PICKUP_APP"
   >("ALL");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, sourceFilter]);
 
   const pendingCount = useMemo(
     () => orders.filter((o) => o.status !== "PAID").length,
@@ -69,6 +77,12 @@ export default function OrdersPOS({
       return true;
     });
   }, [orders, statusFilter, sourceFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredOrders.slice(startIndex, startIndex + pageSize);
+  }, [filteredOrders, currentPage, pageSize]);
 
   const emptyMessage = useMemo(() => {
     let statusLabel = "órdenes";
@@ -241,7 +255,7 @@ export default function OrdersPOS({
                 </td>
               </tr>
             ) : (
-              filteredOrders.slice(0, 10).map((order) => {
+              paginatedOrders.map((order) => {
                 const tipAmt = getOrderTipAmount(order);
                 const isUndoable = (() => {
                   const lastUpdate = new Date(
@@ -450,6 +464,21 @@ export default function OrdersPOS({
           </tbody>
         </table>
       </div>
+
+      {filteredOrders.length > 0 && (
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredOrders.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
+          pageSizeOptions={[5, 10, 20, 50]}
+        />
+      )}
 
       <POSManagerAuthModal
         isOpen={!!undoOrder}

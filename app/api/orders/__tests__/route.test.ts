@@ -46,22 +46,35 @@ describe("GET /api/orders", () => {
     );
   });
 
-  it("allows WAITER when posParam is 'true'", async () => {
+  it("allows WAITER when posParam is 'true' and filters after latest cut", async () => {
     vi.mocked(getProfile).mockResolvedValue({
       role: "WAITER",
       tenant_id: "tenant-123",
     } as any);
 
     const mockOrders = [{ id: "order-pos-1", total: 100 }];
-    const mockQueryBuilder = {
+    const mockOrdersBuilder = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       or: vi.fn().mockResolvedValue({ data: mockOrders, error: null }),
     };
 
+    const mockCutsBuilder = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: { id: "cut-1", created_at: "2026-09-25T12:00:00Z" },
+      }),
+    };
+
     vi.mocked(createClient).mockResolvedValue({
-      from: vi.fn().mockReturnValue(mockQueryBuilder),
+      from: vi.fn((table: string) => {
+        if (table === "daily_cuts") return mockCutsBuilder;
+        return mockOrdersBuilder;
+      }),
     } as any);
 
     const request = new NextRequest(
@@ -72,6 +85,53 @@ describe("GET /api/orders", () => {
 
     expect(response.status).toBe(200);
     expect(body.orders).toEqual(mockOrders);
+    expect(mockOrdersBuilder.or).toHaveBeenCalledWith(
+      "created_at.gt.2026-09-25T12:00:00Z,and(corte_id.is.null,estado_cierre.neq.ARCHIVADA)",
+    );
+  });
+
+  it("filters unarchived orders when posParam is 'true' and no cuts exist", async () => {
+    vi.mocked(getProfile).mockResolvedValue({
+      role: "WAITER",
+      tenant_id: "tenant-123",
+    } as any);
+
+    const mockOrders = [{ id: "order-pos-1", total: 100 }];
+    const mockOrdersBuilder = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      or: vi.fn().mockResolvedValue({ data: mockOrders, error: null }),
+    };
+
+    const mockCutsBuilder = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: null,
+      }),
+    };
+
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        if (table === "daily_cuts") return mockCutsBuilder;
+        return mockOrdersBuilder;
+      }),
+    } as any);
+
+    const request = new NextRequest(
+      "http://localhost:3000/api/orders?pos=true",
+    );
+    const response = await GET(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.orders).toEqual(mockOrders);
+    expect(mockOrdersBuilder.or).toHaveBeenCalledWith(
+      "corte_id.is.null,estado_cierre.neq.ARCHIVADA",
+    );
   });
 
   it("allows ADMIN to query general orders history without posParam", async () => {

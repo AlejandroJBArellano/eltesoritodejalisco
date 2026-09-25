@@ -224,4 +224,52 @@ describe("OrdersPOS component", () => {
     fireEvent.click(undoButton);
     expect(screen.getByText(/Autorizar Reapertura de Cuenta/i)).toBeDefined();
   });
+
+  it("handles pagination navigation and page size change correctly", () => {
+    const manyOrders: OrderWithDetails[] = Array.from({ length: 15 }, (_, i) => ({
+      id: `ord-${i + 1}`,
+      orderNumber: `${100 + i + 1}`,
+      source: "POS",
+      status: OrderStatus.PENDING,
+      table: `Mesa ${i + 1}`,
+      notes: "",
+      subtotal: 50,
+      tax: 0,
+      total: 50,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      orderItems: [],
+      payments: [],
+    }));
+
+    vi.mocked(usePOSData).mockReturnValue({
+      refreshOrders: vi.fn(),
+      availableMenuItems: [],
+      orders: manyOrders,
+    } as unknown as ReturnType<typeof usePOSData>);
+
+    render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
+
+    // First page shows #101 to #110 (10 items)
+    expect(screen.getByText("#101")).toBeDefined();
+    expect(screen.getByText("#110")).toBeDefined();
+    expect(screen.queryByText("#111")).toBeNull();
+
+    // Next page button
+    const nextBtn = screen.getByRole("button", { name: /Siguiente/i });
+    fireEvent.click(nextBtn);
+
+    // Second page shows #111 to #115
+    expect(screen.queryByText("#101")).toBeNull();
+    expect(screen.getByText("#111")).toBeDefined();
+    expect(screen.getByText("#115")).toBeDefined();
+
+    // Change page size to 20
+    const select = screen.getByRole("combobox");
+    fireEvent.change(select, { target: { value: "20" } });
+
+    // Now all 15 are visible
+    expect(screen.getByText("#101")).toBeDefined();
+    expect(screen.getByText("#115")).toBeDefined();
+  });
 });

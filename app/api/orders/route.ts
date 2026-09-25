@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentCDMXDay } from "@/lib/utils";
 import type { CreateOrderRequest } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
@@ -67,10 +66,21 @@ export async function GET(request: NextRequest) {
     }
 
     if (posParam === "true") {
-      const today = getCurrentCDMXDay();
-      query = query.or(
-        `operational_date.eq.${today},and(corte_id.is.null,estado_cierre.neq.ARCHIVADA)`,
-      );
+      const { data: latestCut } = await supabase
+        .from("daily_cuts")
+        .select("id, created_at")
+        .eq("tenant_id", tenant.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (latestCut?.created_at) {
+        query = query.or(
+          `created_at.gt.${latestCut.created_at},and(corte_id.is.null,estado_cierre.neq.ARCHIVADA)`,
+        );
+      } else {
+        query = query.or("corte_id.is.null,estado_cierre.neq.ARCHIVADA");
+      }
     }
 
     const { data: orders, error } = await query;
