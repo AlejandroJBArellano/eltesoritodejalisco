@@ -189,19 +189,19 @@ export function AdminPickupContent({
       />
 
       <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
-        {/* Section 1: Stripe Integration & Onboarding */}
+        {/* Unified Section: Menú Digital y Pagos */}
         <div className="rounded-2xl bg-card border border-border/80 p-6 sm:p-8 space-y-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border/80 pb-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary">
-                <CreditCard className="w-5 h-5" />
+                <Globe className="w-5 h-5" />
               </div>
               <div>
                 <h2 className="text-base font-bold text-white tracking-tight">
-                  Pagos con Stripe
+                  Menú Digital y Pagos
                 </h2>
                 <p className="text-xs text-text-light/60">
-                  Recibe pedidos en línea y depósitos a tu cuenta bancaria
+                  Enlace directo para recibir pedidos en línea y depósitos a tu cuenta bancaria
                 </p>
               </div>
             </div>
@@ -230,21 +230,27 @@ export function AdminPickupContent({
             </div>
           )}
 
+          {/* Stripe Account Status Banner */}
           {isStripeEnabled ? (
-            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start sm:items-center gap-3">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5 sm:mt-0" />
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0">
+                  <CheckCircle2 className="h-5 w-5" />
+                </div>
                 <div>
                   <h4 className="text-sm font-bold text-emerald-300">
                     Cuenta activa
                   </h4>
+                  <p className="text-xs text-emerald-200/70 mt-0.5">
+                    Recibe pedidos en línea y depósitos a tu cuenta bancaria
+                  </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={handleStripeLogin}
                 disabled={connectingStripe}
-                className="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold rounded-xl border border-emerald-500/40 transition flex items-center gap-2 shrink-0 cursor-pointer disabled:opacity-50"
+                className="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold rounded-xl border border-emerald-500/40 transition flex items-center gap-2 shrink-0 cursor-pointer disabled:opacity-50 active:scale-[0.98]"
               >
                 <ExternalLink className="h-4 w-4" />
                 <span>
@@ -253,16 +259,18 @@ export function AdminPickupContent({
               </button>
             </div>
           ) : hasStripeAccount ? (
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-start sm:items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
+                <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 shrink-0 mt-0.5 sm:mt-0">
+                  <AlertCircle className="h-5 w-5" />
+                </div>
                 <div>
                   <h4 className="text-sm font-bold text-amber-300">
                     Verificación Pendiente
                   </h4>
                   <p className="text-xs text-amber-200/70 mt-0.5 leading-relaxed">
                     Stripe requiere información adicional para habilitar tus
-                    cobros.
+                    cobros y activar el menú.
                   </p>
                 </div>
               </div>
@@ -270,7 +278,7 @@ export function AdminPickupContent({
                 type="button"
                 onClick={handleOpenStripeModal}
                 disabled={connectingStripe}
-                className="px-4 py-2.5 bg-amber-400 text-dark text-xs font-bold rounded-xl hover:brightness-110 transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md disabled:opacity-50"
+                className="px-4 py-2.5 bg-amber-400 text-dark text-xs font-bold rounded-xl hover:brightness-110 transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md disabled:opacity-50 active:scale-[0.98]"
               >
                 <span>
                   {connectingStripe
@@ -281,21 +289,25 @@ export function AdminPickupContent({
               </button>
             </div>
           ) : (
-            <div className="bg-dark/40 border border-border/70 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <h4 className="text-sm font-bold text-text-light">
-                  Conecta tu cuenta bancaria
-                </h4>
-                <p className="text-xs text-text-light/60 leading-relaxed">
-                  Configura tus datos bancarios para recibir pagos y activar tu
-                  menú en línea.
-                </p>
+            <div className="bg-dark/40 border border-border/70 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-primary shrink-0">
+                  <CreditCard className="h-5 w-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-sm font-bold text-text-light">
+                    Conecta tu cuenta bancaria
+                  </h4>
+                  <p className="text-xs text-text-light/60 leading-relaxed">
+                    Configura Stripe para recibir pagos y activar tu menú en línea.
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={handleOpenStripeModal}
                 disabled={connectingStripe}
-                className="px-5 py-2.5 bg-primary text-dark font-black text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md disabled:opacity-50"
+                className="px-5 py-2.5 bg-primary text-dark font-black text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition flex items-center gap-2 shrink-0 cursor-pointer shadow-md disabled:opacity-50 active:scale-[0.98]"
               >
                 <span>
                   {connectingStripe
@@ -306,38 +318,9 @@ export function AdminPickupContent({
               </button>
             </div>
           )}
-        </div>
-
-        {/* Section 2: Kittn Pickup Link & Status */}
-        <div className="rounded-2xl bg-card border border-border/80 p-6 sm:p-8 space-y-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border/80 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary">
-                <Globe className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-white tracking-tight">
-                  Enlace del Menú Digital
-                </h2>
-                <p className="text-xs text-text-light/60">
-                  Enlace directo para que tus clientes ordenen y paguen en línea
-                </p>
-              </div>
-            </div>
-
-            {isStripeEnabled ? (
-              <span className="text-[11px] font-bold text-emerald-400">
-                Listo para compartir
-              </span>
-            ) : (
-              <span className="text-[11px] font-bold text-amber-400/80">
-                Requiere activar Stripe
-              </span>
-            )}
-          </div>
 
           {/* URL & Action buttons */}
-          <div className="space-y-4">
+          <div className="pt-1">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="flex-1 rounded-xl bg-dark/60 border border-border px-4 py-3 text-xs font-mono text-text-light truncate select-all">
                 {pickupUrl}
@@ -353,7 +336,7 @@ export function AdminPickupContent({
                       ? "Conecta Stripe para habilitar el portal"
                       : undefined
                   }
-                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-card hover:bg-white/5 text-text-light text-xs font-bold transition flex items-center justify-center gap-2 border border-border disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-card hover:bg-white/5 text-text-light text-xs font-bold transition flex items-center justify-center gap-2 border border-border disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98]"
                 >
                   {copied ? (
                     <>
@@ -377,7 +360,7 @@ export function AdminPickupContent({
                       ? "Conecta Stripe para habilitar el portal"
                       : undefined
                   }
-                  className="px-4 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition flex items-center justify-center gap-2 border border-primary/25 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition flex items-center justify-center gap-2 border border-primary/25 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98]"
                 >
                   <QrCode className="h-4 w-4" />
                   <span>Código QR</span>
@@ -388,7 +371,7 @@ export function AdminPickupContent({
                     href={pickupUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2.5 rounded-xl bg-primary text-dark hover:brightness-110 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-primary text-dark hover:brightness-110 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                   >
                     <ExternalLink className="h-4 w-4" />
                     <span>Abrir Portal</span>

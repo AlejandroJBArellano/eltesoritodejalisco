@@ -14,16 +14,23 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-// Mock Stripe Connect JS
-vi.mock("@stripe/connect-js", () => ({
-  loadConnectAndInitialize: vi.fn().mockReturnValue({}),
-}));
-
-vi.mock("@stripe/react-connect-js", () => ({
-  ConnectComponentsProvider: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  ConnectAccountOnboarding: () => <div>Stripe Onboarding Embedded</div>,
+vi.mock("@/components/admin/settings/StripeEmbeddedOnboardingModal", () => ({
+  StripeEmbeddedOnboardingModal: ({
+    isOpen,
+    onClose,
+    onSuccess,
+  }: {
+    isOpen: boolean;
+    onClose: () => void;
+    onSuccess?: () => void;
+  }) =>
+    isOpen ? (
+      <div data-testid="stripe-modal">
+        <span>Conectar Pagos con Stripe</span>
+        <button onClick={onClose}>Cerrar Modal Stripe</button>
+        <button onClick={onSuccess}>Completar Modal Stripe</button>
+      </div>
+    ) : null,
 }));
 
 const mockTenant = {
@@ -80,7 +87,7 @@ describe("AdminPickupContent Component", () => {
     );
 
     expect(screen.getByText("Kittn Portal")).toBeInTheDocument();
-    expect(screen.getByText("Pagos con Stripe")).toBeInTheDocument();
+    expect(screen.getByText("Menú Digital y Pagos")).toBeInTheDocument();
     expect(screen.getByText("Cuenta activa")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /ver depósitos/i }),
@@ -89,7 +96,6 @@ describe("AdminPickupContent Component", () => {
       screen.getByText("https://tacos-el-pastor.trykittn.com"),
     ).toBeInTheDocument();
     expect(screen.getByText("Activo")).toBeInTheDocument();
-    expect(screen.getByText("Listo para compartir")).toBeInTheDocument();
     expect(screen.getByText("Domingo")).toBeInTheDocument();
     expect(screen.getByText("Lunes")).toBeInTheDocument();
     expect(screen.getByText("Martes")).toBeInTheDocument();
@@ -147,7 +153,6 @@ describe("AdminPickupContent Component", () => {
     );
 
     expect(screen.getByText("Inactivo")).toBeInTheDocument();
-    expect(screen.getByText("Requiere activar Stripe")).toBeInTheDocument();
     expect(
       screen.getByText("Conecta tu cuenta bancaria"),
     ).toBeInTheDocument();
@@ -305,5 +310,185 @@ describe("AdminPickupContent Component", () => {
     expect(
       await screen.findByText("Horarios actualizados exitosamente."),
     ).toBeInTheDocument();
+  });
+
+  it("handles time change inputs for open_time and close_time", () => {
+    render(
+      <AdminPickupContent
+        initialTenant={mockTenant}
+        initialHours={mockHours}
+      />,
+    );
+
+    const timeInputs = screen.getAllByDisplayValue("09:00");
+    expect(timeInputs.length).toBeGreaterThan(0);
+
+    fireEvent.change(timeInputs[0], { target: { value: "08:30" } });
+    expect(screen.getByDisplayValue("08:30")).toBeInTheDocument();
+  });
+
+  it("displays stripe error when login-link API fails", async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ error: "Error de autenticación de Stripe" }),
+    } as any);
+
+    render(
+      <AdminPickupContent
+        initialTenant={mockTenant}
+        initialHours={mockHours}
+      />,
+    );
+
+    const loginBtn = screen.getByRole("button", {
+      name: /ver depósitos/i,
+    });
+    fireEvent.click(loginBtn);
+
+    expect(
+      await screen.findByText("Error de autenticación de Stripe"),
+    ).toBeInTheDocument();
+  });
+
+  it("handles exception during Stripe login", async () => {
+    vi.mocked(global.fetch).mockRejectedValueOnce(new Error("Network failure"));
+
+    render(
+      <AdminPickupContent
+        initialTenant={mockTenant}
+        initialHours={mockHours}
+      />,
+    );
+
+    const loginBtn = screen.getByRole("button", {
+      name: /ver depósitos/i,
+    });
+    fireEvent.click(loginBtn);
+
+    expect(
+      await screen.findByText("Error al conectar con Stripe"),
+    ).toBeInTheDocument();
+  });
+
+  it("handles API error response when saving business hours", async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ error: "Error del servidor al guardar horarios" }),
+    } as any);
+
+    render(
+      <AdminPickupContent
+        initialTenant={mockTenant}
+        initialHours={mockHours}
+      />,
+    );
+
+    const saveBtn = screen.getByRole("button", { name: /guardar horarios/i });
+    fireEvent.click(saveBtn);
+
+    expect(
+      await screen.findByText("Error del servidor al guardar horarios"),
+    ).toBeInTheDocument();
+  });
+
+  it("handles network error exception when saving business hours", async () => {
+    vi.mocked(global.fetch).mockRejectedValueOnce(new Error("Fallo de red"));
+
+    render(
+      <AdminPickupContent
+        initialTenant={mockTenant}
+        initialHours={mockHours}
+      />,
+    );
+
+    const saveBtn = screen.getByRole("button", { name: /guardar horarios/i });
+    fireEvent.click(saveBtn);
+
+    expect(await screen.findByText("Fallo de red")).toBeInTheDocument();
+  });
+
+  it("closes QR modal when close button is clicked", () => {
+    render(
+      <AdminPickupContent
+        initialTenant={mockTenant}
+        initialHours={mockHours}
+      />,
+    );
+
+    const qrBtn = screen.getByRole("button", { name: /código qr/i });
+    fireEvent.click(qrBtn);
+
+    expect(screen.getByText("Código QR del Menú Digital")).toBeInTheDocument();
+
+    const closeBtn = screen.getByRole("button", { name: /cerrar/i });
+    fireEvent.click(closeBtn);
+
+    expect(
+      screen.queryByText("Código QR del Menú Digital"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("handles closing Stripe modal and completing onboarding successfully", async () => {
+    const inactiveTenant = {
+      ...mockTenant,
+      stripe_account_id: null,
+      stripe_charges_enabled: false,
+    };
+
+    render(
+      <AdminPickupContent
+        initialTenant={inactiveTenant}
+        initialHours={mockHours}
+      />,
+    );
+
+    const connectBtn = screen.getByRole("button", {
+      name: /conectar stripe/i,
+    });
+    fireEvent.click(connectBtn);
+
+    expect(screen.getByTestId("stripe-modal")).toBeInTheDocument();
+
+    const closeModalBtn = screen.getByRole("button", {
+      name: /cerrar modal stripe/i,
+    });
+    fireEvent.click(closeModalBtn);
+
+    expect(screen.queryByTestId("stripe-modal")).not.toBeInTheDocument();
+
+    // Reopen and trigger success
+    fireEvent.click(connectBtn);
+    const completeModalBtn = screen.getByRole("button", {
+      name: /completar modal stripe/i,
+    });
+    fireEvent.click(completeModalBtn);
+
+    expect(mockRefresh).toHaveBeenCalled();
+  });
+
+  it("handles close_time changes and formats time correctly", () => {
+    const hoursWithEmptyTime: DbBusinessHours[] = [
+      {
+        id: "h-0",
+        day_of_week: 0,
+        open_time: "",
+        close_time: "20:00",
+        is_closed: false,
+      },
+    ];
+
+    render(
+      <AdminPickupContent
+        initialTenant={mockTenant}
+        initialHours={hoursWithEmptyTime}
+      />,
+    );
+
+    // Fallback renders 09:00 for open_time
+    expect(screen.getByDisplayValue("09:00")).toBeInTheDocument();
+
+    const closeInput = screen.getByDisplayValue("20:00");
+    fireEvent.change(closeInput, { target: { value: "21:30" } });
+    expect(screen.getByDisplayValue("21:30")).toBeInTheDocument();
   });
 });
