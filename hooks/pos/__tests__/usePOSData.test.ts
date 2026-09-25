@@ -86,10 +86,15 @@ describe("usePOSData Hook", () => {
           json: async () => ({ customers: [] }),
         } as Response);
       }
-      if (urlStr.includes("/api/orders")) {
+      if (urlStr.includes("/api/pos/orders") || urlStr.includes("/api/orders")) {
         return Promise.resolve({
           ok: true,
-          json: async () => ({ orders: [] }),
+          json: async () => ({
+            orders: [],
+            counts: { total: 0, pending: 0, paid: 0, pos: 0, pickup: 0 },
+            pagination: { page: 1, pageSize: 10, total: 0, totalPages: 1 },
+            stats: { count: 0, sales: 0, avgTicket: 0 },
+          }),
         } as Response);
       }
       return Promise.resolve({

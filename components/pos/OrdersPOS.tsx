@@ -16,7 +16,7 @@ import {
   Undo2,
   Utensils,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatServiceLabel, getServiceType } from "@/lib/utils/serviceType";
 import { POSManagerAuthModal } from "./modals/POSManagerAuthModal";
 import { TablePagination } from "@/components/ui/DataTableControls";
@@ -33,68 +33,33 @@ export default function OrdersPOS({
   const isWaiter = user?.isWaiter ?? false;
   const [undoOrder, setUndoOrder] = useState<Order | null>(null);
 
-  const { refreshOrders, availableMenuItems, orders } = usePOSData();
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING" | "PAID">(
-    "ALL",
-  );
-  const [sourceFilter, setSourceFilter] = useState<
-    "ALL" | "POS" | "PICKUP_APP"
-  >("ALL");
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [statusFilter, sourceFilter]);
-
-  const pendingCount = useMemo(
-    () => orders.filter((o) => o.status !== "PAID").length,
-    [orders],
-  );
-  const paidCount = useMemo(
-    () => orders.filter((o) => o.status === "PAID").length,
-    [orders],
-  );
-  const pickupCount = useMemo(
-    () => orders.filter((o) => o.source === "PICKUP_APP").length,
-    [orders],
-  );
-  const posCount = useMemo(
-    () => orders.filter((o) => o.source !== "PICKUP_APP").length,
-    [orders],
-  );
-
-  const filteredOrders = useMemo(() => {
-    return orders.filter((o) => {
-      if (statusFilter === "PENDING" && o.status === "PAID") return false;
-      if (statusFilter === "PAID" && o.status !== "PAID") return false;
-
-      if (sourceFilter === "POS" && o.source === "PICKUP_APP") return false;
-      if (sourceFilter === "PICKUP_APP" && o.source !== "PICKUP_APP")
-        return false;
-
-      return true;
-    });
-  }, [orders, statusFilter, sourceFilter]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
-  const paginatedOrders = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredOrders.slice(startIndex, startIndex + pageSize);
-  }, [filteredOrders, currentPage, pageSize]);
+  const {
+    refreshOrders,
+    availableMenuItems,
+    orders,
+    orderCounts,
+    orderPagination,
+    ordersPage,
+    setOrdersPage,
+    ordersPageSize,
+    setOrdersPageSize,
+    ordersStatusFilter,
+    setOrdersStatusFilter,
+    ordersSourceFilter,
+    setOrdersSourceFilter,
+  } = usePOSData();
 
   const emptyMessage = useMemo(() => {
     let statusLabel = "órdenes";
-    if (statusFilter === "PENDING") statusLabel = "órdenes pendientes";
-    if (statusFilter === "PAID") statusLabel = "órdenes pagadas";
+    if (ordersStatusFilter === "PENDING") statusLabel = "órdenes pendientes";
+    if (ordersStatusFilter === "PAID") statusLabel = "órdenes pagadas";
 
     let sourceLabel = "";
-    if (sourceFilter === "PICKUP_APP") sourceLabel = " de Kittn Pickup";
-    if (sourceFilter === "POS") sourceLabel = " de POS";
+    if (ordersSourceFilter === "PICKUP_APP") sourceLabel = " de Kittn Pickup";
+    if (ordersSourceFilter === "POS") sourceLabel = " de POS";
 
     return `No hay ${statusLabel}${sourceLabel} todavía`;
-  }, [statusFilter, sourceFilter]);
+  }, [ordersStatusFilter, ordersSourceFilter]);
 
   const { isSubmittingCart, setEditingOrder, openModifyModal } = usePOSCart(
     availableMenuItems,
@@ -123,23 +88,29 @@ export default function OrdersPOS({
         <div className="flex items-center gap-1.5 bg-dark/40 p-1 rounded-xl border border-border">
           <button
             type="button"
-            onClick={() => setStatusFilter("ALL")}
+            onClick={() => {
+              setOrdersStatusFilter("ALL");
+              setOrdersPage(1);
+            }}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-              statusFilter === "ALL"
+              ordersStatusFilter === "ALL"
                 ? "bg-card text-text-light border border-border/80 shadow-sm"
                 : "text-text-light/50 hover:text-text-light"
             }`}
           >
             <span>Todas</span>
             <span className="text-[10px] opacity-70 font-mono font-bold">
-              ({orders.length})
+              ({orderCounts.total})
             </span>
           </button>
           <button
             type="button"
-            onClick={() => setStatusFilter("PENDING")}
+            onClick={() => {
+              setOrdersStatusFilter("PENDING");
+              setOrdersPage(1);
+            }}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-              statusFilter === "PENDING"
+              ordersStatusFilter === "PENDING"
                 ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm"
                 : "text-text-light/50 hover:text-amber-400"
             }`}
@@ -148,19 +119,22 @@ export default function OrdersPOS({
             <span>Pendientes</span>
             <span
               className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
-                statusFilter === "PENDING"
+                ordersStatusFilter === "PENDING"
                   ? "bg-amber-500/30 text-amber-200"
                   : "bg-card-light/60 text-text-light/60"
               }`}
             >
-              {pendingCount}
+              {orderCounts.pending}
             </span>
           </button>
           <button
             type="button"
-            onClick={() => setStatusFilter("PAID")}
+            onClick={() => {
+              setOrdersStatusFilter("PAID");
+              setOrdersPage(1);
+            }}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-              statusFilter === "PAID"
+              ordersStatusFilter === "PAID"
                 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
                 : "text-text-light/50 hover:text-emerald-400"
             }`}
@@ -169,12 +143,12 @@ export default function OrdersPOS({
             <span>Pagadas</span>
             <span
               className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
-                statusFilter === "PAID"
+                ordersStatusFilter === "PAID"
                   ? "bg-emerald-500/30 text-emerald-200"
                   : "bg-card-light/60 text-text-light/60"
               }`}
             >
-              {paidCount}
+              {orderCounts.paid}
             </span>
           </button>
         </div>
@@ -183,34 +157,43 @@ export default function OrdersPOS({
         <div className="flex items-center gap-1.5 bg-dark/40 p-1 rounded-xl border border-border">
           <button
             type="button"
-            onClick={() => setSourceFilter("ALL")}
+            onClick={() => {
+              setOrdersSourceFilter("ALL");
+              setOrdersPage(1);
+            }}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-              sourceFilter === "ALL"
+              ordersSourceFilter === "ALL"
                 ? "bg-card text-text-light border border-border/80 shadow-sm"
                 : "text-text-light/50 hover:text-text-light"
             }`}
           >
-            Todos ({orders.length})
+            Todos ({orderCounts.total})
           </button>
           <button
             type="button"
-            onClick={() => setSourceFilter("POS")}
+            onClick={() => {
+              setOrdersSourceFilter("POS");
+              setOrdersPage(1);
+            }}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-              sourceFilter === "POS"
+              ordersSourceFilter === "POS"
                 ? "bg-card text-text-light border border-border/80 shadow-sm"
                 : "text-text-light/50 hover:text-text-light"
             }`}
           >
             <span>🍽️ POS Directo</span>
             <span className="text-[10px] opacity-70 font-mono font-bold">
-              ({posCount})
+              ({orderCounts.pos})
             </span>
           </button>
           <button
             type="button"
-            onClick={() => setSourceFilter("PICKUP_APP")}
+            onClick={() => {
+              setOrdersSourceFilter("PICKUP_APP");
+              setOrdersPage(1);
+            }}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-              sourceFilter === "PICKUP_APP"
+              ordersSourceFilter === "PICKUP_APP"
                 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
                 : "text-text-light/50 hover:text-emerald-400"
             }`}
@@ -218,7 +201,7 @@ export default function OrdersPOS({
             <ShoppingBag className="h-3 w-3" />
             <span>Kittn Pickup</span>
             <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
-              {pickupCount}
+              {orderCounts.pickup}
             </span>
           </button>
         </div>
@@ -246,7 +229,7 @@ export default function OrdersPOS({
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {filteredOrders.length === 0 ? (
+            {orders.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-16 text-center">
                   <p className="text-xs font-extrabold uppercase tracking-widest text-text-light/30">
@@ -255,7 +238,7 @@ export default function OrdersPOS({
                 </td>
               </tr>
             ) : (
-              paginatedOrders.map((order) => {
+              orders.map((order) => {
                 const tipAmt = getOrderTipAmount(order);
                 const isUndoable = (() => {
                   const lastUpdate = new Date(
@@ -465,16 +448,16 @@ export default function OrdersPOS({
         </table>
       </div>
 
-      {filteredOrders.length > 0 && (
+      {orderPagination.total > 0 && (
         <TablePagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredOrders.length}
-          pageSize={pageSize}
-          onPageChange={setCurrentPage}
+          currentPage={ordersPage}
+          totalPages={orderPagination.totalPages}
+          totalItems={orderPagination.total}
+          pageSize={ordersPageSize}
+          onPageChange={setOrdersPage}
           onPageSizeChange={(size) => {
-            setPageSize(size);
-            setCurrentPage(1);
+            setOrdersPageSize(size);
+            setOrdersPage(1);
           }}
           pageSizeOptions={[5, 10, 20, 50]}
         />

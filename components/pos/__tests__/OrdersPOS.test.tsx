@@ -67,6 +67,11 @@ const mockOrders: OrderWithDetails[] = [
 ];
 
 describe("OrdersPOS component", () => {
+  const setOrdersPage = vi.fn();
+  const setOrdersPageSize = vi.fn();
+  const setOrdersStatusFilter = vi.fn();
+  const setOrdersSourceFilter = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -83,6 +88,27 @@ describe("OrdersPOS component", () => {
       refreshOrders: vi.fn(),
       availableMenuItems: [],
       orders: mockOrders,
+      orderCounts: {
+        total: 2,
+        pending: 1,
+        paid: 1,
+        pos: 1,
+        pickup: 1,
+      },
+      orderPagination: {
+        page: 1,
+        pageSize: 10,
+        total: 2,
+        totalPages: 1,
+      },
+      ordersPage: 1,
+      setOrdersPage,
+      ordersPageSize: 10,
+      setOrdersPageSize,
+      ordersStatusFilter: "ALL",
+      setOrdersStatusFilter,
+      ordersSourceFilter: "ALL",
+      setOrdersSourceFilter,
     } as unknown as ReturnType<typeof usePOSData>);
 
     vi.mocked(usePOSCart).mockReturnValue({
@@ -123,74 +149,71 @@ describe("OrdersPOS component", () => {
     expect(screen.getAllByText(/Pickup/i).length).toBeGreaterThanOrEqual(1);
   });
 
-  it("filters only pending orders when clicking on Pendientes tab", () => {
+  it("calls setOrdersStatusFilter and resets page when clicking on Pendientes tab", () => {
     render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Pendientes/i }));
 
-    expect(screen.getByText("#101")).toBeDefined();
-    expect(screen.queryByText("#102")).toBeNull();
+    expect(setOrdersStatusFilter).toHaveBeenCalledWith("PENDING");
+    expect(setOrdersPage).toHaveBeenCalledWith(1);
   });
 
-  it("filters only paid orders when clicking on Pagadas tab", () => {
+  it("calls setOrdersStatusFilter and resets page when clicking on Pagadas tab", () => {
     render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Pagadas/i }));
 
-    expect(screen.queryByText("#101")).toBeNull();
-    expect(screen.getByText("#102")).toBeDefined();
+    expect(setOrdersStatusFilter).toHaveBeenCalledWith("PAID");
+    expect(setOrdersPage).toHaveBeenCalledWith(1);
   });
 
-  it("restores all orders when clicking on Todas tab after filtering", () => {
+  it("calls setOrdersStatusFilter and resets page when clicking on Todas tab", () => {
     render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /Pagadas/i }));
-    expect(screen.queryByText("#101")).toBeNull();
 
     const allStatusBtn = screen.getAllByRole("button", { name: /Todas/i })[0];
     fireEvent.click(allStatusBtn);
 
-    expect(screen.getByText("#101")).toBeDefined();
-    expect(screen.getByText("#102")).toBeDefined();
+    expect(setOrdersStatusFilter).toHaveBeenCalledWith("ALL");
+    expect(setOrdersPage).toHaveBeenCalledWith(1);
   });
 
-  it("filters only POS orders when clicking on POS Directo filter", () => {
+  it("calls setOrdersSourceFilter and resets page when clicking on POS Directo filter", () => {
     render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
 
     fireEvent.click(screen.getByText(/POS Directo/i));
 
-    expect(screen.getByText("#101")).toBeDefined();
-    expect(screen.queryByText("#102")).toBeNull();
+    expect(setOrdersSourceFilter).toHaveBeenCalledWith("POS");
+    expect(setOrdersPage).toHaveBeenCalledWith(1);
   });
 
-  it("filters only Kittn Pickup orders when clicking on Kittn Pickup filter and restores with Todos", () => {
+  it("calls setOrdersSourceFilter and resets page when clicking on Kittn Pickup filter and Todos", () => {
     render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
 
     fireEvent.click(screen.getByText(/Kittn Pickup/i));
+    expect(setOrdersSourceFilter).toHaveBeenCalledWith("PICKUP_APP");
 
-    expect(screen.queryByText("#101")).toBeNull();
-    expect(screen.getByText("#102")).toBeDefined();
-
-    fireEvent.click(screen.getByText(/Todos \(/i));
-    expect(screen.getByText("#101")).toBeDefined();
-    expect(screen.getByText("#102")).toBeDefined();
+    fireEvent.click(screen.getByText(/Todos \(2\)/i));
+    expect(setOrdersSourceFilter).toHaveBeenCalledWith("ALL");
   });
 
-  it("displays contextual empty message when no orders match combined filters", () => {
+  it("displays contextual empty message when orders list is empty", () => {
+    vi.mocked(usePOSData).mockReturnValue({
+      refreshOrders: vi.fn(),
+      availableMenuItems: [],
+      orders: [],
+      orderCounts: { total: 0, pending: 0, paid: 0, pos: 0, pickup: 0 },
+      orderPagination: { page: 1, pageSize: 10, total: 0, totalPages: 1 },
+      ordersPage: 1,
+      setOrdersPage,
+      ordersPageSize: 10,
+      setOrdersPageSize,
+      ordersStatusFilter: "PENDING",
+      setOrdersStatusFilter,
+      ordersSourceFilter: "PICKUP_APP",
+      setOrdersSourceFilter,
+    } as unknown as ReturnType<typeof usePOSData>);
+
     render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
-
-    // #101 is POS + PENDING, #102 is PICKUP + PAID
-    // Filter: Pagadas + POS Directo -> 0 orders
-    fireEvent.click(screen.getByRole("button", { name: /Pagadas/i }));
-    fireEvent.click(screen.getByText(/POS Directo/i));
-
-    expect(
-      screen.getByText(/No hay órdenes pagadas de POS todavía/i),
-    ).toBeDefined();
-
-    // Filter: Pendientes + Kittn Pickup -> 0 orders
-    fireEvent.click(screen.getByRole("button", { name: /Pendientes/i }));
-    fireEvent.click(screen.getByText(/Kittn Pickup/i));
 
     expect(
       screen.getByText(/No hay órdenes pendientes de Kittn Pickup todavía/i),
@@ -219,57 +242,39 @@ describe("OrdersPOS component", () => {
     expect(screen.queryByText("+$35.00 propina")).toBeNull();
     expect(screen.getByRole("button", { name: /Propina/i })).toBeDefined();
 
-    // Clicking Deshacer should prompt authorization modal for waiter
     const undoButton = screen.getByRole("button", { name: /Deshacer/i });
     fireEvent.click(undoButton);
     expect(screen.getByText(/Autorizar Reapertura de Cuenta/i)).toBeDefined();
   });
 
-  it("handles pagination navigation and page size change correctly", () => {
-    const manyOrders: OrderWithDetails[] = Array.from({ length: 15 }, (_, i) => ({
-      id: `ord-${i + 1}`,
-      orderNumber: `${100 + i + 1}`,
-      source: "POS",
-      status: OrderStatus.PENDING,
-      table: `Mesa ${i + 1}`,
-      notes: "",
-      subtotal: 50,
-      tax: 0,
-      total: 50,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      orderItems: [],
-      payments: [],
-    }));
-
+  it("handles pagination controls using server pagination hook props", () => {
     vi.mocked(usePOSData).mockReturnValue({
       refreshOrders: vi.fn(),
       availableMenuItems: [],
-      orders: manyOrders,
+      orders: mockOrders,
+      orderCounts: { total: 25, pending: 10, paid: 15, pos: 20, pickup: 5 },
+      orderPagination: { page: 1, pageSize: 10, total: 25, totalPages: 3 },
+      ordersPage: 1,
+      setOrdersPage,
+      ordersPageSize: 10,
+      setOrdersPageSize,
+      ordersStatusFilter: "ALL",
+      setOrdersStatusFilter,
+      ordersSourceFilter: "ALL",
+      setOrdersSourceFilter,
     } as unknown as ReturnType<typeof usePOSData>);
 
     render(<OrdersPOS onClickCancel={vi.fn()} cancelArmedId={null} />);
 
-    // First page shows #101 to #110 (10 items)
-    expect(screen.getByText("#101")).toBeDefined();
-    expect(screen.getByText("#110")).toBeDefined();
-    expect(screen.queryByText("#111")).toBeNull();
-
     // Next page button
     const nextBtn = screen.getByRole("button", { name: /Siguiente/i });
     fireEvent.click(nextBtn);
-
-    // Second page shows #111 to #115
-    expect(screen.queryByText("#101")).toBeNull();
-    expect(screen.getByText("#111")).toBeDefined();
-    expect(screen.getByText("#115")).toBeDefined();
+    expect(setOrdersPage).toHaveBeenCalledWith(2);
 
     // Change page size to 20
     const select = screen.getByRole("combobox");
     fireEvent.change(select, { target: { value: "20" } });
-
-    // Now all 15 are visible
-    expect(screen.getByText("#101")).toBeDefined();
-    expect(screen.getByText("#115")).toBeDefined();
+    expect(setOrdersPageSize).toHaveBeenCalledWith(20);
+    expect(setOrdersPage).toHaveBeenCalledWith(1);
   });
 });

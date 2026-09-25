@@ -221,26 +221,84 @@ function usePOSDataInternal(tenantId?: string) {
     }
   }, []);
 
-  const fetchOrders = useCallback(async () => {
-    const response = await fetch("/api/orders?pos=true");
-    const data = await response.json();
-    if (!response.ok) throw new Error(data?.error || "Error al cargar órdenes");
-    const mappedOrders = (data.orders || []).map((dbOrder: DbOrderPayload) =>
-      mapOrderData(dbOrder),
-    ) as Order[];
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [ordersPageSize, setOrdersPageSize] = useState(10);
+  const [ordersStatusFilter, setOrdersStatusFilter] = useState<
+    "ALL" | "PENDING" | "PAID"
+  >("ALL");
+  const [ordersSourceFilter, setOrdersSourceFilter] = useState<
+    "ALL" | "POS" | "PICKUP_APP"
+  >("ALL");
 
-    // Only display unarchived orders (orders active or created after the latest cash cut)
-    const activeOrders = mappedOrders.filter(
-      (order) => !order.corteId && order.closeStatus !== "ARCHIVED",
-    );
+  const [orderCounts, setOrderCounts] = useState({
+    total: 0,
+    pending: 0,
+    paid: 0,
+    pos: 0,
+    pickup: 0,
+  });
 
-    setOrders(activeOrders);
-    return activeOrders;
-  }, []);
+  const [orderPagination, setOrderPagination] = useState({
+    page: 1,
+    pageSize: 10,
+    total: 0,
+    totalPages: 1,
+  });
+
+  const [orderStats, setOrderStats] = useState({
+    count: 0,
+    sales: 0,
+    avgTicket: 0,
+  });
+
+  const fetchOrders = useCallback(
+    async (
+      p = ordersPage,
+      size = ordersPageSize,
+      status = ordersStatusFilter,
+      source = ordersSourceFilter,
+    ) => {
+      try {
+        const queryParams = new URLSearchParams({
+          page: String(p),
+          pageSize: String(size),
+          status,
+          source,
+        });
+        const response = await fetch(`/api/pos/orders?${queryParams.toString()}`);
+        const data = await response.json();
+        if (!response.ok)
+          throw new Error(data?.error || "Error al cargar órdenes");
+
+        const mappedOrders = (data.orders || []).map((dbOrder: DbOrderPayload) =>
+          mapOrderData(dbOrder),
+        ) as Order[];
+
+        setOrders(mappedOrders);
+        if (data.counts) setOrderCounts(data.counts);
+        if (data.pagination) setOrderPagination(data.pagination);
+        if (data.stats) setOrderStats(data.stats);
+
+        return mappedOrders;
+      } catch (err) {
+        console.error("[POS] Error fetching orders:", err);
+        return [];
+      }
+    },
+    [ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter],
+  );
 
   const refreshOrders = useCallback(() => {
-    return fetchOrders();
-  }, [fetchOrders]);
+    return fetchOrders(ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter);
+  }, [fetchOrders, ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter]);
+
+  // Refetch orders whenever server pagination or filter parameters change
+  useEffect(() => {
+    setOrdersLoading(true);
+    fetchOrders(ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter).finally(() => {
+      setOrdersLoading(false);
+    });
+  }, [fetchOrders, ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter]);
 
   useEffect(() => {
     async function load() {
@@ -254,7 +312,9 @@ function usePOSDataInternal(tenantId?: string) {
           fetchCategories(),
           fetchCustomers().finally(() => setCustomersLoading(false)),
           fetchTerminals(),
-          fetchOrders().finally(() => setOrdersLoading(false)),
+          fetchOrders(1, ordersPageSize, "ALL", "ALL").finally(() =>
+            setOrdersLoading(false),
+          ),
         ]);
       } catch (err) {
         setErrorMessage(
@@ -263,7 +323,7 @@ function usePOSDataInternal(tenantId?: string) {
       }
     }
     load();
-  }, [fetchOrders, fetchMenu, fetchCategories, fetchCustomers, fetchTerminals]);
+  }, [fetchOrders, fetchMenu, fetchCategories, fetchCustomers, fetchTerminals, ordersPageSize]);
 
   // Realtime subscription: any INSERT/UPDATE/DELETE on orders, ingredients,
   // menu_items or menu_categories for this tenant triggers a debounced refetch.
@@ -273,7 +333,9 @@ function usePOSDataInternal(tenantId?: string) {
     const debouncedFetchOrders = (payload: unknown) => {
       console.log("[POS Realtime] Order event:", payload);
       if (fetchDebounceRef.current) clearTimeout(fetchDebounceRef.current);
-      fetchDebounceRef.current = setTimeout(() => fetchOrders(), 300);
+      fetchDebounceRef.current = setTimeout(() => {
+        fetchOrders(ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter);
+      }, 300);
     };
 
     const debouncedFetchMenu = (payload: unknown) => {
@@ -345,34 +407,20 @@ function usePOSDataInternal(tenantId?: string) {
       if (categoriesDebounceRef.current)
         clearTimeout(categoriesDebounceRef.current);
     };
-  }, [tenantId, supabase, fetchOrders, fetchMenu, fetchCategories]);
+  }, [
+    tenantId,
+    supabase,
+    fetchOrders,
+    fetchMenu,
+    fetchCategories,
+    ordersPage,
+    ordersPageSize,
+    ordersStatusFilter,
+    ordersSourceFilter,
+  ]);
 
-  // Today metrics summary — single pass O(N) loop
-  const todayStats = useMemo(() => {
-    const todayDateStr = getTodayDateStr();
-    let count = 0;
-    let salesTotal = 0;
-    let paidCount = 0;
-
-    for (let i = 0; i < orders.length; i++) {
-      const o = orders[i];
-      if (getOrderDateStr(o.createdAt) === todayDateStr) {
-        count++;
-        if (o.status === "PAID" || o.status === "DELIVERED") {
-          salesTotal += o.total;
-          paidCount++;
-        }
-      }
-    }
-
-    const avgTicket = paidCount > 0 ? salesTotal / paidCount : 0;
-
-    return {
-      count,
-      sales: salesTotal,
-      avgTicket,
-    };
-  }, [orders]);
+  // Today metrics summary from live API stats
+  const todayStats = orderStats;
 
   /** Items con tracking de ingrediente y stock en nivel bajo o agotado */
   const lowStockItems = useMemo(
@@ -406,5 +454,16 @@ function usePOSDataInternal(tenantId?: string) {
     todayStats,
     lowStockItems,
     terminals,
+    // Server-side pagination & live counts
+    orderCounts,
+    orderPagination,
+    ordersPage,
+    setOrdersPage,
+    ordersPageSize,
+    setOrdersPageSize,
+    ordersStatusFilter,
+    setOrdersStatusFilter,
+    ordersSourceFilter,
+    setOrdersSourceFilter,
   };
 }
