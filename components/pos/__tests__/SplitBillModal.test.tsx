@@ -217,4 +217,44 @@ describe("SplitBillModal Component", () => {
     expect(screen.getByText("General")).toBeInTheDocument();
     expect(screen.getByText("Clip")).toBeInTheDocument();
   });
+
+  it("allows selecting independent tip payment method and passes it to onConfirm", () => {
+    const onConfirm = vi.fn();
+    render(
+      <SplitBillModal
+        order={mockOrder}
+        onConfirm={onConfirm}
+        onClose={vi.fn()}
+      />,
+    );
+
+    // Switch both persons to Card payment
+    const cardButtons = screen.getAllByRole("button", { name: "Tarjeta" });
+    cardButtons.forEach((btn) => fireEvent.click(btn));
+
+    // Click % tip for person 1 and preset 10%
+    const percentButtons = screen.getAllByRole("button", { name: "%" });
+    fireEvent.click(percentButtons[0]);
+    const tenPercentButtons = screen.getAllByRole("button", { name: "10%" });
+    fireEvent.click(tenPercentButtons[0]);
+
+    // Select Efectivo for tip on person 1 (index 1 is Person 1's tip method button)
+    const cashButtons = screen.getAllByRole("button", { name: "Efectivo" });
+    fireEvent.click(cashButtons[1]);
+
+    const confirmBtn = screen.getByRole("button", {
+      name: /REGISTRAR PAGOS/i,
+    });
+    fireEvent.click(confirmBtn);
+
+    expect(onConfirm).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          method: "CARD",
+          tipAmount: 10,
+          tipPaymentMethod: "CASH",
+        }),
+      ]),
+    );
+  });
 });

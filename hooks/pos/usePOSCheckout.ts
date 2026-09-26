@@ -51,6 +51,11 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     "NONE",
   );
   const [tipInput, setTipInput] = useState<string>("");
+  const [tipPaymentMethod, setTipPaymentMethod] = useState<
+    "SAME" | "CASH" | "CARD" | "TRANSFER"
+  >("SAME");
+  const [tipTerminalId, setTipTerminalId] = useState<string | null>(null);
+  const [tipReceivedAmount, setTipReceivedAmount] = useState<string>("");
 
   // Unusual tip confirmation: if non-null, UI must show inline confirm before calling handleProcessPayment
   const [unusualTipInfo, setUnusualTipInfo] = useState<{
@@ -68,6 +73,9 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     "NONE" | "PERCENTAGE" | "FIXED"
   >("NONE");
   const [editTipInput, setEditTipInput] = useState<string>("");
+  const [editTipPaymentMethod, setEditTipPaymentMethod] = useState<
+    "SAME" | "CASH" | "CARD" | "TRANSFER"
+  >("SAME");
 
   // Split bill State
   const [showSplitBill, setShowSplitBill] = useState(false);
@@ -86,6 +94,10 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     return 0;
   }, [checkoutOrderTotal, tipType, tipInput]);
 
+  const resolvedTipPaymentMethod = useMemo(() => {
+    return tipPaymentMethod === "SAME" ? paymentMethod : tipPaymentMethod;
+  }, [tipPaymentMethod, paymentMethod]);
+
   const editTipAmountCalculated = useMemo(() => {
     if (!editingTipOrderTotal) return 0;
     if (editTipType === "PERCENTAGE") {
@@ -99,10 +111,40 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
 
   const change = useMemo(() => {
     if (!checkoutOrderTotal || !receivedAmount) return 0;
-    const diff =
-      Number(receivedAmount) - (checkoutOrderTotal + tipAmountCalculated);
+    if (paymentMethod !== "CASH") return 0;
+
+    const cashDue =
+      resolvedTipPaymentMethod === "CASH"
+        ? checkoutOrderTotal + tipAmountCalculated
+        : checkoutOrderTotal;
+
+    const diff = Number(receivedAmount) - cashDue;
     return diff > 0 ? diff : 0;
-  }, [checkoutOrderTotal, receivedAmount, tipAmountCalculated]);
+  }, [
+    checkoutOrderTotal,
+    receivedAmount,
+    paymentMethod,
+    resolvedTipPaymentMethod,
+    tipAmountCalculated,
+  ]);
+
+  const tipChange = useMemo(() => {
+    if (
+      paymentMethod === "CASH" ||
+      resolvedTipPaymentMethod !== "CASH" ||
+      !tipAmountCalculated ||
+      !tipReceivedAmount
+    ) {
+      return 0;
+    }
+    const diff = Number(tipReceivedAmount) - tipAmountCalculated;
+    return diff > 0 ? diff : 0;
+  }, [
+    paymentMethod,
+    resolvedTipPaymentMethod,
+    tipAmountCalculated,
+    tipReceivedAmount,
+  ]);
 
   const handleProcessPayment = async (
     forceConfirmed = false,
@@ -130,6 +172,11 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
       setCheckoutError(null);
       const isCardPayment =
         paymentMethod === "CARD" || paymentMethod === "TRANSFER";
+      const actualTipMethod =
+        tipPaymentMethod === "SAME" ? paymentMethod : tipPaymentMethod;
+      const isTipCard =
+        actualTipMethod === "CARD" || actualTipMethod === "TRANSFER";
+
       const response = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -140,9 +187,12 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
           receivedAmount:
             paymentMethod === "CASH"
               ? Number(receivedAmount)
-              : checkoutOrder.total + tipAmountCalculated,
+              : checkoutOrder.total +
+                (actualTipMethod === paymentMethod ? tipAmountCalculated : 0),
           change: paymentMethod === "CASH" ? change : 0,
           tipAmount: tipAmountCalculated,
+          tipPaymentMethod: actualTipMethod,
+          ...(isTipCard && tipTerminalId ? { tipTerminalId } : {}),
           ...(isCardPayment
             ? {
                 terminalId:
@@ -264,12 +314,20 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     try {
       setIsSubmitting(true);
       setCheckoutError(null);
+      const actualEditTipMethod =
+        editTipPaymentMethod === "SAME"
+          ? editingTipOrder.payments?.[0]?.tipPaymentMethod ||
+            editingTipOrder.payments?.[0]?.method ||
+            "CASH"
+          : editTipPaymentMethod;
+
       const response = await fetch("/api/payments", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId: editingTipOrder.id,
           tipAmount: editTipAmountCalculated,
+          tipPaymentMethod: actualEditTipMethod,
           pin,
         }),
       });
@@ -475,6 +533,14 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     tipInput,
     setTipInput,
     tipAmountCalculated,
+    tipPaymentMethod,
+    setTipPaymentMethod,
+    tipTerminalId,
+    setTipTerminalId,
+    tipReceivedAmount,
+    setTipReceivedAmount,
+    tipChange,
+    resolvedTipPaymentMethod,
     change,
 
     unusualTipInfo,
@@ -492,6 +558,8 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
     setEditTipType,
     editTipInput,
     setEditTipInput,
+    editTipPaymentMethod,
+    setEditTipPaymentMethod,
     editTipAmountCalculated,
 
     showSplitBill,

@@ -53,6 +53,8 @@ describe("POSTipModal", () => {
     setEditTipType: mockSetEditTipType,
     editTipInput: "25",
     setEditTipInput: mockSetEditTipInput,
+    editTipPaymentMethod: "CASH",
+    setEditTipPaymentMethod: vi.fn(),
     editTipAmountCalculated: 25,
     handleUpdateTip: mockHandleUpdateTip,
   };
@@ -184,5 +186,23 @@ describe("POSTipModal", () => {
     await waitFor(() => {
       expect(mockHandleUpdateTip).toHaveBeenCalledWith("1234");
     });
+  });
+
+  it("allows selecting a different tip payment method (CARD, TRANSFER)", () => {
+    const mockSetEditTipPaymentMethod = vi.fn();
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...baseCheckoutState,
+      setEditTipPaymentMethod: mockSetEditTipPaymentMethod,
+    } as any);
+
+    render(<POSTipModal />);
+
+    const cardButton = screen.getByRole("button", { name: "Tarjeta" });
+    fireEvent.click(cardButton);
+    expect(mockSetEditTipPaymentMethod).toHaveBeenCalledWith("CARD");
+
+    const transferButton = screen.getByRole("button", { name: "Transf." });
+    fireEvent.click(transferButton);
+    expect(mockSetEditTipPaymentMethod).toHaveBeenCalledWith("TRANSFER");
   });
 });

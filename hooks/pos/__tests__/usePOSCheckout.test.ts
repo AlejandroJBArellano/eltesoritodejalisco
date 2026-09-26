@@ -259,4 +259,59 @@ describe("usePOSCheckout Hook", () => {
     expect(decoded).toContain("Descuento en orden: -$9.00 (Amigo)");
     expect(decoded).toContain("Total Pagado: $81.00");
   });
+
+  it("should calculate change correctly when tip method differs from payment method", () => {
+    const { result } = renderHook(() => usePOSCheckout(mockRefreshOrders));
+
+    act(() => {
+      result.current.setCheckoutOrder(mockOrder); // order total = 100
+      result.current.setPaymentMethod("CASH");
+      result.current.setTipType("FIXED");
+      result.current.setTipInput("20");
+      result.current.setTipPaymentMethod("CARD"); // tip is paid by CARD
+      result.current.setReceivedAmount("100");
+    });
+
+    // Cash due is only 100 (tip is on card), so change = 100 - 100 = 0
+    expect(result.current.change).toBe(0);
+    expect(result.current.resolvedTipPaymentMethod).toBe("CARD");
+  });
+
+  it("should send tipPaymentMethod and tipTerminalId in handleProcessPayment", async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+
+    const { result } = renderHook(() => usePOSCheckout(mockRefreshOrders));
+
+    act(() => {
+      result.current.setCheckoutOrder(mockOrder);
+      result.current.setPaymentMethod("CARD");
+      result.current.setSelectedTerminalId("term-1");
+      result.current.setTipType("FIXED");
+      result.current.setTipInput("15");
+      result.current.setTipPaymentMethod("CASH");
+      result.current.setReceivedAmount("100");
+    });
+
+    await act(async () => {
+      await result.current.handleProcessPayment();
+    });
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    const [url, options] = vi.mocked(global.fetch).mock.calls[0];
+    expect(url).toBe("/api/payments");
+    expect(options?.method).toBe("POST");
+    expect(JSON.parse(options?.body as string)).toEqual({
+      orderId: "order-1",
+      method: "CARD",
+      amount: 100,
+      receivedAmount: 100,
+      change: 0,
+      tipAmount: 15,
+      tipPaymentMethod: "CASH",
+      terminalId: "term-1",
+    });
+  });
 });

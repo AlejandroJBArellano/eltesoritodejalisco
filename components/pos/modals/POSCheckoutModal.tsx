@@ -59,6 +59,14 @@ export function POSCheckoutModal() {
     tipInput,
     setTipInput,
     tipAmountCalculated,
+    tipPaymentMethod,
+    setTipPaymentMethod,
+    tipTerminalId,
+    setTipTerminalId,
+    tipReceivedAmount,
+    setTipReceivedAmount,
+    tipChange,
+    resolvedTipPaymentMethod,
     change,
     unusualTipInfo,
     setUnusualTipInfo,
@@ -262,18 +270,34 @@ export function POSCheckoutModal() {
       ? orderTotals.subtotalGross
       : calculatedSubtotalGross;
 
+  const isTipCashOnly =
+    paymentMethod !== "CASH" && resolvedTipPaymentMethod === "CASH";
+  const isOrderCashOnly =
+    paymentMethod === "CASH" && resolvedTipPaymentMethod !== "CASH";
+  const isAllCash =
+    paymentMethod === "CASH" && resolvedTipPaymentMethod === "CASH";
+
+  const exactCashDue = isAllCash
+    ? checkoutOrder.total + tipAmountCalculated
+    : isOrderCashOnly
+      ? checkoutOrder.total
+      : 0;
+
   const isSubmitDisabled =
     isSubmittingCheckout ||
     isApplyingDiscount ||
     !!unusualTipInfo ||
-    (checkoutOrder.total + tipAmountCalculated > 0 &&
-      paymentMethod === "CASH" &&
-      (!receivedAmount ||
-        Number(receivedAmount) < checkoutOrder.total + tipAmountCalculated));
+    (exactCashDue > 0 &&
+      (!receivedAmount || Number(receivedAmount) < exactCashDue)) ||
+    (isTipCashOnly &&
+      tipReceivedAmount !== "" &&
+      Number(tipReceivedAmount) < tipAmountCalculated);
 
   const exactTotalDue = checkoutOrder.total + tipAmountCalculated;
   const quickCashPresets = [50, 100, 200, 500, 1000]
-    .filter((b) => b > exactTotalDue)
+    .filter(
+      (b) => b > (paymentMethod === "CASH" ? exactCashDue : exactTotalDue),
+    )
     .slice(0, 3);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -871,25 +895,60 @@ export function POSCheckoutModal() {
                     </div>
 
                     {tipType !== "NONE" && (
-                      <input
-                        type="number"
-                        value={tipInput}
-                        disabled={isSubmittingCheckout}
-                        onChange={(e) => setTipInput(e.target.value)}
-                        placeholder={
-                          tipType === "PERCENTAGE"
-                            ? "% Ej. 10"
-                            : "$ Monto propina"
-                        }
-                        className="w-full text-base font-mono font-bold p-2.5 border border-border bg-dark/40 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-center text-text-light transition-all placeholder:text-text-light/30 disabled:opacity-50"
-                      />
+                      <div className="space-y-2 pt-1">
+                        <input
+                          type="number"
+                          value={tipInput}
+                          disabled={isSubmittingCheckout}
+                          onChange={(e) => setTipInput(e.target.value)}
+                          placeholder={
+                            tipType === "PERCENTAGE"
+                              ? "% Ej. 10"
+                              : "$ Monto propina"
+                          }
+                          className="w-full text-base font-mono font-bold p-2.5 border border-border bg-dark/40 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-center text-text-light transition-all placeholder:text-text-light/30 disabled:opacity-50"
+                        />
+
+                        {/* Selector de Método de Propina */}
+                        {tipAmountCalculated > 0 && (
+                          <div className="space-y-1.5 pt-1">
+                            <label className="text-[10px] font-bold text-text-light/40 uppercase tracking-wider block">
+                              Método de la Propina
+                            </label>
+                            <div className="grid grid-cols-4 gap-1.5">
+                              {[
+                                { value: "SAME", label: "Mismo" },
+                                { value: "CASH", label: "Efectivo" },
+                                { value: "CARD", label: "Tarjeta" },
+                                { value: "TRANSFER", label: "Transf." },
+                              ].map((opt) => (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  disabled={isSubmittingCheckout}
+                                  onClick={() =>
+                                    setTipPaymentMethod(opt.value as any)
+                                  }
+                                  className={`py-1.5 text-[10px] rounded-lg font-bold uppercase border transition-all cursor-pointer ${
+                                    tipPaymentMethod === opt.value
+                                      ? "bg-primary/20 border-primary text-primary shadow-xs"
+                                      : "border-border text-text-light/60 bg-white/5 hover:border-text-light/20 hover:text-text-light hover:bg-white/10"
+                                  }`}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
 
                   {/* Método de Pago */}
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-text-light/40 uppercase tracking-wider block">
-                      Método de Pago
+                      Método de Pago de la Cuenta
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       {PAYMENT_METHODS.map((m) => {
@@ -950,9 +1009,54 @@ export function POSCheckoutModal() {
                       )}
                   </div>
 
-                  {/* Pago en Efectivo */}
+                  {/* Desglose cuando el método de propina difiere del de la orden */}
+                  {tipAmountCalculated > 0 &&
+                    resolvedTipPaymentMethod !== paymentMethod && (
+                      <div className="rounded-lg bg-primary/10 border border-primary/25 p-3 space-y-1.5 text-xs animate-in fade-in duration-150">
+                        <p className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                          Desglose de Cobro Multimétodo
+                        </p>
+                        <div className="flex justify-between font-mono text-text-light">
+                          <span>
+                            Cuenta (
+                            {
+                              PAYMENT_METHODS.find(
+                                (p) => p.value === paymentMethod,
+                              )?.label
+                            }
+                            ):
+                          </span>
+                          <span className="font-bold tabular-nums">
+                            ${checkoutOrder.total.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between font-mono text-primary">
+                          <span>
+                            Propina (
+                            {
+                              PAYMENT_METHODS.find(
+                                (p) => p.value === resolvedTipPaymentMethod,
+                              )?.label
+                            }
+                            ):
+                          </span>
+                          <span className="font-bold tabular-nums">
+                            +${tipAmountCalculated.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Pago de la Cuenta en Efectivo */}
                   {paymentMethod === "CASH" && (
                     <div className="space-y-2.5">
+                      <label className="text-[10px] font-bold text-text-light/40 uppercase tracking-wider block">
+                        Efectivo Recibido (
+                        {isAllCash
+                          ? `Total con Propina: $${exactCashDue.toFixed(2)}`
+                          : `Total Cuenta: $${exactCashDue.toFixed(2)}`}
+                        )
+                      </label>
                       <input
                         type="number"
                         value={receivedAmount}
@@ -969,11 +1073,11 @@ export function POSCheckoutModal() {
                           type="button"
                           disabled={isSubmittingCheckout}
                           onClick={() =>
-                            setReceivedAmount(exactTotalDue.toFixed(2))
+                            setReceivedAmount(exactCashDue.toFixed(2))
                           }
                           className="flex-1 py-1.5 px-2 rounded-lg bg-white/5 hover:bg-white/10 border border-border text-[10px] font-mono font-bold uppercase text-text-light/70 hover:text-text-light transition-all cursor-pointer active:scale-[0.98]"
                         >
-                          Exacto (${exactTotalDue.toFixed(2)})
+                          Exacto (${exactCashDue.toFixed(2)})
                         </button>
                         {quickCashPresets.map((preset) => (
                           <button
@@ -998,6 +1102,35 @@ export function POSCheckoutModal() {
                           ${change.toFixed(2)}
                         </span>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Propina en Efectivo cuando la cuenta se cobra por Tarjeta o Transferencia */}
+                  {isTipCashOnly && (
+                    <div className="space-y-2 p-3 bg-dark/40 rounded-xl border border-border">
+                      <label className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">
+                        Efectivo Recibido para Propina ($
+                        {tipAmountCalculated.toFixed(2)})
+                      </label>
+                      <input
+                        type="number"
+                        value={tipReceivedAmount}
+                        disabled={isSubmittingCheckout}
+                        onChange={(e) => setTipReceivedAmount(e.target.value)}
+                        placeholder={`$${tipAmountCalculated.toFixed(2)} exacto...`}
+                        className="w-full text-xl font-mono font-bold p-2.5 border border-border bg-dark/40 rounded-lg focus:border-emerald-500 outline-none text-center text-text-light transition-all placeholder:text-text-light/20"
+                      />
+                      {tipReceivedAmount !== "" &&
+                        Number(tipReceivedAmount) > tipAmountCalculated && (
+                          <div className="flex justify-between items-center bg-dark/60 p-2 rounded-lg border border-border">
+                            <span className="font-bold text-text-light/40 text-xs uppercase">
+                              Cambio de Propina
+                            </span>
+                            <span className="text-base font-mono font-bold text-emerald-400 tabular-nums">
+                              ${tipChange.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
                     </div>
                   )}
                 </>

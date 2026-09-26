@@ -10,6 +10,7 @@ type SplitMode = "EQUAL" | "ITEMS";
 
 type SplitPart = {
   paymentMethod: string;
+  tipPaymentMethod?: string;
   terminalId?: string;
   tipType: "NONE" | "PERCENTAGE" | "FIXED";
   tipInput: string;
@@ -20,6 +21,8 @@ export type SplitPayment = {
   amount: number;
   method: string;
   tipAmount: number;
+  tipPaymentMethod?: string | null;
+  tipTerminalId?: string | null;
   receivedAmount?: number;
   change?: number;
   terminalId?: string | null;
@@ -43,6 +46,7 @@ const PAYMENT_METHODS = [
 
 const defaultPart = (): SplitPart => ({
   paymentMethod: "CASH",
+  tipPaymentMethod: "SAME",
   tipType: "NONE",
   tipInput: "",
   receivedAmount: "",
@@ -197,9 +201,16 @@ export function SplitBillModal({
     if (!allItemsAssigned) return false;
     for (let i = 0; i < partCount; i++) {
       const part = parts[i];
-      const total = partAmounts[i] + tipAmounts[i];
+      const tip = tipAmounts[i];
+      const resolvedTipMethod =
+        part.tipPaymentMethod && part.tipPaymentMethod !== "SAME"
+          ? part.tipPaymentMethod
+          : part.paymentMethod;
+
       if (part.paymentMethod === "CASH") {
-        if (!part.receivedAmount || Number(part.receivedAmount) < total)
+        const requiredCash =
+          resolvedTipMethod === "CASH" ? partAmounts[i] + tip : partAmounts[i];
+        if (!part.receivedAmount || Number(part.receivedAmount) < requiredCash)
           return false;
       }
     }
@@ -210,9 +221,16 @@ export function SplitBillModal({
     const splits: SplitPayment[] = parts.slice(0, partCount).map((part, i) => {
       const amount = partAmounts[i];
       const tip = tipAmounts[i];
-      const total = amount + tip;
-      const received =
-        part.paymentMethod === "CASH" ? Number(part.receivedAmount) : total;
+      const resolvedTipMethod =
+        part.tipPaymentMethod && part.tipPaymentMethod !== "SAME"
+          ? part.tipPaymentMethod
+          : part.paymentMethod;
+
+      const isCash = part.paymentMethod === "CASH";
+      const cashDue = resolvedTipMethod === "CASH" ? amount + tip : amount;
+      const received = isCash
+        ? Number(part.receivedAmount)
+        : amount + (resolvedTipMethod === part.paymentMethod ? tip : 0);
 
       const isCard =
         part.paymentMethod === "CARD" || part.paymentMethod === "TRANSFER";
@@ -230,11 +248,11 @@ export function SplitBillModal({
         amount,
         method: part.paymentMethod,
         tipAmount: tip,
+        tipPaymentMethod: resolvedTipMethod,
         receivedAmount: received,
-        change:
-          part.paymentMethod === "CASH"
-            ? Math.max(0, Math.round((received - total) * 100) / 100)
-            : 0,
+        change: isCash
+          ? Math.max(0, Math.round((received - cashDue) * 100) / 100)
+          : 0,
         terminalId: selectedTerm?.id || null,
         terminalName: selectedTerm?.name || null,
         terminalCommissionRate: selectedTerm ? rate : null,
@@ -595,22 +613,50 @@ export function SplitBillModal({
                   )}
 
                   {part.tipType !== "NONE" && (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        value={part.tipInput}
-                        onChange={(e) =>
-                          updatePart(i, "tipInput", e.target.value)
-                        }
-                        placeholder={
-                          part.tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"
-                        }
-                        className="flex-1 text-xs font-mono font-bold p-2 border border-border bg-dark/40 rounded-lg focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
-                      />
-                      {!isWaiter && tip > 0 && (
-                        <span className="text-[10px] font-mono font-bold text-primary whitespace-nowrap tabular-nums">
-                          +${tip.toFixed(2)}
-                        </span>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          value={part.tipInput}
+                          onChange={(e) =>
+                            updatePart(i, "tipInput", e.target.value)
+                          }
+                          placeholder={
+                            part.tipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"
+                          }
+                          className="flex-1 text-xs font-mono font-bold p-2 border border-border bg-dark/40 rounded-lg focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
+                        />
+                        {!isWaiter && tip > 0 && (
+                          <span className="text-[10px] font-mono font-bold text-primary whitespace-nowrap tabular-nums">
+                            +${tip.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+
+                      {tip > 0 && (
+                        <div className="grid grid-cols-4 gap-1 pt-0.5">
+                          {[
+                            { value: "SAME", label: "Mismo" },
+                            { value: "CASH", label: "Efectivo" },
+                            { value: "CARD", label: "Tarjeta" },
+                            { value: "TRANSFER", label: "Transf." },
+                          ].map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() =>
+                                updatePart(i, "tipPaymentMethod", opt.value)
+                              }
+                              className={`py-1 text-[9px] rounded-md font-bold uppercase border transition-all cursor-pointer ${
+                                (part.tipPaymentMethod || "SAME") === opt.value
+                                  ? "border-primary bg-primary/20 text-primary"
+                                  : "border-border text-text-light/50 bg-white/5 hover:text-text-light"
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
                       )}
                     </div>
                   )}

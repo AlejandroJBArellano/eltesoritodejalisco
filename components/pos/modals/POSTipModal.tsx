@@ -2,7 +2,7 @@ import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { useOptionalUser } from "@/components/UserProvider";
 import { HandCoins, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { POSManagerAuthModal } from "./POSManagerAuthModal";
 
 export function POSTipModal() {
@@ -20,9 +20,23 @@ export function POSTipModal() {
     setEditTipType,
     editTipInput,
     setEditTipInput,
+    editTipPaymentMethod,
+    setEditTipPaymentMethod,
     editTipAmountCalculated,
     handleUpdateTip,
   } = usePOSCheckout(refreshOrders);
+
+  useEffect(() => {
+    if (editingTipOrder?.payments && editingTipOrder.payments.length > 0) {
+      const p = editingTipOrder.payments[0];
+      const initialMethod = ((p.tipPaymentMethod || p.method || "CASH") as string) as
+        | "SAME"
+        | "CASH"
+        | "CARD"
+        | "TRANSFER";
+      setEditTipPaymentMethod(initialMethod);
+    }
+  }, [editingTipOrder, setEditTipPaymentMethod]);
 
   if (!editingTipOrder) return null;
 
@@ -126,15 +140,45 @@ export function POSTipModal() {
             </div>
 
             {editTipType !== "NONE" && (
-              <input
-                type="number"
-                value={editTipInput}
-                onChange={(e) => setEditTipInput(e.target.value)}
-                placeholder={
-                  editTipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"
-                }
-                className="w-full text-base font-bold font-mono p-2.5 border border-border bg-dark/40 rounded-lg focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
-              />
+              <>
+                <input
+                  type="number"
+                  value={editTipInput}
+                  onChange={(e) => setEditTipInput(e.target.value)}
+                  placeholder={
+                    editTipType === "PERCENTAGE" ? "% Ej. 10" : "$ Monto"
+                  }
+                  className="w-full text-base font-bold font-mono p-2.5 border border-border bg-dark/40 rounded-lg focus:border-primary outline-none text-center text-text-light transition-colors placeholder:text-text-light/30 tabular-nums"
+                />
+
+                <div className="space-y-1.5 pt-2">
+                  <label className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider block">
+                    Método de la Propina
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { value: "CASH", label: "Efectivo" },
+                      { value: "CARD", label: "Tarjeta" },
+                      { value: "TRANSFER", label: "Transf." },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() =>
+                          setEditTipPaymentMethod(opt.value as any)
+                        }
+                        className={`py-2 text-xs rounded-lg font-bold uppercase border transition-all cursor-pointer ${
+                          editTipPaymentMethod === opt.value
+                            ? "bg-primary/20 border-primary text-primary"
+                            : "border-border text-text-light/60 bg-white/5 hover:text-text-light hover:bg-white/10"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
           </div>
 

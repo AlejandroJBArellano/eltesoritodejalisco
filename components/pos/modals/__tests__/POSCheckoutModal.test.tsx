@@ -103,6 +103,14 @@ describe("POSCheckoutModal", () => {
     tipInput: "",
     setTipInput: mockSetTipInput,
     tipAmountCalculated: 0,
+    tipPaymentMethod: "SAME",
+    setTipPaymentMethod: vi.fn(),
+    tipTerminalId: null,
+    setTipTerminalId: vi.fn(),
+    tipReceivedAmount: "",
+    setTipReceivedAmount: vi.fn(),
+    tipChange: 0,
+    resolvedTipPaymentMethod: "CASH",
     change: 20,
     unusualTipInfo: null,
     setUnusualTipInfo: mockSetUnusualTipInfo,
@@ -488,5 +496,27 @@ describe("POSCheckoutModal", () => {
 
     expect(mockHandleCourtesyPayment).not.toHaveBeenCalled();
     expect(screen.getByTestId("pos-manager-auth-modal")).toBeDefined();
+  });
+
+  it("displays tip payment method options when tip is added and allows selecting one", () => {
+    const mockSetTipPaymentMethod = vi.fn();
+    vi.mocked(usePOSCheckout).mockReturnValue({
+      ...baseCheckoutState,
+      tipType: "FIXED",
+      tipInput: "50",
+      tipAmountCalculated: 50,
+      tipPaymentMethod: "SAME",
+      setTipPaymentMethod: mockSetTipPaymentMethod,
+      resolvedTipPaymentMethod: "CARD",
+      paymentMethod: "CARD",
+    } as any);
+
+    render(<POSCheckoutModal />);
+
+    expect(screen.getByText("Método de la Propina")).toBeInTheDocument();
+    const tipCashButtons = screen.getAllByRole("button", { name: "Efectivo" });
+    // First 'Efectivo' button is inside the tip method grid
+    fireEvent.click(tipCashButtons[0]);
+    expect(mockSetTipPaymentMethod).toHaveBeenCalledWith("CASH");
   });
 });
