@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Bell, BellOff, BellRing, Loader2 } from "lucide-react";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -76,7 +77,7 @@ export function PushNotificationPrompt({
 
       if (perm === "denied") {
         setErrorMsg(
-          "Notificaciones bloqueadas en tu navegador. Habilítalas en el ícono de ajustes/candado en la barra de URL.",
+          "Notificaciones bloqueadas en tu navegador. Habilítalas en el ícono de ajustes o candado en la barra de URL.",
         );
         setLoading(false);
         return;
@@ -178,7 +179,14 @@ export function PushNotificationPrompt({
           type="button"
           onClick={isSubscribed ? handleUnsubscribe : handleSubscribe}
           disabled={loading}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          aria-label={
+            permission === "denied"
+              ? "Notificaciones bloqueadas"
+              : isSubscribed
+                ? "Notificaciones push activas"
+                : "Activar notificaciones"
+          }
+          className={`inline-flex items-center justify-center gap-1.5 px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg text-xs font-bold transition-all cursor-pointer select-none active:scale-[0.98] ${
             isSubscribed
               ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
               : permission === "denied"
@@ -193,12 +201,29 @@ export function PushNotificationPrompt({
                 : "Activar notificaciones push en este dispositivo"
           }
         >
-          <span>
+          {loading ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+          ) : isSubscribed ? (
+            <BellRing className="w-3.5 h-3.5 shrink-0" />
+          ) : permission === "denied" ? (
+            <BellOff className="w-3.5 h-3.5 shrink-0" />
+          ) : (
+            <Bell className="w-3.5 h-3.5 shrink-0" />
+          )}
+
+          <span className="hidden sm:inline">
             {isSubscribed
-              ? "🔔 Notificaciones Activas"
+              ? "Notificaciones Activas"
               : permission === "denied"
-                ? "🚫 Notificaciones Bloqueadas"
-                : "🔕 Activar Notificaciones"}
+                ? "Notificaciones Bloqueadas"
+                : "Activar Notificaciones"}
+          </span>
+          <span className="sm:hidden">
+            {isSubscribed
+              ? "Activas"
+              : permission === "denied"
+                ? "Bloqueadas"
+                : "Activar"}
           </span>
         </button>
       </div>
@@ -209,24 +234,30 @@ export function PushNotificationPrompt({
     <div
       className={`p-4 rounded-xl border border-border bg-card shadow-sm ${className}`}
     >
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-lg shrink-0">
-            {isSubscribed ? "🔔" : permission === "denied" ? "🚫" : "🔕"}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+            {isSubscribed ? (
+              <BellRing className="w-5 h-5 text-emerald-400" />
+            ) : permission === "denied" ? (
+              <BellOff className="w-5 h-5 text-rose-400" />
+            ) : (
+              <Bell className="w-5 h-5 text-primary" />
+            )}
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <h4 className="text-sm font-black text-text-light">
               Notificaciones Web Push
             </h4>
-            <p className="text-xs text-text-light/60">
+            <p className="text-xs text-text-light/60 mt-0.5 leading-relaxed">
               {permission === "denied"
-                ? "Permiso bloqueado en tu navegador. Habilítalo en los ajustes/candado del sitio en la barra de URL."
+                ? "Permiso bloqueado en tu navegador. Habilítalo en los ajustes o candado del sitio en la barra de URL."
                 : isSubscribed
                   ? "Este dispositivo recibirá avisos de pedidos online y stock bajo."
                   : "Recibe alertas en tiempo real en esta pantalla aunque no esté visible."}
             </p>
             {errorMsg && (
-              <p className="text-xs text-rose-400 font-medium mt-1">
+              <p className="text-xs text-rose-400 font-medium mt-1 break-words">
                 {errorMsg}
               </p>
             )}
@@ -237,7 +268,7 @@ export function PushNotificationPrompt({
           type="button"
           onClick={isSubscribed ? handleUnsubscribe : handleSubscribe}
           disabled={loading}
-          className={`px-3.5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer active:scale-[0.98] ${
+          className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer active:scale-[0.98] ${
             isSubscribed
               ? "bg-dark/40 text-text-light/80 hover:bg-dark/40 border border-border"
               : permission === "denied"
@@ -245,13 +276,16 @@ export function PushNotificationPrompt({
                 : "bg-primary text-background hover:bg-primary-hover shadow-sm"
           }`}
         >
-          {loading
-            ? "Procesando..."
-            : isSubscribed
-              ? "Desactivar"
-              : permission === "denied"
-                ? "Reintentar"
-                : "Activar Alertas"}
+          {loading && <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />}
+          <span>
+            {loading
+              ? "Procesando..."
+              : isSubscribed
+                ? "Desactivar"
+                : permission === "denied"
+                  ? "Reintentar"
+                  : "Activar Alertas"}
+          </span>
         </button>
       </div>
     </div>
