@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   startTask,
   pauseTask,
@@ -13,7 +13,7 @@ import {
   type PrimordialTask,
   type TaskExecution,
 } from "@/types";
-import { ExportButton } from "@/components/ui/DataTableControls";
+import { ExportButton, TableSearchInput } from "@/components/ui/DataTableControls";
 import { ActiveTaskTimer } from "./ActiveTaskTimer";
 import {
   Folder,
@@ -24,9 +24,13 @@ import {
   CheckCircle2,
   Clock,
   Sparkles,
+  ListTodo,
+  CheckCheck,
 } from "lucide-react";
 
 const FREQUENCY_LABELS = TASK_FREQUENCY_LABELS;
+
+type StatusFilter = "ALL" | "PENDING" | "IN_PROGRESS" | "COMPLETED";
 
 export function TareasClient({
   initialTasks,
@@ -39,6 +43,9 @@ export function TareasClient({
   const [executions, setExecutions] =
     useState<TaskExecution[]>(initialExecutions);
   const [loadingTaskId, setLoadingTaskId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
 
   // Guardar las fotos seleccionadas por ejecución
   const [selectedPhotos, setSelectedPhotos] = useState<{
@@ -82,6 +89,90 @@ export function TareasClient({
     const alertTimer = setInterval(checkTimeout, 10000);
     return () => clearInterval(alertTimer);
   }, [executions, initialTasks, timeoutAlert]);
+
+  // Operational metrics
+  const {
+    totalTasks,
+    inProgressCount,
+    completedCount,
+    pendingCount,
+    progressPercentage,
+    categoriesList,
+  } = useMemo(() => {
+    const total = initialTasks.length;
+    const activeExecs = executions.filter(
+      (e) => e.status === "IN_PROGRESS" || e.status === "PAUSED",
+    );
+    const activeIds = new Set(activeExecs.map((e) => e.task_id));
+    const completedIds = new Set(
+      executions.filter((e) => e.status === "COMPLETED").map((e) => e.task_id),
+    );
+
+    const inProg = activeIds.size;
+    const comp = completedIds.size;
+    const pend = Math.max(0, total - comp - inProg);
+    const pct = total > 0 ? Math.round((comp / total) * 100) : 0;
+
+    const cats = Array.from(
+      new Set(
+        initialTasks
+          .map((t) => t.category?.name || "Sin Categoría")
+          .filter(Boolean),
+      ),
+    );
+
+    return {
+      totalTasks: total,
+      inProgressCount: inProg,
+      completedCount: comp,
+      pendingCount: pend,
+      progressPercentage: pct,
+      categoriesList: cats,
+    };
+  }, [initialTasks, executions]);
+
+  // Filtered tasks
+  const filteredTasks = useMemo(() => {
+    return initialTasks.filter((task) => {
+      // Search filter
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        const matchesName = task.name.toLowerCase().includes(q);
+        const matchesCat = (task.category?.name || "")
+          .toLowerCase()
+          .includes(q);
+        if (!matchesName && !matchesCat) return false;
+      }
+
+      // Category filter
+      const catName = task.category?.name || "Sin Categoría";
+      if (selectedCategory !== "ALL" && catName !== selectedCategory) {
+        return false;
+      }
+
+      // Status filter
+      if (statusFilter !== "ALL") {
+        const activeExec = executions.find(
+          (e) =>
+            e.task_id === task.id &&
+            (e.status === "IN_PROGRESS" || e.status === "PAUSED"),
+        );
+        const completedExec = executions.find(
+          (e) => e.task_id === task.id && e.status === "COMPLETED",
+        );
+
+        if (statusFilter === "IN_PROGRESS") {
+          if (!activeExec) return false;
+        } else if (statusFilter === "COMPLETED") {
+          if (!completedExec || activeExec) return false;
+        } else if (statusFilter === "PENDING") {
+          if (activeExec || completedExec) return false;
+        }
+      }
+
+      return true;
+    });
+  }, [initialTasks, executions, search, selectedCategory, statusFilter]);
 
   const handleStart = async (taskId: string) => {
     setLoadingTaskId(taskId);
@@ -185,8 +276,23 @@ export function TareasClient({
     }
   };
 
+  // Group filtered tasks by category
+  const groupedTasks = useMemo(() => {
+    return filteredTasks.reduce(
+      (acc, task) => {
+        const catName = task.category?.name || "Sin Categoría";
+        if (!acc[catName]) {
+          acc[catName] = [];
+        }
+        acc[catName].push(task);
+        return acc;
+      },
+      {} as { [categoryName: string]: PrimordialTask[] },
+    );
+  }, [filteredTasks]);
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Modal de Alerta de Timeout */}
       {timeoutAlert && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
@@ -227,67 +333,226 @@ export function TareasClient({
         </div>
       )}
 
-      {/* Header Bar with Export */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border/80 shadow-xs">
-        <div className="flex items-center gap-2.5">
-          <span className="text-xs font-bold text-text-light uppercase tracking-wider">
-            Checklist de Turno
-          </span>
-          <span className="text-[11px] font-mono font-medium text-text-light/60 px-2 py-0.5 rounded-md bg-white/[0.04] border border-border/60">
-            {initialTasks.length} {initialTasks.length === 1 ? "tarea" : "tareas"}
-          </span>
+      {/* Operational Pulse StatCards Row */}
+      <section
+        aria-label="Resumen operativo del turno"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
+      >
+        <div className="rounded-xl bg-card p-4 sm:p-5 border border-border/80 transition-all duration-150 shadow-xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-semibold text-text-light/60 uppercase tracking-wider">
+              Total Tareas
+            </span>
+            <div className="rounded-lg p-2 bg-background/60 border border-border/40 text-text-light/80">
+              <ListTodo className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between">
+            <p className="text-2xl sm:text-3xl font-bold text-text-light tracking-tight tabular-nums font-mono">
+              {totalTasks}
+            </p>
+            <span className="text-xs font-medium text-text-light/50">
+              Configuradas
+            </span>
+          </div>
         </div>
-        <ExportButton
-          data={initialTasks}
-          columns={[
-            { header: "Tarea", key: "name" },
-            {
-              header: "Categoría",
-              accessor: (t) => t.category?.name || "Sin Categoría",
-            },
-            {
-              header: "Frecuencia",
-              accessor: (t) =>
-                FREQUENCY_LABELS[t.frequency_type] || t.frequency_type,
-            },
-            {
-              header: "Tiempo Estimado",
-              accessor: (t) => `${t.timeout_minutes} min`,
-            },
-            {
-              header: "Estado Actual",
-              accessor: (t) => {
-                const exec = executions.find((e) => e.task_id === t.id);
-                if (!exec) return "PENDIENTE";
-                if (exec.status === "COMPLETED") return "COMPLETADA";
-                if (exec.status === "IN_PROGRESS") return "EN PROGRESO";
-                if (exec.status === "PAUSED") return "PAUSADA";
-                return exec.status;
-              },
-            },
-          ]}
-          filename={() =>
-            `checklist_tareas_${new Date().toISOString().split("T")[0]}`
-          }
-          sheetName="Checklist"
-        />
+
+        <div className="rounded-xl bg-card p-4 sm:p-5 border border-border/80 transition-all duration-150 shadow-xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-semibold text-text-light/60 uppercase tracking-wider">
+              En Progreso
+            </span>
+            <div
+              className={`rounded-lg p-2 border ${
+                inProgressCount > 0
+                  ? "bg-amber-500/10 border-amber-500/25 text-amber-400"
+                  : "bg-background/60 border border-border/40 text-text-light/60"
+              }`}
+            >
+              <Sparkles
+                className={`h-4 w-4 ${inProgressCount > 0 ? "animate-spin" : ""}`}
+              />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between">
+            <p
+              className={`text-2xl sm:text-3xl font-bold tracking-tight tabular-nums font-mono ${
+                inProgressCount > 0 ? "text-amber-400" : "text-text-light"
+              }`}
+            >
+              {inProgressCount}
+            </p>
+            <span className="text-xs font-medium text-text-light/50">
+              {inProgressCount === 1 ? "Activa" : "Activas"}
+            </span>
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-card p-4 sm:p-5 border border-border/80 transition-all duration-150 shadow-xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-semibold text-text-light/60 uppercase tracking-wider">
+              Completadas
+            </span>
+            <div className="rounded-lg p-2 bg-emerald-500/10 border border-emerald-500/25 text-emerald-400">
+              <CheckCheck className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between">
+            <p className="text-2xl sm:text-3xl font-bold text-emerald-400 tracking-tight tabular-nums font-mono">
+              {completedCount}
+            </p>
+            <span className="text-xs font-medium text-emerald-400/80 font-mono tabular-nums">
+              {progressPercentage}%
+            </span>
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-card p-4 sm:p-5 border border-border/80 transition-all duration-150 shadow-xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-semibold text-text-light/60 uppercase tracking-wider">
+              Pendientes
+            </span>
+            <div className="rounded-lg p-2 bg-background/60 border border-border/40 text-text-light/60">
+              <Clock className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between">
+            <p className="text-2xl sm:text-3xl font-bold text-text-light tracking-tight tabular-nums font-mono">
+              {pendingCount}
+            </p>
+            <span className="text-xs font-medium text-text-light/50">
+              Por iniciar
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Header & Controls Bar */}
+      <div className="bg-card p-4 rounded-xl border border-border/80 shadow-xs space-y-3.5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <span className="text-xs font-bold text-text-light uppercase tracking-wider">
+              Checklist de Turno
+            </span>
+            <span className="text-[11px] font-mono font-medium text-text-light/60 px-2 py-0.5 rounded-md bg-white/[0.04] border border-border/60">
+              {initialTasks.length}{" "}
+              {initialTasks.length === 1 ? "tarea" : "tareas"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2.5 flex-wrap justify-end">
+            <ExportButton
+              data={initialTasks}
+              columns={[
+                { header: "Tarea", key: "name" },
+                {
+                  header: "Categoría",
+                  accessor: (t) => t.category?.name || "Sin Categoría",
+                },
+                {
+                  header: "Frecuencia",
+                  accessor: (t) =>
+                    FREQUENCY_LABELS[t.frequency_type] || t.frequency_type,
+                },
+                {
+                  header: "Tiempo Estimado",
+                  accessor: (t) => `${t.timeout_minutes} min`,
+                },
+                {
+                  header: "Estado Actual",
+                  accessor: (t) => {
+                    const exec = executions.find((e) => e.task_id === t.id);
+                    if (!exec) return "PENDIENTE";
+                    if (exec.status === "COMPLETED") return "COMPLETADA";
+                    if (exec.status === "IN_PROGRESS") return "EN PROGRESO";
+                    if (exec.status === "PAUSED") return "PAUSADA";
+                    return exec.status;
+                  },
+                },
+              ]}
+              filename={() =>
+                `checklist_tareas_${new Date().toISOString().split("T")[0]}`
+              }
+              sheetName="Checklist"
+            />
+          </div>
+        </div>
+
+        {/* Filter Controls Row */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1 border-t border-border/60">
+          <div className="flex-1 min-w-[200px]">
+            <TableSearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Buscar tarea..."
+            />
+          </div>
+
+          {/* Status Filter Buttons */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+            <button
+              onClick={() => setStatusFilter("ALL")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${
+                statusFilter === "ALL"
+                  ? "bg-primary text-dark border-primary font-bold shadow-xs"
+                  : "bg-background/80 text-text-light/70 border-border/60 hover:bg-white/5 hover:text-text-light"
+              }`}
+            >
+              Todas ({totalTasks})
+            </button>
+            <button
+              onClick={() => setStatusFilter("PENDING")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${
+                statusFilter === "PENDING"
+                  ? "bg-primary text-dark border-primary font-bold shadow-xs"
+                  : "bg-background/80 text-text-light/70 border-border/60 hover:bg-white/5 hover:text-text-light"
+              }`}
+            >
+              Pendientes ({pendingCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter("IN_PROGRESS")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${
+                statusFilter === "IN_PROGRESS"
+                  ? "bg-amber-500 text-dark border-amber-500 font-bold shadow-xs"
+                  : "bg-background/80 text-text-light/70 border-border/60 hover:bg-white/5 hover:text-text-light"
+              }`}
+            >
+              En Progreso ({inProgressCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter("COMPLETED")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${
+                statusFilter === "COMPLETED"
+                  ? "bg-emerald-600 text-white border-emerald-600 font-bold shadow-xs"
+                  : "bg-background/80 text-text-light/70 border-border/60 hover:bg-white/5 hover:text-text-light"
+              }`}
+            >
+              Completadas ({completedCount})
+            </button>
+          </div>
+
+          {/* Category Select Filter (if multiple categories) */}
+          {categoriesList.length > 1 && (
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer shrink-0"
+            >
+              <option value="ALL">Todas las Categorías</option>
+              {categoriesList.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
       </div>
 
       {/* Task List Grouped by Category */}
       <div className="space-y-8">
-        {Object.entries(
-          initialTasks.reduce(
-            (acc, task) => {
-              const catName = task.category?.name || "Sin Categoría";
-              if (!acc[catName]) {
-                acc[catName] = [];
-              }
-              acc[catName].push(task);
-              return acc;
-            },
-            {} as { [categoryName: string]: PrimordialTask[] },
-          ),
-        ).map(([categoryName, tasks]) => (
+        {Object.entries(groupedTasks).map(([categoryName, tasks]) => (
           <div key={categoryName} className="space-y-4">
             <div className="flex items-center justify-between gap-3 border-b border-border/70 pb-3">
               <div className="flex items-center gap-2.5">
@@ -303,13 +568,18 @@ export function TareasClient({
               </span>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4">
               {tasks.map((task) => {
                 const activeExecution = executions.find(
                   (e) =>
                     e.task_id === task.id &&
                     (e.status === "IN_PROGRESS" || e.status === "PAUSED"),
                 );
+                const isCompletedToday =
+                  !activeExecution &&
+                  executions.some(
+                    (e) => e.task_id === task.id && e.status === "COMPLETED",
+                  );
 
                 const frequencyLabel =
                   FREQUENCY_LABELS[task.frequency_type] || task.frequency_type;
@@ -320,27 +590,38 @@ export function TareasClient({
                     className={`group relative flex flex-col justify-between p-4 sm:p-5 rounded-xl border transition-all duration-150 shadow-xs ${
                       activeExecution
                         ? "bg-card border-primary/50 ring-1 ring-primary/20"
-                        : "bg-card border-border/70 hover:border-border hover:bg-card/90"
+                        : isCompletedToday
+                          ? "bg-card/70 border-emerald-500/20 hover:border-emerald-500/40"
+                          : "bg-card border-border/70 hover:border-border hover:bg-card/90"
                     }`}
                   >
                     <div>
-                      <h3 className="text-sm sm:text-base font-semibold text-text-light tracking-tight group-hover:text-white transition-colors leading-snug">
+                      {/* Top Badges */}
+                      <div className="flex flex-wrap items-center justify-between gap-1.5 mb-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-white/[0.04] border border-border/60 px-2 py-0.5 text-[11px] font-medium text-text-light/70 uppercase tracking-wider">
+                            <span className="h-1 w-1 rounded-full bg-text-light/40" />
+                            {frequencyLabel}
+                          </span>
+                          {task.requires_photo && (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 text-[11px] font-medium text-amber-300 uppercase tracking-wider">
+                              <Camera className="h-3 w-3 text-amber-400" />
+                              Foto
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] font-mono font-medium text-text-light/50 tabular-nums">
+                          ⏱ {task.timeout_minutes}m
+                        </span>
+                      </div>
+
+                      {/* Task Name */}
+                      <h3 className="text-sm font-semibold text-text-light tracking-tight group-hover:text-white transition-colors leading-snug">
                         {task.name}
                       </h3>
-                      <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
-                        <span className="inline-flex items-center gap-1.5 rounded-md bg-white/[0.04] border border-border/60 px-2 py-0.5 text-[11px] font-medium text-text-light/70 uppercase tracking-wider">
-                          <span className="h-1 w-1 rounded-full bg-text-light/40" />
-                          {frequencyLabel}
-                        </span>
-                        {task.requires_photo && (
-                          <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 text-[11px] font-medium text-amber-300 uppercase tracking-wider">
-                            <Camera className="h-3 w-3 text-amber-400" />
-                            Evidencia Foto
-                          </span>
-                        )}
-                      </div>
                     </div>
 
+                    {/* Active In-Progress / Paused State */}
                     {activeExecution ? (
                       <div className="mt-4 border-t border-border/70 pt-3.5 space-y-3.5">
                         <div className="flex justify-between items-center bg-background/60 px-3.5 py-2.5 rounded-lg border border-border/70">
@@ -353,7 +634,9 @@ export function TareasClient({
                             ) : (
                               <>
                                 <Sparkles className="h-3.5 w-3.5 text-emerald-400 animate-spin" />
-                                <span className="text-emerald-400">En progreso</span>
+                                <span className="text-emerald-400">
+                                  En progreso
+                                </span>
                               </>
                             )}
                           </span>
@@ -419,6 +702,23 @@ export function TareasClient({
                           </button>
                         </div>
                       </div>
+                    ) : isCompletedToday ? (
+                      <div className="mt-4 pt-3 border-t border-border/60 flex flex-col gap-2.5">
+                        <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+                          <CheckCircle2 className="h-4 w-4" />
+                          <span>Completada en turno</span>
+                        </div>
+                        <button
+                          onClick={() => handleStart(task.id)}
+                          disabled={loadingTaskId === task.id}
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-background/60 hover:bg-white/10 text-text-light/80 hover:text-white border border-border/60 py-2 px-3 text-xs font-semibold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                        >
+                          <Play className="h-3 w-3 fill-current" />
+                          {loadingTaskId === task.id
+                            ? "Iniciando..."
+                            : "Iniciar de nuevo"}
+                        </button>
+                      </div>
                     ) : (
                       <button
                         onClick={() => handleStart(task.id)}
@@ -437,7 +737,16 @@ export function TareasClient({
             </div>
           </div>
         ))}
+
+        {Object.keys(groupedTasks).length === 0 && (
+          <div className="text-center py-12 bg-card rounded-xl border border-border/80">
+            <p className="text-sm font-semibold text-text-light/60">
+              No se encontraron tareas con los filtros seleccionados.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

@@ -282,4 +282,84 @@ describe("TareasClient Component", () => {
       expect(completeTask).toHaveBeenCalledWith("exec-2", s3Url);
     });
   });
+
+  it("should render operational pulse KPI stats correctly", () => {
+    const activeExec: TaskExecution = {
+      id: "exec-1",
+      task_id: "task-1",
+      user_id: "user-1",
+      status: "IN_PROGRESS",
+      start_time: new Date().toISOString(),
+      last_resumed_at: new Date().toISOString(),
+      paused_seconds: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    render(
+      <TareasClient
+        initialTasks={mockTasks}
+        initialExecutions={[activeExec]}
+        userId="user-1"
+      />,
+    );
+
+    expect(screen.getByText("Total Tareas")).toBeInTheDocument();
+    expect(screen.getByText("En Progreso")).toBeInTheDocument();
+    expect(screen.getByText("Completadas")).toBeInTheDocument();
+    expect(screen.getByText("Pendientes")).toBeInTheDocument();
+    expect(screen.getByText("Configuradas")).toBeInTheDocument();
+  });
+
+  it("should filter tasks by search input and status buttons", async () => {
+    const user = userEvent.setup();
+    const activeExec: TaskExecution = {
+      id: "exec-1",
+      task_id: "task-1",
+      user_id: "user-1",
+      status: "IN_PROGRESS",
+      start_time: new Date().toISOString(),
+      last_resumed_at: new Date().toISOString(),
+      paused_seconds: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    render(
+      <TareasClient
+        initialTasks={mockTasks}
+        initialExecutions={[activeExec]}
+        userId="user-1"
+      />,
+    );
+
+    // Search for Freidora
+    const searchInput = screen.getByPlaceholderText("Buscar tarea...");
+    await user.type(searchInput, "Freidora");
+    expect(screen.getByText("Limpieza de Freidora")).toBeInTheDocument();
+    expect(screen.queryByText("Revisión de Baños")).not.toBeInTheDocument();
+
+    // Clear search
+    await user.clear(searchInput);
+    expect(screen.getByText("Revisión de Baños")).toBeInTheDocument();
+
+    // Filter by Pendientes
+    const pendientesButton = screen.getByRole("button", { name: /Pendientes/i });
+    await user.click(pendientesButton);
+    expect(screen.getByText("Revisión de Baños")).toBeInTheDocument();
+    expect(screen.queryByText("Limpieza de Freidora")).not.toBeInTheDocument();
+
+    // Filter by En Progreso
+    const enProgresoButton = screen.getByRole("button", { name: /En Progreso/i });
+    await user.click(enProgresoButton);
+    expect(screen.getByText("Limpieza de Freidora")).toBeInTheDocument();
+    expect(screen.queryByText("Revisión de Baños")).not.toBeInTheDocument();
+
+    // Filter by Todas
+    const todasButton = screen.getByRole("button", { name: /Todas/i });
+    await user.click(todasButton);
+    expect(screen.getByText("Limpieza de Freidora")).toBeInTheDocument();
+    expect(screen.getByText("Revisión de Baños")).toBeInTheDocument();
+  });
 });
+
