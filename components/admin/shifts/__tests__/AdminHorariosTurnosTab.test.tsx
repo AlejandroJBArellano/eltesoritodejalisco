@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { AdminHorariosTurnosTab } from "../AdminHorariosTurnosTab";
 
 vi.mock("../WeeklyShiftPlanner", () => ({
@@ -31,10 +31,10 @@ describe("AdminHorariosTurnosTab Component", () => {
     render(<AdminHorariosTurnosTab initialUsers={[]} />);
 
     expect(
-      screen.getByText("Planeador de Turnos Semanales"),
+      screen.getByText("turnos semanales"),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Historial de Marcajes y Asistencias"),
+      screen.getByText("historial de asistencia"),
     ).toBeInTheDocument();
     expect(screen.getByTestId("mock-weekly-shift-planner")).toBeInTheDocument();
   });
@@ -43,7 +43,7 @@ describe("AdminHorariosTurnosTab Component", () => {
     render(<AdminHorariosTurnosTab initialUsers={[]} />);
 
     const historyTabBtn = screen.getByRole("button", {
-      name: /historial de marcajes y asistencias/i,
+      name: /historial de asistencia/i,
     });
     fireEvent.click(historyTabBtn);
 
