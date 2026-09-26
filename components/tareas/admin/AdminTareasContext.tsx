@@ -17,7 +17,12 @@ import {
   updatePrimordialTask,
   deletePrimordialTask,
 } from "@/lib/actions/tasks";
-import type { TaskExecution, TaskCategory, PrimordialTask } from "@/types";
+import {
+  TASK_FREQUENCY_LABELS,
+  type TaskExecution,
+  type TaskCategory,
+  type PrimordialTask,
+} from "@/types";
 import type {
   AdminTareasTab,
   StaffPerformanceMetric,
@@ -536,8 +541,13 @@ export function AdminTareasProvider({
       if (taskSortField === "name") comp = a.name.localeCompare(b.name);
       else if (taskSortField === "category")
         comp = (a.category?.name || "").localeCompare(b.category?.name || "");
-      else if (taskSortField === "frequency")
-        comp = a.frequency_type.localeCompare(b.frequency_type);
+      else if (taskSortField === "frequency") {
+        const labelA =
+          TASK_FREQUENCY_LABELS[a.frequency_type] || a.frequency_type;
+        const labelB =
+          TASK_FREQUENCY_LABELS[b.frequency_type] || b.frequency_type;
+        comp = labelA.localeCompare(labelB);
+      }
       return taskSortDir === "asc" ? comp : -comp;
     });
   }, [filteredTasks, taskSortField, taskSortDir]);

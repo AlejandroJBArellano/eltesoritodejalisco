@@ -179,6 +179,11 @@ describe("adminExportColumns", () => {
     );
     expect(timeCol?.accessor?.(mockTask)).toBe("10 min");
 
+    const freqCol = TASKS_CONFIG_EXPORT_COLUMNS.find(
+      (c) => c.header === "Frecuencia",
+    );
+    expect(freqCol?.accessor?.(mockTask)).toBe("Diaria");
+
     const photoCol = TASKS_CONFIG_EXPORT_COLUMNS.find(
       (c) => c.header === "Requiere Foto",
     );

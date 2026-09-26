@@ -1,5 +1,5 @@
 import type { ExportColumn } from "@/components/ui/DataTableControls";
-import type { PrimordialTask, TaskExecution } from "@/types";
+import { TASK_FREQUENCY_LABELS, type PrimordialTask, type TaskExecution } from "@/types";
 import type { StaffPerformanceMetric } from "./types";
 
 export const EXECUTIONS_EXPORT_COLUMNS: ExportColumn<TaskExecution>[] = [
@@ -87,7 +87,10 @@ export const PERFORMANCE_EXPORT_COLUMNS: ExportColumn<StaffPerformanceMetric>[] 
 export const TASKS_CONFIG_EXPORT_COLUMNS: ExportColumn<PrimordialTask>[] = [
   { header: "Tarea", key: "name" },
   { header: "Categoría", accessor: (t) => t.category?.name || "Sin Categoría" },
-  { header: "Frecuencia", key: "frequency_type" },
+  {
+    header: "Frecuencia",
+    accessor: (t) => TASK_FREQUENCY_LABELS[t.frequency_type] || t.frequency_type,
+  },
   {
     header: "Tiempo Límite",
     accessor: (t) => `${t.timeout_minutes} min`,

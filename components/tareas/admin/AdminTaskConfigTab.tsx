@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import type { PrimordialTask, TaskCategory } from "@/types";
+import { TASK_FREQUENCY_LABELS, type PrimordialTask, type TaskCategory } from "@/types";
 import {
   TableSearchInput,
   TableHeaderSortCell,
@@ -136,8 +136,8 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
               className="w-full rounded-lg border border-border bg-dark/40 px-3 py-2 text-xs font-medium text-text-light outline-none focus:border-primary cursor-pointer transition-colors"
             >
               <option value="ALL">Todas las Frecuencias</option>
-              <option value="DAILY">Diario</option>
-              <option value="CONTINUOUS">Continuo</option>
+              <option value="DAILY">Diaria</option>
+              <option value="CONTINUOUS">Continua</option>
               <option value="ROUTINE">Rutina</option>
               <option value="WEEKLY">Semanal</option>
               <option value="CLOSING">Cierre</option>
@@ -186,8 +186,8 @@ export function AdminTaskConfigTab(props: AdminTaskConfigTabProps) {
                       {t.category?.name || "Sin categoría"}
                     </span>
                   </td>
-                  <td className="py-3 px-4 font-mono text-xs uppercase text-primary font-bold tabular-nums">
-                    {t.frequency_type}
+                  <td className="py-3 px-4 text-xs font-semibold text-primary">
+                    {TASK_FREQUENCY_LABELS[t.frequency_type] || t.frequency_type}
                   </td>
                   <td className="py-3 px-4 text-xs text-text-light/60 font-mono tabular-nums">
                     {t.requires_photo ? "📷 Requiere Foto" : "Sin Foto"} |{" "}

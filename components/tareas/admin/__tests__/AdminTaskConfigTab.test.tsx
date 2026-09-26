@@ -83,11 +83,11 @@ describe("AdminTaskConfigTab Component", () => {
       />,
     );
 
-    expect(
-      screen.getByText("Catálogo de Tareas Primordiales (2)"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Catálogo de Tareas Primordiales (2)")).toBeInTheDocument();
     expect(screen.getByText("Limpieza de Plancha")).toBeInTheDocument();
     expect(screen.getByText("Conteo de Vinos")).toBeInTheDocument();
+    expect(screen.getAllByText("Diaria").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Semanal").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("📷 Requiere Foto | 30 min")).toBeInTheDocument();
     expect(screen.getByText("Sin Foto | 45 min")).toBeInTheDocument();
 

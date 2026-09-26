@@ -8,7 +8,11 @@ import {
   completeTask,
   uploadTaskPhoto,
 } from "@/lib/actions/tasks";
-import { PrimordialTask, TaskExecution } from "@/types";
+import {
+  TASK_FREQUENCY_LABELS,
+  type PrimordialTask,
+  type TaskExecution,
+} from "@/types";
 import { ExportButton } from "@/components/ui/DataTableControls";
 import { ActiveTaskTimer } from "./ActiveTaskTimer";
 import {
@@ -22,14 +26,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const FREQUENCY_LABELS: Record<string, string> = {
-  CONTINUOUS: "Continua",
-  DAILY: "Diaria",
-  ROUTINE: "Rutina",
-  VARIABLE: "Variable",
-  WEEKLY: "Semanal",
-  MONTHLY: "Mensual",
-};
+const FREQUENCY_LABELS = TASK_FREQUENCY_LABELS;
 
 export function TareasClient({
   initialTasks,
