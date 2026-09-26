@@ -86,7 +86,12 @@ export function DailySummaryTicket({
     ? Number(cut?.propinas_tarjeta ?? 0)
     : Number(todayTotals?.propinasTarjeta ?? 0);
 
-  const propinasTotales = propinasEfectivo + propinasTarjeta;
+  const propinasTransferencia = isHistorical
+    ? Number(cut?.propinas_transferencia ?? 0)
+    : Number(todayTotals?.propinasTransferencia ?? 0);
+
+  const propinasTotales =
+    propinasEfectivo + propinasTarjeta + propinasTransferencia;
 
   const totalGastos = isHistorical
     ? Number(cut?.total_gastos ?? 0)
@@ -260,6 +265,10 @@ export function DailySummaryTicket({
         <div className="flex justify-between">
           <span>PROPINAS TARJETA:</span>
           <span>{formatCurrency(propinasTarjeta)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>PROPINAS TRANSFERENCIA:</span>
+          <span>{formatCurrency(propinasTransferencia)}</span>
         </div>
         <div className="flex justify-between font-bold">
           <span>TOTAL PROPINAS:</span>

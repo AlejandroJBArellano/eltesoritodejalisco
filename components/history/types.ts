@@ -31,6 +31,7 @@ export interface DailyCut {
   iva_acumulado: number;
   propinas_efectivo: number;
   propinas_tarjeta: number;
+  propinas_transferencia?: number;
   caja_efectivo: number;
   caja_tarjeta: number;
   comision_tarjeta?: number | null;
@@ -60,6 +61,7 @@ export interface DailyCutSummaryTotals {
   ivaAcumulado: number;
   propinasEfectivo: number;
   propinasTarjeta: number;
+  propinasTransferencia: number;
   cajaEfectivo: number;
   cajaTarjeta: number;
   comisionTarjeta: number;

@@ -85,6 +85,16 @@ export function DailyCutDetailModal({
               ${Number(cut.propinas_tarjeta).toFixed(2)}
             </span>
           </div>
+          {Number(cut.propinas_transferencia || 0) > 0 && (
+            <div className="bg-dark/40 p-3 rounded-lg border border-border">
+              <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
+                Propinas (Transferencia)
+              </span>
+              <span className="text-amber-400 text-lg font-mono tabular-nums font-bold">
+                ${Number(cut.propinas_transferencia).toFixed(2)}
+              </span>
+            </div>
+          )}
           <div className="bg-dark/40 p-3 rounded-lg border border-border">
             <span className="text-text-light/50 text-[10px] font-extrabold uppercase tracking-widest block mb-1">
               Caja Final (Efectivo)

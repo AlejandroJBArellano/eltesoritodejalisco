@@ -8,6 +8,7 @@ const mockTotals: DailyCutSummaryTotals = {
   ivaAcumulado: 240,
   propinasEfectivo: 50,
   propinasTarjeta: 50,
+  propinasTransferencia: 0,
   cajaEfectivo: 1000,
   cajaTarjeta: 790,
   comisionTarjeta: 0,

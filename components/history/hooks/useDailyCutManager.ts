@@ -107,6 +107,7 @@ export function useDailyCutManager({
     let ivaAcumulado = 0;
     let propinasEfectivo = 0;
     let propinasTarjeta = 0;
+    let propinasTransferencia = 0;
     let cajaEfectivo = 0;
     let cajaTarjeta = 0;
     let totalComisionTarjetaCalculada = 0;
@@ -139,7 +140,7 @@ export function useDailyCutManager({
             const amount = Number(payment.amount || 0);
             const tipAmount = Number(payment.tipAmount || 0);
             const paymentMethod = payment.method;
-            const totalPago = amount + tipAmount;
+            const tipPaymentMethod = payment.tipPaymentMethod || paymentMethod;
 
             const subtotalFiscal = amount / 1.16;
             const ivaFiscal = amount - subtotalFiscal;
@@ -147,16 +148,44 @@ export function useDailyCutManager({
             ventaNeta += subtotalFiscal;
             ivaAcumulado += ivaFiscal;
 
-            if (paymentMethod === PaymentMethod.CASH) {
+            // Desglose de propina según su método real
+            if (tipPaymentMethod === PaymentMethod.CASH) {
               propinasEfectivo += tipAmount;
-              cajaEfectivo += totalPago;
+            } else if (tipPaymentMethod === PaymentMethod.CARD) {
+              propinasTarjeta += tipAmount;
+            } else if (tipPaymentMethod === PaymentMethod.TRANSFER) {
+              propinasTransferencia += tipAmount;
+            } else {
+              propinasEfectivo += tipAmount;
+            }
+
+            // Suma a caja según el método de cada concepto
+            if (paymentMethod === PaymentMethod.CASH) {
+              cajaEfectivo += amount;
             } else if (
               paymentMethod === PaymentMethod.CARD ||
               paymentMethod === PaymentMethod.TRANSFER
             ) {
-              propinasTarjeta += tipAmount;
-              cajaTarjeta += totalPago;
+              cajaTarjeta += amount;
+            } else {
+              cajaEfectivo += amount;
+            }
 
+            if (tipPaymentMethod === PaymentMethod.CASH) {
+              cajaEfectivo += tipAmount;
+            } else if (
+              tipPaymentMethod === PaymentMethod.CARD ||
+              tipPaymentMethod === PaymentMethod.TRANSFER
+            ) {
+              cajaTarjeta += tipAmount;
+            } else {
+              cajaEfectivo += tipAmount;
+            }
+
+            if (
+              paymentMethod === PaymentMethod.CARD ||
+              paymentMethod === PaymentMethod.TRANSFER
+            ) {
               if (payment.terminalCommissionAmount != null) {
                 totalComisionTarjetaCalculada += Number(
                   payment.terminalCommissionAmount,
@@ -168,8 +197,6 @@ export function useDailyCutManager({
                 totalComisionTarjetaCalculada += comm;
                 hasExplicitCommissions = true;
               }
-            } else {
-              cajaEfectivo += totalPago;
             }
           }
         });
@@ -205,7 +232,8 @@ export function useDailyCutManager({
       ? totalComisionTarjetaCalculada
       : (cajaTarjeta * terminalCommissionRate) / 100;
     const cajaTarjetaNeta = Math.max(0, cajaTarjeta - comisionTarjeta);
-    const utilidadReal = ventaNeta + propinasEfectivo + propinasTarjeta;
+    const utilidadReal =
+      ventaNeta + propinasEfectivo + propinasTarjeta + propinasTransferencia;
     const utilidadFinal = utilidadReal - todayExpenses - comisionTarjeta;
 
     const ordersAtTable = todayOrders.filter(
@@ -224,6 +252,7 @@ export function useDailyCutManager({
       ivaAcumulado,
       propinasEfectivo,
       propinasTarjeta,
+      propinasTransferencia,
       cajaEfectivo,
       cajaTarjeta,
       comisionTarjeta,
@@ -405,6 +434,7 @@ export function useDailyCutManager({
         manualTipsTarjeta !== ""
           ? Number(manualTipsTarjeta)
           : todayTotals.propinasTarjeta;
+      const tipsTransferenciaFinal = todayTotals.propinasTransferencia;
       const comisionTarjetaFinal = (cardFinal * terminalCommissionRate) / 100;
 
       let cutNotes: string | null = null;
@@ -421,16 +451,21 @@ export function useDailyCutManager({
           iva_acumulado: todayTotals.ivaAcumulado,
           propinas_efectivo: tipsEfectivoFinal,
           propinas_tarjeta: tipsTarjetaFinal,
+          propinas_transferencia: tipsTransferenciaFinal,
           caja_efectivo: cashFinal,
           caja_tarjeta: cardFinal,
           comision_tarjeta: comisionTarjetaFinal,
           utilidad_real:
-            todayTotals.ventaNeta + tipsEfectivoFinal + tipsTarjetaFinal,
+            todayTotals.ventaNeta +
+            tipsEfectivoFinal +
+            tipsTarjetaFinal +
+            tipsTransferenciaFinal,
           total_gastos: todayExpenses,
           utilidad_final:
             todayTotals.ventaNeta +
             tipsEfectivoFinal +
-            tipsTarjetaFinal -
+            tipsTarjetaFinal +
+            tipsTransferenciaFinal -
             todayExpenses -
             comisionTarjetaFinal,
           total_orders: todayOrders.length,
@@ -444,9 +479,10 @@ export function useDailyCutManager({
       const { error: tipsError } = await supabase.from("daily_tips").insert({
         tenant_id: tenant.id,
         cut_date: mxDateStr,
-        total_card_tips: tipsTarjetaFinal,
+        total_card_tips: tipsTarjetaFinal + tipsTransferenciaFinal,
         total_cash_tips: tipsEfectivoFinal,
-        total_tips: tipsTarjetaFinal + tipsEfectivoFinal,
+        total_tips:
+          tipsTarjetaFinal + tipsEfectivoFinal + tipsTransferenciaFinal,
         total_hours: tipTotalHours,
         breakdown: tipBreakdown as unknown as null,
       });
