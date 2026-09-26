@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
             tiempo_preparacion_segundos, created_at,
             menu_items ( id, name, price, image_url, is_available )
           ),
-          payments ( id, order_id, method, amount, received_amount, change, tip_amount, created_at ),
+          payments ( id, order_id, method, amount, received_amount, change, tip_amount, tip_payment_method, tip_terminal_id, terminal_id, terminal_name, terminal_commission_rate, terminal_commission_amount, created_at ),
           customer:customers ( id, name, email, phone )
         `
         : `

@@ -8,6 +8,8 @@ type PaymentInput = {
   amount: number;
   method: string;
   tipAmount: number;
+  tipPaymentMethod?: string | null;
+  tipTerminalId?: string | null;
   receivedAmount?: number;
   change?: number;
   terminalId?: string | null;
@@ -45,6 +47,8 @@ const toPaymentInsert = (
       payment.receivedAmount != null ? Number(payment.receivedAmount) : null,
     change: payment.change != null ? Number(payment.change) : null,
     tip_amount: payment.tipAmount ? Number(payment.tipAmount) : 0,
+    tip_payment_method: payment.tipPaymentMethod || payment.method,
+    tip_terminal_id: payment.tipTerminalId || null,
     terminal_id: payment.terminalId || null,
     terminal_name: payment.terminalName || null,
     terminal_commission_rate: rate,
@@ -212,6 +216,8 @@ export async function POST(request: NextRequest) {
       receivedAmount,
       change,
       tipAmount,
+      tipPaymentMethod,
+      tipTerminalId,
       terminalId,
       terminalName,
       terminalCommissionRate,
@@ -236,6 +242,8 @@ export async function POST(request: NextRequest) {
             receivedAmount,
             change,
             tipAmount,
+            tipPaymentMethod,
+            tipTerminalId,
             terminalId,
             terminalName,
             terminalCommissionRate,
@@ -266,6 +274,7 @@ export async function POST(request: NextRequest) {
       actionType: "PAID",
       details: {
         method,
+        tipPaymentMethod: payment.tip_payment_method,
         amount: Number(amount),
         tipAmount: Number(tipAmount || 0),
         terminalId: payment.terminal_id,
@@ -288,7 +297,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { orderId, tipAmount } = body;
+    const { orderId, tipAmount, tipPaymentMethod } = body;
 
     if (!orderId) {
       return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
@@ -338,7 +347,7 @@ export async function PATCH(request: NextRequest) {
     );
 
     let assignedTipCents = 0;
-    const paymentUpdates: { id: string; tip_amount: number }[] = [];
+    const paymentUpdates: { id: string; tip_amount: number; tip_payment_method?: string }[] = [];
 
     for (let index = 0; index < payments.length; index++) {
       const payment = payments[index];
@@ -355,18 +364,23 @@ export async function PATCH(request: NextRequest) {
       paymentUpdates.push({
         id: payment.id,
         tip_amount: paymentTipCents / CENTS_PER_PESO,
+        ...(tipPaymentMethod ? { tip_payment_method: tipPaymentMethod } : {}),
       });
     }
 
     const updateResults = await Promise.all(
-      paymentUpdates.map((paymentUpdate) =>
-        supabase
+      paymentUpdates.map((paymentUpdate) => {
+        const updatePayload: { tip_amount: number; tip_payment_method?: string } = {
+          tip_amount: paymentUpdate.tip_amount,
+        };
+        if (paymentUpdate.tip_payment_method) {
+          updatePayload.tip_payment_method = paymentUpdate.tip_payment_method;
+        }
+        return supabase
           .from("payments")
-          .update({
-            tip_amount: paymentUpdate.tip_amount,
-          })
-          .eq("id", paymentUpdate.id),
-      ),
+          .update(updatePayload)
+          .eq("id", paymentUpdate.id);
+      }),
     );
 
     for (const { error: updateError } of updateResults) {
