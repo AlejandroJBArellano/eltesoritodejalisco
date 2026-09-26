@@ -1,10 +1,9 @@
 "use client";
 
-import { logout } from "@/app/login/actions";
-import { useTenant } from "@/components/TenantProvider";
-import { useOptionalUser } from "@/components/UserProvider";
 import { PushNotificationPrompt } from "@/components/notifications/PushNotificationPrompt";
 import { SidebarDrawer } from "@/components/SidebarDrawer";
+import { useTenant } from "@/components/TenantProvider";
+import { useOptionalUser } from "@/components/UserProvider";
 import { createClient } from "@/lib/supabase/client";
 import { Menu } from "lucide-react";
 import Link from "next/link";
@@ -139,11 +138,10 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-150 ${
-                      isActive
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-150 ${isActive
                         ? "bg-primary/15 text-primary border border-primary/25"
                         : "text-text-light/60 hover:text-text-light hover:bg-white/5 border border-transparent"
-                    }`}
+                      }`}
                   >
                     {link.label}
                   </Link>
@@ -151,33 +149,17 @@ export default function Navbar() {
               })}
             </div>
 
-            {/* Right: notifications + email + logout */}
-            <div className="flex items-center gap-3 shrink-0">
+            {/* Right: notifications + logout icon button */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <PushNotificationPrompt
                 compact
                 role={
                   user?.role === "CHEF"
                     ? "KITCHEN"
                     : ((user?.role as
-                        "ADMIN" | "MANAGER" | "WAITER" | undefined) ?? "ADMIN")
+                      "ADMIN" | "MANAGER" | "WAITER" | undefined) ?? "ADMIN")
                 }
               />
-              {email && (
-                <span
-                  className="hidden sm:block text-xs font-medium text-text-light/40 max-w-45 truncate"
-                  title={email}
-                >
-                  {email}
-                </span>
-              )}
-              <form action={logout}>
-                <button
-                  type="submit"
-                  className="text-xs font-semibold text-text-light/60 hover:text-rose-400 bg-white/4 hover:bg-rose-500/10 border border-border/60 hover:border-rose-500/20 px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-[0.98] cursor-pointer"
-                >
-                  Salir
-                </button>
-              </form>
             </div>
           </div>
         </div>

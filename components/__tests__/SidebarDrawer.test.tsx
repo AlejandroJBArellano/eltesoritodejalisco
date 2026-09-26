@@ -82,7 +82,11 @@ describe("SidebarDrawer Component", () => {
     expect(screen.getByText("Historial de Órdenes")).toBeInTheDocument();
     expect(screen.getByText("Detector de Horas Pico")).toBeInTheDocument();
     expect(screen.getByText("Admin User")).toBeInTheDocument();
+    expect(screen.getByText("admin@test.com")).toBeInTheDocument();
     expect(screen.getByText("ADMIN")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /cerrar sesión/i }),
+    ).toBeInTheDocument();
   });
 
   it("calls onClose when backdrop is clicked", () => {

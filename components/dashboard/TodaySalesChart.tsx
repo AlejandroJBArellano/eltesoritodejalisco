@@ -78,7 +78,7 @@ export function TodaySalesChart({
   return (
     <div
       data-testid="today-sales-chart"
-      className="rounded-2xl bg-card border border-border/80 shadow-md p-5 sm:p-6 transition-all"
+      className="rounded-xl bg-card border border-border p-4 sm:p-5 transition-all"
     >
       {/* Top Header Metric Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border/80 pb-5">

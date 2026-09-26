@@ -1,5 +1,6 @@
 "use client";
 
+import { logout } from "@/app/login/actions";
 import { useTenant } from "@/components/TenantProvider";
 import { useOptionalUser } from "@/components/UserProvider";
 import {
@@ -12,6 +13,7 @@ import {
   ClipboardCheck,
   Clock,
   LayoutDashboard,
+  LogOut,
   Package,
   Receipt,
   ReceiptText,
@@ -365,18 +367,39 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
 
         {/* User Footer */}
         {user?.profile && (
-          <div className="p-3 border-t border-border/80 bg-black/20 shrink-0">
-            <div className="flex items-center justify-between">
+          <div className="p-3.5 border-t border-border/80 bg-black/20 shrink-0">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold text-text-light truncate">
-                  {user.profile.full_name || user.profile.email}
-                </span>
+                {user.profile.full_name ? (
+                  <>
+                    <span className="text-xs font-bold text-text-light truncate">
+                      {user.profile.full_name}
+                    </span>
+                    <span className="text-[11px] text-text-light/50 truncate font-mono">
+                      {user.profile.email}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-xs font-bold text-text-light truncate font-mono">
+                    {user.profile.email}
+                  </span>
+                )}
                 {user.profile.role && (
-                  <span className="text-[10px] font-mono text-text-light/50 uppercase">
+                  <span className="text-[10px] font-mono text-primary/80 uppercase font-semibold mt-0.5">
                     {user.profile.role}
                   </span>
                 )}
               </div>
+              <form action={logout}>
+                <button
+                  type="submit"
+                  aria-label="Cerrar sesión"
+                  title="Cerrar sesión"
+                  className="p-2 rounded-lg text-text-light/60 hover:text-rose-400 hover:bg-rose-500/10 border border-border/60 hover:border-rose-500/20 transition-all duration-150 active:scale-[0.98] cursor-pointer shrink-0 flex items-center justify-center"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </form>
             </div>
           </div>
         )}

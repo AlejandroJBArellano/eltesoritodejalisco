@@ -97,13 +97,15 @@ describe("Navbar Component", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders navigation links including 'Historial' for ADMIN role", () => {
+  it("renders navigation links including 'Historial' for ADMIN role and logout button", () => {
     render(<Navbar />);
 
     expect(screen.getByText("POS")).toBeInTheDocument();
     expect(screen.getByText("Cocina")).toBeInTheDocument();
     expect(screen.getByText("Historial")).toBeInTheDocument();
-    expect(screen.getByText("admin@test.com")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /cerrar sesión/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText("KITTN")).toBeInTheDocument();
     expect(screen.getByText("OS")).toBeInTheDocument();
   });
@@ -191,7 +193,9 @@ describe("Navbar Component", () => {
       });
     });
 
-    expect(screen.getByText("updated@test.com")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /cerrar sesión/i }),
+    ).toBeInTheDocument();
 
     unmount();
     expect(unsubscribeMock).toHaveBeenCalled();

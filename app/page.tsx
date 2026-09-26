@@ -108,15 +108,8 @@ export default async function Home() {
         )}
 
         {isAdmin && (
-          <TodaySalesChart
-            hourlyRows={hourlyRows}
-            salesToday={stats.salesToday}
-            ordersCount={stats.activeOrdersCount}
-            tipsToday={stats.tipsToday}
-          />
+          <DailyStatsSection stats={stats} hourlyRows={hourlyRows} />
         )}
-
-        {isAdmin && <DailyStatsSection stats={stats} />}
 
         <OperationSection />
 
