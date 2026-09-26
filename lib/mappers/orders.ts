@@ -95,6 +95,12 @@ export interface DbOrderPayload {
     received_amount?: number;
     change?: number;
     tip_amount?: number;
+    tip_payment_method?: string | null;
+    tip_terminal_id?: string | null;
+    terminal_id?: string | null;
+    terminal_name?: string | null;
+    terminal_commission_rate?: number | null;
+    terminal_commission_amount?: number | null;
     created_at?: string;
   }>;
   customers?: Customer | null;
@@ -186,6 +192,12 @@ export const mapOrderData = (dbOrder: DbOrderPayload): OrderWithDetails => {
           receivedAmount: p.received_amount,
           change: p.change,
           tipAmount: p.tip_amount || 0,
+          tipPaymentMethod: p.tip_payment_method || null,
+          tipTerminalId: p.tip_terminal_id || null,
+          terminalId: p.terminal_id || null,
+          terminalName: p.terminal_name || null,
+          terminalCommissionRate: p.terminal_commission_rate != null ? Number(p.terminal_commission_rate) : null,
+          terminalCommissionAmount: p.terminal_commission_amount != null ? Number(p.terminal_commission_amount) : null,
           createdAt: safeParseDate(p.created_at),
         })) as Payment[])
       : [],

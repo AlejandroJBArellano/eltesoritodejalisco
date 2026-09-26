@@ -156,6 +156,8 @@ export interface Payment {
   receivedAmount?: number;
   change?: number;
   tipAmount?: number;
+  tipPaymentMethod?: PaymentMethod | string | null;
+  tipTerminalId?: string | null;
   terminalId?: string | null;
   terminalName?: string | null;
   terminalCommissionRate?: number | null;
@@ -339,7 +341,22 @@ export interface SmartBatch {
 // ============================================
 
 export type TaskFrequency =
-  "CONTINUOUS" | "VARIABLE" | "ROUTINE" | "DAILY" | "WEEKLY" | "CLOSING";
+  | "CONTINUOUS"
+  | "VARIABLE"
+  | "ROUTINE"
+  | "DAILY"
+  | "WEEKLY"
+  | "CLOSING";
+
+export const TASK_FREQUENCY_LABELS: Record<string, string> = {
+  CONTINUOUS: "Continua",
+  DAILY: "Diaria",
+  ROUTINE: "Rutina",
+  WEEKLY: "Semanal",
+  CLOSING: "Cierre",
+  VARIABLE: "Variable",
+  MONTHLY: "Mensual",
+};
 
 export type TaskStatus =
   "PENDING" | "IN_PROGRESS" | "PAUSED" | "COMPLETED" | "APPROVED" | "NOT_DONE";
