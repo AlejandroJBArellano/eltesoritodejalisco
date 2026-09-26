@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { ExportButton, TableSearchInput } from "@/components/ui/DataTableControls";
 import {
-  startTask,
+  completeTask,
   pauseTask,
   resumeTask,
-  completeTask,
+  startTask,
   uploadTaskPhoto,
 } from "@/lib/actions/tasks";
 import {
@@ -13,20 +13,18 @@ import {
   type PrimordialTask,
   type TaskExecution,
 } from "@/types";
-import { ExportButton, TableSearchInput } from "@/components/ui/DataTableControls";
-import { ActiveTaskTimer } from "./ActiveTaskTimer";
 import {
-  Folder,
   Camera,
-  Play,
-  Pause,
-  RotateCcw,
   CheckCircle2,
   Clock,
-  Sparkles,
-  ListTodo,
-  CheckCheck,
+  Folder,
+  Pause,
+  Play,
+  RotateCcw,
+  Sparkles
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ActiveTaskTimer } from "./ActiveTaskTimer";
 
 const FREQUENCY_LABELS = TASK_FREQUENCY_LABELS;
 
@@ -333,100 +331,6 @@ export function TareasClient({
         </div>
       )}
 
-      {/* Operational Pulse StatCards Row */}
-      <section
-        aria-label="Resumen operativo del turno"
-        className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
-      >
-        <div className="rounded-xl bg-card p-4 sm:p-5 border border-border/80 transition-all duration-150 shadow-xs">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] font-semibold text-text-light/60 uppercase tracking-wider">
-              Total Tareas
-            </span>
-            <div className="rounded-lg p-2 bg-background/60 border border-border/40 text-text-light/80">
-              <ListTodo className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-2 flex items-baseline justify-between">
-            <p className="text-2xl sm:text-3xl font-bold text-text-light tracking-tight tabular-nums font-mono">
-              {totalTasks}
-            </p>
-            <span className="text-xs font-medium text-text-light/50">
-              Configuradas
-            </span>
-          </div>
-        </div>
-
-        <div className="rounded-xl bg-card p-4 sm:p-5 border border-border/80 transition-all duration-150 shadow-xs">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] font-semibold text-text-light/60 uppercase tracking-wider">
-              En Progreso
-            </span>
-            <div
-              className={`rounded-lg p-2 border ${
-                inProgressCount > 0
-                  ? "bg-amber-500/10 border-amber-500/25 text-amber-400"
-                  : "bg-background/60 border border-border/40 text-text-light/60"
-              }`}
-            >
-              <Sparkles
-                className={`h-4 w-4 ${inProgressCount > 0 ? "animate-spin" : ""}`}
-              />
-            </div>
-          </div>
-          <div className="mt-2 flex items-baseline justify-between">
-            <p
-              className={`text-2xl sm:text-3xl font-bold tracking-tight tabular-nums font-mono ${
-                inProgressCount > 0 ? "text-amber-400" : "text-text-light"
-              }`}
-            >
-              {inProgressCount}
-            </p>
-            <span className="text-xs font-medium text-text-light/50">
-              {inProgressCount === 1 ? "Activa" : "Activas"}
-            </span>
-          </div>
-        </div>
-
-        <div className="rounded-xl bg-card p-4 sm:p-5 border border-border/80 transition-all duration-150 shadow-xs">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] font-semibold text-text-light/60 uppercase tracking-wider">
-              Completadas
-            </span>
-            <div className="rounded-lg p-2 bg-emerald-500/10 border border-emerald-500/25 text-emerald-400">
-              <CheckCheck className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-2 flex items-baseline justify-between">
-            <p className="text-2xl sm:text-3xl font-bold text-emerald-400 tracking-tight tabular-nums font-mono">
-              {completedCount}
-            </p>
-            <span className="text-xs font-medium text-emerald-400/80 font-mono tabular-nums">
-              {progressPercentage}%
-            </span>
-          </div>
-        </div>
-
-        <div className="rounded-xl bg-card p-4 sm:p-5 border border-border/80 transition-all duration-150 shadow-xs">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] font-semibold text-text-light/60 uppercase tracking-wider">
-              Pendientes
-            </span>
-            <div className="rounded-lg p-2 bg-background/60 border border-border/40 text-text-light/60">
-              <Clock className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-2 flex items-baseline justify-between">
-            <p className="text-2xl sm:text-3xl font-bold text-text-light tracking-tight tabular-nums font-mono">
-              {pendingCount}
-            </p>
-            <span className="text-xs font-medium text-text-light/50">
-              Por iniciar
-            </span>
-          </div>
-        </div>
-      </section>
-
       {/* Header & Controls Bar */}
       <div className="bg-card p-4 rounded-xl border border-border/80 shadow-xs space-y-3.5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -492,41 +396,37 @@ export function TareasClient({
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
             <button
               onClick={() => setStatusFilter("ALL")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${
-                statusFilter === "ALL"
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${statusFilter === "ALL"
                   ? "bg-primary text-dark border-primary font-bold shadow-xs"
                   : "bg-background/80 text-text-light/70 border-border/60 hover:bg-white/5 hover:text-text-light"
-              }`}
+                }`}
             >
               Todas ({totalTasks})
             </button>
             <button
               onClick={() => setStatusFilter("PENDING")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${
-                statusFilter === "PENDING"
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${statusFilter === "PENDING"
                   ? "bg-primary text-dark border-primary font-bold shadow-xs"
                   : "bg-background/80 text-text-light/70 border-border/60 hover:bg-white/5 hover:text-text-light"
-              }`}
+                }`}
             >
               Pendientes ({pendingCount})
             </button>
             <button
               onClick={() => setStatusFilter("IN_PROGRESS")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${
-                statusFilter === "IN_PROGRESS"
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${statusFilter === "IN_PROGRESS"
                   ? "bg-amber-500 text-dark border-amber-500 font-bold shadow-xs"
                   : "bg-background/80 text-text-light/70 border-border/60 hover:bg-white/5 hover:text-text-light"
-              }`}
+                }`}
             >
               En Progreso ({inProgressCount})
             </button>
             <button
               onClick={() => setStatusFilter("COMPLETED")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${
-                statusFilter === "COMPLETED"
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer shrink-0 border ${statusFilter === "COMPLETED"
                   ? "bg-emerald-600 text-white border-emerald-600 font-bold shadow-xs"
                   : "bg-background/80 text-text-light/70 border-border/60 hover:bg-white/5 hover:text-text-light"
-              }`}
+                }`}
             >
               Completadas ({completedCount})
             </button>
@@ -587,13 +487,12 @@ export function TareasClient({
                 return (
                   <div
                     key={task.id}
-                    className={`group relative flex flex-col justify-between p-4 sm:p-5 rounded-xl border transition-all duration-150 shadow-xs ${
-                      activeExecution
+                    className={`group relative flex flex-col justify-between p-4 sm:p-5 rounded-xl border transition-all duration-150 shadow-xs ${activeExecution
                         ? "bg-card border-primary/50 ring-1 ring-primary/20"
                         : isCompletedToday
                           ? "bg-card/70 border-emerald-500/20 hover:border-emerald-500/40"
                           : "bg-card border-border/70 hover:border-border hover:bg-card/90"
-                    }`}
+                      }`}
                   >
                     <div>
                       {/* Top Badges */}
