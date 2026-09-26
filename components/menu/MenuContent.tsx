@@ -16,7 +16,6 @@ import { CategoriesPanel } from "./components/CategoriesPanel";
 import { CategoryModal } from "./components/CategoryModal";
 import { IngredientModal } from "./components/IngredientModal";
 import { MenuFilters } from "./components/MenuFilters";
-import { MenuStatsCards } from "./components/MenuStatsCards";
 import { MenuTable } from "./components/MenuTable";
 import { ProductModal } from "./components/ProductModal";
 import { RecipeModal } from "./components/RecipeModal";
@@ -223,8 +222,6 @@ function MenuContentInner({
             {activeErrors}
           </div>
         )}
-
-        <MenuStatsCards />
 
         {categoriesLoaded && <CategoriesPanel />}
 
