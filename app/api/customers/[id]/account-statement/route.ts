@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
 import { getProfile } from "@/lib/auth";
 import { PaymentMethod } from "@/types";
+import type { Database } from "@/types/supabase";
+import { logOrderAction } from "@/lib/services/orderAudit";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -202,14 +204,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     let remainingToDistribute = paymentAmount;
-    const paymentRecords: {
-      order_id: string;
-      tenant_id: string;
-      amount: number;
-      method: "CASH" | "CARD" | "TRANSFER" | "OTHER";
-      received_amount?: number;
-      change?: number;
-    }[] = [];
+    type PaymentInsert = Database["public"]["Tables"]["payments"]["Insert"];
+    const paymentRecords: PaymentInsert[] = [];
     const ordersFullyPaid: string[] = [];
 
     for (const order of orders) {
@@ -227,10 +223,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       const appliedToThis = Math.min(remainingToDistribute, balance);
 
       paymentRecords.push({
+        id: crypto.randomUUID(),
         order_id: order.id,
         tenant_id: tenant.id,
         amount: appliedToThis,
-        method: method as "CASH" | "CARD" | "TRANSFER" | "OTHER",
+        method: method as Database["public"]["Enums"]["PaymentMethod"],
         received_amount:
           method === "CASH"
             ? Number(receivedAmount || appliedToThis)
@@ -263,6 +260,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         .in("id", ordersFullyPaid);
 
       if (updateOrdersError) throw updateOrdersError;
+
+      for (const orderId of ordersFullyPaid) {
+        await logOrderAction({
+          orderId,
+          tenantId: tenant.id,
+          user: profile,
+          actionType: "PAID",
+          details: {
+            reason: "Liquidación por abono a cuenta",
+          },
+        });
+      }
     }
 
     // 4. Registrar en notas o actualizar puntos/gasto del cliente si corresponde
