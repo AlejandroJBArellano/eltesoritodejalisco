@@ -50,13 +50,13 @@ export function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md overflow-y-auto animate-in fade-in duration-150">
-      <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md overflow-y-auto animate-in fade-in duration-150 print:bg-transparent print:backdrop-blur-none print:static print:overflow-visible print:p-0 print:m-0 print:block print:w-auto print:h-auto">
+      <div className="fixed inset-0 no-print" onClick={onClose} aria-hidden="true" />
       <div
-        className={`relative bg-card border border-border rounded-xl w-full ${maxWidthMap[maxWidth]} max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-6 z-10`}
+        className={`relative bg-card border border-border rounded-xl w-full ${maxWidthMap[maxWidth]} max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-6 z-10 print:border-none print:shadow-none print:bg-transparent print:max-h-none print:overflow-visible print:w-auto print:m-0 print:static print:p-0`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-card shrink-0">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-card shrink-0 no-print">
           <div className="flex items-center gap-2.5">
             {icon}
             <div>
@@ -80,7 +80,7 @@ export function Modal({
         </div>
 
         {/* Content */}
-        <div className="p-5 overflow-y-auto flex-1">{children}</div>
+        <div className="p-5 overflow-y-auto flex-1 print:p-0 print:overflow-visible">{children}</div>
       </div>
     </div>
   );

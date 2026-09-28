@@ -74,7 +74,8 @@ body {
 /* ── Print utility ────────────────────────────────────── */
 @media print {
   .no-print,
-  nav {
+  nav,
+  header {
     display: none !important;
   }
   .pos-client-root > *:not(.print-modal-container) {
@@ -96,6 +97,16 @@ body {
     -webkit-backdrop-filter: none !important;
     z-index: auto !important;
     overflow: visible !important;
+  }
+
+  /* Ocultar contenido de fondo al imprimir tickets o tarjetas desde modales */
+  body:has(.ticket-container) main,
+  body:has(.ticket-container) .page-header-container,
+  body:has(.daily-summary-ticket-container) main,
+  body:has(.daily-summary-ticket-container) .page-header-container,
+  body:has(.printable-qr-card) main,
+  body:has(.printable-qr-card) .page-header-container {
+    display: none !important;
   }
 }
 

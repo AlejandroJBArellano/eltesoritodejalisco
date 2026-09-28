@@ -132,7 +132,7 @@ export function CustomerAccountModal({
       >
         <div className="space-y-5">
           {/* Tabs Selector */}
-          <div className="flex border-b border-border">
+          <div className="flex border-b border-border no-print">
             <button
               type="button"
               onClick={() => setActiveTab("resumen")}
@@ -171,7 +171,7 @@ export function CustomerAccountModal({
           </div>
 
           {errorMessage && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-bold flex items-center gap-2">
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-bold flex items-center gap-2 no-print">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>

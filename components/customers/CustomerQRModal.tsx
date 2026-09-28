@@ -121,7 +121,7 @@ export function CustomerQRModal({
         </div>
 
         {/* Acciones del Modal */}
-        <div className="space-y-3">
+        <div className="space-y-3 no-print">
           {/* Enlace directo y botón de copiar */}
           <div className="flex items-center gap-2 rounded-lg bg-dark/40 border border-border p-2">
             <span className="text-xs font-mono text-text-light/70 truncate flex-1 px-2 select-all">
@@ -166,6 +166,21 @@ export function CustomerQRModal({
           </div>
         </div>
       </div>
+
+      <style>{`
+        @media print {
+          .printable-qr-card {
+            border: 1px solid #000000 !important;
+            box-shadow: none !important;
+            margin: 0 auto !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+          }
+          .printable-qr-card * {
+            color: #000000 !important;
+          }
+        }
+      `}</style>
     </Modal>
   );
 }

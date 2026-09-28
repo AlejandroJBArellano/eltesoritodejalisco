@@ -65,27 +65,35 @@ export function CustomerAccountTicket({
     });
   };
 
-  const totalSumNotes = pendingNotes.reduce((acc, n) => acc + n.total, 0);
-  const totalSumPaid = pendingNotes.reduce((acc, n) => acc + n.totalPaid, 0);
+  const totalSumNotes = pendingNotes.reduce(
+    (acc, n) => acc + (Number(n.total) || 0),
+    0,
+  );
+  const totalSumPaid = pendingNotes.reduce(
+    (acc, n) => acc + (Number(n.totalPaid) || 0),
+    0,
+  );
+
+  const displayTenantName = tenantName || "Kittn Restaurante";
 
   const generateWhatsAppUrl = () => {
     if (!customer.phone) return null;
     const cleanPhone = customer.phone.replace(/[^0-9]/g, "");
     if (!cleanPhone) return null;
 
-    let msg = `¡Hola *${customer.name}*! Te compartimos tu Estado de Cuenta de *${tenantName}*:\n\n`;
+    let msg = `¡Hola *${customer.name}*! Te compartimos tu Estado de Cuenta de *${displayTenantName}*:\n\n`;
     msg += `📌 *Resumen de Cuenta:*\n`;
     msg += `▪ Total notas pendientes: $${totalSumNotes.toFixed(2)}\n`;
     msg += `▪ Abonos realizados: $${totalSumPaid.toFixed(2)}\n`;
-    msg += `▪ *SALDO TOTAL PENDIENTE: $${totalDebt.toFixed(2)}*\n\n`;
+    msg += `▪ *SALDO TOTAL PENDIENTE: $${Number(totalDebt || 0).toFixed(2)}*\n\n`;
 
     msg += `🧾 *Desglose de Notas:*\n`;
     pendingNotes.forEach((n) => {
-      msg += `• Nota #${n.orderNumber} (${formatDate(n.createdAt)}): Saldo $${n.remainingBalance.toFixed(2)}\n`;
+      msg += `• Nota #${n.orderNumber} (${formatDate(n.createdAt)}): Saldo $${Number(n.remainingBalance || 0).toFixed(2)}\n`;
     });
 
     if (lastPayment) {
-      msg += `\nÚltimo abono: $${Number(lastPayment.amount).toFixed(2)} (${lastPayment.method}) el ${formatDate(lastPayment.createdAt)}\n`;
+      msg += `\nÚltimo abono: $${Number(lastPayment.amount || 0).toFixed(2)} (${lastPayment.method}) el ${formatDate(lastPayment.createdAt)}\n`;
     }
 
     msg += `\nAgradecemos tu preferencia. ¡Buen día!`;
@@ -124,7 +132,7 @@ export function CustomerAccountTicket({
       >
         <div className="text-center mb-3">
           <h2 className="text-base font-bold tracking-tight">
-            {tenantName.toUpperCase()}
+            {displayTenantName.toUpperCase()}
           </h2>
           {rfc && <p className="text-[10px]">RFC: {rfc}</p>}
           {postal_code && <p className="text-[10px]">C.P.: {postal_code}</p>}
@@ -170,9 +178,11 @@ export function CustomerAccountTicket({
               <tr key={note.id} className="align-top">
                 <td className="py-1 font-bold">#{note.orderNumber}</td>
                 <td className="py-1">{formatDate(note.createdAt)}</td>
-                <td className="py-1 text-right">${note.total.toFixed(2)}</td>
+                <td className="py-1 text-right">
+                  ${(Number(note.total) || 0).toFixed(2)}
+                </td>
                 <td className="py-1 text-right font-bold">
-                  ${note.remainingBalance.toFixed(2)}
+                  ${(Number(note.remainingBalance) || 0).toFixed(2)}
                 </td>
               </tr>
             ))}
@@ -197,7 +207,7 @@ export function CustomerAccountTicket({
           <p>Total Abonado: ${totalSumPaid.toFixed(2)}</p>
           <div className="border-t-2 border-black pt-1 mt-1">
             <p className="text-sm font-black">
-              SALDO DEUDOR: ${totalDebt.toFixed(2)}
+              SALDO DEUDOR: ${(Number(totalDebt) || 0).toFixed(2)}
             </p>
           </div>
         </div>
@@ -207,7 +217,7 @@ export function CustomerAccountTicket({
           <div className="mt-3 p-2 bg-gray-100 rounded border border-gray-300 text-[10px] text-center">
             <p className="font-bold uppercase">Último Abono Registrado</p>
             <p>
-              ${Number(lastPayment.amount).toFixed(2)} ({lastPayment.method}) -{" "}
+              ${Number(lastPayment.amount || 0).toFixed(2)} ({lastPayment.method}) -{" "}
               {formatDate(lastPayment.createdAt)}
             </p>
           </div>
@@ -234,31 +244,66 @@ export function CustomerAccountTicket({
 
       <style>{`
         @media print {
+          @page {
+            size: 80mm auto;
+            margin: 0;
+          }
+          html,
+          body {
+            background: #ffffff !important;
+            color: #000000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
           .no-print,
-          nav {
+          nav,
+          header,
+          aside {
             display: none !important;
           }
-          body {
-            background: white !important;
-            color: black !important;
+          main,
+          .page-header-container {
+            display: none !important;
           }
           .ticket-container {
             position: absolute !important;
             left: 0 !important;
             top: 0 !important;
             width: 80mm !important;
+            max-width: 80mm !important;
             border: none !important;
             box-shadow: none !important;
-            background: white !important;
-            padding: 5px !important;
+            background: #ffffff !important;
+            padding: 8px !important;
             margin: 0 !important;
           }
+          .ticket-container,
           .ticket-container * {
-            color: black !important;
+            color: #000000 !important;
+            border-color: #000000 !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            text-shadow: none !important;
           }
-          @page {
-            size: 80mm auto;
-            margin: 0;
+          .ticket-container table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+          }
+          .ticket-container tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .ticket-container td,
+          .ticket-container th {
+            vertical-align: top !important;
+          }
+          .ticket-container hr,
+          .ticket-container .border-dashed {
+            border-style: dashed !important;
+            border-color: #000000 !important;
           }
         }
       `}</style>

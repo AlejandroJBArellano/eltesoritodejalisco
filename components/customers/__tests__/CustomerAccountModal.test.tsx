@@ -191,6 +191,25 @@ describe("CustomerAccountModal Component", () => {
     });
   });
 
+  it("switches to ticket tab when clicking Imprimir Ticket button on summary card", async () => {
+    render(
+      <CustomerAccountModal
+        isOpen={true}
+        onClose={vi.fn()}
+        customer={mockCustomer}
+      />,
+    );
+
+    await screen.findByText("#201");
+
+    const printTicketBtn = screen.getByRole("button", {
+      name: /Imprimir Ticket/i,
+    });
+    fireEvent.click(printTicketBtn);
+
+    expect(screen.getByTestId("account-ticket-container")).toBeInTheDocument();
+  });
+
   it("handles fetch error gracefully", async () => {
     (global.fetch as any).mockResolvedValueOnce({
       ok: false,
