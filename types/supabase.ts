@@ -5,6 +5,98 @@ export type Database = {
   
   "public": {
           Tables: {
+            "checkout_drafts": {
+                  Row: {
+                    "consumed_at": string | null,"created_at": string,"expires_at": string,"id": string,"order_id": string,"payload": Json,"tenant_id": string
+                  }
+                  Insert: {
+                    "consumed_at"?: string | null,"created_at"?: string,"expires_at"?: string,"id"?: string,"order_id"?: string,"payload"?: Json,"tenant_id"?: string
+                  }
+                  Update: {
+                    "consumed_at"?: string | null,"created_at"?: string,"expires_at"?: string,"id"?: string,"order_id"?: string,"payload"?: Json,"tenant_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"menu_item_option_group_tiers": {
+                  Row: {
+                    "group_id": string,"id": string,"price": number,"quantity_from": number,"quantity_to": number | null,"tenant_id": string
+                  }
+                  Insert: {
+                    "group_id"?: string,"id"?: string,"price"?: number,"quantity_from"?: number,"quantity_to"?: number | null,"tenant_id"?: string
+                  }
+                  Update: {
+                    "group_id"?: string,"id"?: string,"price"?: number,"quantity_from"?: number,"quantity_to"?: number | null,"tenant_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"menu_item_option_groups": {
+                  Row: {
+                    "allow_repeat": boolean,"created_at": string,"id": string,"is_active": boolean,"max_per_option": number | null,"max_select": number | null,"menu_item_id": string,"min_select": number,"name": string,"pricing_mode": string,"sort_order": number,"tenant_id": string,"tier_match_mode": string | null,"updated_at": string
+                  }
+                  Insert: {
+                    "allow_repeat"?: boolean,"created_at"?: string,"id"?: string,"is_active"?: boolean,"max_per_option"?: number | null,"max_select"?: number | null,"menu_item_id"?: string,"min_select"?: number,"name"?: string,"pricing_mode"?: string,"sort_order"?: number,"tenant_id"?: string,"tier_match_mode"?: string | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "allow_repeat"?: boolean,"created_at"?: string,"id"?: string,"is_active"?: boolean,"max_per_option"?: number | null,"max_select"?: number | null,"menu_item_id"?: string,"min_select"?: number,"name"?: string,"pricing_mode"?: string,"sort_order"?: number,"tenant_id"?: string,"tier_match_mode"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"menu_item_option_recipe_items": {
+                  Row: {
+                    "id": string,"ingredient_id": string,"option_id": string,"quantity_required": number,"tenant_id": string
+                  }
+                  Insert: {
+                    "id"?: string,"ingredient_id"?: string,"option_id"?: string,"quantity_required"?: number,"tenant_id"?: string
+                  }
+                  Update: {
+                    "id"?: string,"ingredient_id"?: string,"option_id"?: string,"quantity_required"?: number,"tenant_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"menu_item_options": {
+                  Row: {
+                    "created_at": string,"deduct_linked_inventory": boolean,"group_id": string,"id": string,"is_active": boolean,"linked_menu_item_id": string | null,"name": string,"out_of_stock_behavior": string,"price_delta": number,"price_source": string,"sort_order": number,"tenant_id": string,"updated_at": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"deduct_linked_inventory"?: boolean,"group_id"?: string,"id"?: string,"is_active"?: boolean,"linked_menu_item_id"?: string | null,"name"?: string,"out_of_stock_behavior"?: string,"price_delta"?: number,"price_source"?: string,"sort_order"?: number,"tenant_id"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"deduct_linked_inventory"?: boolean,"group_id"?: string,"id"?: string,"is_active"?: boolean,"linked_menu_item_id"?: string | null,"name"?: string,"out_of_stock_behavior"?: string,"price_delta"?: number,"price_source"?: string,"sort_order"?: number,"tenant_id"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"order_item_group_tiers": {
+                  Row: {
+                    "created_at": string,"group_id": string | null,"group_name": string,"id": string,"order_item_id": string,"price": number,"quantity": number,"tenant_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"group_id"?: string | null,"group_name"?: string,"id"?: string,"order_item_id"?: string,"price"?: number,"quantity"?: number,"tenant_id"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"group_id"?: string | null,"group_name"?: string,"id"?: string,"order_item_id"?: string,"price"?: number,"quantity"?: number,"tenant_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"order_item_options": {
+                  Row: {
+                    "created_at": string,"group_id": string | null,"group_name": string,"group_sort": number,"id": string,"inventory": Json,"option_id": string | null,"option_name": string,"option_sort": number,"order_item_id": string,"quantity": number,"tenant_id": string,"unit_price": number
+                  }
+                  Insert: {
+                    "created_at"?: string,"group_id"?: string | null,"group_name"?: string,"group_sort"?: number,"id"?: string,"inventory"?: Json,"option_id"?: string | null,"option_name"?: string,"option_sort"?: number,"order_item_id"?: string,"quantity"?: number,"tenant_id"?: string,"unit_price"?: number
+                  }
+                  Update: {
+                    "created_at"?: string,"group_id"?: string | null,"group_name"?: string,"group_sort"?: number,"id"?: string,"inventory"?: Json,"option_id"?: string | null,"option_name"?: string,"option_sort"?: number,"order_item_id"?: string,"quantity"?: number,"tenant_id"?: string,"unit_price"?: number
+                  }
+                  Relationships: [
+                    
+                  ]
+                },
             "attendance": {
                   Row: {
                     "check_in": string | null,"check_out": string | null,"created_at": string | null,"date": string | null,"id": string,"status": string | null,"tenant_id": string,"updated_at": string | null,"user_id": string | null
@@ -290,13 +382,13 @@ isOneToOne: false
                   ]
                 },"menu_items": {
                   Row: {
-                    "category": string | null,"created_at": string,"description": string | null,"id": string,"image_url": string | null,"ingredient_id": string | null,"is_available": boolean,"name": string,"price": number,"show_in_dine_in": boolean | null,"show_in_takeaway": boolean | null,"stripe_product_id": string | null,"tenant_id": string,"translations": Json | null,"updated_at": string
+                    "customization_deduct_base"?: boolean,"customization_layout"?: string,"category": string | null,"created_at": string,"description": string | null,"id": string,"image_url": string | null,"ingredient_id": string | null,"is_available": boolean,"name": string,"price": number,"show_in_dine_in": boolean | null,"show_in_takeaway": boolean | null,"stripe_product_id": string | null,"tenant_id": string,"translations": Json | null,"updated_at": string
                   }
                   Insert: {
-                    "category"?: string | null,"created_at"?: string,"description"?: string | null,"id": string,"image_url"?: string | null,"ingredient_id"?: string | null,"is_available"?: boolean,"name": string,"price": number,"show_in_dine_in"?: boolean | null,"show_in_takeaway"?: boolean | null,"stripe_product_id"?: string | null,"tenant_id": string,"translations"?: Json | null,"updated_at": string
+                    "customization_deduct_base"?: boolean,"customization_layout"?: string,"category"?: string | null,"created_at"?: string,"description"?: string | null,"id": string,"image_url"?: string | null,"ingredient_id"?: string | null,"is_available"?: boolean,"name": string,"price": number,"show_in_dine_in"?: boolean | null,"show_in_takeaway"?: boolean | null,"stripe_product_id"?: string | null,"tenant_id": string,"translations"?: Json | null,"updated_at": string
                   }
                   Update: {
-                    "category"?: string | null,"created_at"?: string,"description"?: string | null,"id"?: string,"image_url"?: string | null,"ingredient_id"?: string | null,"is_available"?: boolean,"name"?: string,"price"?: number,"show_in_dine_in"?: boolean | null,"show_in_takeaway"?: boolean | null,"stripe_product_id"?: string | null,"tenant_id"?: string,"translations"?: Json | null,"updated_at"?: string
+                    "customization_deduct_base"?: boolean,"customization_layout"?: string,"category"?: string | null,"created_at"?: string,"description"?: string | null,"id"?: string,"image_url"?: string | null,"ingredient_id"?: string | null,"is_available"?: boolean,"name"?: string,"price"?: number,"show_in_dine_in"?: boolean | null,"show_in_takeaway"?: boolean | null,"stripe_product_id"?: string | null,"tenant_id"?: string,"translations"?: Json | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -365,13 +457,13 @@ isOneToOne: false
                   ]
                 },"order_items": {
                   Row: {
-                    "created_at": string,"discount_amount": number | null,"discount_reason": string | null,"discount_scope": string | null,"discount_type": string | null,"discount_value": number | null,"id": string,"inventory_deducted": boolean,"menu_item_id": string,"notes": string | null,"order_id": string,"quantity": number,"status": string | null,"tenant_id": string,"tiempo_preparacion_segundos": number | null,"unit_price": number
+                    "base_unit_price"?: number | null,"customization_modified_at"?: string | null,"discount_base_price"?: number | null,"options_inventory_deducted"?: boolean,"skip_base_inventory"?: boolean,"created_at": string,"discount_amount": number | null,"discount_reason": string | null,"discount_scope": string | null,"discount_type": string | null,"discount_value": number | null,"id": string,"inventory_deducted": boolean,"menu_item_id": string,"notes": string | null,"order_id": string,"quantity": number,"status": string | null,"tenant_id": string,"tiempo_preparacion_segundos": number | null,"unit_price": number
                   }
                   Insert: {
-                    "created_at"?: string,"discount_amount"?: number | null,"discount_reason"?: string | null,"discount_scope"?: string | null,"discount_type"?: string | null,"discount_value"?: number | null,"id": string,"inventory_deducted"?: boolean,"menu_item_id": string,"notes"?: string | null,"order_id": string,"quantity"?: number,"status"?: string | null,"tenant_id": string,"tiempo_preparacion_segundos"?: number | null,"unit_price": number
+                    "base_unit_price"?: number | null,"customization_modified_at"?: string | null,"discount_base_price"?: number | null,"options_inventory_deducted"?: boolean,"skip_base_inventory"?: boolean,"created_at"?: string,"discount_amount"?: number | null,"discount_reason"?: string | null,"discount_scope"?: string | null,"discount_type"?: string | null,"discount_value"?: number | null,"id": string,"inventory_deducted"?: boolean,"menu_item_id": string,"notes"?: string | null,"order_id": string,"quantity"?: number,"status"?: string | null,"tenant_id": string,"tiempo_preparacion_segundos"?: number | null,"unit_price": number
                   }
                   Update: {
-                    "created_at"?: string,"discount_amount"?: number | null,"discount_reason"?: string | null,"discount_scope"?: string | null,"discount_type"?: string | null,"discount_value"?: number | null,"id"?: string,"inventory_deducted"?: boolean,"menu_item_id"?: string,"notes"?: string | null,"order_id"?: string,"quantity"?: number,"status"?: string | null,"tenant_id"?: string,"tiempo_preparacion_segundos"?: number | null,"unit_price"?: number
+                    "base_unit_price"?: number | null,"customization_modified_at"?: string | null,"discount_base_price"?: number | null,"options_inventory_deducted"?: boolean,"skip_base_inventory"?: boolean,"created_at"?: string,"discount_amount"?: number | null,"discount_reason"?: string | null,"discount_scope"?: string | null,"discount_type"?: string | null,"discount_value"?: number | null,"id"?: string,"inventory_deducted"?: boolean,"menu_item_id"?: string,"notes"?: string | null,"order_id"?: string,"quantity"?: number,"status"?: string | null,"tenant_id"?: string,"tiempo_preparacion_segundos"?: number | null,"unit_price"?: number
                   }
                   Relationships: [
                     {
@@ -508,13 +600,13 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "email": string,"full_name": string | null,"id": string,"pin": string | null,"role": string | null,"role_id": string | null,"tenant_id": string,"updated_at": string | null
+                    "seen_announcements"?: Json,"email": string,"full_name": string | null,"id": string,"pin": string | null,"role": string | null,"role_id": string | null,"tenant_id": string,"updated_at": string | null
                   }
                   Insert: {
-                    "email": string,"full_name"?: string | null,"id": string,"pin"?: string | null,"role"?: string | null,"role_id"?: string | null,"tenant_id": string,"updated_at"?: string | null
+                    "seen_announcements"?: Json,"email": string,"full_name"?: string | null,"id": string,"pin"?: string | null,"role"?: string | null,"role_id"?: string | null,"tenant_id": string,"updated_at"?: string | null
                   }
                   Update: {
-                    "email"?: string,"full_name"?: string | null,"id"?: string,"pin"?: string | null,"role"?: string | null,"role_id"?: string | null,"tenant_id"?: string,"updated_at"?: string | null
+                    "seen_announcements"?: Json,"email"?: string,"full_name"?: string | null,"id"?: string,"pin"?: string | null,"role"?: string | null,"role_id"?: string | null,"tenant_id"?: string,"updated_at"?: string | null
                   }
                   Relationships: [
                     {
@@ -708,13 +800,13 @@ isOneToOne: false
                   ]
                 },"tenants": {
                   Row: {
-                    "attendance_tolerance_minutes": number | null,"commission_rate": number | null,"created_at": string | null,"custom_domain": string | null,"dark_bg_color": string | null,"google_reviews_url": string | null,"id": string,"logo_url": string | null,"loyalty_enabled": boolean | null,"loyalty_ratio": number | null,"name": string,"postal_code": string | null,"primary_color": string | null,"regimen_fiscal": string | null,"rfc": string | null,"secondary_color": string | null,"slug": string,"stripe_account_id": string | null,"stripe_charges_enabled": boolean | null,"stripe_details_submitted": boolean | null,"system_name": string,"terminal_commission_rate": number | null,"ticket_footer_text": string | null,"updated_at": string | null
+                    "customization_edit_after_kitchen"?: string,"customization_edit_notify_kds"?: boolean,"customization_edit_reprint"?: boolean,"discount_includes_modifiers"?: boolean,"attendance_tolerance_minutes": number | null,"commission_rate": number | null,"created_at": string | null,"custom_domain": string | null,"dark_bg_color": string | null,"google_reviews_url": string | null,"id": string,"logo_url": string | null,"loyalty_enabled": boolean | null,"loyalty_ratio": number | null,"name": string,"postal_code": string | null,"primary_color": string | null,"regimen_fiscal": string | null,"rfc": string | null,"secondary_color": string | null,"slug": string,"stripe_account_id": string | null,"stripe_charges_enabled": boolean | null,"stripe_details_submitted": boolean | null,"system_name": string,"terminal_commission_rate": number | null,"ticket_footer_text": string | null,"updated_at": string | null
                   }
                   Insert: {
-                    "attendance_tolerance_minutes"?: number | null,"commission_rate"?: number | null,"created_at"?: string | null,"custom_domain"?: string | null,"dark_bg_color"?: string | null,"google_reviews_url"?: string | null,"id"?: string,"logo_url"?: string | null,"loyalty_enabled"?: boolean | null,"loyalty_ratio"?: number | null,"name": string,"postal_code"?: string | null,"primary_color"?: string | null,"regimen_fiscal"?: string | null,"rfc"?: string | null,"secondary_color"?: string | null,"slug": string,"stripe_account_id"?: string | null,"stripe_charges_enabled"?: boolean | null,"stripe_details_submitted"?: boolean | null,"system_name"?: string,"terminal_commission_rate"?: number | null,"ticket_footer_text"?: string | null,"updated_at"?: string | null
+                    "customization_edit_after_kitchen"?: string,"customization_edit_notify_kds"?: boolean,"customization_edit_reprint"?: boolean,"discount_includes_modifiers"?: boolean,"attendance_tolerance_minutes"?: number | null,"commission_rate"?: number | null,"created_at"?: string | null,"custom_domain"?: string | null,"dark_bg_color"?: string | null,"google_reviews_url"?: string | null,"id"?: string,"logo_url"?: string | null,"loyalty_enabled"?: boolean | null,"loyalty_ratio"?: number | null,"name": string,"postal_code"?: string | null,"primary_color"?: string | null,"regimen_fiscal"?: string | null,"rfc"?: string | null,"secondary_color"?: string | null,"slug": string,"stripe_account_id"?: string | null,"stripe_charges_enabled"?: boolean | null,"stripe_details_submitted"?: boolean | null,"system_name"?: string,"terminal_commission_rate"?: number | null,"ticket_footer_text"?: string | null,"updated_at"?: string | null
                   }
                   Update: {
-                    "attendance_tolerance_minutes"?: number | null,"commission_rate"?: number | null,"created_at"?: string | null,"custom_domain"?: string | null,"dark_bg_color"?: string | null,"google_reviews_url"?: string | null,"id"?: string,"logo_url"?: string | null,"loyalty_enabled"?: boolean | null,"loyalty_ratio"?: number | null,"name"?: string,"postal_code"?: string | null,"primary_color"?: string | null,"regimen_fiscal"?: string | null,"rfc"?: string | null,"secondary_color"?: string | null,"slug"?: string,"stripe_account_id"?: string | null,"stripe_charges_enabled"?: boolean | null,"stripe_details_submitted"?: boolean | null,"system_name"?: string,"terminal_commission_rate"?: number | null,"ticket_footer_text"?: string | null,"updated_at"?: string | null
+                    "customization_edit_after_kitchen"?: string,"customization_edit_notify_kds"?: boolean,"customization_edit_reprint"?: boolean,"discount_includes_modifiers"?: boolean,"attendance_tolerance_minutes"?: number | null,"commission_rate"?: number | null,"created_at"?: string | null,"custom_domain"?: string | null,"dark_bg_color"?: string | null,"google_reviews_url"?: string | null,"id"?: string,"logo_url"?: string | null,"loyalty_enabled"?: boolean | null,"loyalty_ratio"?: number | null,"name"?: string,"postal_code"?: string | null,"primary_color"?: string | null,"regimen_fiscal"?: string | null,"rfc"?: string | null,"secondary_color"?: string | null,"slug"?: string,"stripe_account_id"?: string | null,"stripe_charges_enabled"?: boolean | null,"stripe_details_submitted"?: boolean | null,"system_name"?: string,"terminal_commission_rate"?: number | null,"ticket_footer_text"?: string | null,"updated_at"?: string | null
                   }
                   Relationships: [
                     
@@ -762,6 +854,12 @@ isOneToOne: false
 { Args: { "p_tenant_id": string }; Returns: {
               "active_orders": number,"customers_count": number,"sales_today": number,"tips_today": number
             }[]
+                           },
+"mark_announcement_seen":
+{ Args: { "p_key": string }; Returns: Json
+                           },
+"save_menu_item_customization":
+{ Args: { "p_config": Json,"p_menu_item_id": string,"p_tenant_id": string }; Returns: Json
                            },
 "get_user_tenants":
 { Args: { "user_id": string }; Returns: string[]
