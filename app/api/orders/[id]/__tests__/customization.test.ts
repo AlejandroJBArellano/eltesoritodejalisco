@@ -164,6 +164,18 @@ describe("PUT /api/orders/[id] — editar personalización", () => {
     expect(db.tables.order_item_options).toHaveLength(1);
   });
 
+  it("reads the edit policy fresh from the DB, not from the cached tenant", async () => {
+    // Caché del proceso: política vieja. Base: el admin ya cambió a NEVER.
+    vi.mocked(getTenantContext).mockResolvedValue({
+      id: TENANT,
+      customization_edit_after_kitchen: "WITH_PERMISSION",
+    } as never);
+    db.tables.tenants = [{ id: TENANT, customization_edit_after_kitchen: "NEVER" }];
+    const response = await put({ items: [{ id: "oi1", quantity: 1, selections: newSelection }] });
+    expect(response.status).toBe(403);
+    expect(db.tables.order_items[0].unit_price).toBe(120);
+  });
+
   it("WITH_PERMISSION rejects roles without pos.edit_order", async () => {
     vi.mocked(getProfile).mockResolvedValue({ role: "CHEF" } as never);
     const response = await put({ items: [{ id: "oi1", quantity: 1, selections: newSelection }] });

@@ -127,6 +127,21 @@ function currentSelections(row: CurrentItemRow): Selection[] {
     .map((o) => ({ optionId: o.option_id, quantity: Number(o.quantity) || 0 }));
 }
 
+/** Ajustes de edición leídos directo de la base (sin caché). */
+async function fetchCustomizationSettings(
+  tenantId: string,
+  fallback: unknown,
+): Promise<unknown> {
+  const { data, error } = await createAdminClient()
+    .from("tenants")
+    .select(
+      "customization_edit_after_kitchen, customization_edit_reprint, customization_edit_notify_kds",
+    )
+    .eq("id", tenantId)
+    .maybeSingle();
+  return error || !data ? fallback : data;
+}
+
 type EditPolicy = "NEVER" | "WITH_PERMISSION" | "WITH_MANAGER_AUTH";
 
 function editAfterKitchenPolicy(tenant: unknown): EditPolicy {
@@ -285,8 +300,15 @@ export async function PUT(
       return !selectionsEqual(currentSelections(existing), item.selections);
     });
 
+    // Los ajustes del tenant viven en un caché por proceso (2 min). Para una
+    // regla de permisos se leen frescos de la base cuando hay ediciones.
+    const customizationSettings =
+      selectionEdits.length > 0
+        ? await fetchCustomizationSettings(tenant.id, tenant)
+        : tenant;
+
     if (selectionEdits.length > 0) {
-      const policy = editAfterKitchenPolicy(tenant);
+      const policy = editAfterKitchenPolicy(customizationSettings);
       if (policy === "NEVER") {
         return NextResponse.json(
           {
@@ -341,8 +363,8 @@ export async function PUT(
     const editById = new Map(
       selectionEdits.map((item, index) => [item.id, resolvedEdits[index]]),
     );
-    const notifyKds = tenantFlag(tenant, "customization_edit_notify_kds");
-    const reprint = tenantFlag(tenant, "customization_edit_reprint");
+    const notifyKds = tenantFlag(customizationSettings, "customization_edit_notify_kds");
+    const reprint = tenantFlag(customizationSettings, "customization_edit_reprint");
 
     if (hasRemovedItems || hasReducedQuantity) {
       if (profile?.role === "WAITER") {
