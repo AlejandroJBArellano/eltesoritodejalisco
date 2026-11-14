@@ -108,9 +108,13 @@ export function POSDiscountModal({
       ? customReason.trim()
       : reason || customReason.trim() || null;
 
-  const handleApplyClick = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isValueValid) return;
+  // Ojo: este modal se renderiza DENTRO del <form> del carrito del POS. Un
+  // <form> anidado provocaba un envío nativo (recarga y se perdía el carrito),
+  // así que aquí no hay <form>: "Aplicar" y Enter se manejan explícitamente.
+  const handleApplyClick = async (e?: React.SyntheticEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (!isValueValid || isVerifyingPin) return;
 
     if (isWaiter) {
       if (!managerPin.trim()) {
@@ -195,7 +199,17 @@ export function POSDiscountModal({
           </button>
         </div>
 
-        <form onSubmit={handleApplyClick} className="space-y-4">
+        <div
+          className="space-y-4"
+          onKeyDown={(e) => {
+            if (
+              e.key === "Enter" &&
+              (e.target as HTMLElement).tagName === "INPUT"
+            ) {
+              void handleApplyClick(e);
+            }
+          }}
+        >
           {/* Tipo de Descuento: Porcentaje vs Fijo */}
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-text-light/50 uppercase tracking-wider block">
@@ -414,7 +428,8 @@ export function POSDiscountModal({
           {/* Botones de acción */}
           <div className="flex flex-col gap-2 pt-2">
             <button
-              type="submit"
+              type="button"
+              onClick={(e) => void handleApplyClick(e)}
               disabled={!isValueValid || isVerifyingPin}
               className="w-full bg-primary text-background py-2.5 rounded-lg font-bold text-xs hover:brightness-110 active:scale-[0.98] shadow-sm focus-visible:ring-2 focus-visible:ring-primary outline-none disabled:opacity-30 disabled:pointer-events-none transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
             >
@@ -442,7 +457,7 @@ export function POSDiscountModal({
               Cancelar
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
