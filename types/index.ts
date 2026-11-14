@@ -94,7 +94,18 @@ export interface OrderItem {
   orderId: string;
   menuItemId: string;
   quantity: number;
+  /** Precio unitario final (base + niveles + opciones). */
   unitPrice: number;
+  /** Precio base congelado (solo renglones personalizados). */
+  baseUnitPrice?: number | null;
+  /** Precio sobre el que aplica el descuento por artículo. */
+  discountBasePrice?: number | null;
+  /** Opciones elegidas (snapshot congelado de la venta). */
+  selectionLines?: import("@/lib/customization/types").SelectionSnapshotLine[];
+  /** Selección reconstruida para reabrir el modal de personalización. */
+  selections?: import("@/lib/customization/types").Selection[];
+  /** Momento en que se editó la personalización (KDS "Modificado"). */
+  customizationModifiedAt?: Date | null;
   notes?: string;
   status?: OrderStatus;
   preparationTimeSeconds?: number | null;
@@ -237,6 +248,7 @@ export type OrderAuditActionType =
   | "CREATED"
   | "ITEMS_ADDED"
   | "ITEMS_REMOVED"
+  | "CUSTOMIZATION_EDITED"
   | "DISCOUNT_APPLIED"
   | "CANCELLED"
   | "REOPENED"
@@ -280,6 +292,8 @@ export interface CreateOrderRequest {
     menuItemId: string;
     quantity: number;
     notes?: string;
+    /** Personalización: unidades por opción (por unidad del renglón). */
+    selections?: { optionId: string; quantity: number }[];
     discountType?: "PERCENT" | "FIXED" | null;
     discountValue?: number | null;
     discountScope?: "ROW" | "UNIT" | null;

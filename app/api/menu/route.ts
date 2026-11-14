@@ -7,6 +7,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
 import { getProfile } from "@/lib/auth";
 import { uploadMenuItemImage } from "@/lib/s3";
+import {
+  loadCustomizations,
+  serializeForClient,
+} from "@/lib/customization/server";
+import { computePriceRange } from "@/lib/customization";
 
 /**
  * GET /api/menu
@@ -17,8 +22,9 @@ export async function GET() {
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
-    // Run both queries in parallel — they are independent
-    const [{ data: items, error }, { data: popularData }] = await Promise.all([
+    // Run queries in parallel — they are independent
+    const [{ data: items, error }, { data: popularData }, customizations] =
+      await Promise.all([
       supabase
         .from("menu_items")
         .select(
@@ -33,6 +39,7 @@ export async function GET() {
         .gte("order_count", 5)
         .order("order_count", { ascending: false })
         .limit(5),
+      loadCustomizations(tenant.id),
     ]);
 
     if (error) throw error;
@@ -55,6 +62,10 @@ export async function GET() {
         minimum_stock: ingredient ? ingredient.minimum_stock : null,
         is_popular: popularIds.has(item.id),
         is_recommended: false,
+        ...customizationFields(
+          item.price,
+          serializeForClient(customizations.byMenuItem.get(item.id)),
+        ),
       };
     });
 
@@ -69,6 +80,25 @@ export async function GET() {
 }
 
 export const dynamic = "force-dynamic";
+
+/** Campos de personalización que viajan con cada producto del menú. */
+function customizationFields(
+  price: number,
+  customization: ReturnType<typeof serializeForClient>,
+) {
+  if (!customization) {
+    return { customization: null, price_from: null };
+  }
+  const range = computePriceRange(price, customization);
+  return {
+    customization,
+    // "desde $X" cuando el mínimo difiere del precio base
+    price_from:
+      range.min != null && Math.abs(range.min - Number(price)) > 0.001
+        ? range.min
+        : null,
+  };
+}
 
 /**
  * POST /api/menu

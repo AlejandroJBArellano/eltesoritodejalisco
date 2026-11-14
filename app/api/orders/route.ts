@@ -3,8 +3,18 @@ import type { CreateOrderRequest } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
 import { getProfile } from "@/lib/auth";
-import { reverseInventoryForOrder } from "@/lib/services/inventory";
+import {
+  deductInventoryForOrder,
+  reverseInventoryForOrder,
+} from "@/lib/services/inventory";
 import { logOrderAction } from "@/lib/services/orderAudit";
+import {
+  CustomizationError,
+  resolveOrderItems,
+  tenantDiscountIncludesModifiers,
+  toRpcItem,
+  type OrderItemInput,
+} from "@/lib/customization/server";
 
 /**
  * GET /api/orders
@@ -39,6 +49,8 @@ export async function GET(request: NextRequest) {
           order_items (
             id, order_id, menu_item_id, quantity, unit_price, notes, status,
             tiempo_preparacion_segundos, created_at,
+            base_unit_price, discount_base_price, customization_modified_at,
+            order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
             menu_items ( id, name, price, image_url, is_available )
           ),
           payments ( id, order_id, method, amount, received_amount, change, tip_amount, tip_payment_method, tip_terminal_id, terminal_id, terminal_name, terminal_commission_rate, terminal_commission_amount, created_at ),
@@ -48,6 +60,7 @@ export async function GET(request: NextRequest) {
           *,
           order_items (
             *,
+            order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
             menu_items (*)
           ),
           payments (*),
@@ -134,7 +147,26 @@ export async function POST(request: NextRequest) {
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
-    // 1. Create order + items in a single atomic RPC call.
+    // 0. Validar personalización y calcular precios en el servidor.
+    //    El precio que mande el cliente nunca se usa.
+    const resolvedItems = await resolveOrderItems(
+      tenant.id,
+      orderItems.map(
+        (i): OrderItemInput => ({
+          menuItemId: i.menuItemId,
+          quantity: Number(i.quantity),
+          notes: i.notes || null,
+          selections: i.selections || [],
+          discountType: i.discountType || null,
+          discountValue: i.discountValue ? Number(i.discountValue) : null,
+          discountScope: i.discountScope || "ROW",
+          discountReason: i.discountReason || null,
+        }),
+      ),
+      { includeModifiersInDiscount: tenantDiscountIncludesModifiers(tenant) },
+    );
+
+    // 1. Create order + items (+ snapshot de opciones) in a single atomic RPC call.
     //    The SQL function generates the order_number and returns the full nested order object.
     const { data: fullOrder, error: rpcError } = await supabase.rpc(
       "create_order_with_items",
@@ -144,15 +176,7 @@ export async function POST(request: NextRequest) {
         p_source: source,
         p_table: table || null,
         p_notes: notes || null,
-        p_items: orderItems.map((i) => ({
-          menu_item_id: i.menuItemId,
-          quantity: Number(i.quantity),
-          notes: i.notes || null,
-          discount_type: i.discountType || null,
-          discount_value: i.discountValue ? Number(i.discountValue) : null,
-          discount_scope: i.discountScope || "ROW",
-          discount_reason: i.discountReason || null,
-        })),
+        p_items: resolvedItems.map(toRpcItem),
         p_pickup_time: pickupTime ? new Date(pickupTime).toISOString() : null,
         p_discount_type: discountType || null,
         p_discount_value: discountValue ? Number(discountValue) : null,
@@ -161,6 +185,15 @@ export async function POST(request: NextRequest) {
     );
 
     if (rpcError) throw rpcError;
+
+    // 2. El producto base se descuenta dentro del RPC; las opciones aquí.
+    if (
+      resolvedItems.some((item) =>
+        item.options.some((o) => o.inventory.length > 0),
+      )
+    ) {
+      await deductInventoryForOrder(fullOrder.id);
+    }
 
     const profile = await getProfile();
     const createdItems = Array.isArray(fullOrder?.order_items)
@@ -192,6 +225,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ order: fullOrder }, { status: 201 });
   } catch (error) {
+    if (error instanceof CustomizationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     console.error("Error creating order:", error);
     return NextResponse.json(
       { error: "Failed to create order" },

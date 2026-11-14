@@ -62,6 +62,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         *,
         order_items (
           *,
+          order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
           menu_items (*)
         )
       `,

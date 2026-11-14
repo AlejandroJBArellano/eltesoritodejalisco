@@ -12,6 +12,12 @@ export interface DbDiscountFields {
 export interface ItemDiscountInput {
   unitPrice: number;
   quantity: number;
+  /**
+   * Precio sobre el que se calcula el descuento (por unidad). Si no se indica,
+   * es `unitPrice`. Con personalización y `discount_includes_modifiers=false`
+   * es el precio base sin opciones.
+   */
+  discountBasePrice?: number | null;
   discountType?: DiscountType | null;
   discountValue?: number | null;
   discountScope?: DiscountScope | null;
@@ -54,23 +60,29 @@ export function calculateItemDiscount({
   discountType,
   discountValue,
   discountScope = "ROW",
+  discountBasePrice,
 }: ItemDiscountInput): ItemDiscountResult {
   const safeQty = Math.max(0, Number(quantity) || 0);
   const safePrice = Math.max(0, Number(unitPrice) || 0);
   const gross = Math.round(safeQty * safePrice * 100) / 100;
+  const safeBase =
+    discountBasePrice == null
+      ? safePrice
+      : Math.min(safePrice, Math.max(0, Number(discountBasePrice) || 0));
+  const discountable = Math.round(safeQty * safeBase * 100) / 100;
 
   const numValue = Number(discountValue) || 0;
-  if (!discountType || numValue <= 0 || gross <= 0) {
+  if (!discountType || numValue <= 0 || discountable <= 0) {
     return { discountAmount: 0, finalPrice: gross };
   }
 
   let discount = 0;
   if (discountType === "PERCENT") {
-    const raw = (gross * numValue) / 100;
-    discount = Math.min(gross, Math.round(raw * 100) / 100);
+    const raw = (discountable * numValue) / 100;
+    discount = Math.min(discountable, Math.round(raw * 100) / 100);
   } else if (discountType === "FIXED") {
     const raw = discountScope === "UNIT" ? numValue * safeQty : numValue;
-    discount = Math.min(gross, Math.round(raw * 100) / 100);
+    discount = Math.min(discountable, Math.round(raw * 100) / 100);
   }
 
   const finalPrice = Math.max(0, Math.round((gross - discount) * 100) / 100);

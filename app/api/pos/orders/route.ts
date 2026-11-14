@@ -92,6 +92,8 @@ export async function GET(request: NextRequest) {
       order_items (
         id, order_id, menu_item_id, quantity, unit_price, notes, status,
         tiempo_preparacion_segundos, created_at,
+        base_unit_price, discount_base_price, customization_modified_at,
+        order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
         menu_items ( id, name, price, image_url, is_available )
       ),
       payments ( id, order_id, method, amount, received_amount, change, tip_amount, tip_payment_method, tip_terminal_id, terminal_id, terminal_name, terminal_commission_rate, terminal_commission_amount, created_at ),

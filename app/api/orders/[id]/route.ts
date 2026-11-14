@@ -7,12 +7,155 @@ import { getProfile, verifyManagerPin } from "@/lib/auth";
 import {
   deductInventoryForOrder,
   reverseInventoryForOrder,
+  reverseOptionInventoryForItems,
 } from "@/lib/services/inventory";
 import {
   calculateItemDiscount,
   calculateOrderDiscountTotals,
 } from "@/lib/utils/discounts";
 import { logOrderAction } from "@/lib/services/orderAudit";
+import {
+  CustomizationError,
+  orderItemCustomizationColumns,
+  replaceOrderItemSnapshot,
+  resolveOrderItems,
+  tenantDiscountIncludesModifiers,
+  type OrderItemInput,
+} from "@/lib/customization/server";
+import {
+  formatSelectionLine,
+  selectionsEqual,
+  type Selection,
+} from "@/lib/customization";
+import { hasPermission } from "@/lib/permissions";
+import {
+  mapSelectionLines,
+  type DbOrderItemOption,
+} from "@/lib/mappers/orders";
+
+type ServerClient = Awaited<ReturnType<typeof createClient>>;
+
+interface PutItem {
+  id: string;
+  quantity: number;
+  discountType?: string | null;
+  discountValue?: number | null;
+  discountScope?: "ROW" | "UNIT" | null;
+  discountReason?: string | null;
+  notes?: string | null;
+  /** Nueva selección de personalización (si se edita). */
+  selections?: Selection[];
+}
+
+interface CurrentItemRow {
+  id: string;
+  unit_price: number;
+  quantity: number;
+  menu_item_id: string;
+  discount_base_price?: number | null;
+  options_inventory_deducted?: boolean | null;
+  order_item_options?: DbOrderItemOption[] | null;
+  menu_items?: { name?: string } | { name?: string }[] | null;
+}
+
+/** Renglones actuales; si la migración no está aplicada, sin personalización. */
+async function fetchCurrentItems(
+  supabase: ServerClient,
+  orderId: string,
+): Promise<CurrentItemRow[]> {
+  const full = await supabase
+    .from("order_items")
+    .select(
+      `
+      id,
+      unit_price,
+      quantity,
+      menu_item_id,
+      discount_base_price,
+      options_inventory_deducted,
+      order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
+      menu_items (
+        name
+      )
+    `,
+    )
+    .eq("order_id", orderId);
+  if (!full.error) return (full.data || []) as unknown as CurrentItemRow[];
+  const legacy = await supabase
+    .from("order_items")
+    .select(
+      `
+      id,
+      unit_price,
+      quantity,
+      menu_item_id,
+      menu_items (
+        name
+      )
+    `,
+    )
+    .eq("order_id", orderId);
+  return (legacy.data || []) as unknown as CurrentItemRow[];
+}
+
+async function fetchRemainingItems(supabase: ServerClient, orderId: string) {
+  type Row = {
+    unit_price: number;
+    quantity: number;
+    discount_type: string | null;
+    discount_value: number | null;
+    discount_scope: string | null;
+    discount_base_price?: number | null;
+  };
+  const full = await supabase
+    .from("order_items")
+    .select(
+      "unit_price, quantity, discount_type, discount_value, discount_scope, discount_base_price",
+    )
+    .eq("order_id", orderId);
+  if (!full.error) return (full.data || []) as Row[];
+  const legacy = await supabase
+    .from("order_items")
+    .select("unit_price, quantity, discount_type, discount_value, discount_scope")
+    .eq("order_id", orderId);
+  return (legacy.data || []) as Row[];
+}
+
+function currentSelections(row: CurrentItemRow): Selection[] {
+  return (row.order_item_options || [])
+    .filter((o): o is DbOrderItemOption & { option_id: string } => !!o.option_id)
+    .map((o) => ({ optionId: o.option_id, quantity: Number(o.quantity) || 0 }));
+}
+
+type EditPolicy = "NEVER" | "WITH_PERMISSION" | "WITH_MANAGER_AUTH";
+
+function editAfterKitchenPolicy(tenant: unknown): EditPolicy {
+  const value = (tenant as { customization_edit_after_kitchen?: string | null })
+    ?.customization_edit_after_kitchen;
+  return value === "NEVER" || value === "WITH_MANAGER_AUTH"
+    ? value
+    : "WITH_PERMISSION";
+}
+
+function tenantFlag(
+  tenant: unknown,
+  key: "customization_edit_notify_kds" | "customization_edit_reprint",
+): boolean {
+  return (tenant as Record<string, unknown> | null)?.[key] !== false;
+}
+
+function isManagerProfile(profile: unknown): boolean {
+  const p = profile as {
+    role?: string | null;
+    role_data?: { permissions?: string[] | null } | null;
+  } | null;
+  const role = (p?.role || "").toUpperCase();
+  return (
+    role === "ADMIN" ||
+    role === "MANAGER" ||
+    (p?.role_data?.permissions || []).includes("*")
+  );
+}
 
 /**
  * GET /api/orders/:id
@@ -34,6 +177,7 @@ export async function GET(
         *,
         order_items (
           *,
+          order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
           menu_items (*)
         ),
         payments (*),
@@ -113,22 +257,10 @@ export async function PUT(
     );
     const keepIds = itemsToKeep.map((i: { id: string }) => i.id);
 
-    // Fetch current order items with menu item names
-    const { data: currentItems } = await supabase
-      .from("order_items")
-      .select(
-        `
-        id,
-        unit_price,
-        quantity,
-        menu_items (
-          name
-        )
-      `,
-      )
-      .eq("order_id", id);
+    // Fetch current order items with menu item names (+ personalización)
+    const currentItems = await fetchCurrentItems(supabase, id);
 
-    const currentMap = new Map((currentItems || []).map((ci) => [ci.id, ci]));
+    const currentMap = new Map(currentItems.map((ci) => [ci.id, ci]));
     const currentIds = Array.from(currentMap.keys());
 
     // Delete items that are no longer in the list
@@ -144,6 +276,73 @@ export async function PUT(
 
     const profile = await getProfile();
     let manager = null;
+
+    // --- Edición de personalización de renglones ya enviados a cocina ---
+    const selectionEdits = (itemsToKeep as PutItem[]).filter((item) => {
+      if (!Array.isArray(item.selections)) return false;
+      const existing = currentMap.get(item.id);
+      if (!existing) return false;
+      return !selectionsEqual(currentSelections(existing), item.selections);
+    });
+
+    if (selectionEdits.length > 0) {
+      const policy = editAfterKitchenPolicy(tenant);
+      if (policy === "NEVER") {
+        return NextResponse.json(
+          {
+            error:
+              "La configuración del restaurante no permite editar la personalización después de enviar a cocina",
+          },
+          { status: 403 },
+        );
+      }
+      if (policy === "WITH_PERMISSION" && !hasPermission(profile, "pos.edit_order")) {
+        return NextResponse.json(
+          { error: "No tienes permiso para modificar comandas" },
+          { status: 403 },
+        );
+      }
+      if (policy === "WITH_MANAGER_AUTH" && !isManagerProfile(profile)) {
+        if (!pin) {
+          return NextResponse.json(
+            {
+              error: "Se requiere PIN de Gerencia para editar la personalización",
+              requiresManagerAuth: true,
+            },
+            { status: 403 },
+          );
+        }
+        manager = await verifyManagerPin(tenant.id, String(pin).trim());
+        if (!manager) {
+          return NextResponse.json(
+            { error: "PIN de autorización incorrecto" },
+            { status: 401 },
+          );
+        }
+      }
+    }
+
+    const resolvedEdits =
+      selectionEdits.length > 0
+        ? await resolveOrderItems(
+            tenant.id,
+            selectionEdits.map(
+              (item): OrderItemInput => ({
+                menuItemId: currentMap.get(item.id)!.menu_item_id,
+                quantity: item.quantity,
+                selections: item.selections || [],
+              }),
+            ),
+            {
+              includeModifiersInDiscount: tenantDiscountIncludesModifiers(tenant),
+            },
+          )
+        : [];
+    const editById = new Map(
+      selectionEdits.map((item, index) => [item.id, resolvedEdits[index]]),
+    );
+    const notifyKds = tenantFlag(tenant, "customization_edit_notify_kds");
+    const reprint = tenantFlag(tenant, "customization_edit_reprint");
 
     if (hasRemovedItems || hasReducedQuantity) {
       if (profile?.role === "WAITER") {
@@ -175,57 +374,82 @@ export async function PUT(
       if (deleteError) throw deleteError;
     }
 
-    // Update quantities, discounts and notes for items that remain
-    const updatePromises = itemsToKeep.map(
-      (item: {
-        id: string;
-        quantity: number;
-        discountType?: string | null;
-        discountValue?: number | null;
-        discountScope?: "ROW" | "UNIT" | null;
-        discountReason?: string | null;
-        notes?: string | null;
-      }) => {
-        const existing = currentMap.get(item.id);
-        const unitPrice = existing?.unit_price ?? 0;
-        const discountCalc = calculateItemDiscount({
-          unitPrice,
-          quantity: item.quantity,
-          discountType: (item.discountType as "PERCENT" | "FIXED") || null,
-          discountValue: item.discountValue,
-          discountScope: item.discountScope,
-        });
+    // Personalización editada: reponer inventario de las opciones anteriores
+    // y guardar el nuevo snapshot (el descuento nuevo se hace al final).
+    if (editById.size > 0) {
+      const editedIds = Array.from(editById.keys());
+      await reverseOptionInventoryForItems(
+        id,
+        editedIds.filter((itemId) => currentMap.get(itemId)?.options_inventory_deducted),
+      );
+      const admin = createAdminClient();
+      await Promise.all(
+        Array.from(editById.entries()).map(([itemId, resolved]) =>
+          replaceOrderItemSnapshot(admin, tenant.id, itemId, resolved),
+        ),
+      );
+    }
 
-        return supabase
-          .from("order_items")
-          .update({
-            quantity: item.quantity,
-            discount_type: item.discountType ?? null,
-            discount_value: item.discountValue ?? null,
-            discount_amount: discountCalc.discountAmount,
-            discount_scope: item.discountScope ?? "ROW",
-            discount_reason: item.discountReason ?? null,
-            ...(item.notes !== undefined
-              ? { notes: item.notes ? item.notes.trim() || null : null }
-              : {}),
-          })
-          .eq("id", item.id)
-          .eq("order_id", id);
-      },
-    );
+    // Update quantities, discounts and notes for items that remain
+    const nowIso = new Date().toISOString();
+    const updatePromises = (itemsToKeep as PutItem[]).map((item) => {
+      const existing = currentMap.get(item.id);
+      const edit = editById.get(item.id);
+      const unitPrice = edit ? edit.unitPrice : (existing?.unit_price ?? 0);
+      const discountBasePrice = edit
+        ? edit.discountBasePrice
+        : (existing?.discount_base_price ?? null);
+      const discountCalc = calculateItemDiscount({
+        unitPrice,
+        quantity: item.quantity,
+        discountType: (item.discountType as "PERCENT" | "FIXED") || null,
+        discountValue: item.discountValue,
+        discountScope: item.discountScope,
+        discountBasePrice,
+      });
+
+      return supabase
+        .from("order_items")
+        .update({
+          quantity: item.quantity,
+          discount_type: item.discountType ?? null,
+          discount_value: item.discountValue ?? null,
+          discount_amount: discountCalc.discountAmount,
+          discount_scope: item.discountScope ?? "ROW",
+          discount_reason: item.discountReason ?? null,
+          ...(item.notes !== undefined
+            ? { notes: item.notes ? item.notes.trim() || null : null }
+            : {}),
+          ...(edit
+            ? {
+                unit_price: edit.unitPrice,
+                base_unit_price: edit.hasCustomization ? edit.baseUnitPrice : null,
+                discount_base_price: edit.hasCustomization
+                  ? edit.discountBasePrice
+                  : null,
+                options_inventory_deducted: false,
+                ...(notifyKds
+                  ? { customization_modified_at: nowIso, status: "PENDING" }
+                  : {}),
+              }
+            : {}),
+        })
+        .eq("id", item.id)
+        .eq("order_id", id);
+    });
 
     const updateResults = await Promise.all(updatePromises);
     for (const res of updateResults) {
       if (res.error) throw res.error;
     }
 
+    // Descontar inventario de la nueva selección
+    if (resolvedEdits.some((e) => e.options.some((o) => o.inventory.length > 0))) {
+      await deductInventoryForOrder(id);
+    }
+
     // Recalculate order totals from what's left in the database
-    const { data: remainingItems } = await supabase
-      .from("order_items")
-      .select(
-        "unit_price, quantity, discount_type, discount_value, discount_scope",
-      )
-      .eq("order_id", id);
+    const remainingItems = await fetchRemainingItems(supabase, id);
 
     const activeOrderDiscountType =
       discountType !== undefined ? discountType : order.discount_type;
@@ -235,12 +459,13 @@ export async function PUT(
       discountReason !== undefined ? discountReason : order.discount_reason;
 
     const totals = calculateOrderDiscountTotals({
-      items: (remainingItems || []).map((ri) => ({
+      items: remainingItems.map((ri) => ({
         unitPrice: ri.unit_price,
         quantity: ri.quantity,
         discountType: (ri.discount_type as "PERCENT" | "FIXED") || null,
         discountValue: ri.discount_value,
         discountScope: (ri.discount_scope as "ROW" | "UNIT") || null,
+        discountBasePrice: ri.discount_base_price ?? null,
       })),
       orderDiscountType:
         (activeOrderDiscountType as "PERCENT" | "FIXED") || null,
@@ -250,6 +475,11 @@ export async function PUT(
     const updatePayload: Record<string, unknown> = {
       subtotal: totals.subtotalGross,
       tax: 0,
+      ...(editById.size > 0 &&
+      notifyKds &&
+      ["DELIVERED", "READY"].includes(order.status)
+        ? { status: "PENDING" }
+        : {}),
       discount_type: activeOrderDiscountType || null,
       discount_value: activeOrderDiscountValue || null,
       discount_amount: totals.orderDiscount,
@@ -274,6 +504,7 @@ export async function PUT(
         *,
         order_items (
           *,
+          order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
           menu_items (*)
         ),
         customer:customers (*)
@@ -360,8 +591,38 @@ export async function PUT(
       });
     }
 
-    return NextResponse.json({ order: updatedOrder });
+    if (editById.size > 0) {
+      const summary = Array.from(editById.entries())
+        .map(([itemId, resolved]) => {
+          const existing = currentMap.get(itemId);
+          const before = formatSelectionLine(
+            mapSelectionLines(existing?.order_item_options),
+          );
+          const after = formatSelectionLine(resolved.options);
+          return `${resolved.menuItemName}: ${before || "sin opciones"} → ${after || "sin opciones"}`;
+        })
+        .join(" | ");
+      await logOrderAction({
+        orderId: id,
+        tenantId: tenant.id,
+        user: profile,
+        actionType: "CUSTOMIZATION_EDITED",
+        details: {
+          summary,
+          itemIds: Array.from(editById.keys()),
+          ...(authorizedByName ? { authorizedBy: authorizedByName } : {}),
+        },
+      });
+    }
+
+    return NextResponse.json({
+      order: updatedOrder,
+      reprintItemIds: reprint ? Array.from(editById.keys()) : [],
+    });
   } catch (error) {
+    if (error instanceof CustomizationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     console.error("Error modifying order:", error);
     return NextResponse.json(
       { error: "Failed to modify order" },
@@ -476,6 +737,7 @@ export async function PATCH(
           *,
           order_items (
             *,
+            order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
             menu_items (*)
           ),
           customer:customers (*)
@@ -508,27 +770,6 @@ export async function PATCH(
       return NextResponse.json({ order: updatedOrder });
     }
 
-    let additionalSubtotal = 0;
-    const newItemsData = [];
-
-    const menuItemIds = orderItems
-      .map((item: { menuItemId: string }) => item.menuItemId)
-      .filter(Boolean);
-    const { data: menuItems, error: menuItemsError } = await supabase
-      .from("menu_items")
-      .select("*")
-      .in("id", menuItemIds)
-      .eq("tenant_id", tenant.id);
-
-    if (menuItemsError) {
-      throw new Error("Failed to fetch menu items");
-    }
-
-    const menuItemMap = new Map(
-      menuItems?.map((item) => [item.id, item]) || [],
-    );
-
-    // Process each new item
     for (const item of orderItems) {
       if (!item.menuItemId) {
         return NextResponse.json(
@@ -536,37 +777,44 @@ export async function PATCH(
           { status: 400 },
         );
       }
+    }
 
-      const menuItem = menuItemMap.get(item.menuItemId);
-      if (!menuItem) {
-        return NextResponse.json(
-          { error: `Menu item ${item.menuItemId} not found` },
-          { status: 400 },
-        );
-      }
+    // Validar personalización y precio en el servidor
+    const resolvedItems = await resolveOrderItems(
+      tenant.id,
+      orderItems.map(
+        (item: {
+          menuItemId: string;
+          quantity: number | string;
+          notes?: string;
+          selections?: { optionId: string; quantity: number }[];
+        }): OrderItemInput => ({
+          menuItemId: item.menuItemId,
+          quantity: Number(item.quantity),
+          notes: item.notes || "",
+          selections: item.selections || [],
+        }),
+      ),
+      { includeModifiersInDiscount: tenantDiscountIncludesModifiers(tenant) },
+    );
 
-      const quantity = Number(item.quantity);
-      if (isNaN(quantity) || quantity <= 0) {
-        return NextResponse.json(
-          { error: `Invalid quantity for item ${menuItem.name}` },
-          { status: 400 },
-        );
-      }
-
-      const itemTotal = menuItem.price * quantity;
-      additionalSubtotal += itemTotal;
-
-      newItemsData.push({
+    let additionalSubtotal = 0;
+    const newItemsData = resolvedItems.map((item) => {
+      additionalSubtotal += item.unitPrice * item.quantity;
+      return {
         id: crypto.randomUUID(),
         order_id: id,
         tenant_id: tenant.id,
         menu_item_id: item.menuItemId,
-        quantity: quantity,
-        unit_price: menuItem.price,
+        quantity: item.quantity,
         notes: item.notes || "",
         status: "PENDING",
-      });
-    }
+        ...orderItemCustomizationColumns(item),
+      };
+    });
+    const menuItemNames = new Map(
+      resolvedItems.map((item) => [item.menuItemId, item.menuItemName]),
+    );
 
     // Create new order items in database
     const { error: itemsError } = await supabase
@@ -574,6 +822,16 @@ export async function PATCH(
       .insert(newItemsData);
 
     if (itemsError) throw itemsError;
+
+    // Snapshot de opciones/niveles de los renglones personalizados
+    const admin = createAdminClient();
+    await Promise.all(
+      resolvedItems.map((item, index) =>
+        item.hasCustomization
+          ? replaceOrderItemSnapshot(admin, tenant.id, newItemsData[index].id, item)
+          : Promise.resolve(),
+      ),
+    );
 
     // Deduct inventory immediately for the newly added items
     await deductInventoryForOrder(id);
@@ -609,6 +867,7 @@ export async function PATCH(
         *,
         order_items (
           *,
+          order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
           menu_items (*)
         ),
         customer:customers (*)
@@ -619,9 +878,10 @@ export async function PATCH(
     if (updateError) throw updateError;
 
     const profile = await getProfile();
-    const addedItemsSummary = newItemsData.map((item) => {
-      const menuItem = menuItemMap.get(item.menu_item_id);
-      return `${menuItem?.name || "Producto"} x${item.quantity}`;
+    const addedItemsSummary = resolvedItems.map((item) => {
+      const name = menuItemNames.get(item.menuItemId) || "Producto";
+      const line = formatSelectionLine(item.options);
+      return `${name}${line ? ` (${line})` : ""} x${item.quantity}`;
     });
 
     await logOrderAction({
@@ -637,6 +897,9 @@ export async function PATCH(
 
     return NextResponse.json({ order: updatedOrder });
   } catch (error) {
+    if (error instanceof CustomizationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     console.error("Error updating order:", error);
     return NextResponse.json(
       { error: "Failed to update order" },

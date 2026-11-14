@@ -22,6 +22,18 @@ vi.mock("@/lib/services/orderAudit", () => ({
   logOrderAction: vi.fn().mockResolvedValue({ success: true }),
 }));
 
+const fake = vi.hoisted(() => ({ db: null as null | { client: unknown } }));
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: () => fake.db!.client,
+}));
+vi.mock("@/lib/services/inventory", () => ({
+  deductInventoryForOrder: vi.fn().mockResolvedValue({ success: true, deductions: [] }),
+  reverseInventoryForOrder: vi.fn().mockResolvedValue({ success: true, deductions: [] }),
+}));
+
+import { createFakeDb, tesoritoTables } from "@/test/fakeSupabase";
+import { deductInventoryForOrder } from "@/lib/services/inventory";
+
 describe("GET /api/orders", () => {
   const mockTenant = { id: "tenant-123" };
 
@@ -166,6 +178,15 @@ describe("POST /api/orders", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(getTenantContext).mockResolvedValue(mockTenant as any);
+    fake.db = createFakeDb({
+      ...tesoritoTables(),
+      menu_items: [
+        ...tesoritoTables().menu_items,
+        { id: "item-1", tenant_id: "tenant-123", name: "Producto", price: 45, is_available: true },
+        { id: "item-2", tenant_id: "tenant-123", name: "papulince", price: 50, is_available: true },
+        { id: "item-3", tenant_id: "tenant-123", name: "Coca Cola", price: 30, is_available: true },
+      ],
+    });
   });
 
   it("creates an order passing item discounts and order discount to the RPC", async () => {
@@ -206,6 +227,27 @@ describe("POST /api/orders", () => {
 
     expect(response.status).toBe(201);
     expect(body.order).toBeDefined();
+
+    expect(mockRpc).toHaveBeenCalledWith(
+      "create_order_with_items",
+      expect.objectContaining({
+        p_discount_type: "FIXED",
+        p_discount_value: 5,
+        p_items: [
+          expect.objectContaining({
+            menu_item_id: "item-1",
+            quantity: 1,
+            unit_price: 45,
+            discount_type: "PERCENT",
+            discount_value: 10,
+            discount_scope: "ROW",
+            discount_reason: "Cortesía",
+            options: [],
+            tiers: [],
+          }),
+        ],
+      }),
+    );
 
     expect(logOrderAction).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -262,6 +304,134 @@ describe("POST /api/orders", () => {
         }),
       }),
     );
+  });
+});
+
+describe("POST /api/orders — personalización", () => {
+  const mockTenant = { id: "tenant-123" };
+  const okRpc = () =>
+    vi.fn().mockResolvedValue({
+      data: { id: "o-mix", order_number: "261113-001", total: 140, order_items: [] },
+      error: null,
+    });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getTenantContext).mockResolvedValue(mockTenant as any);
+    fake.db = createFakeDb(tesoritoTables());
+  });
+
+  const post = (orderItems: unknown[]) =>
+    POST(
+      new NextRequest("http://localhost:3000/api/orders", {
+        method: "POST",
+        body: JSON.stringify({ source: "POS", orderItems }),
+      }),
+    );
+
+  it("prices on the server and sends the snapshot to the RPC", async () => {
+    const mockRpc = okRpc();
+    vi.mocked(createClient).mockResolvedValue({ rpc: mockRpc } as any);
+
+    const response = await post([
+      {
+        menuItemId: "mi-mixtos",
+        quantity: 2,
+        notes: "sin cebolla",
+        // El precio del cliente se ignora
+        unitPrice: 1,
+        selections: [
+          { optionId: "o-pastor", quantity: 2 },
+          { optionId: "o-birria", quantity: 1 },
+        ],
+      },
+    ]);
+
+    expect(response.status).toBe(201);
+    const item = mockRpc.mock.calls[0][1].p_items[0];
+    expect(item).toMatchObject({
+      menu_item_id: "mi-mixtos",
+      quantity: 2,
+      notes: "sin cebolla",
+      unit_price: 140,
+      base_unit_price: 0,
+      discount_base_price: 140,
+      skip_base_inventory: false,
+      tiers: [{ group_id: "g-tacos", group_name: "Elige tus tacos", quantity: 3, price: 120 }],
+    });
+    expect(item.options).toEqual([
+      expect.objectContaining({ option_id: "o-birria", option_name: "Birria", quantity: 1, unit_price: 0, inventory: [{ ingredientId: "ing-birria", quantity: 0.1 }] }),
+      expect.objectContaining({ option_id: "o-pastor", option_name: "Pastor", quantity: 2, unit_price: 10, inventory: [] }),
+    ]);
+    // Birria consume inventario ⇒ se descuentan las opciones
+    expect(deductInventoryForOrder).toHaveBeenCalledWith("o-mix");
+  });
+
+  it("respects discount_includes_modifiers=false", async () => {
+    vi.mocked(getTenantContext).mockResolvedValue({
+      id: "tenant-123",
+      discount_includes_modifiers: false,
+    } as any);
+    const mockRpc = okRpc();
+    vi.mocked(createClient).mockResolvedValue({ rpc: mockRpc } as any);
+    await post([
+      { menuItemId: "mi-mixtos", quantity: 1, selections: [{ optionId: "o-carnitas", quantity: 3 }] },
+    ]);
+    expect(mockRpc.mock.calls[0][1].p_items[0]).toMatchObject({
+      unit_price: 120,
+      discount_base_price: 0,
+    });
+  });
+
+  it("rejects an incomplete selection with 400 and does not create the order", async () => {
+    const mockRpc = okRpc();
+    vi.mocked(createClient).mockResolvedValue({ rpc: mockRpc } as any);
+    const response = await post([
+      { menuItemId: "mi-mixtos", quantity: 1, selections: [{ optionId: "o-pastor", quantity: 2 }] },
+    ]);
+    const body = await response.json();
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("Tacos Mixtos: Faltan 1 en Elige tus tacos");
+    expect(mockRpc).not.toHaveBeenCalled();
+  });
+
+  it("rejects a customizable product sent without selection", async () => {
+    vi.mocked(createClient).mockResolvedValue({ rpc: okRpc() } as any);
+    const response = await post([{ menuItemId: "mi-mixtos", quantity: 1 }]);
+    expect(response.status).toBe(400);
+  });
+
+  it("rejects selections on a product without customization", async () => {
+    vi.mocked(createClient).mockResolvedValue({ rpc: okRpc() } as any);
+    const response = await post([
+      { menuItemId: "mi-coca", quantity: 1, selections: [{ optionId: "o-pastor", quantity: 1 }] },
+    ]);
+    const body = await response.json();
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("Coca Cola no admite personalización");
+  });
+
+  it("rejects products from another tenant", async () => {
+    vi.mocked(createClient).mockResolvedValue({ rpc: okRpc() } as any);
+    const response = await post([{ menuItemId: "ghost", quantity: 1 }]);
+    expect(response.status).toBe(400);
+  });
+
+  it("skips the base product inventory when deductBase is off", async () => {
+    fake.db = createFakeDb({
+      ...tesoritoTables(),
+      menu_items: tesoritoTables().menu_items.map((m) =>
+        m.id === "mi-mixtos" ? { ...m, customization_deduct_base: false } : m,
+      ),
+    });
+    const mockRpc = okRpc();
+    vi.mocked(createClient).mockResolvedValue({ rpc: mockRpc } as any);
+    await post([
+      { menuItemId: "mi-mixtos", quantity: 1, selections: [{ optionId: "o-carnitas", quantity: 3 }] },
+    ]);
+    expect(mockRpc.mock.calls[0][1].p_items[0].skip_base_inventory).toBe(true);
+    // Carnitas no consume inventario ⇒ no hace falta llamar al descuento
+    expect(deductInventoryForOrder).not.toHaveBeenCalled();
   });
 });
 
