@@ -10,6 +10,17 @@ import { invalidateTenantCache } from "@/lib/tenant";
 import { getCurrentCDMXDate, getCurrentCDMXDay } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
+import {
+  orderItemCustomizationColumns,
+  replaceOrderItemSnapshot,
+  resolveOrderItems,
+  type ResolvedOrderItem,
+} from "@/lib/customization/server";
+import {
+  loadCheckoutDraft,
+  markCheckoutDraftConsumed,
+} from "@/lib/customization/checkoutDraft";
+import { formatSelectionLine } from "@/lib/customization";
 
 export async function POST(request: NextRequest) {
   const bodyText = await request.text();
@@ -69,7 +80,7 @@ export async function POST(request: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
     const metadata = session.metadata;
 
-    if (!metadata || !metadata.orderItems) {
+    if (!metadata || (!metadata.orderItems && !metadata.draftId)) {
       console.warn("Stripe Checkout Session missing order metadata.");
       return NextResponse.json({ received: true });
     }
@@ -89,7 +100,9 @@ export async function POST(request: NextRequest) {
       const type = metadata.type || "takeout"; // 'takeout' | 'dine-in'
       const notes = metadata.notes || "";
       const pickupTime = metadata.pickupTime || null;
-      const rawOrderItems = JSON.parse(metadata.orderItems);
+      const rawOrderItems = metadata.orderItems
+        ? JSON.parse(metadata.orderItems)
+        : [];
       const orderItems: Array<{
         menuItemId: string;
         quantity: number;
@@ -252,10 +265,38 @@ export async function POST(request: NextRequest) {
       const todayStr = getCurrentCDMXDay().replace(/-/g, "").slice(2);
       const orderNumber = `${todayStr}-${nextSeq.toString().padStart(3, "0")}`;
 
-      // 2. Fetch prices and calculate totals
+      // 2. Renglones con precio: del borrador (calculado y validado en el
+      //    checkout) o, para sesiones antiguas, recalculados desde el menú.
+      let resolvedItems: ResolvedOrderItem[] | null = null;
+      if (metadata.draftId) {
+        resolvedItems = await loadCheckoutDraft(
+          supabaseAdmin,
+          metadata.draftId,
+          tenantId,
+        );
+        if (!resolvedItems) {
+          throw new Error(`Checkout draft ${metadata.draftId} not found`);
+        }
+      } else {
+        resolvedItems = [];
+        for (const item of orderItems) {
+          try {
+            const [resolved] = await resolveOrderItems(
+              tenantId,
+              [{ menuItemId: item.menuItemId, quantity: item.quantity, notes: item.notes }],
+              { includeModifiersInDiscount: true, client: supabaseAdmin },
+            );
+            resolvedItems.push(resolved);
+          } catch (resolveErr) {
+            // Igual que antes: se omiten productos que ya no existen
+            console.error("[Stripe Webhook] Skipping item:", resolveErr);
+          }
+        }
+      }
+
       let subtotal = 0;
-      const itemsWithPrices = [];
-      const itemSummaries = [];
+      const itemsWithPrices: Array<Record<string, unknown> & { id: string }> = [];
+      const itemSummaries: string[] = [];
       const itemsForEmail: Array<{
         name: string;
         quantity: number;
@@ -263,37 +304,33 @@ export async function POST(request: NextRequest) {
         notes?: string;
       }> = [];
 
-      for (const item of orderItems) {
-        const { data: menuItem } = await supabaseAdmin
-          .from("menu_items")
-          .select("*")
-          .eq("id", item.menuItemId)
-          .eq("tenant_id", tenantId)
-          .single();
+      for (const resolved of resolvedItems) {
+        const quantity = Number(resolved.quantity);
+        subtotal += resolved.unitPrice * quantity;
+        const selectionLine = formatSelectionLine(resolved.options);
 
-        if (menuItem) {
-          const itemPrice = menuItem.price;
-          const quantity = Number(item.quantity);
-          subtotal += itemPrice * quantity;
+        itemsWithPrices.push({
+          id: crypto.randomUUID(),
+          menu_item_id: resolved.menuItemId,
+          quantity: quantity,
+          notes: resolved.notes || null,
+          ...orderItemCustomizationColumns(resolved),
+        });
 
-          itemsWithPrices.push({
-            id: crypto.randomUUID(),
-            menu_item_id: item.menuItemId,
-            quantity: quantity,
-            unit_price: itemPrice,
-            notes: item.notes || null,
-          });
+        itemsForEmail.push({
+          name: selectionLine
+            ? `${resolved.menuItemName} (${selectionLine})`
+            : resolved.menuItemName,
+          quantity: quantity,
+          unitPrice: resolved.unitPrice,
+          notes: resolved.notes || undefined,
+        });
 
-          itemsForEmail.push({
-            name: menuItem.name,
-            quantity: quantity,
-            unitPrice: itemPrice,
-            notes: item.notes || undefined,
-          });
-
-          itemSummaries.push(`${quantity}x ${menuItem.name}`);
-        }
+        itemSummaries.push(
+          `${quantity}x ${resolved.menuItemName}${selectionLine ? ` (${selectionLine})` : ""}`,
+        );
       }
+      subtotal = Math.round(subtotal * 100) / 100;
 
       const total = subtotal; // tax = 0%
 
@@ -364,6 +401,23 @@ export async function POST(request: NextRequest) {
         );
 
       if (itemsError) throw itemsError;
+
+      // 4b. Snapshot de personalización
+      await Promise.all(
+        resolvedItems.map((resolved, index) =>
+          resolved.hasCustomization
+            ? replaceOrderItemSnapshot(
+                supabaseAdmin,
+                tenantId,
+                itemsWithPrices[index].id,
+                resolved,
+              )
+            : Promise.resolve(),
+        ),
+      );
+      if (metadata.draftId) {
+        await markCheckoutDraftConsumed(supabaseAdmin, metadata.draftId);
+      }
 
       // 5. Create payment record
       const paymentId = crypto.randomUUID();

@@ -1,7 +1,15 @@
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
+import {
+  CustomizationError,
+  resolveOrderItems,
+  type OrderItemInput,
+} from "@/lib/customization/server";
+import { saveCheckoutDraft } from "@/lib/customization/checkoutDraft";
+import { formatSelectionLine } from "@/lib/customization";
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,7 +69,35 @@ export async function POST(request: NextRequest) {
       "https://trykittn.com";
     const isEn = locale === "en";
 
-    for (const item of orderItems) {
+    // Validar personalización y calcular precios en el servidor
+    let resolvedItems;
+    try {
+      resolvedItems = await resolveOrderItems(
+        tenant.id,
+        orderItems.map(
+          (item: {
+            menuItemId: string;
+            quantity: number | string;
+            notes?: string;
+            selections?: { optionId: string; quantity: number }[];
+          }): OrderItemInput => ({
+            menuItemId: item.menuItemId,
+            quantity: Number(item.quantity),
+            notes: item.notes || "",
+            selections: item.selections || [],
+          }),
+        ),
+        { includeModifiersInDiscount: true },
+      );
+    } catch (err) {
+      if (err instanceof CustomizationError) {
+        return NextResponse.json({ error: err.message }, { status: 400 });
+      }
+      throw err;
+    }
+
+    for (const [index, item] of orderItems.entries()) {
+      const resolved = resolvedItems[index];
       const { data: menuItem, error: fetchError } = await supabase
         .from("menu_items")
         .select("*")
@@ -135,24 +171,34 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      const selectionLine = formatSelectionLine(resolved.options);
       lineItems.push({
-        price_data: {
-          currency: "mxn",
-          unit_amount: Math.round(menuItem.price * 100),
-          product: stripeProductId,
-        },
-        quantity: Number(item.quantity),
+        price_data: selectionLine
+          ? {
+              // Personalizado: el nombre muestra la selección en el recibo
+              currency: "mxn",
+              unit_amount: Math.round(resolved.unitPrice * 100),
+              product_data: {
+                name: `${menuItem.name} (${selectionLine})`.slice(0, 250),
+              },
+            }
+          : {
+              currency: "mxn",
+              unit_amount: Math.round(resolved.unitPrice * 100),
+              product: stripeProductId,
+            },
+        quantity: resolved.quantity,
       });
 
       validatedItems.push({
         menuItemId: menuItem.id,
-        quantity: Number(item.quantity),
+        quantity: resolved.quantity,
         notes: item.notes || "",
       });
 
       descriptionItems.push({
-        name: menuItem.name,
-        quantity: Number(item.quantity),
+        name: selectionLine ? `${menuItem.name} (${selectionLine})` : menuItem.name,
+        quantity: resolved.quantity,
       });
     }
 
@@ -247,6 +293,29 @@ export async function POST(request: NextRequest) {
         : [item.menuItemId, item.quantity],
     );
 
+    // Carrito validado y con precio ⇒ borrador (la metadata solo lleva el id).
+    const draftId = await saveCheckoutDraft(
+      createAdminClient(),
+      tenant.id,
+      orderId,
+      resolvedItems,
+    );
+    const hasCustomization = resolvedItems.some((i) => i.hasCustomization);
+    if (!draftId && hasCustomization) {
+      return NextResponse.json(
+        { error: "No se pudo preparar el pago. Intenta de nuevo." },
+        { status: 500 },
+      );
+    }
+    const legacyItemsJson = JSON.stringify(compactOrderItems);
+    if (!draftId && legacyItemsJson.length > 500) {
+      // Sin borrador y sin espacio en la metadata no habría cómo crear la orden.
+      return NextResponse.json(
+        { error: "No se pudo preparar el pago. Intenta de nuevo." },
+        { status: 500 },
+      );
+    }
+
     const stripeLocale = isEn ? "en" : "es-419";
 
     const session = await stripe.checkout.sessions.create({
@@ -276,7 +345,11 @@ export async function POST(request: NextRequest) {
         customerName: (customerName || "").slice(0, 100),
         type, // 'takeout' | 'dine-in'
         notes: (notes || "").slice(0, 300),
-        orderItems: JSON.stringify(compactOrderItems),
+        ...(draftId ? { draftId } : {}),
+        // Compatibilidad: solo si cabe en el límite de 500 caracteres de Stripe
+        ...(!hasCustomization && legacyItemsJson.length <= 500
+          ? { orderItems: legacyItemsJson }
+          : {}),
         pickupTime: pickupTime || "",
         tipAmount: validatedTipAmount.toString(),
         commissionRate: commissionRate.toString(),
