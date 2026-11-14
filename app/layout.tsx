@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import { TenantProvider } from "@/components/TenantProvider";
 import { UserProvider } from "@/components/UserProvider";
+import { AnnouncementGate } from "@/components/announcements/AnnouncementGate";
 import { getProfile } from "@/lib/auth";
 import { getTenantContext } from "@/lib/tenant";
 import type { Metadata } from "next";
@@ -64,6 +65,7 @@ export default async function RootLayout({
           <UserProvider initialProfile={profile}>
             <Navbar />
             {children}
+            <AnnouncementGate />
           </UserProvider>
         </TenantProvider>
       </body>
