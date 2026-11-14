@@ -19,6 +19,8 @@ import { MenuFilters } from "./components/MenuFilters";
 import { MenuTable } from "./components/MenuTable";
 import { ProductModal } from "./components/ProductModal";
 import { RecipeModal } from "./components/RecipeModal";
+import { CustomizationEditorModal } from "./components/CustomizationEditorModal";
+import { useOptionalUser } from "@/components/UserProvider";
 
 import {
   EMPTY_INGREDIENT_FORM,
@@ -62,6 +64,7 @@ export function MenuContent(props: MenuContentProps) {
 }
 
 function MenuContentInner({
+  items,
   paginatedItems,
   totalPages,
   totalItems,
@@ -69,6 +72,10 @@ function MenuContentInner({
 }: MenuContentProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const user = useOptionalUser();
+  const canCustomize =
+    user?.hasPermission?.("menu.manage_customization") ?? false;
+  const [customizingItem, setCustomizingItem] = useState<MenuItem | null>(null);
 
   const {
     errorMessage,
@@ -252,6 +259,7 @@ function MenuContentInner({
             paginatedItems={paginatedItems}
             totalPages={totalPages}
             totalItems={totalItems}
+            onCustomize={canCustomize ? setCustomizingItem : undefined}
           />
         </section>
       </main>
@@ -263,6 +271,24 @@ function MenuContentInner({
       />
 
       <CategoryModal />
+
+      {customizingItem && (
+        <CustomizationEditorModal
+          menuItem={{
+            id: customizingItem.id,
+            name: customizingItem.name,
+            price: Number(customizingItem.price) || 0,
+          }}
+          menuItems={items.map((m) => ({
+            id: m.id,
+            name: m.name,
+            price: Number(m.price) || 0,
+          }))}
+          ingredients={initialIngredients}
+          onClose={() => setCustomizingItem(null)}
+          onSaved={() => router.refresh()}
+        />
+      )}
 
       <RecipeModal
         ingredients={initialIngredients}

@@ -15,6 +15,7 @@ export type PermissionKey =
   // Menú & Catálogo
   | "menu.view"
   | "menu.manage"
+  | "menu.manage_customization"
   | "menu.toggle_availability"
   // Inventario & Compras
   | "inventory.view"
@@ -135,6 +136,12 @@ export const PERMISSION_MODULES: PermissionGroup[] = [
         key: "menu.manage",
         label: "Administrar Menú",
         description: "Crear, editar recetas, precios y categorías.",
+      },
+      {
+        key: "menu.manage_customization",
+        label: "Configurar Personalización",
+        description:
+          "Crear grupos de opciones de platillos (sabores, extras, niveles de precio).",
       },
       {
         key: "menu.toggle_availability",
@@ -278,6 +285,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     "kitchen.manage_queue",
     "menu.view",
     "menu.manage",
+    "menu.manage_customization",
     "menu.toggle_availability",
     "inventory.view",
     "inventory.adjust_stock",

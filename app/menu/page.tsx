@@ -165,6 +165,25 @@ async function getFilteredMenuItems(params: {
   }
 
   const items = (data || []) as DbMenuItem[];
+
+  // Grupos de personalización por producto (si la migración aún no existe, 0)
+  const groupCounts = new Map<string, number>();
+  if (items.length > 0) {
+    const { data: groupRows, error: groupError } = await supabase
+      .from("menu_item_option_groups")
+      .select("menu_item_id")
+      .eq("tenant_id", params.tenantId)
+      .in(
+        "menu_item_id",
+        items.map((i) => i.id),
+      );
+    if (!groupError) {
+      for (const row of (groupRows || []) as { menu_item_id: string }[]) {
+        groupCounts.set(row.menu_item_id, (groupCounts.get(row.menu_item_id) || 0) + 1);
+      }
+    }
+  }
+
   const mappedItems: MenuItem[] = items.map((item) => ({
     id: item.id,
     name: item.name,
@@ -177,6 +196,7 @@ async function getFilteredMenuItems(params: {
     ingredientId: item.ingredient_id,
     show_in_dine_in: item.show_in_dine_in ?? true,
     show_in_takeaway: item.show_in_takeaway ?? true,
+    customizationGroups: groupCounts.get(item.id) || 0,
   }));
 
   return {

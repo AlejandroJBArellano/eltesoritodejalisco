@@ -30,6 +30,8 @@ export type MenuItem = {
   ingredientId?: string | null;
   show_in_dine_in?: boolean;
   show_in_takeaway?: boolean;
+  /** Grupos de personalización configurados (0 = no personalizable). */
+  customizationGroups?: number;
 };
 
 export type MenuCategory = {

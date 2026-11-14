@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Image as ImageIcon,
   Pencil,
+  SlidersHorizontal,
   Trash2,
   XCircle,
 } from "lucide-react";
@@ -21,12 +22,15 @@ interface MenuTableProps {
   paginatedItems: MenuItem[];
   totalPages: number;
   totalItems: number;
+  /** Abre el editor de personalización (solo con menu.manage_customization). */
+  onCustomize?: (item: MenuItem) => void;
 }
 
 export function MenuTable({
   paginatedItems,
   totalPages,
   totalItems,
+  onCustomize,
 }: MenuTableProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -131,6 +135,13 @@ export function MenuTable({
                 </td>
                 <td className="py-3 px-4">
                   <p className="font-bold text-text-light">{item.name}</p>
+                  {(item.customizationGroups ?? 0) > 0 && (
+                    <span className="mt-0.5 inline-flex items-center gap-1 rounded-md border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                      <SlidersHorizontal className="h-2.5 w-2.5" />
+                      Personalizable · {item.customizationGroups}{" "}
+                      {item.customizationGroups === 1 ? "grupo" : "grupos"}
+                    </span>
+                  )}
                   {item.description && (
                     <p className="text-xs text-text-light/50 line-clamp-1">
                       {item.description}
@@ -168,6 +179,16 @@ export function MenuTable({
                 </td>
                 <td className="py-3 px-4 text-right">
                   <div className="flex items-center justify-end gap-2">
+                    {onCustomize && (
+                      <button
+                        onClick={() => onCustomize(item)}
+                        className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-2 text-amber-400 hover:bg-amber-500/20 transition-colors cursor-pointer active:scale-[0.98]"
+                        title="Personalizar platillo"
+                        aria-label={`Personalizar ${item.name}`}
+                      >
+                        <SlidersHorizontal className="h-4 w-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => onOpenRecipe(item.id)}
                       className="rounded-lg bg-primary/10 border border-primary/20 p-2 text-primary hover:bg-primary/20 transition-colors cursor-pointer active:scale-[0.98]"
