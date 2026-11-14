@@ -11,6 +11,7 @@ import { FinancialSummaryKPIs } from "./FinancialSummaryKPIs";
 import { AnalyticsBanner } from "./AnalyticsBanner";
 import { DailySalesTable } from "./DailySalesTable";
 import { ProductSalesSection } from "./ProductSalesSection";
+import { OptionSalesSection } from "./OptionSalesSection";
 import { SalesSourceCard } from "./SalesSourceCard";
 import { TopCustomersTable } from "./TopCustomersTable";
 
@@ -72,6 +73,9 @@ function ReportsView() {
 
         {/* Ventas por Producto y Ranking de Más Vendidos */}
         <ProductSalesSection />
+
+        {/* Ventas por opción de personalización */}
+        <OptionSalesSection />
 
         {/* Grid Inferior: Fuentes de Venta y Mejores Clientes */}
         <div className="grid gap-8 lg:grid-cols-2">
