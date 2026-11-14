@@ -5,6 +5,7 @@ import { Check, ChevronLeft, ChevronRight, Minus, Plus, X } from "lucide-react";
 import {
   applyOptionChange,
   canIncrementOption,
+  computePriceRange,
   getActiveGroups,
   getDefaultSelections,
   getEffectiveOptionPrice,
@@ -276,6 +277,13 @@ export function CustomizationModal({
     [customization, selections],
   );
   const firstError = validation.errors[0]?.message ?? null;
+  // Mientras la selección no está completa el nivel aún no aplica y el total
+  // sería engañoso ($0); se muestra el precio mínimo posible.
+  const minPrice = useMemo(
+    () => computePriceRange(basePrice, customization).min,
+    [basePrice, customization],
+  );
+  const showFromPrice = !validation.valid && minPrice != null;
 
   const visibleGroups = isWizard ? [groups[step]] : groups;
   const currentStatus = isWizard
@@ -366,10 +374,10 @@ export function CustomizationModal({
         <footer className="space-y-3 border-t border-border px-5 py-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-text-light/60">
-              Total
+              {showFromPrice ? "Desde" : "Total"}
             </span>
             <span className="font-mono text-lg font-black tabular-nums text-text-light">
-              {money(price.unitPrice)}
+              {money(showFromPrice ? (minPrice ?? price.unitPrice) : price.unitPrice)}
             </span>
           </div>
           {firstError && isLastStep && (

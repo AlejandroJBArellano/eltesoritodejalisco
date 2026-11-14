@@ -1,7 +1,14 @@
 import { isCustomizableMenuItem, usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { MenuItem } from "@/types/pos";
-import { Package, PackageSearch, Plus, Search, X } from "lucide-react";
+import {
+  Package,
+  PackageSearch,
+  Plus,
+  Search,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { memo } from "react";
 
 const CATEGORY_CONFIG: Record<
@@ -257,8 +264,13 @@ const MenuItemCard = memo(function MenuItemCard({
           {m.name}
         </span>
         {isCustomizable && !isOutOfStock && (
-          <span className="rounded-md bg-amber-500/10 text-amber-400 text-[9px] font-semibold px-1.5 py-0.5 uppercase tracking-wider shrink-0 border border-amber-500/20">
-            Personalizable
+          // Ícono compacto: una etiqueta de texto cortaba el nombre del producto
+          <span
+            title="Personalizable"
+            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-amber-500/20 bg-amber-500/10 text-amber-400"
+          >
+            <SlidersHorizontal className="h-3 w-3" aria-hidden="true" />
+            <span className="sr-only">Personalizable</span>
           </span>
         )}
       </div>

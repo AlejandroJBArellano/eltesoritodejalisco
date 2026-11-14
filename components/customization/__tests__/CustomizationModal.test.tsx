@@ -31,6 +31,9 @@ describe("CustomizationModal", () => {
     const add = screen.getByRole("button", { name: /^Agregar$/ });
     expect(add).toBeDisabled();
     expect(screen.getByText("Faltan 3 en Elige tus tacos")).toBeInTheDocument();
+    // Selección incompleta: precio mínimo posible, no $0
+    expect(screen.getByText("Desde")).toBeInTheDocument();
+    expect(screen.getByText("$120.00")).toBeInTheDocument();
     expect(screen.getByText("Obligatorio · Elige 3")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Agregar Pastor" }));
