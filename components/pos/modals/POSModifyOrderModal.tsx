@@ -3,9 +3,12 @@
 import { usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { useOptionalUser } from "@/components/UserProvider";
+import { useOptionalTenant } from "@/components/TenantProvider";
+import { formatSelectionLine } from "@/lib/customization";
 import {
   AlertTriangle,
   Minus,
+  Pencil,
   Percent,
   Plus,
   Tag,
@@ -23,6 +26,15 @@ import {
 export function POSModifyOrderModal() {
   const user = useOptionalUser();
   const isWaiter = user?.isWaiter ?? false;
+  const tenant = useOptionalTenant();
+  const editPolicy = tenant?.customization_edit_after_kitchen || "WITH_PERMISSION";
+  // ¿Puede este usuario editar la personalización de platillos ya en cocina?
+  const canEditCustomization =
+    editPolicy === "NEVER"
+      ? false
+      : editPolicy === "WITH_PERMISSION"
+        ? (user?.hasPermission?.("pos.edit_order") ?? true)
+        : true;
 
   const { availableMenuItems, customers, refreshOrders } = usePOSData();
 
@@ -47,6 +59,7 @@ export function POSModifyOrderModal() {
     handleRemoveModifyOrderDiscount,
     handleSaveModifiedOrder,
     isSubmittingCart,
+    openModifyItemCustomization,
   } = usePOSCart(availableMenuItems, refreshOrders);
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -129,6 +142,13 @@ export function POSModifyOrderModal() {
     return hasDecreased;
   }, [modifyingOrder, modifyItems]);
 
+  // Con PIN de gerencia: el mesero necesita autorización para cambiar selecciones
+  const needsCustomizationAuth =
+    editPolicy === "WITH_MANAGER_AUTH" &&
+    isWaiter &&
+    modifyItems.some((item) => item.selectionChanged);
+  const needsAuth = (isWaiter && hasItemReductions) || needsCustomizationAuth;
+
   if (!modifyingOrder) return null;
 
   const safeTotals = modifyOrderTotals || {
@@ -186,7 +206,7 @@ export function POSModifyOrderModal() {
   };
 
   const handleSaveClick = async () => {
-    if (isWaiter && hasItemReductions) {
+    if (needsAuth) {
       setIsAuthModalOpen(true);
       return;
     }
@@ -204,7 +224,7 @@ export function POSModifyOrderModal() {
   };
 
   const handleSaveAndTransitionToAdd = async () => {
-    if (isWaiter && hasItemReductions) {
+    if (needsAuth) {
       setShowAddItemsConfirm(false);
       setPendingTransitionToAdd(true);
       setIsAuthModalOpen(true);
@@ -290,8 +310,18 @@ export function POSModifyOrderModal() {
                   discountType: item.discountType,
                   discountValue: item.discountValue,
                   discountScope: item.discountScope,
+                  discountBasePrice: item.discountBasePrice ?? null,
                 });
                 const hasItemDiscount = discountAmount > 0;
+                const selectionLine = formatSelectionLine(item.selectionLines);
+                const menuProduct = availableMenuItems.find(
+                  (m) => m.id === item.menuItemId,
+                );
+                const isCustomizable = Boolean(
+                  menuProduct?.customization?.groups.some(
+                    (g) => g.isActive && g.options.some((o) => o.isActive),
+                  ),
+                );
 
                 return (
                   <div
@@ -303,6 +333,37 @@ export function POSModifyOrderModal() {
                         <p className="font-bold text-xs text-text-light uppercase tracking-tight truncate">
                           {item.menuItemName}
                         </p>
+                        {(selectionLine || isCustomizable) &&
+                          (isCustomizable && canEditCustomization ? (
+                            <button
+                              type="button"
+                              onClick={() => openModifyItemCustomization(index)}
+                              disabled={isSubmittingCart}
+                              className="group mt-0.5 flex max-w-full items-start gap-1 text-left text-[10px] font-semibold text-amber-400 hover:text-amber-300 cursor-pointer disabled:opacity-50"
+                              title="Editar personalización"
+                            >
+                              <span className="line-clamp-2">
+                                {selectionLine || "Elegir opciones"}
+                              </span>
+                              <Pencil className="mt-0.5 h-2.5 w-2.5 shrink-0 opacity-60 group-hover:opacity-100" />
+                            </button>
+                          ) : (
+                            <p
+                              className="mt-0.5 text-[10px] font-semibold text-amber-400/80 line-clamp-2"
+                              title={
+                                isCustomizable
+                                  ? "La configuración del restaurante no permite editar la personalización después de enviar a cocina"
+                                  : undefined
+                              }
+                            >
+                              {selectionLine}
+                            </p>
+                          ))}
+                        {item.selectionChanged && (
+                          <span className="mt-1 inline-block rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-300">
+                            Personalización editada
+                          </span>
+                        )}
                         <p className="text-[10px] font-mono font-medium text-text-light/50 mt-0.5 tabular-nums">
                           ${item.unitPrice.toFixed(2)} c/u
                         </p>
@@ -659,8 +720,16 @@ export function POSModifyOrderModal() {
           setIsAuthModalOpen(false);
           setPendingTransitionToAdd(false);
         }}
-        title="Autorizar Cancelación de Productos"
-        description="Se detectó la eliminación o reducción de productos en la comanda activa. Ingresa el PIN de Gerencia para autorizar los cambios."
+        title={
+          isWaiter && hasItemReductions
+            ? "Autorizar Cancelación de Productos"
+            : "Autorizar Cambio de Personalización"
+        }
+        description={
+          isWaiter && hasItemReductions
+            ? "Se detectó la eliminación o reducción de productos en la comanda activa. Ingresa el PIN de Gerencia para autorizar los cambios."
+            : "Se modificó la personalización de un platillo que ya está en cocina. Ingresa el PIN de Gerencia para autorizar el cambio."
+        }
         reasonPresets={[
           "Error de captura",
           "Cliente canceló platillo",

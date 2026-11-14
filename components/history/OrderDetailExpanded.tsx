@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import type { Order } from "./types";
 import type { OrderAuditLog } from "@/types";
+import { formatSelectionLine } from "@/lib/customization";
 
 export interface OrderDetailExpandedProps {
   order: Order;
@@ -46,6 +47,12 @@ function getActionBadgeConfig(actionType: string): ActionBadgeConfig {
         badgeClass: "bg-red-500/10 text-red-400 border-red-500/20",
         label: "Productos eliminados",
         icon: Trash2,
+      };
+    case "CUSTOMIZATION_EDITED":
+      return {
+        badgeClass: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+        label: "Personalización editada",
+        icon: PlusCircle,
       };
     case "CANCELLED":
       return {
@@ -104,6 +111,13 @@ function formatLogMessage(log: OrderAuditLog): string {
     case "ITEMS_ADDED": {
       const summary = details.summary ? `: ${details.summary}` : "";
       return `${log.user_name} agregó${summary}`;
+    }
+    case "CUSTOMIZATION_EDITED": {
+      const summary = details.summary ? `: ${details.summary}` : "";
+      const auth = details.authorizedBy
+        ? ` (Autorizado por ${details.authorizedBy})`
+        : "";
+      return `${log.user_name} cambió la personalización${summary}${auth}`;
     }
     case "ITEMS_REMOVED": {
       let rawSummary = String(details.summary || "").trim();
@@ -230,6 +244,11 @@ export function OrderDetailExpanded({
                 <tr key={item.id}>
                   <td className="py-1.5 font-bold text-text-light">
                     {item.menuItem?.name || "Producto"}
+                    {item.selectionLines && item.selectionLines.length > 0 && (
+                      <span className="text-[10px] text-text-light/70 block font-semibold">
+                        {formatSelectionLine(item.selectionLines)}
+                      </span>
+                    )}
                     {item.notes && (
                       <span className="text-[10px] text-amber-400/80 block font-normal">
                         Notas: {item.notes}

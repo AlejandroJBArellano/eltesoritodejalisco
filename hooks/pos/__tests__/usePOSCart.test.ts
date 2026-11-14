@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { usePOSCart } from "../usePOSCart";
 import { MenuItem, Order } from "@/types/pos";
+import { tacosMixtos } from "@/lib/customization/__tests__/fixtures";
 
 const mockMenuItems: MenuItem[] = [
   {
@@ -20,10 +21,11 @@ const mockMenuItems: MenuItem[] = [
   },
   {
     id: "3",
-    name: "Orden Mixta",
-    price: 60,
+    name: "Tacos Mixtos",
+    price: 0,
     isAvailable: true,
     category: "Tacos",
+    customization: tacosMixtos(),
   },
 ];
 
@@ -151,36 +153,123 @@ describe("usePOSCart Hook", () => {
     vi.useRealTimers();
   });
 
-  it("should handle mixed order flavor changes correctly without exceeding total limit", () => {
+  it("opens the customization modal for customizable products instead of adding", () => {
     const { result } = renderHook(() =>
       usePOSCart(mockMenuItems, mockRefreshOrders),
     );
 
-    // Trigger mixed order flow by clicking "Orden Mixta"
     act(() => {
       result.current.handleGridItemClick(mockMenuItems[2]);
     });
 
-    expect(result.current.mixedOrderMenuItem).toEqual(mockMenuItems[2]);
-    expect(result.current.mixedFlavorCounts.Carnitas).toBe(0);
-
-    // Increment Carnitas flavor
-    act(() => {
-      result.current.handleMixedFlavorChange("Carnitas", 1);
+    expect(result.current.formState.items).toHaveLength(0);
+    expect(result.current.customizationRequest).toMatchObject({
+      kind: "cart-new",
+      menuItem: { id: "3" },
+      initialSelections: [],
     });
-    expect(result.current.mixedFlavorCounts.Carnitas).toBe(1);
 
-    // Try to add more than MIXED_ORDER_TOTAL (3 flavors total)
     act(() => {
-      result.current.handleMixedFlavorChange("Birria", 2);
+      result.current.cancelCustomization();
     });
-    expect(result.current.mixedFlavorCounts.Birria).toBe(2); // total = 3 now
+    expect(result.current.customizationRequest).toBeNull();
+  });
 
-    // Incrementing Pastor should fail/be ignored since total is 3
+  it("confirms a selection, merges identical lines and prices them with options", () => {
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+    const selection = [
+      { optionId: "pastor", quantity: 2 },
+      { optionId: "birria", quantity: 1 },
+    ];
+
+    for (let i = 0; i < 2; i++) {
+      act(() => {
+        result.current.handleGridItemClick(mockMenuItems[2]);
+      });
+      act(() => {
+        result.current.confirmCustomization(selection);
+      });
+    }
+
+    expect(result.current.formState.items).toEqual([
+      {
+        menuItemId: "3",
+        quantity: "2",
+        notes: "",
+        selections: [
+          { optionId: "birria", quantity: 1 },
+          { optionId: "pastor", quantity: 2 },
+        ],
+      },
+    ]);
+    // 120 nivel + 2×$10 pastor = $140 c/u × 2
+    expect(result.current.cartTotal).toBe(280);
+    expect(result.current.getDraftPricing(result.current.formState.items[0]).unitPrice).toBe(140);
+  });
+
+  it("edits the selection of a cart line", () => {
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
     act(() => {
-      result.current.handleMixedFlavorChange("Pastor", 1);
+      result.current.handleGridItemClick(mockMenuItems[2]);
     });
-    expect(result.current.mixedFlavorCounts.Pastor).toBe(0); // stayed 0
+    act(() => {
+      result.current.confirmCustomization([{ optionId: "pastor", quantity: 3 }]);
+    });
+    act(() => {
+      result.current.openCartItemCustomization(0);
+    });
+    expect(result.current.customizationRequest).toMatchObject({
+      kind: "cart-edit",
+      index: 0,
+      initialSelections: [{ optionId: "pastor", quantity: 3 }],
+    });
+    act(() => {
+      result.current.confirmCustomization([{ optionId: "carnitas", quantity: 3 }]);
+    });
+    expect(result.current.formState.items[0].selections).toEqual([
+      { optionId: "carnitas", quantity: 3 },
+    ]);
+    expect(result.current.cartTotal).toBe(120);
+  });
+
+  it("sends selections in the order payload", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ order: { id: "o1" } }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { result } = renderHook(() =>
+      usePOSCart(mockMenuItems, mockRefreshOrders),
+    );
+    act(() => {
+      result.current.handleGridItemClick(mockMenuItems[2]);
+    });
+    act(() => {
+      result.current.confirmCustomization([{ optionId: "pastor", quantity: 3 }]);
+    });
+    act(() => {
+      result.current.handleGridItemClick(mockMenuItems[0]);
+    });
+    await act(async () => {
+      await result.current.handleCheckoutSubmit(
+        { preventDefault: () => {} } as unknown as React.FormEvent<HTMLFormElement>,
+        () => {},
+      );
+    });
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.orderItems).toEqual([
+      expect.objectContaining({
+        menuItemId: "3",
+        quantity: 1,
+        selections: [{ optionId: "pastor", quantity: 3 }],
+      }),
+      expect.not.objectContaining({ selections: expect.anything() }),
+    ]);
+    vi.unstubAllGlobals();
   });
 
   it("totalCartItems should reflect the sum of all item quantities", () => {

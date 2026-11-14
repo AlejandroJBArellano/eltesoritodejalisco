@@ -1,4 +1,4 @@
-import { isMixedOrderItem, usePOSCart } from "@/hooks/pos/usePOSCart";
+import { isCustomizableMenuItem, usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { MenuItem } from "@/types/pos";
 import { Package, PackageSearch, Plus, Search, X } from "lucide-react";
@@ -222,7 +222,7 @@ const MenuItemCard = memo(function MenuItemCard({
   item: m,
   onClick,
 }: MenuItemCardProps) {
-  const isMixed = isMixedOrderItem(m.name);
+  const isCustomizable = isCustomizableMenuItem(m);
   const stockStatus = getStockStatus(m);
   const isOutOfStock = stockStatus === "out";
   const isLowStock = stockStatus === "low";
@@ -256,16 +256,25 @@ const MenuItemCard = memo(function MenuItemCard({
         >
           {m.name}
         </span>
-        {isMixed && !isOutOfStock && (
+        {isCustomizable && !isOutOfStock && (
           <span className="rounded-md bg-amber-500/10 text-amber-400 text-[9px] font-semibold px-1.5 py-0.5 uppercase tracking-wider shrink-0 border border-amber-500/20">
-            Mixto
+            Personalizable
           </span>
         )}
       </div>
 
       <div className="mt-2 flex items-center justify-between w-full gap-1 flex-wrap">
         <span className="rounded-md bg-dark/40 border border-border px-2 py-0.5 text-xs font-mono font-bold text-text-light tabular-nums">
-          ${m.price.toFixed(2)}
+          {m.priceFrom != null ? (
+            <>
+              <span className="font-sans font-semibold text-text-light/50">
+                desde{" "}
+              </span>
+              ${m.priceFrom.toFixed(2)}
+            </>
+          ) : (
+            `$${m.price.toFixed(2)}`
+          )}
         </span>
 
         {/* Stock badge — only when ingredient is tracked */}

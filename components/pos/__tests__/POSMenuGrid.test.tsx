@@ -13,7 +13,10 @@ vi.mock("@/hooks/pos/usePOSData", () => ({
 
 vi.mock("@/hooks/pos/usePOSCart", () => ({
   usePOSCart: vi.fn(),
-  isMixedOrderItem: vi.fn(() => false),
+  isCustomizableMenuItem: vi.fn(
+    (m?: { customization?: { groups?: unknown[] } | null }) =>
+      Boolean(m?.customization?.groups?.length),
+  ),
 }));
 
 vi.mock("@/hooks/pos/usePOSCheckout", () => ({
@@ -65,13 +68,11 @@ const defaultCartValue = {
   modifyingOrder: null,
   setModifyingOrder: vi.fn(),
   modifyItems: [],
-  mixedOrderMenuItem: null,
-  setMixedOrderMenuItem: vi.fn(),
-  mixedFlavorCounts: {},
+  customizationRequest: null,
   handleFormChange: vi.fn(),
   handleGridItemClick: vi.fn(),
-  handleMixedFlavorChange: vi.fn(),
-  handleMixedOrderConfirm: vi.fn(),
+  confirmCustomization: vi.fn(),
+  cancelCustomization: vi.fn(),
   handleQuantityChange: vi.fn(),
   handleItemNoteChange: vi.fn(),
   handleClearCart: vi.fn(),

@@ -13,8 +13,9 @@ vi.mock("@/hooks/pos/usePOSData", () => ({
 
 vi.mock("@/hooks/pos/usePOSCart", () => ({
   usePOSCart: vi.fn(),
-  isMixedOrderItem: vi.fn((name: string) =>
-    name.toLowerCase().includes("orden mixta"),
+  isCustomizableMenuItem: vi.fn(
+    (m?: { customization?: { groups?: unknown[] } | null }) =>
+      Boolean(m?.customization?.groups?.length),
   ),
 }));
 
@@ -71,9 +72,30 @@ const mockAvailableItems: MenuItem[] = [
   },
   {
     id: "menu-4",
-    name: "Orden Mixta",
-    price: 85,
+    name: "Tacos Mixtos",
+    price: 0,
+    priceFrom: 120,
     isAvailable: true,
+    customization: {
+      layout: "SCROLL",
+      deductBase: true,
+      groups: [
+        {
+          id: "g",
+          name: "Elige tus tacos",
+          sortOrder: 0,
+          minSelect: 3,
+          maxSelect: 3,
+          allowRepeat: true,
+          maxPerOption: null,
+          pricingMode: "TIERED",
+          tierMatchMode: "EXACT",
+          isActive: true,
+          tiers: [{ quantityFrom: 3, quantityTo: null, price: 120 }],
+          options: [],
+        },
+      ],
+    },
   },
 ];
 
@@ -458,7 +480,8 @@ describe("POSAddItemsModal Component", () => {
     // Badges
     expect(screen.getByText("Bajo Stock")).toBeInTheDocument(); // Quesadilla has 3 <= min 5
     expect(screen.getByText("Sin Stock")).toBeInTheDocument(); // Torta Ahogada has 0
-    expect(screen.getByText("Mixto")).toBeInTheDocument(); // Orden Mixta
+    expect(screen.getByText("Personalizable")).toBeInTheDocument(); // Tacos Mixtos
+    expect(screen.getByText("desde $120.00")).toBeInTheDocument();
 
     // Open mobile tray
     const mobileTrayBtn = screen.getByRole("button", {

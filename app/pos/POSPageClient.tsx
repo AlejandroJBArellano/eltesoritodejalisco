@@ -12,7 +12,8 @@ import { POSCartSidebar } from "@/components/pos/POSCartSidebar";
 import { POSMenuGrid } from "@/components/pos/POSMenuGrid";
 import { POSAddItemsModal } from "@/components/pos/modals/POSAddItemsModal";
 import { POSCheckoutModal } from "@/components/pos/modals/POSCheckoutModal";
-import { POSMixedOrderModal } from "@/components/pos/modals/POSMixedOrderModal";
+import { POSCustomizationHost } from "@/components/pos/POSCustomizationHost";
+import { mapOrderData } from "@/lib/mappers/orders";
 import { POSModifyOrderModal } from "@/components/pos/modals/POSModifyOrderModal";
 import { POSTipModal } from "@/components/pos/modals/POSTipModal";
 
@@ -79,7 +80,8 @@ function POSPageContent() {
   const {
     editingOrder,
     modifyingOrder,
-    mixedOrderMenuItem,
+    reprintRequest,
+    setReprintRequest,
     handleCheckoutSubmit,
     handleCancelOrder,
     totalCartItems,
@@ -116,6 +118,41 @@ function POSPageContent() {
     setShowSplitBill,
     handleSplitPayment,
   } = usePOSCheckout();
+
+  // Comanda de cocina limitada a ciertos renglones (reimpresión tras editar)
+  const [kitchenTicketItemIds, setKitchenTicketItemIds] = useState<
+    string[] | null
+  >(null);
+
+  useEffect(() => {
+    if (!reprintRequest) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(`/api/orders/${reprintRequest.orderId}`);
+        const data = await response.json();
+        if (!cancelled && response.ok && data?.order) {
+          setKitchenTicketItemIds(reprintRequest.itemIds);
+          setCheckoutOrder(mapOrderData(data.order));
+          setShowTicket(false);
+          setShowKitchenTicket(true);
+        }
+      } catch (err) {
+        console.error("[POS] No se pudo preparar la reimpresión:", err);
+      } finally {
+        if (!cancelled) setReprintRequest(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    reprintRequest,
+    setReprintRequest,
+    setCheckoutOrder,
+    setShowTicket,
+    setShowKitchenTicket,
+  ]);
 
   const user = useOptionalUser();
   const isWaiter = user?.isWaiter ?? false;
@@ -343,7 +380,7 @@ function POSPageContent() {
 
       {modifyingOrder && <POSModifyOrderModal />}
 
-      {mixedOrderMenuItem && <POSMixedOrderModal />}
+      <POSCustomizationHost />
 
       {(showTicket || showKitchenTicket) && checkoutOrder && (
         <div className="fixed inset-0 bg-black/80 flex items-start justify-center p-4 z-50 overflow-y-auto backdrop-blur-md print-modal-container">
@@ -380,6 +417,7 @@ function POSPageContent() {
                   setCheckoutOrder(null);
                   setShowTicket(false);
                   setShowKitchenTicket(false);
+                  setKitchenTicketItemIds(null);
                   setWhatsappNumber("");
                   setShowWhatsAppModal(false);
                 }}
@@ -391,7 +429,10 @@ function POSPageContent() {
             {showTicket ? (
               <OrderTicket order={checkoutOrder} />
             ) : (
-              <KitchenTicket order={checkoutOrder} />
+              <KitchenTicket
+                order={checkoutOrder}
+                onlyItemIds={kitchenTicketItemIds}
+              />
             )}
           </div>
         </div>

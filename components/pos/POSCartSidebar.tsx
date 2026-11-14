@@ -1,4 +1,5 @@
-import { isMixedOrderItem, usePOSCart } from "@/hooks/pos/usePOSCart";
+import { priceDraftItem, usePOSCart } from "@/hooks/pos/usePOSCart";
+import { formatSelectionLine } from "@/lib/customization";
 import { usePOSCheckout } from "@/hooks/pos/usePOSCheckout";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import {
@@ -14,6 +15,7 @@ import {
   ChevronUp,
   Loader2,
   Minus,
+  Pencil,
   Percent,
   Plus,
   Printer,
@@ -64,7 +66,17 @@ export function POSCartSidebar() {
     handleRemoveItemDiscount,
     handleApplyOrderDiscount,
     handleRemoveOrderDiscount,
+    getDraftPricing: hookDraftPricing,
+    openCartItemCustomization,
   } = usePOSCart(availableMenuItems, refreshOrders);
+  const getDraftPricing =
+    hookDraftPricing ??
+    ((item: OrderFormState["items"][number]) =>
+      priceDraftItem(
+        availableMenuItems.find((m) => m.id === item.menuItemId),
+        item.selections,
+        true,
+      ));
 
   const safeTotals = cartTotals || {
     subtotalGross: 0,
@@ -104,7 +116,7 @@ export function POSCartSidebar() {
       title: product?.name
         ? `Descuento: ${product.name}`
         : "Descuento en Producto",
-      subtitle: `$${(product?.price || 0).toFixed(2)} c/u`,
+      subtitle: `$${getDraftPricing(item).unitPrice.toFixed(2)} c/u`,
       itemQuantity: Number(item.quantity) || 1,
       initialDiscount: {
         discountType: item.discountType || null,
@@ -345,15 +357,18 @@ export function POSCartSidebar() {
               const product = availableMenuItems.find(
                 (m) => m.id === item.menuItemId,
               );
-              const isMixed = product && isMixedOrderItem(product.name);
+              const pricing = getDraftPricing(item);
+              const selectionLine = formatSelectionLine(pricing.lines);
               const noteExpanded = expandedNotes.has(index);
+              const lineGross = pricing.unitPrice * Number(item.quantity);
 
               const { discountAmount, finalPrice } = calculateItemDiscount({
-                unitPrice: product?.price || 0,
+                unitPrice: pricing.unitPrice,
                 quantity: Number(item.quantity) || 1,
                 discountType: item.discountType,
                 discountValue: item.discountValue,
                 discountScope: item.discountScope,
+                discountBasePrice: pricing.discountBasePrice,
               });
               const hasItemDiscount = discountAmount > 0;
 
@@ -367,15 +382,22 @@ export function POSCartSidebar() {
                       <p className="font-bold text-xs text-text-light tracking-tight truncate">
                         {product?.name || "Producto"}
                       </p>
-                      {isMixed && item.notes ? (
-                        <p className="text-[10px] font-semibold text-amber-400 mt-0.5">
-                          {item.notes}
-                        </p>
-                      ) : (
-                        <p className="text-[10px] font-mono text-text-light/50 mt-0.5 tabular-nums">
-                          ${(product?.price || 0).toFixed(2)} c/u
-                        </p>
+                      {pricing.customizable && (
+                        <button
+                          type="button"
+                          onClick={() => openCartItemCustomization(index)}
+                          className="group mt-0.5 flex max-w-full items-start gap-1 text-left text-[10px] font-semibold text-amber-400 hover:text-amber-300 cursor-pointer"
+                          title="Editar personalización"
+                        >
+                          <span className="line-clamp-2">
+                            {selectionLine || "Elegir opciones"}
+                          </span>
+                          <Pencil className="mt-0.5 h-2.5 w-2.5 shrink-0 opacity-60 group-hover:opacity-100" />
+                        </button>
                       )}
+                      <p className="text-[10px] font-mono text-text-light/50 mt-0.5 tabular-nums">
+                        ${pricing.unitPrice.toFixed(2)} c/u
+                      </p>
 
                       {/* Badge de descuento en el ítem */}
                       {hasItemDiscount && (
@@ -422,10 +444,7 @@ export function POSCartSidebar() {
                         {hasItemDiscount ? (
                           <div>
                             <span className="text-[10px] font-mono line-through text-text-light/40 mr-1 block tabular-nums">
-                              $
-                              {(
-                                (product?.price || 0) * Number(item.quantity)
-                              ).toFixed(2)}
+                              ${lineGross.toFixed(2)}
                             </span>
                             <span className="font-mono font-bold text-xs text-emerald-400 tabular-nums">
                               ${finalPrice.toFixed(2)}
@@ -433,10 +452,7 @@ export function POSCartSidebar() {
                           </div>
                         ) : (
                           <p className="font-mono font-bold text-xs text-text-light tabular-nums">
-                            $
-                            {(
-                              (product?.price || 0) * Number(item.quantity)
-                            ).toFixed(2)}
+                            ${lineGross.toFixed(2)}
                           </p>
                         )}
                       </div>
@@ -459,25 +475,23 @@ export function POSCartSidebar() {
                         <Percent className="h-3.5 w-3.5" />
                       </button>
 
-                      {!isMixed && (
-                        <button
-                          type="button"
-                          onClick={() => toggleNote(index)}
-                          className="text-text-light/30 hover:text-text-light/70 transition-colors p-1 cursor-pointer"
-                          title="Agregar nota"
-                        >
-                          {noteExpanded ? (
-                            <ChevronUp className="h-3.5 w-3.5" />
-                          ) : (
-                            <ChevronDown className="h-3.5 w-3.5" />
-                          )}
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => toggleNote(index)}
+                        className="text-text-light/30 hover:text-text-light/70 transition-colors p-1 cursor-pointer"
+                        title="Agregar nota"
+                      >
+                        {noteExpanded ? (
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        ) : (
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        )}
+                      </button>
                     </div>
                   </div>
 
                   {/* Expandable note input */}
-                  {noteExpanded && !isMixed && (
+                  {noteExpanded && (
                     <div className="px-2.5 pb-2.5">
                       <input
                         type="text"

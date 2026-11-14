@@ -482,6 +482,7 @@ function usePOSCheckoutInternal(refreshOrders: () => Promise<Order[]>) {
         discountType: it.discountType || rawIt.discount_type || null,
         discountValue: it.discountValue ?? rawIt.discount_value ?? null,
         discountScope: it.discountScope || rawIt.discount_scope || "ROW",
+        discountBasePrice: it.discountBasePrice ?? null,
       };
     });
 

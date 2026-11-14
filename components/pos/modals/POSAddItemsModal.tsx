@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   Minus,
   PackageSearch,
+  Pencil,
   Plus,
   Search,
   ShoppingBag,
@@ -12,10 +13,11 @@ import {
   X,
 } from "lucide-react";
 
-import { isMixedOrderItem, usePOSCart } from "@/hooks/pos/usePOSCart";
+import { isCustomizableMenuItem, usePOSCart } from "@/hooks/pos/usePOSCart";
 import { usePOSData } from "@/hooks/pos/usePOSData";
 import { getCategoryConfig } from "@/components/pos/POSMenuGrid";
 import { MenuItem } from "@/types/pos";
+import { formatSelectionLine } from "@/lib/customization";
 
 /** Derive stock status for a menu item */
 function getStockStatus(item: MenuItem): "out" | "low" | "ok" | "untracked" {
@@ -42,6 +44,8 @@ export function POSAddItemsModal() {
     removeAdditionalItemRow,
     handleAddItems,
     isSubmittingCart,
+    getDraftPricing,
+    openAdditionalItemCustomization,
   } = usePOSCart();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -90,7 +94,8 @@ export function POSAddItemsModal() {
           (m) => m.id === item.menuItemId,
         );
         const qty = Number(item.quantity) || 0;
-        const unitPrice = product?.price || 0;
+        const pricing = getDraftPricing?.(item);
+        const unitPrice = pricing ? pricing.unitPrice : product?.price || 0;
         return {
           ...item,
           index,
@@ -98,10 +103,12 @@ export function POSAddItemsModal() {
           qty,
           unitPrice,
           totalPrice: unitPrice * qty,
+          customizable: pricing?.customizable ?? false,
+          selectionLine: pricing ? formatSelectionLine(pricing.lines) : "",
         };
       })
       .filter((item) => Boolean(item.menuItemId));
-  }, [additionalItems, availableMenuItems]);
+  }, [additionalItems, availableMenuItems, getDraftPricing]);
 
   const totalAdditionalCount = useMemo(() => {
     return trayItems.reduce((sum, item) => sum + item.qty, 0);
@@ -302,7 +309,7 @@ export function POSAddItemsModal() {
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {filteredMenuItems.map((m) => {
-                  const isMixed = isMixedOrderItem(m.name);
+                  const isCustomizable = isCustomizableMenuItem(m);
                   const stockStatus = getStockStatus(m);
                   const isOutOfStock = stockStatus === "out";
                   const isLowStock = stockStatus === "low";
@@ -323,9 +330,9 @@ export function POSAddItemsModal() {
                     >
                       {/* Badges de Estado */}
                       <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
-                        {isMixed && (
+                        {isCustomizable && (
                           <span className="rounded bg-primary/20 border border-primary/30 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wider text-primary">
-                            Mixto
+                            Personalizable
                           </span>
                         )}
                         {isOutOfStock && (
@@ -346,7 +353,9 @@ export function POSAddItemsModal() {
 
                       <div className="flex items-center justify-between w-full mt-2">
                         <span className="text-xs font-mono font-bold text-primary tabular-nums">
-                          ${m.price.toFixed(2)}
+                          {m.priceFrom != null
+                            ? `desde $${m.priceFrom.toFixed(2)}`
+                            : `$${m.price.toFixed(2)}`}
                         </span>
                         <div className="h-6 w-6 rounded-md bg-white/5 group-hover:bg-primary/20 group-hover:text-primary flex items-center justify-center text-text-light/50 transition-colors">
                           <Plus className="h-3.5 w-3.5" />
@@ -433,6 +442,20 @@ export function POSAddItemsModal() {
                       <p className="text-xs font-semibold text-text-light truncate">
                         {item.product?.name || "Producto"}
                       </p>
+                      {item.customizable && (
+                        <button
+                          type="button"
+                          onClick={() => openAdditionalItemCustomization?.(item.index)}
+                          disabled={isSubmittingCart}
+                          className="group flex max-w-full items-start gap-1 text-left text-[11px] font-semibold text-amber-400 hover:text-amber-300 cursor-pointer disabled:opacity-50"
+                          title="Editar personalización"
+                        >
+                          <span className="line-clamp-2">
+                            {item.selectionLine || "Elegir opciones"}
+                          </span>
+                          <Pencil className="mt-0.5 h-2.5 w-2.5 shrink-0 opacity-60 group-hover:opacity-100" />
+                        </button>
+                      )}
                       <p className="text-[11px] font-mono font-medium text-text-light/50 tabular-nums">
                         ${item.unitPrice.toFixed(2)} c/u
                       </p>

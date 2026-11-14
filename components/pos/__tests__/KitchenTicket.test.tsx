@@ -56,13 +56,18 @@ const mockMixedOrder: OrderWithDetails = {
       orderId: "order-2",
       menuItemId: "menu-2",
       quantity: 1,
-      unitPrice: 80,
-      notes: "Pastor, Asada, Pollo",
+      unitPrice: 140,
+      notes: "Sin cebolla",
+      selectionLines: [
+        { optionId: "o-birria", groupId: "g", groupName: "Elige tus tacos", optionName: "Birria", quantity: 1, unitPrice: 0, groupSort: 0, optionSort: 1 },
+        { optionId: "o-pastor", groupId: "g", groupName: "Elige tus tacos", optionName: "Pastor", quantity: 2, unitPrice: 10, groupSort: 0, optionSort: 3 },
+        { optionId: "o-queso", groupId: "g2", groupName: "Extras", optionName: "Queso extra", quantity: 1, unitPrice: 15, groupSort: 1, optionSort: 0 },
+      ],
       status: OrderStatus.PENDING,
       createdAt: new Date(),
       menuItem: {
         id: "menu-2",
-        name: "Orden Mixta de Tacos",
+        name: "Tacos Mixtos",
         price: 80,
         isAvailable: true,
         category: "TACOS",
@@ -103,16 +108,26 @@ describe("KitchenTicket Component", () => {
     expect(screen.getByText(printTimeStr)).toBeInTheDocument();
   });
 
-  it("should render flavor lines and pickup time for programed mixed orders", () => {
+  it("renders the customization as a single line, notes apart, and pickup time", () => {
     render(<KitchenTicket order={mockMixedOrder} />);
 
     expect(screen.getByText("#0026")).toBeInTheDocument();
     expect(screen.getByText("ENTREGA:")).toBeInTheDocument();
+    expect(
+      screen.getByText("▪ 1x Birria, 2x Pastor · Queso extra"),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/OJO: Sin cebolla/i)).toBeInTheDocument();
+  });
 
-    // Check that flavor lines are split and displayed
-    expect(screen.getByText(/▪\s*Pastor/i)).toBeInTheDocument();
-    expect(screen.getByText(/▪\s*Asada/i)).toBeInTheDocument();
-    expect(screen.getByText(/▪\s*Pollo/i)).toBeInTheDocument();
+  it("reprints only the modified items with a MODIFICADO banner", () => {
+    const order: OrderWithDetails = {
+      ...mockMixedOrder,
+      orderItems: [...mockOrder.orderItems, ...mockMixedOrder.orderItems],
+    };
+    render(<KitchenTicket order={order} onlyItemIds={["item-2"]} />);
+    expect(screen.getByText("** MODIFICADO **")).toBeInTheDocument();
+    expect(screen.getByText("Tacos Mixtos")).toBeInTheDocument();
+    expect(screen.queryByText(/Taco de Pastor/i)).not.toBeInTheDocument();
   });
 
   it("should render general order notes", () => {

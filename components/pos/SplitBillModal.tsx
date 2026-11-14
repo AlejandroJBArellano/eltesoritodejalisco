@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { formatSelectionLine } from "@/lib/customization";
 import { X, Scissors, AlertTriangle } from "lucide-react";
 import { OrderWithDetails } from "@/types";
 import { useOptionalUser } from "@/components/UserProvider";
@@ -375,6 +376,11 @@ export function SplitBillModal({
                     <p className="font-bold text-text-light text-xs truncate">
                       {item.menuItem?.name || "Producto"}
                     </p>
+                    {item.selectionLines && item.selectionLines.length > 0 && (
+                      <p className="text-[10px] font-semibold text-amber-400/80 truncate">
+                        {formatSelectionLine(item.selectionLines)}
+                      </p>
+                    )}
                     <p className="text-[10px] text-text-light/50 font-mono tabular-nums">
                       {item.quantity > 1 ? `${item.quantity}× ` : ""}$
                       {(item.unitPrice * item.quantity).toFixed(2)}

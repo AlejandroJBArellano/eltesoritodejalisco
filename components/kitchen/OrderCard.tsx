@@ -17,6 +17,7 @@ import {
   Utensils,
 } from "lucide-react";
 import { formatServiceLabel, getServiceType } from "@/lib/utils/serviceType";
+import { formatSelectionLine } from "@/lib/customization";
 
 interface OrderCardProps {
   order: OrderWithDetails;
@@ -56,7 +57,17 @@ const OrderItemRow = memo(function OrderItemRow({
             {item.quantity}x
           </span>{" "}
           {item.menuItem.name}
+          {item.customizationModifiedAt && !isItemReady && (
+            <span className="ml-1.5 inline-flex items-center rounded-md border border-sky-500/40 bg-sky-500/15 px-1.5 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wider text-sky-300">
+              Modificado
+            </span>
+          )}
         </p>
+        {item.selectionLines && item.selectionLines.length > 0 && (
+          <p className="mt-0.5 text-xs font-semibold text-text-light/80 leading-snug">
+            {formatSelectionLine(item.selectionLines)}
+          </p>
+        )}
         {item.notes && (
           <div className="mt-1 text-xs font-medium text-amber-300 bg-amber-500/10 p-1.5 rounded-md border border-amber-500/20 flex items-start gap-1.5">
             <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-400 mt-0.5" />{" "}

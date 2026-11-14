@@ -33,6 +33,8 @@ interface DbMenuItem {
   ingredient_id?: string | null;
   current_stock?: number | null;
   minimum_stock?: number | null;
+  customization?: MenuItem["customization"];
+  price_from?: number | null;
 }
 
 /** Get today's date string in CDMX timezone (YYYY-MM-DD). */
@@ -198,6 +200,8 @@ function usePOSDataInternal(tenantId?: string) {
         ingredientId: item.ingredient_id ?? null,
         currentStock: item.current_stock ?? null,
         minimumStock: item.minimum_stock ?? null,
+        customization: item.customization ?? null,
+        priceFrom: item.price_from ?? null,
       })),
     );
   }, []);

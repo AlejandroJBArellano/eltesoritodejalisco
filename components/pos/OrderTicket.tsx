@@ -9,6 +9,7 @@ import {
 } from "@/lib/utils/discounts";
 import { getServiceType } from "@/lib/utils/serviceType";
 import { OrderWithDetails } from "@/types";
+import { formatSelectionLine } from "@/lib/customization";
 
 interface OrderTicketProps {
   order: OrderWithDetails;
@@ -175,6 +176,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
                       discountScope: (item.discountScope ??
                         rawItem.discount_scope) as
                         "ROW" | "UNIT" | null | undefined,
+                      discountBasePrice: item.discountBasePrice ?? null,
                     }).discountAmount
                   : 0;
             const net = Math.max(0, gross - itemDiscount);
@@ -183,6 +185,11 @@ export function OrderTicket({ order }: OrderTicketProps) {
                 <td className="pr-2">{item.quantity}</td>
                 <td className="whitespace-normal wrap-break-word">
                   <div>{item.menuItem?.name || "Producto"}</div>
+                  {item.selectionLines && item.selectionLines.length > 0 && (
+                    <div className="text-[11px] text-gray-700">
+                      {formatSelectionLine(item.selectionLines)}
+                    </div>
+                  )}
                   {itemDiscount > 0 && (
                     <div className="text-[11px] text-gray-600">
                       Desc: -${itemDiscount.toFixed(2)}

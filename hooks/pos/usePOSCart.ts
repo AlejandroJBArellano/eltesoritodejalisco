@@ -13,11 +13,19 @@ import {
   MenuItem,
   OrderItemDraft,
   ModifyItem,
-  MixedFlavor,
-  MIXED_ORDER_TOTAL,
-  MIXED_ORDER_FLAVORS,
   OrderServiceType,
 } from "@/types/pos";
+import {
+  buildSelectionSnapshot,
+  hasCustomization,
+  normalizeSelections,
+  priceSelection,
+  selectionKey,
+  selectionsEqual,
+  type Selection,
+  type SelectionSnapshotLine,
+} from "@/lib/customization";
+import { useOptionalTenant } from "@/components/TenantProvider";
 import { resolveTableValue } from "@/lib/utils/serviceType";
 import {
   calculateItemDiscount,
@@ -37,21 +45,88 @@ const emptyForm: OrderFormState = {
   discountReason: null,
 };
 
-const MIXED_ORDER_KEYWORD = "orden mixta";
+/** ¿El producto abre el modal de personalización? */
+export const isCustomizableMenuItem = (
+  menuItem: Pick<MenuItem, "customization"> | null | undefined,
+) => hasCustomization(menuItem?.customization);
 
-const emptyFlavorCounts = (): Record<MixedFlavor, number> =>
-  Object.fromEntries(MIXED_ORDER_FLAVORS.map((f) => [f, 0])) as Record<
-    MixedFlavor,
-    number
-  >;
+export interface DraftPricing {
+  /** Precio unitario final (base + niveles + opciones). */
+  unitPrice: number;
+  /** Base del descuento por artículo (null = unitPrice). */
+  discountBasePrice: number | null;
+  lines: SelectionSnapshotLine[];
+  customizable: boolean;
+}
 
-export const isMixedOrderItem = (name: string) =>
-  name.toLowerCase().includes(MIXED_ORDER_KEYWORD);
+/** Precio y líneas de un renglón del carrito según la personalización. */
+export function priceDraftItem(
+  product: MenuItem | undefined,
+  selections: Selection[] | undefined,
+  discountIncludesModifiers: boolean,
+): DraftPricing {
+  if (!product) {
+    return { unitPrice: 0, discountBasePrice: null, lines: [], customizable: false };
+  }
+  if (!hasCustomization(product.customization)) {
+    return {
+      unitPrice: product.price,
+      discountBasePrice: null,
+      lines: [],
+      customizable: false,
+    };
+  }
+  const price = priceSelection(product.price, product.customization, selections);
+  return {
+    unitPrice: price.unitPrice,
+    discountBasePrice: discountIncludesModifiers ? null : price.basePrice,
+    lines: buildSelectionSnapshot(product.customization, selections),
+    customizable: true,
+  };
+}
 
-export const formatMixedNotes = (counts: Record<MixedFlavor, number>) =>
-  MIXED_ORDER_FLAVORS.filter((f) => counts[f] > 0)
-    .map((f) => `${counts[f]}x ${f}`)
-    .join(", ");
+/** Agrega un renglón o suma 1 al renglón idéntico (producto+selección+nota, sin descuento). */
+export function addOrMergeDraft(
+  items: OrderItemDraft[],
+  menuItemId: string,
+  selections: Selection[] = [],
+): OrderItemDraft[] {
+  const key = selectionKey(menuItemId, selections, "");
+  const existingIndex = items.findIndex(
+    (item) =>
+      !item.discountType &&
+      selectionKey(item.menuItemId, item.selections, item.notes) === key,
+  );
+  if (existingIndex >= 0) {
+    const next = [...items];
+    next[existingIndex] = {
+      ...next[existingIndex],
+      quantity: (Number(next[existingIndex].quantity) + 1).toString(),
+    };
+    return next;
+  }
+  const normalized = normalizeSelections(selections);
+  return [
+    ...items,
+    {
+      menuItemId,
+      quantity: "1",
+      notes: "",
+      ...(normalized.length > 0 ? { selections: normalized } : {}),
+    },
+  ];
+}
+
+export type CustomizationRequest = {
+  menuItem: MenuItem;
+  initialSelections: Selection[];
+} & (
+  | { kind: "cart-new" }
+  | { kind: "cart-edit"; index: number }
+  | { kind: "additional-new" }
+  | { kind: "additional-edit"; index: number }
+  | { kind: "modify-edit"; index: number }
+);
 
 type POSCartValue = ReturnType<typeof usePOSCartInternal>;
 const POSCartContext = createContext<POSCartValue | null>(null);
@@ -90,12 +165,17 @@ function usePOSCartInternal(
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [cartError, setCartError] = useState<string | null>(null);
 
-  // Mixed Order State
-  const [mixedOrderMenuItem, setMixedOrderMenuItem] = useState<MenuItem | null>(
-    null,
-  );
-  const [mixedFlavorCounts, setMixedFlavorCounts] =
-    useState<Record<MixedFlavor, number>>(emptyFlavorCounts());
+  const tenant = useOptionalTenant();
+  const discountIncludesModifiers = tenant?.discount_includes_modifiers !== false;
+
+  // Personalización: modal abierto para un producto/renglón
+  const [customizationRequest, setCustomizationRequest] =
+    useState<CustomizationRequest | null>(null);
+  // Reimpresión de comanda tras editar personalización
+  const [reprintRequest, setReprintRequest] = useState<{
+    orderId: string;
+    itemIds: string[];
+  } | null>(null);
 
   // Edit Order State (add items)
   const [editingOrder, setEditingOrderState] = useState<Order | null>(null);
@@ -146,16 +226,27 @@ function usePOSCartInternal(
     return map;
   }, [availableMenuItems]);
 
+  const getDraftPricing = React.useCallback(
+    (item: Pick<OrderItemDraft, "menuItemId" | "selections">): DraftPricing =>
+      priceDraftItem(
+        availableMenuItemMap.get(item.menuItemId),
+        item.selections,
+        discountIncludesModifiers,
+      ),
+    [availableMenuItemMap, discountIncludesModifiers],
+  );
+
   const cartTotals = useMemo(() => {
     return calculateOrderDiscountTotals({
       items: formState.items.map((item) => {
-        const product = availableMenuItemMap.get(item.menuItemId);
+        const pricing = getDraftPricing(item);
         return {
-          unitPrice: product?.price || 0,
+          unitPrice: pricing.unitPrice,
           quantity: Number(item.quantity) || 0,
           discountType: item.discountType,
           discountValue: item.discountValue,
           discountScope: item.discountScope,
+          discountBasePrice: pricing.discountBasePrice,
         };
       }),
       orderDiscountType: formState.discountType,
@@ -165,7 +256,7 @@ function usePOSCartInternal(
     formState.items,
     formState.discountType,
     formState.discountValue,
-    availableMenuItemMap,
+    getDraftPricing,
   ]);
 
   const cartTotal = cartTotals.total;
@@ -178,6 +269,7 @@ function usePOSCartInternal(
         discountType: item.discountType,
         discountValue: item.discountValue,
         discountScope: item.discountScope,
+        discountBasePrice: item.discountBasePrice ?? null,
       })),
       orderDiscountType: modifyOrderDiscount.discountType,
       orderDiscountValue: modifyOrderDiscount.discountValue,
@@ -225,56 +317,135 @@ function usePOSCartInternal(
   };
 
   const handleGridItemClick = (menuItem: MenuItem) => {
-    if (isMixedOrderItem(menuItem.name)) {
-      setMixedOrderMenuItem(menuItem);
-      setMixedFlavorCounts(emptyFlavorCounts());
+    if (isCustomizableMenuItem(menuItem)) {
+      setCustomizationRequest({
+        kind: "cart-new",
+        menuItem,
+        initialSelections: [],
+      });
       return;
     }
 
-    setFormState((prev) => {
-      const existingIndex = prev.items.findIndex(
-        (item) => item.menuItemId === menuItem.id && item.notes === "",
-      );
-      if (existingIndex >= 0) {
-        const nextItems = [...prev.items];
-        nextItems[existingIndex] = {
-          ...nextItems[existingIndex],
-          quantity: (Number(nextItems[existingIndex].quantity) + 1).toString(),
-        };
-        return { ...prev, items: nextItems };
-      }
-      return {
-        ...prev,
-        items: [
-          ...prev.items,
-          { menuItemId: menuItem.id, quantity: "1", notes: "" },
-        ],
-      };
-    });
-  };
-
-  const handleMixedFlavorChange = (flavor: MixedFlavor, delta: number) => {
-    setMixedFlavorCounts((prev) => {
-      const next = { ...prev };
-      const newVal = (next[flavor] || 0) + delta;
-      const total = Object.values(next).reduce((s, v) => s + v, 0) + delta;
-      if (newVal < 0 || total > MIXED_ORDER_TOTAL) return prev;
-      next[flavor] = newVal;
-      return next;
-    });
-  };
-
-  const handleMixedOrderConfirm = () => {
-    if (!mixedOrderMenuItem) return;
-    const notes = formatMixedNotes(mixedFlavorCounts);
     setFormState((prev) => ({
       ...prev,
-      items: [
-        ...prev.items,
-        { menuItemId: mixedOrderMenuItem.id, quantity: "1", notes },
-      ],
+      items: addOrMergeDraft(prev.items, menuItem.id),
     }));
-    setMixedOrderMenuItem(null);
+  };
+
+  /** Reabre el modal para cambiar la selección de un renglón del carrito. */
+  const openCartItemCustomization = (index: number) => {
+    const item = formState.items[index];
+    const menuItem = item && availableMenuItemMap.get(item.menuItemId);
+    if (!item || !menuItem || !isCustomizableMenuItem(menuItem)) return;
+    setCustomizationRequest({
+      kind: "cart-edit",
+      index,
+      menuItem,
+      initialSelections: item.selections || [],
+    });
+  };
+
+  const openAdditionalItemCustomization = (index: number) => {
+    const item = additionalItems[index];
+    const menuItem = item && availableMenuItemMap.get(item.menuItemId);
+    if (!item || !menuItem || !isCustomizableMenuItem(menuItem)) return;
+    setCustomizationRequest({
+      kind: "additional-edit",
+      index,
+      menuItem,
+      initialSelections: item.selections || [],
+    });
+  };
+
+  const openModifyItemCustomization = (index: number) => {
+    const item = modifyItems[index];
+    const menuItem = item && availableMenuItemMap.get(item.menuItemId);
+    if (!item || !menuItem || !isCustomizableMenuItem(menuItem)) return;
+    setCustomizationRequest({
+      kind: "modify-edit",
+      index,
+      menuItem,
+      initialSelections: item.selections || [],
+    });
+  };
+
+  const cancelCustomization = () => setCustomizationRequest(null);
+
+  const confirmCustomization = (selections: Selection[]) => {
+    const request = customizationRequest;
+    if (!request) return;
+    const normalized = normalizeSelections(selections);
+    switch (request.kind) {
+      case "cart-new":
+        setFormState((prev) => ({
+          ...prev,
+          items: addOrMergeDraft(prev.items, request.menuItem.id, normalized),
+        }));
+        break;
+      case "cart-edit":
+        setFormState((prev) => {
+          const nextItems = [...prev.items];
+          if (!nextItems[request.index]) return prev;
+          nextItems[request.index] = {
+            ...nextItems[request.index],
+            selections: normalized,
+          };
+          return { ...prev, items: nextItems };
+        });
+        break;
+      case "additional-new":
+        setAdditionalItems((prev) =>
+          addOrMergeDraft(prev, request.menuItem.id, normalized),
+        );
+        break;
+      case "additional-edit":
+        setAdditionalItems((prev) => {
+          const next = [...prev];
+          if (!next[request.index]) return prev;
+          next[request.index] = { ...next[request.index], selections: normalized };
+          return next;
+        });
+        break;
+      case "modify-edit":
+        setModifyItems((prev) => {
+          const next = [...prev];
+          const current = next[request.index];
+          if (!current) return prev;
+          const pricing = priceDraftItem(
+            request.menuItem,
+            normalized,
+            discountIncludesModifiers,
+          );
+          const original = modifyingOrder?.orderItems?.find(
+            (o) => o.id === current.id,
+          );
+          const changed = !selectionsEqual(original?.selections || [], normalized);
+          const { discountAmount } = calculateItemDiscount({
+            unitPrice: pricing.unitPrice,
+            quantity: current.quantity,
+            discountType: current.discountType,
+            discountValue: current.discountValue,
+            discountScope: current.discountScope,
+            discountBasePrice: pricing.discountBasePrice,
+          });
+          next[request.index] = {
+            ...current,
+            selections: normalized,
+            selectionLines: changed
+              ? pricing.lines
+              : original?.selectionLines || pricing.lines,
+            unitPrice: changed ? pricing.unitPrice : original?.unitPrice ?? pricing.unitPrice,
+            discountBasePrice: changed
+              ? pricing.discountBasePrice
+              : original?.discountBasePrice ?? null,
+            discountAmount,
+            selectionChanged: changed,
+          };
+          return next;
+        });
+        break;
+    }
+    setCustomizationRequest(null);
   };
 
   const handleQuantityChange = (index: number, delta: number) => {
@@ -305,13 +476,14 @@ function usePOSCartInternal(
       const nextItems = [...prev.items];
       const targetItem = nextItems[index];
       if (!targetItem) return prev;
-      const product = availableMenuItemMap.get(targetItem.menuItemId);
+      const pricing = getDraftPricing(targetItem);
       const { discountAmount } = calculateItemDiscount({
-        unitPrice: product?.price || 0,
+        unitPrice: pricing.unitPrice,
         quantity: Number(targetItem.quantity) || 0,
         discountType: discount.discountType,
         discountValue: discount.discountValue,
         discountScope: discount.discountScope,
+        discountBasePrice: pricing.discountBasePrice,
       });
       nextItems[index] = {
         ...targetItem,
@@ -363,6 +535,7 @@ function usePOSCartInternal(
         discountType: discount.discountType,
         discountValue: discount.discountValue,
         discountScope: discount.discountScope,
+        discountBasePrice: next[index].discountBasePrice ?? null,
       });
       next[index] = {
         ...next[index],
@@ -458,6 +631,9 @@ function usePOSCartInternal(
           menuItemId: item.menuItemId,
           quantity: Number(item.quantity),
           notes: item.notes || undefined,
+          ...(item.selections && item.selections.length > 0
+            ? { selections: item.selections }
+            : {}),
           discountType: item.discountType || undefined,
           discountValue: item.discountValue || undefined,
           discountScope: item.discountScope || undefined,
@@ -488,22 +664,15 @@ function usePOSCartInternal(
   };
 
   const quickAddAdditionalItem = (menuItem: MenuItem) => {
-    setAdditionalItems((prev) => {
-      const existingIndex = prev.findIndex(
-        (item) =>
-          item.menuItemId === menuItem.id && (!item.notes || item.notes === ""),
-      );
-      if (existingIndex >= 0) {
-        const nextItems = [...prev];
-        const currentQty = Number(nextItems[existingIndex].quantity) || 0;
-        nextItems[existingIndex] = {
-          ...nextItems[existingIndex],
-          quantity: (currentQty + 1).toString(),
-        };
-        return nextItems;
-      }
-      return [...prev, { menuItemId: menuItem.id, quantity: "1", notes: "" }];
-    });
+    if (isCustomizableMenuItem(menuItem)) {
+      setCustomizationRequest({
+        kind: "additional-new",
+        menuItem,
+        initialSelections: [],
+      });
+      return;
+    }
+    setAdditionalItems((prev) => addOrMergeDraft(prev, menuItem.id));
   };
 
   const updateAdditionalItemQty = (index: number, delta: number) => {
@@ -562,6 +731,9 @@ function usePOSCartInternal(
             menuItemId: item.menuItemId,
             quantity: Number(item.quantity),
             notes: item.notes || undefined,
+            ...(item.selections && item.selections.length > 0
+              ? { selections: item.selections }
+              : {}),
           })),
         }),
       });
@@ -630,6 +802,10 @@ function usePOSCartInternal(
         unitPrice: item.unitPrice,
         menuItemName: item.menuItem?.name || "Producto",
         notes: item.notes || "",
+        selections: item.selections || [],
+        selectionLines: item.selectionLines || [],
+        discountBasePrice: item.discountBasePrice ?? null,
+        selectionChanged: false,
         discountType: item.discountType || null,
         discountValue: item.discountValue != null ? item.discountValue : null,
         discountAmount: item.discountAmount || 0,
@@ -687,6 +863,7 @@ function usePOSCartInternal(
     for (const item of modifyItems) {
       const orig = origItemMap.get(item.id);
       if (!orig) return true;
+      if (item.selectionChanged) return true;
       if (item.quantity !== Number(orig.quantity)) return true;
       if ((item.notes || "") !== (orig.notes || "")) return true;
 
@@ -750,6 +927,7 @@ function usePOSCartInternal(
           items: modifyItems.map((item) => ({
             id: item.id,
             quantity: item.quantity,
+            ...(item.selectionChanged ? { selections: item.selections || [] } : {}),
             notes: item.notes ? item.notes.trim() || null : null,
             discountType: item.discountType || null,
             discountValue: item.discountValue || null,
@@ -768,6 +946,9 @@ function usePOSCartInternal(
       if (!response.ok)
         throw new Error(data?.error || "Error al modificar orden");
       await refreshOrders();
+      if (Array.isArray(data?.reprintItemIds) && data.reprintItemIds.length > 0) {
+        setReprintRequest({ orderId: modifyingOrder.id, itemIds: data.reprintItemIds });
+      }
       setModifyingOrder(null);
       setModifyItems([]);
       setModifyTable("");
@@ -831,12 +1012,17 @@ function usePOSCartInternal(
     handleApplyOrderDiscount,
     handleRemoveOrderDiscount,
 
-    // Mixed Order
-    mixedOrderMenuItem,
-    setMixedOrderMenuItem,
-    mixedFlavorCounts,
-    handleMixedFlavorChange,
-    handleMixedOrderConfirm,
+    // Personalización
+    getDraftPricing,
+    discountIncludesModifiers,
+    customizationRequest,
+    openCartItemCustomization,
+    openAdditionalItemCustomization,
+    openModifyItemCustomization,
+    confirmCustomization,
+    cancelCustomization,
+    reprintRequest,
+    setReprintRequest,
 
     // Additional items (editing existing order)
     additionalItems,

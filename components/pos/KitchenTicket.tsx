@@ -1,14 +1,12 @@
 import { OrderWithDetails } from "@/types";
 import { formatServiceTicket, getServiceType } from "@/lib/utils/serviceType";
+import { formatSelectionLine } from "@/lib/customization";
 
 interface KitchenTicketProps {
   order: OrderWithDetails;
+  /** Si se indica, solo imprime estos renglones (reimpresión tras editar). */
+  onlyItemIds?: string[] | null;
 }
-
-const MIXED_ORDER_KEYWORD = "orden mixta";
-
-const isMixedOrderItem = (name: string) =>
-  name.toLowerCase().includes(MIXED_ORDER_KEYWORD);
 
 const formatDate = (dateInput: Date | string | undefined) => {
   if (!dateInput) return "";
@@ -32,7 +30,11 @@ const formatTime = (dateInput: Date | string | undefined) => {
   });
 };
 
-export function KitchenTicket({ order }: KitchenTicketProps) {
+export function KitchenTicket({ order, onlyItemIds }: KitchenTicketProps) {
+  const isReprint = Array.isArray(onlyItemIds) && onlyItemIds.length > 0;
+  const items = isReprint
+    ? order.orderItems.filter((item) => onlyItemIds!.includes(item.id))
+    : order.orderItems;
   const orderDate = formatDate(order.createdAt);
   const orderTime = formatTime(order.createdAt);
   const printTime = formatTime(new Date());
@@ -44,6 +46,11 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
       {/* Header */}
       <div className="text-center mb-3">
         <h2 className="text-2xl font-black tracking-wider">*** COMANDA ***</h2>
+        {isReprint && (
+          <p className="mt-1 bg-black text-white text-base font-black tracking-widest uppercase py-1">
+            ** MODIFICADO **
+          </p>
+        )}
         <div className="border-b border-dashed border-black my-2"></div>
         <p className="text-3xl font-black my-1">#{order.orderNumber}</p>
         <div className="border-b border-dashed border-black my-2"></div>
@@ -101,15 +108,8 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
 
       {/* Items */}
       <div className="space-y-3">
-        {order.orderItems.map((item) => {
-          const mixed = isMixedOrderItem(item.menuItem.name);
-          const flavorLines =
-            mixed && item.notes
-              ? item.notes
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-              : [];
+        {items.map((item) => {
+          const selectionLine = formatSelectionLine(item.selectionLines);
 
           return (
             <div
@@ -124,16 +124,12 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
                   {item.menuItem.name}
                 </span>
               </div>
-              {flavorLines.length > 0 && (
-                <ul className="mt-1 ml-8 space-y-0.5">
-                  {flavorLines.map((line, i) => (
-                    <li key={i} className="text-sm font-bold uppercase">
-                      ▪ {line}
-                    </li>
-                  ))}
-                </ul>
+              {selectionLine && (
+                <p className="mt-1 ml-8 text-sm font-bold uppercase leading-snug">
+                  ▪ {selectionLine}
+                </p>
               )}
-              {item.notes && !mixed && (
+              {item.notes && (
                 <div className="mt-1.5 ml-8 p-1.5 border-2 border-black text-sm font-black uppercase bg-gray-100 flex items-start gap-1">
                   <span>⚠️</span>
                   <span className="flex-1">OJO: {item.notes}</span>

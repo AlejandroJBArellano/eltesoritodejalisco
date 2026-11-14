@@ -11,9 +11,9 @@ vi.mock("@/hooks/pos/usePOSData", () => ({
   usePOSData: vi.fn(),
 }));
 
-vi.mock("@/hooks/pos/usePOSCart", () => ({
+vi.mock("@/hooks/pos/usePOSCart", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/hooks/pos/usePOSCart")>()),
   usePOSCart: vi.fn(),
-  isMixedOrderItem: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock("@/hooks/pos/usePOSCheckout", () => ({

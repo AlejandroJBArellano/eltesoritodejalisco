@@ -1,4 +1,9 @@
 import { OrderWithDetails, PaymentTerminal } from "./index";
+import type {
+  MenuItemCustomization,
+  Selection,
+  SelectionSnapshotLine,
+} from "@/lib/customization/types";
 export type { PaymentTerminal };
 
 export type MenuItem = {
@@ -12,6 +17,10 @@ export type MenuItem = {
   currentStock?: number | null;
   minimumStock?: number | null;
   ingredientId?: string | null;
+  /** Grupos de opciones; si tiene alguno activo, abre el modal al tocarlo. */
+  customization?: MenuItemCustomization | null;
+  /** "Desde $X" cuando la personalización cambia el precio mínimo. */
+  priceFrom?: number | null;
 };
 
 export type Customer = {
@@ -23,6 +32,8 @@ export type OrderItemDraft = {
   menuItemId: string;
   quantity: string;
   notes: string;
+  /** Personalización elegida (por unidad del renglón). */
+  selections?: Selection[];
   discountType?: "PERCENT" | "FIXED" | null;
   discountValue?: number | null;
   discountAmount?: number | null;
@@ -54,18 +65,17 @@ export type ModifyItem = {
   unitPrice: number;
   menuItemName: string;
   notes?: string;
+  /** Selección actual (editable si el producto es personalizable). */
+  selections?: Selection[];
+  /** Líneas para mostrar (snapshot o recalculadas tras editar). */
+  selectionLines?: SelectionSnapshotLine[];
+  /** Precio sobre el que aplica el descuento por artículo. */
+  discountBasePrice?: number | null;
+  /** La selección cambió respecto a la orden guardada. */
+  selectionChanged?: boolean;
   discountType?: "PERCENT" | "FIXED" | null;
   discountValue?: number | null;
   discountAmount?: number;
   discountScope?: "ROW" | "UNIT" | null;
   discountReason?: string | null;
 };
-
-export const MIXED_ORDER_TOTAL = 3;
-export const MIXED_ORDER_FLAVORS = [
-  "Carnitas",
-  "Birria",
-  "Pastor",
-  "Jamaica",
-] as const;
-export type MixedFlavor = (typeof MIXED_ORDER_FLAVORS)[number];
