@@ -11,6 +11,7 @@ import { SettingsGeneralSection } from "./settings/SettingsGeneralSection";
 import { SettingsHeaderActions } from "./settings/SettingsHeaderActions";
 import { SettingsLoyaltySection } from "./settings/SettingsLoyaltySection";
 import { SettingsTerminalSection } from "./settings/SettingsTerminalSection";
+import { SettingsCustomizationSection } from "./settings/SettingsCustomizationSection";
 import { getContrastColor } from "./settings/types";
 
 export {
@@ -39,6 +40,7 @@ function SettingsFormContent() {
           <SettingsTerminalSection />
           <SettingsFiscalSection />
           <SettingsLoyaltySection />
+          <SettingsCustomizationSection />
           {/* <McpConnectCard /> */}
         </div>
 

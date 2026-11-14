@@ -54,6 +54,27 @@ export async function updateTenantSettings(
     const googleReviewsUrl = formData.get("googleReviewsUrl") as string;
     const ticketFooterText = formData.get("ticketFooterText") as string;
 
+    // Personalización de platillos (solo si el formulario los envía)
+    const customizationSettings: Record<string, unknown> = {};
+    const editPolicy = formData.get("customizationEditAfterKitchen");
+    if (
+      editPolicy === "NEVER" ||
+      editPolicy === "WITH_PERMISSION" ||
+      editPolicy === "WITH_MANAGER_AUTH"
+    ) {
+      customizationSettings.customization_edit_after_kitchen = editPolicy;
+    }
+    for (const [field, column] of [
+      ["customizationEditReprint", "customization_edit_reprint"],
+      ["customizationEditNotifyKds", "customization_edit_notify_kds"],
+      ["discountIncludesModifiers", "discount_includes_modifiers"],
+    ] as const) {
+      const value = formData.get(field);
+      if (value === "true" || value === "false") {
+        customizationSettings[column] = value === "true";
+      }
+    }
+
     // File Upload handling
     const logoFile = formData.get("logoFile") as File | null;
     let logoUrl = formData.get("logoUrl") as string;
@@ -95,6 +116,7 @@ export async function updateTenantSettings(
         terminal_commission_rate: terminalCommissionRate,
         google_reviews_url: googleReviewsUrl ? googleReviewsUrl.trim() : null,
         ticket_footer_text: ticketFooterText ? ticketFooterText.trim() : null,
+        ...customizationSettings,
         updated_at: new Date().toISOString(),
       })
       .eq("id", tenant.id);
