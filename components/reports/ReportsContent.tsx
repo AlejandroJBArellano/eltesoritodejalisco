@@ -107,6 +107,7 @@ export function ReportsContent() {
           </p>
           <Link
             href="/"
+            prefetch={false}
             className="inline-flex items-center justify-center gap-2 w-full py-3 bg-primary text-background rounded-lg font-black text-sm uppercase tracking-wider hover:bg-primary-hover transition-all shadow-md"
           >
             <ArrowLeft className="h-4 w-4" /> Volver al Dashboard

@@ -26,6 +26,7 @@ export function AnalyticsBanner() {
         <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/analytics/sales"
+            prefetch={false}
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold text-dark uppercase tracking-wider hover:opacity-90 active:scale-[0.98] transition-all shadow-xs"
           >
             <BarChart3 className="h-4 w-4" />
@@ -34,6 +35,7 @@ export function AnalyticsBanner() {
           </Link>
           <Link
             href="/analytics/hourly"
+            prefetch={false}
             className="inline-flex items-center gap-2 rounded-lg bg-dark/40 border border-border px-4 py-2.5 text-xs font-bold text-text-light hover:bg-card-light active:scale-[0.98] transition-all"
           >
             <Clock className="h-4 w-4 text-warning" />
