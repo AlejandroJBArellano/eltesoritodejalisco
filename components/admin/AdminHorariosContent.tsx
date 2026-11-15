@@ -117,6 +117,7 @@ export function AdminHorariosContent({
         <div className="mb-4">
           <Link
             href="/"
+            prefetch={false}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-text-light/60 hover:text-text-light transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -271,6 +272,7 @@ export function AdminHorariosContent({
               <div className="flex justify-end gap-3">
                 <Link
                   href="/"
+                  prefetch={false}
                   className="rounded-lg border border-border px-5 py-2.5 text-xs font-black uppercase tracking-wider text-text-light/60 hover:text-text-light hover:bg-white/5 transition-all"
                 >
                   Cancelar

@@ -416,6 +416,7 @@ export function WeeklyShiftPlanner({
             </p>
             <Link
               href="/admin/users"
+              prefetch={false}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-dark/40 border border-border text-xs font-bold text-primary hover:border-primary/50 transition-colors"
             >
               <Plus className="h-3.5 w-3.5" /> Registrar Colaboradores

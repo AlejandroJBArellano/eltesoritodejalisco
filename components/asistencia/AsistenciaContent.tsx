@@ -29,12 +29,14 @@ function AsistenciaContentInner() {
             <div className="flex items-center gap-2">
               <Link
                 href="/admin/horarios"
+                prefetch={false}
                 className="inline-flex items-center gap-2 rounded-xl bg-white/10 border border-white/15 px-4 py-2 text-xs font-black text-white uppercase tracking-wider hover:bg-white/20 transition-all"
               >
                 <Calendar className="h-4 w-4 text-primary" /> Programar Turnos
               </Link>
               <Link
                 href="/asistencia/history"
+                prefetch={false}
                 className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-black text-black uppercase tracking-wider hover:brightness-105 transition-all shadow-lg shadow-primary/20"
               >
                 <FileText className="h-4 w-4" /> Ver Historial

@@ -45,6 +45,7 @@ export function AdminUsersSubnav() {
               <Link
                 key={tab.href}
                 href={tab.href}
+                prefetch={false}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shrink-0 ${
                   isActive
                     ? "bg-primary/20 text-primary border border-primary/30 shadow-sm"
