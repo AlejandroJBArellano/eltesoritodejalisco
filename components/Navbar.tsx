@@ -14,20 +14,27 @@ export default function Navbar() {
   const pathname = usePathname();
   const user = useOptionalUser();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [email, setEmail] = useState<string | null>(
-    user?.profile?.email ?? null,
-  );
+  const initialEmail = user?.profile?.email ?? null;
+  const [email, setEmail] = useState<string | null>(initialEmail);
   const { system_name } = useTenant();
+
+  useEffect(() => {
+    setEmail(initialEmail);
+  }, [initialEmail]);
 
   useEffect(() => {
     const supabase = createClient();
 
-    // Fetch initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setEmail(user?.email ?? null);
-    });
+    // Only query auth.getUser() on client if SSR UserProvider did not supply email
+    if (!initialEmail) {
+      supabase.auth.getUser().then(({ data: { user: authUser } }) => {
+        if (authUser?.email) {
+          setEmail(authUser.email);
+        }
+      });
+    }
 
-    // Listen to auth state changes to dynamically update the user email
+    // Listen to auth state changes once on mount to dynamically update the user email
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -37,7 +44,8 @@ export default function Navbar() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Hide Navbar on login or auth pages
   if (pathname.startsWith("/login") || pathname.startsWith("/auth")) {

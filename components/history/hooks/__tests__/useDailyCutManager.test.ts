@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useDailyCutManager } from "../useDailyCutManager";
 import { OrderStatus, PaymentMethod, type OrderWithDetails } from "@/types";
+import { useOptionalTenant } from "@/components/TenantProvider";
+
+vi.mock("@/components/TenantProvider", () => ({
+  useOptionalTenant: vi.fn().mockReturnValue(null),
+}));
 
 vi.mock("@/hooks/usePendingCut", () => ({
   usePendingCut: () => ({
@@ -318,6 +323,27 @@ describe("useDailyCutManager", () => {
     // Caja Tarjeta = 262. 5% commission = 13.1
     expect(result.current.todayTotals.comisionTarjeta).toBeCloseTo(13.1, 1);
     expect(result.current.todayTotals.cajaTarjetaNeta).toBeCloseTo(248.9, 1);
+  });
+
+  it("uses TenantProvider context when present and skips /api/tenant fetch", async () => {
+    vi.mocked(useOptionalTenant).mockReturnValue({
+      id: "tenant-from-ctx",
+      terminal_commission_rate: 4,
+    } as any);
+    const fetchSpy = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+    global.fetch = fetchSpy;
+
+    const { result } = renderHook(() =>
+      useDailyCutManager({ orders: mockTodayOrders }),
+    );
+
+    await act(async () => {
+      await result.current.refetchExpenses();
+    });
+
+    expect(fetchSpy).not.toHaveBeenCalledWith("/api/tenant");
+    expect(result.current.terminalCommissionRate).toBe(4);
+    vi.mocked(useOptionalTenant).mockReturnValue(null);
   });
 
   it("calculates accurate commissions based on individual payment terminal commission amounts", () => {

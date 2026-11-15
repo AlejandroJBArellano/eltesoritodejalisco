@@ -5,6 +5,7 @@ import { PaymentMethod } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import { usePendingCut } from "@/hooks/usePendingCut";
 import { getServiceType } from "@/lib/utils/serviceType";
+import { useOptionalTenant } from "@/components/TenantProvider";
 import type {
   DailyCutSummaryTotals,
   ExpenseDetailItem,
@@ -21,6 +22,7 @@ export function useDailyCutManager({
   orders,
   onCutFinalized,
 }: UseDailyCutManagerProps) {
+  const contextTenant = useOptionalTenant();
   const [todayExpenses, setTodayExpenses] = useState(0);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [showFinalizeModal, setShowFinalizeModal] = useState(false);
@@ -274,9 +276,13 @@ export function useDailyCutManager({
 
   const fetchTodayExpenses = useCallback(async () => {
     try {
-      const tenantRes = await fetch("/api/tenant");
-      if (!tenantRes.ok) return;
-      const { tenant } = await tenantRes.json();
+      let tenant = contextTenant;
+      if (!tenant) {
+        const tenantRes = await fetch("/api/tenant");
+        if (!tenantRes.ok) return;
+        const json = await tenantRes.json();
+        tenant = json?.tenant ?? null;
+      }
       if (!tenant) return;
 
       if (tenant.terminal_commission_rate != null) {
@@ -315,7 +321,7 @@ export function useDailyCutManager({
     } catch (err) {
       console.error("Error fetching today expenses:", err);
     }
-  }, []);
+  }, [contextTenant]);
 
   useEffect(() => {
     void fetchTodayExpenses();
@@ -381,9 +387,13 @@ export function useDailyCutManager({
 
     try {
       setIsFinalizing(true);
-      const tenantRes = await fetch("/api/tenant");
-      if (!tenantRes.ok) throw new Error("No se pudo obtener el tenant");
-      const { tenant } = await tenantRes.json();
+      let tenant = contextTenant;
+      if (!tenant) {
+        const tenantRes = await fetch("/api/tenant");
+        if (!tenantRes.ok) throw new Error("No se pudo obtener el tenant");
+        const json = await tenantRes.json();
+        tenant = json?.tenant ?? null;
+      }
       if (!tenant) throw new Error("No se pudo obtener el tenant");
 
       const supabase = createClient();
@@ -519,6 +529,7 @@ export function useDailyCutManager({
     tipBreakdown,
     terminalCommissionRate,
     onCutFinalized,
+    contextTenant,
   ]);
 
   const handleGeneratePendingCut = useCallback(async () => {

@@ -32,12 +32,14 @@ vi.mock("@/components/notifications/PushNotificationPrompt", () => ({
   ),
 }));
 
+const getUserMock = vi.fn().mockResolvedValue({
+  data: { user: { email: "admin@test.com" } },
+});
+
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
     auth: {
-      getUser: vi.fn().mockResolvedValue({
-        data: { user: { email: "admin@test.com" } },
-      }),
+      getUser: getUserMock,
       onAuthStateChange: (cb: any) => {
         authStateCallback = cb;
         return {
@@ -97,17 +99,36 @@ describe("Navbar Component", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders navigation links including 'Historial' for ADMIN role and logout button", () => {
+  it("renders navigation links including 'Historial' for ADMIN role without calling auth.getUser when SSR email exists", () => {
     render(<Navbar />);
 
     expect(screen.getByText("POS")).toBeInTheDocument();
     expect(screen.getByText("Cocina")).toBeInTheDocument();
     expect(screen.getByText("Historial")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /cerrar sesión/i }),
-    ).toBeInTheDocument();
     expect(screen.getByText("KITTN")).toBeInTheDocument();
     expect(screen.getByText("OS")).toBeInTheDocument();
+    expect(getUserMock).not.toHaveBeenCalled();
+  });
+
+  it("calls auth.getUser only when SSR email is missing and does not resubscribe on pathname change", async () => {
+    vi.mocked(useOptionalUser).mockReturnValue({
+      profile: null,
+      role: "ADMIN",
+      isAdmin: true,
+      isWaiter: false,
+      isChef: false,
+      isAuthenticated: false,
+    });
+
+    const { rerender } = render(<Navbar />);
+    await act(async () => {});
+
+    expect(getUserMock).toHaveBeenCalledTimes(1);
+
+    vi.mocked(usePathname).mockReturnValue("/pos");
+    rerender(<Navbar />);
+
+    expect(getUserMock).toHaveBeenCalledTimes(1);
   });
 
   it("highlights active link based on current pathname", () => {
@@ -193,9 +214,11 @@ describe("Navbar Component", () => {
       });
     });
 
-    expect(
-      screen.getByRole("button", { name: /cerrar sesión/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByText("KITTN")).toBeInTheDocument();
+
+    act(() => {
+      authStateCallback?.("SIGNED_OUT", null);
+    });
 
     unmount();
     expect(unsubscribeMock).toHaveBeenCalled();
