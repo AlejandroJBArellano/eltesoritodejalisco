@@ -255,12 +255,26 @@ function usePOSDataInternal(tenantId?: string) {
     avgTicket: 0,
   });
 
+  const ordersQueryRef = useRef({
+    ordersPage,
+    ordersPageSize,
+    ordersStatusFilter,
+    ordersSourceFilter,
+  });
+  ordersQueryRef.current = {
+    ordersPage,
+    ordersPageSize,
+    ordersStatusFilter,
+    ordersSourceFilter,
+  };
+  const lastManualRefreshRef = useRef<number>(0);
+
   const fetchOrders = useCallback(
     async (
-      p = ordersPage,
-      size = ordersPageSize,
-      status = ordersStatusFilter,
-      source = ordersSourceFilter,
+      p = ordersQueryRef.current.ordersPage,
+      size = ordersQueryRef.current.ordersPageSize,
+      status = ordersQueryRef.current.ordersStatusFilter,
+      source = ordersQueryRef.current.ordersSourceFilter,
     ) => {
       try {
         const queryParams = new URLSearchParams({
@@ -289,36 +303,54 @@ function usePOSDataInternal(tenantId?: string) {
         return [];
       }
     },
-    [ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter],
+    [],
   );
 
   const refreshOrders = useCallback(() => {
-    return fetchOrders(ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter);
-  }, [fetchOrders, ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter]);
+    if (fetchDebounceRef.current) {
+      clearTimeout(fetchDebounceRef.current);
+      fetchDebounceRef.current = null;
+    }
+    lastManualRefreshRef.current = Date.now();
+    const {
+      ordersPage: p,
+      ordersPageSize: size,
+      ordersStatusFilter: status,
+      ordersSourceFilter: source,
+    } = ordersQueryRef.current;
+    return fetchOrders(p, size, status, source);
+  }, [fetchOrders]);
 
-  // Refetch orders whenever server pagination or filter parameters change
+  // Fetch orders on mount and whenever server pagination or filter parameters change
   useEffect(() => {
     setOrdersLoading(true);
-    fetchOrders(ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter).finally(() => {
+    fetchOrders(
+      ordersPage,
+      ordersPageSize,
+      ordersStatusFilter,
+      ordersSourceFilter,
+    ).finally(() => {
       setOrdersLoading(false);
     });
-  }, [fetchOrders, ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter]);
+  }, [
+    fetchOrders,
+    ordersPage,
+    ordersPageSize,
+    ordersStatusFilter,
+    ordersSourceFilter,
+  ]);
 
   useEffect(() => {
     async function load() {
       try {
         setMenuLoading(true);
         setCustomersLoading(true);
-        setOrdersLoading(true);
-        // Menu, categories, customers and terminals gate the main UI; orders are non-blocking
+        // Menu, categories, customers and terminals gate the main UI; orders are handled by the effect above
         await Promise.all([
           fetchMenu().finally(() => setMenuLoading(false)),
           fetchCategories(),
           fetchCustomers().finally(() => setCustomersLoading(false)),
           fetchTerminals(),
-          fetchOrders(1, ordersPageSize, "ALL", "ALL").finally(() =>
-            setOrdersLoading(false),
-          ),
         ]);
       } catch (err) {
         setErrorMessage(
@@ -327,29 +359,54 @@ function usePOSDataInternal(tenantId?: string) {
       }
     }
     load();
-  }, [fetchOrders, fetchMenu, fetchCategories, fetchCustomers, fetchTerminals, ordersPageSize]);
+  }, [fetchMenu, fetchCategories, fetchCustomers, fetchTerminals]);
 
   // Realtime subscription: any INSERT/UPDATE/DELETE on orders, ingredients,
   // menu_items or menu_categories for this tenant triggers a debounced refetch.
   useEffect(() => {
     if (!tenantId) return;
 
-    const debouncedFetchOrders = (payload: unknown) => {
-      console.log("[POS Realtime] Order event:", payload);
+    const debouncedFetchOrders = () => {
+      if (
+        typeof document !== "undefined" &&
+        document.visibilityState === "hidden"
+      ) {
+        return;
+      }
+      // Skip immediate echo from a manual mutation refresh triggered on this client
+      if (Date.now() - lastManualRefreshRef.current < 1000) {
+        return;
+      }
       if (fetchDebounceRef.current) clearTimeout(fetchDebounceRef.current);
       fetchDebounceRef.current = setTimeout(() => {
-        fetchOrders(ordersPage, ordersPageSize, ordersStatusFilter, ordersSourceFilter);
+        const {
+          ordersPage: p,
+          ordersPageSize: size,
+          ordersStatusFilter: status,
+          ordersSourceFilter: source,
+        } = ordersQueryRef.current;
+        fetchOrders(p, size, status, source);
       }, 300);
     };
 
-    const debouncedFetchMenu = (payload: unknown) => {
-      console.log("[POS Realtime] Menu/Ingredient update event:", payload);
+    const debouncedFetchMenu = () => {
+      if (
+        typeof document !== "undefined" &&
+        document.visibilityState === "hidden"
+      ) {
+        return;
+      }
       if (menuDebounceRef.current) clearTimeout(menuDebounceRef.current);
-      menuDebounceRef.current = setTimeout(() => fetchMenu(), 500);
+      menuDebounceRef.current = setTimeout(() => fetchMenu(), 1000);
     };
 
-    const debouncedFetchCategories = (payload: unknown) => {
-      console.log("[POS Realtime] Category update event:", payload);
+    const debouncedFetchCategories = () => {
+      if (
+        typeof document !== "undefined" &&
+        document.visibilityState === "hidden"
+      ) {
+        return;
+      }
       if (categoriesDebounceRef.current)
         clearTimeout(categoriesDebounceRef.current);
       categoriesDebounceRef.current = setTimeout(() => fetchCategories(), 300);
@@ -373,6 +430,7 @@ function usePOSDataInternal(tenantId?: string) {
           event: "*",
           schema: "public",
           table: "ingredients",
+          filter: `tenant_id=eq.${tenantId}`,
         },
         debouncedFetchMenu,
       )
@@ -396,13 +454,7 @@ function usePOSDataInternal(tenantId?: string) {
         },
         debouncedFetchMenu,
       )
-      .subscribe((status, err) => {
-        console.log(
-          `[POS Realtime] Subscription status for tenant ${tenantId}:`,
-          status,
-          err,
-        );
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
@@ -411,17 +463,7 @@ function usePOSDataInternal(tenantId?: string) {
       if (categoriesDebounceRef.current)
         clearTimeout(categoriesDebounceRef.current);
     };
-  }, [
-    tenantId,
-    supabase,
-    fetchOrders,
-    fetchMenu,
-    fetchCategories,
-    ordersPage,
-    ordersPageSize,
-    ordersStatusFilter,
-    ordersSourceFilter,
-  ]);
+  }, [tenantId, supabase, fetchOrders, fetchMenu, fetchCategories]);
 
   // Today metrics summary from live API stats
   const todayStats = orderStats;

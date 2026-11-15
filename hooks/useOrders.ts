@@ -20,9 +20,12 @@ export function useRealtimeOrders(
   soundEnabled: boolean = false,
   tenantId?: string,
   pollIntervalMs: number = 15000,
+  skipInitialFetch: boolean = false,
 ) {
   const [orders, setOrders] = useState<OrderWithDetails[]>(initialData);
-  const [loading, setLoading] = useState(initialData.length === 0);
+  const [loading, setLoading] = useState(
+    !skipInitialFetch && initialData.length === 0,
+  );
   const [error, setError] = useState<string | null>(null);
 
   // Stabilise the Supabase client — avoid re-creating on every render
@@ -30,6 +33,7 @@ export function useRealtimeOrders(
 
   const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isConnectedRef = useRef(false);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -64,7 +68,7 @@ export function useRealtimeOrders(
   }, [fetchOrders]);
 
   useEffect(() => {
-    if (initialData.length === 0) {
+    if (!skipInitialFetch && initialData.length === 0) {
       fetchOrders();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,10 +81,19 @@ export function useRealtimeOrders(
     soundEnabledRef.current = soundEnabled;
   }, [soundEnabled]);
 
-  // Periodic safety-net polling to recover missed events (e.g. tablet sleep or packet loss)
+  // Periodic fallback polling ONLY when Realtime is disconnected and tab is visible
   useEffect(() => {
     if (pollIntervalMs <= 0) return;
     const interval = setInterval(() => {
+      if (
+        typeof document !== "undefined" &&
+        document.visibilityState === "hidden"
+      ) {
+        return;
+      }
+      if (isConnectedRef.current) {
+        return;
+      }
       fetchOrders();
     }, pollIntervalMs);
     return () => clearInterval(interval);
@@ -152,6 +165,7 @@ export function useRealtimeOrders(
       })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
+          isConnectedRef.current = true;
           if (isFirstSubscription) {
             isFirstSubscription = false;
           } else {
@@ -162,12 +176,14 @@ export function useRealtimeOrders(
           status === "TIMED_OUT" ||
           status === "CLOSED"
         ) {
+          isConnectedRef.current = false;
           // Fetch orders immediately and queue a reconnect fetch if socket was interrupted
           fetchOrders();
         }
       });
 
     return () => {
+      isConnectedRef.current = false;
       supabase.removeChannel(channel);
       if (fetchTimeoutRef.current) {
         clearTimeout(fetchTimeoutRef.current);

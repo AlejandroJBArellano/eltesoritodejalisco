@@ -6,8 +6,7 @@ import type { DbOrderPayload } from "@/lib/mappers/orders";
 import { getTenantContext } from "@/lib/tenant";
 
 // Fetch active kitchen orders
-async function getActiveOrders() {
-  const tenant = await getTenantContext();
+async function getActiveOrders(tenantId: string) {
   const supabase = await createClient();
   const { data: orders } = await supabase
     .from("orders")
@@ -17,12 +16,12 @@ async function getActiveOrders() {
       order_items (
         *,
         order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
-        menu_items (*)
+        menu_items ( id, name, price, image_url, is_available )
       ),
       payments (*)
     `,
     )
-    .eq("tenant_id", tenant.id)
+    .eq("tenant_id", tenantId)
     .in("status", ["PENDING", "PREPARING", "READY"])
     .order("created_at", { ascending: true });
 
@@ -33,7 +32,7 @@ async function getActiveOrders() {
 
 export default async function KitchenPage() {
   const tenant = await getTenantContext();
-  const orders = await getActiveOrders();
+  const orders = await getActiveOrders(tenant.id);
 
   return <KitchenDisplaySystem initialOrders={orders} tenantId={tenant.id} />;
 }

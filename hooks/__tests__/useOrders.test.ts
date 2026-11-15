@@ -7,14 +7,21 @@ import {
 } from "../useOrders";
 import { OrderStatus, OrderWithDetails } from "@/types";
 
+const realtimeCallbacks: {
+  subscribe?: (status: string) => void;
+  postgres?: (payload: { eventType: string }) => void;
+} = {};
+
 // Mock Supabase client
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
     channel: () => ({
-      on: function () {
+      on: function (_event: string, _filter: unknown, cb: (payload: { eventType: string }) => void) {
+        realtimeCallbacks.postgres = cb;
         return this;
       },
-      subscribe: function () {
+      subscribe: function (cb?: (status: string) => void) {
+        realtimeCallbacks.subscribe = cb;
         return this;
       },
     }),
@@ -29,6 +36,7 @@ describe("useOrders Hook utilities & timers", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   describe("getElapsedSeconds", () => {
@@ -188,6 +196,75 @@ describe("useOrders Hook utilities & timers", () => {
 
       addEventListenerSpy.mockRestore();
       removeEventListenerSpy.mockRestore();
+      globalFetch.mockRestore();
+    });
+
+    it("skips polling when Realtime is SUBSCRIBED or tab is hidden", async () => {
+      const globalFetch = vi.spyOn(global, "fetch").mockResolvedValue({
+        ok: true,
+        json: async () => ({ orders: [] }),
+      } as Response);
+
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "visible",
+      });
+
+      renderHook(() => useRealtimeOrders([], false, undefined, 5000));
+      expect(globalFetch).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        realtimeCallbacks.subscribe?.("SUBSCRIBED");
+      });
+
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(globalFetch).toHaveBeenCalledTimes(1);
+
+      // Simulate disconnect (triggers 1 immediate reconnect fetch -> 2 calls total),
+      // then hidden tab: advancing poll interval must NOT call fetchOrders again
+      act(() => {
+        realtimeCallbacks.subscribe?.("CHANNEL_ERROR");
+      });
+      expect(globalFetch).toHaveBeenCalledTimes(2);
+
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "hidden",
+      });
+
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(globalFetch).toHaveBeenCalledTimes(2);
+
+      // Visible + disconnected -> fallback polling triggers
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "visible",
+      });
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(globalFetch).toHaveBeenCalledTimes(3);
+
+      globalFetch.mockRestore();
+    });
+
+    it("skips initial mount fetch when skipInitialFetch is true", () => {
+      const globalFetch = vi.spyOn(global, "fetch").mockResolvedValue({
+        ok: true,
+        json: async () => ({ orders: [] }),
+      } as Response);
+
+      const { result } = renderHook(() =>
+        useRealtimeOrders([], false, undefined, 0, true),
+      );
+
+      expect(globalFetch).not.toHaveBeenCalled();
+      expect(result.current.loading).toBe(false);
+
       globalFetch.mockRestore();
     });
   });

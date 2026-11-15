@@ -136,6 +136,8 @@ export function KitchenDisplaySystem({
     initialOrders,
     soundEnabled,
     tenantId,
+    15000,
+    true,
   );
   const [view, setView] = useState<"kanban" | "batching">("kanban");
   const [sourceFilter, setSourceFilter] = useState<

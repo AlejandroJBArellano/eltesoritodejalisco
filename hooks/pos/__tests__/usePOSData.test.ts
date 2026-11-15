@@ -2,18 +2,37 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { usePOSData } from "../usePOSData";
 
+const capturedChannels: Array<{
+  name: string;
+  filters: Array<{ table: string; filter?: string }>;
+  callback?: (payload: unknown) => void;
+}> = [];
+
 // Mock Supabase client
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
-    channel: () => ({
-      on: function () {
-        return this;
-      },
-      subscribe: function (cb?: (status: string) => void) {
-        if (cb) cb("SUBSCRIBED");
-        return this;
-      },
-    }),
+    channel: (name: string) => {
+      const entry: (typeof capturedChannels)[number] = {
+        name,
+        filters: [],
+      };
+      capturedChannels.push(entry);
+      return {
+        on: function (
+          _event: string,
+          opts: { table: string; filter?: string },
+          cb: (payload: unknown) => void,
+        ) {
+          entry.filters.push({ table: opts.table, filter: opts.filter });
+          entry.callback = cb;
+          return this;
+        },
+        subscribe: function (cb?: (status: string) => void) {
+          if (cb) cb("SUBSCRIBED");
+          return this;
+        },
+      };
+    },
     removeChannel: vi.fn(),
   }),
 }));
@@ -65,6 +84,7 @@ const mockCategories = [
 describe("usePOSData Hook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    capturedChannels.length = 0;
 
     global.fetch = vi.fn((url: string | URL | Request) => {
       const urlStr = url.toString();
@@ -188,5 +208,85 @@ describe("usePOSData Hook", () => {
     );
     expect(result.current.menuItemMap.get("item-2")?.price).toBe(30);
     expect(result.current.menuItemMap.has("non-existent")).toBe(false);
+  });
+
+  it("fetches /api/pos/orders once on mount and does not reload catalog when paginating", async () => {
+    const { result } = renderHook(() => usePOSData("tenant-123"));
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    const fetchMock = vi.mocked(global.fetch);
+    const initialCalls = fetchMock.mock.calls.map(([u]) => u.toString());
+    expect(
+      initialCalls.filter((u) => u.includes("/api/pos/orders")),
+    ).toHaveLength(1);
+    expect(initialCalls.filter((u) => u.includes("/api/menu?"))).toHaveLength(
+      0,
+    );
+    const initialMenuCalls = initialCalls.filter(
+      (u) => u === "/api/menu",
+    ).length;
+    expect(initialMenuCalls).toBe(1);
+
+    await act(async () => {
+      result.current.setOrdersPage(2);
+    });
+
+    await waitFor(() => {
+      const updatedCalls = fetchMock.mock.calls.map(([u]) => u.toString());
+      expect(
+        updatedCalls.filter((u) => u.includes("/api/pos/orders")),
+      ).toHaveLength(2);
+      expect(updatedCalls.filter((u) => u === "/api/menu")).toHaveLength(1);
+    });
+  });
+
+  it("filters ingredients Realtime subscription by tenant_id and suppresses echo after refreshOrders", async () => {
+    vi.useFakeTimers();
+    const { result } = renderHook(() => usePOSData("tenant-123"));
+
+    await act(async () => {
+      await vi.runOnlyPendingTimersAsync();
+    });
+
+    const ingredientsChannel = capturedChannels.find((c) =>
+      c.filters.some((f) => f.table === "ingredients"),
+    );
+    expect(ingredientsChannel?.filters).toContainEqual({
+      table: "ingredients",
+      filter: "tenant_id=eq.tenant-123",
+    });
+
+    const fetchMock = vi.mocked(global.fetch);
+    const beforeRefreshOrdersCount = fetchMock.mock.calls.filter(([u]) =>
+      u.toString().includes("/api/pos/orders"),
+    ).length;
+
+    await act(async () => {
+      await result.current.refreshOrders();
+    });
+
+    const afterRefreshOrdersCount = fetchMock.mock.calls.filter(([u]) =>
+      u.toString().includes("/api/pos/orders"),
+    ).length;
+    expect(afterRefreshOrdersCount).toBe(beforeRefreshOrdersCount + 1);
+
+    // Trigger immediate Realtime echo on orders channel -> should be suppressed within 1.5s
+    const ordersChannel = capturedChannels.find((c) =>
+      c.filters.some((f) => f.table === "orders"),
+    );
+    act(() => {
+      ordersChannel?.callback?.({ eventType: "UPDATE" });
+      vi.advanceTimersByTime(500);
+    });
+
+    const afterEchoCount = fetchMock.mock.calls.filter(([u]) =>
+      u.toString().includes("/api/pos/orders"),
+    ).length;
+    expect(afterEchoCount).toBe(afterRefreshOrdersCount);
+
+    vi.useRealTimers();
   });
 });
