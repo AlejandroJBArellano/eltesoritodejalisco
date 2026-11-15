@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant";
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
+import { invalidateMenuCache } from "@/lib/menuCache";
 import type { Tables } from "@/types/supabase";
 
 type RecipeItemWithIngredient = Tables<"recipe_items"> & {
@@ -97,6 +98,8 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    invalidateMenuCache(tenant.id);
+
     const formatted = {
       id: recipeItem.id,
       menuItemId: recipeItem.menu_item_id,
@@ -155,6 +158,8 @@ export async function PUT(request: NextRequest) {
 
     if (error) throw error;
 
+    invalidateMenuCache(tenant.id);
+
     const formatted = {
       id: recipeItem.id,
       menuItemId: recipeItem.menu_item_id,
@@ -201,6 +206,8 @@ export async function DELETE(request: NextRequest) {
       .eq("tenant_id", tenant.id);
 
     if (error) throw error;
+
+    invalidateMenuCache(tenant.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

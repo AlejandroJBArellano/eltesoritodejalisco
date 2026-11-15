@@ -11,6 +11,7 @@
 import type { InventoryDeductionResult } from "@/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { aggregateOptionRequirements } from "@/lib/customization/inventory";
+import { invalidateMenuCache } from "@/lib/menuCache";
 
 interface InventoryIngredient {
   id: string;
@@ -293,6 +294,7 @@ async function processInventory(
 
     if (updatePromises.length > 0) {
       await Promise.all(updatePromises);
+      invalidateMenuCache(order.tenant_id);
 
       const { error: logError } = await supabase
         .from("stock_adjustments")
@@ -428,6 +430,8 @@ export async function adjustIngredientStock(
       .single();
 
     if (updateError) throw updateError;
+
+    invalidateMenuCache(ingredient.tenant_id);
 
     // Create adjustment record
     const { error: insertError } = await supabase

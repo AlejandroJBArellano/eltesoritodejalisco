@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 import { getProfile } from "@/lib/auth";
 import { getTenantContext } from "@/lib/tenant";
 import { uploadMenuItemImage } from "@/lib/s3";
+import { invalidateMenuCache } from "@/lib/menuCache";
 
 vi.mock("@/lib/auth", () => ({
   getProfile: vi.fn(),
@@ -43,12 +44,13 @@ describe("Menu API Route Handlers (/api/menu)", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    invalidateMenuCache();
     vi.mocked(getTenantContext).mockResolvedValue(mockTenant as any);
     vi.mocked(getProfile).mockResolvedValue(mockAdminProfile as any);
   });
 
   describe("GET /api/menu", () => {
-    it("returns enriched menu items for tenant", async () => {
+    it("returns enriched menu items for tenant, caches on 2nd call, and sets Cache-Control by auth", async () => {
       const mockOrderMenu = vi.fn().mockResolvedValue({
         data: [
           {
@@ -86,11 +88,24 @@ describe("Menu API Route Handlers (/api/menu)", () => {
         return {};
       });
 
-      const res = await GET();
+      // Unauthenticated (Pickup) request -> public CDN cache headers
+      const publicReq = new NextRequest("http://localhost:3000/api/menu");
+      const res = await GET(publicReq);
       expect(res.status).toBe(200);
+      expect(res.headers.get("Cache-Control")).toContain("s-maxage=30");
+      expect(res.headers.get("Vary")).toBe("Host, x-tenant-slug");
       const body = await res.json();
       expect(body.items).toHaveLength(1);
       expect(body.items[0].current_stock).toBe(10);
+
+      // 2nd call within TTL -> hits process cache (no extra DB query), authenticated -> private no-store
+      const authReq = new NextRequest("http://localhost:3000/api/menu", {
+        headers: { cookie: "sb-proj-auth-token=abc" },
+      });
+      const cachedRes = await GET(authReq);
+      expect(cachedRes.status).toBe(200);
+      expect(cachedRes.headers.get("Cache-Control")).toBe("private, no-store");
+      expect(mockSelectMenu).toHaveBeenCalledTimes(1);
     });
   });
 

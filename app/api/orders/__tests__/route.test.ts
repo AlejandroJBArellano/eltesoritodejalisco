@@ -146,7 +146,7 @@ describe("GET /api/orders", () => {
     );
   });
 
-  it("allows ADMIN to query general orders history without posParam", async () => {
+  it("allows ADMIN to query general orders history without posParam and applies default limit 300", async () => {
     vi.mocked(getProfile).mockResolvedValue({
       role: "ADMIN",
       tenant_id: "tenant-123",
@@ -156,7 +156,8 @@ describe("GET /api/orders", () => {
     const mockQueryBuilder = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: mockOrders, error: null }),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: mockOrders, error: null }),
     };
 
     vi.mocked(createClient).mockResolvedValue({
@@ -169,6 +170,31 @@ describe("GET /api/orders", () => {
 
     expect(response.status).toBe(200);
     expect(body.orders).toEqual(mockOrders);
+    expect(mockQueryBuilder.limit).toHaveBeenCalledWith(300);
+  });
+
+  it("caps ?limit= at 1000 and accepts custom positive limit", async () => {
+    vi.mocked(getProfile).mockResolvedValue({
+      role: "ADMIN",
+      tenant_id: "tenant-123",
+    } as any);
+
+    const mockQueryBuilder = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
+
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn().mockReturnValue(mockQueryBuilder),
+    } as any);
+
+    await GET(new NextRequest("http://localhost:3000/api/orders?limit=50"));
+    expect(mockQueryBuilder.limit).toHaveBeenCalledWith(50);
+
+    await GET(new NextRequest("http://localhost:3000/api/orders?limit=9999"));
+    expect(mockQueryBuilder.limit).toHaveBeenCalledWith(1000);
   });
 });
 

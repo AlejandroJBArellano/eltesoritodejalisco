@@ -12,14 +12,43 @@ import {
   serializeForClient,
 } from "@/lib/customization/server";
 import { computePriceRange } from "@/lib/customization";
+import {
+  getCachedMenu,
+  invalidateMenuCache,
+  setCachedMenu,
+} from "@/lib/menuCache";
+
+function buildMenuGetHeaders(request?: NextRequest): HeadersInit {
+  const hasAuthCookie = Boolean(
+    request?.cookies.getAll().some((c) => c.name.startsWith("sb-")),
+  );
+
+  if (hasAuthCookie) {
+    return {
+      "Cache-Control": "private, no-store",
+    };
+  }
+
+  return {
+    "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+    Vary: "Host, x-tenant-slug",
+  };
+}
 
 /**
  * GET /api/menu
  * Get all menu items (including translations for i18n and ingredient stock)
  */
-export async function GET() {
+export async function GET(request?: NextRequest) {
   try {
     const tenant = await getTenantContext();
+    const headers = buildMenuGetHeaders(request);
+
+    const cachedItems = getCachedMenu(tenant.id);
+    if (cachedItems) {
+      return NextResponse.json({ items: cachedItems }, { headers });
+    }
+
     const supabase = await createClient();
 
     // Run queries in parallel — they are independent
@@ -69,7 +98,9 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ items: enrichedItems });
+    setCachedMenu(tenant.id, enrichedItems);
+
+    return NextResponse.json({ items: enrichedItems }, { headers });
   } catch (error) {
     console.error("Error fetching menu items:", error);
     return NextResponse.json(
@@ -186,6 +217,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (createError) throw createError;
+
+    invalidateMenuCache(tenant.id);
 
     return NextResponse.json({ item }, { status: 201 });
   } catch (error) {
@@ -332,6 +365,8 @@ export async function PUT(request: NextRequest) {
 
     if (updateError) throw updateError;
 
+    invalidateMenuCache(tenant.id);
+
     return NextResponse.json({ item });
   } catch (error) {
     console.error("Error updating menu item:", error);
@@ -379,6 +414,8 @@ export async function DELETE(request: NextRequest) {
       .eq("tenant_id", tenant.id);
 
     if (error) throw error;
+
+    invalidateMenuCache(tenant.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

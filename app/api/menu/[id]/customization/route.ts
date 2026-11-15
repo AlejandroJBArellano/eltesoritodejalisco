@@ -10,6 +10,7 @@ import { getTenantContext } from "@/lib/tenant";
 import { hasPermission } from "@/lib/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadCustomizations } from "@/lib/customization/server";
+import { invalidateMenuCache } from "@/lib/menuCache";
 import {
   computePriceRange,
   emptyCustomization,
@@ -255,6 +256,8 @@ export async function PUT(
       p_config: config,
     });
     if (rpcError) throw rpcError;
+
+    invalidateMenuCache(tenant.id);
 
     const result = await readConfig(tenant.id, menuItemId);
     return NextResponse.json({ ...result, issues });

@@ -7,6 +7,7 @@ import {
   deductInventoryForOrder,
   reverseInventoryForOrder,
 } from "@/lib/services/inventory";
+import { invalidateMenuCache } from "@/lib/menuCache";
 import { logOrderAction } from "@/lib/services/orderAudit";
 import {
   CustomizationError,
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const statusParam = searchParams.get("status");
     const posParam = searchParams.get("pos");
+    const limitParam = searchParams.get("limit");
 
     const profile = await getProfile();
     if (profile?.role === "WAITER" && posParam !== "true") {
@@ -39,33 +41,23 @@ export async function GET(request: NextRequest) {
     const tenant = await getTenantContext();
     const supabase = await createClient();
 
-    // POS view uses a narrower select — only columns read by mapOrderData
-    const selectFields =
-      posParam === "true"
-        ? `
-          id, order_number, customer_id, source, status, table, notes,
-          subtotal, tax, total, created_at, updated_at, completed_at,
-          corte_id, estado_cierre, operational_date, pickup_time,
-          order_items (
-            id, order_id, menu_item_id, quantity, unit_price, notes, status,
-            tiempo_preparacion_segundos, created_at,
-            base_unit_price, discount_base_price, customization_modified_at,
-            order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
-            menu_items ( id, name, price, image_url, is_available )
-          ),
-          payments ( id, order_id, method, amount, received_amount, change, tip_amount, tip_payment_method, tip_terminal_id, terminal_id, terminal_name, terminal_commission_rate, terminal_commission_amount, created_at ),
-          customer:customers ( id, name, email, phone )
-        `
-        : `
-          *,
-          order_items (
-            *,
-            order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
-            menu_items (*)
-          ),
-          payments (*),
-          customer:customers (*)
-        `;
+    // Narrow select — only columns read by mapOrderData (avoids serializing heavy menu_items translations/descriptions)
+    const selectFields = `
+      id, order_number, customer_id, source, status, table, notes,
+      subtotal, tax, total, created_at, updated_at, completed_at,
+      corte_id, estado_cierre, operational_date, pickup_time,
+      discount_type, discount_value, discount_amount, discount_reason,
+      order_items (
+        id, order_id, menu_item_id, quantity, unit_price, notes, status,
+        tiempo_preparacion_segundos, created_at,
+        base_unit_price, discount_base_price, customization_modified_at,
+        discount_type, discount_value, discount_amount, discount_scope, discount_reason,
+        order_item_options ( option_id, group_id, group_name, option_name, quantity, unit_price, group_sort, option_sort ),
+        menu_items ( id, name, price, image_url, is_available )
+      ),
+      payments ( id, order_id, method, amount, received_amount, change, tip_amount, tip_payment_method, tip_terminal_id, terminal_id, terminal_name, terminal_commission_rate, terminal_commission_amount, created_at ),
+      customer:customers ( id, name, email, phone )
+    `;
 
     let query = supabase
       .from("orders")
@@ -94,6 +86,16 @@ export async function GET(request: NextRequest) {
       } else {
         query = query.or("corte_id.is.null,estado_cierre.neq.ARCHIVADA");
       }
+    } else if (
+      !statusParam &&
+      typeof (query as { limit?: unknown }).limit === "function"
+    ) {
+      const parsedLimit = limitParam ? Number(limitParam) : 300;
+      const safeLimit =
+        Number.isFinite(parsedLimit) && parsedLimit > 0
+          ? Math.min(parsedLimit, 1000)
+          : 300;
+      query = query.limit(safeLimit);
     }
 
     const { data: orders, error } = await query;
@@ -185,6 +187,8 @@ export async function POST(request: NextRequest) {
     );
 
     if (rpcError) throw rpcError;
+
+    invalidateMenuCache(tenant.id);
 
     // 2. El producto base se descuenta dentro del RPC; las opciones aquí.
     if (

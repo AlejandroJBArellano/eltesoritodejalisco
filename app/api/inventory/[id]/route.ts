@@ -4,6 +4,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant";
 import { getProfile } from "@/lib/auth";
+import { invalidateMenuCache } from "@/lib/menuCache";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -125,6 +126,8 @@ export async function PATCH(
       .single();
 
     if (updateError) throw updateError;
+
+    invalidateMenuCache(tenant.id);
 
     return NextResponse.json({
       ingredient: {

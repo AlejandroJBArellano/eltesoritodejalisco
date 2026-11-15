@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
 import { getProfile } from "@/lib/auth";
+import { invalidateMenuCache } from "@/lib/menuCache";
 
 /**
  * GET /api/menu-categories
@@ -205,6 +206,8 @@ export async function PUT(request: NextRequest) {
         console.error("Cascade rename error:", cascadeError);
         // Non-fatal: category was updated, but items may still have old name
       }
+
+      invalidateMenuCache(tenant.id);
     }
 
     return NextResponse.json({ category });
