@@ -116,6 +116,7 @@ export default function Navbar() {
 
               <Link
                 href="/"
+                prefetch={false}
                 className="flex items-center gap-2.5 text-lg sm:text-xl font-bold tracking-tight shrink-0 group"
               >
                 <img
@@ -146,6 +147,7 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
+                    prefetch={false}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-150 ${isActive
                         ? "bg-primary/15 text-primary border border-primary/25"
                         : "text-text-light/60 hover:text-text-light hover:bg-white/5 border border-transparent"

@@ -36,6 +36,7 @@ export function PageHeader({
               <>
                 <Link
                   href={backHref}
+                  prefetch={false}
                   className="group flex items-center gap-1.5 text-xs font-semibold text-text-light/60 hover:text-primary transition-colors shrink-0"
                 >
                   <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />

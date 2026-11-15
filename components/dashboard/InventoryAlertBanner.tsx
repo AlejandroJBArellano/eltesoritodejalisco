@@ -31,6 +31,7 @@ export function InventoryAlertBanner({ alerts }: InventoryAlertBannerProps) {
         </div>
         <Link
           href="/inventario"
+          prefetch={false}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-300 hover:text-rose-200 border border-rose-500/30 hover:border-rose-500/50 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-lg transition-all active:scale-[0.98] shrink-0"
         >
           <span>Ver Inventario</span>

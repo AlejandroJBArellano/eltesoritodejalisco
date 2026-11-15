@@ -259,6 +259,7 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
         <div className="flex items-center justify-between px-5 h-16 border-b border-border/80 shrink-0">
           <Link
             href="/"
+            prefetch={false}
             onClick={handleLinkClick}
             className="flex items-center gap-2.5 font-bold tracking-tight text-white hover:opacity-90 transition-opacity"
           >
@@ -300,6 +301,7 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
         <div className="px-3 pt-3">
           <Link
             href="/"
+            prefetch={false}
             onClick={handleLinkClick}
             className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${pathname === "/"
               ? "bg-primary/20 text-primary border border-primary/30"
@@ -338,6 +340,7 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                       <Link
                         key={item.href}
                         href={item.href}
+                        prefetch={false}
                         onClick={handleLinkClick}
                         className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${isActive
                           ? "bg-primary/15 text-primary font-bold border border-primary/25"

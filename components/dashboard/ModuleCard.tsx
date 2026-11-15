@@ -16,6 +16,7 @@ export function ModuleCard({
   return (
     <Link
       href={href}
+      prefetch={false}
       target={target}
       rel={target === "_blank" ? "noopener noreferrer" : undefined}
       className="group cursor-pointer focus:outline-none block h-full"
