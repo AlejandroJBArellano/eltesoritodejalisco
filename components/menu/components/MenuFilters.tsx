@@ -1,28 +1,29 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useTransition } from "react";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import React, { useMemo } from "react";
 import { TableSearchInput } from "@/components/ui/DataTableControls";
 import { useMenuCategories } from "../hooks/useMenuCategories";
 
-export function MenuFilters() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const rawSearchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+interface MenuFiltersProps {
+  searchQuery: string;
+  categoryFilter: string;
+  availabilityFilter: "all" | "available" | "unavailable";
+  onSearchChange: (q: string) => void;
+  onCategoryChange: (category: string) => void;
+  onAvailabilityChange: (
+    availability: "all" | "available" | "unavailable",
+  ) => void;
+}
 
+export function MenuFilters({
+  searchQuery,
+  categoryFilter,
+  availabilityFilter,
+  onSearchChange,
+  onCategoryChange,
+  onAvailabilityChange,
+}: MenuFiltersProps) {
   const { menuCategories } = useMenuCategories();
-
-  const searchQuery = rawSearchParams.get("q") || "";
-  const categoryFilter = rawSearchParams.get("category") || "all";
-  const availabilityFilter = (rawSearchParams.get("availability") || "all") as
-    "all" | "available" | "unavailable";
-
-  const [localQuery, setLocalQuery] = useState(searchQuery);
-
-  useEffect(() => {
-    setLocalQuery(searchQuery);
-  }, [searchQuery]);
 
   const categories = useMemo(() => {
     return menuCategories
@@ -32,48 +33,20 @@ export function MenuFilters() {
       .map((c) => c.name);
   }, [menuCategories]);
 
-  const updateSearchParam = (
-    updates: Record<string, string | number | null>,
-  ) => {
-    const params = new URLSearchParams(rawSearchParams.toString());
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === null || value === "" || value === "all") {
-        params.delete(key);
-      } else {
-        params.set(key, String(value));
-      }
-    });
-    if (updates.page === undefined) {
-      params.delete("page");
-    }
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`);
-    });
-  };
-
-  const handleSearchChange = (val: string) => {
-    setLocalQuery(val);
-    if (val === "") {
-      updateSearchParam({ q: null });
-    }
-  };
-
   return (
-    <div
-      className={`grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}
-    >
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-dark/40 p-4 rounded-xl border border-border">
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          updateSearchParam({ q: localQuery });
+          onSearchChange(searchQuery);
         }}
       >
         <label className="text-[10px] font-extrabold text-text-light/50 uppercase tracking-wider block mb-1">
           Buscar Producto
         </label>
         <TableSearchInput
-          value={localQuery}
-          onChange={handleSearchChange}
+          value={searchQuery}
+          onChange={onSearchChange}
           placeholder="Buscar por nombre o descripción..."
         />
       </form>
@@ -84,7 +57,7 @@ export function MenuFilters() {
         </label>
         <select
           value={categoryFilter}
-          onChange={(e) => updateSearchParam({ category: e.target.value })}
+          onChange={(e) => onCategoryChange(e.target.value)}
           className="w-full rounded-lg border border-border bg-card px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary cursor-pointer transition-colors duration-200"
         >
           <option value="all">Todas las Categorías</option>
@@ -104,10 +77,9 @@ export function MenuFilters() {
         <select
           value={availabilityFilter}
           onChange={(e) =>
-            updateSearchParam({
-              availability: e.target.value as
-                "all" | "available" | "unavailable",
-            })
+            onAvailabilityChange(
+              e.target.value as "all" | "available" | "unavailable",
+            )
           }
           className="w-full rounded-lg border border-border bg-card px-3 py-2 text-xs font-bold text-text-light outline-none focus:border-primary cursor-pointer transition-colors duration-200"
         >

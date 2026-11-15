@@ -37,6 +37,7 @@ if (customDomain) {
 
 const nextConfig: NextConfig = {
   images: {
+    unoptimized: true,
     remotePatterns,
   },
 };

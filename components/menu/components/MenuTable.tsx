@@ -1,6 +1,6 @@
+"use client";
+
 import Image from "next/image";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { useTransition } from "react";
 import {
   TableHeaderSortCell,
   TablePagination,
@@ -22,6 +22,13 @@ interface MenuTableProps {
   paginatedItems: MenuItem[];
   totalPages: number;
   totalItems: number;
+  currentPage: number;
+  pageSize: number;
+  sortField: SortField;
+  sortDirection: "asc" | "desc";
+  onSortChange: (field: SortField, direction: "asc" | "desc") => void;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
   /** Abre el editor de personalización (solo con menu.manage_customization). */
   onCustomize?: (item: MenuItem) => void;
 }
@@ -30,13 +37,15 @@ export function MenuTable({
   paginatedItems,
   totalPages,
   totalItems,
+  currentPage,
+  pageSize,
+  sortField,
+  sortDirection,
+  onSortChange,
+  onPageChange,
+  onPageSizeChange,
   onCustomize,
 }: MenuTableProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const rawSearchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-
   const {
     openEditProductModal,
     handleDelete: onDelete,
@@ -44,41 +53,14 @@ export function MenuTable({
   } = useMenuItems();
   const { openRecipeModal: onOpenRecipe } = useRecipes();
 
-  const sortField = (rawSearchParams.get("sort") as SortField) || "name";
-  const sortDirection =
-    (rawSearchParams.get("direction") as "asc" | "desc") || "asc";
-  const currentPage = Number(rawSearchParams.get("page")) || 1;
-  const pageSize = Number(rawSearchParams.get("pageSize")) || 10;
-
-  const updateSearchParam = (
-    updates: Record<string, string | number | null>,
-  ) => {
-    const params = new URLSearchParams(rawSearchParams.toString());
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === null || value === "" || value === "all") {
-        params.delete(key);
-      } else {
-        params.set(key, String(value));
-      }
-    });
-    if (updates.page === undefined) {
-      params.delete("page");
-    }
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`);
-    });
-  };
-
   const handleSort = (field: SortField) => {
     const nextDirection =
       sortField === field && sortDirection === "asc" ? "desc" : "asc";
-    updateSearchParam({ sort: field, direction: nextDirection });
+    onSortChange(field, nextDirection);
   };
 
   return (
-    <div
-      className={`space-y-4 ${isPending ? "opacity-60 transition-opacity duration-200" : ""}`}
-    >
+    <div className="space-y-4">
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
         <table className="w-full text-left text-sm">
           <thead className="bg-dark/40 text-xs uppercase tracking-wider text-text-light/60 border-b border-border">
@@ -125,6 +107,7 @@ export function MenuTable({
                       alt={item.name}
                       width={40}
                       height={40}
+                      unoptimized
                       className="h-10 w-10 rounded-lg object-cover border border-border"
                     />
                   ) : (
@@ -245,10 +228,8 @@ export function MenuTable({
         totalPages={totalPages}
         totalItems={totalItems}
         pageSize={pageSize}
-        onPageChange={(page) => updateSearchParam({ page })}
-        onPageSizeChange={(size) => {
-          updateSearchParam({ pageSize: size, page: 1 });
-        }}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
       />
     </div>
   );

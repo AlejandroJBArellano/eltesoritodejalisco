@@ -16,37 +16,62 @@ type DbMenuItem = Database["public"]["Tables"]["menu_items"]["Row"];
 type DbMenuCategory = Database["public"]["Tables"]["menu_categories"]["Row"];
 type DbIngredient = Database["public"]["Tables"]["ingredients"]["Row"];
 
-async function getMenuDropdownItems(): Promise<
-  { id: string; name: string; price: number; category?: string | null }[]
-> {
-  const tenant = await getTenantContext();
+async function getAllMenuItems(tenantId: string): Promise<MenuItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("menu_items")
-    .select("id, name, price, category")
-    .eq("tenant_id", tenant.id)
+    .select(
+      "id, name, description, price, category, image_url, is_available, translations, ingredient_id, show_in_dine_in, show_in_takeaway",
+    )
+    .eq("tenant_id", tenantId)
     .order("name", { ascending: true });
 
   if (error) {
-    console.error("Error fetching menu items for dropdown:", error);
+    console.error("Error fetching menu items:", error);
     return [];
   }
 
-  return (data || []).map((item) => ({
+  const items = (data || []) as DbMenuItem[];
+
+  // Grupos de personalización por producto (si la migración aún no existe, 0)
+  const groupCounts = new Map<string, number>();
+  if (items.length > 0) {
+    const { data: groupRows, error: groupError } = await supabase
+      .from("menu_item_option_groups")
+      .select("menu_item_id")
+      .eq("tenant_id", tenantId);
+    if (!groupError) {
+      for (const row of (groupRows || []) as { menu_item_id: string }[]) {
+        groupCounts.set(
+          row.menu_item_id,
+          (groupCounts.get(row.menu_item_id) || 0) + 1,
+        );
+      }
+    }
+  }
+
+  return items.map((item) => ({
     id: item.id,
     name: item.name,
+    description: item.description,
     price: item.price,
     category: item.category,
+    imageUrl: item.image_url,
+    isAvailable: item.is_available,
+    translations: (item.translations as unknown as Translations) || undefined,
+    ingredientId: item.ingredient_id,
+    show_in_dine_in: item.show_in_dine_in ?? true,
+    show_in_takeaway: item.show_in_takeaway ?? true,
+    customizationGroups: groupCounts.get(item.id) || 0,
   }));
 }
 
-async function getMenuCategories(): Promise<MenuCategory[]> {
-  const tenant = await getTenantContext();
+async function getMenuCategories(tenantId: string): Promise<MenuCategory[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("menu_categories")
     .select("*")
-    .eq("tenant_id", tenant.id)
+    .eq("tenant_id", tenantId)
     .order("sort_order", { ascending: true });
 
   if (error) {
@@ -66,13 +91,12 @@ async function getMenuCategories(): Promise<MenuCategory[]> {
   }));
 }
 
-async function getIngredients(): Promise<Ingredient[]> {
-  const tenant = await getTenantContext();
+async function getIngredients(tenantId: string): Promise<Ingredient[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("ingredients")
     .select("*")
-    .eq("tenant_id", tenant.id)
+    .eq("tenant_id", tenantId)
     .order("name", { ascending: true });
 
   if (error) {
@@ -90,119 +114,11 @@ async function getIngredients(): Promise<Ingredient[]> {
     minimumStock: ing.minimum_stock,
     costPerUnit: ing.cost_per_unit,
     trackingType: (ing.tracking_type === "PIECE" ? "PIECE" : "MEASURABLE") as
-      "MEASURABLE" | "PIECE",
+      | "MEASURABLE"
+      | "PIECE",
     createdAt: ing.created_at ?? "",
     updatedAt: ing.updated_at ?? "",
   }));
-}
-
-async function getMenuStats(tenantId: string) {
-  const supabase = await createClient();
-
-  const [totalCountResult, activeCountResult] = await Promise.all([
-    supabase
-      .from("menu_items")
-      .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tenantId),
-    supabase
-      .from("menu_items")
-      .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tenantId)
-      .eq("is_available", true),
-  ]);
-
-  return {
-    totalCount: totalCountResult.count ?? 0,
-    activeCount: activeCountResult.count ?? 0,
-  };
-}
-
-async function getFilteredMenuItems(params: {
-  tenantId: string;
-  q: string;
-  category: string;
-  availability: string;
-  sort: SortField;
-  direction: "asc" | "desc";
-  page: number;
-  pageSize: number;
-}): Promise<{ items: MenuItem[]; totalCount: number }> {
-  const supabase = await createClient();
-  let query = supabase
-    .from("menu_items")
-    .select("*", { count: "exact" })
-    .eq("tenant_id", params.tenantId);
-
-  if (params.q.trim()) {
-    query = query.or(
-      `name.ilike.%${params.q.trim()}%,description.ilike.%${params.q.trim()}%,category.ilike.%${params.q.trim()}%`,
-    );
-  }
-  if (params.category === "uncategorized") {
-    query = query.or("category.is.null,category.eq.");
-  } else if (params.category !== "all") {
-    query = query.ilike("category", params.category.trim());
-  }
-  if (params.availability === "available") {
-    query = query.eq("is_available", true);
-  } else if (params.availability === "unavailable") {
-    query = query.eq("is_available", false);
-  }
-
-  // Map sort field to DB column
-  const sortColumn =
-    params.sort === "isAvailable" ? "is_available" : params.sort;
-  query = query.order(sortColumn, { ascending: params.direction === "asc" });
-
-  const start = (params.page - 1) * params.pageSize;
-  const end = start + params.pageSize - 1;
-  query = query.range(start, end);
-
-  const { data, count, error } = await query;
-  if (error) {
-    console.error("Error fetching filtered menu items:", error);
-    return { items: [], totalCount: 0 };
-  }
-
-  const items = (data || []) as DbMenuItem[];
-
-  // Grupos de personalización por producto (si la migración aún no existe, 0)
-  const groupCounts = new Map<string, number>();
-  if (items.length > 0) {
-    const { data: groupRows, error: groupError } = await supabase
-      .from("menu_item_option_groups")
-      .select("menu_item_id")
-      .eq("tenant_id", params.tenantId)
-      .in(
-        "menu_item_id",
-        items.map((i) => i.id),
-      );
-    if (!groupError) {
-      for (const row of (groupRows || []) as { menu_item_id: string }[]) {
-        groupCounts.set(row.menu_item_id, (groupCounts.get(row.menu_item_id) || 0) + 1);
-      }
-    }
-  }
-
-  const mappedItems: MenuItem[] = items.map((item) => ({
-    id: item.id,
-    name: item.name,
-    description: item.description,
-    price: item.price,
-    category: item.category,
-    imageUrl: item.image_url,
-    isAvailable: item.is_available,
-    translations: (item.translations as unknown as Translations) || undefined,
-    ingredientId: item.ingredient_id,
-    show_in_dine_in: item.show_in_dine_in ?? true,
-    show_in_takeaway: item.show_in_takeaway ?? true,
-    customizationGroups: groupCounts.get(item.id) || 0,
-  }));
-
-  return {
-    items: mappedItems,
-    totalCount: count ?? 0,
-  };
 }
 
 export default async function MenuPage({
@@ -229,42 +145,18 @@ export default async function MenuPage({
 
   const tenant = await getTenantContext();
 
-  const [
-    dropdownItems,
-    initialCategories,
-    initialIngredients,
-    stats,
-    filteredResult,
-  ] = await Promise.all([
-    getMenuDropdownItems(),
-    getMenuCategories(),
-    getIngredients(),
-    getMenuStats(tenant.id),
-    getFilteredMenuItems({
-      tenantId: tenant.id,
-      q,
-      category,
-      availability,
-      sort,
-      direction,
-      page,
-      pageSize,
-    }),
+  const [allItems, initialCategories, initialIngredients] = await Promise.all([
+    getAllMenuItems(tenant.id),
+    getMenuCategories(tenant.id),
+    getIngredients(tenant.id),
   ]);
-
-  const totalItems = filteredResult.totalCount;
-  const totalPages = Math.ceil(totalItems / pageSize) || 1;
 
   const categoriesList = initialCategories.map((c) => c.name);
 
   return (
     <MenuContent
-      items={dropdownItems as unknown as MenuItem[]}
-      paginatedItems={filteredResult.items}
+      items={allItems}
       categories={categoriesList}
-      activeCount={stats.activeCount}
-      totalPages={totalPages}
-      totalItems={totalItems}
       initialMenuCategories={initialCategories}
       initialIngredients={initialIngredients}
       searchParams={{

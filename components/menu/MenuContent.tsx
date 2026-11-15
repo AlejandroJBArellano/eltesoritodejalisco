@@ -33,11 +33,7 @@ import {
 
 interface MenuContentProps {
   items: MenuItem[];
-  paginatedItems: MenuItem[];
   categories: string[];
-  activeCount: number;
-  totalPages: number;
-  totalItems: number;
   initialMenuCategories: MenuCategory[];
   initialIngredients: Ingredient[];
   searchParams: {
@@ -49,6 +45,35 @@ interface MenuContentProps {
     page: number;
     pageSize: number;
   };
+}
+
+function syncMenuUrlParams(params: {
+  q: string;
+  category: string;
+  availability: string;
+  sort: SortField;
+  direction: "asc" | "desc";
+  page: number;
+  pageSize: number;
+}) {
+  if (typeof window === "undefined") return;
+  const search = new URLSearchParams();
+  if (params.q) search.set("q", params.q);
+  if (params.category && params.category !== "all") {
+    search.set("category", params.category);
+  }
+  if (params.availability && params.availability !== "all") {
+    search.set("availability", params.availability);
+  }
+  if (params.sort !== "name") search.set("sort", params.sort);
+  if (params.direction !== "asc") search.set("direction", params.direction);
+  if (params.page > 1) search.set("page", String(params.page));
+  if (params.pageSize !== 10) search.set("pageSize", String(params.pageSize));
+  const qs = search.toString();
+  const nextUrl = qs
+    ? `${window.location.pathname}?${qs}`
+    : window.location.pathname;
+  window.history.replaceState(null, "", nextUrl);
 }
 
 export function MenuContent(props: MenuContentProps) {
@@ -65,10 +90,8 @@ export function MenuContent(props: MenuContentProps) {
 
 function MenuContentInner({
   items,
-  paginatedItems,
-  totalPages,
-  totalItems,
   initialIngredients,
+  searchParams,
 }: MenuContentProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -76,6 +99,124 @@ function MenuContentInner({
   const canCustomize =
     user?.hasPermission?.("menu.manage_customization") ?? false;
   const [customizingItem, setCustomizingItem] = useState<MenuItem | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState(searchParams.q || "");
+  const [categoryFilter, setCategoryFilter] = useState(
+    searchParams.category || "all",
+  );
+  const [availabilityFilter, setAvailabilityFilter] = useState<
+    "all" | "available" | "unavailable"
+  >(
+    (searchParams.availability as "all" | "available" | "unavailable") ||
+      "all",
+  );
+  const [sortField, setSortField] = useState<SortField>(
+    searchParams.sort || "name",
+  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
+    searchParams.direction || "asc",
+  );
+  const [page, setPage] = useState(searchParams.page || 1);
+  const [pageSize, setPageSize] = useState(searchParams.pageSize || 10);
+
+  const filteredAndSortedItems = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const cat = categoryFilter.trim().toLowerCase();
+
+    const filtered = items.filter((item) => {
+      if (q) {
+        const matchesName = item.name.toLowerCase().includes(q);
+        const matchesDesc = (item.description || "").toLowerCase().includes(q);
+        const matchesCat = (item.category || "").toLowerCase().includes(q);
+        if (!matchesName && !matchesDesc && !matchesCat) return false;
+      }
+
+      if (cat === "uncategorized") {
+        if (item.category && item.category.trim() !== "") return false;
+      } else if (cat !== "all") {
+        if ((item.category || "").trim().toLowerCase() !== cat) return false;
+      }
+
+      if (availabilityFilter === "available" && !item.isAvailable) {
+        return false;
+      }
+      if (availabilityFilter === "unavailable" && item.isAvailable) {
+        return false;
+      }
+
+      return true;
+    });
+
+    const factor = sortDirection === "desc" ? -1 : 1;
+    return filtered.slice().sort((a, b) => {
+      if (sortField === "price") {
+        return (Number(a.price) - Number(b.price)) * factor;
+      }
+      if (sortField === "isAvailable") {
+        return (Number(a.isAvailable) - Number(b.isAvailable)) * factor;
+      }
+      const aVal = sortField === "category" ? a.category || "" : a.name;
+      const bVal = sortField === "category" ? b.category || "" : b.name;
+      return aVal.localeCompare(bVal, "es", { sensitivity: "base" }) * factor;
+    });
+  }, [
+    items,
+    searchQuery,
+    categoryFilter,
+    availabilityFilter,
+    sortField,
+    sortDirection,
+  ]);
+
+  const totalItems = filteredAndSortedItems.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+  const safePage = Math.min(page, totalPages);
+  const paginatedItems = useMemo(() => {
+    const start = (safePage - 1) * pageSize;
+    return filteredAndSortedItems.slice(start, start + pageSize);
+  }, [filteredAndSortedItems, safePage, pageSize]);
+
+  const updateFilterState = (updates: {
+    q?: string;
+    category?: string;
+    availability?: "all" | "available" | "unavailable";
+    sort?: SortField;
+    direction?: "asc" | "desc";
+    page?: number;
+    pageSize?: number;
+  }) => {
+    const nextQ = updates.q !== undefined ? updates.q : searchQuery;
+    const nextCategory =
+      updates.category !== undefined ? updates.category : categoryFilter;
+    const nextAvailability =
+      updates.availability !== undefined
+        ? updates.availability
+        : availabilityFilter;
+    const nextSort = updates.sort !== undefined ? updates.sort : sortField;
+    const nextDirection =
+      updates.direction !== undefined ? updates.direction : sortDirection;
+    const nextPageSize =
+      updates.pageSize !== undefined ? updates.pageSize : pageSize;
+    const nextPage = updates.page !== undefined ? updates.page : 1;
+
+    setSearchQuery(nextQ);
+    setCategoryFilter(nextCategory);
+    setAvailabilityFilter(nextAvailability);
+    setSortField(nextSort);
+    setSortDirection(nextDirection);
+    setPageSize(nextPageSize);
+    setPage(nextPage);
+
+    syncMenuUrlParams({
+      q: nextQ,
+      category: nextCategory,
+      availability: nextAvailability,
+      sort: nextSort,
+      direction: nextDirection,
+      page: nextPage,
+      pageSize: nextPageSize,
+    });
+  };
 
   const {
     errorMessage,
@@ -253,12 +394,32 @@ function MenuContentInner({
             </button>
           </div>
 
-          <MenuFilters />
+          <MenuFilters
+            searchQuery={searchQuery}
+            categoryFilter={categoryFilter}
+            availabilityFilter={availabilityFilter}
+            onSearchChange={(q) => updateFilterState({ q })}
+            onCategoryChange={(category) => updateFilterState({ category })}
+            onAvailabilityChange={(availability) =>
+              updateFilterState({ availability })
+            }
+          />
 
           <MenuTable
             paginatedItems={paginatedItems}
             totalPages={totalPages}
             totalItems={totalItems}
+            currentPage={safePage}
+            pageSize={pageSize}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSortChange={(sort, direction) =>
+              updateFilterState({ sort, direction })
+            }
+            onPageChange={(nextPage) => updateFilterState({ page: nextPage })}
+            onPageSizeChange={(size) =>
+              updateFilterState({ pageSize: size, page: 1 })
+            }
             onCustomize={canCustomize ? setCustomizingItem : undefined}
           />
         </section>
