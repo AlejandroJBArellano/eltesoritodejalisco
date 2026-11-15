@@ -17,6 +17,7 @@ export default function LastOrders() {
       {!isWaiter && (
         <Link
           href="/history"
+          prefetch={false}
           className="text-xs font-bold text-primary hover:underline uppercase tracking-wider flex items-center gap-1"
         >
           Ver Historial Completo
