@@ -107,7 +107,7 @@ export const getTenantBySlug = cache(
 );
 
 // Helper to resolve tenant context dynamically in server components, layouts, or route handlers
-export async function getTenantContext(): Promise<TenantContextType> {
+export const getTenantContext = cache(async (): Promise<TenantContextType> => {
   const headersList = await headers();
 
   // Check if a client or middleware set the tenant slug header explicitly
@@ -129,4 +129,4 @@ export async function getTenantContext(): Promise<TenantContextType> {
   }
 
   return tenant;
-}
+});

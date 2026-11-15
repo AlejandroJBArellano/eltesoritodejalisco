@@ -1,7 +1,8 @@
+import { cache } from "react";
 import { createClient } from "./supabase/server";
 import { getTenantContext } from "./tenant";
 
-export async function getUser() {
+export const getUser = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -9,9 +10,9 @@ export async function getUser() {
   } = await supabase.auth.getUser();
   if (error || !user) return null;
   return user;
-}
+});
 
-export async function getProfile() {
+export const getProfile = cache(async () => {
   const user = await getUser();
   if (!user) return null;
 
@@ -40,7 +41,7 @@ export async function getProfile() {
   }
 
   return profile;
-}
+});
 
 export type UserRole = "ADMIN" | "MANAGER" | "WAITER" | "CHEF" | "INVENTORY";
 
