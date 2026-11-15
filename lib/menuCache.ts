@@ -1,40 +1,48 @@
+import { revalidateTag, unstable_cache } from "next/cache";
+
 /**
- * Process-level in-memory cache for enriched menu responses per tenant.
- * Eliminates repeated 6-query database round-trips and customization tree
- * computation when multiple POS terminals or pickup clients request /api/menu.
- * Automatically invalidated on menu, recipe, customization, or stock mutations.
+ * Shared Next.js Data Cache for enriched menu responses per tenant.
+ * Revalidated immediately via `revalidateTag(..., { expire: 0 })` whenever
+ * menu items, customizations, recipes, categories, or stock change.
+ * Falls back cleanly to direct execution outside Next.js runtime (e.g. Vitest).
  */
-const MENU_CACHE_TTL_MS = 30 * 1000; // 30 seconds
+const MENU_CACHE_TTL_SECONDS = 300; // 5 min safety net; mutations invalidate immediately
 
-interface MenuCacheEntry {
-  items: unknown[];
-  expiresAt: number;
+export function getMenuCacheTag(tenantId: string): string {
+  return `menu:${tenantId}`;
 }
 
-const menuMemoryCache = new Map<string, MenuCacheEntry>();
-
-export function getCachedMenu(tenantId: string): unknown[] | null {
-  const entry = menuMemoryCache.get(tenantId);
-  if (entry && entry.expiresAt > Date.now()) {
-    return entry.items;
+export async function getOrLoadMenuCache<T>(
+  tenantId: string,
+  loader: () => Promise<T[]>,
+): Promise<T[]> {
+  try {
+    const cachedLoader = unstable_cache(loader, ["api-menu", tenantId], {
+      tags: [getMenuCacheTag(tenantId)],
+      revalidate: MENU_CACHE_TTL_SECONDS,
+    });
+    return await cachedLoader();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message.includes("incrementalCache missing")) {
+      return loader();
+    }
+    throw error;
   }
-  if (entry) {
-    menuMemoryCache.delete(tenantId);
-  }
-  return null;
-}
-
-export function setCachedMenu(tenantId: string, items: unknown[]): void {
-  menuMemoryCache.set(tenantId, {
-    items,
-    expiresAt: Date.now() + MENU_CACHE_TTL_MS,
-  });
 }
 
 export function invalidateMenuCache(tenantId?: string): void {
-  if (tenantId) {
-    menuMemoryCache.delete(tenantId);
-  } else {
-    menuMemoryCache.clear();
+  if (!tenantId) return;
+  try {
+    revalidateTag(getMenuCacheTag(tenantId), { expire: 0 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (
+      message.includes("static generation store missing") ||
+      message.includes("incrementalCache missing")
+    ) {
+      return;
+    }
+    throw error;
   }
 }

@@ -1,7 +1,6 @@
 // TesoritoOS - Menu Management API
 // Handles menu items CRUD with AWS S3 image storage
 
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/tenant";
@@ -13,94 +12,80 @@ import {
 } from "@/lib/customization/server";
 import { computePriceRange } from "@/lib/customization";
 import {
-  getCachedMenu,
+  getOrLoadMenuCache,
   invalidateMenuCache,
-  setCachedMenu,
 } from "@/lib/menuCache";
-
-function buildMenuGetHeaders(request?: NextRequest): HeadersInit {
-  const hasAuthCookie = Boolean(
-    request?.cookies.getAll().some((c) => c.name.startsWith("sb-")),
-  );
-
-  if (hasAuthCookie) {
-    return {
-      "Cache-Control": "private, no-store",
-    };
-  }
-
-  return {
-    "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
-    Vary: "Host, x-tenant-slug",
-  };
-}
 
 /**
  * GET /api/menu
- * Get all menu items (including translations for i18n and ingredient stock)
+ * Get all menu items (including translations for i18n and ingredient stock).
+ * Uses Next.js shared Data Cache invalidated immediately by mutations, while keeping
+ * HTTP responses `no-store` so neither CDN nor browser serves stale prices/stock.
  */
-export async function GET(request?: NextRequest) {
+export async function GET() {
   try {
     const tenant = await getTenantContext();
-    const headers = buildMenuGetHeaders(request);
 
-    const cachedItems = getCachedMenu(tenant.id);
-    if (cachedItems) {
-      return NextResponse.json({ items: cachedItems }, { headers });
-    }
+    const enrichedItems = await getOrLoadMenuCache(tenant.id, async () => {
+      const supabase = createAdminClient();
 
-    const supabase = await createClient();
+      // Run queries in parallel — they are independent
+      const [{ data: items, error }, { data: popularData }, customizations] =
+        await Promise.all([
+          supabase
+            .from("menu_items")
+            .select(
+              "*, translations, ingredients(id, current_stock, minimum_stock)",
+            )
+            .eq("tenant_id", tenant.id)
+            .order("name", { ascending: true }),
+          supabase
+            .from("popular_menu_items")
+            .select("menu_item_id")
+            .eq("tenant_id", tenant.id)
+            .gte("order_count", 5)
+            .order("order_count", { ascending: false })
+            .limit(5),
+          loadCustomizations(tenant.id),
+        ]);
 
-    // Run queries in parallel — they are independent
-    const [{ data: items, error }, { data: popularData }, customizations] =
-      await Promise.all([
-      supabase
-        .from("menu_items")
-        .select(
-          "*, translations, ingredients(id, current_stock, minimum_stock)",
-        )
-        .eq("tenant_id", tenant.id)
-        .order("name", { ascending: true }),
-      supabase
-        .from("popular_menu_items")
-        .select("menu_item_id")
-        .eq("tenant_id", tenant.id)
-        .gte("order_count", 5)
-        .order("order_count", { ascending: false })
-        .limit(5),
-      loadCustomizations(tenant.id),
-    ]);
+      if (error) throw error;
 
-    if (error) throw error;
+      const popularIds = new Set(
+        (popularData || []).map((row) => row.menu_item_id),
+      );
 
-    const popularIds = new Set(
-      (popularData || []).map((row) => row.menu_item_id),
-    );
-
-    const enrichedItems = (items || []).map((item) => {
-      const ingredient = item.ingredients as {
-        id: string;
-        current_stock: number;
-        minimum_stock: number;
-      } | null;
-      return {
-        ...item,
-        // Flatten ingredient stock fields for easy consumption in the POS
-        ingredient_id: item.ingredient_id ?? null,
-        current_stock: ingredient ? ingredient.current_stock : null,
-        minimum_stock: ingredient ? ingredient.minimum_stock : null,
-        is_popular: popularIds.has(item.id),
-        is_recommended: false,
-        ...customizationFields(
-          item.price,
-          serializeForClient(customizations.byMenuItem.get(item.id)),
-        ),
-      };
+      return (items || []).map((item) => {
+        const ingredient = item.ingredients as {
+          id: string;
+          current_stock: number;
+          minimum_stock: number;
+        } | null;
+        return {
+          ...item,
+          // Flatten ingredient stock fields for easy consumption in the POS
+          ingredient_id: item.ingredient_id ?? null,
+          current_stock: ingredient ? ingredient.current_stock : null,
+          minimum_stock: ingredient ? ingredient.minimum_stock : null,
+          is_popular: popularIds.has(item.id),
+          is_recommended: false,
+          ...customizationFields(
+            item.price,
+            serializeForClient(customizations.byMenuItem.get(item.id)),
+          ),
+        };
+      });
     });
 
-    setCachedMenu(tenant.id, enrichedItems);
-
-    return NextResponse.json({ items: enrichedItems }, { headers });
+    return NextResponse.json(
+      { items: enrichedItems },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+          Vary: "Host, x-tenant-slug",
+        },
+      },
+    );
   } catch (error) {
     console.error("Error fetching menu items:", error);
     return NextResponse.json(
